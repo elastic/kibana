@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-
+import { mount, ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import {
   TableListViewKibanaDependencies,
   TableListViewKibanaProvider,
@@ -19,6 +19,17 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
+
+jest.mock('react-router-dom', () => {
+  return {
+    useLocation: () => ({
+      search: '',
+    }),
+    useHistory: () => ({
+      push: () => undefined,
+    }),
+  };
+});
 
 function makeDefaultProps(): DashboardListingProps {
   return {
@@ -49,6 +60,11 @@ function mountWith({ props: incomingProps }: { props?: DashboardListingProps }) 
             {
               ui: {
                 ...savedObjectsTagging,
+                parseSearchQuery: async () => ({
+                  searchTerm: '',
+                  tagReferences: [],
+                  tagReferencesToExclude: [],
+                }),
                 components: {
                   TagList: () => null,
                 },
@@ -69,12 +85,15 @@ function mountWith({ props: incomingProps }: { props?: DashboardListingProps }) 
 
 describe('after fetch', () => {
   test('renders all table rows', async () => {
-    const { component } = mountWith({});
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    let component: ReactWrapper;
+
+    await act(async () => {
+      ({ component } = mountWith({}));
+    });
+
     // Ensure the state changes are reflected
-    component.update();
-    expect(component).toMatchSnapshot();
+    component!.update();
+    expect(component!).toMatchSnapshot();
   });
 
   test('renders call to action when no dashboards exist', async () => {
@@ -85,12 +104,15 @@ describe('after fetch', () => {
       hits: [],
     });
 
-    const { component } = mountWith({});
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    let component: ReactWrapper;
+
+    await act(async () => {
+      ({ component } = mountWith({}));
+    });
+
     // Ensure the state changes are reflected
-    component.update();
-    expect(component).toMatchSnapshot();
+    component!.update();
+    expect(component!).toMatchSnapshot();
   });
 
   test('renders call to action with continue when no dashboards exist but one is in progress', async () => {
@@ -105,23 +127,30 @@ describe('after fetch', () => {
       hits: [],
     });
 
-    const { component } = mountWith({});
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    let component: ReactWrapper;
+
+    await act(async () => {
+      ({ component } = mountWith({}));
+    });
+
     // Ensure the state changes are reflected
-    component.update();
-    expect(component).toMatchSnapshot();
+    component!.update();
+    expect(component!).toMatchSnapshot();
   });
 
   test('initialFilter', async () => {
     const props = makeDefaultProps();
     props.initialFilter = 'testFilter';
-    const { component } = mountWith({ props });
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+
+    let component: ReactWrapper;
+
+    await act(async () => {
+      ({ component } = mountWith({}));
+    });
+
     // Ensure the state changes are reflected
-    component.update();
-    expect(component).toMatchSnapshot();
+    component!.update();
+    expect(component!).toMatchSnapshot();
   });
 
   test('When given a title that matches multiple dashboards, filter on the title', async () => {
@@ -131,12 +160,16 @@ describe('after fetch', () => {
     (
       pluginServices.getServices().dashboardSavedObject.findDashboards.findByTitle as jest.Mock
     ).mockResolvedValue(undefined);
-    const { component } = mountWith({ props });
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+
+    let component: ReactWrapper;
+
+    await act(async () => {
+      ({ component } = mountWith({ props }));
+    });
+
     // Ensure the state changes are reflected
-    component.update();
-    expect(component).toMatchSnapshot();
+    component!.update();
+    expect(component!).toMatchSnapshot();
     expect(props.redirectTo).not.toHaveBeenCalled();
   });
 
@@ -147,11 +180,15 @@ describe('after fetch', () => {
     (
       pluginServices.getServices().dashboardSavedObject.findDashboards.findByTitle as jest.Mock
     ).mockResolvedValue({ id: 'you_found_me' });
-    const { component } = mountWith({ props });
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+
+    let component: ReactWrapper;
+
+    await act(async () => {
+      ({ component } = mountWith({ props }));
+    });
+
     // Ensure the state changes are reflected
-    component.update();
+    component!.update();
     expect(props.redirectTo).toHaveBeenCalledWith({
       destination: 'dashboard',
       id: 'you_found_me',
@@ -162,11 +199,14 @@ describe('after fetch', () => {
   test('showWriteControls', async () => {
     pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
 
-    const { component } = mountWith({});
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
+    let component: ReactWrapper;
+
+    await act(async () => {
+      ({ component } = mountWith({}));
+    });
+
     // Ensure the state changes are reflected
-    component.update();
-    expect(component).toMatchSnapshot();
+    component!.update();
+    expect(component!).toMatchSnapshot();
   });
 });
