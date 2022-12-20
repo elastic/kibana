@@ -310,4 +310,38 @@ describe('aggregate()', () => {
       })
     );
   });
+
+  describe('tags number limit', () => {
+    test('sets to default (50) if it is not provided', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      await rulesClient.aggregate();
+
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([
+        {
+          aggs: {
+            tags: {
+              terms: { size: 50 },
+            },
+          },
+        },
+      ]);
+    });
+
+    test('sets to the provided value', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      await rulesClient.aggregate({ options: { maxTags: 1000 } });
+
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([
+        {
+          aggs: {
+            tags: {
+              terms: { size: 1000 },
+            },
+          },
+        },
+      ]);
+    });
+  });
 });
