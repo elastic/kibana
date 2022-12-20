@@ -58,7 +58,7 @@ export class CustomBrandingService {
   public start(): CustomBrandingStart {
     return {
       get: this.get,
-      set: this.set,
+      set: this.set.bind(this),
       customBranding$: this.customBranding$.pipe(takeUntil(this.stop$)),
       hasCustomBranding$: this.hasCustomBranding$.pipe(takeUntil(this.stop$)),
     };
@@ -69,7 +69,7 @@ export class CustomBrandingService {
    */
   public setup(): CustomBrandingSetup {
     return {
-      register: this.register,
+      register: this.register.bind(this),
     };
   }
 

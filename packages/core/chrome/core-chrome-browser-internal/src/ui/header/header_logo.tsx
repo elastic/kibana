@@ -12,6 +12,7 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
+import { CustomBranding } from '@kbn/core-custom-branding-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { ElasticMark } from './elastic_mark';
@@ -83,11 +84,15 @@ interface Props {
   forceNavigation$: Observable<boolean>;
   navigateToApp: (appId: string) => void;
   loadingCount$?: ReturnType<HttpStart['getLoadingCount$']>;
+  customBranding$: Observable<CustomBranding>;
 }
 
 export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables }: Props) {
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
+  const customBranding = useObservable(observables.customBranding$, {});
+  const { customizedLogo } = customBranding;
+  const hasCustomBranding = Object.keys(customBranding).length > 0;
 
   return (
     <a
@@ -99,8 +104,12 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
         defaultMessage: 'Elastic home',
       })}
     >
-      <LoadingIndicator loadingCount$={loadingCount$!} />
-      <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
+      <LoadingIndicator loadingCount$={loadingCount$!} hasCustomBranding={hasCustomBranding} />
+      {customizedLogo ? (
+        <img src={customizedLogo} width="200" height="84" alt="custom mark" />
+      ) : (
+        <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
+      )}
     </a>
   );
 }

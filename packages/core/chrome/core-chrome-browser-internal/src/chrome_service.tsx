@@ -103,6 +103,7 @@ export class ChromeService {
     http,
     injectedMetadata,
     notifications,
+    customBranding,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
@@ -145,6 +146,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
+    const { customBranding$ } = customBranding;
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -233,6 +235,7 @@ export class ChromeService {
           navControlsExtension$={navControls.getExtension$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
+          customBranding$={customBranding$}
         />
       ),
 
