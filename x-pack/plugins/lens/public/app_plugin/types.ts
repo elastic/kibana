@@ -44,7 +44,6 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-// import { ShortUrl } from '@kbn/share-plugin/common/url_service';
 import type {
   DatasourceMap,
   EditorFrameInstance,
