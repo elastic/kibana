@@ -116,8 +116,8 @@ export function timeBasedIndexCheck(dataView: DataView, showNotification = false
       const toastNotifications = getToastNotifications();
       toastNotifications.addWarning({
         title: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationTitle', {
-          defaultMessage: 'The data view {dataViewName} is not based on a time series',
-          values: { dataViewName: dataView.getIndexPattern() },
+          defaultMessage: 'The data view {dataViewIndexPattern} is not based on a time series',
+          values: { dataViewIndexPattern: dataView.getIndexPattern() },
         }),
         text: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationDescription', {
           defaultMessage: 'Anomaly detection only runs over time-based indices',
@@ -131,9 +131,9 @@ export function timeBasedIndexCheck(dataView: DataView, showNotification = false
 }
 
 /**
- * Returns true if the data view name contains a :
+ * Returns true if the data view index pattern contains a :
  * which means it is cross-cluster
  */
-export function isCcsIndexPattern(dataViewName: string) {
-  return dataViewName.includes(':');
+export function isCcsIndexPattern(dataViewIndexPattern: string) {
+  return dataViewIndexPattern.includes(':');
 }
