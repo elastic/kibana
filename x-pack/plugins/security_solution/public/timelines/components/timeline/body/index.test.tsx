@@ -6,18 +6,12 @@
  */
 
 import React from 'react';
-import type { Store, Action } from 'redux';
+import type { Store } from 'redux';
 import { mount } from 'enzyme';
-import { waitFor, render, fireEvent, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import type { RenderResult } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import type { DroppableProps, DraggableProps } from 'react-beautiful-dnd';
-import { asyncForEach } from '@kbn/std';
 
-import { useCurrentUser } from '../../../../common/lib/kibana/hooks';
-
-import { securityMock } from '@kbn/security-plugin/public/mocks';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { useKibana, useCurrentUser } from '../../../../common/lib/kibana';
 import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
@@ -46,15 +40,6 @@ import { createStore } from '../../../../common/store';
 import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../common/lib/kibana/hooks', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana/hooks');
-  return {
-    ...originalModule,
-    useAppUrl: () => {
-      return { getAppUrl: jest.fn() };
-    },
-  };
-});
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
 );
@@ -71,6 +56,9 @@ jest.mock('../../../../common/components/user_privileges', () => {
 });
 
 const mockUseFieldBrowserOptions = jest.fn();
+const mockUseKibana = useKibana as jest.Mock;
+const mockUseCurrentUser = useCurrentUser as jest.Mock<Partial<ReturnType<typeof useCurrentUser>>>;
+const mockCasesContract = jest.requireActual('@kbn/cases-plugin/public/mocks');
 jest.mock('../../fields_browser', () => ({
   useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
 }));
@@ -83,50 +71,8 @@ const useAddToTimeline = () => ({
   hasDraggableLock: jest.fn(),
   startDragToTimeline: jest.fn(),
 });
-// const mockUser = securityMock.createMockAuthenticatedUser({
-//   roles: ['superuser'],
-// });
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
-  const mockCasesContract = jest.requireActual('@kbn/cases-plugin/public/mocks');
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        application: {
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(),
-          capabilities: {
-            siem: { crud_alerts: true, read_alerts: true },
-          },
-        },
-        cases: mockCasesContract.mockCasesContract(),
-        data: {
-          search: jest.fn(),
-          query: jest.fn(),
-          dataViews: jest.fn(),
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-        savedObjects: {
-          client: {},
-        },
-        timelines: {
-          getLastUpdated: jest.fn(),
-          getLoadingPanel: jest.fn(),
-          getFieldBrowser: jest.fn(),
-          getUseAddToTimeline: () => useAddToTimeline,
-        },
-      },
-      useNavigateTo: jest.fn().mockReturnValue({
-        navigateTo: jest.fn(),
-      }),
-    }),
-    useCurrentUser: jest.fn().mockReturnValue({ username: 'user', roles: ['superuser'] }),
-  };
-});
 
+jest.mock('../../../../common/lib/kibana');
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',
@@ -276,26 +222,52 @@ jest.mock('react-beautiful-dnd', () => {
 });
 
 describe('Body', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getWrapper = async (childrenComponent: JSX.Element, store?: any) => {
+  const getWrapper = async (childrenComponent: JSX.Element, store?: { store: Store<State> }) => {
     const wrapper = mount(childrenComponent, {
       wrappingComponent: TestProviders,
       wrappingComponentProps: store ?? {},
     });
     await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists());
 
-    // await wrapper.findByTestId('suricataRefs');
     return wrapper;
   };
   const mockRefetch = jest.fn();
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
-  let authenticatedUser: AuthenticatedUser;
 
   beforeEach(() => {
-    // (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
-    // authenticatedUser = securityMock.createMockAuthenticatedUser({
-    //   roles: ['superuser'],
-    // });
+    mockUseCurrentUser.mockReturnValue({ username: 'test-username' });
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        cases: mockCasesContract.mockCasesContract(),
+        data: {
+          search: jest.fn(),
+          query: jest.fn(),
+          dataViews: jest.fn(),
+        },
+        uiSettings: {
+          get: jest.fn(),
+        },
+        savedObjects: {
+          client: {},
+        },
+        timelines: {
+          getLastUpdated: jest.fn(),
+          getLoadingPanel: jest.fn(),
+          getFieldBrowser: jest.fn(),
+          getUseAddToTimeline: () => useAddToTimeline,
+        },
+      },
+      useNavigateTo: jest.fn().mockReturnValue({
+        navigateTo: jest.fn(),
+      }),
+    });
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
@@ -372,15 +344,12 @@ describe('Body', () => {
     const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
       wrapper.find('[data-test-subj="add-note"]').first().find('button').simulate('click');
       wrapper.update();
-      console.log(wrapper.find('[data-test-subj="add-note"]').first().find('button').debug());
       wrapper
         .find('[data-test-subj="new-note-tabs"] textarea')
         .simulate('change', { target: { value: note } });
       wrapper.update();
-      console.log(wrapper.find('[data-test-subj="new-note-tabs"] textarea').debug());
       wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
       wrapper.update();
-      console.log(wrapper.find('button[data-test-subj="add-note"]').first().debug());
     };
 
     beforeEach(() => {
@@ -392,7 +361,6 @@ describe('Body', () => {
 
       addaNoteToEvent(wrapper, 'hello world');
       wrapper.update();
-      console.log(mockDispatch.mock.calls);
       expect(mockDispatch).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({

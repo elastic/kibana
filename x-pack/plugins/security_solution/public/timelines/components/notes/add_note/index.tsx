@@ -18,7 +18,7 @@ import { useDispatch } from 'react-redux';
 
 import { appActions } from '../../../../common/store/app';
 import type { Note } from '../../../../common/lib/note';
-import { useCurrentUser } from '../../../../common/lib/kibana/hooks';
+import { useCurrentUser } from '../../../../common/lib/kibana';
 import type { AssociateNote, UpdateInternalNewNote } from '../helpers';
 import { updateAndAssociateNode } from '../helpers';
 import * as i18n from '../translations';
