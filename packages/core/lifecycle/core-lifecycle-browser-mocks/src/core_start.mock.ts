@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -38,9 +37,6 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     savedObjects: savedObjectsServiceMock.createStartContract(),
     deprecations: deprecationsServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),
-    injectedMetadata: {
-      getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
-    },
     fatalErrors: fatalErrorsServiceMock.createStartContract(),
   };
 
