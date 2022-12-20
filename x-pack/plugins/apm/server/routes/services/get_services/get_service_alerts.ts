@@ -13,7 +13,6 @@ import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PRODUCER, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ServiceGroup } from '../../../../common/service_groups';
-import { environmentQuery } from '../../../../common/utils/environment_query';
 import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 
@@ -28,7 +27,6 @@ interface ServiceAggResponse {
 
 export async function getServicesAlerts({
   apmAlertsClient,
-  environment,
   kuery,
   maxNumServices,
   start,
@@ -36,7 +34,6 @@ export async function getServicesAlerts({
   serviceGroup,
 }: {
   apmAlertsClient: ApmAlertsClient;
-  environment: string;
   kuery: string;
   maxNumServices: number;
   start: number;
@@ -51,7 +48,6 @@ export async function getServicesAlerts({
           { term: { [ALERT_RULE_PRODUCER]: 'apm' } },
           { term: { [ALERT_STATUS]: 'active' } },
           ...rangeQuery(start, end),
-          ...environmentQuery(environment),
           ...kqlQuery(kuery),
           ...serviceGroupQuery(serviceGroup),
         ],
