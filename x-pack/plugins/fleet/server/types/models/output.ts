@@ -67,7 +67,7 @@ const OutputBaseSchema = {
       mem_queue_events: schema.maybe(schema.number()),
       queue_flush_timeout: schema.maybe(schema.number()),
       max_batch_bytes: schema.maybe(schema.number()),
-    }),
+    })
   ),
 };
 
@@ -109,7 +109,7 @@ export const UpdateOutputSchema = schema.object({
       mem_queue_events: schema.maybe(schema.number()),
       queue_flush_timeout: schema.maybe(schema.number()),
       max_batch_bytes: schema.maybe(schema.number()),
-    }),
+    })
   ),
 });
 

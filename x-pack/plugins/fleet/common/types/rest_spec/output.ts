@@ -52,7 +52,7 @@ export interface PutOutputRequest {
       mem_queue_events?: number;
       queue_flush_timeout?: number;
       max_batch_bytes?: number;
-    }
+    };
   };
 }
 
@@ -84,7 +84,7 @@ export interface PostOutputRequest {
       mem_queue_events?: number;
       queue_flush_timeout?: number;
       max_batch_bytes?: number;
-    }
+    };
   };
 }
 

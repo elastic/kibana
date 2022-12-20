@@ -235,7 +235,7 @@ export default function (providerContext: FtrProviderContext) {
               disk_queue_enabled: true,
               disk_queue_path: 'path/to/disk/queue',
               disk_queue_encryption_enabled: true,
-            }
+            },
           })
           .expect(200);
       });
@@ -253,7 +253,7 @@ export default function (providerContext: FtrProviderContext) {
               disk_queue_enabled: true,
               disk_queue_path: 'path/to/disk/queue',
               disk_queue_encryption_enabled: true,
-            }
+            },
           })
           .expect(200);
       });

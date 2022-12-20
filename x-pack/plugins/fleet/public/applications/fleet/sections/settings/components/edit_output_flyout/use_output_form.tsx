@@ -267,10 +267,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       let shipperParams = {};
       if (!isShipperDisabled) {
         shipperParams = {
-          shipper : {
+          shipper: {
             disk_queue_enabled: diskQueueEnabledInput.value,
             disk_queue_path:
-              diskQueueEnabledInput.value && diskQueuePathInput.value ? diskQueuePathInput.value : '',
+              diskQueueEnabledInput.value && diskQueuePathInput.value
+                ? diskQueuePathInput.value
+                : '',
             disk_queue_max_size:
               diskQueueEnabledInput.value && diskQueueMaxSizeInput.value
                 ? diskQueueMaxSizeInput.value
@@ -285,7 +287,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
             mem_queue_events: memQueueEvents.value ? Number(memQueueEvents.value) : 0,
             queue_flush_timeout: queueFlushTimeout.value ? Number(queueFlushTimeout.value) : 0,
             max_batch_bytes: maxBatchBytes.value ? Number(maxBatchBytes.value) : 0,
-          }
+          },
         };
       }
 
