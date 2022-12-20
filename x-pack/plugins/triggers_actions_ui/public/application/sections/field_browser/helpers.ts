@@ -7,7 +7,6 @@
 
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { isEmpty } from 'lodash/fp';
-import type { BrowserFieldItem } from '../../../types';
 
 export const FIELD_BROWSER_WIDTH = 925;
 export const TABLE_HEIGHT = 260;
@@ -163,9 +162,6 @@ export const getExampleText = (example: string | number | null | undefined): str
 
 /** Returns `true` if the escape key was pressed */
 export const isEscape = (event: React.KeyboardEvent): boolean => event.key === 'Escape';
-
-export const getShowDescriptionColumn = (fieldItems: BrowserFieldItem[]) =>
-  fieldItems.some((fieldItem) => !!fieldItem.description?.trim());
 
 export const CATEGORY_TABLE_CLASS_NAME = 'category-table';
 export const CLOSE_BUTTON_CLASS_NAME = 'close-button';

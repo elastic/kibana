@@ -28,7 +28,7 @@ import { getEmptyValue, getExampleText, getIconFromType } from '../../helpers';
 /**
  * Returns the field items of all categories selected
  */
-export const getFieldItems = ({
+export const getFieldItemsData = ({
   browserFields,
   selectedCategoryIds,
   columnIds,
@@ -36,31 +36,38 @@ export const getFieldItems = ({
   browserFields: BrowserFields;
   selectedCategoryIds: string[];
   columnIds: string[];
-}): BrowserFieldItem[] => {
+}): { fieldItems: BrowserFieldItem[]; showDescriptionColumn: boolean } => {
   const categoryIds =
     selectedCategoryIds.length > 0 ? selectedCategoryIds : Object.keys(browserFields);
   const selectedFieldIds = new Set(columnIds);
+  let showDescriptionColumn = false;
 
-  return uniqBy(
+  const fieldItems = uniqBy(
     'name',
-    categoryIds.reduce<BrowserFieldItem[]>((fieldItems, categoryId) => {
+    categoryIds.reduce<BrowserFieldItem[]>((fieldItemsAcc, categoryId) => {
       const categoryBrowserFields = Object.values(browserFields[categoryId]?.fields ?? {});
       if (categoryBrowserFields.length > 0) {
-        fieldItems.push(
-          ...categoryBrowserFields.map(({ name = '', ...field }) => ({
-            name,
-            type: field.type,
-            description: field.description ?? '',
-            example: field.example?.toString(),
-            category: categoryId,
-            selected: selectedFieldIds.has(name),
-            isRuntime: !!field.runtimeField,
-          }))
+        fieldItemsAcc.push(
+          ...categoryBrowserFields.map(({ name = '', ...field }) => {
+            if (!showDescriptionColumn && !!field.description) {
+              showDescriptionColumn = true;
+            }
+            return {
+              name,
+              type: field.type,
+              description: field.description ?? '',
+              example: field.example?.toString(),
+              category: categoryId,
+              selected: selectedFieldIds.has(name),
+              isRuntime: !!field.runtimeField,
+            };
+          })
         );
       }
-      return fieldItems;
+      return fieldItemsAcc;
     }, [])
   );
+  return { fieldItems, showDescriptionColumn };
 };
 
 const getDefaultFieldTableColumns = ({
