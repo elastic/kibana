@@ -17,8 +17,9 @@ import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { isDraggedDataViewField } from '../../../utils';
-import type { FramePublicAPI, Visualization } from '../../../types';
+import type { FramePublicAPI, Visualization, AccessorConfig } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
+import { annotationsIconSet } from '../xy_config_panel/annotations_config_panel/icon_set';
 import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
 import {
   checkScaleOperation,
@@ -444,13 +445,23 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
   };
 };
 
-export const getSingleColorAnnotationConfig = (annotation: EventAnnotationConfig) => ({
-  columnId: annotation.id,
-  triggerIcon: annotation.isHidden ? ('invisible' as const) : ('color' as const),
-  color:
-    annotation?.color ||
-    (isRangeAnnotationConfig(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
-});
+export const getSingleColorAnnotationConfig = (
+  annotation: EventAnnotationConfig
+): AccessorConfig => {
+  const annotationIcon = !isRangeAnnotationConfig(annotation)
+    ? annotationsIconSet.find((option) => option.value === annotation?.icon) ||
+      annotationsIconSet.find((option) => option.value === 'triangle')
+    : undefined;
+  const icon = annotationIcon?.icon ?? annotationIcon?.value;
+  return {
+    columnId: annotation.id,
+    triggerIconType: annotation.isHidden ? 'invisible' : icon ? 'custom' : 'color',
+    customIcon: icon,
+    color:
+      annotation?.color ||
+      (isRangeAnnotationConfig(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
+  };
+};
 
 export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig) =>
   layer.annotations.map((annotation) => getSingleColorAnnotationConfig(annotation));
