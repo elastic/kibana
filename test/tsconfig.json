@@ -9,6 +9,7 @@
       "node",
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
+      "@kbn/ambient-ftr-types",
     ]
   },
   "include": [

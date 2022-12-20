@@ -19,7 +19,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isEsIngestPipelines } from '../../../../../../common/api_schemas/type_guards';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import { UseEditTransformFlyoutReturnType } from './use_edit_transform_flyout';

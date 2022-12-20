@@ -69,12 +69,15 @@ export async function getActionStatuses(
     const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
     const cardinalityCount = (matchingBucket?.agent_count as any)?.value ?? 0;
     const docCount = matchingBucket?.doc_count ?? 0;
-    const nbAgentsAck = Math.min(
-      docCount,
-      // only using cardinality count when count lower than precision threshold
-      docCount > PRECISION_THRESHOLD ? docCount : cardinalityCount,
-      nbAgentsActioned
-    );
+    const nbAgentsAck =
+      action.type === 'UPDATE_TAGS'
+        ? Math.min(docCount, nbAgentsActioned)
+        : Math.min(
+            docCount,
+            // only using cardinality count when count lower than precision threshold
+            docCount > PRECISION_THRESHOLD ? docCount : cardinalityCount,
+            nbAgentsActioned
+          );
     const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
     const complete = nbAgentsAck >= nbAgentsActioned;
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
