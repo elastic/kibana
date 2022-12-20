@@ -295,9 +295,7 @@ export class ExecutionHandler<
             alertGroup: action.group,
           });
 
-          if (this.isRecoveredAlert(actionGroup)) {
-            executableAlert.scheduleActions(action.group as ActionGroupIds);
-          } else {
+          if (!this.isRecoveredAlert(actionGroup)) {
             if (isSummaryActionOnInterval(action)) {
               executableAlert.updateLastScheduledActions(
                 action.group as ActionGroupIds,
@@ -558,12 +556,14 @@ export class ExecutionHandler<
         end: new Date(),
         ruleId,
         spaceId,
+        excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       };
     } else {
       options = {
         executionUuid: this.executionId,
         ruleId,
         spaceId,
+        excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       };
     }
 

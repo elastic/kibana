@@ -11,9 +11,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import type { Agent } from '../../types';
 import { AgentReassignmentError } from '../../errors';
 
-import { SO_SEARCH_LIMIT } from '../../constants';
-
-import { getAgentDocuments, getAgentsByKuery } from './crud';
+import { getAgentDocuments } from './crud';
 import type { GetAgentsOptions } from '.';
 import { searchHitToAgent } from './helpers';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
@@ -30,7 +28,7 @@ export async function updateAgentTags(
   tagsToRemove: string[]
 ): Promise<{ actionId: string }> {
   const outgoingErrors: Record<Agent['id'], Error> = {};
-  let givenAgents: Agent[] = [];
+  const givenAgents: Agent[] = [];
 
   if ('agentIds' in options) {
     const givenAgentsResults = await getAgentDocuments(esClient, options.agentIds);
@@ -44,30 +42,17 @@ export async function updateAgentTags(
       }
     }
   } else if ('kuery' in options) {
-    const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-    const res = await getAgentsByKuery(esClient, {
-      kuery: options.kuery,
-      showInactive: options.showInactive ?? false,
-      page: 1,
-      perPage: batchSize,
-    });
-    if (res.total <= batchSize) {
-      givenAgents = res.agents;
-    } else {
-      return await new UpdateAgentTagsActionRunner(
-        esClient,
-        soClient,
-        {
-          ...options,
-          batchSize,
-          total: res.total,
-          kuery: options.kuery,
-          tagsToAdd,
-          tagsToRemove,
-        },
-        { pitId: '' }
-      ).runActionAsyncWithRetry();
-    }
+    return await new UpdateAgentTagsActionRunner(
+      esClient,
+      soClient,
+      {
+        ...options,
+        kuery: options.kuery,
+        tagsToAdd,
+        tagsToRemove,
+      },
+      { pitId: '' }
+    ).runActionAsyncWithRetry();
   }
 
   return await updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {

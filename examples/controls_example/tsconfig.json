@@ -17,6 +17,7 @@
     { "path": "../developer_examples/tsconfig.json" },
     { "path": "../../src/plugins/data/tsconfig.json" },
     { "path": "../../src/plugins/controls/tsconfig.json" },
+    { "path": "../../src/plugins/navigation/tsconfig.json" },
     { "path": "../../src/plugins/presentation_util/tsconfig.json" }
   ]
 }

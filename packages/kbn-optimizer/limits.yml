@@ -11,6 +11,8 @@ pageLoadAssetSize:
   charts: 55000
   cloud: 21076
   cloudChat: 19894
+  cloudDataMigration: 19170
+  cloudDefend: 18697
   cloudExperiments: 59358
   cloudFullStory: 18493
   cloudGainsight: 18710
@@ -65,6 +67,7 @@ pageLoadAssetSize:
   grokdebugger: 26779
   guidedOnboarding: 42965
   home: 30182
+  imageEmbeddable: 12500
   indexLifecycleManagement: 107090
   indexManagement: 140608
   infra: 184320
