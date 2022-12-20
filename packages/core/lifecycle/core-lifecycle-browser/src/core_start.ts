@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { InjectedMetadataStart } from '@kbn/core-injected-metadata-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -63,6 +62,4 @@ export interface CoreStart {
   deprecations: DeprecationsServiceStart;
   /** {@link ThemeServiceStart} */
   theme: ThemeServiceStart;
-  /** {@link InjectedMetadataStart} */
-  injectedMetadata: InjectedMetadataStart;
 }

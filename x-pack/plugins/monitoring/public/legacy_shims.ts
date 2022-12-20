@@ -52,7 +52,6 @@ export interface IShims {
   toastNotifications: NotificationsStart['toasts'];
   capabilities: ApplicationStart['capabilities'];
   getBasePath: () => string;
-  getInjected: (name: string, defaultValue?: unknown) => unknown;
   breadcrumbs: {
     set: (breadcrumbs: BreadcrumbItem[]) => void;
     update: (breadcrumbs?: BreadcrumbItem[]) => void;
@@ -91,8 +90,6 @@ export class Legacy {
       toastNotifications: core.notifications.toasts,
       capabilities: core.application.capabilities,
       getBasePath: (): string => core.http.basePath.get(),
-      getInjected: (name: string, defaultValue?: unknown): string | unknown =>
-        core.injectedMetadata.getInjectedVar(name, defaultValue),
       breadcrumbs: {
         set: (breadcrumbs: BreadcrumbItem[]) => this._shims.breadcrumbs.update(breadcrumbs),
         update: (breadcrumbs?: BreadcrumbItem[]) => {
