@@ -140,7 +140,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       if (useFullIndexData) {
         const runtimeMappings = dataView.getComputedFields().runtimeFields as RuntimeMappings;
         const { start, end } = await getTimeFieldRange({
-          index: dataView.title,
+          index: dataView.getIndexPattern(),
           timeFieldName: dataView.timeFieldName,
           // By default we want to use full non-frozen time range
           query: addExcludeFrozenToQuery(combinedQuery),
@@ -185,7 +185,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           moduleId,
           prefix: resultJobPrefix,
           query: tempQuery,
-          indexPatternName: dataView.title,
+          indexPatternName: dataView.getIndexPattern(),
           useDedicatedIndex,
           startDatafeed: startDatafeedAfterSave,
           ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),
@@ -264,7 +264,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       }
     },
     [
-      dataView.title,
+      dataView,
       getTimeRange,
       jobOverrides,
       jobs,

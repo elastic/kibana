@@ -62,7 +62,7 @@ export const useIndexData = (
     setStatus(INDEX_STATUS.LOADING);
 
     const esSearchRequest = {
-      index: dataView.title,
+      index: dataView.getIndexPattern(),
       body: {
         fields: ['*'],
         _source: false,
@@ -84,7 +84,7 @@ export const useIndexData = (
       return;
     }
 
-    const isCrossClusterSearch = dataView.title.includes(':');
+    const isCrossClusterSearch = dataView.getIndexPattern().includes(':');
     const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
 
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
@@ -176,7 +176,7 @@ export const useIndexData = (
     }, {} as EsSorting);
 
     const esSearchRequest = {
-      index: dataView.title,
+      index: dataView.getIndexPattern(),
       body: {
         fields: ['*'],
         _source: false,
@@ -198,7 +198,7 @@ export const useIndexData = (
       return;
     }
 
-    const isCrossClusterSearch = dataView.title.includes(':');
+    const isCrossClusterSearch = dataView.getIndexPattern().includes(':');
     const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
 
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
@@ -217,7 +217,7 @@ export const useIndexData = (
   const fetchColumnChartsData = async function () {
     const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
     const columnChartsData = await api.getHistogramsForFields(
-      dataView.title,
+      dataView.getIndexPattern(),
       columns
         .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
         .map((cT) => {
@@ -259,7 +259,7 @@ export const useIndexData = (
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    dataView.title,
+    dataView.getIndexPattern,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, pagination, sortingColumns, dataViewFields, combinedRuntimeMappings]),
   ]);
@@ -272,7 +272,7 @@ export const useIndexData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     chartsVisible,
-    dataView.title,
+    dataView.getIndexPattern,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, dataGrid.visibleColumns, combinedRuntimeMappings]),
   ]);

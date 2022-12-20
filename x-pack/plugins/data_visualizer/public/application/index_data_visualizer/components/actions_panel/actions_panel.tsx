@@ -49,7 +49,7 @@ export const ActionsPanel: FC<Props> = ({
     let unmounted = false;
 
     const indexPatternId = dataView.id;
-    const indexPatternTitle = dataView.title;
+    const indexPatternTitle = dataView.getIndexPattern();
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
       if (!isDiscoverAvailable) return;

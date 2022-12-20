@@ -44,8 +44,8 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
       this._includeEventRateField = includeEventRateField;
       this._removeTextFields = removeTextFields;
 
-      const resp = await ml.jobs.newJobCaps(dataView.title, dataView.type === 'rollup');
-      const { fields: allFields, aggs } = createObjects(resp, dataView.title);
+      const resp = await ml.jobs.newJobCaps(dataView.getIndexPattern(), dataView.type === 'rollup');
+      const { fields: allFields, aggs } = createObjects(resp, dataView.getIndexPattern());
 
       if (this._includeEventRateField === true) {
         addEventRateField(aggs, allFields);

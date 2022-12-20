@@ -101,7 +101,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       : stepDefineForm.latestFunctionConfig;
 
   const previewRequest = getPreviewTransformRequestBody(
-    dataView.title,
+    dataView.getIndexPattern(),
     pivotQuery,
     stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT
       ? stepDefineForm.pivotConfig.state.requestPayload
@@ -109,7 +109,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
   );
 
-  const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, dataView.title);
+  const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, dataView.getIndexPattern());
   const copyToClipboardSourceDescription = i18n.translate(
     'xpack.transform.indexPreview.copyClipboardTooltip',
     {
@@ -127,7 +127,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
 
   const pivotPreviewProps = {
     ...usePivotData(
-      dataView.title,
+      dataView.getIndexPattern(),
       pivotQuery,
       validationStatus,
       requestPayload,
@@ -211,7 +211,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
               defaultMessage: 'Data view',
             })}
           >
-            <span>{dataView.title}</span>
+            <span>{dataView.getIndexPattern()}</span>
           </EuiFormRow>
         )}
 

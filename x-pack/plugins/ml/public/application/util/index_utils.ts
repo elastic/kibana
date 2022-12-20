@@ -49,11 +49,11 @@ export async function getDataViewIdFromName(name: string): Promise<string | null
     throw new Error('Data views are not initialized!');
   }
   const dataViews = await dataViewsContract.find(name);
-  const dataView = dataViews.find(({ title }) => title === name);
+  const dataView = dataViews.find((dv) => dv.getIndexPattern() === name);
   if (!dataView) {
     return null;
   }
-  return dataView.id ?? dataView.title;
+  return dataView.id ?? dataView.getIndexPattern();
 }
 
 export function getDataViewById(id: string): Promise<DataView> {
@@ -117,7 +117,7 @@ export function timeBasedIndexCheck(dataView: DataView, showNotification = false
       toastNotifications.addWarning({
         title: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationTitle', {
           defaultMessage: 'The data view {dataViewName} is not based on a time series',
-          values: { dataViewName: dataView.title },
+          values: { dataViewName: dataView.getIndexPattern() },
         }),
         text: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationDescription', {
           defaultMessage: 'Anomaly detection only runs over time-based indices',
