@@ -91,10 +91,9 @@ const getCommonProps = (dataView: DataView) => {
     savedSearch: savedSearchMock,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
-
     stateContainer: {
       setAppState: action('Set app state'),
-      appStateContainer: {
+      appState: {
         getState: () => ({
           interval: 'auto',
         }),
