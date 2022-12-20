@@ -17,20 +17,16 @@ import type {
 const CUSTOM_BRANDING_PLUGIN = 'customBranding';
 
 export class CustomBrandingService {
-  private customBranding: CustomBranding;
+  private customBranding: CustomBranding = {};
   private registeredPlugin?: string;
-  private hasCustomBranding$: BehaviorSubject<boolean>;
-  private customBranding$: BehaviorSubject<CustomBranding>;
+  private hasCustomBranding$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private customBranding$: BehaviorSubject<CustomBranding> = new BehaviorSubject<CustomBranding>(
+    this.customBranding
+  );
   private stop$ = new Subject<void>();
 
-  constructor() {
-    this.customBranding = {};
-    this.hasCustomBranding$ = new BehaviorSubject<boolean>(false);
-    this.customBranding$ = new BehaviorSubject<CustomBranding>(this.customBranding);
-  }
-
   private set(customBranding: CustomBranding) {
-    if (!this.registeredPlugin || this.registeredPlugin !== CUSTOM_BRANDING_PLUGIN) {
+    if (this.registeredPlugin !== CUSTOM_BRANDING_PLUGIN) {
       throw new Error('Plugin needs to register before setting custom branding');
     }
     Object.keys(customBranding).forEach((key) => {
