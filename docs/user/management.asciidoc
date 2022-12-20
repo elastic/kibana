@@ -200,6 +200,8 @@ include::{kib-repo-dir}/management/advanced-options.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-tags.asciidoc[]
 
+include::{kib-repo-dir}/management/upgrade-assistant.asciidoc[]
+
 include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]
 
 

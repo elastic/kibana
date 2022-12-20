@@ -504,6 +504,7 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
     );
   }
+  await rulesFinder.close();
 
   let result;
   try {
