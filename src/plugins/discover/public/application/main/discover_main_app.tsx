@@ -98,7 +98,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * Can be removed once the state container work was completed
    */
   useEffect(() => {
-    stateContainer.internalState.transitions.setDataViewList(dataViewList);
+    stateContainer.internalState.transitions.setSavedDataViews(dataViewList);
   }, [stateContainer, dataViewList]);
 
   const resetCurrentSavedSearch = useCallback(() => {

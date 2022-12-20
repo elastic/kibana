@@ -236,17 +236,17 @@ describe('createSearchSessionRestorationDataProvider', () => {
 
     test('appendAdHocDataViews', async () => {
       state.actions.appendAdHocDataViews(dataViewMock);
-      expect(state.internalState.getState().dataViewAdHocList).toEqual([dataViewMock]);
+      expect(state.internalState.getState().adHocDataViews).toEqual([dataViewMock]);
     });
     test('removeAdHocDataViewById', async () => {
       state.actions.appendAdHocDataViews(dataViewMock);
       state.actions.removeAdHocDataViewById(dataViewMock.id!);
-      expect(state.internalState.getState().dataViewAdHocList).toEqual([]);
+      expect(state.internalState.getState().adHocDataViews).toEqual([]);
     });
     test('replaceAdHocDataViewWithId', async () => {
       state.actions.appendAdHocDataViews(dataViewMock);
       state.actions.replaceAdHocDataViewWithId(dataViewMock.id!, dataViewComplexMock);
-      expect(state.internalState.getState().dataViewAdHocList).toEqual([dataViewComplexMock]);
+      expect(state.internalState.getState().adHocDataViews).toEqual([dataViewComplexMock]);
     });
   });
 });

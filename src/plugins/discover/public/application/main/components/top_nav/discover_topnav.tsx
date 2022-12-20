@@ -62,9 +62,9 @@ export const DiscoverTopNav = ({
   updateDataViewList,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
-  const adHocDataViewList = useInternalStateSelector((state) => state.dataViewAdHocList);
+  const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
-  const savedDataViewList = useInternalStateSelector((state) => state.dataViewList);
+  const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
     [dataView]
@@ -163,7 +163,7 @@ export const DiscoverTopNav = ({
         searchSource,
         onOpenSavedSearch,
         isPlainRecord,
-        adHocDataViews: adHocDataViewList,
+        adHocDataViews,
         updateDataViewList,
         persistDataView,
         updateAdHocDataViewId,
@@ -178,7 +178,7 @@ export const DiscoverTopNav = ({
       searchSource,
       onOpenSavedSearch,
       isPlainRecord,
-      adHocDataViewList,
+      adHocDataViews,
       persistDataView,
       updateAdHocDataViewId,
       updateDataViewList,
@@ -218,8 +218,8 @@ export const DiscoverTopNav = ({
     onCreateDefaultAdHocDataView,
     onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
-    adHocDataViews: adHocDataViewList,
-    savedDataViews: savedDataViewList,
+    adHocDataViews,
+    savedDataViews,
   };
 
   const onTextBasedSavedAndExit = useCallback(

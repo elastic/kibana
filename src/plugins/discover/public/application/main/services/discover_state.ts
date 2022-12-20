@@ -248,7 +248,7 @@ export function getDiscoverStateContainer({
 
   const loadDataViewList = async () => {
     const dataViewList = await services.dataViews.getIdsWithTitle(true);
-    internalStateContainer.transitions.setDataViewList(dataViewList);
+    internalStateContainer.transitions.setSavedDataViews(dataViewList);
   };
 
   return {

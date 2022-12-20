@@ -15,13 +15,13 @@ import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 
 export interface InternalState {
   dataView: DataView | undefined;
-  dataViewList: DataViewListItem[];
-  dataViewAdHocList: DataView[];
+  savedDataViews: DataViewListItem[];
+  adHocDataViews: DataView[];
 }
 
 interface InternalStateTransitions {
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
-  setDataViewList: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
+  setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
   setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
   appendAdHocDataViews: (
     state: InternalState
@@ -44,21 +44,21 @@ export function getInternalStateContainer() {
   return createStateContainer<InternalState, InternalStateTransitions, {}>(
     {
       dataView: undefined,
-      dataViewAdHocList: [],
-      dataViewList: [],
+      adHocDataViews: [],
+      savedDataViews: [],
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
         ...prevState,
         dataView: nextDataView,
       }),
-      setDataViewList: (prevState: InternalState) => (nextDataViewList: DataViewListItem[]) => ({
+      setSavedDataViews: (prevState: InternalState) => (nextDataViewList: DataViewListItem[]) => ({
         ...prevState,
-        dataViewList: nextDataViewList,
+        savedDataViews: nextDataViewList,
       }),
       setAdHocDataViews: (prevState: InternalState) => (newAdHocDataViewList: DataView[]) => ({
         ...prevState,
-        dataViewAdHocList: newAdHocDataViewList,
+        adHocDataViews: newAdHocDataViewList,
       }),
       appendAdHocDataViews:
         (prevState: InternalState) => (dataViewsAdHoc: DataView | DataView[]) => {
@@ -66,24 +66,24 @@ export function getInternalStateContainer() {
           const concatList = (
             Array.isArray(dataViewsAdHoc) ? dataViewsAdHoc : [dataViewsAdHoc]
           ).filter((dataView) => {
-            return !prevState.dataViewAdHocList.find((el: DataView) => el.id === dataView.id);
+            return !prevState.adHocDataViews.find((el: DataView) => el.id === dataView.id);
           });
           if (!concatList.length) {
             return prevState;
           }
           return {
             ...prevState,
-            dataViewAdHocList: prevState.dataViewAdHocList.concat(dataViewsAdHoc),
+            adHocDataViews: prevState.adHocDataViews.concat(dataViewsAdHoc),
           };
         },
       removeAdHocDataViewById: (prevState: InternalState) => (id: string) => ({
         ...prevState,
-        dataViewAdHocList: prevState.dataViewAdHocList.filter((dataView) => dataView.id !== id),
+        adHocDataViews: prevState.adHocDataViews.filter((dataView) => dataView.id !== id),
       }),
       replaceAdHocDataViewWithId:
         (prevState: InternalState) => (prevId: string, newDataView: DataView) => ({
           ...prevState,
-          dataViewAdHocList: prevState.dataViewAdHocList.map((dataView) =>
+          adHocDataViews: prevState.adHocDataViews.map((dataView) =>
             dataView.id === prevId ? newDataView : dataView
           ),
         }),
