@@ -167,21 +167,14 @@ export function DashboardEditingToolbar() {
     .filter((button) => button) as QuickButtonProps[];
 
   const extraButtons = [
-    <EditorMenu
-      createNewVisType={createNewVisType}
-      createNewEmbeddable={createNewEmbeddable}
-    />,
+    <EditorMenu createNewVisType={createNewVisType} createNewEmbeddable={createNewEmbeddable} />,
     <AddFromLibraryButton
       onClick={() => dashboardContainer.addFromLibrary()}
       data-test-subj="dashboardAddPanelButton"
     />,
   ];
   if (dashboardContainer.controlGroup) {
-    extraButtons.push(
-      <ControlsToolbarButton
-        controlGroup={dashboardContainer.controlGroup}
-      />
-    );
+    extraButtons.push(<ControlsToolbarButton controlGroup={dashboardContainer.controlGroup} />);
   }
 
   return (

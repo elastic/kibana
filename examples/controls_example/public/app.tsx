@@ -34,8 +34,8 @@ export const renderApp = async (
               </EuiTitle>
               <EuiText>
                 <p>
-                  Pass filters, query, and time range to narrow controls. Combine search bar filters with
-                  controls filters to narrow results.
+                  Pass filters, query, and time range to narrow controls. Combine search bar filters
+                  with controls filters to narrow results.
                 </p>
               </EuiText>
             </>
@@ -43,7 +43,7 @@ export const renderApp = async (
         >
           <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
         </EuiAccordion>
-        
+
         <EuiSpacer size="xl" />
 
         <EuiAccordion
@@ -54,16 +54,14 @@ export const renderApp = async (
                 <h2>Edit and save example</h2>
               </EuiTitle>
               <EuiText>
-                <p>
-                  Customize controls and persist state to local storage.
-                </p>
+                <p>Customize controls and persist state to local storage.</p>
               </EuiText>
             </>
           }
         >
           <EditExample />
         </EuiAccordion>
-        
+
         <EuiSpacer size="xl" />
 
         <EuiAccordion

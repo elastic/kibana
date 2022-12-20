@@ -7,9 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
@@ -34,4 +32,4 @@ export const EditExample = () => {
       />
     </EuiPanel>
   );
-}
+};

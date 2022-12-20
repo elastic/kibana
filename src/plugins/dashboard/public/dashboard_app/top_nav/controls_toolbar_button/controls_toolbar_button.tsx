@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
+import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { getControlButtonTitle } from '../../_dashboard_app_strings';
 import { AddDataControlButton } from './add_data_control_button';
 import { AddTimeSliderControlButton } from './add_time_slider_control_button';
-import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
-export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlGroupContainer; }) {
+export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlGroupContainer }) {
   return (
     <SolutionToolbarPopover
       ownFocus
@@ -27,14 +27,8 @@ export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlG
       {({ closePopover }: { closePopover: () => void }) => (
         <EuiContextMenuPanel
           items={[
-            <AddDataControlButton
-              controlGroup={controlGroup}
-              closePopover={closePopover}
-            />,
-            <AddTimeSliderControlButton
-              controlGroup={controlGroup}
-              closePopover={closePopover}
-            />,
+            <AddDataControlButton controlGroup={controlGroup} closePopover={closePopover} />,
+            <AddTimeSliderControlButton controlGroup={controlGroup} closePopover={closePopover} />,
             controlGroup.getEditControlGroupButton(closePopover),
           ]}
         />

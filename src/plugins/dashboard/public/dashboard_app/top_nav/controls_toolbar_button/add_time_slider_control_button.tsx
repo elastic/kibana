@@ -16,12 +16,9 @@ interface Props {
   controlGroup: ControlGroupContainer;
 }
 
-export const AddTimeSliderControlButton = ({
-  closePopover,
-  controlGroup,
-}: Props) => {
+export const AddTimeSliderControlButton = ({ closePopover, controlGroup }: Props) => {
   const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
-  
+
   useEffect(() => {
     const subscription = controlGroup.getInput$().subscribe(() => {
       const childIds = controlGroup.getChildIds();
