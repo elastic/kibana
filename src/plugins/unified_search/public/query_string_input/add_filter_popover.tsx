@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiFlexItem,
   EuiButtonIcon,
@@ -20,7 +20,10 @@ import { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import { popoverDragAndDropCss } from './add_filter_popover.styles';
-import { CloseFilterEditorConfirmModal } from './close_filter_editor_confirm_modal';
+import {
+  withCloseFilterEditorConfirmModal,
+  WithCloseFilterEditorConfirmModalProps,
+} from '../filter_bar/filter_editor';
 
 export const strings = {
   getAddFilterButtonLabel: () =>
@@ -29,7 +32,7 @@ export const strings = {
     }),
 };
 
-interface AddFilterPopoverProps {
+interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
   indexPatterns?: Array<DataView | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
@@ -38,37 +41,19 @@ interface AddFilterPopoverProps {
   buttonProps?: Partial<EuiButtonIconProps>;
 }
 
-export const AddFilterPopover = React.memo(function AddFilterPopover({
+const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   indexPatterns,
   filters,
   timeRangeForSuggestionsOverride,
   onFiltersUpdated,
+  onCloseFilterPopover,
   buttonProps,
   isDisabled,
 }: AddFilterPopoverProps) {
   const euiTheme = useEuiTheme();
   const [showAddFilterPopover, setShowAddFilterPopover] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [shouldShowConfirmModalOnClosePopover, setShouldShowConfirmModalOnClosePopover] =
-    useState(false);
-
-  const onCancelModal = useCallback(() => {
-    setShowConfirmModal(false);
-  }, [setShowConfirmModal]);
-
-  const onConfirmModal = useCallback(() => {
-    setShowAddFilterPopover(false);
-    setShowConfirmModal(false);
-    setShouldShowConfirmModalOnClosePopover(false);
-  }, [setShowAddFilterPopover, setShowConfirmModal, setShouldShowConfirmModalOnClosePopover]);
-
-  const onCloseFilterPopover = useCallback(() => {
-    if (shouldShowConfirmModalOnClosePopover) {
-      setShowConfirmModal(true);
-    } else {
-      setShowAddFilterPopover(false);
-    }
-  }, [setShowConfirmModal, setShowAddFilterPopover, shouldShowConfirmModalOnClosePopover]);
+  const [updatedFilter, setUpdatedFilter] = useState<Filter>();
+  const [originalFilter, setOriginalFilter] = useState<Filter>();
 
   const button = (
     <EuiToolTip delay="long" content={strings.getAddFilterButtonLabel()}>
@@ -86,6 +71,10 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
     </EuiToolTip>
   );
 
+  const closePopover = useCallback(() => {
+    onCloseFilterPopover(originalFilter, updatedFilter, [() => setShowAddFilterPopover(false)]);
+  }, [originalFilter, updatedFilter, setShowAddFilterPopover, onCloseFilterPopover]);
+
   return (
     <EuiFlexItem grow={false}>
       <EuiPopover
@@ -93,7 +82,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
         button={button}
         isOpen={showAddFilterPopover}
         closePopover={() => {
-          onCloseFilterPopover();
+          closePopover();
         }}
         anchorPosition="downLeft"
         panelPaddingSize="none"
@@ -110,15 +99,18 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
           filters={filters}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           onFiltersUpdated={onFiltersUpdated}
-          setShouldShowConfirmModalOnClosePopover={setShouldShowConfirmModalOnClosePopover}
-          closePopover={() => {
-            onCloseFilterPopover();
+          onLocalFilterUpdate={setUpdatedFilter}
+          onLocalFilterCreate={setOriginalFilter}
+          closePopoverOnAdd={() => {
+            setShowAddFilterPopover(false);
+          }}
+          closePopoverOnCancel={() => {
+            closePopover();
           }}
         />
       </EuiPopover>
-      {showConfirmModal && (
-        <CloseFilterEditorConfirmModal onCancel={onCancelModal} onConfirm={onConfirmModal} />
-      )}
     </EuiFlexItem>
   );
 });
+
+export const AddFilterPopover = withCloseFilterEditorConfirmModal(AddFilterPopoverComponent);
