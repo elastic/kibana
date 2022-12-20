@@ -15,5 +15,5 @@ export const journey = new Journey({
   ],
 }).step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
   await page.goto(kbnUrl.get(`/app/dashboards`));
-  await page.waitForSelector('#dashboardListingHeading');
+  await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
 });
