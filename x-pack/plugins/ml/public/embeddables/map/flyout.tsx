@@ -37,7 +37,11 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
       const layerGeoFields: Record<string, any> = {};
       const currentLayers = embeddable.getLayerList().filter((layer) => {
         const geoField = layer.getGeoFieldNames().length ? layer.getGeoFieldNames()[0] : undefined;
-        if (geoField && layerGeoFields[geoField] === undefined && layer.getIndexPatternIds().length) {
+        if (
+          geoField &&
+          layerGeoFields[geoField] === undefined &&
+          layer.getIndexPatternIds().length
+        ) {
           layerGeoFields[geoField] = true;
           return true;
         }
