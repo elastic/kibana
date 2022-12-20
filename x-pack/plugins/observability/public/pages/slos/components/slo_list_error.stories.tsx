@@ -9,12 +9,11 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloList as Component } from './slo_list';
+import { SloListError as Component } from './slo_list_error';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/SloList',
-  argTypes: {},
+  title: 'app/SLO/ListPage/SloListError',
   decorators: [KibanaReactStorybookDecorator],
 };
 
@@ -22,5 +21,5 @@ const Template: ComponentStory<typeof Component> = () => <Component />;
 
 const defaultProps = {};
 
-export const SloList = Template.bind({});
-SloList.args = defaultProps;
+export const SloListError = Template.bind({});
+SloListError.args = defaultProps;
