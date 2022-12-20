@@ -25,7 +25,6 @@ export default FieldIcon;
 
 function normalizeFieldType(type: string) {
   if (type === 'histogram') {
-    // TODO: check why are we replacing this type
     return 'number';
   }
   return type === 'document' ? 'number' : type;
