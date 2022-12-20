@@ -22,6 +22,7 @@ import {
   getOptionalListField,
   getMultipleUrlsOrHostsError,
   getUnsupportedKeysError,
+  getNoUrlsOrHostsError,
 } from './common_fields';
 
 export const getNormalizeICMPFields = ({
@@ -49,6 +50,9 @@ export const getNormalizeICMPFields = ({
   const hosts = getOptionalListField(monitor.hosts);
   if (hosts.length > 1) {
     errors.push(getMultipleUrlsOrHostsError(monitor, 'hosts', version));
+  }
+  if (hosts.length === 0) {
+    errors.push(getNoUrlsOrHostsError(monitor, 'host', version));
   }
 
   if (unsupportedKeys.length) {
