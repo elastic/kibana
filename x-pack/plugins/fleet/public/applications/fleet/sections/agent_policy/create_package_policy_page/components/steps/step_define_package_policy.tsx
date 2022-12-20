@@ -29,12 +29,8 @@ import type {
   NewPackagePolicy,
   RegistryVarsEntry,
 } from '../../../../../types';
-import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../../../services';
 import { Loading } from '../../../../../components';
-import { useStartServices, useGetPackagePolicies } from '../../../../../hooks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../constants';
-import { getMaxPackageName } from '../../../../../../../../common/services';
-import { SO_SEARCH_LIMIT } from '../../../../../../../../common/constants';
+import { useStartServices } from '../../../../../hooks';
 
 import { isAdvancedVar } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -74,13 +70,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   }) => {
     const { docLinks } = useStartServices();
 
-    // Fetch all packagePolicies having the package name
-    const { data: packagePolicyData, isLoading: isLoadingPackagePolicies } = useGetPackagePolicies({
-      perPage: SO_SEARCH_LIMIT,
-      page: 1,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
-    });
-
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
@@ -100,47 +89,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     // Update package policy's package and agent policy info
     useEffect(() => {
-      if (isLoadingPackagePolicies) {
-        return;
-      }
-
-      if (isUpdate) {
-        // If we're upgrading, we need to make sure we catch an addition of package-level
-        // vars when they were previously no package-level vars defined
-        if (!packagePolicy.vars && packageInfo.vars) {
-          updatePackagePolicy(
-            packageToPackagePolicy(
-              packageInfo,
-              agentPolicy?.id || '',
-              packagePolicy.namespace,
-              packagePolicy.name,
-              packagePolicy.description,
-              integrationToEnable
-            )
-          );
-        }
-      }
-
-      const pkg = packagePolicy.package;
-      const currentPkgKey = pkg ? pkgKeyFromPackageInfo(pkg) : '';
-      const pkgKey = pkgKeyFromPackageInfo(packageInfo);
-
-      // If package has changed, create shell package policy with input&stream values based on package info
-      if (currentPkgKey !== pkgKey) {
-        const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
-
-        updatePackagePolicy(
-          packageToPackagePolicy(
-            packageInfo,
-            agentPolicy?.id || '',
-            packagePolicy.namespace,
-            packagePolicy.name || incrementedName,
-            packagePolicy.description,
-            integrationToEnable
-          )
-        );
-      }
-
+      //  TODO move this to parent hook
       // If agent policy has changed, update package policy's agent policy ID and namespace
       if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
         updatePackagePolicy({
@@ -148,16 +97,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           namespace: agentPolicy.namespace,
         });
       }
-    }, [
-      isUpdate,
-      packagePolicy,
-      agentPolicy,
-      packageInfo,
-      updatePackagePolicy,
-      integrationToEnable,
-      packagePolicyData,
-      isLoadingPackagePolicies,
-    ]);
+    }, [packagePolicy, agentPolicy, packageInfo, updatePackagePolicy]);
 
     const isManaged = packagePolicy.is_managed;
 

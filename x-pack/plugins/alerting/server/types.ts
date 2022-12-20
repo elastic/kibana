@@ -132,6 +132,7 @@ export interface GetSummarizedAlertsFnOpts {
   executionUuid?: string;
   ruleId: string;
   spaceId: string;
+  excludedAlertInstanceIds: string[];
 }
 
 // TODO - add type for these alerts when we determine which alerts-as-data

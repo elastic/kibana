@@ -171,11 +171,6 @@ export enum ActionConnectorMode {
   ActionForm = 'actionForm',
 }
 
-export interface BulkDeleteResponse {
-  errors: BulkOperationError[];
-  total: number;
-}
-
 export interface BulkOperationResponse {
   rules: Rule[];
   errors: BulkOperationError[];
