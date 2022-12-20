@@ -119,7 +119,7 @@ export const OptionsListPopoverSuggestions = ({
           className={
             showOnlySelected && invalidSelectionsSet.has(key)
               ? 'optionsList__selectionInvalid'
-              : undefined
+              : 'optionsList__validSuggestion'
           }
           aria-label={
             availableOptions?.[key]
@@ -130,7 +130,7 @@ export const OptionsListPopoverSuggestions = ({
               : key
           }
         >
-          <EuiFlexGroup>
+          <EuiFlexGroup gutterSize="none" responsive={false}>
             <EuiFlexItem>{`${key}`}</EuiFlexItem>
             {!showOnlySelected && (
               <EuiFlexItem grow={false} tabIndex={-1}>

@@ -178,8 +178,11 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
     }),
     parse: (rawEsResult) =>
       get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
-          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
+        (suggestions: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
+          return {
+            ...suggestions,
+            [suggestion.key_as_string]: { doc_count: suggestion.doc_count },
+          };
         },
         {}
       ),
@@ -239,10 +242,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
       getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
       getIpBuckets(rawEsResult, buckets, 'ipv6');
       return buckets
-        .sort(
-          (bucketA: EsBucket, bucketB: EsBucket) =>
-            (bucketB?.doc_count ?? 0) - (bucketA?.doc_count ?? 0)
-        )
+        .sort((bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count)
         .slice(0, 10) // only return top 10 results
         .reduce((suggestions, suggestion: EsBucket) => {
           return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };

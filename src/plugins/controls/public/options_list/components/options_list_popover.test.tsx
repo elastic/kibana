@@ -118,6 +118,43 @@ describe('Options list popover', () => {
     expect(sortButton.prop('disabled')).toBe(true);
   });
 
+  test('test single invalid selection', async () => {
+    const popover = await mountComponent({
+      explicitInput: {
+        selectedOptions: ['bark', 'woof'],
+      },
+      componentState: {
+        availableOptions: {
+          bark: { doc_count: 75 },
+        },
+        validSelections: ['bark'],
+        invalidSelections: ['woof'],
+      },
+    });
+    const validSelection = findTestSubject(popover, 'optionsList-control-selection-bark');
+    expect(validSelection.text()).toEqual('bark75');
+    const title = findTestSubject(popover, 'optionList__ignoredSelectionLabel').text();
+    expect(title).toEqual('Ignored selection');
+    const invalidSelection = findTestSubject(popover, 'optionsList-control-ignored-selection-woof');
+    expect(invalidSelection.text()).toEqual('woof');
+    expect(invalidSelection.hasClass('optionsList__selectionInvalid')).toBe(true);
+  });
+
+  test('test title when multiple invalid selections', async () => {
+    const popover = await mountComponent({
+      explicitInput: { selectedOptions: ['bark', 'woof', 'meow'] },
+      componentState: {
+        availableOptions: {
+          bark: { doc_count: 75 },
+        },
+        validSelections: ['bark'],
+        invalidSelections: ['woof', 'meow'],
+      },
+    });
+    const title = findTestSubject(popover, 'optionList__ignoredSelectionLabel').text();
+    expect(title).toEqual('Ignored selections');
+  });
+
   test('should default to exclude = false', async () => {
     const popover = await mountComponent();
     const includeButton = findTestSubject(popover, 'optionsList__includeResults');

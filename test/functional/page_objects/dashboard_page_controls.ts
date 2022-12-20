@@ -33,6 +33,17 @@ interface OptionsListAdditionalSettings {
   hideSort?: boolean;
 }
 
+export const OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS: { [key: string]: number } = {
+  hiss: 5,
+  ruff: 4,
+  bark: 3,
+  grrr: 3,
+  meow: 3,
+  growl: 2,
+  grr: 2,
+  'bow ow ow': 1,
+};
+
 export class DashboardPageControls extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
@@ -375,11 +386,44 @@ export class DashboardPageControls extends FtrService {
     return +(await availableOptions.getAttribute('data-option-count'));
   }
 
-  public async optionsListPopoverGetAvailableOptions(filterOutExists: boolean = true) {
+  public async optionsListPopoverGetAvailableOptions() {
     this.log.debug(`getting available options from options list`);
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
-    const availableOptionsArray = (await availableOptions.getVisibleText()).split('\n');
-    return filterOutExists ? availableOptionsArray.slice(1) : availableOptionsArray;
+
+    const suggestionElements = await availableOptions.findAllByClassName(
+      'optionsList__validSuggestion'
+    );
+    const suggestions: { [key: string]: number } = await suggestionElements.reduce(
+      async (promise, option) => {
+        const acc = await promise;
+        const [key, docCount] = (await option.getVisibleText()).split('\n');
+        return { ...acc, [key]: Number(docCount) };
+      },
+      Promise.resolve({} as { [key: string]: number })
+    );
+
+    const invalidSelectionElements = await availableOptions.findAllByClassName(
+      'optionsList__selectionInvalid'
+    );
+    const invalidSelections = await Promise.all(
+      invalidSelectionElements.map(async (option) => {
+        return await option.getVisibleText();
+      })
+    );
+
+    return { suggestions, invalidSelections };
+  }
+
+  public async ensureAvailableOptionsEqual(
+    controlId: string,
+    expectation: { suggestions: { [key: string]: number }; invalidSelections: string[] },
+    skipOpen?: boolean
+  ) {
+    if (!skipOpen) await this.optionsListOpenPopover(controlId);
+    await this.retry.try(async () => {
+      expect(await this.optionsListPopoverGetAvailableOptions()).to.eql(expectation);
+    });
+    if (!skipOpen) await this.optionsListEnsurePopoverIsClosed(controlId);
   }
 
   public async optionsListPopoverSearchForOption(search: string) {
