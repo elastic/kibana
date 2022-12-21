@@ -15,7 +15,7 @@ import _ from 'lodash';
 
 import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
-import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   ControlGroupInput,
@@ -31,11 +31,10 @@ import {
   controlOrdersAreEqual,
 } from './control_group_chaining_system';
 import { pluginServices } from '../../services';
-import { ControlEditor } from '../editor/control_editor';
+import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
 import {
   ControlEmbeddable,
   ControlInput,
@@ -54,7 +53,6 @@ import {
   getRangeSliderPanelState,
   getTimeSliderPanelState,
 } from '../control_group_input_builder';
-import { ControlGroupStrings } from '../control_group_strings';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -127,84 +125,7 @@ export class ControlGroupContainer extends Container<
   }
 
   public openAddDataControlFlyout() {
-    const {
-      overlays: { openFlyout, openConfirm },
-      controls: { getControlTypes, getControlFactory },
-      theme: { theme$ },
-    } = pluginServices.getServices();
-    const ControlsServicesProvider = pluginServices.getContextProvider();
-
-    let controlInput: Partial<DataControlInput> = {};
-    const onCancel = () => {
-      if (Object.keys(controlInput).length === 0) {
-        this.closeAllFlyouts();
-        return;
-      }
-
-      openConfirm(ControlGroupStrings.management.discardNewControl.getSubtitle(), {
-        confirmButtonText: ControlGroupStrings.management.discardNewControl.getConfirm(),
-        cancelButtonText: ControlGroupStrings.management.discardNewControl.getCancel(),
-        title: ControlGroupStrings.management.discardNewControl.getTitle(),
-        buttonColor: 'danger',
-      }).then((confirmed) => {
-        if (confirmed) {
-          this.closeAllFlyouts();
-        }
-      });
-    };
-
-    const flyoutInstance = openFlyout(
-      toMountPoint(
-        <ControlsServicesProvider>
-          <ControlEditor
-            setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
-            getRelevantDataViewId={this.getMostRelevantDataViewId}
-            isCreate={true}
-            width={this.getInput().defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
-            grow={this.getInput().defaultControlGrow ?? DEFAULT_CONTROL_GROW}
-            updateTitle={(newTitle) => (controlInput.title = newTitle)}
-            updateWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-            updateGrow={(defaultControlGrow: boolean) => this.updateInput({ defaultControlGrow })}
-            onSave={(type) => {
-              this.closeAllFlyouts();
-              if (!type) {
-                return;
-              }
-
-              const factory = getControlFactory(type) as IEditableControlFactory;
-              if (factory.presaveTransformFunction) {
-                controlInput = factory.presaveTransformFunction(controlInput);
-              }
-
-              if (type === OPTIONS_LIST_CONTROL) {
-                this.addOptionsListControl(controlInput as AddOptionsListControlProps);
-                return;
-              }
-
-              if (type === RANGE_SLIDER_CONTROL) {
-                this.addRangeSliderControl(controlInput as AddRangeSliderControlProps);
-                return;
-              }
-
-              this.addDataControlFromField(controlInput as AddDataControlProps);
-            }}
-            onCancel={onCancel}
-            onTypeEditorChange={(partialInput) =>
-              (controlInput = { ...controlInput, ...partialInput })
-            }
-          />
-        </ControlsServicesProvider>,
-        { theme$ }
-      ),
-      {
-        'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),
-        outsideClickCloses: false,
-        onClose: () => {
-          onCancel();
-        },
-      }
-    );
-    setFlyoutRef(flyoutInstance);
+    openAddDataControlFlyout(this);
   }
 
   private getEditControlGroupButton = (closePopover: () => void) => {
