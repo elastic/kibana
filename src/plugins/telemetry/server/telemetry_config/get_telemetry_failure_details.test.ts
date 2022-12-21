@@ -10,7 +10,7 @@ import { getTelemetryFailureDetails } from './get_telemetry_failure_details';
 
 describe('getTelemetryFailureDetails: get details about server usage fetcher failures', () => {
   it('returns `failureCount: 0` and `failureVersion: undefined` when telemetry does not have any custom configs in saved Object', () => {
-    const telemetrySavedObject = null;
+    const telemetrySavedObject = {};
     const failureDetails = getTelemetryFailureDetails({ telemetrySavedObject });
     expect(failureDetails).toStrictEqual({
       failureVersion: undefined,

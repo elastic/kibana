@@ -7,18 +7,23 @@
  */
 
 import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '@kbn/core/server';
-import { TelemetrySavedObjectAttributes } from '.';
+import { TELEMETRY_SAVED_OBJECT_TYPE, TELEMETRY_SAVED_OBJECT_ID } from './constants';
+import type { TelemetrySavedObjectAttributes } from './types';
 
 export async function updateTelemetrySavedObject(
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectAttributes: TelemetrySavedObjectAttributes
 ) {
   try {
-    return await savedObjectsClient.update('telemetry', 'telemetry', savedObjectAttributes);
+    return await savedObjectsClient.update(
+      TELEMETRY_SAVED_OBJECT_TYPE,
+      TELEMETRY_SAVED_OBJECT_ID,
+      savedObjectAttributes
+    );
   } catch (err) {
     if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      return await savedObjectsClient.create('telemetry', savedObjectAttributes, {
-        id: 'telemetry',
+      return await savedObjectsClient.create(TELEMETRY_SAVED_OBJECT_TYPE, savedObjectAttributes, {
+        id: TELEMETRY_SAVED_OBJECT_ID,
         overwrite: true,
       });
     }
