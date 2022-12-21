@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component, MouseEvent } from 'react';
-import { EuiConfirmModal, EuiFormRow, EuiRange } from '@elastic/eui';
+import React, { Component } from 'react';
+import { EuiConfirmModal, EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AggDescriptor } from '../../../../common/descriptor_types';
@@ -94,7 +94,7 @@ export class ResolutionEditor extends Component<Props, State> {
     return resolution ? (resolution as GRID_RESOLUTION) : GRID_RESOLUTION.COARSE;
   }
 
-  _onResolutionChange = (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
+  _onResolutionChange: EuiRangeProps['onChange'] = (event) => {
     const resolution = this._sliderValueToResolution(parseInt(event.currentTarget.value, 10));
     if (isMvt(this.props.renderAs, resolution)) {
       const hasUnsupportedMetrics = this.props.metrics.find(isUnsupportedVectorTileMetric);
