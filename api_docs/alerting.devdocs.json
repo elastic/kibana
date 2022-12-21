@@ -1241,7 +1241,8 @@
             "label": "paramsModifier",
             "description": [],
             "signature": [
-              "RuleParamsModifier<Params> | undefined"
+              "RuleParamsModifier",
+              "<Params> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
             "deprecated": false,
@@ -1314,7 +1315,8 @@
             "label": "paramsModifier",
             "description": [],
             "signature": [
-              "RuleParamsModifier<Params> | undefined"
+              "RuleParamsModifier",
+              "<Params> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
             "deprecated": false,
@@ -1525,6 +1527,20 @@
             "tags": [],
             "label": "spaceId",
             "description": [],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.GetSummarizedAlertsFnOpts.excludedAlertInstanceIds",
+            "type": "Array",
+            "tags": [],
+            "label": "excludedAlertInstanceIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3018,7 +3034,7 @@
           },
           "<Params>>; muteAll: (options: { id: string; }) => Promise<void>; getAlertState: (params: ",
           "GetAlertStateParams",
-          ") => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; alertRecoveredInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }>; getAlertSummary: (params: ",
+          ") => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; alertRecoveredInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; summaryActions?: { [x: string]: { date: Date; }; } | undefined; }>; getAlertSummary: (params: ",
           "GetAlertSummaryParams",
           ") => Promise<",
           {
@@ -3116,7 +3132,15 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<Params>[]; errors: ",
+          "<Params>[]; skipped: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.BulkActionSkipResult",
+            "text": "BulkActionSkipResult"
+          },
+          "[]; errors: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -4091,6 +4115,59 @@
               }
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.BulkActionSkipResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkActionSkipResult",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.BulkActionSkipResult.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.BulkActionSkipResult.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.BulkActionSkipResult.skip_reason",
+            "type": "string",
+            "tags": [],
+            "label": "skip_reason",
+            "description": [],
+            "signature": [
+              "\"RULE_NOT_MODIFIED\""
+            ],
+            "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6519,21 +6596,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.AlertActions",
-        "type": "Type",
-        "tags": [],
-        "label": "AlertActions",
-        "description": [],
-        "signature": [
-          "{ [x: string]: { date?: Date | undefined; }; }"
-        ],
-        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.AlertInstanceContext",
         "type": "Type",
         "tags": [],
@@ -6555,7 +6617,7 @@
         "label": "AlertInstanceMeta",
         "description": [],
         "signature": [
-          "{ lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; }"
+          "{ lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
@@ -6618,6 +6680,21 @@
           "\"/api/alerting\""
         ],
         "path": "x-pack/plugins/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.BulkEditSkipReason",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkEditSkipReason",
+        "description": [],
+        "signature": [
+          "\"RULE_NOT_MODIFIED\""
+        ],
+        "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6690,7 +6767,7 @@
         "label": "LastScheduledActions",
         "description": [],
         "signature": [
-          "{ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }"
+          "{ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
@@ -6764,7 +6841,7 @@
         "label": "RawAlertInstance",
         "description": [],
         "signature": [
-          "{ state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }"
+          "{ state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
@@ -7024,7 +7101,7 @@
         "label": "RuleTaskState",
         "description": [],
         "signature": [
-          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; alertRecoveredInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date?: Date | undefined; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }"
+          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; alertRecoveredInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; } & { actions?: { [x: string]: { date: Date; }; } | undefined; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; summaryActions?: { [x: string]: { date: Date; }; } | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
         "deprecated": false,
@@ -7157,6 +7234,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.ThrottledActions",
+        "type": "Type",
+        "tags": [],
+        "label": "ThrottledActions",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { date: Date; }; }"
+        ],
+        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.WithoutReservedActionGroups",
         "type": "Type",
         "tags": [],
@@ -7180,28 +7272,6 @@
       }
     ],
     "objects": [
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.actionsSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "actionsSchema",
-        "description": [],
-        "signature": [
-          "RecordC",
-          "<",
-          "StringC",
-          ", ",
-          "PartialC",
-          "<{ date: ",
-          "Type",
-          "<Date, string, unknown>; }>>"
-        ],
-        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "alerting",
         "id": "def-common.DisabledActionTypeIdsForActionGroup",
@@ -7381,7 +7451,7 @@
           "<",
           "StringC",
           ", ",
-          "PartialC",
+          "TypeC",
           "<{ date: ",
           "Type",
           "<Date, string, unknown>; }>>; }>]>; flappingHistory: ",
@@ -7529,7 +7599,7 @@
           "<",
           "StringC",
           ", ",
-          "PartialC",
+          "TypeC",
           "<{ date: ",
           "Type",
           "<Date, string, unknown>; }>>; }>]>; flappingHistory: ",
@@ -7571,7 +7641,7 @@
           "<",
           "StringC",
           ", ",
-          "PartialC",
+          "TypeC",
           "<{ date: ",
           "Type",
           "<Date, string, unknown>; }>>; }>]>; flappingHistory: ",
@@ -7586,9 +7656,39 @@
           "NullC",
           ", ",
           "Type",
-          "<Date, string, unknown>]>; }>"
+          "<Date, string, unknown>]>; summaryActions: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "TypeC",
+          "<{ date: ",
+          "Type",
+          "<Date, string, unknown>; }>>; }>"
         ],
         "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.throttledActionSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "throttledActionSchema",
+        "description": [],
+        "signature": [
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "TypeC",
+          "<{ date: ",
+          "Type",
+          "<Date, string, unknown>; }>>"
+        ],
+        "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

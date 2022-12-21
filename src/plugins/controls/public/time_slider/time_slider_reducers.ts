@@ -8,7 +8,7 @@
 
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
-import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import { EuiRangeTick } from '@elastic/eui';
 import { TimeSliderReduxState } from './types';
 
 export const timeSliderReducers = {
