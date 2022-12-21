@@ -355,7 +355,7 @@ export function ChangeDataView({
         <TextBasedLanguagesList
           textBasedLanguages={textBasedLanguages}
           selectedOption={triggerLabel}
-          onChange={async (lang) => {
+          onChange={(lang) => {
             setTriggerLabel(lang);
             setPopoverIsOpen(false);
             setIsTextBasedLangSelected(true);

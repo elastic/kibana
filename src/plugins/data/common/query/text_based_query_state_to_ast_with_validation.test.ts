@@ -59,7 +59,7 @@ describe('textBasedQueryStateToAstWithValidation', () => {
   it('returns an object with the correct structure for text based language with non existing dataview', async () => {
     const actual = await textBasedQueryStateToAstWithValidation({
       filters: [],
-      query: { sql: 'SELECT * FROM another_dataview' },
+      query: { sql: 'SELECT * FROM index_pattern_with_no_data_view' },
       time: {
         from: 'now',
         to: 'now+7d',
@@ -68,7 +68,7 @@ describe('textBasedQueryStateToAstWithValidation', () => {
     expect(actual).toHaveProperty(
       'chain.2.arguments',
       expect.objectContaining({
-        query: ['SELECT * FROM another_dataview'],
+        query: ['SELECT * FROM index_pattern_with_no_data_view'],
       })
     );
   });

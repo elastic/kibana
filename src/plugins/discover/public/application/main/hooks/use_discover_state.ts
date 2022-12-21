@@ -8,6 +8,7 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { type DataViewListItem, type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -125,6 +126,7 @@ export function useDiscoverState({
   /**
    * Adhoc data views functionality
    */
+  const isTextBasedMode = state?.query && isOfAggregateQueryType(state?.query);
   const { adHocDataViewList, persistDataView, updateAdHocDataViewId, onAddAdHocDataViews } =
     useAdHocDataViews({
       dataView,
@@ -135,7 +137,7 @@ export function useDiscoverState({
       filterManager,
       toastNotifications,
       trackUiMetric,
-      query: state?.query,
+      isTextBasedMode,
     });
 
   const [savedDataViewList, setSavedDataViewList] = useState(initialDataViewList);

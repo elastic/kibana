@@ -319,7 +319,7 @@ describe('useTextBasedQueryLanguage', () => {
     });
   });
 
-  test('changing a text based query with a dataview that not exists should return results', async () => {
+  test('changing a text based query with an index pattern that not corresponds to a dataview should return results', async () => {
     const replaceUrlAppState = jest.fn();
     const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
     dataViewsCreateMock.mockImplementation(() => ({
