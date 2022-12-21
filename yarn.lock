@@ -3169,10 +3169,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-browser@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal":
   version "0.0.0"
   uid ""
