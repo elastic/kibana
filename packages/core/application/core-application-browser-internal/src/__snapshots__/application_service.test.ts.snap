@@ -68,32 +68,11 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
     }
   }
   hasCustomBranding$={
-    AnonymousSubject {
-      "closed": false,
-      "currentObservers": null,
-      "destination": BehaviorSubject {
-        "_value": false,
-        "closed": false,
-        "currentObservers": null,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [],
+    Observable {
       "operator": [Function],
-      "source": BehaviorSubject {
-        "_value": false,
-        "closed": false,
-        "currentObservers": null,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
+      "source": Observable {
+        "_subscribe": [Function],
       },
-      "thrownError": null,
     }
   }
   history={
