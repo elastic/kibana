@@ -35,11 +35,7 @@ import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout
 import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
-import {
-  ControlEmbeddable,
-  ControlInput,
-  ControlOutput,
-} from '../../types';
+import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { getNextPanelOrder } from './control_group_helpers';
 import type {
   AddDataControlProps,
