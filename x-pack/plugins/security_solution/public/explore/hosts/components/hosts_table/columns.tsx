@@ -11,7 +11,6 @@ import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { DefaultDraggable } from '../../../../common/components/draggables';
 import type { HostsTableColumns } from '.';
 import * as i18n from './translations';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
@@ -35,44 +34,18 @@ export const getHostsColumns = (
           return (
             <CellActions
               mode={CellActionsMode.HOVER_POPOVER}
-              showMoreActionsFrom={5}
-              showTooltip
+              visibleCellActions={5}
+              showActionTooltips
               triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
-              config={{
-                field: 'host.name',
+              field={{
+                name: 'host.name',
                 value: hostName[0],
-                fieldType: 'keyword',
-                metadata: { scopeId: undefined },
+                type: 'keyword',
               }}
             >
               <HostDetailsLink hostName={hostName[0]} />
             </CellActions>
           );
-
-          // <DraggableWrapper
-          //   key={id}
-          //   dataProvider={{
-          //     and: [],
-          //     enabled: true,
-          //     excluded: false,
-          //     id,
-          //     name: hostName[0],
-          //     kqlQuery: '',
-          //     queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
-          //   }}
-          //   isAggregatable={true}
-          //   fieldType={'keyword'}
-          //   render={(dataProvider, _, snapshot) =>
-          //     snapshot.isDragging ? (
-          //       <DragEffects>
-          //         <Provider dataProvider={dataProvider} />
-          //       </DragEffects>
-          //     ) : (
-          // <HostDetailsLink hostName={hostName[0]} />
-          //     )
-          //   }
-          // />
-          // );
         }
         return getEmptyTagValue();
       },
@@ -116,14 +89,19 @@ export const getHostsColumns = (
       render: (hostOsName) => {
         if (hostOsName != null) {
           return (
-            <DefaultDraggable
-              id={`host-page-draggable-host.os.name-${hostOsName[0]}`}
-              field={'host.os.name'}
-              value={hostOsName[0]}
-              isDraggable={false}
-              hideTopN={true}
-              tooltipContent={null}
-            />
+            <CellActions
+              mode={CellActionsMode.HOVER_POPOVER}
+              visibleCellActions={5}
+              showActionTooltips
+              triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+              field={{
+                name: 'host.os.name',
+                value: hostOsName[0],
+                type: 'keyword',
+              }}
+            >
+              {hostOsName}
+            </CellActions>
           );
         }
         return getEmptyTagValue();
@@ -138,14 +116,19 @@ export const getHostsColumns = (
       render: (hostOsVersion) => {
         if (hostOsVersion != null) {
           return (
-            <DefaultDraggable
-              id={`host-page-draggable-host.os.version-${hostOsVersion[0]}`}
-              field={'host.os.version'}
-              value={hostOsVersion[0]}
-              isDraggable={false}
-              hideTopN={true}
-              tooltipContent={null}
-            />
+            <CellActions
+              mode={CellActionsMode.HOVER_POPOVER}
+              visibleCellActions={5}
+              showActionTooltips
+              triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+              field={{
+                name: 'host.os.version',
+                value: hostOsVersion[0],
+                type: 'keyword',
+              }}
+            >
+              {hostOsVersion}
+            </CellActions>
           );
         }
         return getEmptyTagValue();
