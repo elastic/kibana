@@ -76,23 +76,27 @@ export function DataViewsList({
   );
 
   const [sortByOptions, setSortByOptions] = useState<EuiSelectableOption[]>(() => {
-    return sortingService.getColumns().map((key) => {
-      return toSelectableOption(
-        key,
-        key === sortingService.column,
-        optionsListStrings.editorAndPopover.sortBy[key].getSortByLabel()
+    return sortingService
+      .getColumns()
+      .map((key) =>
+        toSelectableOption(
+          key,
+          key === sortingService.column,
+          optionsListStrings.editorAndPopover.sortBy[key].getSortByLabel()
+        )
       );
-    });
   });
 
   const [sortDirectionOptions, setSortDirectionOptions] = useState<EuiSelectableOption[]>(() => {
-    return sortingService.getOrderDirections().map((key) => {
-      return toSelectableOption(
-        key,
-        key === sortingService.direction,
-        optionsListStrings.editorAndPopover.sortOrder[key].getSortOrderLabel()
+    return sortingService
+      .getOrderDirections()
+      .map((key) =>
+        toSelectableOption(
+          key,
+          key === sortingService.direction,
+          optionsListStrings.editorAndPopover.sortOrder[key].getSortOrderLabel()
+        )
       );
-    });
   });
 
   const onChangeSortDirection = useCallback(

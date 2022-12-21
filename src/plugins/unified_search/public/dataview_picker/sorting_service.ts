@@ -8,7 +8,7 @@
 
 import { Direction, SortDirection } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { IStorageWrapper, Storage } from '@kbn/kibana-utils-plugin/public';
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
@@ -23,21 +23,25 @@ export interface Sorting {
 }
 
 export class SortingService<T = unknown> {
-  private storage = new Storage(window.localStorage);
+  private localStorage: IStorageWrapper;
   public column: Sorting['column'];
   public direction: Sorting['direction'];
 
-  constructor(private callbacks: Record<Sorting['column'], (arg: T) => string>) {
+  constructor(
+    private callbacks: Record<Sorting['column'], (arg: T) => string>,
+    private storage?: IStorageWrapper
+  ) {
     const { column, direction } = this.getSorting();
     this.column = column;
     this.direction = direction;
+    this.localStorage = this.storage ? this.storage : new Storage(window.localStorage);
   }
 
   private getSorting(): Sorting {
     let parsedSorting: Sorting | undefined;
 
     try {
-      parsedSorting = this.storage.get(storageKey);
+      parsedSorting = this.localStorage.get(storageKey);
     } catch (e) {
       parsedSorting = undefined;
     }
@@ -47,12 +51,12 @@ export class SortingService<T = unknown> {
 
   setDirection(direction: Sorting['direction']) {
     this.direction = direction;
-    this.storage.set(storageKey, { direction, column: this.column });
+    this.localStorage.set(storageKey, { direction, column: this.column });
   }
 
   setColumn(column: Sorting['column']) {
     this.column = column;
-    this.storage.set(storageKey, { column, direction: this.direction });
+    this.localStorage.set(storageKey, { column, direction: this.direction });
   }
 
   getOrderDirections(): Array<Sorting['direction']> {

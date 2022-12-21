@@ -7,7 +7,9 @@
  */
 
 import { SortDirection } from '@elastic/eui';
-import { IStorageWrapper, Storage } from '@kbn/kibana-utils-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { DataViewListItemEnhanced } from './dataview_list';
 import { ALPHABETICALLY, SortingService } from './sorting_service';
 
@@ -15,10 +17,21 @@ describe('Sorting service', () => {
   let sortingService: SortingService<DataViewListItemEnhanced>;
   let storage: IStorageWrapper;
   beforeEach(() => {
-    sortingService = new SortingService<DataViewListItemEnhanced>({
-      alphabetically: (item) => item.name ?? item.title,
-    });
-    storage = new Storage(window.localStorage);
+    storage = new Storage(new StubBrowserStorage());
+    sortingService = new SortingService<DataViewListItemEnhanced>(
+      {
+        alphabetically: (item) => item.name ?? item.title,
+      },
+      storage
+    );
+  });
+
+  it('should get column value', () => {
+    expect(sortingService.column).toEqual(ALPHABETICALLY);
+  });
+
+  it('should get direction value', () => {
+    expect(sortingService.direction).toEqual(SortDirection.ASC);
   });
 
   it('should set sorting direction', () => {
