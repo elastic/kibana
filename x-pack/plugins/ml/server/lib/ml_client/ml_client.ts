@@ -286,7 +286,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getDataFrameAnalyticsStats(...p: Parameters<MlClient['getDataFrameAnalyticsStats']>) {
@@ -317,7 +317,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getDatafeedStats(...p: Parameters<MlClient['getDatafeedStats']>) {
@@ -342,7 +342,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getDatafeeds(...p: Parameters<MlClient['getDatafeeds']>) {
@@ -367,7 +367,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getFilters(...p: Parameters<MlClient['getFilters']>) {
@@ -405,7 +405,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getJobs(...p: Parameters<MlClient['getJobs']>) {
@@ -437,7 +437,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getModelSnapshots(...p: Parameters<MlClient['getModelSnapshots']>) {
@@ -466,7 +466,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLModelNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
@@ -483,7 +483,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLModelNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async startTrainedModelDeployment(...p: Parameters<MlClient['startTrainedModelDeployment']>) {

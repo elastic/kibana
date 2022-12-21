@@ -5,17 +5,18 @@ A custom version of the handlebars package which, to improve security, does not 
 ## Limitations
 
 - Only the following compile options are supported:
+  - `data`
   - `knownHelpers`
   - `knownHelpersOnly`
+  - `noEscape`
   - `strict`
   - `assumeObjects`
-  - `noEscape`
-  - `data`
 
 - Only the following runtime options are supported:
-  - `helpers`
-  - `blockParams`
   - `data`
+  - `helpers`
+  - `decorators` (not documented in the official Handlebars [runtime options documentation](https://handlebarsjs.com/api-reference/runtime-options.html))
+  - `blockParams` (not documented in the official Handlebars [runtime options documentation](https://handlebarsjs.com/api-reference/runtime-options.html))
 
 The [Inline partials](https://handlebarsjs.com/guide/partials.html#inline-partials) handlebars template feature is currently not supported by `@kbn/handlebars`.
 
@@ -129,47 +130,14 @@ Output:
       },
       params: [],
       hash: undefined,
-      escaped: true,
-      strip: { open: false, close: false }
-    }
-  ],
-  strip: {}
-}
-```
-
-You can also filter which properties not to display, e.g:
-
-```sh
-./packages/kbn-handlebars/scripts/print_ast.js '{{#myBlock}}Hello {{name}}{{/myBlock}}' params,hash,loc,strip,data,depth,parts,inverse,openStrip,inverseStrip,closeStrip,blockParams,escaped
-```
-
-Output:
-
-```js
-{
-  type: 'Program',
-  body: [
-    {
-      type: 'BlockStatement',
-      path: { type: 'PathExpression', original: 'myBlock' },
-      program: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ContentStatement',
-            original: 'Hello ',
-            value: 'Hello '
-          },
-          {
-            type: 'MustacheStatement',
-            path: { type: 'PathExpression', original: 'name' }
-          }
-        ]
-      }
+      escaped: true
     }
   ]
 }
 ```
+
+By default certain properties will be hidden in the output.
+For more control over the output, check out the options by running the script without any arguments.
 
 ### Print generated code
 
