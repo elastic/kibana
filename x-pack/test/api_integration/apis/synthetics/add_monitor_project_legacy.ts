@@ -19,10 +19,8 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import {
-  comparePolicies,
-  getTestProjectSyntheticsPolicy,
-} from '../uptime/rest/sample_data/test_policy';
+import { comparePolicies } from './sample_data/test_policy';
+import { getTestProjectSyntheticsPolicy } from './sample_data/test_project_monitor_policy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddProjectLegacyMonitors', function () {
@@ -84,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.10.3')
+        .post('/api/fleet/epm/packages/synthetics/0.11.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -1459,6 +1457,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'check if title is present-Test private location 0',
             id,
             configId,
+            locationName: 'Test private location 0',
           })
         );
       } finally {
@@ -1576,6 +1575,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'check if title is present-Test private location 0',
             id,
             configId,
+            locationName: 'Test private location 0',
           })
         );
 
@@ -1655,6 +1655,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'check if title is present-Test private location 0',
             id,
             configId,
+            locationName: 'Test private location 0',
           })
         );
 
@@ -1752,7 +1753,15 @@ export default function ({ getService }: FtrProviderContext) {
           streams: [
             {
               enabled: true,
-              data_stream: { type: 'synthetics', dataset: 'http' },
+              data_stream: {
+                elasticsearch: {
+                  privileges: {
+                    indices: ['auto_configure', 'create_doc', 'read'],
+                  },
+                },
+                type: 'synthetics',
+                dataset: 'http',
+              },
               vars: {
                 __ui: { value: '{"is_tls_enabled":false}', type: 'yaml' },
                 enabled: { value: false, type: 'bool' },
@@ -1826,8 +1835,9 @@ export default function ({ getService }: FtrProviderContext) {
                 'check.response.body.positive': ['Saved', 'saved'],
                 'ssl.verification_mode': 'full',
                 'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+                'run_from.geo.name': 'Test private location 0',
+                'run_from.id': 'Test private location 0',
                 processors: [
-                  { add_observer_metadata: { geo: { name: 'Test private location 0' } } },
                   {
                     add_fields: {
                       target: '',
@@ -1920,6 +1930,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'check if title is present-Test private location 0',
             id,
             configId,
+            locationName: 'Test private location 0',
           })
         );
 
@@ -1956,6 +1967,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'check if title is present-Test private location 0',
             id: id2,
             configId: configId2,
+            locationName: 'Test private location 0',
           })
         );
       } finally {
