@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
+import { ESCaseSeverity } from '@kbn/cases-plugin/server/services/cases/types';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
@@ -473,6 +474,40 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               uid: 'abc',
             },
           ]);
+        });
+      });
+    });
+
+    describe('8.7.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_severity.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_severity.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('severity', () => {
+        it('severity string labels are converted to matching number', async () => {
+          const expectedSeverityValues: Record<string, ESCaseSeverity> = {
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': ESCaseSeverity.LOW,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': ESCaseSeverity.MEDIUM,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': ESCaseSeverity.HIGH,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': ESCaseSeverity.CRITICAL,
+          };
+
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+
+          for (const hit of casesFromES.body.hits.hits) {
+            const caseID = hit._id;
+            expect(expectedSeverityValues[caseID]).not.to.be(undefined);
+            expect(hit._source?.cases.severity).to.eql(expectedSeverityValues[caseID]);
+          }
         });
       });
     });

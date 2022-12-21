@@ -287,12 +287,25 @@ describe('Custom query rules', () => {
             deleteSelectedRules();
 
             cy.get(RULES_TABLE)
+              .get(RULES_ROW)
+              .first()
+              .within(() => {
+                cy.get(RULE_SWITCH).should('not.exist');
+              });
+
+            cy.get(RULES_TABLE)
               .find(RULES_ROW)
               .should('have.length', expectedNumberOfRulesAfterDeletion);
             cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
               const numberOfRules = body.data.length;
               expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
             });
+            cy.get(RULES_TABLE)
+              .get(RULES_ROW)
+              .first()
+              .within(() => {
+                cy.get(RULE_SWITCH).should('exist');
+              });
             cy.get(CUSTOM_RULES_BTN).should(
               'have.text',
               `Custom rules (${expectedNumberOfRulesAfterDeletion})`

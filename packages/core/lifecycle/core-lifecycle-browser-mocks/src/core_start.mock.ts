@@ -14,7 +14,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-browser
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { uiSettingsServiceMock, settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
@@ -34,6 +34,7 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    settings: settingsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     deprecations: deprecationsServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),

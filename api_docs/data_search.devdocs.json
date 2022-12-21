@@ -12066,6 +12066,23 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.aggRate",
+        "type": "Function",
+        "tags": [],
+        "label": "aggRate",
+        "description": [],
+        "signature": [
+          "() => FunctionDefinition"
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/rate_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.aggregateQueryToAst",
         "type": "Function",
         "tags": [],
@@ -12281,6 +12298,23 @@
           "() => FunctionDefinition"
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/terms_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.aggTimeSeries",
+        "type": "Function",
+        "tags": [],
+        "label": "aggTimeSeries",
+        "description": [],
+        "signature": [
+          "() => FunctionDefinition"
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/time_series_fn.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -14864,6 +14898,39 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.getRateMetricAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "getRateMetricAgg",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IMetricAggConfig",
+            "text": "IMetricAggConfig"
+          },
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/rate.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.getResponseInspectorStats",
         "type": "Function",
         "tags": [],
@@ -15378,6 +15445,39 @@
           ">"
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.getTimeSeriesBucketAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeSeriesBucketAgg",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IBucketAggConfig",
+            "text": "IBucketAggConfig"
+          },
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/time_series.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -18189,6 +18289,59 @@
                 "text": "ExpressionFunctionDefinition"
               },
               "<\"aggTerms\", any, Arguments, ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggExpressionType",
+                "text": "AggExpressionType"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggFunctionsMapping.aggTimeSeries",
+            "type": "Object",
+            "tags": [],
+            "label": "aggTimeSeries",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggTimeSeries\", any, AggArgs, ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -22199,6 +22352,26 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.TIME_SERIES",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.TIME_SERIES]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BaseAggParams",
+                "text": "BaseAggParams"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.AggParamsMapping.BUCKET_TYPES.MULTI_TERMS",
             "type": "Object",
             "tags": [],
@@ -22731,6 +22904,26 @@
                 "docId": "kibDataSearchPluginApi",
                 "section": "def-common.AggParamsPercentiles",
                 "text": "AggParamsPercentiles"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.RATE",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.RATE]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsRate",
+                "text": "AggParamsRate"
               }
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -23347,6 +23540,62 @@
               "number | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/rare_terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsRate",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsRate",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsRate",
+            "text": "AggParamsRate"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/rate.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsRate.unit",
+            "type": "string",
+            "tags": [],
+            "label": "unit",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/metrics/rate.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsRate.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/rate.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -31741,6 +31990,27 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.AggParamsTimeSeries",
+        "type": "Type",
+        "tags": [],
+        "label": "AggParamsTimeSeries",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/time_series.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.aggPercentileRanksFnName",
         "type": "string",
         "tags": [],
@@ -31795,6 +32065,21 @@
           "\"aggRareTerms\""
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/rare_terms_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.aggRateFnName",
+        "type": "string",
+        "tags": [],
+        "label": "aggRateFnName",
+        "description": [],
+        "signature": [
+          "\"aggRate\""
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/rate_fn.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -32019,6 +32304,21 @@
           "\"aggTerms\""
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/terms_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.aggTimeSeriesFnName",
+        "type": "string",
+        "tags": [],
+        "label": "aggTimeSeriesFnName",
+        "description": [],
+        "signature": [
+          "\"aggTimeSeries\""
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/time_series_fn.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

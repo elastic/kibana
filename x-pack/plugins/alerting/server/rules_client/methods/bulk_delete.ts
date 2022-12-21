@@ -142,6 +142,7 @@ const bulkDeleteWithOCC = async (
       );
     }
   }
+  await rulesFinder.close();
 
   const result = await context.unsecuredSavedObjectsClient.bulkDelete(rulesToDelete);
 

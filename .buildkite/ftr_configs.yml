@@ -186,6 +186,7 @@ enabled:
   - x-pack/test/functional/apps/lens/group3/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/tsvb/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/agg_based/config.ts
+  - x-pack/test/functional/apps/lens/open_in_lens/dashboard/config.ts
   - x-pack/test/functional/apps/license_management/config.ts
   - x-pack/test/functional/apps/logstash/config.ts
   - x-pack/test/functional/apps/management/config.ts
