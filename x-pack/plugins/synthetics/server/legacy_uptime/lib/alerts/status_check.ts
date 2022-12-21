@@ -14,13 +14,14 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { formatDurationFromTimeUnitChar, TimeUnitChar } from '@kbn/observability-plugin/common';
+import moment from 'moment';
 import { UptimeAlertTypeFactory } from './types';
 import {
   StatusCheckFilters,
   Ping,
   GetMonitorAvailabilityParams,
 } from '../../../../common/runtime_types';
-import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
 import {
   updateState,
   getViewInAppUrl,
@@ -137,7 +138,10 @@ export const formatFilterString = async (
     search
   );
 
-export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
+export const getMonitorSummary = (
+  monitorInfo: Ping & { '@timestamp'?: string },
+  statusMessage: string
+) => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
   const summary = {
@@ -152,8 +156,29 @@ export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
 
   return {
     ...summary,
-    [ALERT_REASON_MSG]: `${monitorName} from ${observerLocation} ${statusMessage}`,
+    [ALERT_REASON_MSG]: getReasonMessage({
+      name: monitorName,
+      location: observerLocation,
+      status: statusMessage,
+      timestamp: monitorInfo['@timestamp'] ?? monitorInfo.timestamp,
+    }),
   };
+};
+
+export const getReasonMessage = ({
+  name,
+  status,
+  location,
+  timestamp,
+}: {
+  name: string;
+  location: string;
+  status: string;
+  timestamp: string;
+}) => {
+  const checkedAt = moment(timestamp).format('LLL');
+
+  return `${name} from ${location} ${status} Checked at ${checkedAt}`;
 };
 
 export const getMonitorAlertDocument = (monitorSummary: Record<string, string | undefined>) => ({

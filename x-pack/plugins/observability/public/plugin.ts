@@ -343,6 +343,7 @@ export class Plugin
     });
 
     return {
+      observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       navigation: {
         PageTemplate,
       },

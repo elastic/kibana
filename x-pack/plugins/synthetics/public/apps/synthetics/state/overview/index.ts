@@ -6,7 +6,6 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-
 import { MonitorOverviewState } from './models';
 
 import {
@@ -17,6 +16,8 @@ import {
   setFlyoutConfig,
   setOverviewPageStateAction,
 } from './actions';
+import { enableMonitorAlertAction } from '../monitor_list/actions';
+import { ConfigKey } from '../../components/monitor_add_edit/types';
 
 const initialState: MonitorOverviewState = {
   data: {
@@ -76,6 +77,24 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
         ...action.payload,
         allConfigs: { ...action.payload.upConfigs, ...action.payload.downConfigs },
       };
+    })
+    .addCase(enableMonitorAlertAction.success, (state, action) => {
+      const attrs = action.payload.attributes;
+      if (!('errors' in attrs)) {
+        const isAlertEnabled = Boolean(attrs[ConfigKey.STATUS_ALERT_ENABLED]);
+        state.data.monitors = state.data.monitors.map((monitor) => {
+          if (
+            monitor.id === action.payload.id ||
+            attrs[ConfigKey.MONITOR_QUERY_ID] === monitor.id
+          ) {
+            return {
+              ...monitor,
+              isAlertEnabled,
+            };
+          }
+          return monitor;
+        });
+      }
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.statusError = action.payload;

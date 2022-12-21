@@ -36,6 +36,16 @@ export const MonitorStatusTranslations = {
       },
     }
   ),
+  defaultSubjectMessage: i18n.translate(
+    'xpack.synthetics.alerts.monitorStatus.defaultSubjectMessage',
+    {
+      defaultMessage: 'Monitor {monitorName} with url {monitorUrl} is down',
+      values: {
+        monitorName: '{{context.monitorName}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+      },
+    }
+  ),
   defaultRecoveryMessage: i18n.translate(
     'xpack.synthetics.alerts.monitorStatus.defaultRecoveryMessage',
     {

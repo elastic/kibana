@@ -94,7 +94,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       type: syntheticsMonitorType,
       sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
       sortOrder,
-      perPage: 500,
+      perPage: 1000,
       search: query ? `${query}*` : undefined,
       searchFields: SEARCH_FIELDS,
     });
@@ -120,6 +120,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
             name: monitor.attributes[ConfigKey.NAME],
             location,
             isEnabled: monitor.attributes[ConfigKey.ENABLED],
+            isAlertEnabled: monitor.attributes[ConfigKey.STATUS_ALERT_ENABLED] ?? false,
           };
           allMonitors.push(config);
           total++;

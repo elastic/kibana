@@ -7,6 +7,7 @@
 
 import { ErrorToastOptions } from '@kbn/core-notifications-browser';
 import { createAction } from '@reduxjs/toolkit';
+import { UpsertMonitorResponse } from '..';
 import {
   EncryptedSyntheticsMonitor,
   MonitorManagementListResult,
@@ -48,4 +49,14 @@ export const fetchUpsertFailureAction = createAction<{
   id: string;
   error: IHttpSerializedFetchError;
 }>('fetchUpsertMonitorFailure');
+
+export const enableMonitorAlertAction = createAsyncAction<
+  UpsertMonitorRequest,
+  UpsertMonitorResponse,
+  {
+    id: string;
+    error: IHttpSerializedFetchError;
+  }
+>('enableMonitorAlertAction');
+
 export const clearMonitorUpsertStatus = createAction<string>('clearMonitorUpsertStatus');

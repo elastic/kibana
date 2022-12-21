@@ -437,6 +437,27 @@ export const FIELD: Record<string, FieldMeta> = {
       },
     }),
   },
+  [ConfigKey.STATUS_ALERT_ENABLED]: {
+    fieldKey: ConfigKey.STATUS_ALERT_ENABLED,
+    component: EuiSwitch,
+    label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
+      defaultMessage: 'Enable status alert',
+    }),
+    controlled: true,
+    props: ({ isEdit, setValue }) => ({
+      id: 'syntheticsMonitorConfigIsAlertEnabled',
+      label: isEdit
+        ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertEnabled.label', {
+            defaultMessage: 'Disabling will stop alerting on this monitor.',
+          })
+        : i18n.translate('xpack.synthetics.monitorConfig.create.alertEnabled.label', {
+            defaultMessage: 'Enable status alert on this monitor.',
+          }),
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(ConfigKey.STATUS_ALERT_ENABLED, !!event.target.checked);
+      },
+    }),
+  },
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
     component: ComboBox,

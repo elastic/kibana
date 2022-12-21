@@ -16,6 +16,7 @@ import { IHttpSerializedFetchError } from '../utils/http_error';
 import { MonitorListPageState } from './models';
 import {
   clearMonitorUpsertStatus,
+  enableMonitorAlertAction,
   fetchMonitorListAction,
   fetchUpsertFailureAction,
   fetchUpsertMonitorAction,
@@ -24,7 +25,10 @@ import {
 
 export interface MonitorListState {
   data: MonitorManagementListResult;
-  monitorUpsertStatuses: Record<string, { status: FETCH_STATUS; enabled?: boolean }>;
+  monitorUpsertStatuses: Record<
+    string,
+    { status: FETCH_STATUS; enabled?: boolean; alertStatus?: FETCH_STATUS }
+  >;
   pageState: MonitorListPageState;
   loading: boolean;
   loaded: boolean;
@@ -76,6 +80,24 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchUpsertFailureAction, (state, action) => {
       state.monitorUpsertStatuses[action.payload.id] = { status: FETCH_STATUS.FAILURE };
+    })
+    .addCase(enableMonitorAlertAction.get, (state, action) => {
+      state.monitorUpsertStatuses[action.payload.id] = {
+        ...state.monitorUpsertStatuses[action.payload.id],
+        alertStatus: FETCH_STATUS.LOADING,
+      };
+    })
+    .addCase(enableMonitorAlertAction.success, (state, action) => {
+      state.monitorUpsertStatuses[action.payload.id] = {
+        ...state.monitorUpsertStatuses[action.payload.id],
+        alertStatus: FETCH_STATUS.SUCCESS,
+      };
+    })
+    .addCase(enableMonitorAlertAction.fail, (state, action) => {
+      state.monitorUpsertStatuses[action.payload.id] = {
+        ...state.monitorUpsertStatuses[action.payload.id],
+        alertStatus: FETCH_STATUS.FAILURE,
+      };
     })
     .addCase(clearMonitorUpsertStatus, (state, action) => {
       if (state.monitorUpsertStatuses[action.payload]) {

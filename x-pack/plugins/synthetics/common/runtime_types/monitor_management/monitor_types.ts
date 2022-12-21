@@ -88,6 +88,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.PROJECT_ID]: t.string,
     [ConfigKey.ORIGINAL_SPACE]: t.string,
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
+    [ConfigKey.STATUS_ALERT_ENABLED]: t.boolean,
   }),
 ]);
 
@@ -395,6 +396,7 @@ export const MonitorOverviewItemCodec = t.interface({
   configId: t.string,
   location: MonitorServiceLocationCodec,
   isEnabled: t.boolean,
+  isAlertEnabled: t.boolean,
 });
 
 export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;

@@ -52,6 +52,17 @@ export const EDIT_LABEL = i18n.translate('xpack.synthetics.management.editLabel'
   defaultMessage: 'Edit',
 });
 
+export const ENABLE_STATUS_ALERT = i18n.translate('xpack.synthetics.management.enableStatusAlert', {
+  defaultMessage: 'Enable status alert',
+});
+
+export const DISABLE_STATUS_ALERT = i18n.translate(
+  'xpack.synthetics.management.disableStatusAlert',
+  {
+    defaultMessage: 'Disable status alert',
+  }
+);
+
 export const DUPLICATE_LABEL = i18n.translate('xpack.synthetics.management.duplicateLabel', {
   defaultMessage: 'Duplicate',
 });

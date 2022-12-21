@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { RuleAction as RuleActionOrig } from '@kbn/triggers-actions-ui-plugin/public';
 import type {
   IndexActionParams,
   PagerDutyActionParams,
@@ -16,12 +14,12 @@ import type {
   WebhookActionParams,
   EmailActionParams,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
-import { NewAlertParams } from './alerts';
-import { ACTION_GROUP_DEFINITIONS } from '../../../../common/constants/alerts';
-import { MonitorStatusTranslations } from '../../../../common/translations';
-import { ActionTypeId } from '../../components/settings/types';
-import { Ping } from '../../../../common/runtime_types/ping';
-import { DefaultEmail } from '../../../../common/runtime_types';
+import { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
+import uuid from 'uuid';
+
+import { ActionConnector, ActionTypeId } from './types';
+import { MonitorStatusTranslations } from '../translations';
+import { DefaultEmail } from '../runtime_types';
 
 export const SLACK_ACTION_ID: ActionTypeId = '.slack';
 export const PAGER_DUTY_ACTION_ID: ActionTypeId = '.pagerduty';
@@ -33,30 +31,22 @@ export const JIRA_ACTION_ID: ActionTypeId = '.jira';
 export const WEBHOOK_ACTION_ID: ActionTypeId = '.webhook';
 export const EMAIL_ACTION_ID: ActionTypeId = '.email';
 
-const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
-
 export type RuleAction = Omit<RuleActionOrig, 'actionTypeId'>;
-
-const getRecoveryMessage = (selectedMonitor: Ping) => {
-  return i18n.translate('xpack.synthetics.alerts.monitorStatus.recoveryMessage', {
-    defaultMessage: 'Monitor {monitor} with url {url} has recovered with status Up',
-    values: {
-      monitor: selectedMonitor?.monitor?.name || selectedMonitor?.monitor?.id,
-      url: selectedMonitor?.url?.full,
-    },
-  });
-};
 
 export function populateAlertActions({
   defaultActions,
-  selectedMonitor,
   defaultEmail,
-}: NewAlertParams) {
+  groupId,
+}: {
+  groupId: string;
+  defaultActions: ActionConnector[];
+  defaultEmail?: DefaultEmail;
+}) {
   const actions: RuleAction[] = [];
   defaultActions.forEach((aId) => {
     const action: RuleAction = {
       id: aId.id,
-      group: MONITOR_STATUS.id,
+      group: groupId,
       params: {},
     };
 
@@ -64,24 +54,25 @@ export function populateAlertActions({
       id: aId.id,
       group: 'recovered',
       params: {
-        message: getRecoveryMessage(selectedMonitor),
+        message: MonitorStatusTranslations.defaultRecoveryMessage,
       },
     };
 
     switch (aId.actionTypeId) {
       case PAGER_DUTY_ACTION_ID:
-        action.params = getPagerDutyActionParams(selectedMonitor);
-        recoveredAction.params = getPagerDutyActionParams(selectedMonitor, true);
+        const dedupKey = uuid.v4();
+        action.params = getPagerDutyActionParams(dedupKey);
+        recoveredAction.params = getPagerDutyActionParams(dedupKey, true);
         actions.push(recoveredAction);
         break;
       case SERVER_LOG_ACTION_ID:
-        action.params = getServerLogActionParams(selectedMonitor);
-        recoveredAction.params = getServerLogActionParams(selectedMonitor, true);
+        action.params = getServerLogActionParams();
+        recoveredAction.params = getServerLogActionParams(true);
         actions.push(recoveredAction);
         break;
       case INDEX_ACTION_ID:
-        action.params = getIndexActionParams(selectedMonitor);
-        recoveredAction.params = getIndexActionParams(selectedMonitor, true);
+        action.params = getIndexActionParams();
+        recoveredAction.params = getIndexActionParams(true);
         actions.push(recoveredAction);
         break;
       case SERVICE_NOW_ACTION_ID:
@@ -93,8 +84,8 @@ export function populateAlertActions({
         // Recovery action for Jira is not implemented yet
         break;
       case WEBHOOK_ACTION_ID:
-        action.params = getWebhookActionParams(selectedMonitor);
-        recoveredAction.params = getWebhookActionParams(selectedMonitor, true);
+        action.params = getWebhookActionParams();
+        recoveredAction.params = getWebhookActionParams(true);
         actions.push(recoveredAction);
         break;
       case SLACK_ACTION_ID:
@@ -106,7 +97,7 @@ export function populateAlertActions({
         break;
       case EMAIL_ACTION_ID:
         if (defaultEmail) {
-          action.params = getEmailActionParams(defaultEmail, selectedMonitor);
+          action.params = getEmailActionParams(defaultEmail);
         }
         break;
       default:
@@ -121,14 +112,14 @@ export function populateAlertActions({
   return actions;
 }
 
-function getIndexActionParams(selectedMonitor: Ping, recovery = false): IndexActionParams {
+function getIndexActionParams(recovery = false): IndexActionParams {
   if (recovery) {
     return {
       documents: [
         {
           monitorName: '{{context.monitorName}}',
           monitorUrl: '{{{context.monitorUrl}}}',
-          statusMessage: getRecoveryMessage(selectedMonitor),
+          statusMessage: MonitorStatusTranslations.defaultRecoveryMessage,
           latestErrorMessage: '',
           observerLocation: '{{context.observerLocation}}',
         },
@@ -150,11 +141,11 @@ function getIndexActionParams(selectedMonitor: Ping, recovery = false): IndexAct
   };
 }
 
-function getServerLogActionParams(selectedMonitor: Ping, recovery = false): ServerLogActionParams {
+function getServerLogActionParams(recovery = false): ServerLogActionParams {
   if (recovery) {
     return {
       level: 'info',
-      message: getRecoveryMessage(selectedMonitor),
+      message: MonitorStatusTranslations.defaultRecoveryMessage,
     };
   }
   return {
@@ -163,24 +154,24 @@ function getServerLogActionParams(selectedMonitor: Ping, recovery = false): Serv
   };
 }
 
-function getWebhookActionParams(selectedMonitor: Ping, recovery = false): WebhookActionParams {
+function getWebhookActionParams(recovery = false): WebhookActionParams {
   return {
     body: recovery
-      ? getRecoveryMessage(selectedMonitor)
+      ? MonitorStatusTranslations.defaultRecoveryMessage
       : MonitorStatusTranslations.defaultActionMessage,
   };
 }
 
-function getPagerDutyActionParams(selectedMonitor: Ping, recovery = false): PagerDutyActionParams {
+function getPagerDutyActionParams(dedupKey: string, recovery = false): PagerDutyActionParams {
   if (recovery) {
     return {
-      dedupKey: selectedMonitor.monitor.id + MONITOR_STATUS.id,
+      dedupKey,
       eventAction: 'resolve',
-      summary: getRecoveryMessage(selectedMonitor),
+      summary: MonitorStatusTranslations.defaultRecoveryMessage,
     };
   }
   return {
-    dedupKey: selectedMonitor.monitor.id + MONITOR_STATUS.id,
+    dedupKey,
     eventAction: 'trigger',
     severity: 'error',
     summary: MonitorStatusTranslations.defaultActionMessage,
@@ -226,19 +217,10 @@ function getJiraActionParams(): JiraActionParams {
   };
 }
 
-function getEmailActionParams(
-  defaultEmail: DefaultEmail,
-  selectedMonitor: Ping
-): EmailActionParams {
+function getEmailActionParams(defaultEmail: DefaultEmail): EmailActionParams {
   return {
     to: defaultEmail.to,
-    subject: i18n.translate('xpack.synthetics.monitor.simpleStatusAlert.email.subject', {
-      defaultMessage: 'Monitor {monitor} with url {url} is down',
-      values: {
-        monitor: selectedMonitor?.monitor?.name || selectedMonitor?.monitor?.id,
-        url: selectedMonitor?.url?.full,
-      },
-    }),
+    subject: MonitorStatusTranslations.defaultSubjectMessage,
     message: MonitorStatusTranslations.defaultActionMessage,
     cc: defaultEmail.cc ?? [],
     bcc: defaultEmail.bcc ?? [],

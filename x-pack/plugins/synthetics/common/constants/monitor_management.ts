@@ -12,6 +12,7 @@ export enum ConfigKey {
   CONFIG_ID = 'config_id',
   CONFIG_HASH = 'hash',
   ENABLED = 'enabled',
+  STATUS_ALERT_ENABLED = 'status_alert_enabled',
   FORM_MONITOR_TYPE = 'form_monitor_type',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',

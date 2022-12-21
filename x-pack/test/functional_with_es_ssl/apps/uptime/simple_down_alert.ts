@@ -97,7 +97,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           group: 'recovered',
           params: {
             message:
-              'Monitor 0000-intermittent with url http://localhost:5678/pattern?r=200x5,500x1 has recovered with status Up',
+              'Alert for monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} has recovered',
           },
           id: 'my-slack1',
         },

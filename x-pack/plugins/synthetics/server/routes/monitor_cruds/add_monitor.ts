@@ -13,6 +13,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { createDefaultAlertIfNotExist } from '../settings/enable_default_alerting';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
@@ -47,6 +48,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     }),
   },
   handler: async ({
+    context,
     request,
     response,
     savedObjectsClient,
@@ -96,6 +98,19 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
             id: newMonitor.id,
           },
         });
+      }
+
+      try {
+        // we do this async, so we don't block the user, error handling will be done on the UI via separate api
+        createDefaultAlertIfNotExist({ soClient: savedObjectsClient, context, server }).then(() => {
+          server.logger.debug(
+            `Successfully created default alert for monitor: ${newMonitor.attributes.name}`
+          );
+        });
+      } catch (e) {
+        server.logger.error(
+          `Error creating default alert: ${e} for monitor: ${newMonitor.attributes.name}`
+        );
       }
 
       return response.ok({ body: newMonitor });

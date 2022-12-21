@@ -6,11 +6,19 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonIcon, EuiContextMenu, useEuiShadow, EuiPanel } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenu,
+  useEuiShadow,
+  EuiPanel,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
+import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
 import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
@@ -106,6 +114,8 @@ export function ActionsPopover({
     labels,
   });
 
+  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable({});
+
   const [enableLabel, setEnableLabel] = useState(
     monitor.isEnabled ? disableMonitorLabel : enableMonitorLabel
   );
@@ -133,6 +143,8 @@ export function ActionsPopover({
     },
   };
 
+  const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
+
   let popoverItems = [
     {
       name: actionsMenuGoToMonitorName,
@@ -157,6 +169,25 @@ export function ActionsPopover({
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
           updateMonitorEnabledState(!monitor.isEnabled);
+        }
+      },
+    },
+    {
+      name: monitor.isAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel,
+      icon: alertLoading ? (
+        <EuiLoadingSpinner size="s" />
+      ) : monitor.isAlertEnabled ? (
+        'bellSlash'
+      ) : (
+        'bell'
+      ),
+      onClick: () => {
+        if (!alertLoading) {
+          updateAlertEnabledState({
+            monitor: { [ConfigKey.STATUS_ALERT_ENABLED]: !monitor.isAlertEnabled },
+            configId: monitor.configId,
+            name: monitor.name,
+          });
         }
       },
     },
@@ -253,6 +284,20 @@ const disableMonitorLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelDisableMonitor',
   {
     defaultMessage: 'Disable monitor',
+  }
+);
+
+const disableAlertLabel = i18n.translate(
+  'xpack.synthetics.overview.actions.disableLabelDisableAlert',
+  {
+    defaultMessage: 'Disable status alert',
+  }
+);
+
+const enableMonitorAlertLabel = i18n.translate(
+  'xpack.synthetics.overview.actions.enableLabelDisableAlert',
+  {
+    defaultMessage: 'Enable status alert',
   }
 );
 

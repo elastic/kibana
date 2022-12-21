@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  enableDefaultAlertingRoute,
+  getDefaultAlertingRoute,
+} from './settings/enable_default_alerting';
 import { syncParamsSyntheticsParamsRoute } from './settings/sync_global_params';
 import { editSyntheticsParamsRoute } from './settings/edit_param';
 import { getSyntheticsParamsRoute } from './settings/params';
@@ -69,6 +73,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   editSyntheticsParamsRoute,
   addSyntheticsParamsRoute,
   syncParamsSyntheticsParamsRoute,
+  enableDefaultAlertingRoute,
+  getDefaultAlertingRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [

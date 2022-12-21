@@ -159,6 +159,7 @@ const getRoutes = (
               />
             ),
             isSelected: true,
+            'data-test-subj': 'syntheticsMonitorOverviewTab',
           },
           {
             label: (
@@ -168,6 +169,7 @@ const getRoutes = (
               />
             ),
             href: `${syntheticsPath}${MONITORS_ROUTE}`,
+            'data-test-subj': 'syntheticsMonitorManagementTab',
           },
         ],
       },
@@ -192,6 +194,7 @@ const getRoutes = (
               />
             ),
             href: `${syntheticsPath}${OVERVIEW_ROUTE}`,
+            'data-test-subj': 'syntheticsMonitorOverviewTab',
           },
           {
             label: (
@@ -201,6 +204,7 @@ const getRoutes = (
               />
             ),
             isSelected: true,
+            'data-test-subj': 'syntheticsMonitorManagementTab',
           },
         ],
       },
