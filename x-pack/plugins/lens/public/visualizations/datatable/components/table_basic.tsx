@@ -91,14 +91,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   useEffect(() => {
     setPagination(
-      props.args.pageSize
+      props.args.pageSize && props.args.pageSize < firstLocalTable.rows.length
         ? {
             pageIndex: 0,
             pageSize: props.args.pageSize ?? DEFAULT_PAGE_SIZE,
           }
         : undefined
     );
-  }, [props.args.pageSize]);
+  }, [props.args.pageSize, firstLocalTable]);
 
   useDeepCompareEffect(() => {
     setColumnConfig({
