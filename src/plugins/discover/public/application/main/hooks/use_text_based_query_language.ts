@@ -95,7 +95,7 @@ export function useTextBasedQueryLanguage({
 
           if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
             dataViewObj.timeFieldName = '@timestamp';
-          } else if (dataViewObj.fields.getByType('date')) {
+          } else if (dataViewObj.fields.getByType('date')?.length) {
             const dateFields = dataViewObj.fields.getByType('date');
             dataViewObj.timeFieldName = dateFields[0].name;
           }

@@ -92,7 +92,7 @@ export async function getStateFromAggregateQuery(
       if (dataView && dataView.id) {
         if (dataView.fields.getByName('@timestamp')?.type === 'date') {
           dataView.timeFieldName = '@timestamp';
-        } else if (dataView.fields.getByType('date')) {
+        } else if (dataView.fields.getByType('date')?.length) {
           const dateFields = dataView.fields.getByType('date');
           dataView.timeFieldName = dateFields[0].name;
         }
