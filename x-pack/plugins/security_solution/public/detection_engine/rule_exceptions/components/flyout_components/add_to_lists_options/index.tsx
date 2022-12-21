@@ -58,7 +58,7 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              {sharedLists.length === 0 && (
+              {sharedLists.length === 0 && rulesCount > 0 && (
                 <EuiButton
                   iconType="popout"
                   iconSide="right"

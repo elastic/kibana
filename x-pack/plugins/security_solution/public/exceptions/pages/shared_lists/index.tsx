@@ -384,10 +384,18 @@ export const SharedLists = React.memo(() => {
         <EuiFlexItem>
           <EuiPageHeader
             pageTitle={i18n.ALL_EXCEPTIONS}
-            description={timelines.getLastUpdated({
-              showUpdating: loading,
-              updatedAt: lastUpdated,
-            })}
+            description={
+              <>
+                <div>{'To view rule specific exceptions navigate to the rules details page.'}</div>
+                {/* TODO: update the above text to incorporate a navigateToApp link to the rule management page */}
+                <div>
+                  {timelines.getLastUpdated({
+                    showUpdating: loading,
+                    updatedAt: lastUpdated,
+                  })}
+                </div>
+              </>
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
