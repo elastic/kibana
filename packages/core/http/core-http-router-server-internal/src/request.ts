@@ -137,7 +137,7 @@ export class CoreKibanaRequest<
     this.rewrittenUrl = appState?.rewrittenUrl;
 
     this.url = request.url ?? new URL('https://fake-request/url');
-    this.headers = deepFreeze({ ...request.headers });
+    this.headers = isRealRawRequest(request) ? deepFreeze({ ...request.headers }) : request.headers;
     this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
     this.isFakeRequest = isFakeRawRequest(request);
 
@@ -155,12 +155,12 @@ export class CoreKibanaRequest<
 
     this.auth = {
       // missing in fakeRequests, so we cast to false
-      isAuthenticated: Boolean(request.auth?.isAuthenticated),
+      isAuthenticated: request.auth?.isAuthenticated ?? false,
     };
   }
 
   private getEvents(request: RawRequest): KibanaRequestEvents {
-    if (!isRealRawRequest(request)) {
+    if (isFakeRawRequest(request)) {
       return {
         aborted$: NEVER,
         completed$: NEVER,
