@@ -17,7 +17,7 @@ export function SloList() {
   const [activePage, setActivePage] = useState(0);
 
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<SortType | undefined>();
+  const [sort, setSort] = useState<SortType>('name');
   const [filters, setFilters] = useState<SortItem[]>([]);
 
   const [deleting, setIsDeleting] = useState(false);
