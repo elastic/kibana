@@ -52,7 +52,6 @@ export async function inspectSearchParams(
   const indices: {
     [Property in keyof APMConfig['indices']]: string;
   } = {
-    sourcemap: 'myIndex',
     error: 'myIndex',
     onboarding: 'myIndex',
     span: 'myIndex',
@@ -86,14 +85,10 @@ export async function inspectSearchParams(
     }
   ) as APMConfig;
   const mockInternalESClient = { search: spy } as any;
-  const mockIndices = {
-    ...indices,
-    apmAgentConfigurationIndex: 'myIndex',
-    apmCustomLinkIndex: 'myIndex',
-  };
+
   try {
     response = await fn({
-      mockIndices,
+      mockIndices: indices,
       mockApmEventClient,
       mockConfig,
       mockInternalESClient,

@@ -636,6 +636,7 @@ export const getPieVisualization = ({
       dimensions.push({
         id: metric,
         name: metricLabel,
+        dimensionType: 'metric',
       });
     });
 
@@ -645,6 +646,7 @@ export const getPieVisualization = ({
           name: i18n.translate('xpack.lens.pie.horizontalAxisLabel', {
             defaultMessage: 'Horizontal axis',
           }),
+          dimensionType: 'horizontal_axis',
           id: accessor,
         });
       });
@@ -654,19 +656,23 @@ export const getPieVisualization = ({
       let name = i18n.translate('xpack.lens.pie.treemapGroupLabel', {
         defaultMessage: 'Group by',
       });
+      let dimensionType = 'group_by';
       if (state.shape === 'mosaic') {
         name = i18n.translate('xpack.lens.pie.verticalAxisLabel', {
           defaultMessage: 'Vertical axis',
         });
+        dimensionType = 'vertical_axis';
       }
       if (state.shape === 'donut' || state.shape === 'pie') {
         name = i18n.translate('xpack.lens.pie.sliceGroupLabel', {
           defaultMessage: 'Slice by',
         });
+        dimensionType = 'slice_by';
       }
       layer.primaryGroups.forEach((accessor) => {
         dimensions.push({
           name,
+          dimensionType,
           id: accessor,
         });
       });

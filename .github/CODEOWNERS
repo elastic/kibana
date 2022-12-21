@@ -12,6 +12,7 @@
 /src/plugins/discover/ @elastic/kibana-data-discovery
 /src/plugins/saved_search/ @elastic/kibana-data-discovery
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-data-discovery
+/x-pack/test/functional/apps/discover/ @elastic/kibana-data-discovery
 /test/functional/apps/discover/ @elastic/kibana-data-discovery
 /test/functional/apps/context/ @elastic/kibana-data-discovery
 /test/api_integration/apis/unified_field_list/ @elastic/kibana-data-discovery
@@ -72,6 +73,7 @@
 /src/plugins/ui_actions/ @elastic/kibana-global-experience
 /src/plugins/ui_actions_enhanced/ @elastic/kibana-global-experience
 /src/plugins/navigation/ @elastic/kibana-global-experience
+/src/plugins/image_embeddable/ @elastic/kibana-global-experience
 /x-pack/plugins/notifications/ @elastic/kibana-global-experience
 
 ## Examples
@@ -496,20 +498,15 @@
 /x-pack/plugins/security_solution/public/common/components/navigation @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/news_feed @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/overview_description_list @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/paginated_table @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/sidebar_header @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/stat_items @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/tables @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/top_n @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/with_hover_actions @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/containers/hosts_risk @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/containers/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/lib/cell_actions @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/cases @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/hosts @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/network @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/public/explore @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/overview @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/users @elastic/security-threat-hunting-explore
 
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-explore
@@ -641,11 +638,6 @@ x-pack/plugins/threat_intelligence @elastic/protections-experience
 x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections-experience
 x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
-
-# Security Intelligence And Analytics
-/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules @elastic/security-intelligence-analytics
-
-
 # Security Asset Management
 /x-pack/plugins/osquery @elastic/security-asset-management
 /x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-asset-management
@@ -704,7 +696,7 @@ packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/analytics/shippers/gainsight @elastic/kibana-core
-packages/content-management/inspector @elastic/kibana-global-experience
+packages/content-management/content_editor @elastic/kibana-global-experience
 packages/content-management/table_list @elastic/kibana-global-experience
 packages/core/analytics/core-analytics-browser @elastic/kibana-core
 packages/core/analytics/core-analytics-browser-internal @elastic/kibana-core
@@ -885,6 +877,7 @@ packages/home/sample_data_types @elastic/kibana-global-experience
 packages/kbn-ace @elastic/platform-deployment-management
 packages/kbn-alerts @elastic/security-solution
 packages/kbn-ambient-common-types @elastic/kibana-operations
+packages/kbn-ambient-ftr-types @elastic/kibana-operations
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core
@@ -916,6 +909,7 @@ packages/kbn-dev-utils @elastic/kibana-operations
 packages/kbn-doc-links @elastic/kibana-docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-ebt-tools @elastic/kibana-core
+packages/kbn-ecs @elastic/kibana-core
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations
 packages/kbn-es-errors @elastic/kibana-core
@@ -952,7 +946,7 @@ packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-mapbox-gl @elastic/kibana-gis
-packages/kbn-monaco @elastic/kibana-app-services
+packages/kbn-monaco @elastic/kibana-global-experience
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-osquery-io-ts-types @elastic/security-asset-management
@@ -965,6 +959,7 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-react-field @elastic/kibana-app-services
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
+packages/kbn-rison @elastic/kibana-operations
 packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
@@ -1055,6 +1050,7 @@ packages/shared-ux/page/solution_nav @elastic/kibana-global-experience
 packages/shared-ux/prompt/no_data_views/impl @elastic/kibana-global-experience
 packages/shared-ux/prompt/no_data_views/mocks @elastic/kibana-global-experience
 packages/shared-ux/prompt/no_data_views/types @elastic/kibana-global-experience
+packages/shared-ux/prompt/not_found @elastic/kibana-global-experience
 packages/shared-ux/router/impl @elastic/kibana-global-experience
 packages/shared-ux/router/mocks @elastic/kibana-global-experience
 packages/shared-ux/router/types @elastic/kibana-global-experience

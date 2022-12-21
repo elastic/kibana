@@ -9,15 +9,16 @@ import React, { useEffect, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 import type { FieldErrors } from 'react-hook-form';
+import { useFieldArray } from 'react-hook-form';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { map, omit } from 'lodash';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { usePack } from '../../packs/use_pack';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import { useKibana } from '../../common/lib/kibana';
 import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_field';
 import { PackFieldWrapper } from './pack_field_wrapper';
-import { usePack } from '../../packs/use_pack';
 
 interface OsqueryResponseActionsValues {
   savedQueryId?: string | null;
@@ -74,13 +75,29 @@ const OsqueryResponseActionParamsFormComponent = ({
         },
   });
 
-  const { watch, register, formState } = hooksForm;
+  const { watch, register, formState, control } = hooksForm;
 
   const [packId, queryType, queries, id] = watch(['packId', 'queryType', 'queries', 'id']);
   const { data: packData } = usePack({
     packId: packId?.[0],
     skip: !packId?.[0],
   });
+
+  const { replace } = useFieldArray({
+    name: 'queries',
+    control,
+  });
+
+  useEffect(() => {
+    if (packData?.queries) {
+      const queriesArray = map(packData?.queries, (query, queryId: string) => ({
+        ...query,
+        id: queryId,
+      }));
+
+      replace(queriesArray);
+    }
+  }, [packData, replace]);
 
   useEffect(() => {
     onError(formState.errors);
@@ -99,12 +116,7 @@ const OsqueryResponseActionParamsFormComponent = ({
           ? {
               id: formData.id,
               packId: formData?.packId?.length ? formData?.packId[0] : undefined,
-              queries: packData
-                ? map(packData.queries, (query, queryId: string) => ({
-                    ...query,
-                    id: queryId,
-                  }))
-                : formData.queries,
+              queries: formData.queries,
             }
           : {
               id: formData.id,

@@ -35,7 +35,8 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const http = useHttp();
   const user = useCurrentUser();
 
-  const fleetServicesFromUseKibana = useKibana().services.fleet;
+  const kibanaServices = useKibana().services;
+  const fleetServicesFromUseKibana = kibanaServices.fleet;
   // The `fleetServicesFromPluginStart` will be defined when this hooks called from a component
   // that is being rendered under the Fleet context (UI extensions). The `fleetServicesFromUseKibana`
   // above will be `undefined` in this case.
@@ -56,8 +57,9 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const [hasHostIsolationExceptionsItems, setHasHostIsolationExceptionsItems] =
     useState<boolean>(false);
 
-  const securitySolutionPermissions = calculatePermissionsFromCapabilities(
-    useKibana().services.application.capabilities
+  const securitySolutionPermissions = useMemo(
+    () => calculatePermissionsFromCapabilities(kibanaServices.application.capabilities),
+    [kibanaServices.application.capabilities]
   );
 
   const privileges = useMemo(() => {

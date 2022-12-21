@@ -43,7 +43,7 @@ import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { hasActiveFilter } from './utils';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
-import { DiscoverMainContent } from './discover_main_content';
+import { DiscoverHistogramLayout } from './discover_histogram_layout';
 
 /**
  * Local storage key for sidebar persistence state
@@ -72,6 +72,7 @@ export function DiscoverLayout({
   persistDataView,
   updateAdHocDataViewId,
   adHocDataViewList,
+  searchSessionManager,
   savedDataViewList,
   updateDataViewList,
 }: DiscoverLayoutProps) {
@@ -197,6 +198,75 @@ export function DiscoverLayout({
 
   const resizeRef = useRef<HTMLDivElement>(null);
 
+  const mainDisplay = useMemo(() => {
+    if (resultState === 'none') {
+      return (
+        <DiscoverNoResults
+          isTimeBased={isTimeBased}
+          data={data}
+          error={dataState.error}
+          hasQuery={isOfQueryType(state.query) && !!state.query?.query}
+          hasFilters={hasActiveFilter(state.filters)}
+          onDisableFilters={onDisableFilters}
+        />
+      );
+    }
+
+    if (resultState === 'uninitialized') {
+      return <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />;
+    }
+
+    return (
+      <>
+        <DiscoverHistogramLayout
+          isPlainRecord={isPlainRecord}
+          dataView={dataView}
+          navigateTo={navigateTo}
+          resetSavedSearch={resetSavedSearch}
+          expandedDoc={expandedDoc}
+          setExpandedDoc={setExpandedDoc}
+          savedSearch={savedSearch}
+          savedSearchData$={savedSearchData$}
+          savedSearchRefetch$={savedSearchRefetch$}
+          state={state}
+          stateContainer={stateContainer}
+          isTimeBased={isTimeBased}
+          viewMode={viewMode}
+          onAddFilter={onAddFilter as DocViewFilterFn}
+          onFieldEdited={onFieldEdited}
+          columns={columns}
+          resizeRef={resizeRef}
+          inspectorAdapters={inspectorAdapters}
+          searchSessionManager={searchSessionManager}
+        />
+        {resultState === 'loading' && <LoadingSpinner />}
+      </>
+    );
+  }, [
+    columns,
+    data,
+    dataState.error,
+    dataView,
+    expandedDoc,
+    inspectorAdapters,
+    isPlainRecord,
+    isTimeBased,
+    navigateTo,
+    onAddFilter,
+    onDisableFilters,
+    onFieldEdited,
+    resetSavedSearch,
+    resultState,
+    savedSearch,
+    savedSearchData$,
+    savedSearchRefetch$,
+    searchSessionManager,
+    setExpandedDoc,
+    state,
+    stateContainer,
+    viewMode,
+  ]);
+
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <h1
@@ -245,7 +315,7 @@ export function DiscoverLayout({
           history={history}
         />
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="dscPageBody__sidebar">
             <SidebarMemoized
               columns={columns}
               documents$={savedSearchData$.documents$}
@@ -295,41 +365,7 @@ export function DiscoverLayout({
                 'dscPageContent--emptyPrompt': resultState === 'none',
               })}
             >
-              {resultState === 'none' && (
-                <DiscoverNoResults
-                  isTimeBased={isTimeBased}
-                  data={data}
-                  error={dataState.error}
-                  hasQuery={isOfQueryType(state.query) && !!state.query?.query}
-                  hasFilters={hasActiveFilter(state.filters)}
-                  onDisableFilters={onDisableFilters}
-                />
-              )}
-              {resultState === 'uninitialized' && (
-                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />
-              )}
-              {resultState === 'loading' && <LoadingSpinner />}
-              {resultState === 'ready' && (
-                <DiscoverMainContent
-                  isPlainRecord={isPlainRecord}
-                  dataView={dataView}
-                  navigateTo={navigateTo}
-                  resetSavedSearch={resetSavedSearch}
-                  expandedDoc={expandedDoc}
-                  setExpandedDoc={setExpandedDoc}
-                  savedSearch={savedSearch}
-                  savedSearchData$={savedSearchData$}
-                  savedSearchRefetch$={savedSearchRefetch$}
-                  state={state}
-                  stateContainer={stateContainer}
-                  isTimeBased={isTimeBased}
-                  viewMode={viewMode}
-                  onAddFilter={onAddFilter as DocViewFilterFn}
-                  onFieldEdited={onFieldEdited}
-                  columns={columns}
-                  resizeRef={resizeRef}
-                />
-              )}
+              {mainDisplay}
             </EuiPageContent>
           </EuiFlexItem>
         </EuiFlexGroup>

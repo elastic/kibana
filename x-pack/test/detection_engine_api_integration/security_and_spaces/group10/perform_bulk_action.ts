@@ -1062,7 +1062,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ];
         cases.forEach(({ type, value }) => {
           it(`should return error when trying to apply "${type}" edit action to prebuilt rule`, async () => {
-            await installPrePackagedRules(supertest, log);
+            await installPrePackagedRules(supertest, es, log);
             const prebuiltRule = await fetchPrebuiltRule();
 
             const { body } = await postBulkAction()
@@ -1523,7 +1523,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ];
           cases.forEach(({ type }) => {
             it(`should apply "${type}" rule action to prebuilt rule`, async () => {
-              await installPrePackagedRules(supertest, log);
+              await installPrePackagedRules(supertest, es, log);
               const prebuiltRule = await fetchPrebuiltRule();
               const webHookConnector = await createWebHookConnector();
 
@@ -1577,7 +1577,7 @@ export default ({ getService }: FtrProviderContext): void => {
           // if rule action is applied together with another edit action, that can't be applied to prebuilt rule (for example: tags action)
           // bulk edit request should return error
           it(`should return error if one of edit action is not eligible for prebuilt rule`, async () => {
-            await installPrePackagedRules(supertest, log);
+            await installPrePackagedRules(supertest, es, log);
             const prebuiltRule = await fetchPrebuiltRule();
             const webHookConnector = await createWebHookConnector();
 

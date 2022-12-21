@@ -40,6 +40,7 @@ import {
   TABLE_CONTROLS,
   TIME_RANGE_PICKER,
   TOGGLE_FLYOUT_BUTTON,
+  REFRESH_BUTTON,
 } from '../screens/indicators';
 import { login } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
@@ -230,6 +231,18 @@ describe('Indicators', () => {
       cy.get(QUERY_INPUT).should('exist').focus().clear().type('{enter}');
 
       cy.get(TABLE_CONTROLS).should('contain.text', 'Showing 1-25 of');
+    });
+
+    it('should reload the data when refresh button is pressed', () => {
+      cy.intercept(/bsearch/).as('search');
+
+      cy.get(REFRESH_BUTTON).should('exist').click();
+
+      cy.wait('@search');
+
+      cy.get(REFRESH_BUTTON).should('exist').click();
+
+      cy.wait('@search');
     });
 
     describe('No items match search criteria', () => {

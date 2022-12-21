@@ -16,6 +16,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiCallOut
         color="warning"
+        data-test-subj="noFieldsCallout-noFieldsExist"
         size="s"
         title="No fields exist in this data view."
       />
@@ -26,6 +27,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiCallOut
         color="warning"
+        data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
         title="There are no fields."
       />
@@ -38,6 +40,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiCallOut
         color="warning"
+        data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
         title="No empty fields"
       />
@@ -51,6 +54,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiCallOut
         color="warning"
+        data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
         title="No fields match the selected filters."
       >
@@ -78,6 +82,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiCallOut
         color="warning"
+        data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
         title="There are no available fields that contain data."
       >
@@ -108,6 +113,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiCallOut
         color="warning"
+        data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
         title="No fields match the selected filters."
       >
@@ -139,6 +145,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     expect(component).toMatchInlineSnapshot(`
       <EuiCallOut
         color="warning"
+        data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
         title="No fields match the selected filters."
       >

@@ -94,9 +94,7 @@ export const SharedLists = React.memo(() => {
   const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
     exceptionReferenceModalInitialState
   );
-  const [filters, setFilters] = useState<ExceptionListFilter | undefined>({
-    types: [ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT],
-  });
+  const [filters, setFilters] = useState<ExceptionListFilter | undefined>();
 
   const [
     loadingExceptions,
@@ -108,7 +106,10 @@ export const SharedLists = React.memo(() => {
     setSort,
   ] = useExceptionLists({
     errorMessage: i18n.ERROR_EXCEPTION_LISTS,
-    filterOptions: filters,
+    filterOptions: {
+      ...filters,
+      types: [ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT],
+    },
     http,
     namespaceTypes: ['single', 'agnostic'],
     notifications,
@@ -448,7 +449,11 @@ export const SharedLists = React.memo(() => {
           isBulkAction={false}
           showAlertCloseOptions
           onCancel={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
-          onConfirm={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
+          onConfirm={(didRuleChange: boolean) => {
+            setDisplayAddExceptionItemFlyout(false);
+            if (didRuleChange) handleRefresh();
+          }}
+          isNonTimeline={true}
         />
       )}
 

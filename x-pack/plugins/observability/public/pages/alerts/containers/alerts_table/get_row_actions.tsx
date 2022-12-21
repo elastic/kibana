@@ -17,7 +17,6 @@ const buildData = (alerts: EcsFieldsResponse): ObservabilityActionsProps['data']
     []
   );
 };
-const fakeSetEventsDeleted = () => [];
 export const getRowActions = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   config: ConfigSchema
@@ -35,7 +34,6 @@ export const getRowActions = (
           ecsData={{ _id: alert._id, _index: alert._index }}
           id={id}
           observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-          setEventsDeleted={fakeSetEventsDeleted}
           setFlyoutAlert={setFlyoutAlert}
           config={config}
         />

@@ -81,18 +81,16 @@ const { refetchFieldsExistenceInfo, isProcessing } = useExistingFieldsFetcher({
   ...
 });
 const fieldsExistenceReader = useExistingFieldsReader()
-const { fieldGroups } = useGroupedFields({
-  dataViewId: currentDataViewId,
-  allFields,
-  fieldsExistenceReader,
+const fieldListGroupedProps = useGroupedFields({
+  dataViewId: currentDataViewId, // pass `null` here for text-based queries to skip fields existence check
+  allFields, // pass `null` to show loading indicators
+  fieldsExistenceReader, // pass `undefined` for text-based queries 
   ...
 });
 
 // and now we can render a field list
 <FieldListGrouped
-  fieldGroups={fieldGroups}
-  fieldsExistenceStatus={fieldsExistenceReader.getFieldsExistenceStatus(currentDataViewId)}
-  fieldsExistInIndex={!!allFields.length}
+  {...fieldListGroupedProps}
   renderFieldItem={renderFieldItem}
   screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
 />

@@ -68,19 +68,12 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(createCaseUserAction.payload.connector).to.eql(postCaseReq.connector);
     });
 
-    it('creates a delete case user action when a case is deleted', async () => {
+    it('deletes all user actions when a case is deleted', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       await deleteCases({ supertest, caseIDs: [theCase.id] });
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
 
-      const userAction = userActions[1];
-
-      // One for creation and one for deletion
-      expect(userActions.length).to.eql(2);
-
-      expect(userAction.action).to.eql('delete');
-      expect(userAction.type).to.eql('delete_case');
-      expect(userAction.payload).to.eql({});
+      expect(userActions.length).to.be(0);
     });
 
     it('creates a status update user action when changing the status', async () => {
