@@ -66,34 +66,32 @@ export const SubFeatureForm = (props: Props) => {
     return null;
   }
   return (
-    <>
-      <EuiFlexGroup>
-        <EuiFlexItem className="eui-textTruncate" grow={3}>
-          <EuiFlexGroup gutterSize="s" direction="column">
+    <EuiFlexGroup>
+      <EuiFlexItem className="eui-textTruncate" grow={3}>
+        <EuiFlexGroup gutterSize="s" direction="column">
+          <EuiFlexItem>
+            <EuiText size="s">
+              {props.subFeature.name} {getTooltip()}
+            </EuiText>
+          </EuiFlexItem>
+          {props.subFeature.description && (
             <EuiFlexItem>
-              <EuiText size="s">
-                {props.subFeature.name} {getTooltip()}
-              </EuiText>
+              <EuiToolTip content={props.subFeature.description}>
+                <EuiText
+                  color={'subdued'}
+                  size={'xs'}
+                  className="eui-textTruncate"
+                  data-test-subj="subFeatureDescription"
+                >
+                  {props.subFeature.description}
+                </EuiText>
+              </EuiToolTip>
             </EuiFlexItem>
-            {props.subFeature.description && (
-              <EuiFlexItem>
-                <EuiToolTip content={props.subFeature.description}>
-                  <EuiText
-                    color={'subdued'}
-                    size={'xs'}
-                    className="eui-textTruncate"
-                    data-test-subj="subFeatureDescription"
-                  >
-                    {props.subFeature.description}
-                  </EuiText>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={2}>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={2}>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   function renderPrivilegeGroup(privilegeGroup: SubFeaturePrivilegeGroup, index: number) {

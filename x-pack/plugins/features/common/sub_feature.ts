@@ -31,7 +31,7 @@ export interface SubFeatureConfig {
   privilegeGroups: readonly SubFeaturePrivilegeGroupConfig[];
 
   /**
-   * Optional description to display under the Kibana sub-feature control
+   * An optional description that will appear as subtext underneath the sub-feature name
    */
   description?: string;
 }
