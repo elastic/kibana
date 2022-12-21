@@ -8,7 +8,8 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { type DataViewListItem, type DataView, DataViewType } from '@kbn/data-views-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
@@ -36,13 +37,11 @@ export function useDiscoverState({
   history,
   savedSearch,
   setExpandedDoc,
-  dataViewList,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
   setExpandedDoc: (doc?: DataTableRecord) => void;
-  dataViewList: DataViewListItem[];
 }) {
   const { uiSettings, data, filterManager, dataViews, toastNotifications, trackUiMetric } =
     services;
@@ -95,7 +94,7 @@ export function useDiscoverState({
   /**
    * Adhoc data views functionality
    */
-
+  const isTextBasedMode = state?.query && isOfAggregateQueryType(state?.query);
   const { persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
     dataView,
     dataViews,
@@ -105,6 +104,7 @@ export function useDiscoverState({
     filterManager,
     toastNotifications,
     trackUiMetric,
+    isTextBasedMode,
   });
 
   /**
@@ -137,7 +137,6 @@ export function useDiscoverState({
     documents$: data$.documents$,
     dataViews,
     stateContainer,
-    dataViewList,
     savedSearch,
   });
 

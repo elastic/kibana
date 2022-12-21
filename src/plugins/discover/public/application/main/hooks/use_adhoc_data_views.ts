@@ -28,6 +28,7 @@ export const useAdHocDataViews = ({
   dataViews,
   toastNotifications,
   trackUiMetric,
+  isTextBasedMode,
 }: {
   dataView: DataView;
   savedSearch: SavedSearch;
@@ -37,12 +38,13 @@ export const useAdHocDataViews = ({
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
   trackUiMetric?: (metricType: string, eventName: string | string[], count?: number) => void;
+  isTextBasedMode?: boolean;
 }) => {
   useEffect(() => {
     if (!dataView.isPersisted()) {
       trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
-  }, [dataView, trackUiMetric]);
+  }, [dataView, isTextBasedMode, trackUiMetric]);
 
   /**
    * Takes care of checking data view id references in filters

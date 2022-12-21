@@ -117,15 +117,13 @@ export function ChangeDataView({
       setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews, isTextBasedLangSelected]);
 
   useEffect(() => {
-    if (trigger.label) {
-      if (textBasedLanguage) {
-        setTriggerLabel(textBasedLanguage.toUpperCase());
-      } else {
-        setTriggerLabel(trigger.label);
-      }
+    if (textBasedLanguage) {
+      setTriggerLabel(textBasedLanguage.toUpperCase());
+    } else {
+      setTriggerLabel(trigger.label);
     }
   }, [textBasedLanguage, trigger.label]);
 
@@ -158,7 +156,8 @@ export function ChangeDataView({
         {...rest}
       >
         <>
-          {isAdHocSelected && (
+          {/* we don't want to display the adHoc icon on text based mode */}
+          {isAdHocSelected && !isTextBasedLangSelected && (
             <EuiIcon
               type={adhoc}
               color="primary"
