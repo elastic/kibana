@@ -77,7 +77,7 @@ export const useRetrieveStepImage = ({
     } else {
       return new Promise<ImageResponse>((resolve) => resolve(null));
     }
-  }, [skippedStep, hasIntersected, imgPath, retryFetchOnRevisit, hasImage]);
+  }, [skippedStep, hasIntersected, imgPath, retryFetchOnRevisit]);
 
   return dataResult;
 };

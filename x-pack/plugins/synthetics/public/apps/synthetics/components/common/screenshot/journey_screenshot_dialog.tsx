@@ -87,7 +87,10 @@ export const JourneyScreenshotDialog = ({
   return isOpen ? (
     <EuiOutsideClickDetector onOutsideClick={onClose}>
       <EuiModal
-        onClose={onClose}
+        onClose={(evt?: KeyboardEvent<HTMLDivElement> | MouseEvent<HTMLButtonElement>) => {
+          evt?.stopPropagation?.();
+          onClose();
+        }}
         css={css({
           outline: 0,
           maxWidth: 'calc(90vw)',
