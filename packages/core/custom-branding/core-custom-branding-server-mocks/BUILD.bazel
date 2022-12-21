@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "core-custom-branding-server-internal"
-PKG_REQUIRE_NAME = "@kbn/core-custom-branding-server-internal"
+PKG_DIRNAME = "core-custom-branding-server-mocks"
+PKG_REQUIRE_NAME = "@kbn/core-custom-branding-server-mocks"
 
 SOURCE_FILES = glob(
   [
@@ -11,12 +11,10 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.config.js",
-    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
     "**/__snapshots__/**",
     "**/integration_tests/**",
-    "**/mocks/**",
     "**/scripts/**",
     "**/storybook/**",
     "**/test_fixtures/**",
@@ -60,9 +58,9 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "//packages/core/custom-branding/core-custom-branding-server:npm_module_types",
+  "@npm//rxjs",
   "//packages/core/custom-branding/core-custom-branding-common:npm_module_types",
-  "//packages/core/base/core-base-server-internal:npm_module_types",
+  "//packages/core/custom-branding/core-custom-branding-server:npm_module_types",
 ]
 
 jsts_transpiler(

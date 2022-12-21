@@ -65,6 +65,7 @@ RUNTIME_DEPS = [
   "//packages/core/http/core-http-resources-server-internal",
   "//packages/core/plugins/core-plugins-server-internal",
   "//packages/core/apps/core-apps-server-internal",
+  "//packages/core/custom-branding/core-custom-branding-server-internal",
 ]
 
 TYPES_DEPS = [
@@ -105,6 +106,8 @@ TYPES_DEPS = [
   "//packages/core/lifecycle/core-lifecycle-server-internal:npm_module_types",
   "//packages/core/plugins/core-plugins-server-internal:npm_module_types",
   "//packages/core/apps/core-apps-server-internal:npm_module_types",
+  "//packages/core/custom-branding/core-custom-branding-server-internal:npm_module_types",
+  "//packages/core/custom-branding/core-custom-branding-server-mocks:npm_module_types",
 ]
 
 jsts_transpiler(

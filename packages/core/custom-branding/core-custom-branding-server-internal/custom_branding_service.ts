@@ -10,6 +10,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import type { CustomBrandingStart, CustomBrandingSetup } from '@kbn/core-custom-branding-server';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import { CoreContext } from '@kbn/core-base-server-internal';
 
 const CUSTOM_BRANDING_PLUGIN = 'customBranding';
 
@@ -20,6 +21,8 @@ export class CustomBrandingService {
     this.customBranding
   );
   private stop$ = new Subject<void>();
+
+  constructor(core: CoreContext) {}
 
   private set(customBranding: CustomBranding) {
     if (this.registeredPlugin !== CUSTOM_BRANDING_PLUGIN) {

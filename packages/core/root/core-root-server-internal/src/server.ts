@@ -58,6 +58,7 @@ import {
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService, statusConfig } from '@kbn/core-status-server-internal';
 import { UiSettingsService, uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
+import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -125,6 +126,7 @@ export class Server {
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
   private readonly docLinks: DocLinksService;
+  private readonly customBranding: CustomBrandingService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -170,6 +172,7 @@ export class Server {
     this.executionContext = new ExecutionContextService(core);
     this.prebootService = new PrebootService(core);
     this.docLinks = new DocLinksService(core);
+    this.customBranding = new CustomBrandingService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -335,12 +338,15 @@ export class Server {
       rendering: renderingSetup,
     });
 
+    const customBrandingSetup = this.customBranding.setup();
+
     const loggingSetup = this.logging.setup();
 
     const coreSetup: InternalCoreSetup = {
       analytics: analyticsSetup,
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
+      customBranding: customBrandingSetup,
       docLinks: docLinksSetup,
       elasticsearch: elasticsearchServiceSetup,
       environment: environmentSetup,
@@ -378,6 +384,7 @@ export class Server {
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
     const elasticsearchStart = await this.elasticsearch.start();
+    const customBrandingStart = this.customBranding.start();
     const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
@@ -404,6 +411,7 @@ export class Server {
     this.coreStart = {
       analytics: analyticsStart,
       capabilities: capabilitiesStart,
+      customBranding: customBrandingStart,
       docLinks: docLinkStart,
       elasticsearch: elasticsearchStart,
       executionContext: executionContextStart,
@@ -440,6 +448,7 @@ export class Server {
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
+    await this.customBranding.stop();
     this.node.stop();
     this.deprecations.stop();
   }

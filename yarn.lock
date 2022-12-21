@@ -2969,6 +2969,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-custom-branding-server-mocks@link:bazel-bin/packages/core/custom-branding/core-custom-branding-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-custom-branding-server@link:bazel-bin/packages/core/custom-branding/core-custom-branding-server":
   version "0.0.0"
   uid ""
