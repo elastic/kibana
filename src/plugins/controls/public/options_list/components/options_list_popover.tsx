@@ -46,6 +46,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
 
   return (
     <span
+      role="listbox"
       id={`control-popover-${id}`}
       aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
     >
@@ -58,10 +59,10 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
         />
       )}
       <div
-        style={{ width: width > 300 ? width : undefined }}
         className="optionsList __items"
-        data-option-count={Object.keys(availableOptions ?? {}).length}
+        style={{ width: width > 300 ? width : undefined }}
         data-test-subj={`optionsList-control-available-options`}
+        data-option-count={Object.keys(availableOptions ?? {}).length}
       >
         <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected} />
         {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
