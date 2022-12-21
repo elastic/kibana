@@ -94,6 +94,17 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
       ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
     }
   }
+  div .euiDataGridRowCell__contentByHeight {
+    height: auto;
+    align-self: center;
+  }
+  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__contentByHeight {
+    flex-grow: 0;
+    width: 100%;
+  }
+  div .siemEventsTable__trSupplement--summary {
+    display: block;
+  }
 `;
 
 export const DataTableComponent = React.memo<DataTableProps>(
@@ -436,6 +447,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
             pagination={pagination}
             ref={dataGridRef}
             rowHeightsOptions={rowHeightsOptions}
+            width={isEventRenderedView ? '100%' : 'inherit'}
           />
         </EuiDataGridContainer>
       </>

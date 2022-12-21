@@ -156,25 +156,28 @@ const eventRenderedViewColumns: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
-    // initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
+    displayAsText: i18n.translate(
+      'xpack.securitySolution.EventRenderedView.timestampTitle.column',
+      {
+        defaultMessage: 'Timestamp',
+      }
+    ),
+    initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH + 50,
     actions: false,
     isExpandable: false,
-    isResizable: true,
+    isResizable: false,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    displayAsText: i18n.translate(
-      'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.ruleTitle',
-      {
-        defaultMessage: 'Rule',
-      }
-    ),
+    displayAsText: i18n.translate('xpack.securitySolution.EventRenderedView.ruleTitle.column', {
+      defaultMessage: 'Rule',
+    }),
     id: 'kibana.alert.rule.name',
-    // initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH,
+    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH + 50,
     linkField: 'kibana.alert.rule.uuid',
     actions: false,
     isExpandable: false,
-    isResizable: true,
+    isResizable: false,
   },
   {
     columnHeaderType: defaultColumnHeaderType,

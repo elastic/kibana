@@ -22,11 +22,6 @@ const hasCellActions = (columnId?: string) => {
 
 const StyledContent = styled.div<{ $isDetails: boolean }>`
   padding: ${({ $isDetails }) => ($isDetails ? '0 8px' : undefined)};
-  margin: 0;
-  position: absolute;
-  top: 50%;
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
 `;
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({

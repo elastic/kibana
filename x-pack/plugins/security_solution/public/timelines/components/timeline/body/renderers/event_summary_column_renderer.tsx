@@ -54,7 +54,7 @@ export const eventSummaryColumnRenderer: ColumnRenderer = {
         <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
           {rowRenderer != null ? (
             <EventRenderedFlexItem className="eui-xScroll">
-              <div className="eui-displayInlineBlock">
+              <div className="eui-displayBlock">
                 {rowRenderer &&
                   rowRenderer.renderRow({
                     data: ecsData,
