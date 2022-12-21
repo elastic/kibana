@@ -46,6 +46,8 @@ import {
   DatasourceLayers,
   UserMessage,
   UserMessagesGetter,
+  AddUserMessages,
+  isMessageRemovable,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
@@ -89,6 +91,7 @@ export interface WorkspacePanelProps {
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
   lensInspector: LensInspector;
   getUserMessages: UserMessagesGetter;
+  addUserMessages: AddUserMessages;
 }
 
 interface WorkspaceState {
@@ -143,6 +146,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   suggestionForDraggedField,
   lensInspector,
   getUserMessages,
+  addUserMessages,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
@@ -220,14 +224,16 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, []);
 
+  const removeSearchWarningMessagesRef = useRef<() => void>();
+
   const onData$ = useCallback(
-    (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
+    (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (renderDeps.current) {
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
         const datasource = Object.values(renderDeps.current.datasourceMap)[0];
         const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
 
-        let requestWarnings: Array<React.ReactNode | string> = [];
+        let requestWarnings: UserMessage[] = [];
 
         if (adapters?.requests) {
           requestWarnings = getSearchWarningMessages(
@@ -240,24 +246,31 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           );
         }
 
-        dispatchLens(
-          onActiveDataChange({
-            activeData:
-              adapters && adapters.tables
-                ? Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
-                    (acc, [key, value], index, tables) => ({
-                      ...acc,
-                      [tables.length === 1 ? defaultLayerId : key]: value,
-                    }),
-                    {}
-                  )
-                : undefined,
-            requestWarnings,
-          })
-        );
+        if (requestWarnings.length) {
+          removeSearchWarningMessagesRef.current = addUserMessages(
+            requestWarnings.filter(isMessageRemovable)
+          );
+        } else if (removeSearchWarningMessagesRef.current) {
+          removeSearchWarningMessagesRef.current();
+          removeSearchWarningMessagesRef.current = undefined;
+        }
+
+        if (adapters && adapters.tables) {
+          dispatchLens(
+            onActiveDataChange({
+              activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
+                (acc, [key, value], _index, tables) => ({
+                  ...acc,
+                  [tables.length === 1 ? defaultLayerId : key]: value,
+                }),
+                {}
+              ),
+            })
+          );
+        }
       }
     },
-    [dispatchLens, plugins.data.search]
+    [addUserMessages, dispatchLens, plugins.data.search]
   );
 
   const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;

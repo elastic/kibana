@@ -104,6 +104,7 @@ export interface EditorFrameProps {
   lensInspector: LensInspector;
   indexPatternService: IndexPatternServiceAPI;
   getUserMessages: UserMessagesGetter;
+  addUserMessages: AddUserMessages;
 }
 
 export type VisualizationMap = Record<string, Visualization>;
@@ -284,7 +285,10 @@ type UserMessageDisplayLocation =
     }
   | { id: 'dimensionTrigger'; layerId: string; dimensionId: string };
 
+export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
+
 export interface UserMessage {
+  uniqueId?: string;
   severity: 'error' | 'warning';
   shortMessage: string;
   longMessage: React.ReactNode | string;
@@ -292,12 +296,18 @@ export interface UserMessage {
   displayLocations: UserMessageDisplayLocation[];
 }
 
-export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
+export type RemovableUserMessage = UserMessage & { uniqueId: string };
 
 export type UserMessagesGetter = (
   locationId: UserMessagesDisplayLocationId,
   severity?: UserMessage['severity']
 ) => UserMessage[];
+
+export type AddUserMessages = (messages: RemovableUserMessage[]) => () => void;
+
+export function isMessageRemovable(message: UserMessage): message is RemovableUserMessage {
+  return Boolean(message.uniqueId);
+}
 
 /**
  * Interface for the datasource registry
@@ -478,7 +488,7 @@ export interface Datasource<T = unknown, P = unknown> {
     warning: SearchResponseWarning,
     request: SearchRequest,
     response: estypes.SearchResponse
-  ) => Array<string | React.ReactNode> | undefined;
+  ) => UserMessage[];
 
   /**
    * Checks if the visualization created is time based, for example date histogram

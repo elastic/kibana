@@ -123,6 +123,7 @@ export class EditorFrameService {
           lensInspector,
           indexPatternService,
           getUserMessages,
+          addUserMessages,
         }) => {
           return (
             <div className="lnsApp__frame">
@@ -133,6 +134,7 @@ export class EditorFrameService {
                 lensInspector={lensInspector}
                 showNoDataPopover={showNoDataPopover}
                 getUserMessages={getUserMessages}
+                addUserMessages={addUserMessages}
                 indexPatternService={indexPatternService}
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}

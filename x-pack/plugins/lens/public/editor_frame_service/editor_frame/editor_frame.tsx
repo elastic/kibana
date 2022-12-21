@@ -15,6 +15,7 @@ import {
   VisualizationMap,
   Suggestion,
   UserMessagesGetter,
+  AddUserMessages,
 } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { BannerWrapper } from './banner_wrapper';
@@ -48,6 +49,7 @@ export interface EditorFrameProps {
   lensInspector: LensInspector;
   indexPatternService: IndexPatternServiceAPI;
   getUserMessages: UserMessagesGetter;
+  addUserMessages: AddUserMessages;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -158,6 +160,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 framePublicAPI={framePublicAPI}
                 getSuggestionForField={getSuggestionForField.current}
                 getUserMessages={props.getUserMessages}
+                addUserMessages={props.addUserMessages}
               />
             </ErrorBoundary>
           )

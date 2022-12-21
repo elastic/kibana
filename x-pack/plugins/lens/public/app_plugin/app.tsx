@@ -15,7 +15,7 @@ import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
-import { EditorFrameInstance, UserMessagesGetter } from '../types';
+import { AddUserMessages, EditorFrameInstance, UserMessage, UserMessagesGetter } from '../types';
 import { Document } from '../persistence/saved_object_store';
 
 import {
@@ -453,9 +453,10 @@ export function App({
     selectFrameDatasourceAPI(state, datasourceMap)
   );
 
-  // TODO - store messages in ref -- may eventually consider store messages in redux so they can be pushed to from other places
-  const getUserMessages: UserMessagesGetter = (locationId, severity) =>
-    [
+  const [userMessages, setUserMessages] = useState<UserMessage[]>([]);
+
+  useEffect(() => {
+    setUserMessages([
       ...(activeDatasourceId
         ? datasourceMap[activeDatasourceId].getUserMessages(
             datasourceStates[activeDatasourceId].state,
@@ -484,11 +485,57 @@ export function App({
         core: coreStart,
         dataViews: frameDatasourceAPI.dataViews,
       }),
-    ].filter(
+    ]);
+  }, [
+    activeDatasourceId,
+    coreStart,
+    datasourceMap,
+    datasourceStates,
+    dispatch,
+    frameDatasourceAPI,
+    visualization,
+    visualizationMap,
+  ]);
+
+  // these are messages managed from other parts of Lens
+  const [additionalUserMessages, setAdditionalUserMessages] = useState<Record<string, UserMessage>>(
+    {}
+  );
+
+  const getUserMessages: UserMessagesGetter = (locationId, severity) =>
+    [...userMessages, ...Object.values(additionalUserMessages)].filter(
       (message) =>
         Boolean(message.displayLocations.find((location) => location.id === locationId)) &&
         (severity ? message.severity === severity : true)
     );
+
+  const addUserMessages: AddUserMessages = (messages) => {
+    const newMessageMap = {
+      ...additionalUserMessages,
+    };
+
+    const addedMessageIds: string[] = [];
+    messages.forEach((message) => {
+      if (!newMessageMap[message.uniqueId]) {
+        newMessageMap[message.uniqueId] = message;
+        addedMessageIds.push(message.uniqueId);
+      }
+    });
+
+    if (addedMessageIds.length) {
+      setAdditionalUserMessages(newMessageMap);
+    }
+
+    return () => {
+      const withMessagesRemoved = {
+        ...additionalUserMessages,
+      };
+
+      addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
+
+      setAdditionalUserMessages(withMessagesRemoved);
+    };
+  };
 
   return (
     <>
@@ -525,6 +572,7 @@ export function App({
             lensInspector={lensInspector}
             indexPatternService={indexPatternService}
             getUserMessages={getUserMessages}
+            addUserMessages={addUserMessages}
           />
         )}
       </div>
@@ -593,6 +641,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
   showNoDataPopover,
   getUserMessages,
+  addUserMessages,
   lensInspector,
   indexPatternService,
 }: {
@@ -600,6 +649,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   lensInspector: LensInspector;
   showNoDataPopover: () => void;
   getUserMessages: UserMessagesGetter;
+  addUserMessages: AddUserMessages;
   indexPatternService: IndexPatternServiceAPI;
 }) {
   const { EditorFrameContainer } = editorFrame;
@@ -607,6 +657,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
     <EditorFrameContainer
       showNoDataPopover={showNoDataPopover}
       getUserMessages={getUserMessages}
+      addUserMessages={addUserMessages}
       lensInspector={lensInspector}
       indexPatternService={indexPatternService}
     />

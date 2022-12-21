@@ -100,6 +100,7 @@ function getDefaultProps() {
     showNoDataPopover: jest.fn(),
     indexPatternService: createIndexPatternServiceMock(),
     getUserMessages: () => [],
+    addUserMessages: () => () => {},
   };
   return defaultProps;
 }

@@ -73,6 +73,7 @@ const defaultProps = {
   lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
   toggleFullscreen: jest.fn(),
   getUserMessages: () => [],
+  addUserMessages: () => () => {},
 };
 
 const toExpr = (
@@ -573,7 +574,6 @@ describe('workspace_panel', () => {
       type: 'lens/onActiveDataChange',
       payload: {
         activeData: tablesData,
-        requestWarnings: [],
       },
     });
   });
