@@ -13,7 +13,7 @@ import copy from 'copy-to-clipboard';
 import { KibanaServices } from '../../common/lib/kibana';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../utils';
 
-export const ACTION_ID = 'copyToClipboard';
+export const ACTION_ID = 'embeddable_copyToClipboard';
 
 function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   return (

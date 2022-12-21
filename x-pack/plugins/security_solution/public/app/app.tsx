@@ -65,7 +65,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                     <ManageUserInfo>
                       <ReactQueryClientProvider>
                         <CellActionsContextProvider
-                          getCompatibleActions={uiActions.getTriggerCompatibleActions}
+                          getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                         >
                           <PageRouter
                             history={history}

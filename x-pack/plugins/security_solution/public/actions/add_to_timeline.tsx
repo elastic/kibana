@@ -7,16 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core/public';
+import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { addProvider } from '../timelines/store/timeline/actions';
 import { APP_UI_ID } from '../../common/constants';
 import { TimelineId } from '../../common/types';
-import type { SecurityAppStore } from '../plugin';
 import { createDataProviders } from './utils/dataprovider';
 import { KibanaServices } from '../common/lib/kibana';
-import type { ActionContext } from './types';
+import type { SecurityAppStore } from '../common/store';
 
-export const ACTION_ID = 'addToTimeline';
+export const ACTION_ID = 'security_addToTimeline';
 const ICON = 'timeline';
 
 const ADD_TO_TIMELINE = i18n.translate(
@@ -36,20 +36,21 @@ export const createAddToTimelineAction = ({
   const { application: applicationService, notifications: notificationsService } =
     KibanaServices.get();
 
-  return createAction<ActionContext>({
+  return createAction<CellActionExecutionContext>({
     id: ACTION_ID,
     type: ACTION_ID,
     order,
     getIconType: (): string => ICON,
     getDisplayName: () => ADD_TO_TIMELINE,
+    getDisplayNameTooltip: () => ADD_TO_TIMELINE,
     isCompatible: async () => isInSecurityApp(applicationService),
-    execute: async (context: ActionContext) => {
+    execute: async ({ field }) => {
       const dataProviders =
         createDataProviders({
           contextId: TimelineId.active,
-          fieldType: context.fieldType,
-          values: context.value,
-          field: context.field,
+          fieldType: field.type,
+          values: field.value,
+          field: field.name,
         }) ?? [];
 
       if (dataProviders.length > 0) {
@@ -57,7 +58,7 @@ export const createAddToTimelineAction = ({
 
         notificationsService.toasts.addSuccess({
           title: i18n.translate('xpack.securitySolution.actions.addToTimeline.addedFieldMessage', {
-            values: { fieldOrValue: context.value },
+            values: { fieldOrValue: field.value },
             defaultMessage: `Added {fieldOrValue} to timeline`,
           }),
         });

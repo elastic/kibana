@@ -17,7 +17,7 @@ import { TimelineId } from '../../../common/types';
 import { createDataProviders } from './data_provider';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../utils';
 
-export const ACTION_ID = 'addToTimeline';
+export const ACTION_ID = 'embeddable_addToTimeline';
 
 function isDataColumnsFilterable(data?: CellValueContext['data']): boolean {
   return (

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
@@ -16,12 +17,11 @@ import { Provider } from 'react-redux';
 import { Router, useLocation } from 'react-router-dom';
 import type { ScopedHistory } from '@kbn/core/public';
 import { StatefulTopN } from '../common/components/top_n';
-import type { SecurityAppStore } from '../plugin';
 import { KibanaContextProvider, useGetUserCasesPermissions } from '../common/lib/kibana';
 import { APP_ID, APP_NAME, DEFAULT_DARK_MODE } from '../../common/constants';
 import type { StartServices } from '../types';
 import { getScopeFromPath, useSourcererDataView } from '../common/containers/sourcerer';
-import type { ActionContext } from './types';
+import type { SecurityAppStore } from '../common/store';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.actions.showTopTooltip', {
@@ -29,8 +29,14 @@ const SHOW_TOP = (fieldName: string) =>
     defaultMessage: `Show top {fieldName}`,
   });
 
-const ID = 'show-top-n';
+const ID = 'security_showTopN';
 const ICON = 'visBarVertical';
+
+export interface ShowTopNActionContext extends CellActionExecutionContext {
+  metadata?: {
+    scopeId?: string;
+  };
+}
 
 export const createShowTopNAction = ({
   store,
@@ -43,14 +49,15 @@ export const createShowTopNAction = ({
   history: ScopedHistory<unknown>;
   order?: number;
 }) =>
-  createAction<ActionContext>({
+  createAction<ShowTopNActionContext>({
     id: ID,
     type: ID,
     order,
     getIconType: (): string => ICON,
-    getDisplayName: ({ field }) => SHOW_TOP(field),
-    isCompatible: async ({ field, value }: ActionContext) => field != null && value != null,
-    execute: async (context: ActionContext) => {
+    getDisplayName: ({ field }) => SHOW_TOP(field.name),
+    getDisplayNameTooltip: ({ field }) => SHOW_TOP(field.name),
+    isCompatible: async ({ field }) => field.name != null && field.value != null,
+    execute: async (context) => {
       const onClose = () => {
         if (context.extraContentNodeRef.current !== null) {
           unmountComponentAtNode(context.extraContentNodeRef.current);
@@ -84,7 +91,7 @@ const TopNAction = ({
   services,
 }: {
   onClose: () => void;
-  context: ActionContext;
+  context: ShowTopNActionContext;
   services: StartServices;
 }) => {
   const { pathname } = useLocation();
@@ -107,11 +114,11 @@ const TopNAction = ({
         attachToAnchor={false}
       >
         <StatefulTopN
-          field={context.field}
+          field={context.field.name}
           showLegend
           scopeId={context.metadata?.scopeId}
           toggleTopN={onClose}
-          value={context.value}
+          value={context.field.value}
           indexPattern={indexPattern}
           browserFields={browserFields}
         />
