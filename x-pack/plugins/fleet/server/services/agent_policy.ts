@@ -761,6 +761,10 @@ class AgentPolicyService {
         default_fleet_server: policy.is_default_fleet_server === true,
       };
 
+      if (policy.unenroll_timeout) {
+        fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
+      }
+
       return [...acc, fleetServerPolicy];
     }, [] as FleetServerPolicy[]);
 
