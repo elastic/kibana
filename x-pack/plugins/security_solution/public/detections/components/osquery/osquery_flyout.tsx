@@ -22,6 +22,9 @@ export interface OsqueryFlyoutProps {
   agentId?: string;
   defaultValues?: {
     alertIds?: string[];
+    query?: string;
+    ecs_mapping?: { [key: string]: {} };
+    queryField?: boolean;
   };
   onClose: () => void;
   ecsData?: Ecs;
