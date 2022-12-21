@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
+import moment, { Moment } from 'moment';
+import { EuiDatePicker, EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { cx } from '@emotion/css';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { validateParams } from './lib/filter_editor_utils';
+import { compressedDatepickerStyle } from './value_input_type.styles';
 
 interface Props {
   value?: string | number;
@@ -76,23 +79,27 @@ class ValueInputTypeUI extends Component<Props> {
         );
         break;
       case 'date':
-      case 'date_range':
+      case 'date_range': {
+        const className = this.props.compressed
+          ? cx(this.props.className, compressedDatepickerStyle)
+          : this.props.className;
+
         inputElement = (
-          <EuiFieldText
-            compressed={this.props.compressed}
+          <EuiDatePicker
+            className={className}
+            onChange={(date) => date && this.onDatePickerChange(date)}
+            selected={value ? moment(value) : undefined}
+            showTimeSelect
             disabled={this.props.disabled}
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
-            value={value}
-            onChange={this.onChange}
             onBlur={this.onBlur}
             isInvalid={this.props.isInvalid}
-            controlOnly={this.props.controlOnly}
-            className={this.props.className}
             data-test-subj={this.props.dataTestSubj}
           />
         );
         break;
+      }
       case 'ip':
       case 'ip_range':
         inputElement = (
@@ -154,6 +161,10 @@ class ValueInputTypeUI extends Component<Props> {
   private onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const params = event.target.value;
     this.props.onChange(params);
+  };
+
+  private onDatePickerChange = (date: Moment) => {
+    this.props.onChange(date.utc().format());
   };
 
   private onBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
