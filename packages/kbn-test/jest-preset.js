@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-const pkgMap = require('@kbn/package-map').readPackageMap();
-
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
@@ -40,12 +38,6 @@ module.exports = {
     '\\.editor\\.worker(\\.js)?$':
       '<rootDir>/packages/kbn-test/src/jest/mocks/worker_module_mock.js',
     '^(!!)?file-loader!': '<rootDir>/packages/kbn-test/src/jest/mocks/file_mock.js',
-    ...Object.fromEntries(
-      Array.from(pkgMap.entries()).flatMap(([pkgId, repoRelativeDir]) => [
-        [`^${pkgId}$`, [`<rootDir>/${repoRelativeDir}`]],
-        [`^${pkgId}/(.*)$`, [`<rootDir>/${repoRelativeDir}/$1`]],
-      ])
-    ),
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader

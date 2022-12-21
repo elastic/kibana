@@ -12,8 +12,32 @@
 // It would be available once https://github.com/facebook/jest/pull/9976 got merged.
 
 const resolve = require('resolve');
+const { REPO_ROOT } = require('@kbn/repo-info');
+const { readPackageMap } = require('@kbn/package-map');
 
+const pkgMap = readPackageMap();
+
+/**
+ * @param {string} request
+ * @param {import('resolve').SyncOpts} options
+ * @returns
+ */
 module.exports = (request, options) => {
+  if (request.startsWith('@kbn/')) {
+    const [, id, ...sub] = request.split('/');
+    const pkgDir = pkgMap.get(`@kbn/${id}`);
+    if (!pkgDir) {
+      throw new Error(
+        `unable to resolve pkg import, pkg '@kbn/${id}' is not in the pkg map. Do you need to bootstrap?`
+      );
+    }
+
+    return resolve.sync(`./${pkgDir}${sub.length ? `/${sub.join('/')}` : ''}`, {
+      basedir: REPO_ROOT,
+      extensions: options.extensions,
+    });
+  }
+
   try {
     return resolve.sync(request, {
       basedir: options.basedir,
