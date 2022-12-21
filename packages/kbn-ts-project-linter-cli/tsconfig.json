@@ -18,7 +18,6 @@
     "@kbn/dev-cli-errors",
     "@kbn/repo-path",
     "@kbn/get-repo-files",
-    "@kbn/package-map",
     "@kbn/ts-projects",
     "@kbn/ts-project-linter",
   ]
