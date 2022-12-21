@@ -26,6 +26,7 @@ interface Props {
   isInvalid?: boolean;
   compressed?: boolean;
   disabled?: boolean;
+  dataTestSubj?: string;
 }
 
 class ValueInputTypeUI extends Component<Props> {
@@ -38,7 +39,7 @@ class ValueInputTypeUI extends Component<Props> {
   };
 
   public render() {
-    const value = this.props.value;
+    const value = this.props.value ?? '';
     const type = this.props.field?.type ?? 'string';
     let inputElement: React.ReactNode;
     switch (type) {
@@ -54,6 +55,7 @@ class ValueInputTypeUI extends Component<Props> {
             isInvalid={!validateParams(value, this.props.field)}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
+            data-test-subj={this.props.dataTestSubj}
           />
         );
         break;
@@ -70,6 +72,7 @@ class ValueInputTypeUI extends Component<Props> {
             onChange={this.onChange}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
+            data-test-subj={this.props.dataTestSubj}
           />
         );
         break;
@@ -87,6 +90,7 @@ class ValueInputTypeUI extends Component<Props> {
             isInvalid={this.props.isInvalid}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
+            data-test-subj={this.props.dataTestSubj}
           />
         );
         break;
@@ -103,6 +107,7 @@ class ValueInputTypeUI extends Component<Props> {
             controlOnly={this.props.controlOnly}
             className={this.props.className}
             compressed={this.props.compressed}
+            data-test-subj={this.props.dataTestSubj}
           />
         );
         break;
@@ -131,6 +136,7 @@ class ValueInputTypeUI extends Component<Props> {
             className={this.props.className}
             fullWidth={this.props.fullWidth}
             compressed={this.props.compressed}
+            data-test-subj={this.props.dataTestSubj}
           />
         );
         break;
