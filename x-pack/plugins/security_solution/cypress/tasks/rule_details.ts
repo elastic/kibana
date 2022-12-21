@@ -30,7 +30,6 @@ import {
   ENDPOINT_EXCEPTIONS_TAB,
   EDIT_RULE_SETTINGS_LINK,
 } from '../screens/rule_details';
-import { waitForAlerts } from './alerts';
 import {
   addExceptionConditions,
   addExceptionFlyoutItemName,
@@ -99,7 +98,6 @@ export const addFirstExceptionFromRuleDetails = (exception: Exception, name: str
 
 export const goToAlertsTab = () => {
   cy.get(ALERTS_TAB).click();
-  waitForAlerts();
 };
 
 export const goToExceptionsTab = () => {

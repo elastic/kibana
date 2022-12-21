@@ -28,6 +28,8 @@ import {
   ADD_ENDPOINT_EXCEPTION_BTN,
   DATAGRID_CHANGES_IN_PROGRESS,
   EVENT_CONTAINER_TABLE_NOT_LOADING,
+  CLOSED_ALERTS_FILTER_BTN,
+  OPENED_ALERTS_FILTER_BTN,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -57,6 +59,7 @@ import {
   OPTION_SELECTABLE,
 } from '../screens/common/filter_group';
 import { LOADING_SPINNER } from '../screens/common/page';
+import { ALERTS_URL } from '../urls/navigation';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
@@ -192,6 +195,13 @@ export const selectPageFilterValue = (filterIndex: number, ...values: string[]) 
   togglePageFilterPopover(filterIndex);
 };
 
+export const goToClosedAlertsOnRuleDetailsPage = () => {
+  cy.get(CLOSED_ALERTS_FILTER_BTN).click();
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
+};
+
 export const goToClosedAlerts = () => {
   selectPageFilterValue(0, 'closed');
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
@@ -201,6 +211,12 @@ export const goToClosedAlerts = () => {
 
 export const goToManageAlertsDetectionRules = () => {
   cy.get(MANAGE_ALERT_DETECTION_RULES_BTN).should('exist').click({ force: true });
+};
+
+export const goToOpenedAlertsOnRuleDetailsPage = () => {
+  cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
 };
 
 export const goToOpenedAlerts = () => {
@@ -293,10 +309,19 @@ export const openUserDetailsFlyout = () => {
 };
 
 export const waitForPageFilters = () => {
-  cy.get(DETECTION_PAGE_FILTER_GROUP_WRAPPER).should('exist');
-  cy.get(DETECTION_PAGE_FILTER_GROUP_LOADING).should('not.exist');
-  cy.get(DETECTION_PAGE_FILTERS_LOADING).should('not.exist');
-  cy.get(OPTION_LISTS_LOADING).should('have.lengthOf', 0);
+  cy.log('Waiting for Page Filters');
+  cy.url().then((urlString) => {
+    const url = new URL(urlString);
+    if (url.pathname.endsWith(ALERTS_URL)) {
+      // since these are only valid on the alert page
+      cy.get(DETECTION_PAGE_FILTER_GROUP_WRAPPER).should('exist');
+      cy.get(DETECTION_PAGE_FILTER_GROUP_LOADING).should('not.exist');
+      cy.get(DETECTION_PAGE_FILTERS_LOADING).should('not.exist');
+      cy.get(OPTION_LISTS_LOADING).should('have.lengthOf', 0);
+    } else {
+      cy.log('Skipping Page Filters Wait');
+    }
+  });
 };
 
 export const resetFilters = () => {

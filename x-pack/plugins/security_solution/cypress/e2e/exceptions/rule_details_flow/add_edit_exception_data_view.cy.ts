@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { OPTION_SELECTABLE } from '../../../screens/common/filter_group';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { getNewRule } from '../../../objects/rule';
-import { ALERTS_COUNT, NUMBER_OF_ALERTS, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
 import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   addExceptionFromFirstAlert,
-  goToClosedAlerts,
-  goToOpenedAlerts,
-  togglePageFilterPopover,
+  goToClosedAlertsOnRuleDetailsPage,
+  goToOpenedAlertsOnRuleDetailsPage,
 } from '../../../tasks/alerts';
 import {
   addExceptionConditions,
@@ -110,7 +108,7 @@ describe('Add exception using data views from rule details', () => {
     cy.get(EMPTY_ALERT_TABLE).should('exist');
 
     // Closed alert should appear in table
-    goToClosedAlerts();
+    goToClosedAlertsOnRuleDetailsPage();
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
 
@@ -127,7 +125,7 @@ describe('Add exception using data views from rule details', () => {
 
     // now that there are no more exceptions, the docs should match and populate alerts
     goToAlertsTab();
-    goToOpenedAlerts();
+    goToOpenedAlertsOnRuleDetailsPage();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
@@ -154,17 +152,15 @@ describe('Add exception using data views from rule details', () => {
     // new exception item displays
     cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
 
-    // Empty table check is not needed and we can simply check that all alerts are closed.
-    // Closed alert should appear in table
+    // Alerts table should now be empty from having added exception and closed
+    // matching alert
     goToAlertsTab();
-    goToClosedAlerts();
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
+
+    // Closed alert should appear in table
+    goToClosedAlertsOnRuleDetailsPage();
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
-
-    // Open Status should not be selectable since there is not open Alerts
-    togglePageFilterPopover(0); // open status filter
-    cy.get(OPTION_SELECTABLE(0, 'open')).should('not.exist');
-    togglePageFilterPopover(0);
 
     // Remove the exception and load an event that would have matched that exception
     // to show that said exception now starts to show up again
@@ -179,7 +175,7 @@ describe('Add exception using data views from rule details', () => {
 
     // now that there are no more exceptions, the docs should match and populate alerts
     goToAlertsTab();
-    goToOpenedAlerts();
+    goToOpenedAlertsOnRuleDetailsPage();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
