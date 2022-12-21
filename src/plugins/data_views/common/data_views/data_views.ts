@@ -1050,7 +1050,7 @@ export class DataViewsService {
         return indexPattern;
       })
       .catch(async (err) => {
-        if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
+        if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
           const samePattern = await this.get(indexPattern.id as string, displayErrors);
           // What keys changed from now and what the server returned
           const updatedBody = samePattern.getAsSavedObjectBody();
