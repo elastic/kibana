@@ -101,7 +101,8 @@ export async function loadDataView(
 export function resolveDataView(
   ip: DataViewData,
   searchSource: ISearchSource,
-  toastNotifications: ToastsStart
+  toastNotifications: ToastsStart,
+  isTextBasedQuery?: boolean
 ) {
   const { loaded: loadedDataView, stateVal, stateValFound } = ip;
 
@@ -133,19 +134,20 @@ export function resolveDataView(
       });
       return ownDataView;
     }
-
-    toastNotifications.addWarning({
-      title: warningTitle,
-      text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
-        defaultMessage:
-          'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
-        values: {
-          loadedDataViewTitle: loadedDataView.getIndexPattern(),
-          loadedDataViewId: loadedDataView.id,
-        },
-      }),
-      'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
-    });
+    if (!Boolean(isTextBasedQuery)) {
+      toastNotifications.addWarning({
+        title: warningTitle,
+        text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
+          defaultMessage:
+            'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
+          values: {
+            loadedDataViewTitle: loadedDataView.getIndexPattern(),
+            loadedDataViewId: loadedDataView.id,
+          },
+        }),
+        'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
+      });
+    }
   }
 
   return loadedDataView;
