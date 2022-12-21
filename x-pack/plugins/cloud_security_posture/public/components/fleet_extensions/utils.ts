@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackagePolicyConfigRecordEntry,
+} from '@kbn/fleet-plugin/common';
+import merge from 'lodash/merge';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_EKS,
@@ -18,7 +23,7 @@ import { assert } from '../../../common/utils/helpers';
 import { cloudPostureIntegrations } from '../../common/constants';
 
 export const isEksInput = (input: NewPackagePolicyInput) => input.type === CLOUDBEAT_EKS;
-export const inputsWithVars = [CLOUDBEAT_EKS, CLOUDBEAT_AWS];
+export const INPUTS_WITH_AWS_VARS = [CLOUDBEAT_EKS, CLOUDBEAT_AWS];
 const defaultInputType: Record<PosturePolicyTemplate, PostureInput> = {
   kspm: CLOUDBEAT_VANILLA,
   cspm: CLOUDBEAT_AWS,
@@ -60,7 +65,7 @@ export const getUpdatedEksVar = (newPolicy: NewPackagePolicy, key: string, value
   updatedPolicy: {
     ...newPolicy,
     inputs: newPolicy.inputs.map((item) =>
-      inputsWithVars.includes(item.type) ? getUpdatedStreamVars(item, key, value) : item
+      INPUTS_WITH_AWS_VARS.includes(item.type) ? getUpdatedStreamVars(item, key, value) : item
     ),
   },
 });
@@ -97,19 +102,35 @@ export const isPostureInput = (
   SUPPORTED_POLICY_TEMPLATES.includes(input.policy_template as PosturePolicyTemplate) &&
   SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as PostureInput);
 
-export const getPolicyWithUpdatedInputs = (
+export const getUpdatedPosturePolicy = (
   newPolicy: NewPackagePolicy,
-  inputType: PostureInput
+  inputType: PostureInput,
+  inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
   ...newPolicy,
+  // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => ({
     ...item,
     enabled: item.type === inputType,
     streams: item.streams.map((stream) => ({
       ...stream,
       enabled: item.type === inputType,
+      // Merge new vars with existing vars
+      ...(item.type === inputType &&
+        stream.vars &&
+        inputVars && { vars: merge({}, stream.vars, inputVars) }),
     })),
   })),
+  // Set hidden policy vars
+  vars: {
+    ...newPolicy.vars,
+    deployment: { ...newPolicy.vars?.deployment, value: inputType },
+    posture: {
+      ...newPolicy.vars?.posture,
+      value: newPolicy.inputs.find((input) => input.type === inputType)
+        ?.policy_template as PosturePolicyTemplate,
+    },
+  },
 });
 
 export const getPolicyTemplateInputOptions = (policyTemplate: PosturePolicyTemplate) =>
@@ -121,30 +142,6 @@ export const getPolicyTemplateInputOptions = (policyTemplate: PosturePolicyTempl
     icon: o.icon,
     disabled: o.disabled,
   }));
-
-export const getPolicyWithInputVars = (
-  newPolicy: NewPackagePolicy,
-  key: string,
-  value: string
-): NewPackagePolicy => ({
-  ...newPolicy,
-  inputs: newPolicy.inputs.map((item) =>
-    inputsWithVars.includes(item.type) ? getUpdatedStreamVars(item, key, value) : item
-  ),
-});
-
-export const getPolicyWithHiddenVars = (
-  newPolicy: NewPackagePolicy,
-  deployment: PostureInput,
-  posture: PosturePolicyTemplate
-): NewPackagePolicy => ({
-  ...newPolicy,
-  vars: {
-    ...newPolicy.vars,
-    deployment: { ...newPolicy.vars?.deployment, value: deployment },
-    posture: { ...newPolicy.vars?.posture, value: posture },
-  },
-});
 
 export const getPostureInput = (policy: NewPackagePolicy) => {
   // Take first enabled input

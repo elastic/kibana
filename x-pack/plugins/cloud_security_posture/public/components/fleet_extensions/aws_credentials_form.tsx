@@ -18,7 +18,7 @@ import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { InlineRadioGroup } from './inline_radio_group';
-import { getPolicyWithInputVars, NewPackagePolicyPostureInput } from './utils';
+import { getUpdatedPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 
 const DocsLink = (
   <EuiText color={'subdued'} size="s">
@@ -102,7 +102,7 @@ const AWS_FIELD_LABEL = {
 };
 
 type AwsOptions = Record<
-  string,
+  'assume_role' | 'direct_access_keys' | 'temporary_keys' | 'shared_credentials',
   {
     label: string;
     info: React.ReactNode;
@@ -110,14 +110,7 @@ type AwsOptions = Record<
   }
 >;
 
-// Ensures the options object is typed correctly
-// Will be removed in TS 4.9 when the 'satisfies' keyword is added
-const satisfies =
-  <T extends unknown>() =>
-  <U extends T>(value: U) =>
-    value;
-
-const options = satisfies<AwsOptions>()({
+const options: AwsOptions = {
   assume_role: {
     label: i18n.translate('xpack.csp.awsIntegration.assumeRoleLabel', {
       defaultMessage: 'Assume role',
@@ -131,7 +124,7 @@ const options = satisfies<AwsOptions>()({
       },
     },
   },
-  direct_access_key: {
+  direct_access_keys: {
     label: i18n.translate('xpack.csp.awsIntegration.directAccessKeyLabel', {
       defaultMessage: 'Direct access keys',
     }),
@@ -174,7 +167,7 @@ const options = satisfies<AwsOptions>()({
       },
     },
   },
-} as const);
+};
 
 type AwsCredentialsType = keyof typeof options;
 const DEFAULT_AWS_VARS_TYPE: AwsCredentialsType = 'assume_role';
@@ -218,24 +211,23 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
       <EuiSpacer size="l" />
       <AwsCredentialTypeSelector
         type={awsCredentialsType}
-        onChange={(optionId) => {
-          let policy = getPolicyWithInputVars(newPolicy, 'aws.credentials.type', optionId);
-
-          // reset all form group values when changing group
-          fields.forEach((field) => {
-            policy = getPolicyWithInputVars(policy, field.id, '');
-          });
-
-          updatePolicy(policy);
-        }}
+        onChange={(optionId) =>
+          updatePolicy(
+            getUpdatedPosturePolicy(newPolicy, input.type, {
+              'aws.credentials.type': { value: optionId },
+            })
+          )
+        }
       />
       <EuiSpacer size="m" />
       {group.info}
       {DocsLink}
       <EuiSpacer />
       <AwsInputVarFields
-        onChange={(key, value) => updatePolicy(getPolicyWithInputVars(newPolicy, key, value))}
         fields={fields}
+        onChange={(key, value) =>
+          updatePolicy(getUpdatedPosturePolicy(newPolicy, input.type, { [key]: { value } }))
+        }
       />
       <EuiSpacer />
     </>
@@ -265,10 +257,11 @@ const AwsInputVarFields = ({
 }) => (
   <div>
     {fields.map((field) => (
-      <EuiFormRow key={field.id} label={field.label} fullWidth>
+      <EuiFormRow key={field.id} label={field.label} fullWidth hasChildLabel={true} id={field.id}>
         <>
           {field.type === 'password' && (
             <EuiFieldPassword
+              id={field.id}
               type="dual"
               fullWidth
               value={field.value || ''}
@@ -277,6 +270,7 @@ const AwsInputVarFields = ({
           )}
           {field.type === 'text' && (
             <EuiFieldText
+              id={field.id}
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}

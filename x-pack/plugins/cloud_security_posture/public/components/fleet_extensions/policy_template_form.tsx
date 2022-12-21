@@ -12,10 +12,8 @@ import type {
 } from '@kbn/fleet-plugin/public';
 import type { PostureInput } from '../../../common/constants';
 import {
-  getPolicyWithUpdatedInputs,
-  getPolicyWithHiddenVars,
-  getPolicyWithInputVars,
-  inputsWithVars,
+  getUpdatedPosturePolicy,
+  INPUTS_WITH_AWS_VARS,
   getPostureInput,
   type NewPackagePolicyPostureInput,
 } from './utils';
@@ -62,20 +60,16 @@ export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit })
    * - Updates policy inputs by user selection
    * - Updates hidden policy vars
    */
-  const updatePolicyInput = (inputType: PostureInput) => {
-    // Apply user selection to enable an input type
-    let policy = getPolicyWithUpdatedInputs(newPolicy, inputType);
-
-    if (inputsWithVars.includes(inputType)) {
-      // Define aws.credentials.type
-      policy = getPolicyWithInputVars(policy, 'aws.credentials.type', DEFAULT_AWS_VARS_GROUP);
-    }
-
-    // Define 'posture' and 'deployment'
-    policy = getPolicyWithHiddenVars(policy, inputType, input.policy_template);
-
-    updatePolicy(policy);
-  };
+  const updatePolicyInput = (inputType: PostureInput) =>
+    updatePolicy(
+      getUpdatedPosturePolicy(
+        newPolicy,
+        inputType,
+        INPUTS_WITH_AWS_VARS.includes(inputType)
+          ? { 'aws.credentials.type': { value: DEFAULT_AWS_VARS_GROUP } }
+          : undefined
+      )
+    );
 
   useEffect(() => {
     // Pick default input type for policy template.
