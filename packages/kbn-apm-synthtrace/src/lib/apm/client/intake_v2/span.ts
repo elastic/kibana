@@ -415,7 +415,9 @@ export interface Span {
         [k: string]: unknown;
       }
   >;
-
+  /**
+   * Describes the event used by the Mobile SDKs: ApplicationLifecycle, Breadcrumb, Crash, Application Opened.
+   */
   event?: null | {
     name: string;
   };
