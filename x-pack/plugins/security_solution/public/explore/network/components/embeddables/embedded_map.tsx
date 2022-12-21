@@ -19,7 +19,7 @@ import { Loader } from '../../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../../common/components/toasters';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { Embeddable } from './embeddable';
-import { createEmbeddable } from './embedded_map_helpers';
+import { createEmbeddable } from './create_embeddable';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
