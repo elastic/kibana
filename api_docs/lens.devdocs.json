@@ -2330,7 +2330,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => ",
+              ", dateRange?: ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.DateRange",
+                "text": "DateRange"
+              },
+              " | undefined) => ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -2508,6 +2516,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.FormulaPublicApi.insertOrReplaceFormulaColumn.$5",
+                "type": "Object",
+                "tags": [],
+                "label": "dateRange",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "lens",
+                    "scope": "common",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-common.DateRange",
+                    "text": "DateRange"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -9304,6 +9334,21 @@
           " & { type: \"legendConfig\"; }"
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.LENS_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "LENS_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"lens\""
+        ],
+        "path": "x-pack/plugins/lens/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

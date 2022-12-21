@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { reduceRight } from 'lodash';
+import { cloneDeep, reduceRight } from 'lodash';
 
 import { Filter } from '@kbn/es-query';
 import { mapCombined } from './mappers/map_combined';
@@ -61,19 +61,20 @@ export function mapFilter(filter: Filter) {
     noop
   );
 
-  const mapped = mapFn(filter);
+  const mappedFilter = cloneDeep(filter);
+  const mapped = mapFn(mappedFilter);
 
   // Map the filter into an object with the key and value exposed so it's
   // easier to work with in the template
-  filter.meta = filter.meta || {};
-  filter.meta.type = mapped.type;
-  filter.meta.key = mapped.key;
+  mappedFilter.meta = filter.meta || {};
+  mappedFilter.meta.type = mapped.type;
+  mappedFilter.meta.key = mapped.key;
   // Display value or formatter function.
-  filter.meta.value = mapped.value;
-  filter.meta.params = mapped.params;
-  filter.meta.disabled = Boolean(filter.meta.disabled);
-  filter.meta.negate = Boolean(filter.meta.negate);
-  filter.meta.alias = filter.meta.alias || null;
+  mappedFilter.meta.value = mapped.value;
+  mappedFilter.meta.params = mapped.params;
+  mappedFilter.meta.disabled = Boolean(mappedFilter.meta.disabled);
+  mappedFilter.meta.negate = Boolean(mappedFilter.meta.negate);
+  mappedFilter.meta.alias = mappedFilter.meta.alias || null;
 
-  return filter;
+  return mappedFilter;
 }

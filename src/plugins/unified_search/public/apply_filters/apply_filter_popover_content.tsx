@@ -87,10 +87,12 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
       <React.Fragment>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="unifiedSearch.filter.applyFilters.popupHeader"
-              defaultMessage="Select filters to apply"
-            />
+            <h1>
+              <FormattedMessage
+                id="unifiedSearch.filter.applyFilters.popupHeader"
+                defaultMessage="Select filters to apply"
+              />
+            </h1>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 

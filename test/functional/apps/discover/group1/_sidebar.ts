@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
 
-  describe('discover sidebar', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/147687
+  describe.skip('discover sidebar', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
@@ -508,6 +509,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         allFields = await PageObjects.discover.getAllFieldNames();
         expect(allFields.includes('_bytes-runtimefield2')).to.be(false);
         expect(allFields.includes('_bytes-runtimefield')).to.be(false);
+      });
+
+      it('should render even when retrieving documents failed with an error', async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await testSubjects.missingOrFail('discoverNoResultsError');
+
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '53 available fields. 0 empty fields. 3 meta fields.'
+        );
+
+        await PageObjects.discover.addRuntimeField('_invalid-runtimefield', `emit(‘’);`);
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        // error in fetching documents because of the invalid runtime field
+        await testSubjects.existOrFail('discoverNoResultsError');
+
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        // check that the sidebar is rendered
+        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+          '54 available fields. 0 empty fields. 3 meta fields.'
+        );
+        let allFields = await PageObjects.discover.getAllFieldNames();
+        expect(allFields.includes('_invalid-runtimefield')).to.be(true);
+
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('discoverNoResultsError'); // still has error
+
+        // check that the sidebar is rendered event after a refresh
+        allFields = await PageObjects.discover.getAllFieldNames();
+        expect(allFields.includes('_invalid-runtimefield')).to.be(true);
+
+        await PageObjects.discover.removeField('_invalid-runtimefield');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        await testSubjects.missingOrFail('discoverNoResultsError');
       });
 
       it('should work correctly when time range is updated', async function () {

@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, useEuiTheme } from '@elastic/eui';
 import React from 'react';
+import { genericComboBoxStyle } from './generic_combo_box.styles';
 
 export interface GenericComboBoxProps<T> {
   options: T[];
@@ -30,7 +31,7 @@ export interface GenericComboBoxProps<T> {
  */
 export function GenericComboBox<T>(props: GenericComboBoxProps<T>) {
   const { options, selectedOptions, getLabel, onChange, ...otherProps } = props;
-
+  const { euiTheme } = useEuiTheme();
   const labels = options.map(getLabel);
   const euiOptions: EuiComboBoxOptionOption[] = labels.map((label) => ({ label }));
   const selectedEuiOptions = selectedOptions
@@ -51,6 +52,7 @@ export function GenericComboBox<T>(props: GenericComboBoxProps<T>) {
   return (
     <EuiComboBox
       options={euiOptions}
+      className={genericComboBoxStyle(euiTheme)}
       selectedOptions={selectedEuiOptions}
       onChange={onComboBoxChange}
       sortMatchesBy="startsWith"

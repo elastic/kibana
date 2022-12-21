@@ -32,7 +32,6 @@ const fromOrFilter = (
   return { ...filter, query: { bool } };
 };
 
-/** @internal */
 export const fromCombinedFilter = (
   filter: Filter,
   dataViews?: DataViewBase | DataViewBase[],

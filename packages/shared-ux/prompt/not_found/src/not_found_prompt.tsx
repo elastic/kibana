@@ -53,10 +53,13 @@ export const NotFoundPrompt = ({ actions }: NotFoundProps) => {
 
   useEffect(() => {
     const loadImage = async () => {
-      const { default: imgSrc } = await import(
-        `./assets/404_astronaut_${colorMode.toLowerCase()}.png`
-      );
-      setImageSrc(imgSrc);
+      if (colorMode === 'DARK') {
+        const { default: imgSrc } = await import(`./assets/404_astronaut_dark.png`);
+        setImageSrc(imgSrc);
+      } else {
+        const { default: imgSrc } = await import(`./assets/404_astronaut_light.png`);
+        setImageSrc(imgSrc);
+      }
     };
     loadImage();
   }, [colorMode]);

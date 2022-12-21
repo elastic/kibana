@@ -99,7 +99,7 @@ export interface SecuritySolutionPluginContext {
   /**
    * Security Solution store
    */
-  getSecuritySolutionStore: Store;
+  securitySolutionStore: Store;
   /**
    * Pass UseInvestigateInTimeline functionality to TI plugin
    */
@@ -114,4 +114,14 @@ export interface SecuritySolutionPluginContext {
   useGlobalTime: () => TimeRange;
 
   SiemSearchBar: VFC<any>;
+
+  /**
+   * Register query in security solution store for tracking and centralized refresh support
+   */
+  registerQuery: (query: { id: string; loading: boolean; refetch: VoidFunction }) => void;
+
+  /**
+   * Deregister stale query
+   */
+  deregisterQuery: (query: { id: string }) => void;
 }

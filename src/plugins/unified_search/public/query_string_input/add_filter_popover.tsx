@@ -59,6 +59,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
         size="m"
         disabled={isDisabled}
         {...buttonProps}
+        style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
       />
     </EuiToolTip>
   );

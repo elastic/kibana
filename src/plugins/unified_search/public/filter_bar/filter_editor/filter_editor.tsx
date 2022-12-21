@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  withEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -32,6 +33,7 @@ import {
   getFilterParams,
   isCombinedFilter,
 } from '@kbn/es-query';
+import { merge } from 'lodash';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
@@ -39,6 +41,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { cx } from '@emotion/css';
+import { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -48,7 +51,11 @@ import {
 import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
 import { flattenFilters } from './lib/helpers';
-import { filterBadgeStyle, filtersBuilderMaxHeight } from './filter_editor.styles';
+import {
+  filterBadgeStyle,
+  filterPreviewLabelStyle,
+  filtersBuilderMaxHeightCss,
+} from './filter_editor.styles';
 
 export const strings = {
   getPanelTitleAdd: () =>
@@ -101,7 +108,7 @@ export const strings = {
       defaultMessage: 'Elasticsearch Query DSL editor',
     }),
 };
-export interface FilterEditorProps {
+export interface FilterEditorComponentProps {
   filter: Filter;
   indexPatterns: DataView[];
   onSubmit: (filter: Filter) => void;
@@ -109,6 +116,8 @@ export interface FilterEditorProps {
   timeRangeForSuggestionsOverride?: boolean;
   mode?: 'edit' | 'add';
 }
+
+export type FilterEditorProps = WithEuiThemeProps & FilterEditorComponentProps;
 
 interface State {
   selectedDataView?: DataView;
@@ -118,7 +127,7 @@ interface State {
   localFilter: Filter;
 }
 
-export class FilterEditor extends Component<FilterEditorProps, State> {
+class FilterEditorComponent extends Component<FilterEditorProps, State> {
   constructor(props: FilterEditorProps) {
     super(props);
     const dataView = this.getIndexPatternFromFilter();
@@ -127,7 +136,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
       customLabel: props.filter.meta.alias || '',
       queryDsl: this.parseFilterToQueryDsl(props.filter),
       isCustomEditorOpen: this.isUnknownFilterType(),
-      localFilter: dataView ? props.filter : buildEmptyFilter(false),
+      localFilter: dataView ? merge({}, props.filter) : buildEmptyFilter(false),
     };
   }
 
@@ -287,7 +296,11 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
 
     return (
       <>
-        <div role="region" aria-label="" className={cx(filtersBuilderMaxHeight, 'eui-yScroll')}>
+        <div
+          role="region"
+          aria-label=""
+          className={cx(filtersBuilderMaxHeightCss(this.props.theme.euiTheme), 'eui-yScroll')}
+        >
           <EuiToolTip
             position="top"
             content={selectedDataView ? '' : strings.getSelectDataViewToolTip()}
@@ -307,7 +320,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
           <EuiFormRow
             fullWidth
             hasEmptyLabelSpace={true}
-            className={filterBadgeStyle}
+            className={cx(filterBadgeStyle, filterPreviewLabelStyle)}
             label={
               <strong>
                 <FormattedMessage
@@ -484,3 +497,5 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
     }
   };
 }
+
+export const FilterEditor = withEuiTheme(FilterEditorComponent);

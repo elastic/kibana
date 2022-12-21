@@ -8,7 +8,6 @@
 
 import React, { useCallback, useContext } from 'react';
 import {
-  EuiButtonEmpty,
   EuiDraggable,
   EuiDroppable,
   EuiFlexGroup,
@@ -35,7 +34,6 @@ import type { Path } from '../types';
 import { getFieldFromFilter, getOperatorFromFilter } from '../../filter_bar/filter_editor';
 import { Operator } from '../../filter_bar/filter_editor';
 import {
-  actionButtonCss,
   cursorAddCss,
   cursorOrCss,
   fieldAndParamCss,
@@ -44,41 +42,20 @@ import {
   disabledDraggableCss,
 } from './filter_item.styles';
 import { Tooltip } from './tooltip';
+import { FilterItemActions, MinimisedFilterItemActions } from './actions';
 
 export const strings = {
   getDragFilterAriaLabel: () =>
     i18n.translate('unifiedSearch.filter.filtersBuilder.dragFilterAriaLabel', {
       defaultMessage: 'Drag filter',
     }),
-  getDeleteFilterGroupButtonIconLabel: () =>
-    i18n.translate('unifiedSearch.filter.filtersBuilder.deleteFilterGroupButtonIcon', {
-      defaultMessage: 'Delete filter group',
-    }),
-  getAddOrFilterGroupButtonIconLabel: () =>
-    i18n.translate('unifiedSearch.filter.filtersBuilder.addOrFilterGroupButtonIcon', {
-      defaultMessage: 'Add filter group with OR',
-    }),
-  getAddOrFilterGroupButtonLabel: () =>
-    i18n.translate('unifiedSearch.filter.filtersBuilder.addOrFilterGroupButtonLabel', {
-      defaultMessage: 'OR',
-    }),
-  getAddAndFilterGroupButtonIconLabel: () =>
-    i18n.translate('unifiedSearch.filter.filtersBuilder.addAndFilterGroupButtonIcon', {
-      defaultMessage: 'Add filter group with AND',
-    }),
-  getAddAndFilterGroupButtonLabel: () =>
-    i18n.translate('unifiedSearch.filter.filtersBuilder.addAndFilterGroupButtonLabel', {
-      defaultMessage: 'AND',
-    }),
   getReorderingRequirementsLabel: () =>
     i18n.translate('unifiedSearch.filter.filtersBuilder.dragHandleDisabled', {
       defaultMessage: 'Reordering requires more than one item.',
     }),
-  getDeleteButtonDisabled: () =>
-    i18n.translate('unifiedSearch.filter.filtersBuilder.deleteButtonDisabled', {
-      defaultMessage: 'A minimum of one item is required.',
-    }),
 };
+
+const MAX_FILTER_NESTING = 5;
 
 export interface FilterItemProps {
   path: Path;
@@ -94,6 +71,11 @@ export interface FilterItemProps {
   renderedLevel: number;
   reverseBackground: boolean;
 }
+
+const isMaxFilterNesting = (path: string) => {
+  const pathArr = path.split('.');
+  return pathArr.length - 1 === MAX_FILTER_NESTING;
+};
 
 export function FilterItem({
   filter,
@@ -117,11 +99,10 @@ export function FilterItem({
   } = useContext(FiltersBuilderContextType);
   const conditionalOperationType = getBooleanRelationType(filter);
   const { euiTheme } = useEuiTheme();
-
   let field: DataViewField | undefined;
   let operator: Operator | undefined;
   let params: Filter['meta']['params'] | undefined;
-
+  const isMaxNesting = isMaxFilterNesting(path);
   if (!conditionalOperationType) {
     field = getFieldFromFilter(filter, dataView!);
     if (field) {
@@ -199,6 +180,7 @@ export function FilterItem({
   const onOrButtonClick = useCallback(() => onAddFilter(BooleanRelation.OR), [onAddFilter]);
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
+  const ActionsComponent = isMobile ? MinimisedFilterItemActions : FilterItemActions;
   return (
     <div
       className={cx({
@@ -276,7 +258,7 @@ export function FilterItem({
                           justifyContent="center"
                           wrap
                         >
-                          <EuiFlexItem className={fieldAndParamCss}>
+                          <EuiFlexItem className={fieldAndParamCss(euiTheme)}>
                             <EuiFormRow>
                               <FieldInput
                                 field={field}
@@ -285,7 +267,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem className={operationCss}>
+                          <EuiFlexItem className={operationCss(euiTheme)}>
                             <EuiFormRow>
                               <OperatorInput
                                 field={field}
@@ -295,7 +277,7 @@ export function FilterItem({
                               />
                             </EuiFormRow>
                           </EuiFlexItem>
-                          <EuiFlexItem className={fieldAndParamCss}>
+                          <EuiFlexItem className={fieldAndParamCss(euiTheme)}>
                             <EuiFormRow>
                               <div data-test-subj="filterParams">
                                 <ParamsEditor
@@ -313,59 +295,17 @@ export function FilterItem({
                         </EuiFlexGroup>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiFlexGroup
-                          justifyContent="flexEnd"
-                          alignItems="flexEnd"
-                          gutterSize="xs"
-                          responsive={false}
-                        >
-                          <EuiFlexItem grow={false}>
-                            <Tooltip
-                              content={strings.getDeleteButtonDisabled()}
-                              show={disableRemove || disabled}
-                            >
-                              <EuiButtonEmpty
-                                onClick={onRemoveFilter}
-                                iconType="trash"
-                                isDisabled={disableRemove || disabled}
-                                size="s"
-                                color="danger"
-                                aria-label={strings.getDeleteFilterGroupButtonIconLabel()}
-                                {...(isMobile ? { className: actionButtonCss } : {})}
-                              />
-                            </Tooltip>
-                          </EuiFlexItem>
-                          {!hideOr ? (
-                            <EuiFlexItem grow={false}>
-                              <EuiButtonEmpty
-                                onClick={onOrButtonClick}
-                                isDisabled={disableOr || disabled}
-                                iconType="plusInCircle"
-                                size="s"
-                                iconSize="s"
-                                aria-label={strings.getAddOrFilterGroupButtonIconLabel()}
-                                {...(isMobile ? { className: actionButtonCss } : {})}
-                                data-test-subj="add-or-filter"
-                              >
-                                {strings.getAddOrFilterGroupButtonLabel()}
-                              </EuiButtonEmpty>
-                            </EuiFlexItem>
-                          ) : null}
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonEmpty
-                              onClick={onAddButtonClick}
-                              isDisabled={disableAnd || disabled}
-                              iconType="plusInCircle"
-                              size="s"
-                              iconSize="s"
-                              aria-label={strings.getAddAndFilterGroupButtonIconLabel()}
-                              {...(isMobile ? { className: actionButtonCss } : {})}
-                              data-test-subj="add-and-filter"
-                            >
-                              {strings.getAddAndFilterGroupButtonLabel()}
-                            </EuiButtonEmpty>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
+                        <ActionsComponent
+                          disabled={disabled}
+                          disableRemove={disableRemove}
+                          hideOr={hideOr || isMaxNesting}
+                          hideAnd={isMaxNesting}
+                          disableOr={disableOr}
+                          disableAnd={disableAnd}
+                          onRemoveFilter={onRemoveFilter}
+                          onOrButtonClick={onOrButtonClick}
+                          onAddButtonClick={onAddButtonClick}
+                        />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiPanel>

@@ -25,7 +25,6 @@ export const conditionSpacesCss = (euiTheme: EuiThemeComputed) => css`
   margin-inline: -${euiTheme.size.xs};
 `;
 
-export const conditionCss = (euiTheme: EuiThemeComputed) => css`
+export const conditionCss = css`
   ${bracketColorCss}
-  ${conditionSpacesCss(euiTheme)}
 `;

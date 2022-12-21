@@ -6,6 +6,7 @@
  */
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
+import path from 'path';
 import { FtrProviderContext } from './ftr_provider_context';
 
 /**
@@ -19,6 +20,7 @@ export async function ScalabilityTestRunner(
   gatlingProjectRootPath: string
 ) {
   const log = getService('log');
+  const gatlingReportBaseDir = path.parse(scalabilityJsonPath).name;
 
   log.info(`Running scalability test with json file: '${scalabilityJsonPath}'`);
 
@@ -28,6 +30,7 @@ export async function ScalabilityTestRunner(
       args: [
         'gatling:test',
         '-q',
+        `-Dgatling.core.outputDirectoryBaseName=${gatlingReportBaseDir}`,
         '-Dgatling.simulationClass=org.kibanaLoadTest.simulation.generic.GenericJourney',
         `-DjourneyPath=${scalabilityJsonPath}`,
       ],

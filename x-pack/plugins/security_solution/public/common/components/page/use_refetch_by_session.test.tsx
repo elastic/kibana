@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import {
@@ -26,13 +25,7 @@ import type { Refetch } from '../../store/inputs/model';
 const state: State = mockGlobalState;
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders store={store}>{children}</TestProviders>
