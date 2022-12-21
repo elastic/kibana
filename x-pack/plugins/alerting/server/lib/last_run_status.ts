@@ -62,17 +62,6 @@ export const lastRunFromState = (
     outcomeMsg.push(outcomeMessage);
   }
 
-  // Overwrite outcome to be error if last run reported any errors
-  if (errors.length > 0) {
-    outcome = RuleLastRunOutcomeValues[2];
-  }
-
-  // Optionally push outcome message reported by
-  // rule execution to the Framework's outcome message array
-  if (outcomeMessage) {
-    outcomeMsg.push(outcomeMessage);
-  }
-
   return {
     lastRun: {
       outcome,
