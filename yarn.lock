@@ -3733,7 +3733,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-nested-property@link:bazel-bin/x-pack/packages/ml/nested_property":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-string-hash@link:bazel-bin/x-pack/packages/ml/string_hash":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-url-state@link:bazel-bin/x-pack/packages/ml/url_state":
   version "0.0.0"
   uid ""
 

@@ -8,26 +8,15 @@
 import React, { FC } from 'react';
 import { parse, stringify } from 'query-string';
 import { createContext, useCallback, useContext, useMemo } from 'react';
-import { decode, encode } from '@kbn/rison';
 import { useHistory, useLocation } from 'react-router-dom';
 import { isEqual } from 'lodash';
+
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import { decode, encode } from '@kbn/rison';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;
 }
-
-// TODO duplicate of ml/object_utils
-export const getNestedProperty = (
-  obj: Record<string, any>,
-  accessor: string,
-  defaultValue?: any
-) => {
-  const value = accessor.split('.').reduce((o, i) => o?.[i], obj);
-
-  if (value === undefined) return defaultValue;
-
-  return value;
-};
 
 export type Accessor = '_a' | '_g';
 export type SetUrlState = (

@@ -377,8 +377,10 @@ filegroup(
     "//x-pack/packages/ml/agg_utils:build",
     "//x-pack/packages/ml/aiops_components:build",
     "//x-pack/packages/ml/aiops_utils:build",
+    "//x-pack/packages/ml/nested_property:build",
     "//x-pack/packages/ml/is_populated_object:build",
     "//x-pack/packages/ml/string_hash:build",
+    "//x-pack/packages/ml/url_state:build",
   ],
 )
 
@@ -726,8 +728,10 @@ filegroup(
     "//x-pack/packages/ml/agg_utils:build_types",
     "//x-pack/packages/ml/aiops_components:build_types",
     "//x-pack/packages/ml/aiops_utils:build_types",
+    "//x-pack/packages/ml/nested_property:build_types",
     "//x-pack/packages/ml/is_populated_object:build_types",
     "//x-pack/packages/ml/string_hash:build_types",
+    "//x-pack/packages/ml/url_state:build_types",
   ],
 )
 

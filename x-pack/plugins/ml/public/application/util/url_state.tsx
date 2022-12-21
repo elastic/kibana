@@ -16,6 +16,8 @@ import React, {
   useEffect,
 } from 'react';
 import { isEqual } from 'lodash';
+
+import { getNestedProperty } from '@kbn/ml-nested-property';
 import { decode, encode } from '@kbn/rison';
 import { useHistory, useLocation } from 'react-router-dom';
 
@@ -24,7 +26,6 @@ import { distinctUntilChanged } from 'rxjs/operators';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { Dictionary } from '../../../common/types/common';
 
-import { getNestedProperty } from './object_utils';
 import { MlPages } from '../../../common/constants/locator';
 
 type Accessor = '_a' | '_g';

@@ -13,19 +13,6 @@ export interface Dictionary<TValue> {
   [id: string]: TValue;
 }
 
-// duplicate of ml/object_utils
-export const getNestedProperty = (
-  obj: Record<string, any>,
-  accessor: string,
-  defaultValue?: any
-) => {
-  const value = accessor.split('.').reduce((o, i) => o?.[i], obj);
-
-  if (value === undefined) return defaultValue;
-
-  return value;
-};
-
 export type Accessor = '_a' | '_g';
 export type SetUrlState = (
   accessor: Accessor,
