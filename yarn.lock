@@ -3169,10 +3169,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-browser@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal":
   version "0.0.0"
   uid ""
@@ -24328,10 +24324,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.7.0:
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.7.0.tgz#20be2021f1c5c4d6fc7cab8e2fa552b2e0779912"
-  integrity sha512-ZB/77G6xKz96beiUIq6RSdU/Klccg8Fg6lGvEmsVSeLwOWjmJDRehBeXE/y59mytOqitYSewFzJsSU5Xov1X+Q==
+selenium-webdriver@^4.7.1:
+  version "4.7.1"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.7.1.tgz#29be9eaac1bd5aa37728c3e5cca352b1e98ec85d"
+  integrity sha512-IfTM9OE8HtCKjOJwyudbAVtAHQKOJK8mu2qrXXbKyj4lqgXF+2lYW4rSZXCV6SLQRWZ+DVGkomCmFzq5orD/ZA==
   dependencies:
     jszip "^3.10.0"
     tmp "^0.2.1"
