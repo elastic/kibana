@@ -17,6 +17,7 @@ export enum EnabledActionTypes {
 }
 
 const MAX_MAX_ATTEMPTS = 10;
+const MIN_MAX_ATTEMPTS = 1;
 
 const preconfiguredActionSchema = schema.object({
   name: schema.string({ minLength: 1 }),
@@ -60,7 +61,7 @@ export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
 
 const connectorTypeSchema = schema.object({
   id: schema.string(),
-  maxAttempts: schema.maybe(schema.number({ max: MAX_MAX_ATTEMPTS })),
+  maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
 });
 
 export const configSchema = schema.object({
@@ -126,7 +127,7 @@ export const configSchema = schema.object({
   ),
   run: schema.maybe(
     schema.object({
-      maxAttempts: schema.maybe(schema.number({ max: MAX_MAX_ATTEMPTS })),
+      maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
       connectorTypeOverrides: schema.maybe(schema.arrayOf(connectorTypeSchema)),
     })
   ),
