@@ -25,7 +25,6 @@ import {
   RuleTypeRegistryContract,
 } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { asyncForEach } from '@kbn/std';
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IToasts } from '@kbn/core/public';
@@ -38,8 +37,7 @@ import {
 } from './test_helpers';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
-import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
-import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
+import { getFormattedDuration } from '../../../lib/monitoring_utils';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
