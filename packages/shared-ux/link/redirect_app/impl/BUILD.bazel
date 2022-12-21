@@ -53,6 +53,8 @@ RUNTIME_DEPS = [
   "@npm//react",
   "@npm//rxjs",
   "//packages/kbn-shared-ux-utility",
+  "@npm//@emotion/react",
+  "@npm//@emotion/css",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -74,6 +76,8 @@ TYPES_DEPS = [
   "//packages/kbn-ambient-ui-types",
   "//packages/shared-ux/link/redirect_app/types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
+  "@npm//@emotion/css",
+  "@npm//@emotion/react",
 ]
 
 jsts_transpiler(

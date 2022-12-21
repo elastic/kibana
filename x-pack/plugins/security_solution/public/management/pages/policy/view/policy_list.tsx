@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
@@ -40,6 +41,7 @@ import { PolicyEndpointCount } from './components/policy_endpoint_count';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 export const PolicyList = memo(() => {
+  const { canReadEndpointList, loading: authLoading } = useUserPrivileges().endpointPrivileges;
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
   const { search } = useLocation();
   const { getAppUrl } = useAppUrl();
@@ -266,7 +268,7 @@ export const PolicyList = memo(() => {
               className="eui-textTruncate"
               data-test-subj="policyEndpointCountLink"
               policyId={policy.id}
-              nonLinkCondition={count === 0}
+              nonLinkCondition={authLoading || !canReadEndpointList || count === 0}
             >
               {count}
             </PolicyEndpointCount>
@@ -274,7 +276,7 @@ export const PolicyList = memo(() => {
         },
       },
     ];
-  }, [policyIdToEndpointCount, backLink]);
+  }, [backLink, policyIdToEndpointCount, authLoading, canReadEndpointList]);
 
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PolicyData>) => {

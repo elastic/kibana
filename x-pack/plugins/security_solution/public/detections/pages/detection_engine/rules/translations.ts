@@ -49,7 +49,14 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine
 export const EXPERIMENTAL_ON = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.experimentalOn',
   {
-    defaultMessage: 'Technical preview: On',
+    defaultMessage: 'Advanced sorting',
+  }
+);
+
+export const EXPERIMENTAL_OFF = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.experimentalOff',
+  {
+    defaultMessage: 'Advanced sorting',
   }
 );
 
@@ -57,14 +64,7 @@ export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.experimentalDescription',
   {
     defaultMessage:
-      'The experimental rules table view is in technical preview and allows for advanced sorting capabilities. If you experience performance issues when working with the table, you can turn this setting off.',
-  }
-);
-
-export const EXPERIMENTAL_OFF = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalOff',
-  {
-    defaultMessage: 'Technical preview: Off',
+      'Turn this on to enable sorting for all table columns. You can turn it off if you encounter table performance issues.',
   }
 );
 
@@ -1065,17 +1065,21 @@ export const RULES_BULK_EDIT_SUCCESS = i18n.translate(
   }
 );
 
-export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (rulesCount: number) =>
+export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (
+  succeededRulesCount: number,
+  skippedRulesCount: number
+) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successToastDescription',
     {
-      values: { rulesCount },
-      defaultMessage:
-        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}",
+      values: { succeededRulesCount, skippedRulesCount },
+      defaultMessage: `{succeededRulesCount, plural, =0 {} =1 {You've successfully updated # rule. } other {You've successfully updated # rules. }}
+        {skippedRulesCount, plural, =0 {} =1 { # rule was skipped.} other { # rules were skipped.}}
+        `,
     }
   );
 
-export const RULES_BULK_EDIT_SUCCESS_INDEX_EDIT_DESCRIPTION = i18n.translate(
+export const RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successIndexEditToastDescription',
   {
     defaultMessage:
@@ -1090,12 +1094,16 @@ export const RULES_BULK_EDIT_FAILURE = i18n.translate(
   }
 );
 
-export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
+export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (
+  failedRulesCount: number,
+  skippedRulesCount: number
+) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.errorToastDescription',
     {
-      values: { rulesCount },
-      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update.',
+      values: { failedRulesCount, skippedRulesCount },
+      defaultMessage:
+        '{failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}} failed to update. {skippedRulesCount, plural, =0 {} =1 { # rule was skipped.} other { # rules were skipped.}}',
     }
   );
 

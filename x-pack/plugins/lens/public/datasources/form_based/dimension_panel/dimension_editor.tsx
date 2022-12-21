@@ -328,6 +328,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         field: currentField || undefined,
         filterOperations: props.filterOperations,
         visualizationGroups: dimensionGroups,
+        dateRange,
       }),
       disabledStatus:
         definition.getDisabledStatus &&
@@ -606,6 +607,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     setIsCloseable,
     paramEditorCustomProps,
     ReferenceEditor,
+    dataSectionExtra: props.dataSectionExtra,
     ...services,
   };
 
@@ -834,8 +836,22 @@ export function DimensionEditor(props: DimensionEditorProps) {
           operationDefinitionMap={operationDefinitionMap}
         />
       ) : null}
+      {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
+        <BucketNestingEditor
+          layer={state.layers[props.layerId]}
+          columnId={props.columnId}
+          setColumns={(columnOrder) => updateLayer({ columnOrder })}
+          getFieldByName={currentIndexPattern.getFieldByName}
+        />
+      )}
 
       {shouldDisplayExtraOptions && <ParamEditor {...paramEditorProps} />}
+      {!selectedOperationDefinition?.handleDataSectionExtra && (
+        <>
+          <EuiSpacer size="m" />
+          {props.dataSectionExtra}
+        </>
+      )}
     </>
   );
 
@@ -1142,15 +1158,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     },
                   });
                 }}
-              />
-            )}
-
-            {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
-              <BucketNestingEditor
-                layer={state.layers[props.layerId]}
-                columnId={props.columnId}
-                setColumns={(columnOrder) => updateLayer({ columnOrder })}
-                getFieldByName={currentIndexPattern.getFieldByName}
               />
             )}
 

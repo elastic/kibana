@@ -474,3 +474,27 @@ describe('isActionExecutable()', () => {
     });
   });
 });
+
+describe('getAllTypes()', () => {
+  test('should return empty when notihing is registered', () => {
+    const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+    const result = registry.getAllTypes();
+    expect(result).toEqual([]);
+  });
+
+  test('should return list of registered type ids', () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+    registry.register({
+      id: 'foo',
+      name: 'Foo',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor: async (options) => {
+        return { status: 'ok', actionId: options.actionId };
+      },
+    });
+    const result = registry.getAllTypes();
+    expect(result).toEqual(['foo']);
+  });
+});

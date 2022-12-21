@@ -93,7 +93,7 @@
           },
           "[], samplerShardSize: number, runtimeMappings?: ",
           "MappingRuntimeFields",
-          " | undefined, abortSignal?: AbortSignal | undefined) => Promise<",
+          " | undefined, abortSignal?: AbortSignal | undefined, randomSamplerProbability?: number | undefined) => Promise<",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "server",
@@ -225,6 +225,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchAggIntervals.$8",
+            "type": "number",
+            "tags": [],
+            "label": "randomSamplerProbability",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -258,7 +273,7 @@
           },
           ", samplerShardSize: number, runtimeMappings?: ",
           "MappingRuntimeFields",
-          " | undefined, abortSignal?: AbortSignal | undefined) => Promise<(",
+          " | undefined, abortSignal?: AbortSignal | undefined, randomSamplerProbability?: number | undefined) => Promise<(",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "server",
@@ -401,11 +416,61 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchHistogramsForFields.$8",
+            "type": "number",
+            "tags": [],
+            "label": "randomSamplerProbability",
+            "description": [
+              "optional random sampler probability"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [
           "an array of histogram data for each supplied field"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.getSampleProbability",
+        "type": "Function",
+        "tags": [],
+        "label": "getSampleProbability",
+        "description": [],
+        "signature": [
+          "(totalDocCount: number) => number"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/get_sample_probability.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.getSampleProbability.$1",
+            "type": "number",
+            "tags": [],
+            "label": "totalDocCount",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/get_sample_probability.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -1314,6 +1379,21 @@
           "; }"
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-server.RANDOM_SAMPLER_SEED",
+        "type": "number",
+        "tags": [],
+        "label": "RANDOM_SAMPLER_SEED",
+        "description": [],
+        "signature": [
+          "3867412"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

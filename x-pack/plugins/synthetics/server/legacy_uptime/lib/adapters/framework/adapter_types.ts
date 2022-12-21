@@ -11,6 +11,7 @@ import type {
   IScopedClusterClient,
   Logger,
   IBasePath,
+  CoreStart,
 } from '@kbn/core/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
@@ -65,6 +66,7 @@ export interface UptimeServerSetup {
   uptimeEsClient: UptimeEsClient;
   basePath: IBasePath;
   isDev?: boolean;
+  coreStart: CoreStart;
 }
 
 export interface UptimeCorePluginsSetup {

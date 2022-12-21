@@ -39,6 +39,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { waitFor } from '@testing-library/react';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
@@ -319,6 +320,8 @@ describe('alertToListItem', () => {
 
 describe('execution duration overview', () => {
   it('render last execution status', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+
     const rule = mockRule({
       executionStatus: { status: 'ok', lastExecutionDate: new Date('2020-08-20T19:23:38Z') },
     });
@@ -348,7 +351,7 @@ describe('execution duration overview', () => {
 });
 
 describe('disable/enable functionality', () => {
-  it('should show that the rule is enabled', () => {
+  it('should show that the rule is enabled', async () => {
     const rule = mockRule();
     const ruleType = mockRuleType();
     const ruleSummary = mockRuleSummary();
@@ -361,7 +364,9 @@ describe('disable/enable functionality', () => {
         readOnly={false}
       />
     );
-    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"]').first();
+    const actionsElem = await waitFor(() =>
+      wrapper.find('[data-test-subj="statusDropdown"]').first()
+    );
 
     expect(actionsElem.text()).toEqual('Enabled');
   });
@@ -381,7 +386,9 @@ describe('disable/enable functionality', () => {
         readOnly={false}
       />
     );
-    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"]').first();
+    const actionsElem = await waitFor(() =>
+      wrapper.find('[data-test-subj="statusDropdown"]').first()
+    );
 
     expect(actionsElem.text()).toEqual('Disabled');
   });

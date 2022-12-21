@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import type { CreatePointInTimeFinderFn, PointInTimeFinder } from './point_in_time_finder';
+import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { CreatePointInTimeFinderFn, PointInTimeFinder } from './point_in_time_finder';
 import { savedObjectsPointInTimeFinderMock } from '../mocks/point_in_time_finder.mock';
 import { findSharedOriginObjects } from './find_shared_origin_objects';
+import { SavedObjectsPointInTimeFinderClient } from '@kbn/core-saved-objects-api-server';
 
 interface MockFindResultParams {
   type: string;
@@ -19,16 +20,13 @@ interface MockFindResultParams {
 }
 
 describe('findSharedOriginObjects', () => {
-  let savedObjectsMock: ReturnType<typeof savedObjectsPointInTimeFinderMock.createClient>;
+  let pitFinderClientMock: jest.Mocked<SavedObjectsPointInTimeFinderClient>;
   let pointInTimeFinder: DeeplyMockedKeys<PointInTimeFinder>;
   let createPointInTimeFinder: jest.MockedFunction<CreatePointInTimeFinderFn>;
 
   beforeEach(() => {
-    savedObjectsMock = savedObjectsPointInTimeFinderMock.createClient();
-    savedObjectsMock.openPointInTimeForType.mockResolvedValueOnce({
-      id: 'abc123',
-    });
-    savedObjectsMock.find.mockResolvedValue({
+    pitFinderClientMock = savedObjectsPointInTimeFinderMock.createClient();
+    pitFinderClientMock.find.mockResolvedValue({
       pit_id: 'foo',
       saved_objects: [],
       // the rest of these fields don't matter but are included for type safety
@@ -36,12 +34,14 @@ describe('findSharedOriginObjects', () => {
       page: 1,
       per_page: 100,
     });
-    pointInTimeFinder = savedObjectsPointInTimeFinderMock.create({ savedObjectsMock })(); // PIT finder mock uses the actual implementation, but it doesn't need to be created with real params because the SOR is mocked too
+    pointInTimeFinder = savedObjectsPointInTimeFinderMock.create({
+      savedObjectsMock: pitFinderClientMock,
+    })(); // PIT finder mock uses the actual implementation, but it doesn't need to be created with real params because the SOR is mocked too
     createPointInTimeFinder = jest.fn().mockReturnValue(pointInTimeFinder);
   });
 
   function mockFindResults(...results: MockFindResultParams[]) {
-    savedObjectsMock.find.mockResolvedValueOnce({
+    pitFinderClientMock.find.mockResolvedValueOnce({
       pit_id: 'foo',
       saved_objects: results.map(({ type, id, originId, namespaces }) => ({
         type,
@@ -79,21 +79,23 @@ describe('findSharedOriginObjects', () => {
     const result = await findSharedOriginObjects(createPointInTimeFinder, objects);
     expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
     expect(createPointInTimeFinder).toHaveBeenCalledWith(
-      expect.objectContaining({ type: ['type-1', 'type-2', 'type-3', 'type-4'] }) // filter assertions are below
+      expect.objectContaining({ type: ['type-1', 'type-2', 'type-3', 'type-4'] }), // filter assertions are below
+      undefined,
+      { disableExtensions: true }
     );
     const kueryFilterArgs = createPointInTimeFinder.mock.calls[0][0].filter.arguments;
     expect(kueryFilterArgs).toHaveLength(8); // 2 for each object
     [obj1, obj2, obj3].forEach(({ type, origin }, i) => {
       expect(kueryFilterArgs[i * 2].arguments).toEqual(
         expect.arrayContaining([
-          { type: 'literal', value: `${type}.id`, isQuoted: false },
-          { type: 'literal', value: `${type}:${origin}`, isQuoted: false },
+          { isQuoted: false, type: 'literal', value: `${type}.id` },
+          { isQuoted: false, type: 'literal', value: `${type}:${origin}` },
         ])
       );
       expect(kueryFilterArgs[i * 2 + 1].arguments).toEqual(
         expect.arrayContaining([
-          { type: 'literal', value: `${type}.originId`, isQuoted: false },
-          { type: 'literal', value: origin, isQuoted: false },
+          { isQuoted: false, type: 'literal', value: `${type}.originId` },
+          { isQuoted: false, type: 'literal', value: origin },
         ])
       );
     });
@@ -119,7 +121,11 @@ describe('findSharedOriginObjects', () => {
     const objects = [obj1, obj2, obj3];
     await findSharedOriginObjects(createPointInTimeFinder, objects, 999);
     expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
-    expect(createPointInTimeFinder).toHaveBeenCalledWith(expect.objectContaining({ perPage: 999 }));
+    expect(createPointInTimeFinder).toHaveBeenCalledWith(
+      expect.objectContaining({ perPage: 999 }),
+      undefined,
+      { disableExtensions: true }
+    );
   });
 
   it('does not create a PointInTimeFinder if no objects are passed in', async () => {
@@ -128,7 +134,7 @@ describe('findSharedOriginObjects', () => {
   });
 
   it('handles PointInTimeFinder.find errors', async () => {
-    savedObjectsMock.find.mockRejectedValue(new Error('Oh no!'));
+    pitFinderClientMock.find.mockRejectedValue(new Error('Oh no!'));
 
     const objects = [obj1, obj2, obj3];
     await expect(() => findSharedOriginObjects(createPointInTimeFinder, objects)).rejects.toThrow(

@@ -19,7 +19,6 @@ import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
 
 interface JobsPageProps {
-  blockRefresh?: boolean;
   isMlEnabledInSpace?: boolean;
   lastRefresh?: number;
 }
@@ -31,7 +30,7 @@ export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState =
   sortDirection: 'asc',
 });
 
-export const JobsPage: FC<JobsPageProps> = (props) => {
+export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh }) => {
   const [pageState, setPageState] = usePageUrlState(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     getDefaultAnomalyDetectionJobsListState()
@@ -48,7 +47,12 @@ export const JobsPage: FC<JobsPageProps> = (props) => {
       <HeaderMenuPortal>
         <JobsActionMenu />
       </HeaderMenuPortal>
-      <JobsListView {...props} jobsViewState={pageState} onJobsViewStateUpdate={setPageState} />
+      <JobsListView
+        isMlEnabledInSpace={isMlEnabledInSpace}
+        lastRefresh={lastRefresh}
+        jobsViewState={pageState}
+        onJobsViewStateUpdate={setPageState}
+      />
       <HelpMenu docLink={helpLink} />
     </>
   );

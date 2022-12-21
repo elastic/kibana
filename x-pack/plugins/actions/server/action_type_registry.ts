@@ -221,4 +221,8 @@ export class ActionTypeRegistry {
   public getUtils(): ActionsConfigurationUtilities {
     return this.actionsConfigUtils;
   }
+
+  public getAllTypes(): string[] {
+    return [...this.list().map(({ id }) => id)];
+  }
 }

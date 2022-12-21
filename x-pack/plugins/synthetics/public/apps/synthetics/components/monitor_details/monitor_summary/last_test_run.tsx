@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useParams } from 'react-router-dom';
 import {
   ConfigKey,
   DataStream,
@@ -29,7 +30,7 @@ import {
 } from '../../../../../../common/runtime_types';
 import { formatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 
-import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import { SinglePingResult } from '../../common/monitor_test_result/single_ping_result';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
@@ -42,10 +43,12 @@ import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 export const LastTestRun = () => {
   const { euiTheme } = useEuiTheme();
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
+  const { lastRefresh } = useSyntheticsRefreshContext();
   const { monitor } = useSelectedMonitor();
 
   const { data: stepsData, loading: stepsLoading } = useJourneySteps(
-    latestPing?.monitor?.check_group
+    latestPing?.monitor?.check_group,
+    lastRefresh
   );
 
   const loading = stepsLoading || pingsLoading;
@@ -101,6 +104,8 @@ const PanelHeader = ({
   const { euiTheme } = useEuiTheme();
 
   const { basePath } = useSyntheticsSettingsContext();
+
+  const { monitorId } = useParams<{ monitorId: string }>();
 
   const format = useKibanaDateFormat();
 
@@ -160,9 +165,7 @@ const PanelHeader = ({
               size="xs"
               iconType="inspect"
               iconSide="left"
-              href={`${basePath}/app/uptime/journey/${
-                latestPing?.monitor?.check_group ?? ''
-              }/steps`}
+              href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${latestPing?.monitor.check_group}`}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewTestRun', {
                 defaultMessage: 'View test run',

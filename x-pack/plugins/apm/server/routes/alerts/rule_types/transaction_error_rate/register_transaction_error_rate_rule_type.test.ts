@@ -121,6 +121,9 @@ describe('Transaction error rate alert', () => {
     );
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
+      alertDetailsUrl: expect.stringContaining(
+        'http://localhost:5601/eyr/app/observability/alerts/'
+      ),
       serviceName: 'foo',
       transactionType: 'type-foo',
       environment: 'env-foo',

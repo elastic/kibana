@@ -80,6 +80,7 @@ export const AlertDetailsPage = memo(() => {
               <DetailsSummaryTab
                 eventId={eventId}
                 dataAsNestedObject={dataAsNestedObject}
+                searchHit={searchHit}
                 detailsData={detailsData}
                 sourcererDataView={sourcererDataView}
               />

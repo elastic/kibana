@@ -11,7 +11,8 @@ import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/
 import type { OpsgenieCreateAlertParams } from '../../../../../server/connector_types/stack';
 import * as i18n from './translations';
 import { CreateAlertProps } from '.';
-import { decodeCreateAlert, isDecodeError } from './schema';
+import { decodeCreateAlert } from './schema';
+import { isDecodeError } from '../schema_utils';
 
 export type JsonEditorProps = Pick<
   CreateAlertProps,

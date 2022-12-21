@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenu, useEuiShadow, EuiPanel } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
-import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
@@ -88,10 +87,10 @@ export function ActionsPopover({
   const locationName = useLocationName({ locationId: monitor.location.id });
 
   const detailUrl = useMonitorDetailLocator({
-    monitorId: monitor.id,
+    configId: monitor.configId,
     locationId: monitor.location.id,
   });
-  const editUrl = useEditMonitorLocator({ monitorId: monitor.id });
+  const editUrl = useEditMonitorLocator({ configId: monitor.configId });
 
   const labels = useMemo(
     () => ({
@@ -102,7 +101,7 @@ export function ActionsPopover({
     [monitor.name]
   );
   const { status, isEnabled, updateMonitorEnabledState } = useMonitorEnableHandler({
-    id: monitor.id,
+    configId: monitor.configId,
     isEnabled: monitor.isEnabled,
     labels,
   });
@@ -126,7 +125,9 @@ export function ActionsPopover({
     disabled: !locationName,
     onClick: () => {
       if (locationName) {
-        dispatch(setFlyoutConfig({ monitorId: monitor.id, location: locationName }));
+        dispatch(
+          setFlyoutConfig({ configId: monitor.configId, location: locationName, id: monitor.id })
+        );
         setIsPopoverOpen(false);
       }
     },

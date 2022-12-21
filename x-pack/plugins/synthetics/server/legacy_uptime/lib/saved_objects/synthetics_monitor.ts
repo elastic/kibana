@@ -7,9 +7,24 @@
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { secretKeys } from '../../../../common/constants/monitor_management';
 import { monitorMigrations } from './migrations/monitors';
 
 export const syntheticsMonitorType = 'synthetics-monitor';
+
+export const SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
+  type: syntheticsMonitorType,
+  attributesToEncrypt: new Set([
+    'secrets',
+    /* adding secretKeys to the list of attributes to encrypt ensures
+     * that secrets are never stored on the resulting saved object,
+     * even in the presence of developer error.
+     *
+     * In practice, all secrets should be stored as a single JSON
+     * payload on the `secrets` key. This ensures performant decryption. */
+    ...secretKeys,
+  ]),
+};
 
 export const getSyntheticsMonitorSavedObjectType = (
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
@@ -52,11 +67,25 @@ export const getSyntheticsMonitorSavedObjectType = (
             },
           },
         },
+        hosts: {
+          type: 'text',
+          fields: {
+            keyword: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+          },
+        },
         journey_id: {
           type: 'keyword',
         },
         project_id: {
           type: 'keyword',
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
         },
         origin: {
           type: 'keyword',
@@ -75,13 +104,24 @@ export const getSyntheticsMonitorSavedObjectType = (
                 },
               },
             },
+            label: {
+              type: 'text',
+            },
           },
         },
         custom_heartbeat_id: {
           type: 'keyword',
         },
+        id: {
+          type: 'keyword',
+        },
         tags: {
           type: 'keyword',
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
         },
         schedule: {
           properties: {
@@ -89,6 +129,9 @@ export const getSyntheticsMonitorSavedObjectType = (
               type: 'integer',
             },
           },
+        },
+        enabled: {
+          type: 'boolean',
         },
       },
     },

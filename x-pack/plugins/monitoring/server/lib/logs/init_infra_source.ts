@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { InfraPluginSetup } from '@kbn/infra-plugin/server';
 import { CCS_REMOTE_PATTERN, INFRA_SOURCE_ID } from '../../../common/constants';
 import { MonitoringConfig } from '../../config';

@@ -74,7 +74,7 @@ exports[`IntegrationsGuard should render empty page when no indicators are found
             class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
           <button
-            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="tiEmptyPageIntegrationsPageLink"
             type="button"
           >

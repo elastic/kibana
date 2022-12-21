@@ -45,7 +45,7 @@ import {
   SHOW_MULTIFIELDS,
 } from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
-import { getFieldsToShow } from '../../utils/get_fields_to_show';
+import { getShouldShowFieldHandler } from '../../utils/get_should_show_field_handler';
 import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -187,6 +187,10 @@ export interface DiscoverGridProps {
    * Saved search id used for links to single doc and surrounding docs in the flyout
    */
   savedSearchId?: string;
+  /**
+   * Document detail view component
+   */
+  DocumentView?: typeof DiscoverGridFlyout;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -226,6 +230,7 @@ export const DiscoverGrid = ({
   rowsPerPageState,
   onUpdateRowsPerPage,
   onFieldEdited,
+  DocumentView,
 }: DiscoverGridProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const services = useDiscoverServices();
@@ -341,9 +346,9 @@ export const DiscoverGrid = ({
 
   const showMultiFields = services.uiSettings.get(SHOW_MULTIFIELDS);
 
-  const fieldsToShow = useMemo(() => {
+  const shouldShowFieldHandler = useMemo(() => {
     const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
-    return getFieldsToShow(dataViewFields, dataView, showMultiFields);
+    return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
   }, [dataView, showMultiFields]);
 
   /**
@@ -355,11 +360,11 @@ export const DiscoverGrid = ({
         dataView,
         displayedRows,
         useNewFieldsApi,
-        fieldsToShow,
+        shouldShowFieldHandler,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
         () => dataGridRef.current?.closeCellPopover()
       ),
-    [dataView, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
+    [dataView, displayedRows, useNewFieldsApi, shouldShowFieldHandler, services.uiSettings]
   );
 
   /**
@@ -445,9 +450,13 @@ export const DiscoverGrid = ({
     }
     return { columns: sortingColumns, onSort: () => {} };
   }, [sortingColumns, onTableSort, isSortEnabled]);
+
+  const canSetExpandedDoc = Boolean(setExpandedDoc && DocumentView);
+
   const lead = useMemo(
-    () => getLeadControlColumns(setExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
-    [controlColumnIds, setExpandedDoc]
+    () =>
+      getLeadControlColumns(canSetExpandedDoc).filter(({ id }) => controlColumnIds.includes(id)),
+    [controlColumnIds, canSetExpandedDoc]
   );
 
   const additionalControls = useMemo(
@@ -625,8 +634,8 @@ export const DiscoverGrid = ({
             </p>
           </EuiScreenReaderOnly>
         )}
-        {setExpandedDoc && expandedDoc && (
-          <DiscoverGridFlyout
+        {setExpandedDoc && expandedDoc && DocumentView && (
+          <DocumentView
             dataView={dataView}
             hit={expandedDoc}
             hits={displayedRows}

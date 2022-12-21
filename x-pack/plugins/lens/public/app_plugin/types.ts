@@ -7,7 +7,6 @@
 
 import type { History } from 'history';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { Observable } from 'rxjs';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import type {
@@ -44,6 +43,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   DatasourceMap,
   EditorFrameInstance,
@@ -153,7 +153,7 @@ export interface LensAppServices {
   presentationUtil: PresentationUtilPluginStart;
   spaces: SpacesApi;
   charts: ChartsPluginSetup;
-  discover?: DiscoverStart;
+  share?: SharePluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   docLinks: DocLinksStart;
   // Temporarily required until the 'by value' paradigm is default.

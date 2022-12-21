@@ -14,8 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
-  const dashboardAddPanel = getService('dashboardAddPanel');
   const fieldEditor = getService('fieldEditor');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const queryBar = getService('queryBar');
@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
@@ -92,7 +93,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should support query and filtering', async () => {
-      await filterBar.addFilter('nestedField.child', 'is', 'nestedValue');
+      await filterBar.addFilter({
+        field: 'nestedField.child',
+        operation: 'is',
+        value: 'nestedValue',
+      });
       expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be('1');
@@ -132,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should update data view id when saving data view from hoc one', async () => {
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
-      await testSubjects.click('discoverAlertsButton');
+      await testSubjects.click('shareTopNavButton');
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -240,10 +245,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.createAdHocDataView('logstas', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await filterBar.addFilter('nestedField.child', 'is', 'nestedValue');
+      await filterBar.addFilter({
+        field: 'nestedField.child',
+        operation: 'is',
+        value: 'nestedValue',
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await filterBar.addFilter('extension', 'is', 'jpg');
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'jpg' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const first = await PageObjects.discover.getCurrentDataViewId();

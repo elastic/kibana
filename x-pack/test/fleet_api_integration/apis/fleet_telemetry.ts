@@ -81,9 +81,14 @@ export default function (providerContext: FtrProviderContext) {
       }
 
       await supertest
-        .put(`/api/fleet/settings`)
+        .post(`/api/fleet/fleet_server_hosts`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ fleet_server_hosts: ['https://test1.fr', 'https://test2.fr'] })
+        .send({
+          id: 'test-default-123',
+          name: 'Default',
+          is_default: true,
+          host_urls: ['https://test.com:8080', 'https://test.com:8081'],
+        })
         .expect(200);
 
       // Default Fleet Server

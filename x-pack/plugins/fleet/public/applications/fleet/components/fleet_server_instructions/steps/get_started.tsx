@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+/* eslint-disable @elastic/eui/href-or-on-click */
+import React from 'react';
 
 import type { EuiStepProps } from '@elastic/eui';
-import { EuiSelect, EuiButtonEmpty } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
   EuiCode,
   EuiForm,
   EuiFormErrorText,
-  EuiLink,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiText,
   EuiFormRow,
@@ -27,9 +27,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MultiRowInput } from '../../../sections/settings/components/multi_row_input';
 
-import { useLink } from '../../../hooks';
+import { useLink, useFlyoutContext } from '../../../hooks';
 
 import type { QuickStartCreateForm } from '../hooks';
+import { FleetServerHostSelect } from '../components';
 
 export function getGettingStartedStep(props: QuickStartCreateForm): EuiStepProps {
   return {
@@ -51,17 +52,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
   submit,
 }) => {
   const { getHref } = useLink();
-
-  const fleetServerHostsOptions = useMemo(
-    () =>
-      fleetServerHosts.map((fleetServerHost) => {
-        return {
-          text: fleetServerHost.name,
-          value: fleetServerHost.id,
-        };
-      }),
-    [fleetServerHosts]
-  );
+  const flyoutContext = useFlyoutContext();
 
   if (status === 'success') {
     return (
@@ -82,12 +73,16 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
             values={{
               hostUrl: <EuiCode>{selectedFleetServerHost?.host_urls[0]}</EuiCode>,
               fleetSettingsLink: (
-                <EuiLink href={getHref('settings')}>
+                <EuiButtonEmpty
+                  href={getHref('settings')}
+                  onClick={() => flyoutContext.closeFleetServerFlyout()}
+                  flush="left"
+                >
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                     defaultMessage="Fleet Settings"
                   />
-                </EuiLink>
+                </EuiButtonEmpty>
               ),
             }}
           />
@@ -107,38 +102,12 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
       </EuiText>
 
       <EuiSpacer size="m" />
-      {fleetServerHosts.length > 0 ? (
-        <>
-          <EuiSelect
-            fullWidth
-            prepend={
-              <EuiText size="relative" color={''}>
-                <FormattedMessage
-                  id="xpack.fleet.fleetServerSetup.fleetServerHostsLabel"
-                  defaultMessage="Fleet Server Hosts"
-                />
-              </EuiText>
-            }
-            append={
-              <EuiButtonEmpty
-                data-test-subj="fleetServerSetup.addNewHostBtn"
-                onClick={() => setFleetServerHost(null)}
-              >
-                <FormattedMessage
-                  id="xpack.fleet.fleetServerSetup.addFleetServerHostBtn"
-                  defaultMessage="Add new Fleet Server Hosts"
-                />
-              </EuiButtonEmpty>
-            }
-            onChange={(e) =>
-              setFleetServerHost(
-                fleetServerHosts.find((fleetServerHost) => fleetServerHost.id === e.target.value)
-              )
-            }
-            options={fleetServerHostsOptions}
-          />
-          <EuiSpacer size="m" />
-        </>
+      {selectedFleetServerHost ? (
+        <FleetServerHostSelect
+          setFleetServerHost={setFleetServerHost}
+          selectedFleetServerHost={selectedFleetServerHost}
+          fleetServerHosts={fleetServerHosts}
+        />
       ) : null}
 
       <EuiForm onSubmit={submit}>
@@ -186,19 +155,21 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
                 {status === 'error' && <EuiFormErrorText>{error}</EuiFormErrorText>}
               </>
             </EuiFormRow>
-            <EuiFormRow fullWidth {...inputs.isDefaultInput.formRowProps}>
-              <EuiSwitch
-                data-test-subj="fleetServerHostsFlyout.isDefaultSwitch"
-                {...inputs.isDefaultInput.props}
-                disabled={false}
-                label={
-                  <FormattedMessage
-                    id="xpack.fleet.settings.fleetServerHostsFlyout.defaultOutputSwitchLabel"
-                    defaultMessage="Make this Fleet server the default one."
-                  />
-                }
-              />
-            </EuiFormRow>
+            {fleetServerHosts.length > 0 ? (
+              <EuiFormRow fullWidth {...inputs.isDefaultInput.formRowProps}>
+                <EuiSwitch
+                  data-test-subj="fleetServerHostsFlyout.isDefaultSwitch"
+                  {...inputs.isDefaultInput.props}
+                  disabled={false}
+                  label={
+                    <FormattedMessage
+                      id="xpack.fleet.settings.fleetServerHostsFlyout.defaultOutputSwitchLabel"
+                      defaultMessage="Make this Fleet server the default one."
+                    />
+                  }
+                />
+              </EuiFormRow>
+            ) : null}
             <EuiSpacer size="m" />
           </>
         ) : null}
@@ -208,10 +179,17 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
           onClick={submit}
           data-test-subj="generateFleetServerPolicyButton"
         >
-          <FormattedMessage
-            id="xpack.fleet.fleetServerFlyout.generateFleetServerPolicyButton"
-            defaultMessage="Generate Fleet Server policy"
-          />
+          {fleetServerHosts.length > 0 ? (
+            <FormattedMessage
+              id="xpack.fleet.fleetServerFlyout.continueFleetServerPolicyButton"
+              defaultMessage="Continue"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.fleetServerFlyout.generateFleetServerPolicyButton"
+              defaultMessage="Generate Fleet Server policy"
+            />
+          )}
         </EuiButton>
       </EuiForm>
     </>

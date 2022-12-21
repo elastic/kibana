@@ -53,9 +53,9 @@ export const StepDetailPage = () => {
 
   return (
     <>
-      {data?.details?.journey && (
+      {data?.details?.journey?.config_id && (
         <MonitorDetailsLinkPortal
-          id={data.details.journey.monitor.id}
+          configId={data.details.journey.config_id}
           name={data.details.journey.monitor.name!}
         />
       )}

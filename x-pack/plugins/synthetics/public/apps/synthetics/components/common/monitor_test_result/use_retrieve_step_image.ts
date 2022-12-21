@@ -81,7 +81,7 @@ export const useRetrieveStepImage = ({
     } else {
       return new Promise<ImageResponse>((resolve) => resolve(null));
     }
-  }, [skippedStep, hasIntersected, imgPath, retryFetchOnRevisit]);
+  }, [skippedStep, hasIntersected, imgPath, retryFetchOnRevisit, hasImage]);
 
   return imgState[imgPath] ?? { data: null, loading: false };
 };

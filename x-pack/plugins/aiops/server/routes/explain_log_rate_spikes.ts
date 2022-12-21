@@ -6,6 +6,7 @@
  */
 
 import { queue } from 'async';
+import { uniqWith, isEqual } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -32,7 +33,8 @@ import {
   aiopsExplainLogRateSpikesSchema,
   addErrorAction,
   pingAction,
-  resetAction,
+  resetAllAction,
+  resetErrorsAction,
   updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
@@ -56,6 +58,7 @@ import {
   getSimpleHierarchicalTreeLeaves,
   markDuplicates,
 } from './queries/get_simple_hierarchical_tree';
+import { getGroupFilter } from './queries/get_group_filter';
 
 // 10s ping frequency to keep the stream alive.
 const PING_FREQUENCY = 10000;
@@ -170,87 +173,123 @@ export const defineExplainLogRateSpikesRoute = (
       async function runAnalysis() {
         try {
           isRunning = true;
-          logDebugMessage('Reset.');
-          push(resetAction());
+
+          if (!request.body.overrides) {
+            logDebugMessage('Full Reset.');
+            push(resetAllAction());
+          } else {
+            logDebugMessage('Reset Errors.');
+            push(resetErrorsAction());
+          }
+
+          if (request.body.overrides?.loaded) {
+            logDebugMessage(`Set 'loaded' override to '${request.body.overrides?.loaded}'.`);
+            loaded = request.body.overrides?.loaded;
+          }
+
           pushPingWithTimeout();
 
           // Step 1: Index Info: Field candidates, total doc count, sample probability
 
           const fieldCandidates: Awaited<ReturnType<typeof fetchIndexInfo>>['fieldCandidates'] = [];
+          let fieldCandidatesCount = fieldCandidates.length;
+
           let sampleProbability = 1;
           let totalDocCount = 0;
 
-          logDebugMessage('Fetch index information.');
-          push(
-            updateLoadingStateAction({
-              ccsWarning: false,
-              loaded,
-              loadingState: i18n.translate(
-                'xpack.aiops.explainLogRateSpikes.loadingState.loadingIndexInformation',
-                {
-                  defaultMessage: 'Loading index information.',
-                }
-              ),
-            })
-          );
+          if (!request.body.overrides?.remainingFieldCandidates) {
+            logDebugMessage('Fetch index information.');
+            push(
+              updateLoadingStateAction({
+                ccsWarning: false,
+                loaded,
+                loadingState: i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.loadingState.loadingIndexInformation',
+                  {
+                    defaultMessage: 'Loading index information.',
+                  }
+                ),
+              })
+            );
 
-          try {
-            const indexInfo = await fetchIndexInfo(client, request.body, abortSignal);
-            fieldCandidates.push(...indexInfo.fieldCandidates);
-            sampleProbability = indexInfo.sampleProbability;
-            totalDocCount = indexInfo.totalDocCount;
-          } catch (e) {
-            if (!isRequestAbortedError(e)) {
-              logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
-              pushError(`Failed to fetch index information.`);
+            try {
+              const indexInfo = await fetchIndexInfo(client, request.body, abortSignal);
+              fieldCandidates.push(...indexInfo.fieldCandidates);
+              fieldCandidatesCount = fieldCandidates.length;
+              sampleProbability = indexInfo.sampleProbability;
+              totalDocCount = indexInfo.totalDocCount;
+            } catch (e) {
+              if (!isRequestAbortedError(e)) {
+                logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
+                pushError(`Failed to fetch index information.`);
+              }
+              end();
+              return;
             }
-            end();
-            return;
+
+            logDebugMessage(`Total document count: ${totalDocCount}`);
+            logDebugMessage(`Sample probability: ${sampleProbability}`);
+
+            loaded += LOADED_FIELD_CANDIDATES;
+
+            pushPingWithTimeout();
+
+            push(
+              updateLoadingStateAction({
+                ccsWarning: false,
+                loaded,
+                loadingState: i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldCandidates',
+                  {
+                    defaultMessage:
+                      'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
+                    values: {
+                      fieldCandidatesCount,
+                    },
+                  }
+                ),
+              })
+            );
+
+            if (fieldCandidatesCount === 0) {
+              endWithUpdatedLoadingState();
+            } else if (shouldStop) {
+              logDebugMessage('shouldStop after fetching field candidates.');
+              end();
+              return;
+            }
           }
 
-          logDebugMessage(`Total document count: ${totalDocCount}`);
-          logDebugMessage(`Sample probability: ${sampleProbability}`);
+          // Step 2: Significant Terms
 
-          loaded += LOADED_FIELD_CANDIDATES;
-
-          const fieldCandidatesCount = fieldCandidates.length;
-
-          push(
-            updateLoadingStateAction({
-              ccsWarning: false,
-              loaded,
-              loadingState: i18n.translate(
-                'xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldCandidates',
-                {
-                  defaultMessage:
-                    'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
-                  values: {
-                    fieldCandidatesCount,
-                  },
-                }
-              ),
-            })
-          );
-
-          if (fieldCandidatesCount === 0) {
-            endWithUpdatedLoadingState();
-          } else if (shouldStop) {
-            logDebugMessage('shouldStop after fetching field candidates.');
-            end();
-            return;
-          }
-
-          const changePoints: ChangePoint[] = [];
+          const changePoints: ChangePoint[] = request.body.overrides?.changePoints
+            ? request.body.overrides?.changePoints
+            : [];
           const fieldsToSample = new Set<string>();
 
           // Don't use more than 10 here otherwise Kibana will emit an error
           // regarding a limit of abort signal listeners of more than 10.
           const MAX_CONCURRENT_QUERIES = 10;
 
+          let remainingFieldCandidates: string[];
+          let loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
+
+          if (request.body.overrides?.remainingFieldCandidates) {
+            fieldCandidates.push(...request.body.overrides?.remainingFieldCandidates);
+            remainingFieldCandidates = request.body.overrides?.remainingFieldCandidates;
+            fieldCandidatesCount = fieldCandidates.length;
+            loadingStepSizePValues =
+              LOADED_FIELD_CANDIDATES +
+              PROGRESS_STEP_P_VALUES -
+              (request.body.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
+          } else {
+            remainingFieldCandidates = fieldCandidates;
+          }
+
           logDebugMessage('Fetch p-values.');
 
           const pValuesQueue = queue(async function (fieldCandidate: string) {
-            loaded += (1 / fieldCandidatesCount) * PROGRESS_STEP_P_VALUES;
+            loaded += (1 / fieldCandidatesCount) * loadingStepSizePValues;
 
             let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
 
@@ -273,6 +312,8 @@ export const defineExplainLogRateSpikesRoute = (
               }
               return;
             }
+
+            remainingFieldCandidates = remainingFieldCandidates.filter((d) => d !== fieldCandidate);
 
             if (pValues.length > 0) {
               pValues.forEach((d) => {
@@ -297,17 +338,23 @@ export const defineExplainLogRateSpikesRoute = (
                     },
                   }
                 ),
+                remainingFieldCandidates,
               })
             );
+          }, MAX_CONCURRENT_QUERIES);
 
-            if (shouldStop) {
+          pValuesQueue.push(fieldCandidates, (err) => {
+            if (err) {
+              logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
+              pushError(`Failed to fetch p-values.`);
+              pValuesQueue.kill();
+              end();
+            } else if (shouldStop) {
               logDebugMessage('shouldStop fetching p-values.');
               pValuesQueue.kill();
               end();
             }
-          }, MAX_CONCURRENT_QUERIES);
-
-          pValuesQueue.push(fieldCandidates);
+          });
           await pValuesQueue.drain();
 
           if (changePoints.length === 0) {
@@ -337,7 +384,8 @@ export const defineExplainLogRateSpikesRoute = (
                 // samplerShardSize
                 -1,
                 undefined,
-                abortSignal
+                abortSignal,
+                sampleProbability
               )) as [NumericChartData]
             )[0];
           } catch (e) {
@@ -382,6 +430,7 @@ export const defineExplainLogRateSpikesRoute = (
                     defaultMessage: 'Transforming significant field/value pairs into groups.',
                   }
                 ),
+                groupsMissing: true,
               })
             );
 
@@ -430,8 +479,8 @@ export const defineExplainLogRateSpikesRoute = (
                 // field/value pairs that are not part of the original list of significant change points.
                 // This cleans up groups and removes those unrelated field/value pairs.
                 const filteredDf = df
-                  .map((fi) => {
-                    fi.set = Object.entries(fi.set).reduce<ItemsetResult['set']>(
+                  .map((fi, fiIndex) => {
+                    const updatedSet = Object.entries(fi.set).reduce<ItemsetResult['set']>(
                       (set, [field, value]) => {
                         if (
                           changePoints.some(
@@ -444,7 +493,16 @@ export const defineExplainLogRateSpikesRoute = (
                       },
                       {}
                     );
+
+                    // only assign the updated reduced set if it doesn't already match
+                    // an existing set. if there's a match just add an empty set
+                    // so it will be filtered in the last step.
+                    fi.set = df.some((d, dIndex) => fiIndex !== dIndex && isEqual(fi.set, d.set))
+                      ? {}
+                      : updatedSet;
+
                     fi.size = Object.keys(fi.set).length;
+
                     return fi;
                   })
                   .filter((fi) => fi.size > 1);
@@ -493,7 +551,7 @@ export const defineExplainLogRateSpikesRoute = (
 
                     return {
                       ...g,
-                      group,
+                      group: uniqWith(group, (a, b) => isEqual(a, b)),
                     };
                   }
                 );
@@ -582,12 +640,7 @@ export const defineExplainLogRateSpikesRoute = (
                   }
 
                   if (overallTimeSeries !== undefined) {
-                    const histogramQuery = getHistogramQuery(
-                      request.body,
-                      cpg.group.map((d) => ({
-                        term: { [d.fieldName]: d.fieldValue },
-                      }))
-                    );
+                    const histogramQuery = getHistogramQuery(request.body, getGroupFilter(cpg));
 
                     let cpgTimeSeries: NumericChartData;
                     try {
@@ -609,7 +662,8 @@ export const defineExplainLogRateSpikesRoute = (
                           // samplerShardSize
                           -1,
                           undefined,
-                          abortSignal
+                          abortSignal,
+                          sampleProbability
                         )) as [NumericChartData]
                       )[0];
                     } catch (e) {
@@ -704,7 +758,8 @@ export const defineExplainLogRateSpikesRoute = (
                       // samplerShardSize
                       -1,
                       undefined,
-                      abortSignal
+                      abortSignal,
+                      sampleProbability
                     )) as [NumericChartData]
                   )[0];
                 } catch (e) {

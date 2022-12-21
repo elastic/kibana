@@ -88,4 +88,78 @@ describe('EPM index template install', () => {
     expect(indexTemplate.priority).toBe(templatePriorityDatasetIsPrefixTrue);
     expect(indexTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixTrue]);
   });
+
+  it('tests prepareTemplate to set source mode to synthetics if specified', async () => {
+    const dataStreamDatasetIsPrefixTrue = {
+      type: 'metrics',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+      dataset_is_prefix: true,
+      elasticsearch: {
+        source_mode: 'synthetic',
+      },
+    } as RegistryDataStream;
+    const pkg = {
+      name: 'package',
+      version: '0.0.1',
+    };
+
+    const { componentTemplates } = prepareTemplate({
+      pkg,
+      dataStream: dataStreamDatasetIsPrefixTrue,
+    });
+
+    const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
+
+    if (!('mappings' in packageTemplate)) {
+      throw new Error('no mappings on package template');
+    }
+
+    expect(packageTemplate.mappings).toHaveProperty('_source');
+    expect(packageTemplate.mappings._source).toEqual({ mode: 'synthetic' });
+  });
+
+  it('tests prepareTemplate to not set source mode to synthetics if specified but user disabled it', async () => {
+    const dataStreamDatasetIsPrefixTrue = {
+      type: 'metrics',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+      dataset_is_prefix: true,
+      elasticsearch: {
+        source_mode: 'synthetic',
+      },
+    } as RegistryDataStream;
+    const pkg = {
+      name: 'package',
+      version: '0.0.1',
+    };
+
+    const { componentTemplates } = prepareTemplate({
+      pkg,
+      dataStream: dataStreamDatasetIsPrefixTrue,
+      experimentalDataStreamFeature: {
+        data_stream: 'metrics-package.dataset',
+        features: {
+          synthetic_source: false,
+          tsdb: false,
+        },
+      },
+    });
+
+    const packageTemplate = componentTemplates['metrics-package.dataset@package'].template;
+
+    if (!('mappings' in packageTemplate)) {
+      throw new Error('no mappings on package template');
+    }
+
+    expect(packageTemplate.mappings).not.toHaveProperty('_source');
+  });
 });

@@ -180,11 +180,15 @@ export function CasesTableServiceProvider(
       await common.clickAndValidate('options-filter-popover-button-assignees', 'euiSelectableList');
     },
 
-    async selectAllCasesAndOpenBulkActions() {
-      await testSubjects.setCheckbox('checkboxSelectAll', 'check');
+    async openBulkActions() {
       await testSubjects.existOrFail('case-table-bulk-actions-link-icon');
       const button = await testSubjects.find('case-table-bulk-actions-link-icon');
       await button.click();
+    },
+
+    async selectAllCasesAndOpenBulkActions() {
+      await testSubjects.setCheckbox('checkboxSelectAll', 'check');
+      await this.openBulkActions();
     },
 
     async changeStatus(status: CaseStatuses, index: number) {
@@ -233,6 +237,57 @@ export function CasesTableServiceProvider(
       await testSubjects.click('case-bulk-action-severity');
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
+    },
+
+    async bulkEditTags(selectedCases: number[], tagsToClick: string[]) {
+      const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
+
+      for (const caseIndex of selectedCases) {
+        assertCaseExists(caseIndex, rows.length);
+        rows[caseIndex].click();
+      }
+
+      await this.openBulkActions();
+      await testSubjects.existOrFail('cases-bulk-action-tags');
+      await testSubjects.click('cases-bulk-action-tags');
+
+      await testSubjects.existOrFail('cases-edit-tags-flyout');
+
+      for (const tag of tagsToClick) {
+        await testSubjects.existOrFail(`cases-actions-tags-edit-selectable-tag-${tag}`);
+        await testSubjects.click(`cases-actions-tags-edit-selectable-tag-${tag}`);
+      }
+
+      await testSubjects.click('cases-edit-tags-flyout-submit');
+      await testSubjects.missingOrFail('cases-edit-tags-flyout');
+    },
+
+    async bulkAddNewTag(selectedCases: number[], tag: string) {
+      const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
+
+      for (const caseIndex of selectedCases) {
+        assertCaseExists(caseIndex, rows.length);
+        rows[caseIndex].click();
+      }
+
+      await this.openBulkActions();
+      await testSubjects.existOrFail('cases-bulk-action-tags');
+      await testSubjects.click('cases-bulk-action-tags');
+
+      await testSubjects.existOrFail('cases-edit-tags-flyout');
+      await testSubjects.existOrFail('cases-actions-tags-edit-selectable-search-input');
+      const searchInput = await testSubjects.find(
+        'cases-actions-tags-edit-selectable-search-input'
+      );
+
+      await testSubjects.existOrFail('cases-actions-tags-edit-selectable-search-input');
+      await searchInput.type(tag);
+
+      await testSubjects.existOrFail('cases-actions-tags-edit-selectable-add-new-tag');
+      await testSubjects.click('cases-actions-tags-edit-selectable-add-new-tag');
+
+      await testSubjects.click('cases-edit-tags-flyout-submit');
+      await testSubjects.missingOrFail('cases-edit-tags-flyout');
     },
 
     async selectAndChangeStatusOfAllCases(status: CaseStatuses) {

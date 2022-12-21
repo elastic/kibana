@@ -16,7 +16,6 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ListFilters } from '../list_filters/list_filters';
 import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import { MonitorListPageState } from '../../../../state';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
@@ -24,9 +23,10 @@ import {
   ConfigKey,
   Ping,
   EncryptedSyntheticsSavedMonitor,
+  OverviewStatusState,
 } from '../../../../../../../common/runtime_types';
 import { SyntheticsSettingsContext } from '../../../../contexts/synthetics_settings_context';
-import { getMonitorListColumns } from './columns';
+import { useMonitorListColumns } from './columns';
 import * as labels from './labels';
 
 interface Props {
@@ -38,6 +38,7 @@ interface Props {
   loadPage: (state: MonitorListPageState) => void;
   reloadPage: () => void;
   errorSummaries?: Ping[];
+  status: OverviewStatusState | null;
 }
 
 export const MonitorList = ({
@@ -46,14 +47,15 @@ export const MonitorList = ({
   total,
   error,
   loading,
+  status,
   loadPage,
   reloadPage,
   errorSummaries,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const { basePath } = useContext(SyntheticsSettingsContext);
   const isXl = useIsWithinMinBreakpoint('xxl');
   const canEditSynthetics = useCanEditSynthetics();
-  const { euiTheme } = useEuiTheme();
 
   const errorSummariesById = useMemo(
     () =>
@@ -77,7 +79,7 @@ export const MonitorList = ({
       loadPage({
         pageIndex: index,
         pageSize: size,
-        sortField: `${field}.keyword`,
+        sortField: field === 'enabled' ? field : `${field}.keyword`,
         sortOrder: direction,
       });
     },
@@ -99,12 +101,12 @@ export const MonitorList = ({
   };
 
   const recordRangeLabel = labels.getRecordRangeLabel({
-    rangeStart: pageSize * pageIndex + 1,
+    rangeStart: total === 0 ? 0 : pageSize * pageIndex + 1,
     rangeEnd: pageSize * pageIndex + pageSize,
     total,
   });
 
-  const columns = getMonitorListColumns({
+  const columns = useMonitorListColumns({
     basePath,
     euiTheme,
     errorSummaries,
@@ -113,12 +115,11 @@ export const MonitorList = ({
     syntheticsMonitors,
     loading,
     reloadPage,
+    status,
   });
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
-      <ListFilters />
-      <EuiSpacer />
       {recordRangeLabel}
       <EuiSpacer size="s" />
       <hr style={{ border: `1px solid ${euiTheme.colors.lightShade}` }} />

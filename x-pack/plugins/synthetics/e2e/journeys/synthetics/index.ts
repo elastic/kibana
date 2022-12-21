@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+export * from './project_api_keys.journey';
 export * from './getting_started.journey';
-// TODO: Fix this test
-// export * from './add_monitor.journey';
+export * from './add_monitor.journey';
 export * from './monitor_selector.journey';
+export * from './management_list.journey';
 export * from './overview_sorting.journey';
-// TODO: Fix this test
-// export * from './overview_scrolling.journey';
+export * from './overview_scrolling.journey';
+export * from './overview_search.journey';
+export * from './private_locations.journey';
+export * from './alerting_default.journey';
+export * from './global_parameters.journey';
+export * from './detail_flyout';

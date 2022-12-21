@@ -66,10 +66,14 @@ export const mockState: SyntheticsAppState = {
   },
   monitorList: {
     pageState: {
+      query: undefined,
       pageIndex: 0,
       pageSize: 10,
-      sortOrder: 'asc',
       sortField: `${ConfigKey.NAME}.keyword`,
+      sortOrder: 'asc',
+      tags: undefined,
+      monitorType: undefined,
+      locations: undefined,
     },
     monitorUpsertStatuses: {},
     data: {
@@ -107,6 +111,19 @@ export const mockState: SyntheticsAppState = {
   browserJourney: getBrowserJourneyMockSlice(),
   networkEvents: {},
   pingStatus: getPingStatusesMockSlice(),
+  agentPolicies: {
+    loading: false,
+    error: null,
+    data: null,
+  },
+  settings: {
+    loading: false,
+    error: null,
+    success: null,
+  },
+  dynamicSettings: {
+    loading: false,
+  },
 };
 
 function getBrowserJourneyMockSlice() {
@@ -412,8 +429,10 @@ function getMonitorDetailsMockSlice() {
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'] as TLSVersion[],
       revision: 1,
       updated_at: '2022-07-24T17:15:46.342Z',
+      created_at: '2022-05-24T13:20:49.322Z',
     },
     syntheticsMonitorLoading: false,
+    syntheticsMonitorDispatchedAt: 0,
     error: null,
     selectedLocationId: 'us_central',
   };

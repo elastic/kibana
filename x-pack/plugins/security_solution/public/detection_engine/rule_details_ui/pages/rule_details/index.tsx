@@ -31,6 +31,7 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
+import { FILTER_OPEN, TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -39,7 +40,6 @@ import {
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
-import { TableId } from '../../../../../common/types/timeline';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -87,7 +87,7 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { Display } from '../../../../hosts/pages/display';
+import { Display } from '../../../../explore/hosts/pages/display';
 
 import {
   focusUtilityBarAction,
@@ -123,15 +123,15 @@ import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_wit
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  AlertsTableFilterGroup,
-  FILTER_OPEN,
-} from '../../../../detections/components/alerts_table/alerts_filter_group';
+import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
 import type { NavTab } from '../../../../common/components/navigation/types';
 import { EditRuleSettingButtonLink } from '../../../../detections/pages/detection_engine/rules/details/components/edit_rule_settings_button_link';
+import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
+import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
+import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -238,6 +238,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
+
+  const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
+  const startMlJobsIfNeeded = useCallback(async () => {
+    await startMlJobs(rule?.machine_learning_job_id);
+  }, [rule, startMlJobs]);
 
   const ruleDetailTabs = useMemo(
     (): Record<RuleDetailTabs, NavTab> => ({
@@ -619,6 +624,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
+  const {
+    isBulkDuplicateConfirmationVisible,
+    showBulkDuplicateConfirmation,
+    cancelRuleDuplication,
+    confirmRuleDuplication,
+  } = useBulkDuplicateExceptionsConfirmation();
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -640,6 +652,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
+      {isBulkDuplicateConfirmationVisible && (
+        <BulkActionDuplicateExceptionsConfirmation
+          onCancel={cancelRuleDuplication}
+          onConfirm={confirmRuleDuplication}
+          rulesCount={1}
+        />
+      )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
@@ -696,6 +715,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             (isMlRule(rule?.type) && !hasMlPermissions)
                           }
                           enabled={isExistingRule && (rule?.enabled ?? false)}
+                          startMlJobsIfNeeded={startMlJobsIfNeeded}
                           onChange={handleOnChangeEnabledRule}
                         />
                         <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>
@@ -729,6 +749,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             rule,
                             hasActionsPrivileges
                           )}
+                          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -754,7 +775,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         loading={isLoading || isSavedQueryLoading}
                         title={ruleI18n.DEFINITION}
                       >
-                        {defineRuleData != null && !isSavedQueryLoading && (
+                        {defineRuleData != null && !isSavedQueryLoading && !isStartingJobs && (
                           <StepDefineRule
                             descriptionColumns="singleSplit"
                             isReadOnlyView={true}

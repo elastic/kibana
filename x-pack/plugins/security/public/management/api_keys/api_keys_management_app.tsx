@@ -27,6 +27,7 @@ import {
 } from '../../components/breadcrumb';
 import { AuthenticationProvider } from '../../components/use_current_user';
 import type { PluginStartDependencies } from '../../plugin';
+import { ReadonlyBadge } from '../badges/readonly_badge';
 
 interface CreateParams {
   authc: AuthenticationServiceSetup;
@@ -67,6 +68,7 @@ export const apiKeysManagementApp = Object.freeze({
                 history={history}
                 notifications={coreStart.notifications}
                 apiKeysAPIClient={new APIKeysAPIClient(coreStart.http)}
+                readOnly={!coreStart.application.capabilities.api_keys.save}
               />
             </Breadcrumb>
           </Providers>,
@@ -102,6 +104,12 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
       <I18nProvider>
         <KibanaThemeProvider theme$={theme$}>
           <Router history={history}>
+            <ReadonlyBadge
+              featureId="api_keys"
+              tooltip={i18n.translate('xpack.security.management.api_keys.readonlyTooltip', {
+                defaultMessage: 'Unable to create or edit API keys',
+              })}
+            />
             <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
           </Router>
         </KibanaThemeProvider>

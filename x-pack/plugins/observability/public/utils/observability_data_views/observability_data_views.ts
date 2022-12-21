@@ -113,13 +113,17 @@ export class ObservabilityDataViews {
 
     const { runtimeFields } = getFieldFormatsForApp(app);
 
-    const dataView = await this.dataViews.create({
-      title: appIndicesPattern,
-      id: getAppDataViewId(app, indices),
-      timeFieldName: '@timestamp',
-      fieldFormats: this.getFieldFormats(app),
-      name: DataTypesLabels[app],
-    });
+    const dataView = await this.dataViews.create(
+      {
+        title: appIndicesPattern,
+        id: getAppDataViewId(app, indices),
+        timeFieldName: '@timestamp',
+        fieldFormats: this.getFieldFormats(app),
+        name: DataTypesLabels[app],
+      },
+      false,
+      false
+    );
 
     if (runtimeFields !== null) {
       runtimeFields.forEach(({ name, field }) => {

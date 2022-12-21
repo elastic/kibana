@@ -17,7 +17,7 @@ describe('<EditPolicy /> frozen phase', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

@@ -17,6 +17,9 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
+import type { PackSavedObjectAttributes } from './common/types';
+import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
+import { packSavedObjectType } from '../common/types';
 import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
 import { createConfig } from './create_config';
 import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
@@ -118,9 +121,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       );
       const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
 
+      const esClient = core.elasticsearch.client.asInternalUser;
       const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
         client,
-        core.elasticsearch.client.asInternalUser,
+        esClient,
         undefined,
         true
       );
@@ -136,6 +140,20 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           async (packagePolicy: PackagePolicy): Promise<PackagePolicy> => {
             if (packagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
               await this.initialize(core, dataViewsService);
+
+              const allPacks = await client.find<PackSavedObjectAttributes>({
+                type: packSavedObjectType,
+              });
+
+              if (allPacks.saved_objects) {
+                await updateGlobalPacksCreateCallback(
+                  packagePolicy,
+                  client,
+                  allPacks,
+                  this.osqueryAppContextService,
+                  esClient
+                );
+              }
             }
 
             return packagePolicy;

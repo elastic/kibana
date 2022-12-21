@@ -9,34 +9,53 @@ import { EuiBasicTableColumn } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
-import type { SnapshotNodeMetric } from '../../../../../common/http_api';
-import { scaleUpPercentage } from '../../../../components/infrastructure_node_metrics_tables/shared/hooks';
-import { NumberCell } from '../../../../components/infrastructure_node_metrics_tables/shared/components';
+import type { SnapshotMetricInput, SnapshotNodeMetric } from '../../../../../common/http_api';
+import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
+import { CloudProviderIconWithTitle, CloudProviders } from './cloud_provider_icon_with_title';
+import { TruncateLinkWithTooltip } from './truncate_link_with_tooltip';
 
 interface HostNodeRow extends HostMetics {
   os?: string | null;
   servicesOnHost?: number | null;
+  title: { name: string; cloudProvider?: CloudProviders | null };
   name: string;
 }
 
 export interface HostMetics {
   cpuCores: SnapshotNodeMetric;
+  diskLatency: SnapshotNodeMetric;
   rx: SnapshotNodeMetric;
   tx: SnapshotNodeMetric;
   memory: SnapshotNodeMetric;
   memoryTotal: SnapshotNodeMetric;
 }
 
+const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefined | null) =>
+  value || value === 0 ? createInventoryMetricFormatter({ type })(value) : 'N/A';
+
 export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
   {
     name: i18n.translate('xpack.infra.hostsTable.nameColumnHeader', {
       defaultMessage: 'Name',
     }),
-    field: 'name',
+    field: 'title',
     sortable: true,
     truncateText: true,
-    textOnly: true,
-    render: (name: string) => <EuiText size="s">{name}</EuiText>,
+    render: (title: HostNodeRow['title']) => (
+      <CloudProviderIconWithTitle
+        provider={title?.cloudProvider}
+        text={title.name}
+        title={
+          <TruncateLinkWithTooltip
+            text={title.name}
+            linkProps={{
+              app: 'metrics',
+              pathname: `/detail/host/${title.name}`,
+            }}
+          />
+        }
+      />
+    ),
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.operatingSystemColumnHeader', {
@@ -50,17 +69,19 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     name: i18n.translate('xpack.infra.hostsTable.numberOfCpusColumnHeader', {
       defaultMessage: '# of CPUs',
     }),
-    field: 'cpuCores.value',
+    field: 'cpuCores',
     sortable: true,
-    render: (value: number) => <NumberCell value={value} />,
+    render: (cpuCores: SnapshotNodeMetric) => (
+      <>{formatMetric('cpuCores', cpuCores?.value ?? cpuCores?.max)}</>
+    ),
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.diskLatencyColumnHeader', {
-      defaultMessage: 'Disk Latency',
+      defaultMessage: 'Disk Latency (avg.)',
     }),
-    field: 'diskLatency',
+    field: 'diskLatency.avg',
     sortable: true,
-    render: (ds: number) => <NumberCell value={ds} unit=" ms" />,
+    render: (avg: number) => <>{formatMetric('diskLatency', avg)}</>,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.averageTxColumnHeader', {
@@ -68,7 +89,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     }),
     field: 'tx.avg',
     sortable: true,
-    render: (avg: number) => <NumberCell value={avg} />,
+    render: (avg: number) => <>{formatMetric('tx', avg)}</>,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.averageRxColumnHeader', {
@@ -76,7 +97,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     }),
     field: 'rx.avg',
     sortable: true,
-    render: (avg: number) => <NumberCell value={avg} />,
+    render: (avg: number) => <>{formatMetric('rx', avg)}</>,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.averageMemoryTotalColumnHeader', {
@@ -84,7 +105,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     }),
     field: 'memoryTotal.avg',
     sortable: true,
-    render: (avg: number) => <NumberCell value={Math.floor(avg)} unit=" MB" />,
+    render: (avg: number) => <>{formatMetric('memoryTotal', avg)}</>,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.servicesOnHostColumnHeader', {
@@ -92,7 +113,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     }),
     field: 'servicesOnHost',
     sortable: true,
-    render: (servicesOnHost: number) => <NumberCell value={servicesOnHost} />,
+    render: (servicesOnHost: number) => <>{formatMetric('cpuCores', servicesOnHost)}</>,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.averageMemoryUsageColumnHeader', {
@@ -100,6 +121,6 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     }),
     field: 'memory.avg',
     sortable: true,
-    render: (avg: number) => <NumberCell value={scaleUpPercentage(avg)} unit="%" />,
+    render: (avg: number) => <>{formatMetric('memory', avg)}</>,
   },
 ];

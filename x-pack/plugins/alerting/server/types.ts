@@ -43,6 +43,8 @@ import {
   RuleMonitoring,
   MappedParams,
   RuleSnooze,
+  IntervalSchedule,
+  RuleLastRun,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -81,6 +83,7 @@ export interface RuleExecutorServices<
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
+  ruleMonitoringService?: PublicRuleMonitoringService;
 }
 
 export interface RuleExecutorOptions<
@@ -128,6 +131,7 @@ export interface GetSummarizedAlertsFnOpts {
   executionUuid?: string;
   ruleId: string;
   spaceId: string;
+  excludedAlertInstanceIds: string[];
 }
 
 // TODO - add type for these alerts when we determine which alerts-as-data
@@ -135,15 +139,15 @@ export interface GetSummarizedAlertsFnOpts {
 export interface SummarizedAlerts {
   new: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
   ongoing: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
   recovered: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
@@ -206,6 +210,11 @@ export interface RawRuleAction extends SavedObjectAttributes {
   actionRef: string;
   actionTypeId: string;
   params: RuleActionParams;
+  frequency?: {
+    summary: boolean;
+    notifyWhen: RuleNotifyWhenType;
+    throttle: string | null;
+  };
 }
 
 export interface RuleMeta extends SavedObjectAttributes {
@@ -254,7 +263,7 @@ export interface RawRule extends SavedObjectAttributes {
   alertTypeId: string; // this cannot be renamed since it is in the saved object
   consumer: string;
   legacyId: string | null;
-  schedule: SavedObjectAttributes;
+  schedule: IntervalSchedule;
   actions: RawRuleAction[];
   params: SavedObjectAttributes;
   mapped_params?: MappedParams;
@@ -265,15 +274,17 @@ export interface RawRule extends SavedObjectAttributes {
   updatedAt: string;
   apiKey: string | null;
   apiKeyOwner: string | null;
-  throttle: string | null;
-  notifyWhen: RuleNotifyWhenType | null;
+  throttle?: string | null;
+  notifyWhen?: RuleNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
-  monitoring?: RuleMonitoring;
+  monitoring?: RawRuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
   isSnoozedUntil?: string | null;
+  lastRun?: RawRuleLastRun | null;
+  nextRun?: string | null;
 }
 
 export interface AlertingPlugin {
@@ -302,3 +313,14 @@ export interface InvalidatePendingApiKey {
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+export interface PublicRuleMonitoringService {
+  setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
+  setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
+  setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
+  setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
+  setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
+}
+
+export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
+export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}

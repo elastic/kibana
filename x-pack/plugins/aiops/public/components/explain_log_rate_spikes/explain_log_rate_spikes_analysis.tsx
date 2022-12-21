@@ -9,6 +9,7 @@ import React, { useEffect, useMemo, useState, FC } from 'react';
 import { isEqual } from 'lodash';
 
 import {
+  EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFormRow,
@@ -24,6 +25,7 @@ import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
+import type { FieldValuePair } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
@@ -71,6 +73,10 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     WindowParameters | undefined
   >();
   const [groupResults, setGroupResults] = useState<boolean>(false);
+  const [overrides, setOverrides] = useState<
+    ApiExplainLogRateSpikes['body']['overrides'] | undefined
+  >(undefined);
+  const [shouldStart, setShouldStart] = useState(false);
 
   const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setGroupResults(e.target.checked);
@@ -97,22 +103,55 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       grouping: true,
       flushFix: true,
       ...windowParameters,
+      overrides,
     },
     { reducer: streamReducer, initialState }
   );
+
+  useEffect(() => {
+    if (!isRunning) {
+      const { loaded, remainingFieldCandidates, groupsMissing } = data;
+
+      if (
+        loaded < 1 &&
+        ((Array.isArray(remainingFieldCandidates) && remainingFieldCandidates.length > 0) ||
+          groupsMissing)
+      ) {
+        setOverrides({ loaded, remainingFieldCandidates, changePoints: data.changePoints });
+      } else {
+        setOverrides(undefined);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRunning]);
 
   const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
   // Start handler clears possibly hovered or pinned
   // change points on analysis refresh.
-  function startHandler() {
+  function startHandler(continueAnalysis = false) {
+    if (!continueAnalysis) {
+      setOverrides(undefined);
+    }
+
     // Reset grouping to false and clear all row selections when restarting the analysis.
     setGroupResults(false);
     clearAllRowState();
 
     setCurrentAnalysisWindowParameters(windowParameters);
-    start();
+
+    // We trigger hooks updates above so we cannot directly call `start()` here
+    // because it would be run with stale arguments.
+    setShouldStart(true);
   }
+
+  useEffect(() => {
+    if (shouldStart) {
+      start();
+      setShouldStart(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldStart]);
 
   useEffect(() => {
     setCurrentAnalysisWindowParameters(windowParameters);
@@ -125,15 +164,15 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       const sortedGroup = group.sort((a, b) =>
         a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
       );
-      const dedupedGroup: Record<string, any> = {};
-      const repeatedValues: Record<string, any> = {};
+      const dedupedGroup: FieldValuePair[] = [];
+      const repeatedValues: FieldValuePair[] = [];
 
       sortedGroup.forEach((pair) => {
         const { fieldName, fieldValue } = pair;
         if (pair.duplicate === false) {
-          dedupedGroup[fieldName] = fieldValue;
+          dedupedGroup.push({ fieldName, fieldValue });
         } else {
-          repeatedValues[fieldName] = fieldValue;
+          repeatedValues.push({ fieldName, fieldValue });
         }
       });
 
@@ -159,7 +198,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
 
   const showSpikeAnalysisTable = data?.changePoints.length > 0;
   const groupItemCount = groupTableItems.reduce((p, c) => {
-    return p + Object.keys(c.group).length;
+    return p + c.group.length;
   }, 0);
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
 
@@ -169,7 +208,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
         isRunning={isRunning}
-        onRefresh={startHandler}
+        onRefresh={() => startHandler(false)}
         onCancel={cancel}
         shouldRerunAnalysis={shouldRerunAnalysis}
       />
@@ -195,6 +234,16 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
                   ))}
                 </ul>
               )}
+              {overrides !== undefined ? (
+                <p>
+                  <EuiButton size="s" onClick={() => startHandler(true)}>
+                    <FormattedMessage
+                      id="xpack.aiops.explainLogRateSpikesPage.tryToContinueAnalysisButtonText"
+                      defaultMessage="Try to continue analysis"
+                    />
+                  </EuiButton>
+                </p>
+              ) : null}
             </EuiText>
           </EuiCallOut>
           <EuiSpacer size="xs" />

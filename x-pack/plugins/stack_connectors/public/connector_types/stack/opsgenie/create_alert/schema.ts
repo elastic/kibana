@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { Either, fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { Either } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
-import { exactCheck } from '@kbn/securitysolution-io-ts-utils';
-import { identity } from 'fp-ts/lib/function';
-import { isEmpty, isObject } from 'lodash';
+import { isEmpty } from 'lodash';
+import { decodeSchema } from '../schema_utils';
 import * as i18n from './translations';
 
 const MessageNonEmptyString = new rt.Type<string, string, unknown>(
@@ -37,6 +35,42 @@ const ResponderTypes = rt.union([
   rt.literal('schedule'),
 ]);
 
+const CreateAlertSchemaOptionalProps = rt.partial(
+  rt.type({
+    alias: rt.string,
+    description: rt.string,
+    responders: rt.array(
+      rt.union([
+        rt.strict({ name: rt.string, type: ResponderTypes }),
+        rt.strict({ id: rt.string, type: ResponderTypes }),
+        rt.strict({ username: rt.string, type: rt.literal('user') }),
+      ])
+    ),
+    visibleTo: rt.array(
+      rt.union([
+        rt.strict({ name: rt.string, type: rt.literal('team') }),
+        rt.strict({ id: rt.string, type: rt.literal('team') }),
+        rt.strict({ id: rt.string, type: rt.literal('user') }),
+        rt.strict({ username: rt.string, type: rt.literal('user') }),
+      ])
+    ),
+    actions: rt.array(rt.string),
+    tags: rt.array(rt.string),
+    details: rt.record(rt.string, rt.string),
+    entity: rt.string,
+    source: rt.string,
+    priority: rt.union([
+      rt.literal('P1'),
+      rt.literal('P2'),
+      rt.literal('P3'),
+      rt.literal('P4'),
+      rt.literal('P5'),
+    ]),
+    user: rt.string,
+    note: rt.string,
+  }).props
+);
+
 /**
  * This schema is duplicated from the server. The only difference is that it is using io-ts vs kbn-schema.
  * NOTE: This schema must be the same as defined here: x-pack/plugins/stack_connectors/server/connector_types/stack/opsgenie/schema.ts
@@ -51,92 +85,38 @@ const ResponderTypes = rt.union([
  */
 const CreateAlertSchema = rt.intersection([
   rt.strict({ message: MessageNonEmptyString }),
-  rt.exact(
-    rt.partial({
-      alias: rt.string,
-      description: rt.string,
-      responders: rt.array(
-        rt.union([
-          rt.strict({ name: rt.string, type: ResponderTypes }),
-          rt.strict({ id: rt.string, type: ResponderTypes }),
-          rt.strict({ username: rt.string, type: rt.literal('user') }),
-        ])
-      ),
-      visibleTo: rt.array(
-        rt.union([
-          rt.strict({ name: rt.string, type: rt.literal('team') }),
-          rt.strict({ id: rt.string, type: rt.literal('team') }),
-          rt.strict({ id: rt.string, type: rt.literal('user') }),
-          rt.strict({ username: rt.string, type: rt.literal('user') }),
-        ])
-      ),
-      actions: rt.array(rt.string),
-      tags: rt.array(rt.string),
-      details: rt.record(rt.string, rt.string),
-      entity: rt.string,
-      source: rt.string,
-      priority: rt.union([
-        rt.literal('P1'),
-        rt.literal('P2'),
-        rt.literal('P3'),
-        rt.literal('P4'),
-        rt.literal('P5'),
-      ]),
-      user: rt.string,
-      note: rt.string,
-    })
-  ),
+  rt.exact(CreateAlertSchemaOptionalProps),
 ]);
-
-export const formatErrors = (errors: rt.Errors): string[] => {
-  const err = errors.map((error) => {
-    if (error.message != null) {
-      return error.message;
-    } else {
-      const keyContext = error.context
-        .filter(
-          (entry) => entry.key != null && !Number.isInteger(+entry.key) && entry.key.trim() !== ''
-        )
-        .map((entry) => entry.key)
-        .join('.');
-
-      const nameContext = error.context.find(
-        (entry) => entry.type != null && entry.type.name != null && entry.type.name.length > 0
-      );
-
-      const suppliedValue =
-        keyContext !== '' ? keyContext : nameContext != null ? nameContext.type.name : '';
-      const value = isObject(error.value) ? JSON.stringify(error.value) : error.value;
-      return `Invalid value "${value}" supplied to "${suppliedValue}"`;
-    }
-  });
-
-  return [...new Set(err)];
-};
 
 type CreateAlertSchemaType = rt.TypeOf<typeof CreateAlertSchema>;
 
-export const decodeCreateAlert = (data: unknown): CreateAlertSchemaType => {
-  const onLeft = (errors: rt.Errors) => {
-    throw new DecodeError(formatErrors(errors));
-  };
+/**
+ * This schema should match CreateAlertSchema except that all fields are optional and message is only enforced as a string.
+ * Enforcing message as only a string accommodates the following scenario:
+ *
+ * If a user deletes an action in the rule form at index 0, and the
+ * action at index 1 had the message field specified with all spaces, the message field is technically invalid but
+ * we want to allow it to pass the partial check so that the form is still populated with the invalid value. Otherwise the
+ * forum will be reset and the user would lose the information (although it is invalid) they had entered
+ */
+const PartialCreateAlertSchema = rt.exact(
+  rt.intersection([
+    rt.partial(rt.type({ message: rt.string }).props),
+    CreateAlertSchemaOptionalProps,
+  ])
+);
 
-  const onRight = (a: CreateAlertSchemaType): CreateAlertSchemaType => identity(a);
+type PartialCreateAlertSchemaType = rt.TypeOf<typeof PartialCreateAlertSchema>;
 
-  return pipe(
-    CreateAlertSchema.decode(data),
-    (decoded) => exactCheck(data, decoded),
-    fold(onLeft, onRight)
-  );
+export const isPartialCreateAlertSchema = (data: unknown): data is PartialCreateAlertSchemaType => {
+  try {
+    decodeSchema(PartialCreateAlertSchema, data);
+    return true;
+  } catch (error) {
+    return false;
+  }
 };
 
-export class DecodeError extends Error {
-  constructor(public readonly decodeErrors: string[]) {
-    super(decodeErrors.join());
-    this.name = this.constructor.name;
-  }
-}
-
-export function isDecodeError(error: unknown): error is DecodeError {
-  return error instanceof DecodeError;
-}
+export const decodeCreateAlert = (data: unknown): CreateAlertSchemaType => {
+  return decodeSchema(CreateAlertSchema, data);
+};

@@ -69,6 +69,13 @@ export function getActiveDatasourceIdFromDoc(doc?: Document) {
   return firstDatasourceFromDoc || null;
 }
 
+export function getActiveVisualizationIdFromDoc(doc?: Document) {
+  if (!doc) {
+    return null;
+  }
+  return doc.visualizationType || null;
+}
+
 export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: Document) => {
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
 };
@@ -283,6 +290,11 @@ export const isOperationFromTheSameGroup = (op1?: DraggingIdentifier, op2?: Drag
     op1.layerId === op2.layerId
   );
 };
+
+export const sortDataViewRefs = (dataViewRefs: IndexPatternRef[]) =>
+  dataViewRefs.sort((a, b) => {
+    return a.title.localeCompare(b.title);
+  });
 
 export const getSearchWarningMessages = (
   adapter: RequestAdapter,

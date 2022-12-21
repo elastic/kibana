@@ -42,16 +42,19 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-babel-preset",
   "//packages/kbn-i18n",
+  "//packages/kbn-ui-theme",
   "@npm//@babel/runtime",
   "@npm//antlr4ts",
   "@npm//babel-loader",
   "@npm//monaco-editor",
+  "@npm//monaco-yaml",
   "@npm//raw-loader",
   "@npm//rxjs",
 ]
 
 TYPES_DEPS = [
   "//packages/kbn-i18n:npm_module_types",
+  "//packages/kbn-ui-theme:npm_module_types",
   "@npm//antlr4ts",
   "@npm//monaco-editor",
   "@npm//rxjs",

@@ -7,11 +7,8 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { MonitorOverviewResult, OverviewStatus } from '../../../../../common/runtime_types';
+import { MonitorOverviewState } from './models';
 
-import { IHttpSerializedFetchError } from '../utils/http_error';
-
-import { MonitorOverviewPageState, MonitorOverviewFlyoutConfig } from './models';
 import {
   clearOverviewStatusErrorAction,
   fetchMonitorOverviewAction,
@@ -20,17 +17,6 @@ import {
   setFlyoutConfig,
   setOverviewPageStateAction,
 } from './actions';
-
-export interface MonitorOverviewState {
-  data: MonitorOverviewResult;
-  pageState: MonitorOverviewPageState;
-  flyoutConfig: MonitorOverviewFlyoutConfig;
-  loading: boolean;
-  loaded: boolean;
-  error: IHttpSerializedFetchError | null;
-  status: OverviewStatus | null;
-  statusError: IHttpSerializedFetchError | null;
-}
 
 const initialState: MonitorOverviewState = {
   data: {
@@ -54,7 +40,6 @@ const initialState: MonitorOverviewState = {
 export const monitorOverviewReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(fetchMonitorOverviewAction.get, (state, action) => {
-      state.pageState = action.payload;
       state.loading = true;
       state.loaded = false;
     })
@@ -80,11 +65,17 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       };
       state.loaded = false;
     })
+    .addCase(fetchOverviewStatusAction.get, (state) => {
+      state.status = null;
+    })
     .addCase(setFlyoutConfig, (state, action) => {
       state.flyoutConfig = action.payload;
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
-      state.status = action.payload;
+      state.status = {
+        ...action.payload,
+        allConfigs: { ...action.payload.upConfigs, ...action.payload.downConfigs },
+      };
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.statusError = action.payload;

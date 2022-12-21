@@ -7,13 +7,13 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutSize } from '@elastic/eui';
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { Query, BoolQuery } from '@kbn/es-query';
+import React, { useEffect, useState } from 'react';
+import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { AlertStatus } from '../../../../../common/typings';
+import { ObservabilityAlertSearchbarWithUrlSync } from '../../../../components/shared/alert_search_bar';
 import { observabilityAlertFeatureIds } from '../../../../config';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
@@ -21,42 +21,28 @@ import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
-import { buildEsQuery } from '../../../../utils/build_es_query';
 import { LoadingObservability } from '../../../overview';
-import {
-  Provider,
-  alertsPageStateContainer,
-  useAlertsPageStateContainer,
-} from '../state_container';
 import './styles.scss';
-import { AlertsStatusFilter, ALERT_STATUS_QUERY } from '../../components';
 import { renderRuleStats } from '../../components/rule_stats';
 import { ObservabilityAppServices } from '../../../../application/types';
-import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
+import {
+  ALERTS_PER_PAGE,
+  ALERTS_SEARCH_BAR_ID,
+  ALERTS_TABLE_ID,
+  URL_STORAGE_KEY,
+} from './constants';
 import { RuleStatsState } from './types';
 
-const getAlertStatusQuery = (status: string): Query[] => {
-  return status ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }] : [];
-};
-
-function AlertsPage() {
+export function AlertsPage() {
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const {
     cases,
     docLinks,
     http,
     notifications: { toasts },
-    triggersActionsUi: {
-      alertsTableConfigurationRegistry,
-      getAlertsStateTable: AlertsStateTable,
-      getAlertsSearchBar: AlertsSearchBar,
-    },
-    data: {
-      query: {
-        timefilter: { timefilter: timeFilterService },
-      },
-    },
+    triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
   } = useKibana<ObservabilityAppServices>().services;
+
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
     total: 0,
@@ -66,18 +52,7 @@ function AlertsPage() {
     snoozed: 0,
   });
   const { hasAnyData, isAllRequestsComplete } = useHasData();
-  const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, status, setStatus } =
-    useAlertsPageStateContainer();
-  const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>(
-    buildEsQuery(
-      {
-        to: rangeTo,
-        from: rangeFrom,
-      },
-      kuery,
-      getAlertStatusQuery(status)
-    )
-  );
+  const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
 
   useBreadcrumbs([
     {
@@ -129,46 +104,6 @@ function AlertsPage() {
 
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
-  const onStatusChange = useCallback(
-    (alertStatus: AlertStatus) => {
-      setEsQuery(
-        buildEsQuery(
-          {
-            to: rangeTo,
-            from: rangeFrom,
-          },
-          kuery,
-          getAlertStatusQuery(alertStatus)
-        )
-      );
-    },
-    [kuery, rangeFrom, rangeTo]
-  );
-
-  useEffect(() => {
-    onStatusChange(status);
-  }, [onStatusChange, status]);
-
-  const onSearchBarParamsChange = useCallback(
-    ({ dateRange, query }) => {
-      timeFilterService.setTime(dateRange);
-      setRangeFrom(dateRange.from);
-      setRangeTo(dateRange.to);
-      setKuery(query);
-      setEsQuery(
-        buildEsQuery(
-          {
-            to: rangeTo,
-            from: rangeFrom,
-          },
-          query,
-          getAlertStatusQuery(status)
-        )
-      );
-    },
-    [rangeFrom, setRangeFrom, rangeTo, status, setRangeTo, setKuery, timeFilterService]
-  );
-
   // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
@@ -199,27 +134,11 @@ function AlertsPage() {
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <AlertsSearchBar
-            appName={'observability-alerts'}
-            featureIds={observabilityAlertFeatureIds}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            query={kuery}
-            onQueryChange={onSearchBarParamsChange}
+          <ObservabilityAlertSearchbarWithUrlSync
+            appName={ALERTS_SEARCH_BAR_ID}
+            onEsQueryChange={setEsQuery}
+            urlStorageKey={URL_STORAGE_KEY}
           />
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <AlertsStatusFilter
-                status={status}
-                onChange={(id) => {
-                  setStatus(id as AlertStatus);
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -228,27 +147,21 @@ function AlertsPage() {
             permissions={userCasesPermissions}
             features={{ alerts: { sync: false } }}
           >
-            <AlertsStateTable
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              configurationId={AlertConsumers.OBSERVABILITY}
-              id={ALERTS_TABLE_ID}
-              flyoutSize={'s' as EuiFlyoutSize}
-              featureIds={observabilityAlertFeatureIds}
-              query={esQuery}
-              showExpandToDetails={false}
-              pageSize={ALERTS_PER_PAGE}
-            />
+            {esQuery && (
+              <AlertsStateTable
+                alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+                configurationId={AlertConsumers.OBSERVABILITY}
+                id={ALERTS_TABLE_ID}
+                flyoutSize={'s' as EuiFlyoutSize}
+                featureIds={observabilityAlertFeatureIds}
+                query={esQuery}
+                showExpandToDetails={false}
+                pageSize={ALERTS_PER_PAGE}
+              />
+            )}
           </CasesContext>
         </EuiFlexItem>
       </EuiFlexGroup>
     </ObservabilityPageTemplate>
-  );
-}
-
-export function WrappedAlertsPage() {
-  return (
-    <Provider value={alertsPageStateContainer}>
-      <AlertsPage />
-    </Provider>
   );
 }

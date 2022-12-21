@@ -5,33 +5,36 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState, useRef } from 'react';
-import { isEqual } from 'lodash';
+import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { MonitorOverviewItem } from '../../../../common/runtime_types';
 import { selectOverviewState } from '../state/overview';
 import { useLocationNames } from './use_location_names';
+import { useGetUrlParams } from './use_url_params';
 
-export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
+export function useMonitorsSortedByStatus() {
+  const { statusFilter } = useGetUrlParams();
   const {
     pageState: { sortOrder },
     data: { monitors },
     status,
   } = useSelector(selectOverviewState);
-  const [monitorsSortedByStatus, setMonitorsSortedByStatus] = useState<
-    Record<string, MonitorOverviewItem[]>
-  >({ up: [], down: [], disabled: [] });
+
   const downMonitors = useRef<Record<string, string[]> | null>(null);
-  const currentMonitors = useRef<MonitorOverviewItem[] | null>(monitors);
   const locationNames = useLocationNames();
 
-  useEffect(() => {
+  const monitorsSortedByStatus = useMemo(() => {
     if (!status) {
-      return;
+      return {
+        down: [],
+        up: [],
+        disabled: [],
+      };
     }
+
     const { downConfigs } = status;
     const downMonitorMap: Record<string, string[]> = {};
-    downConfigs.forEach(({ location, configId }) => {
+    Object.values(downConfigs).forEach(({ location, configId }) => {
       if (downMonitorMap[configId]) {
         downMonitorMap[configId].push(location);
       } else {
@@ -39,37 +42,52 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
       }
     });
 
-    if (
-      !isEqual(downMonitorMap, downMonitors.current) ||
-      !isEqual(monitors, currentMonitors.current)
-    ) {
-      const orderedDownMonitors: MonitorOverviewItem[] = [];
-      const orderedUpMonitors: MonitorOverviewItem[] = [];
-      const orderedDisabledMonitors: MonitorOverviewItem[] = [];
-      monitors.forEach((monitor) => {
-        const monitorLocation = locationNames[monitor.location.id];
-        if (!monitor.isEnabled) {
-          orderedDisabledMonitors.push(monitor);
-        } else if (
-          Object.keys(downMonitorMap).includes(monitor.id) &&
-          downMonitorMap[monitor.id].includes(monitorLocation)
-        ) {
-          orderedDownMonitors.push(monitor);
-        } else {
-          orderedUpMonitors.push(monitor);
-        }
-      });
-      downMonitors.current = downMonitorMap;
-      currentMonitors.current = monitors;
-      setMonitorsSortedByStatus({
-        down: orderedDownMonitors,
-        up: orderedUpMonitors,
-        disabled: orderedDisabledMonitors,
-      });
-    }
+    const orderedDownMonitors: MonitorOverviewItem[] = [];
+    const orderedUpMonitors: MonitorOverviewItem[] = [];
+    const orderedDisabledMonitors: MonitorOverviewItem[] = [];
+
+    monitors.forEach((monitor) => {
+      const monitorLocation = locationNames[monitor.location.id];
+      if (!monitor.isEnabled) {
+        orderedDisabledMonitors.push(monitor);
+      } else if (
+        monitor.configId in downMonitorMap &&
+        downMonitorMap[monitor.configId].includes(monitorLocation)
+      ) {
+        orderedDownMonitors.push(monitor);
+      } else {
+        orderedUpMonitors.push(monitor);
+      }
+    });
+    downMonitors.current = downMonitorMap;
+
+    return {
+      down: orderedDownMonitors,
+      up: orderedUpMonitors,
+      disabled: orderedDisabledMonitors,
+    };
   }, [monitors, locationNames, downMonitors, status]);
 
   return useMemo(() => {
+    switch (statusFilter) {
+      case 'down':
+        return {
+          monitorsSortedByStatus: monitorsSortedByStatus.down,
+          downMonitors: downMonitors.current,
+        };
+      case 'up':
+        return {
+          monitorsSortedByStatus: monitorsSortedByStatus.up,
+          downMonitors: downMonitors.current,
+        };
+      case 'disabled':
+        return {
+          monitorsSortedByStatus: monitorsSortedByStatus.disabled,
+          downMonitors: downMonitors.current,
+        };
+      default:
+        break;
+    }
     const upAndDownMonitors =
       sortOrder === 'asc'
         ? [...monitorsSortedByStatus.down, ...monitorsSortedByStatus.up]
@@ -79,5 +97,5 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
       monitorsSortedByStatus: [...upAndDownMonitors, ...monitorsSortedByStatus.disabled],
       downMonitors: downMonitors.current,
     };
-  }, [downMonitors, monitorsSortedByStatus, sortOrder]);
+  }, [downMonitors, monitorsSortedByStatus, sortOrder, statusFilter]);
 }

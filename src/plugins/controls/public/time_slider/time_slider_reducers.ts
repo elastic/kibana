@@ -8,7 +8,7 @@
 
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
-import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import { EuiRangeTick } from '@elastic/eui';
 import { TimeSliderReduxState } from './types';
 
 export const timeSliderReducers = {
@@ -20,8 +20,15 @@ export const timeSliderReducers = {
   },
   setTimeRangeBounds: (
     state: WritableDraft<TimeSliderReduxState>,
-    action: PayloadAction<{ timeRangeBounds: [number, number]; ticks: EuiRangeTick[] }>
+    action: PayloadAction<{
+      format: string;
+      stepSize: number;
+      timeRangeBounds: [number, number];
+      ticks: EuiRangeTick[];
+    }>
   ) => {
+    state.componentState.format = action.payload.format;
+    state.componentState.stepSize = action.payload.stepSize;
     state.componentState.ticks = action.payload.ticks;
     state.componentState.timeRangeBounds = action.payload.timeRangeBounds;
   },

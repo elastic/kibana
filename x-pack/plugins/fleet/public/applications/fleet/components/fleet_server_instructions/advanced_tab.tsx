@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiLoadingContent, EuiSteps } from '@elastic/eui';
 
 import { useAdvancedForm } from './hooks';
+import { useLatestFleetServers } from './hooks/use_latest_fleet_servers';
 
 import {
   getAddFleetServerHostStep,
@@ -37,6 +38,8 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selecte
     deploymentMode,
     setDeploymentMode,
   } = useAdvancedForm();
+
+  const { hasRecentlyEnrolledFleetServers } = useLatestFleetServers();
 
   const steps = [
     getSelectAgentPolicyStep({
@@ -68,7 +71,10 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selecte
       deploymentMode,
       disabled: !Boolean(serviceToken),
     }),
-    getConfirmFleetServerConnectionStep({ isFleetServerReady, disabled: !Boolean(serviceToken) }),
+    getConfirmFleetServerConnectionStep({
+      hasRecentlyEnrolledFleetServers,
+      disabled: !Boolean(serviceToken),
+    }),
   ];
 
   return isSelectFleetServerPolicyLoading ? (

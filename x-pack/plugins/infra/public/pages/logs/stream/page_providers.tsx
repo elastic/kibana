@@ -16,12 +16,13 @@ import { LogHighlightsStateProvider } from '../../../containers/logs/log_highlig
 import {
   LogPositionStateProvider,
   useLogPositionStateContext,
-  WithLogPositionUrlState,
 } from '../../../containers/logs/log_position';
 import { LogStreamProvider, useLogStreamContext } from '../../../containers/logs/log_stream';
 import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_configuration';
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { useLogViewContext } from '../../../hooks/use_log_view';
+import { LogStreamPageStateProvider } from '../../../observability_logs/log_stream_page/state';
+import { type LogViewNotificationChannel } from '../../../observability_logs/log_view_state';
 
 const LogFilterState: React.FC = ({ children }) => {
   const { derivedDataView } = useLogViewContext();
@@ -55,18 +56,11 @@ const ViewLogInContext: React.FC = ({ children }) => {
 
 const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { logViewId } = useLogViewContext();
-  const { startTimestamp, endTimestamp, targetPosition, isInitialized } =
-    useLogPositionStateContext();
+  const { startTimestamp, endTimestamp, targetPosition } = useLogPositionStateContext();
   const { filterQuery } = useLogFilterStateContext();
 
   // Don't render anything if the date range is incorrect.
   if (!startTimestamp || !endTimestamp) {
-    return null;
-  }
-
-  // Don't initialize the entries until the position has been fully intialized.
-  // See `<WithLogPositionUrlState />`
-  if (!isInitialized) {
     return null;
   }
 
@@ -100,19 +94,21 @@ const LogHighlightsState: React.FC = ({ children }) => {
   return <LogHighlightsStateProvider {...highlightsProps}>{children}</LogHighlightsStateProvider>;
 };
 
-export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
-  const { logViewStatus } = useLogViewContext();
+export const LogStreamPageProviders: React.FunctionComponent<{
+  logViewStateNotifications: LogViewNotificationChannel;
+}> = ({ children, logViewStateNotifications }) => {
+  return (
+    <LogStreamPageStateProvider logViewStateNotifications={logViewStateNotifications}>
+      {children}
+    </LogStreamPageStateProvider>
+  );
+};
 
-  // The providers assume the source is loaded, so short-circuit them otherwise
-  if (logViewStatus?.index === 'missing') {
-    return <>{children}</>;
-  }
-
+export const LogStreamPageContentProviders: React.FunctionComponent = ({ children }) => {
   return (
     <LogViewConfigurationProvider>
       <LogEntryFlyoutProvider>
         <LogPositionStateProvider>
-          <WithLogPositionUrlState />
           <ViewLogInContext>
             <LogFilterState>
               <LogEntriesStateProvider>

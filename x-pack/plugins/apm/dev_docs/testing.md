@@ -34,7 +34,7 @@ The API tests are located in [`x-pack/test/apm_api_integration/`](/x-pack/test/a
 ### Start server and run test in a single process
 
 ```
-node scripts/test/api [--trial/--basic] [--help]
+node x-pack/plugins/apm/scripts/test/api [--trial/--basic] [--help]
 ```
 
 The above command will start an ES instance on http://localhost:9220, a Kibana instance on http://localhost:5620 and run the api tests.
@@ -45,10 +45,10 @@ Once the tests finish, the instances will be terminated.
 ```sh
 
 # start server
-node scripts/test/api --server --basic
+node x-pack/plugins/apm/scripts/test/api --server --basic
 
 # run tests
-node scripts/test/api --runner --basic --grep-files=error_group_list
+node x-pack/plugins/apm/scripts/test/api --runner --basic --grep-files=error_group_list
 ```
 
 ### Update snapshots (from Kibana root)
@@ -77,13 +77,13 @@ The E2E tests are located in [`x-pack/plugins/apm/ftr_e2e`](../ftr_e2e)
 ### Start test server
 
 ```
-node x-pack/plugins/apm/scripts/test/e2e.js --server
+node x-pack/plugins/apm/scripts/test/e2e --server
 ```
 
 ### Run tests
 
 ```
-node x-pack/plugins/apm/scripts/test/e2e.js --runner --open
+node x-pack/plugins/apm/scripts/test/e2e --runner --open
 ```
 
 ### A11y checks
