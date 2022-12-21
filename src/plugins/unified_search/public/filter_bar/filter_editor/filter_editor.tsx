@@ -433,6 +433,16 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   private onCustomLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const customLabel = event.target.value;
     this.setState({ customLabel });
+    if (this.props.onLocalFilterUpdate) {
+      const localFilter = {
+        ...this.state.localFilter,
+        meta: {
+          ...this.state.localFilter.meta,
+          alias: customLabel || null,
+        },
+      };
+      this.props.onLocalFilterUpdate(localFilter);
+    }
   };
 
   private onQueryDslChange = (queryDsl: string) => {
