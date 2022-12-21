@@ -190,9 +190,6 @@ const expandDottedField = (dottedFieldName: string, val: unknown): object => {
 };
 
 const expandFlattenedAlert = (alert: object) => {
-  if (Array.isArray(alert)) {
-    return alert;
-  }
   return Object.entries(alert).reduce(
     (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
     {}
