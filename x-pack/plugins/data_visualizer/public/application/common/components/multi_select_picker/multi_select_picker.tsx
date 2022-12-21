@@ -15,12 +15,11 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { FC, ReactNode, useEffect, useMemo, useState } from 'react';
+import React, { FC, ReactNode, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
-import { useDataVisualizerKibana } from '../../../kibana_context';
+import { useCurrentEuiTheme } from '../../hooks/use_current_eui_theme';
 
 export interface Option {
   name?: string | ReactNode;
@@ -28,6 +27,8 @@ export interface Option {
   checked?: 'on' | 'off';
   disabled?: boolean;
 }
+
+const SELECT_PICKER_HEIGHT = '250px';
 
 const NoFilterItems = () => {
   return (
@@ -45,15 +46,6 @@ const NoFilterItems = () => {
     </div>
   );
 };
-
-export function useCurrentEuiTheme() {
-  const { services } = useDataVisualizerKibana();
-  const uiSettings = services.uiSettings;
-  return useMemo(
-    () => (uiSettings.get('theme:darkMode') ? euiThemeDark : euiThemeLight),
-    [uiSettings]
-  );
-}
 
 interface MultiSelectPickerStyles {
   filterGroup?: SerializedStyles;
@@ -141,7 +133,7 @@ export const MultiSelectPicker: FC<{
           css={
             cssStyles?.filterItemContainer ??
             css`
-              max-height: 250px;
+              max-height: ${SELECT_PICKER_HEIGHT};
               overflow: auto;
             `
           }

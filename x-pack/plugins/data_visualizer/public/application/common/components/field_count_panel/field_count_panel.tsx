@@ -31,7 +31,7 @@ export const FieldCountPanel: FC<Props> = ({
       data-test-subj="dataVisualizerFieldCountPanel"
       responsive={false}
       className="dvFieldCount__panel"
-      wrap={true}
+      wrap
     >
       <TotalFieldsCount fieldsCountStats={fieldsCountStats} />
       <MetricFieldsCount metricsStats={metricsStats} />

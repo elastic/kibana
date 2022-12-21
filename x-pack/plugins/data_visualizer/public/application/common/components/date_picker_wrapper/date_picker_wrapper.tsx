@@ -25,7 +25,6 @@ import { TimeHistoryContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import {
   useRefreshIntervalUpdates,
   useTimeRangeUpdates,
@@ -35,6 +34,7 @@ import { dataVisualizerRefresh$ } from '../../../index_data_visualizer/services/
 import { useUrlState } from '../../util/url_state';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5000;
+const DATE_PICKER_MAX_WIDTH = 540;
 
 interface TimePickerQuickRange {
   from: string;
@@ -249,10 +249,11 @@ export const DatePickerWrapper: FC<{
       <EuiFlexItem
         grow={false}
         css={
-          compact &&
-          css`
-            max-width: 540px;
-          `
+          compact
+            ? {
+                maxWidth: DATE_PICKER_MAX_WIDTH,
+              }
+            : null
         }
       >
         <EuiSuperDatePicker

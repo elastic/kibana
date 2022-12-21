@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiLink,
 } from '@elastic/eui';
+import { useCurrentEuiTheme } from '../../hooks/use_current_eui_theme';
 
 export interface LinkCardProps {
   icon: IconType;
@@ -41,6 +42,8 @@ export const LinkCard: FC<LinkCardProps> = ({
   isDisabled,
   'data-test-subj': dataTestSubj,
 }) => {
+  const euiTheme = useCurrentEuiTheme();
+
   const linkHrefAndOnClickProps = {
     ...(href ? { href } : {}),
     ...(onClick ? { onClick } : {}),
@@ -63,7 +66,7 @@ export const LinkCard: FC<LinkCardProps> = ({
         {...linkHrefAndOnClickProps}
       >
         <EuiFlexGroup gutterSize="s" responsive={true}>
-          <EuiFlexItem grow={false} style={{ paddingTop: '4px' }}>
+          <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.euiSizeXS }}>
             {typeof icon === 'string' ? (
               <EuiIcon size="m" type={icon} aria-label={iconAreaLabel} />
             ) : (

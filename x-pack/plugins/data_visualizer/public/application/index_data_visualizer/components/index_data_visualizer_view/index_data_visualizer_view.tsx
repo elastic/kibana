@@ -24,7 +24,7 @@ import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
-import { useCurrentEuiTheme } from '../../../common/components/multi_select_picker/multi_select_picker';
+import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { DV_RANDOM_SAMPLER_PREFERENCE, useStorage } from '../../hooks/use_storage';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
@@ -454,24 +454,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         <EuiFlexItem>
           <EuiPageContentHeader
             data-test-subj="dataVisualizerPageHeader"
-            css={
-              compact &&
-              css`
-                flex-direction: column;
-                align-items: flex-start;
-              `
-            }
+            css={compact ? { flexDirection: 'column', alignItems: 'flex-start' } : null}
           >
             <EuiPageContentHeaderSection>
-              <div
+              <EuiFlexGroup
                 data-test-subj="dataViewTitleHeader"
-                css={css`
-                  padding: $euiSizeS 0;
-                  display: flex;
-                  flex-direction: row;
-                  align-items: center;
-                  margin-right: ${euiTheme.euiSize};
-                `}
+                direction="row"
+                alignItems="center"
+                css={{ padding: `${euiTheme.euiSizeS} 0`, marginRight: `${euiTheme.euiSize}` }}
               >
                 <EuiTitle size={'s'}>
                   <h2>{currentDataView.getName()}</h2>
@@ -480,7 +470,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                   currentDataView={currentDataView}
                   useNewFieldsApi={true}
                 />
-              </div>
+              </EuiFlexGroup>
             </EuiPageContentHeaderSection>
 
             {compact ? <EuiSpacer size="m" /> : null}

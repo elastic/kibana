@@ -22,7 +22,7 @@ import {
 import moment from 'moment';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import { EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
 
 export interface DocumentCountChartPoint {
@@ -137,8 +137,9 @@ export const DocumentCountChart: FC<Props> = ({
   const timeZone = getTimezone(uiSettings);
 
   return (
-    <div
-      style={{ width: width ?? '100%', display: 'flex', alignItems: 'center' }}
+    <EuiFlexGroup
+      alignItems="center"
+      css={{ width: width ?? '100%' }}
       data-test-subj="dataVisualizerDocumentCountChart"
     >
       {loading ? (
@@ -181,6 +182,6 @@ export const DocumentCountChart: FC<Props> = ({
           />
         </Chart>
       )}
-    </div>
+    </EuiFlexGroup>
   );
 };
