@@ -13,13 +13,26 @@ import {
   EuiSelect,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
 
 const BUDGETING_METHOD_OPTIONS = [{ value: 'occurences', text: 'Occurences' }];
 
 const TIMEWINDOW_OPTIONS = [
-  { value: '30d', text: '30 days' },
-  { value: '7d', text: '7 days' },
+  {
+    value: '30d',
+    text: i18n.translate('xpack.observability.slos.sloEdit.objectives.days', {
+      defaultMessage: '{number} days',
+      values: { number: 30 },
+    }),
+  },
+  {
+    value: '7d',
+    text: i18n.translate('xpack.observability.slos.sloEdit.objectives.days', {
+      defaultMessage: '{number} days',
+      values: { number: 7 },
+    }),
+  },
 ];
 
 export function SloEditFormObjectives() {
@@ -47,7 +60,11 @@ export function SloEditFormObjectives() {
       <EuiFlexItem>
         <EuiFlexGroup direction="row">
           <EuiFlexItem>
-            <EuiFormLabel>Budgeting method</EuiFormLabel>
+            <EuiFormLabel>
+              {i18n.translate('xpack.observability.slos.sloEdit.objectives.budgetingMethod', {
+                defaultMessage: 'Budgeting method',
+              })}
+            </EuiFormLabel>
             <EuiSelect
               id={budgetingSelect}
               options={BUDGETING_METHOD_OPTIONS}
@@ -57,7 +74,11 @@ export function SloEditFormObjectives() {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiFormLabel>Timewindow</EuiFormLabel>
+            <EuiFormLabel>
+              {i18n.translate('xpack.observability.slos.sloEdit.objectives.timeWindow', {
+                defaultMessage: 'Time window',
+              })}
+            </EuiFormLabel>
             <EuiSelect
               id={timeWindowSelect}
               options={TIMEWINDOW_OPTIONS}
@@ -67,7 +88,11 @@ export function SloEditFormObjectives() {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiFormLabel>Target / SLO (%)</EuiFormLabel>
+            <EuiFormLabel>
+              {i18n.translate('xpack.observability.slos.sloEdit.objectives.targetSlo', {
+                defaultMessage: 'Target / SLO (%)',
+              })}
+            </EuiFormLabel>
             <EuiFieldNumber value={sloTarget} onChange={handleChangeSloTarget} />
           </EuiFlexItem>
         </EuiFlexGroup>

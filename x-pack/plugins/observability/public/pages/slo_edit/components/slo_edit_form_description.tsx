@@ -13,6 +13,7 @@ import {
   EuiTextArea,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
 
 export function SloEditFormDescription() {
@@ -33,16 +34,40 @@ export function SloEditFormDescription() {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
-        <EuiFormLabel>SLO Name</EuiFormLabel>
-        <EuiFieldText fullWidth id={sloNameId} value={sloName} onChange={handleChangeSloName} />
+        <EuiFormLabel>
+          {i18n.translate('xpack.observability.slos.sloEdit.description.sloName', {
+            defaultMessage: 'SLO Name',
+          })}
+        </EuiFormLabel>
+        <EuiFieldText
+          fullWidth
+          id={sloNameId}
+          placeholder={i18n.translate(
+            'xpack.observability.slos.sloEdit.description.sloNamePlaceholder',
+            {
+              defaultMessage: 'Name for the SLO',
+            }
+          )}
+          value={sloName}
+          onChange={handleChangeSloName}
+        />
       </EuiFlexItem>
 
       <EuiFlexItem grow>
-        <EuiFormLabel>Description</EuiFormLabel>
+        <EuiFormLabel>
+          {i18n.translate('xpack.observability.slos.sloEdit.description.sloDescription', {
+            defaultMessage: 'Description',
+          })}
+        </EuiFormLabel>
         <EuiTextArea
           fullWidth
           id={descriptionId}
-          placeholder="The purpose of SLO, internal or external."
+          placeholder={i18n.translate(
+            'xpack.observability.slos.sloEdit.description.sloDescriptionPlaceholder',
+            {
+              defaultMessage: 'The purpose of SLO, internal or external.',
+            }
+          )}
           value={sloDescription}
           onChange={handleChangeSloDescription}
         />
