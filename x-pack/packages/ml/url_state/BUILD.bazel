@@ -47,7 +47,12 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//react"
+  "@npm//react",
+  "@npm//lodash",
+  "@npm//query-string",
+  "@npm//react-router-dom",
+  "//packages/kbn-rison",
+  "//x-pack/packages/ml/nested_property",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -62,7 +67,12 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react"
+  "@npm//@types/react",
+  "@npm//@types/lodash",
+  "@npm//@types/react-router-dom",
+  "@npm//query-string",
+  "//packages/kbn-rison:npm_module_types",
+  "//x-pack/packages/ml/nested_property:npm_module_types",
 ]
 
 jsts_transpiler(

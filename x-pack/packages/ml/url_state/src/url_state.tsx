@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
-import { createContext, useCallback, useContext, useMemo } from 'react';
-import { decode } from '@kbn/rison';
+import { parse, stringify } from 'query-string';
+import React, { createContext, useCallback, useContext, useMemo, type FC } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { isEqual } from 'lodash';
+
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import { decode, encode } from '@kbn/rison';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;
@@ -74,6 +78,79 @@ export const dataVisualizerUrlStateStore = createContext<UrlState>({
 
 export const { Provider } = dataVisualizerUrlStateStore;
 
+export const UrlStateProvider: FC = ({ children }) => {
+  const { Provider: StateProvider } = dataVisualizerUrlStateStore;
+
+  const history = useHistory();
+  const { search: urlSearchString } = useLocation();
+
+  const setUrlState: SetUrlState = useCallback(
+    (
+      accessor: Accessor,
+      attribute: string | Dictionary<any>,
+      value?: any,
+      replaceState?: boolean
+    ) => {
+      const prevSearchString = urlSearchString;
+      const urlState = parseUrlState(prevSearchString);
+      const parsedQueryString = parse(prevSearchString, { sort: false });
+
+      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+        urlState[accessor] = {};
+      }
+
+      if (typeof attribute === 'string') {
+        if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
+          return prevSearchString;
+        }
+
+        urlState[accessor][attribute] = value;
+      } else {
+        const attributes = attribute;
+        Object.keys(attributes).forEach((a) => {
+          urlState[accessor][a] = attributes[a];
+        });
+      }
+
+      try {
+        const oldLocationSearchString = stringify(parsedQueryString, {
+          sort: false,
+          encode: false,
+        });
+
+        Object.keys(urlState).forEach((a) => {
+          if (isRisonSerializationRequired(a)) {
+            parsedQueryString[a] = encode(urlState[a]);
+          } else {
+            parsedQueryString[a] = urlState[a];
+          }
+        });
+        const newLocationSearchString = stringify(parsedQueryString, {
+          sort: false,
+          encode: false,
+        });
+
+        if (oldLocationSearchString !== newLocationSearchString) {
+          const newSearchString = stringify(parsedQueryString, { sort: false });
+          if (replaceState) {
+            history.replace({ search: newSearchString });
+          } else {
+            history.push({ search: newSearchString });
+          }
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Could not save url state', error);
+      }
+    },
+    [history, urlSearchString]
+  );
+
+  return (
+    <StateProvider value={{ searchString: urlSearchString, setUrlState }}>{children}</StateProvider>
+  );
+};
+
 export const useUrlState = (accessor: Accessor) => {
   const { searchString, setUrlState: setUrlStateContext } = useContext(dataVisualizerUrlStateStore);
 
@@ -94,7 +171,13 @@ export const useUrlState = (accessor: Accessor) => {
   return [urlState, setUrlState];
 };
 
-export type AppStateKey = 'DATA_VISUALIZER_INDEX_VIEWER';
+export const APP_STATE_KEY = {
+  AIOPS_INDEX_VIEWER: 'AIOPS_INDEX_VIEWER',
+  CHANGE_POINT_INDEX_VIEWER: 'CHANGE_POINT_INDEX_VIEWER',
+  DATA_VISUALIZER_INDEX_VIEWER: 'DATA_VISUALIZER_INDEX_VIEWER',
+} as const;
+
+export type AppStateKey = keyof typeof APP_STATE_KEY;
 
 /**
  * Hook for managing the URL state of the page.
