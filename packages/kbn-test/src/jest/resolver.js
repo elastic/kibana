@@ -18,7 +18,7 @@ const { readPackageMap } = require('@kbn/package-map');
 
 const pkgMap = readPackageMap();
 
-const APM_AGENT_MOCK = Path.resolve(__dirname, 'mocks/apm_agent_mock.js');
+const APM_AGENT_MOCK = Path.resolve(__dirname, 'mocks/apm_agent_mock.ts');
 const CSS_MODULE_MOCK = Path.resolve(__dirname, 'mocks/css_module_mock.js');
 const STYLE_MOCK = Path.resolve(__dirname, 'mocks/style_mock.js');
 const FILE_MOCK = Path.resolve(__dirname, 'mocks/file_mock.js');
