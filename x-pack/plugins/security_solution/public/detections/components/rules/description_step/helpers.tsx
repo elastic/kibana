@@ -27,8 +27,7 @@ import styled from 'styled-components';
 import { FieldIcon } from '@kbn/react-field';
 
 import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
-import { FilterLabel } from '@kbn/unified-search-plugin/public';
+import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -102,11 +101,7 @@ export const buildQueryBarDescription = ({
               <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
                 <EuiBadgeWrap color="hollow">
                   {indexPatterns != null ? (
-                    <FilterLabel
-                      filter={filter}
-                      // @ts-ignore-next-line
-                      valueLabel={getDisplayValueFromFilter(filter, [indexPatterns])}
-                    />
+                    <FilterBadgeGroup filters={[filter]} dataViews={[indexPatterns]} />
                   ) : (
                     <EuiLoadingSpinner size="m" />
                   )}
