@@ -27,7 +27,7 @@ export function SloList() {
     loading,
     error,
     sloList: { results: slos = [], total, perPage },
-  } = useFetchSloList({ page: activePage + 1, name: query, refetch: shouldReload });
+  } = useFetchSloList({ page: activePage + 1, name: query, sortBy: sort, refetch: shouldReload });
 
   useEffect(() => {
     if (shouldReload) {
@@ -78,7 +78,6 @@ export function SloList() {
 
       <EuiFlexItem>
         <SloListItems
-          sort={sort}
           filters={filters}
           slos={slos}
           loading={loading}

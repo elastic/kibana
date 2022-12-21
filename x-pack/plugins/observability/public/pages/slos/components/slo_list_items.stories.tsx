@@ -27,7 +27,6 @@ const defaultProps = {
   loading: false,
   error: false,
   filters: [],
-  sort: undefined,
   onDeleted: () => {},
   onDeleting: () => {},
 };

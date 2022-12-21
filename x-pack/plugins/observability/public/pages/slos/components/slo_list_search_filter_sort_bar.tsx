@@ -27,7 +27,7 @@ export interface SloListSearchFilterSortBarProps {
   onChangeStatusFilter: (statusFilters: SortItem[]) => void;
 }
 
-export type SortType = 'difference' | 'budgetRemaining';
+export type SortType = 'name' | 'indicator_type';
 export type StatusType = 'violated' | 'forecastedViolation' | 'healthy';
 
 export type SortItem = EuiSelectableOption & {
@@ -38,17 +38,17 @@ export type SortItem = EuiSelectableOption & {
 
 const SORT_OPTIONS: SortItem[] = [
   {
-    label: i18n.translate('xpack.observability.slos.list.sortBy.difference', {
-      defaultMessage: 'Difference',
+    label: i18n.translate('xpack.observability.slos.list.sortBy.name', {
+      defaultMessage: 'Name',
     }),
-    type: 'difference',
+    type: 'name',
     checked: 'on',
   },
   {
-    label: i18n.translate('xpack.observability.slos.list.sortBy.budgetRemaining', {
-      defaultMessage: 'Budget remaining',
+    label: i18n.translate('xpack.observability.slos.list.sortBy.indicatorType', {
+      defaultMessage: 'Indicator type',
     }),
-    type: 'budgetRemaining',
+    type: 'indicator_type',
   },
 ];
 
@@ -98,7 +98,7 @@ export function SloListSearchFilterSortBar({
   };
 
   useEffect(() => {
-    if (selectedSort?.type === 'difference' || selectedSort?.type === 'budgetRemaining') {
+    if (selectedSort?.type === 'name' || selectedSort?.type === 'indicator_type') {
       onChangeSort(selectedSort.type);
     }
   }, [onChangeSort, selectedSort]);
@@ -161,7 +161,7 @@ export function SloListSearchFilterSortBar({
               >
                 {i18n.translate('xpack.observability.slos.list.sortByType', {
                   defaultMessage: 'Sort by {type}',
-                  values: { type: selectedSort?.label || '' },
+                  values: { type: selectedSort?.label.toLowerCase() || '' },
                 })}
               </EuiFilterButton>
             }
