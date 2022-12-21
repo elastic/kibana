@@ -15,13 +15,13 @@ exports[`ImportModal Renders import modal 1`] = `
           grow={false}
         >
           <EuiModalHeaderTitle>
-            <h2>
+            <h1>
               <FormattedMessage
                 defaultMessage="Import events"
                 id="xpack.ml.calendarsEdit.eventsTable.importEventsTitle"
                 values={Object {}}
               />
-            </h2>
+            </h1>
           </EuiModalHeaderTitle>
         </EuiFlexItem>
         <EuiFlexItem

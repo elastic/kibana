@@ -87,7 +87,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
       <EuiModal data-test-subj="mlDeleteJobConfirmModal" onClose={closeModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h2>
+            <h1>
               <FormattedMessage
                 id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
                 defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}?"
@@ -96,7 +96,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
                   jobId: jobIds[0],
                 }}
               />
-            </h2>
+            </h1>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>

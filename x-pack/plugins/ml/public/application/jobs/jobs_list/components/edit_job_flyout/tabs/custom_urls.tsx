@@ -288,12 +288,12 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h2>
+            <h1>
               <FormattedMessage
                 id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
                 defaultMessage="Add custom URL"
               />
-            </h2>
+            </h1>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 

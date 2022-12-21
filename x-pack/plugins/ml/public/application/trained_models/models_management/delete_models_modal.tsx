@@ -69,7 +69,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ modelIds, onClos
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h2>
+          <h1>
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.deleteModal.header"
               defaultMessage="Delete {modelsCount, plural, one {{modelId}} other {# models}}?"
@@ -78,7 +78,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ modelIds, onClos
                 modelsCount: modelIds.length,
               }}
             />
-          </h2>
+          </h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 

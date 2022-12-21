@@ -34,12 +34,12 @@ export const ModalWrapper: FC<Props> = ({ onCreateClick, closeModal, saveEnabled
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h2>
+          <h1>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.title"
               defaultMessage="Create detector"
             />
-          </h2>
+          </h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 

@@ -88,7 +88,7 @@ export const CloseJobsConfirmModal: FC<Props> = ({
       <EuiModal data-test-subj="mlCloseJobsConfirmModal" onClose={closeModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h2>{title}</h2>
+            <h1>{title}</h1>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>

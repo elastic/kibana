@@ -93,12 +93,12 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
     <EuiModal initialFocus="[name=panelTitle]" onClose={onCancel}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h2>
+          <h1>
             <FormattedMessage
               id="xpack.ml.swimlaneEmbeddable.setupModal.title"
               defaultMessage="Anomaly swim lane configuration"
             />
-          </h2>
+          </h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 

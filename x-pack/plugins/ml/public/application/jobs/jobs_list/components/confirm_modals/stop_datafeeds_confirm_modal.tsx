@@ -89,7 +89,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
       <EuiModal data-test-subj="mlStopDatafeedsConfirmModal" onClose={closeModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h2>{title}</h2>
+            <h1>{title}</h1>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>

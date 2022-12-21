@@ -85,7 +85,7 @@ const Modal = ({ close, title, children }) => (
   <EuiModal onClose={close} style={{ width: '800px' }}>
     <EuiModalHeader>
       <EuiModalHeaderTitle>
-        <h2>{title}</h2>
+        <h1>{title}</h1>
       </EuiModalHeaderTitle>
     </EuiModalHeader>
 

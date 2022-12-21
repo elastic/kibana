@@ -33,12 +33,12 @@ export function Modal(props) {
     <EuiModal onClose={props.close} maxWidth={860} data-test-subj="mlModalForecast">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h2>
+          <h1>
             <FormattedMessage
               id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastingTitle"
               defaultMessage="Forecasting"
             />
-          </h2>
+          </h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
