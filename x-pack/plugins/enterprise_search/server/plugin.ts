@@ -53,6 +53,7 @@ import { registerConfigDataRoute } from './routes/enterprise_search/config_data'
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
 import { registerCreateAPIKeyRoute } from './routes/enterprise_search/create_api_key';
+import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -182,6 +183,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerConnectorRoutes(dependencies);
     registerCrawlerRoutes(dependencies);
     registerAnalyticsRoutes(dependencies);
+    registerStatsRoutes(dependencies);
 
     getStartServices().then(([, { security: securityStart }]) => {
       registerCreateAPIKeyRoute(dependencies, securityStart);
