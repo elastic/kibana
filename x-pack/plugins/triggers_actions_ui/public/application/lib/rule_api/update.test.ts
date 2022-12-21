@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { Rule } from '../../../types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { updateRule } from './update';
@@ -15,7 +14,6 @@ const http = httpServiceMock.createStartContract();
 describe('updateRule', () => {
   test('should call rule update API', async () => {
     const ruleToUpdate = {
-      throttle: '1m',
       consumer: 'alerts',
       name: 'test',
       tags: ['foo'],
@@ -28,7 +26,6 @@ describe('updateRule', () => {
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
       apiKeyOwner: null,
-      notifyWhen: RuleNotifyWhen.THROTTLE,
     };
     const resolvedValue: Rule = {
       ...ruleToUpdate,
@@ -52,7 +49,7 @@ describe('updateRule', () => {
       Array [
         "/api/alerting/rule/12%2F3",
         Object {
-          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"notify_when\\":\\"onThrottleInterval\\",\\"actions\\":[]}",
+          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[]}",
         },
       ]
     `);
