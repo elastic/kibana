@@ -837,6 +837,63 @@ describe('FeatureTable', () => {
     expect(findTestSubject(wrapper, 'primaryFeaturePrivilegeControl')).toHaveLength(0);
   });
 
+  it('renders subtext for features that define an optional description', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {
+          my_feature: ['all'],
+        },
+      },
+    ]);
+    const featureWithDescription = createFeature({
+      id: 'my_feature',
+      name: 'Some Feature',
+      description: 'a description of my feature',
+    });
+
+    const { wrapper } = setup({
+      role,
+      features: [featureWithDescription],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: false,
+      canCustomizeSubFeaturePrivileges: false,
+    });
+
+    expect(findTestSubject(wrapper, 'featurePrivilegeDescriptionText').exists()).toEqual(true);
+
+    expect(
+      findTestSubject(wrapper, 'featurePrivilegeDescriptionText').text()
+    ).toMatchInlineSnapshot(`"a description of my feature"`);
+  });
+
+  it('does not render subtext for features without a description', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {
+          my_feature: ['all'],
+        },
+      },
+    ]);
+    const featureWithDescription = createFeature({
+      id: 'my_feature',
+      name: 'Some Feature',
+    });
+
+    const { wrapper } = setup({
+      role,
+      features: [featureWithDescription],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: false,
+      canCustomizeSubFeaturePrivileges: false,
+    });
+
+    expect(findTestSubject(wrapper, 'featurePrivilegeDescriptionText').exists()).toEqual(false);
+  });
+
   it('renders renders the primary feature controls when both primary and reserved privileges are specified', () => {
     const role = createRole([
       {
@@ -1315,7 +1372,7 @@ describe('FeatureTable', () => {
       expect(type).toBe('empty');
     });
   });
-  describe('Additional description for Customized Subfeatures', () => {
+  describe('Optional description for sub-features', () => {
     const role = createRole([
       {
         spaces: ['foo'],
@@ -1345,20 +1402,6 @@ describe('FeatureTable', () => {
                     savedObject: { all: [], read: [] },
                     ui: ['sub-toggle-1'],
                   },
-                  {
-                    id: 'sub-toggle-2',
-                    name: 'Sub Toggle 2',
-                    includeIn: 'all',
-                    savedObject: { all: [], read: [] },
-                    ui: ['sub-toggle-2'],
-                  },
-                  {
-                    id: 'sub-toggle-3',
-                    name: 'Sub Toggle 3',
-                    includeIn: 'all',
-                    savedObject: { all: [], read: [] },
-                    ui: ['sub-toggle-3'],
-                  },
                 ],
               },
             ],
@@ -1379,6 +1422,7 @@ describe('FeatureTable', () => {
       const featureExpander = findTestSubject(wrapper, 'featureTableCell');
       featureExpander.simulate('click');
 
+      expect(findTestSubject(wrapper, 'subFeatureDescription').exists()).toEqual(true);
       expect(findTestSubject(wrapper, 'subFeatureDescription').text()).toMatchInlineSnapshot(
         `"some sub feature description"`
       );
@@ -1400,20 +1444,6 @@ describe('FeatureTable', () => {
                     includeIn: 'all',
                     savedObject: { all: [], read: [] },
                     ui: ['sub-toggle-1'],
-                  },
-                  {
-                    id: 'sub-toggle-2',
-                    name: 'Sub Toggle 2',
-                    includeIn: 'all',
-                    savedObject: { all: [], read: [] },
-                    ui: ['sub-toggle-2'],
-                  },
-                  {
-                    id: 'sub-toggle-3',
-                    name: 'Sub Toggle 3',
-                    includeIn: 'all',
-                    savedObject: { all: [], read: [] },
-                    ui: ['sub-toggle-3'],
                   },
                 ],
               },

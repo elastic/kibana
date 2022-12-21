@@ -246,7 +246,11 @@ export class FeatureTable extends Component<Props, State> {
                 {feature.description && (
                   <div className="featurePrivilegeDescription">
                     <EuiToolTip content={feature.description} anchorClassName="eui-textTruncate">
-                      <EuiText color="subdued" size="xs">
+                      <EuiText
+                        color="subdued"
+                        size="xs"
+                        data-test-subj="featurePrivilegeDescriptionText"
+                      >
                         <p className="eui-displayInlineBlock eui-textTruncate">
                           {feature.description}
                         </p>
