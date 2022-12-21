@@ -193,7 +193,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
 
   const inactiveAgentsNotVisible =
     totalInactiveAgents > 0 &&
-    !(selectedStatus.includes('unenrolled') || selectedStatus.includes('inactive'));
+    !selectedStatus.includes('unenrolled') &&
+    !selectedStatus.includes('inactive');
+
   return (
     <>
       {/* Search and filter bar */}
