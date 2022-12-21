@@ -79,11 +79,12 @@ export const lastRunFromState = (
 };
 
 export const lastRunFromError = (error: Error): ILastRun => {
+  const esErrorMessage = getEsErrorMessage(error);
   return {
     lastRun: {
       outcome: RuleLastRunOutcomeValues[2],
       warning: getReasonFromError(error),
-      outcomeMsg: [getEsErrorMessage(error)],
+      outcomeMsg: esErrorMessage ? [esErrorMessage] : null,
       alertsCount: {},
     },
     metrics: null,
@@ -102,6 +103,6 @@ export const lastRunToRaw = (lastRun: ILastRun['lastRun']): RawRuleLastRun => {
       ignored: alertsCount.ignored || 0,
     },
     warning: warning ?? null,
-    outcomeMsg: outcomeMsg ?? null,
+    outcomeMsg: outcomeMsg && !Array.isArray(outcomeMsg) ? [outcomeMsg] : outcomeMsg,
   };
 };
