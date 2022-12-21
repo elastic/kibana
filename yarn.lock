@@ -2825,7 +2825,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-state@link:bazel-bin/packages/content-management/state":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-table-list@link:bazel-bin/packages/content-management/table_list":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-utils@link:bazel-bin/packages/content-management/utils":
   version "0.0.0"
   uid ""
 
