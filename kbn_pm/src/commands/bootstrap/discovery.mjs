@@ -8,6 +8,10 @@
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
 
+// we need to run these in order to generate the pkg map which is used by things
+// like `@kbn/babel-register`, so we have to import the JS files directory and can't
+// rely on `@kbn/babel-register`.
+
 export async function packageDiscovery() {
   const { discoverBazelPackages } = await import(
     // eslint-disable-next-line @kbn/imports/uniform_imports
