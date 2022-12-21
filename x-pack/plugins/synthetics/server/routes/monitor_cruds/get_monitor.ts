@@ -120,7 +120,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
             name: monitor.attributes[ConfigKey.NAME],
             location,
             isEnabled: monitor.attributes[ConfigKey.ENABLED],
-            isAlertEnabled: monitor.attributes[ConfigKey.STATUS_ALERT_ENABLED] ?? false,
+            isStatusAlertEnabled: monitor.attributes[ConfigKey.STATUS_ALERT_ENABLED] ?? false,
           };
           allMonitors.push(config);
           total++;

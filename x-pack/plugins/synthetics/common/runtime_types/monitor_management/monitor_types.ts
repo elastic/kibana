@@ -396,7 +396,7 @@ export const MonitorOverviewItemCodec = t.interface({
   configId: t.string,
   location: MonitorServiceLocationCodec,
   isEnabled: t.boolean,
-  isAlertEnabled: t.boolean,
+  isStatusAlertEnabled: t.boolean,
 });
 
 export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;

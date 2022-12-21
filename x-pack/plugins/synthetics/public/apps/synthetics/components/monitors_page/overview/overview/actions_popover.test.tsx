@@ -25,7 +25,7 @@ describe('ActionsPopover', () => {
         isServiceManaged: true,
       },
       isEnabled: true,
-      isAlertEnabled: true,
+      isStatusAlertEnabled: true,
       name: 'Monitor 1',
       id: 'somelongstring',
       configId: '1lkjelre',

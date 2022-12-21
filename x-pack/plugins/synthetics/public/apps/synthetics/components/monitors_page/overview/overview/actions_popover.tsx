@@ -173,10 +173,10 @@ export function ActionsPopover({
       },
     },
     {
-      name: monitor.isAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel,
+      name: monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel,
       icon: alertLoading ? (
         <EuiLoadingSpinner size="s" />
-      ) : monitor.isAlertEnabled ? (
+      ) : monitor.isStatusAlertEnabled ? (
         'bellSlash'
       ) : (
         'bell'
@@ -184,7 +184,7 @@ export function ActionsPopover({
       onClick: () => {
         if (!alertLoading) {
           updateAlertEnabledState({
-            monitor: { [ConfigKey.STATUS_ALERT_ENABLED]: !monitor.isAlertEnabled },
+            monitor: { [ConfigKey.STATUS_ALERT_ENABLED]: !monitor.isStatusAlertEnabled },
             configId: monitor.configId,
             name: monitor.name,
           });

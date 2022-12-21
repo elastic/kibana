@@ -81,7 +81,7 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     .addCase(enableMonitorAlertAction.success, (state, action) => {
       const attrs = action.payload.attributes;
       if (!('errors' in attrs)) {
-        const isAlertEnabled = Boolean(attrs[ConfigKey.STATUS_ALERT_ENABLED]);
+        const isStatusAlertEnabled = Boolean(attrs[ConfigKey.STATUS_ALERT_ENABLED]);
         state.data.monitors = state.data.monitors.map((monitor) => {
           if (
             monitor.id === action.payload.id ||
@@ -89,7 +89,7 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
           ) {
             return {
               ...monitor,
-              isAlertEnabled,
+              isStatusAlertEnabled,
             };
           }
           return monitor;
