@@ -144,7 +144,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       ? {
           ...lastRun,
           ...(lastRun.outcomeMsg && !Array.isArray(lastRun.outcomeMsg)
-            ? { outcomeMsg: [lastRun.outcomeMsg] }
+            ? { outcomeMsg: lastRun.outcomeMsg ? [lastRun.outcomeMsg] : null }
             : { outcomeMsg: lastRun.outcomeMsg }),
         }
       : {}),
