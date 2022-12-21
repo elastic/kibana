@@ -12,7 +12,6 @@
       "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/core-injected-metadata-browser",
     "@kbn/core-theme-browser",
     "@kbn/core-analytics-browser",
     "@kbn/core-execution-context-browser",
