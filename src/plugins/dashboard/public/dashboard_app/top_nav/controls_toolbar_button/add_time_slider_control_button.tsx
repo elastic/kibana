@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/public';
+import { getAddTimeSliderControlButtonTitle, getOnlyOneTimeSliderControlMsg } from '../../_dashboard_app_strings';
 
 interface Props {
   closePopover: () => void;
@@ -47,15 +47,11 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroup }: Props
       disabled={hasTimeSliderControl}
       toolTipContent={
         hasTimeSliderControl
-          ? i18n.translate('controls.controlGroup.onlyOneTimeSliderControlMsg', {
-              defaultMessage: 'Control group already contains time slider control.',
-            })
+          ? getOnlyOneTimeSliderControlMsg()
           : null
       }
     >
-      {i18n.translate('controls.controlGroup.addTimeSliderControlButtonTitle', {
-        defaultMessage: 'Add time slider control',
-      })}
+      {getAddTimeSliderControlButtonTitle()}
     </EuiContextMenuItem>
   );
 };

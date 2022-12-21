@@ -345,3 +345,13 @@ export const getAddControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
     defaultMessage: 'Add control',
   });
+
+export const getOnlyOneTimeSliderControlMsg = () =>
+  i18n.translate('dashboard.editingToolbar.onlyOneTimeSliderControlMsg', {
+    defaultMessage: 'Control group already contains time slider control.',
+  });
+
+export const getAddTimeSliderControlButtonTitle = () =>
+  i18n.translate('dashboard.editingToolbar.addTimeSliderControlButtonTitle', {
+    defaultMessage: 'Add time slider control',
+  });
