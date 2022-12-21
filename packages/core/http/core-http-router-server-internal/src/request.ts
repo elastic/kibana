@@ -176,9 +176,8 @@ export class CoreKibanaRequest<
       timeout: payloadTimeout,
     } = request.route.settings.payload || {};
 
-    // net.Socket#timeout isn't documented, yet, and isn't part of the types... https://github.com/nodejs/node/pull/34543
-    // the socket is also undefined when using @hapi/shot, or when a "fake request" is used
-    const socketTimeout = (request.raw.req.socket as any)?.timeout;
+    // the socket is undefined when using @hapi/shot, or when a "fake request" is used
+    const socketTimeout = request.raw.req.socket?.timeout;
     const options = {
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
