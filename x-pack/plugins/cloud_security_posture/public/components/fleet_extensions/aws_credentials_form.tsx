@@ -50,7 +50,6 @@ const AssumeRoleDescription = (
       />
     </EuiText>
     <EuiSpacer />
-    {DocsLink}
   </div>
 );
 
@@ -63,7 +62,6 @@ const DirectAccessKeysDescription = (
       />
     </EuiText>
     <EuiSpacer />
-    {DocsLink}
   </div>
 );
 
@@ -78,7 +76,6 @@ const TemporaryKeysDescription = (
       />
     </EuiText>
     <EuiSpacer />
-    {DocsLink}
   </div>
 );
 
@@ -92,73 +89,99 @@ const SharedCredentialsDescription = (
       />
     </EuiText>
     <EuiSpacer />
-    {DocsLink}
   </div>
 );
 
-/**
- * The fields for each AWS Credentials group type
- */
-const AWS_FIELDS = {
-  assume_role: ['role_arn'],
-  direct_access_keys: ['access_key_id', 'secret_access_key'],
-  temporary_keys: ['access_key_id', 'secret_access_key', 'session_token'],
-  shared_credentials: ['shared_credential_file', 'credential_profile_name'],
-} as const;
-
-const AWS_SECRET_FIELDS = ['secret_access_key'] as const;
-
-type Fields = typeof AWS_FIELDS;
-
-/**
- * The info for each AWS Credentials group type
- */
-const AWS_VARS_INFO: Record<keyof Fields, JSX.Element> = {
-  assume_role: AssumeRoleDescription,
-  direct_access_keys: DirectAccessKeysDescription,
-  temporary_keys: TemporaryKeysDescription,
-  shared_credentials: SharedCredentialsDescription,
-};
-
-/**
- * The labels for each AWS Credentials field
- */
-const AWS_FIELD_LABEL: Record<Fields[keyof Fields][number], string> = {
-  role_arn: i18n.translate('xpack.csp.awsIntegration.roleArnLabel', {
-    defaultMessage: 'Role ARN',
-  }),
+const AWS_FIELD_LABEL = {
   access_key_id: i18n.translate('xpack.csp.awsIntegration.accessKeyIdLabel', {
     defaultMessage: 'Access Key ID',
   }),
   secret_access_key: i18n.translate('xpack.csp.awsIntegration.secretAccessKeyLabel', {
     defaultMessage: 'Secret Access Key',
   }),
-  session_token: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
-    defaultMessage: 'Session Token',
-  }),
-  shared_credential_file: i18n.translate('xpack.csp.awsIntegration.sharedCredentialFileLabel', {
-    defaultMessage: 'Shared Credential File',
-  }),
-  credential_profile_name: i18n.translate('xpack.csp.awsIntegration.credentialProfileNameLabel', {
-    defaultMessage: 'Credential Profile Name',
-  }),
 };
 
-/**
- * The options for the AWS credentials group type
- */
-const AWS_CREDENTIALS_OPTIONS: ReadonlyArray<{
-  id: keyof Fields;
-  label: string;
-}> = [
-  { id: 'assume_role', label: 'Assume role' },
-  { id: 'direct_access_keys', label: 'Direct access keys' },
-  { id: 'temporary_keys', label: 'Temporary keys' },
-  { id: 'shared_credentials', label: 'Shared credentials' },
-];
+type AwsOptions = Record<
+  string,
+  {
+    label: string;
+    info: React.ReactNode;
+    fields: Record<string, { label: string; type?: 'password' | 'text' }>;
+  }
+>;
 
-type AwsCredentialsType = typeof AWS_CREDENTIALS_OPTIONS[number]['id'];
-const DEFAULT_AWS_VARS_GROUP: AwsCredentialsType = 'assume_role';
+// Ensures the options object is typed correctly
+// Will be removed in TS 4.9 when the 'satisfies' keyword is added
+const satisfies =
+  <T extends unknown>() =>
+  <U extends T>(value: U) =>
+    value;
+
+const options = satisfies<AwsOptions>()({
+  assume_role: {
+    label: i18n.translate('xpack.csp.awsIntegration.assumeRoleLabel', {
+      defaultMessage: 'Assume role',
+    }),
+    info: AssumeRoleDescription,
+    fields: {
+      role_arn: {
+        label: i18n.translate('xpack.csp.awsIntegration.roleArnLabel', {
+          defaultMessage: 'Role ARN',
+        }),
+      },
+    },
+  },
+  direct_access_key: {
+    label: i18n.translate('xpack.csp.awsIntegration.directAccessKeyLabel', {
+      defaultMessage: 'Direct access keys',
+    }),
+    info: DirectAccessKeysDescription,
+    fields: {
+      access_key_id: { label: AWS_FIELD_LABEL.access_key_id },
+      secret_access_key: { label: AWS_FIELD_LABEL.secret_access_key, type: 'password' },
+    },
+  },
+  temporary_keys: {
+    info: TemporaryKeysDescription,
+    label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
+      defaultMessage: 'Temporary keys',
+    }),
+    fields: {
+      access_key_id: { label: AWS_FIELD_LABEL.access_key_id },
+      secret_access_key: { label: AWS_FIELD_LABEL.secret_access_key, type: 'password' },
+      session_token: {
+        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
+          defaultMessage: 'Session Token',
+        }),
+      },
+    },
+  },
+  shared_credentials: {
+    label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialLabel', {
+      defaultMessage: 'Shared credentials',
+    }),
+    info: SharedCredentialsDescription,
+    fields: {
+      shared_credential_file: {
+        label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialFileLabel', {
+          defaultMessage: 'Shared Credential File',
+        }),
+      },
+      credential_profile_name: {
+        label: i18n.translate('xpack.csp.awsIntegration.credentialProfileNameLabel', {
+          defaultMessage: 'Credential Profile Name',
+        }),
+      },
+    },
+  },
+} as const);
+
+type AwsCredentialsType = keyof typeof options;
+const DEFAULT_AWS_VARS_TYPE: AwsCredentialsType = 'assume_role';
+const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
+  id: value as AwsCredentialsType,
+  label: options[value as keyof typeof options].label,
+}));
 
 interface Props {
   newPolicy: NewPackagePolicy;
@@ -166,20 +189,29 @@ interface Props {
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
 }
 
-const getAwsCredentialVars = (input: NewPackagePolicyInput, fields: readonly string[]) =>
-  Object.fromEntries(
-    Object.entries(input.streams[0].vars || {}).filter(([k]) => fields.includes(k))
-  );
+const getInputVarsFields = (
+  input: NewPackagePolicyInput,
+  fields: AwsOptions[keyof AwsOptions]['fields']
+) =>
+  Object.entries(input.streams[0].vars || {})
+    .filter(([id]) => id in fields)
+    .map(([id, inputVar]) => {
+      const field = fields[id];
+      return {
+        id,
+        label: field.label,
+        type: field.type || 'text',
+        value: inputVar.value,
+      } as const;
+    });
 
 const getDefaultAwsType = (input: Props['input']): AwsCredentialsType =>
-  input?.streams[0].vars?.['aws.credentials.type']?.value || DEFAULT_AWS_VARS_GROUP;
+  input?.streams[0]?.vars?.['aws.credentials.type']?.value || DEFAULT_AWS_VARS_TYPE;
 
 export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
   const awsCredentialsType = getDefaultAwsType(input);
-  const awsCredentialVars = getAwsCredentialVars(input, AWS_FIELDS[awsCredentialsType] || []);
-  const awsCredentialVarsKeys = Object.keys(awsCredentialVars) as Array<
-    Fields[keyof Fields][number]
-  >;
+  const group = options[awsCredentialsType];
+  const fields = getInputVarsFields(input, group.fields);
 
   return (
     <>
@@ -190,23 +222,20 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
           let policy = getPolicyWithInputVars(newPolicy, 'aws.credentials.type', optionId);
 
           // reset all form group values when changing group
-          awsCredentialVarsKeys.forEach((key) => {
-            policy = getPolicyWithInputVars(policy, key, '');
+          fields.forEach((field) => {
+            policy = getPolicyWithInputVars(policy, field.id, '');
           });
 
           updatePolicy(policy);
         }}
       />
       <EuiSpacer size="m" />
-      {AWS_VARS_INFO[awsCredentialsType]}
+      {group.info}
+      {DocsLink}
       <EuiSpacer />
       <AwsInputVarFields
         onChange={(key, value) => updatePolicy(getPolicyWithInputVars(newPolicy, key, value))}
-        fields={awsCredentialVarsKeys.map((field) => ({
-          id: field,
-          value: awsCredentialVars[field].value,
-          label: AWS_FIELD_LABEL[field],
-        }))}
+        fields={fields}
       />
       <EuiSpacer />
     </>
@@ -227,31 +256,33 @@ const AwsCredentialTypeSelector = ({
     onChange={(id) => onChange(id as AwsCredentialsType)}
   />
 );
-
 const AwsInputVarFields = ({
   fields,
   onChange,
 }: {
-  fields: Array<{ label: string; id: string; value: string }>;
+  fields: Array<AwsOptions[keyof AwsOptions]['fields'][number] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
 }) => (
   <div>
     {fields.map((field) => (
       <EuiFormRow key={field.id} label={field.label} fullWidth>
-        {AWS_SECRET_FIELDS.includes(field.id as typeof AWS_SECRET_FIELDS[number]) ? (
-          <EuiFieldPassword
-            type="dual"
-            fullWidth
-            value={field.value || ''}
-            onChange={(event) => onChange(field.id, event.target.value)}
-          />
-        ) : (
-          <EuiFieldText
-            fullWidth
-            value={field.value || ''}
-            onChange={(event) => onChange(field.id, event.target.value)}
-          />
-        )}
+        <>
+          {field.type === 'password' && (
+            <EuiFieldPassword
+              type="dual"
+              fullWidth
+              value={field.value || ''}
+              onChange={(event) => onChange(field.id, event.target.value)}
+            />
+          )}
+          {field.type === 'text' && (
+            <EuiFieldText
+              fullWidth
+              value={field.value || ''}
+              onChange={(event) => onChange(field.id, event.target.value)}
+            />
+          )}
+        </>
       </EuiFormRow>
     ))}
   </div>

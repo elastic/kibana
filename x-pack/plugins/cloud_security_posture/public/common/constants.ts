@@ -18,7 +18,6 @@ import {
 } from '../../common/constants';
 
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
-import k8sLogo from '../assets/icons/k8s_logo.svg';
 
 export const statusColors = {
   passed: euiThemeVars.euiColorVis0,
@@ -118,7 +117,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.benchmarkTitle', {
           defaultMessage: 'CIS Kubernetes',
         }),
-        icon: k8sLogo,
+        icon: 'logoKubernetes',
       },
       {
         type: CLOUDBEAT_EKS,
