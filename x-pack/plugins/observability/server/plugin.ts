@@ -24,9 +24,9 @@ import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/as
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 
 import {
-  observabilityGuideId,
-  observabilityGuideConfig,
-} from '../common/guided_onboarding/observability_guide_config';
+  kubernetesGuideId,
+  kubernetesGuideConfig,
+} from '../common/guided_onboarding/kubernetes_guide_config';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -191,7 +191,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     /**
      * Register a config for the observability guide
      */
-    plugins.guidedOnboarding.registerGuideConfig(observabilityGuideId, observabilityGuideConfig);
+    plugins.guidedOnboarding.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
 
     return {
       getAlertDetailsConfig() {
