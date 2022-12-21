@@ -719,20 +719,19 @@ import rule706 from './credential_access_potential_linux_ssh_bruteforce.json';
 import rule707 from './credential_access_potential_linux_ssh_bruteforce_root.json';
 import rule708 from './privilege_escalation_container_created_with_excessive_linux_capabilities.json';
 import rule709 from './impact_kms_cmk_disabled_or_scheduled_for_deletion.json';
-import rule710 from './guided_onborading_sample_rule.json';
-import rule711 from './persistence_powersshell_profiles.json';
-import rule712 from './command_and_control_non_standard_ssh_port.json';
-import rule713 from './defense_evasion_masquerading_space_after_filename.json';
-import rule714 from './privilege_escalation_tokenmanip_sedebugpriv_enabled.json';
-import rule715 from './privilege_escalation_via_ppid_spoofing.json';
-import rule716 from './privilege_escalation_via_token_theft.json';
-import rule717 from './credential_access_wireless_creds_dumping.json';
-import rule718 from './defense_evasion_persistence_account_tokenfilterpolicy.json';
-import rule719 from './discovery_files_dir_systeminfo_via_cmd.json';
-import rule720 from './credential_access_ldap_attributes.json';
-import rule721 from './privilege_escalation_credroaming_ldap.json';
-import rule722 from './execution_reverse_shell_via_named_pipe.json';
-import rule723 from './multiple_alerts_different_tactics_host.json';
+import rule710 from './persistence_powersshell_profiles.json';
+import rule711 from './command_and_control_non_standard_ssh_port.json';
+import rule712 from './defense_evasion_masquerading_space_after_filename.json';
+import rule713 from './privilege_escalation_tokenmanip_sedebugpriv_enabled.json';
+import rule714 from './privilege_escalation_via_ppid_spoofing.json';
+import rule715 from './privilege_escalation_via_token_theft.json';
+import rule716 from './credential_access_wireless_creds_dumping.json';
+import rule717 from './defense_evasion_persistence_account_tokenfilterpolicy.json';
+import rule718 from './discovery_files_dir_systeminfo_via_cmd.json';
+import rule719 from './credential_access_ldap_attributes.json';
+import rule720 from './privilege_escalation_credroaming_ldap.json';
+import rule721 from './execution_reverse_shell_via_named_pipe.json';
+import rule722 from './multiple_alerts_different_tactics_host.json';
 
 export const rawRules = [
   rule1,
@@ -1457,5 +1456,4 @@ export const rawRules = [
   rule720,
   rule721,
   rule722,
-  rule723,
 ];
