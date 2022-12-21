@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { getTestRunner } from '../../utils/test_runner';
 
-import response from './fixtures/overview.json';
+import response from '../../fixtures/apm/overview.json';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
