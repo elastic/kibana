@@ -10,7 +10,7 @@ import type { AuthenticatedElasticUser } from '../../common/lib/kibana';
 import type { User } from '../../../common/api';
 import type { FilterMode as RecentCasesFilterMode } from './types';
 
-export interface ReporterFiler {
+export interface ReporterFilter {
   currentUserProfile?: UserProfile;
   currentUser: Partial<AuthenticatedElasticUser> | null;
   isLoadingCurrentUserProfile: boolean;
@@ -27,7 +27,7 @@ export const getReporterFilter = ({
   currentUser,
   isLoadingCurrentUserProfile,
   recentCasesFilterBy,
-}: ReporterFiler): { reporters: User[] } => {
+}: ReporterFilter): { reporters: User[] } => {
   const emptyReportersFilter = { reporters: [] };
 
   if (recentCasesFilterBy !== 'myRecentlyReported') {

@@ -8,7 +8,7 @@
 import type { User } from '../../../common/api';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { getReporterFilter, getAssigneeFilter } from './get_filter_options';
-import type { ReporterFiler, AssigneeFilter } from './get_filter_options';
+import type { ReporterFilter, AssigneeFilter } from './get_filter_options';
 
 describe('filter options', () => {
   const currentUserProfile = userProfiles[0];
@@ -18,7 +18,7 @@ describe('filter options', () => {
     username: 'elastic',
   };
 
-  const props: ReporterFiler = {
+  const props: ReporterFilter = {
     currentUserProfile,
     currentUser,
     isLoadingCurrentUserProfile: false,

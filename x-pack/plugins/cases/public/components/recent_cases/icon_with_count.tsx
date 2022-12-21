@@ -6,23 +6,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
-import type { Property } from 'csstype';
 import React from 'react';
 import styled from 'styled-components';
 
-type IconColor =
-  | 'default'
-  | 'subdued'
-  | 'success'
-  | 'accent'
-  | 'danger'
-  | 'warning'
-  | 'ghost'
-  | Property.Color
-  | undefined;
-
 const Icon = styled(EuiIcon)`
-  margin-right: 8px;
+  margin-right: 4px;
 `;
 
 const FlexGroup = styled(EuiFlexGroup)`
@@ -35,17 +23,16 @@ export const IconWithCount = React.memo<{
   count: number;
   icon: string;
   tooltip: string;
-  color?: IconColor;
-}>(({ count, icon, tooltip, color }) => (
+}>(({ count, icon, tooltip }) => (
   <OuterContainer>
     <EuiToolTip content={tooltip}>
       <FlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <Icon color={color ?? 'subdued'} size="s" type={icon} />
+          <Icon color="default" size="s" type={icon} />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiText color={color ?? 'subdued'} size="xs">
+          <EuiText color="default" size="xs">
             {count}
           </EuiText>
         </EuiFlexItem>

@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import { configure, waitFor } from '@testing-library/react';
-import { act } from '@testing-library/react-hooks/dom';
-import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { configure, waitFor, fireEvent } from '@testing-library/react';
 import type { RecentCasesProps } from '.';
 import RecentCases from '.';
 import type { AppMockRenderer } from '../../common/mock';
@@ -120,17 +117,9 @@ describe('RecentCases', () => {
     });
 
     // apply the filter
-    act(() => {
-      userEvent.click(getByTestId('recent-cases-filter'));
-    });
+    const recentCasesFilter = getByTestId('recent-cases-filter');
 
-    await waitForEuiPopoverOpen();
-
-    const myRecentCasesElement = getByTestId('recent-cases-filter-myRecentlyReported');
-
-    act(() => {
-      userEvent.click(myRecentCasesElement);
-    });
+    fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyReported' } });
 
     await waitFor(() =>
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
@@ -150,17 +139,7 @@ describe('RecentCases', () => {
     );
 
     // remove the filter
-    act(() => {
-      userEvent.click(getByTestId('recent-cases-filter'));
-    });
-
-    await waitForEuiPopoverOpen();
-
-    const recentCasesElement = getByTestId('recent-cases-filter-recentlyCreated');
-
-    act(() => {
-      userEvent.click(recentCasesElement);
-    });
+    fireEvent.change(recentCasesFilter, { target: { value: 'recentlyCreated' } });
 
     await waitFor(() =>
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
@@ -188,17 +167,9 @@ describe('RecentCases', () => {
     });
 
     // apply the filter
-    act(() => {
-      userEvent.click(getByTestId('recent-cases-filter'));
-    });
+    const recentCasesFilter = getByTestId('recent-cases-filter');
 
-    await waitForEuiPopoverOpen();
-
-    const myRecentCasesElement = getByTestId('recent-cases-filter-myRecentlyReported');
-
-    act(() => {
-      userEvent.click(myRecentCasesElement);
-    });
+    fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyReported' } });
 
     await waitFor(() => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
@@ -230,17 +201,9 @@ describe('RecentCases', () => {
     });
 
     // apply the filter
-    act(() => {
-      userEvent.click(getByTestId('recent-cases-filter'));
-    });
+    const recentCasesFilter = getByTestId('recent-cases-filter');
 
-    await waitForEuiPopoverOpen();
-
-    const myRecentCasesElement = getByTestId('recent-cases-filter-myRecentlyAssigned');
-
-    act(() => {
-      userEvent.click(myRecentCasesElement);
-    });
+    fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyAssigned' } });
 
     await waitFor(() =>
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
@@ -253,17 +216,7 @@ describe('RecentCases', () => {
     );
 
     // remove the filter
-    act(() => {
-      userEvent.click(getByTestId('recent-cases-filter'));
-    });
-
-    await waitForEuiPopoverOpen();
-
-    const recentCasesElement = getByTestId('recent-cases-filter-recentlyCreated');
-
-    act(() => {
-      userEvent.click(recentCasesElement);
-    });
+    fireEvent.change(recentCasesFilter, { target: { value: 'recentlyCreated' } });
 
     await waitFor(() =>
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
@@ -291,17 +244,9 @@ describe('RecentCases', () => {
     });
 
     // apply the filter
-    act(() => {
-      userEvent.click(getByTestId('recent-cases-filter'));
-    });
+    const recentCasesFilter = getByTestId('recent-cases-filter');
 
-    await waitForEuiPopoverOpen();
-
-    const myRecentCasesElement = getByTestId('recent-cases-filter-myRecentlyAssigned');
-
-    act(() => {
-      userEvent.click(myRecentCasesElement);
-    });
+    fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyAssigned' } });
 
     await waitFor(() =>
       expect(useGetCasesMock).toHaveBeenLastCalledWith({

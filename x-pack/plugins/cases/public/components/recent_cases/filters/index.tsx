@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import type { FilterMode } from '../types';
@@ -22,7 +22,7 @@ const MY_RECENTLY_CREATED_ID = 'recentlyCreated';
 const MY_RECENTLY_REPORTED_ID = 'myRecentlyReported';
 const MY_RECENTLY_ASSIGNED_ID = 'myRecentlyAssigned';
 
-const caseFilterOptions: RecentCasesFilterOptions[] = [
+export const caseFilterOptions: RecentCasesFilterOptions[] = [
   {
     id: MY_RECENTLY_CREATED_ID,
     label: i18n.RECENTLY_CREATED_CASES,
@@ -43,40 +43,30 @@ export const RecentCasesFilters = React.memo<{
   hasCurrentUserInfo: boolean;
   isLoading?: boolean;
 }>(({ filterBy, setFilterBy, hasCurrentUserInfo, isLoading = false }) => {
-  const options: Array<EuiSuperSelectOption<string>> = caseFilterOptions.map((option) => {
+  const options: EuiSelectOption[] = caseFilterOptions.map((option) => {
     return {
       value: option.id,
-      inputDisplay: (
-        <EuiFlexGroup
-          gutterSize="xs"
-          alignItems={'center'}
-          responsive={false}
-          data-test-subj={`recent-cases-filter-${option.id}`}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{option.label}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      text: option.label,
     };
   });
 
   const onChange = useCallback(
-    (filterMode: string) => {
-      setFilterBy(filterMode as FilterMode);
+    (e) => {
+      setFilterBy(e.target.value as FilterMode);
     },
     [setFilterBy]
   );
 
   return (
-    <EuiSuperSelect
-      disabled={!hasCurrentUserInfo}
-      fullWidth={true}
-      isLoading={isLoading}
-      options={options}
-      valueOfSelected={filterBy}
-      onChange={onChange}
+    <EuiSelect
       data-test-subj="recent-cases-filter"
+      disabled={!hasCurrentUserInfo}
+      fullWidth
+      hasNoInitialSelection
+      isLoading={isLoading}
+      onChange={onChange}
+      options={options}
+      value={filterBy}
     />
   );
 });

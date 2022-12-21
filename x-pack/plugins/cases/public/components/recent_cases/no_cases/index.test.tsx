@@ -36,7 +36,8 @@ describe('NoCases', () => {
       </TestProviders>
     );
 
-    expect(result.getByTestId(`no-cases-readonly`)).toBeTruthy();
+    expect(result.getByTestId(`no-cases-readonly`)).toBeInTheDocument();
+    expect(result.queryByTestId('no-cases-create-case')).not.toBeInTheDocument();
   });
 
   it('displays correct message when no cases are reported by user', () => {
@@ -45,7 +46,7 @@ describe('NoCases', () => {
         <NoCases recentCasesFilterBy="myRecentlyReported" />
       </TestProviders>
     );
-    expect(result.getByTestId(`no-cases-create-case`)).toBeTruthy();
+    expect(result.getByTestId(`no-cases-create-case`)).toBeInTheDocument();
   });
 
   it('displays correct message when no cases are assigned to user', () => {
@@ -54,6 +55,6 @@ describe('NoCases', () => {
         <NoCases recentCasesFilterBy="myRecentlyAssigned" />
       </TestProviders>
     );
-    expect(result.getByTestId(`no-cases-assigned-to-me`)).toBeTruthy();
+    expect(result.getByTestId(`no-cases-assigned-to-me`)).toBeInTheDocument();
   });
 });
