@@ -37,7 +37,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.fleet.developer.bundledPackageLocation=${getFullPath('/fleet_bundled_packages')}`,
+        `--xpack.fleet.developer.bundledPackageLocation=${getFullPath('/fixtures/packages')}`,
         ...getPackagesArgs(),
       ],
     },
