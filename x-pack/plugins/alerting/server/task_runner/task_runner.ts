@@ -37,7 +37,6 @@ import {
   RuleTaskState,
   RuleTypeRegistry,
   RawRuleLastRun,
-  ExecutorType
 } from '../types';
 import { asErr, asOk, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
