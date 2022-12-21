@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
+  EuiCallOut,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
@@ -15,6 +16,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
@@ -78,6 +80,37 @@ const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
 const FlexEndEuiFlexItem = styled(EuiFlexItem)`
   align-self: flex-end;
 `;
+
+const InactiveAgentsCallout: React.FC<{
+  onShowInactiveClick: () => void;
+}> = ({ onShowInactiveClick }) => {
+  return (
+    <EuiCallOut
+      size="m"
+      title={
+        <FormattedMessage
+          id="xpack.fleet.agentList.inactiveAgentsCalloutText"
+          defaultMessage="Some agents are inactive or unenrolled"
+        />
+      }
+      iconType="iInCircle"
+    >
+      <FormattedMessage
+        id="xpack.fleet.agentList.inactiveAgentsCalloutText"
+        defaultMessage="These are not displayed by default. Use status filters to show inactive or unenrolled agents. {clickToShow}"
+        values={{
+          clickToShow: (
+            <EuiLink onClick={onShowInactiveClick}>
+              {i18n.translate('xpack.fleet.agentList.inactiveAgentsCalloutClickToShowText', {
+                defaultMessage: 'Click to add these filters',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiCallOut>
+  );
+};
 
 export const SearchAndFilterBar: React.FunctionComponent<{
   agentPolicies: AgentPolicy[];
@@ -158,10 +191,24 @@ export const SearchAndFilterBar: React.FunctionComponent<{
     onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
   };
 
+  const inactiveAgentsNotVisible =
+    totalInactiveAgents > 0 &&
+    !(selectedStatus.includes('unenrolled') || selectedStatus.includes('inactive'));
   return (
     <>
       {/* Search and filter bar */}
       <EuiFlexGroup direction="column">
+        {inactiveAgentsNotVisible && (
+          <EuiFlexItem grow={4}>
+            <InactiveAgentsCallout
+              onShowInactiveClick={() =>
+                onSelectedStatusChange(
+                  Array.from(new Set([...selectedStatus, 'unenrolled', 'inactive']))
+                )
+              }
+            />
+          </EuiFlexItem>
+        )}
         <FlexEndEuiFlexItem>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
