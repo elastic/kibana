@@ -203,15 +203,22 @@ export const SubChart: React.FC<SubChartProps> = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiText size="s">{asPercentage(percentage / 100)}</EuiText>
-              </EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexEnd">
               {sample ? (
                 <EuiFlexItem>
-                  <EuiText size="xs">{asPercentage(sample.Percentage / 100)}</EuiText>
+                  <EuiText size="m">{asPercentage(sample.Percentage / 100)}</EuiText>
                 </EuiFlexItem>
               ) : null}
+              <EuiFlexItem>
+                <EuiText size={sample ? 'xs' : 's'}>
+                  {sample
+                    ? i18n.translate('xpack.profiling.stackFrames.subChart.avg', {
+                        defaultMessage: 'avg. {percentage}',
+                        values: { percentage: asPercentage(percentage / 100) },
+                      })
+                    : asPercentage(percentage / 100)}
+                </EuiText>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
