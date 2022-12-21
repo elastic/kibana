@@ -15,7 +15,7 @@ import {
   ControlStyle,
 } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { EuiButtonGroup, EuiPanel } from '@elastic/eui';
+import { EuiButtonGroup, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
@@ -61,38 +61,46 @@ export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
   };
 
   return (
-    <EuiPanel hasBorder={true}>
-      {ControlGroupReduxWrapper && (
-        <ControlGroupReduxWrapper>
-          <ButtonControls />
-        </ControlGroupReduxWrapper>
-      )}
+    <>
+      <EuiTitle>
+        <h2>Redux example</h2>
+      </EuiTitle>
+      <EuiText>
+        <p>Use the redux context from the control group to set layout style.</p>
+      </EuiText>
+      <EuiPanel hasBorder={true}>
+        {ControlGroupReduxWrapper && (
+          <ControlGroupReduxWrapper>
+            <ButtonControls />
+          </ControlGroupReduxWrapper>
+        )}
 
-      <ControlGroupRenderer
-        onLoadComplete={async (newControlGroup) => {
-          setControlGroup(newControlGroup);
-        }}
-        getInitialInput={async (initialInput, builder) => {
-          await builder.addDataControlFromField(initialInput, {
-            dataViewId,
-            title: 'Destintion country',
-            fieldName: 'geo.dest',
-            width: 'medium',
-            grow: false,
-          });
-          await builder.addDataControlFromField(initialInput, {
-            dataViewId,
-            fieldName: 'bytes',
-            width: 'medium',
-            grow: true,
-            title: 'Bytes',
-          });
-          return {
-            ...initialInput,
-            viewMode: ViewMode.VIEW,
-          };
-        }}
-      />
-    </EuiPanel>
+        <ControlGroupRenderer
+          onLoadComplete={async (newControlGroup) => {
+            setControlGroup(newControlGroup);
+          }}
+          getInitialInput={async (initialInput, builder) => {
+            await builder.addDataControlFromField(initialInput, {
+              dataViewId,
+              title: 'Destintion country',
+              fieldName: 'geo.dest',
+              width: 'medium',
+              grow: false,
+            });
+            await builder.addDataControlFromField(initialInput, {
+              dataViewId,
+              fieldName: 'bytes',
+              width: 'medium',
+              grow: true,
+              title: 'Bytes',
+            });
+            return {
+              ...initialInput,
+              viewMode: ViewMode.VIEW,
+            };
+          }}
+        />
+      </EuiPanel>
+    </>
   );
 };

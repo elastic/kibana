@@ -14,7 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { PLUGIN_ID } from './constants';
@@ -94,56 +94,67 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
   }, [controlFilters, data, dataView, filters, query, timeRange]);
 
   return (
-    <EuiPanel hasBorder={true}>
-      <navigation.ui.TopNavMenu
-        appName={PLUGIN_ID}
-        dateRangeFrom={timeRange.from}
-        dateRangeTo={timeRange.to}
-        filters={filters}
-        indexPatterns={[dataView]}
-        onFiltersUpdated={(newFilters) => {
-          // filterManager.setFilters populates filter.meta so filter pill has pretty title
-          data.query.filterManager.setFilters(newFilters);
-          setFilters(newFilters);
-        }}
-        onQuerySubmit={({ dateRange, query: newQuery }) => {
-          setQuery(newQuery);
-          setTimeRange(dateRange);
-        }}
-        query={query}
-        showSearchBar={true}
-      />
-      <ControlGroupRenderer
-        filters={filters}
-        getInitialInput={async (initialInput, builder) => {
-          await builder.addDataControlFromField(initialInput, {
-            dataViewId: dataView.id!,
-            title: 'Destintion country',
-            fieldName: 'geo.dest',
-            width: 'medium',
-            grow: false,
-          });
-          await builder.addDataControlFromField(initialInput, {
-            dataViewId: dataView.id!,
-            fieldName: 'bytes',
-            width: 'medium',
-            grow: true,
-            title: 'Bytes',
-          });
-          return {
-            ...initialInput,
-            viewMode: ViewMode.VIEW,
-          };
-        }}
-        onLoadComplete={async (newControlGroup) => {
-          setControlGroup(newControlGroup);
-        }}
-        query={query}
-        timeRange={timeRange}
-      />
-      <EuiCallOut title="Search results">
-        {isSearching ? <EuiLoadingSpinner size="l" /> : <p>Hits: {hits}</p>}
-      </EuiCallOut>
-    </EuiPanel>
+    <>
+      <EuiTitle>
+        <h2>Search example</h2>
+      </EuiTitle>
+      <EuiText>
+        <p>
+          Pass filters, query, and time range to narrow controls. Combine search bar filters
+          with controls filters to narrow results.
+        </p>
+      </EuiText>
+      <EuiPanel hasBorder={true}>
+        <navigation.ui.TopNavMenu
+          appName={PLUGIN_ID}
+          dateRangeFrom={timeRange.from}
+          dateRangeTo={timeRange.to}
+          filters={filters}
+          indexPatterns={[dataView]}
+          onFiltersUpdated={(newFilters) => {
+            // filterManager.setFilters populates filter.meta so filter pill has pretty title
+            data.query.filterManager.setFilters(newFilters);
+            setFilters(newFilters);
+          }}
+          onQuerySubmit={({ dateRange, query: newQuery }) => {
+            setQuery(newQuery);
+            setTimeRange(dateRange);
+          }}
+          query={query}
+          showSearchBar={true}
+        />
+        <ControlGroupRenderer
+          filters={filters}
+          getInitialInput={async (initialInput, builder) => {
+            await builder.addDataControlFromField(initialInput, {
+              dataViewId: dataView.id!,
+              title: 'Destintion country',
+              fieldName: 'geo.dest',
+              width: 'medium',
+              grow: false,
+            });
+            await builder.addDataControlFromField(initialInput, {
+              dataViewId: dataView.id!,
+              fieldName: 'bytes',
+              width: 'medium',
+              grow: true,
+              title: 'Bytes',
+            });
+            return {
+              ...initialInput,
+              viewMode: ViewMode.VIEW,
+            };
+          }}
+          onLoadComplete={async (newControlGroup) => {
+            setControlGroup(newControlGroup);
+          }}
+          query={query}
+          timeRange={timeRange}
+        />
+        <EuiCallOut title="Search results">
+          {isSearching ? <EuiLoadingSpinner size="l" /> : <p>Hits: {hits}</p>}
+        </EuiCallOut>
+      </EuiPanel>
+    </>
   );
 };

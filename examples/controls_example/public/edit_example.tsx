@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
@@ -26,7 +26,7 @@ export const EditExample = () => {
 
     localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroup.getInput()));
 
-    // simulated async step timeout
+    // simulated async save await
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     setIsSaving(false);
@@ -35,8 +35,8 @@ export const EditExample = () => {
   async function onLoad() {
     setIsLoading(true);
 
-    // simulated async step timeout
-    await new Promise(resolve => setTimeout(resolve, 2500));
+    // simulated async load await
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     let input = {};
     const inputAsString = localStorage.getItem(INPUT_KEY);
@@ -53,49 +53,57 @@ export const EditExample = () => {
   }
 
   return (
-    <EuiPanel hasBorder={true}>
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            color="primary"
-            iconType="plusInCircle"
-            isDisabled={controlGroup === undefined}
-            onClick={() => {
-              controlGroup.openAddDataControlFlyout();
-            }}
-          >
-            Add control
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="primary"
-            isDisabled={controlGroup === undefined || isSaving}
-            fill
-            onClick={onSave}
-            isLoading={isSaving}
-          >
-            Save
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {isLoading ? <><EuiSpacer/><EuiLoadingContent lines={1} /></> : null}
-      <ControlGroupRenderer
-        getInitialInput={async (initialInput, builder) => {
-          const persistedInput = await onLoad();
-          return {
-            ...initialInput,
-            ...persistedInput,
-            viewMode: ViewMode.EDIT,
-          };
-        }}
-        onLoadComplete={async (newControlGroup) => {
-          setControlGroup(newControlGroup);
-        }}
-      />
-    </EuiPanel>
+    <>
+      <EuiTitle>
+        <h2>Edit and save example</h2>
+      </EuiTitle>
+      <EuiText>
+        <p>Customize controls and persist state to local storage.</p>
+      </EuiText>
+      <EuiPanel hasBorder={true}>
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="primary"
+              iconType="plusInCircle"
+              isDisabled={controlGroup === undefined}
+              onClick={() => {
+                controlGroup.openAddDataControlFlyout();
+              }}
+            >
+              Add control
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="primary"
+              isDisabled={controlGroup === undefined || isSaving}
+              fill
+              onClick={onSave}
+              isLoading={isSaving}
+            >
+              Save
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {isLoading ? <><EuiSpacer/><EuiLoadingContent lines={1} /></> : null}
+        <ControlGroupRenderer
+          getInitialInput={async (initialInput, builder) => {
+            const persistedInput = await onLoad();
+            return {
+              ...initialInput,
+              ...persistedInput,
+              viewMode: ViewMode.EDIT,
+            };
+          }}
+          onLoadComplete={async (newControlGroup) => {
+            setControlGroup(newControlGroup);
+          }}
+        />
+      </EuiPanel>
+    </>
   );
 };
