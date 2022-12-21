@@ -69,6 +69,9 @@ export default async function ({ readConfigFile }) {
       management: {
         pathname: '/app/management',
       },
+      filesManagement: {
+        pathname: '/app/management/kibana/filesManagement',
+      },
       /** @obsolete "management" should be instead of "settings" **/
       settings: {
         pathname: '/app/management',
