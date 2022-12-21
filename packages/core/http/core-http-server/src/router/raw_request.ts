@@ -13,7 +13,7 @@ import type { Headers } from './headers';
 
 /**
  * Represents a fake raw request.
- *
+ * Can be used to instantiate a `KibanaRequest`.
  */
 export interface FakeRawRequest {
   /** The headers associated with the request. */

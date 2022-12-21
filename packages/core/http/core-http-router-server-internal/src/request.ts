@@ -32,7 +32,6 @@ import {
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
 import { RouteValidator } from './validator';
-import { getFakeSocket } from './fake_socket';
 
 const requestSymbol = Symbol('request');
 
@@ -150,7 +149,7 @@ export class CoreKibanaRequest<
     this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = isRealRawRequest(request)
       ? new KibanaSocket(request.raw.req.socket)
-      : getFakeSocket();
+      : KibanaSocket.getFakeSocket();
     this.events = this.getEvents(request);
 
     this.auth = {
