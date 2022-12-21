@@ -244,14 +244,14 @@ describe('stripNonEcsFields', () => {
     it('should not strip valid CIDR', () => {
       const { result, removed } = stripNonEcsFields({
         source: {
-          ip: '192.168.0.0/16',
+          ip: '192.168.0.0',
           name: 'test source',
         },
       });
 
       expect(result).toEqual({
         source: {
-          ip: '192.168.0.0/16',
+          ip: '192.168.0.0',
           name: 'test source',
         },
       });
@@ -330,31 +330,10 @@ describe('stripNonEcsFields', () => {
   });
 
   describe('date field', () => {
-    it('should strip invalid format date', () => {
-      const { result, removed } = stripNonEcsFields({
-        event: {
-          created: '21/21/21',
-          category: 'start',
-        },
-      });
-
-      expect(result).toEqual({
-        event: {
-          category: 'start',
-        },
-      });
-      expect(removed).toEqual([
-        {
-          key: 'event.created',
-          value: '21/21/21',
-        },
-      ]);
-    });
-
     it('should strip invalid date', () => {
       const { result, removed } = stripNonEcsFields({
         event: {
-          created: 'non date',
+          created: true,
           category: 'start',
         },
       });
@@ -367,12 +346,12 @@ describe('stripNonEcsFields', () => {
       expect(removed).toEqual([
         {
           key: 'event.created',
-          value: 'non date',
+          value: true,
         },
       ]);
     });
 
-    it('should not strip valid date', () => {
+    it('should not strip string or number date field', () => {
       const { result, removed } = stripNonEcsFields({
         event: {
           created: '2020/12/12',

@@ -165,11 +165,27 @@ export default ({ getService }: FtrProviderContext) => {
       expect(alertSource).toHaveProperty('client.name', 'test name');
     });
 
-    // source event.created is text, ECS mapping for client.created is date
+    it('should not remove valid ips from ECS source field', async () => {
+      const ip = [
+        '127.0.0.1',
+        '::afff:4567:890a',
+        '::',
+        '::11.22.33.44',
+        '1111:2222:3333:4444:AAAA:BBBB:CCCC:DDDD',
+      ];
+      const document = { client: { ip } };
+
+      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+      expect(errors).toEqual([]);
+      expect(alertSource).toHaveProperty('client.ip', ip);
+    });
+
+    // source event.created is boolean, ECS mapping for client.created is date
     it('should remove source non date field from alert if ECS field mapping is date', async () => {
       const document = {
         event: {
-          created: 'non-valid-date',
+          created: true,
           end: '2022-12-19',
         },
       };

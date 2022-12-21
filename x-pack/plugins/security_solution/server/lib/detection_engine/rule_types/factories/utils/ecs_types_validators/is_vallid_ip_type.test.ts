@@ -12,16 +12,8 @@ describe('isValidIpType', () => {
     expect(isValidIpType('127.0.0.1')).toBe(true);
   });
 
-  it('should validate IPv4 CIDR', () => {
-    expect(isValidIpType('127.0.0.1/16')).toBe(true);
-  });
-
   it('should validate IPv6', () => {
     expect(isValidIpType('2001:db8::')).toBe(true);
-  });
-
-  it('should validate IPv6 CIDR', () => {
-    expect(isValidIpType('2001:db8::/48')).toBe(true);
   });
 
   it('should not validate invalid ip', () => {
