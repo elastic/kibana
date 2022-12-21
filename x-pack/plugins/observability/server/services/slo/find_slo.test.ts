@@ -120,10 +120,10 @@ describe('FindSLO', () => {
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
       mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
 
-      await findSLO.execute({ indicator_type: 'sli.kql.custom' });
+      await findSLO.execute({ indicator_types: ['sli.kql.custom'] });
 
       expect(mockRepository.find).toHaveBeenCalledWith(
-        { indicatorType: 'sli.kql.custom' },
+        { indicatorTypes: ['sli.kql.custom'] },
         { field: SortField.Name, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );

@@ -81,7 +81,7 @@ function toPagination(params: FindSLOParams): Pagination {
 }
 
 function toCriteria(params: FindSLOParams): Criteria {
-  return { name: params.name, indicatorType: params.indicator_type };
+  return { name: params.name, indicatorTypes: params.indicator_types };
 }
 
 function toSort(params: FindSLOParams): Sort {

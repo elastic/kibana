@@ -21,7 +21,7 @@ type ObjectValues<T> = T[keyof T];
 
 export interface Criteria {
   name?: string;
-  indicatorType?: string;
+  indicatorTypes?: string[];
 }
 
 export interface Pagination {
@@ -121,11 +121,16 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
 function buildFilterKuery(criteria: Criteria): string | undefined {
   const filters: string[] = [];
   if (!!criteria.name) {
-    filters.push(`slo.attributes.name: ${addWildcardsIfAbsent(criteria.name)}`);
+    filters.push(`(slo.attributes.name: ${addWildcardsIfAbsent(criteria.name)})`);
   }
-  if (!!criteria.indicatorType) {
-    filters.push(`slo.attributes.indicator.type: ${criteria.indicatorType}`);
+
+  if (!!criteria.indicatorTypes) {
+    const indicatorTypesFilter: string[] = criteria.indicatorTypes.map(
+      (indicatorType) => `slo.attributes.indicator.type: ${indicatorType}`
+    );
+    filters.push(`(${indicatorTypesFilter.join(' or ')})`);
   }
+
   return filters.length > 0 ? filters.join(' and ') : undefined;
 }
 
