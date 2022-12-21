@@ -108,6 +108,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: false,
+      cacheTime: 0,
     },
   },
 });
@@ -259,10 +260,9 @@ describe('rules_list component empty', () => {
   });
 
   it('renders Create rule button', async () => {
-    renderWithProviders(<RulesList />);
+    renderWithProviders(<RulesList showCreateRuleButtonInPrompt />);
 
     const createRuleEl = await screen.findByText('Create rule');
-    expect(createRuleEl).toBeInTheDocument();
     expect(screen.queryByTestId('addRuleFlyoutTitle')).not.toBeInTheDocument();
 
     fireEvent.click(createRuleEl);
@@ -393,46 +393,46 @@ describe('rules_list ', () => {
     });
 
     describe('showActionFilter prop', () => {
-      it('hides the ActionFilter component', async () => {
+      it('showActionFilter prop hides the ActionFilter component', async () => {
         renderWithProviders(<RulesList showActionFilter={false} />);
+        await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+
         expect(screen.queryAllByText('Action type')).toHaveLength(0);
       });
-      it('shows the ActionFilter component if no prop is passed', async () => {
+
+      it('showActionFilter prop shows the ActionFilter component if no prop is passed', async () => {
         renderWithProviders(<RulesList />);
-        expect(screen.queryAllByText('Action type')).toHaveLength(1);
+        expect(await screen.findAllByText('Action type')).toHaveLength(1);
       });
-      it('filters when the action type filter is changed', async () => {
+
+      it('showActionFilter prop filters when the action type filter is changed', async () => {
         renderWithProviders(<RulesList />);
         await waitFor(() => screen.getAllByTestId('actionTypeFilterButton')[0]);
         fireEvent.click(screen.getAllByTestId('actionTypeFilterButton')[0]);
         fireEvent.click(screen.getAllByTestId('actionTypetestFilterOption')[0]);
         // couldn't find better way, avoid using container! this is an exception
-        expect(screen.getAllByRole('marquee', { name: '1 active filters' }).length).toEqual(1);
+        expect(screen.getAllByRole('marquee', { name: '1 active filters' })).toHaveLength(1);
       });
     });
 
-    // review this test, we should be able to remove the act part
     describe('showCreateRuleButton prop', () => {
-      beforeEach(() => {
-        // (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-      });
-
       it('hides the Create Rule button', async () => {
         renderWithProviders(<RulesList showCreateRuleButton={false} />);
-        expect(screen.queryAllByTestId('createRuleButton').length).toEqual(0);
+        await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+
+        expect(screen.queryAllByTestId('createRuleButton')).toHaveLength(0);
       });
 
       it('shows the Create Rule button by default', async () => {
         renderWithProviders(<RulesList />);
-        await waitFor(() => screen.queryAllByTestId('createRuleButton'));
-        expect(screen.queryAllByTestId('createRuleButton').length).toEqual(1);
+        expect(await screen.findAllByTestId('createRuleButton')).toHaveLength(1);
       });
     });
 
     describe('rules_list component with items', () => {
       it('should render basic table and its row', async () => {
         renderWithProviders(<RulesList />);
-        await waitFor(() => expect(screen.queryAllByTestId('rule-row').length).toEqual(6));
+        await waitFor(() => expect(screen.queryAllByTestId('rule-row')).toHaveLength(6));
       });
 
       it('Name and rule type column', async () => {
@@ -441,11 +441,11 @@ describe('rules_list ', () => {
         let ruleNameColumns: HTMLElement[] = [];
         await waitFor(() => {
           ruleNameColumns = screen.queryAllByTestId('rulesTableCell-name');
-          return expect(ruleNameColumns.length).toEqual(mockedRulesData.length);
+          return expect(ruleNameColumns).toHaveLength(mockedRulesData.length);
         });
 
         mockedRulesData.forEach((rule, index) => {
-          expect(ruleNameColumns[index].textContent).toEqual(
+          expect(ruleNameColumns[index]).toHaveTextContent(
             `Name${rule.name}${ruleTypeFromApi.name}`
           );
         });
@@ -454,14 +454,11 @@ describe('rules_list ', () => {
       it('Tags column', async () => {
         renderWithProviders(<RulesList />);
 
-        await waitFor(() =>
-          expect(screen.queryAllByTestId('rulesTableCell-tagsPopover').length).toEqual(
-            mockedRulesData.length
-          )
+        expect(await screen.findAllByTestId('rulesTableCell-tagsPopover')).toHaveLength(
+          mockedRulesData.length
         );
         // only show tags popover if tags exist on rule
-        const tagsBadges = screen.queryAllByTestId('ruleTagBadge');
-        expect(tagsBadges.length).toEqual(
+        expect(screen.queryAllByTestId('ruleTagBadge')).toHaveLength(
           mockedRulesData.filter((data) => data.tags.length > 0).length
         );
       });
@@ -470,7 +467,7 @@ describe('rules_list ', () => {
         renderWithProviders(<RulesList />);
 
         await waitFor(() =>
-          expect(screen.queryAllByTestId('rulesTableCell-lastExecutionDate').length).toEqual(
+          expect(screen.queryAllByTestId('rulesTableCell-lastExecutionDate')).toHaveLength(
             mockedRulesData.length
           )
         );
@@ -489,10 +486,8 @@ describe('rules_list ', () => {
       it('Schedule interval column', async () => {
         renderWithProviders(<RulesList />);
 
-        await waitFor(() =>
-          expect(screen.queryAllByTestId('rulesTableCell-interval').length).toEqual(
-            mockedRulesData.length
-          )
+        expect(await screen.findAllByTestId('rulesTableCell-interval')).toHaveLength(
+          mockedRulesData.length
         );
       });
 
@@ -512,16 +507,14 @@ describe('rules_list ', () => {
         renderWithProviders(<RulesList />);
 
         // Duration column
-        await waitFor(() =>
-          expect(screen.queryAllByTestId('rulesTableCell-duration').length).toEqual(
-            mockedRulesData.length
-          )
+        expect(await screen.findAllByTestId('rulesTableCell-duration')).toHaveLength(
+          mockedRulesData.length
         );
 
         // show warning if duration is long
         await waitFor(() => screen.getAllByText('Info'));
         const durationWarningIcon = screen.getAllByText('Info');
-        expect(durationWarningIcon.length).toEqual(
+        expect(durationWarningIcon).toHaveLength(
           mockedRulesData.filter(
             (data) =>
               data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout)
@@ -536,7 +529,7 @@ describe('rules_list ', () => {
         fireEvent.mouseOver(screen.getAllByText('Duration')[0]);
 
         await waitFor(() =>
-          expect(screen.getByRole('tooltip').textContent).toEqual(
+          expect(screen.getByRole('tooltip')).toHaveTextContent(
             'The length of time it took for the rule to run (mm:ss).'
           )
         );
@@ -545,37 +538,35 @@ describe('rules_list ', () => {
       it('Last response column', async () => {
         renderWithProviders(<RulesList />);
 
-        expect((await screen.findAllByTestId('rulesTableCell-lastResponse')).length).toEqual(
+        expect(await screen.findAllByTestId('rulesTableCell-lastResponse')).toHaveLength(
           mockedRulesData.length
         );
-        expect(screen.getAllByTestId('ruleStatus-succeeded').length).toEqual(2);
-        expect(screen.getAllByTestId('ruleStatus-failed').length).toEqual(2);
-        expect(screen.getAllByTestId('ruleStatus-warning').length).toEqual(1);
+        expect(screen.getAllByTestId('ruleStatus-succeeded')).toHaveLength(2);
+        expect(screen.getAllByTestId('ruleStatus-failed')).toHaveLength(2);
+        expect(screen.getAllByTestId('ruleStatus-warning')).toHaveLength(1);
         fireEvent.mouseOver(screen.getAllByTestId('ruleStatus-failed')[0]);
 
-        expect((await screen.findAllByTestId('ruleStatus-error-tooltip'))[0].textContent).toEqual(
+        expect((await screen.findAllByTestId('ruleStatus-error-tooltip'))[0]).toHaveTextContent(
           'Error: test'
         );
-        expect(screen.getAllByTestId('rulesListAutoRefresh').length).toBeGreaterThan(0);
-        expect(screen.getAllByTestId('ruleStatus-error-license-fix').length).toEqual(1);
-        expect(screen.getAllByTestId('ruleStatus-failed')[0].textContent).toEqual('Failed');
+        expect(screen.getAllByTestId('rulesListAutoRefresh')[0]).toBeInTheDocument();
+        expect(screen.getAllByTestId('ruleStatus-error-license-fix')).toHaveLength(1);
+        expect(screen.getAllByTestId('ruleStatus-failed')[0]).toHaveTextContent('Failed');
         const failedElements = screen.getAllByTestId('ruleStatus-failed');
-        expect(failedElements[failedElements.length - 1].textContent).toEqual('License Error'); // last element
+        expect(failedElements[failedElements.length - 1]).toHaveTextContent('License Error'); // last element
       });
 
       it('Status control column', async () => {
         renderWithProviders(<RulesList />);
 
         await waitFor(() => screen.getAllByTestId('rulesTableCell-status')[0]);
-        expect(screen.getAllByTestId('rulesTableCell-status').length).toEqual(
-          mockedRulesData.length
-        );
+        expect(screen.getAllByTestId('rulesTableCell-status')).toHaveLength(mockedRulesData.length);
       });
 
       it('Monitoring column', async () => {
         renderWithProviders(<RulesList />);
         await waitFor(() => screen.getAllByTestId('rulesTableCell-successRatio')[0]);
-        expect(screen.getAllByTestId('rulesTableCell-successRatio').length).toEqual(
+        expect(screen.getAllByTestId('rulesTableCell-successRatio')).toHaveLength(
           mockedRulesData.length
         );
 
@@ -583,11 +574,11 @@ describe('rules_list ', () => {
 
         mockedRulesData.forEach((rule, index) => {
           if (rule.monitoring) {
-            expect(ratios[index].textContent).toEqual(
+            expect(ratios[index]).toHaveTextContent(
               `${rule.monitoring.run.calculated_metrics.success_ratio * 100}%`
             );
           } else {
-            expect(ratios[index].textContent).toEqual(`N/A`);
+            expect(ratios[index]).toHaveTextContent(`N/A`);
           }
         });
       });
@@ -609,22 +600,20 @@ describe('rules_list ', () => {
         });
 
         fireEvent.mouseOver(percentiles[0]);
-        expect(percentiles[0].textContent).toEqual('03:20');
-        expect((await screen.findByTestId('rule-duration-format-tooltip')).textContent).toBe(
+        expect(percentiles[0]).toHaveTextContent('03:20');
+        expect(await screen.findByTestId('rule-duration-format-tooltip')).toHaveTextContent(
           '200,000 ms'
         );
         fireEvent.mouseLeave(percentiles[0]);
 
         fireEvent.mouseOver(percentiles[1]);
-        expect(percentiles[1].textContent).toEqual('00:00');
-        expect((await screen.findByTestId('rule-duration-format-tooltip')).textContent).toBe(
-          '0 ms'
-        );
+        expect(percentiles[1]).toHaveTextContent('00:00');
+        expect(await screen.findByTestId('rule-duration-format-tooltip')).toHaveTextContent('0 ms');
         fireEvent.mouseLeave(percentiles[1]);
 
         fireEvent.mouseOver(percentiles[5]);
-        expect(percentiles[1].textContent).toEqual('00:00');
-        expect((await screen.findByTestId('rule-duration-format-tooltip')).textContent).toBe('N/A');
+        expect(percentiles[1]).toHaveTextContent('00:00');
+        expect(await screen.findByTestId('rule-duration-format-tooltip')).toHaveTextContent('N/A');
       });
 
       it('Click column to sort by P50', async () => {
@@ -663,7 +652,7 @@ describe('rules_list ', () => {
         await waitFor(() => expect(screen.getByTestId('percentileSelectablePopover-selectable')));
 
         const percentileOptions = screen.getAllByRole('option');
-        expect(percentileOptions.length).toEqual(3);
+        expect(percentileOptions).toHaveLength(3);
       });
 
       it('Select P95', async () => {
@@ -687,11 +676,11 @@ describe('rules_list ', () => {
 
         mockedRulesData.forEach((rule, index) => {
           if (typeof rule.monitoring?.run.calculated_metrics.p95 === 'number') {
-            expect(percentiles[index].textContent).toEqual(
+            expect(percentiles[index]).toHaveTextContent(
               getFormattedDuration(rule.monitoring.run.calculated_metrics.p95)
             );
           } else {
-            expect(percentiles[index].textContent).toEqual('N/A');
+            expect(percentiles[index]).toHaveTextContent('N/A');
           }
         });
       });
@@ -736,9 +725,7 @@ describe('rules_list ', () => {
         fireEvent.click(screen.getByTestId('ruleStatus-error-license-fix'));
 
         expect(screen.queryAllByTestId('manageLicenseModal').length).toBeGreaterThan(0);
-        expect(screen.getByTestId('confirmModalConfirmButton').textContent).toEqual(
-          'Manage license'
-        );
+        expect(screen.getByTestId('confirmModalConfirmButton')).toHaveTextContent('Manage license');
         fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
         expect(global.open).toHaveBeenCalled();
       });
@@ -818,15 +805,11 @@ describe('rules_list ', () => {
         //   failed: 3,
         //   warning: 6,
         // }
-        expect((await screen.findByTestId('totalSucceededRulesCount')).textContent).toEqual(
+        expect(await screen.findByTestId('totalSucceededRulesCount')).toHaveTextContent(
           'Succeeded: 3'
         );
-        expect((await screen.findByTestId('totalFailedRulesCount')).textContent).toEqual(
-          'Failed: 3'
-        );
-        expect((await screen.findByTestId('totalWarningRulesCount')).textContent).toEqual(
-          'Warning: 6'
-        );
+        expect(await screen.findByTestId('totalFailedRulesCount')).toHaveTextContent('Failed: 3');
+        expect(await screen.findByTestId('totalWarningRulesCount')).toHaveTextContent('Warning: 6');
       });
 
       it('does not render the status filter if the feature flag is off', async () => {
@@ -836,8 +819,9 @@ describe('rules_list ', () => {
 
       it('renders the status filter if the experiment is on', async () => {
         (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-
         renderWithProviders(<RulesList />);
+        await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+
         expect(screen.queryByTestId('ruleStatusFilter')).toBeInTheDocument();
       });
 
@@ -929,15 +913,16 @@ describe('rules_list ', () => {
         await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
         const selectActionButtons = document.body.querySelectorAll('.euiButtonIcon[disabled]');
-        expect(selectActionButtons.length).toEqual(2);
+        expect(selectActionButtons).toHaveLength(2);
       });
 
       it('rule list items with actions are not editable if canExecuteAction is false', async () => {
         const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
         hasExecuteActionsCapability.mockReturnValue(false);
         renderWithProviders(<RulesList />);
+        await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-        expect(document.body.querySelectorAll('button.euiButtonIcon[disabled]').length).toEqual(8);
+        expect(document.body.querySelectorAll('button.euiButtonIcon[disabled]')).toHaveLength(8);
         hasExecuteActionsCapability.mockReturnValue(true);
       });
 
@@ -966,7 +951,8 @@ describe('rules_list ', () => {
 
         it('not renders create rule button', async () => {
           renderWithProviders(<RulesList />);
-          expect(screen.queryAllByTestId('createRuleButton').length).toEqual(0);
+          await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+          expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
         });
       });
     });
@@ -1144,6 +1130,8 @@ describe('rules_list ', () => {
         ruleParamsExpression: jest.fn(),
         requiresAppContext: true,
       };
+      actionTypeRegistry = actionTypeRegistryMock.create();
+      ruleTypeRegistry = ruleTypeRegistryMock.create();
       ruleTypeRegistry.has.mockReturnValue(true);
       ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
       useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
@@ -1159,158 +1147,224 @@ describe('rules_list ', () => {
     describe('filteredRuleTypes prop', () => {
       it('renders only rules for the specified rule types', async () => {
         renderWithProviders(<RulesList filteredRuleTypes={filteredRuleTypes} />);
-        await waitFor(() => expect(screen.queryAllByTestId('rule-row').length).toEqual(2));
+        await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+
+        expect(await screen.findAllByTestId('rule-row')).toHaveLength(2);
       });
     });
   });
 });
 
-// describe('rules_list with show only capability', () => {
-//   beforeEach(() => {
-//     loadRulesWithKueryFilter.mockResolvedValue({
-//       page: 1,
-//       perPage: 10000,
-//       total: 2,
-//       data: [
-//         {
-//           id: '1',
-//           name: 'test rule',
-//           tags: ['tag1'],
-//           enabled: true,
-//           ruleTypeId: 'test_rule_type',
-//           schedule: { interval: '5d' },
-//           actions: [],
-//           params: { name: 'test rule type name' },
-//           scheduledTaskId: null,
-//           createdBy: null,
-//           updatedBy: null,
-//           apiKeyOwner: null,
-//           throttle: '1m',
-//           muteAll: false,
-//           mutedInstanceIds: [],
-//           executionStatus: {
-//             status: 'active',
-//             lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-//             error: null,
-//           },
-//         },
-//         {
-//           id: '2',
-//           name: 'test rule 2',
-//           tags: ['tag1'],
-//           enabled: true,
-//           ruleTypeId: 'test_rule_type',
-//           schedule: { interval: '5d' },
-//           actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
-//           params: { name: 'test rule type name' },
-//           scheduledTaskId: null,
-//           createdBy: null,
-//           updatedBy: null,
-//           apiKeyOwner: null,
-//           throttle: '1m',
-//           muteAll: false,
-//           mutedInstanceIds: [],
-//           executionStatus: {
-//             status: 'active',
-//             lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-//             error: null,
-//           },
-//         },
-//       ],
-//     });
-//     loadActionTypes.mockResolvedValue([
-//       {
-//         id: 'test',
-//         name: 'Test',
-//       },
-//       {
-//         id: 'test2',
-//         name: 'Test2',
-//       },
-//     ]);
-//     loadAllActions.mockResolvedValue([]);
-//   });
-//
-// afterEach(() => {
-//   jest.clearAllMocks();
-//   queryClient.clear();
-//   cleanup();
-// });
-//
-//   describe('rules_list with enabled items', () => {
-//     beforeEach(() => {
-//       loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
-//       const ruleTypeMock: RuleTypeModel = {
-//         id: 'test_rule_type',
-//         iconClass: 'test',
-//         description: 'Rule when testing',
-//         documentationUrl: 'https://localhost.local/docs',
-//         validate: () => {
-//           return { errors: {} };
-//         },
-//         ruleParamsExpression: jest.fn(),
-//         requiresAppContext: true,
-//       };
-//       ruleTypeRegistry.has.mockReturnValue(true);
-//       ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
-//       useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
-//       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-//     });
-//     it('renders table of rules with edit button disabled', async () => {
-renderWithProviders(<RulesList />);
-//       expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
-//       expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-//       expect(wrapper.find('[data-test-subj="editActionHoverButton"]')).toHaveLength(0);
-//     });
-//     it('renders table of rules with delete button disabled', async () => {
-//       const { hasAllPrivilege } = jest.requireMock('../../../lib/capabilities');
-//       hasAllPrivilege.mockReturnValue(false);
-renderWithProviders(<RulesList />);
-//       expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
-//       expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-//       expect(wrapper.find('[data-test-subj="deleteActionHoverButton"]')).toHaveLength(0);
-//       hasAllPrivilege.mockReturnValue(true);
-//     });
-//     it('renders table of rules with actions menu collapsedItemActions', async () => {
-renderWithProviders(<RulesList />);
-//       expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
-//       expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-//       expect(wrapper.find('[data-test-subj="collapsedItemActions"]').length).toBeGreaterThan(0);
-//     });
-//   });
-//   describe('rules_list with disabled items', () => {
-//     beforeEach(() => {
-//       loadRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi()]);
-//       ruleTypeRegistry.has.mockReturnValue(false);
-//     });
-//     it('renders rules list with disabled indicator if disabled due to license', async () => {
-//       await setup();
-//       expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
-//       expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-//       expect(wrapper.find('EuiTableRow').at(0).prop('className')).toEqual('');
-//       expect(wrapper.find('EuiTableRow').at(1).prop('className')?.trim()).toEqual(
-//         'actRulesList__tableRowDisabled'
-//       );
-//       expect(wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').length).toBe(
-//         1
-//       );
-//       expect(
-//         wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').props().type
-//       ).toEqual('questionInCircle');
-//       expect(
-//         wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').props().content
-//       ).toEqual('This rule type requires a Platinum license.');
-//     });
-//     it('clicking the notify badge shows the snooze panel', async () => {
-//       await setup();
-//       expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeFalsy();
-//       wrapper
-//         .find('[data-test-subj="rulesTableCell-rulesListNotify"]')
-//         .first()
-//         .simulate('mouseenter');
-//       expect(wrapper.find('[data-test-subj="rulesListNotifyBadge"]').exists()).toBeTruthy();
-//       wrapper.find('[data-test-subj="rulesListNotifyBadge-unsnoozed"]').first().simulate('click');
-//       expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
-//     });
-//   });
-// });
+describe('rules_list with show only capability', () => {
+  beforeEach(() => {
+    loadActionTypes.mockResolvedValue([
+      {
+        id: 'test',
+        name: 'Test',
+      },
+      {
+        id: 'test2',
+        name: 'Test2',
+      },
+    ]);
+    loadAllActions.mockResolvedValue([]);
+    loadRuleAggregationsWithKueryFilter.mockResolvedValue({
+      ruleEnabledStatus: { enabled: 2, disabled: 0 },
+      ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
+      ruleMutedStatus: { muted: 0, unmuted: 2 },
+      ruleTags,
+    });
+    loadRuleTags.mockResolvedValue({
+      ruleTags,
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
+  });
+
+  describe('rules_list with enabled items', () => {
+    beforeEach(() => {
+      loadRulesWithKueryFilter.mockResolvedValue({
+        page: 1,
+        perPage: 10000,
+        total: 2,
+        data: [
+          {
+            id: '1',
+            name: 'test rule',
+            tags: ['tag1'],
+            enabled: true,
+            ruleTypeId: 'test_rule_type',
+            schedule: { interval: '5d' },
+            actions: [],
+            params: { name: 'test rule type name' },
+            scheduledTaskId: null,
+            createdBy: null,
+            updatedBy: null,
+            apiKeyOwner: null,
+            throttle: '1m',
+            muteAll: false,
+            mutedInstanceIds: [],
+            executionStatus: {
+              status: 'active',
+              lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+              error: null,
+            },
+          },
+          {
+            id: '2',
+            name: 'test rule 2',
+            tags: ['tag1'],
+            enabled: true,
+            ruleTypeId: 'test_rule_type',
+            schedule: { interval: '5d' },
+            actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
+            params: { name: 'test rule type name' },
+            scheduledTaskId: null,
+            createdBy: null,
+            updatedBy: null,
+            apiKeyOwner: null,
+            throttle: '1m',
+            muteAll: false,
+            mutedInstanceIds: [],
+            executionStatus: {
+              status: 'active',
+              lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+              error: null,
+            },
+          },
+        ],
+      });
+      loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+      const ruleTypeMock: RuleTypeModel = {
+        id: 'test_rule_type',
+        iconClass: 'test',
+        description: 'Rule when testing',
+        documentationUrl: 'https://localhost.local/docs',
+        validate: () => {
+          return { errors: {} };
+        },
+        ruleParamsExpression: jest.fn(),
+        requiresAppContext: true,
+      };
+      const actionTypeRegistry = actionTypeRegistryMock.create();
+      const ruleTypeRegistry = ruleTypeRegistryMock.create();
+      ruleTypeRegistry.has.mockReturnValue(true);
+      ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
+      useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+      useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    });
+
+    it('renders table of rules with edit button disabled', async () => {
+      renderWithProviders(<RulesList />);
+
+      expect(await screen.findAllByTestId('rulesList')).toHaveLength(1);
+      expect(await screen.findAllByTestId('rule-row')).toHaveLength(2);
+      expect(screen.queryByTestId('editActionHoverButton')).not.toBeInTheDocument();
+    });
+
+    it('renders table of rules with delete button disabled', async () => {
+      const { hasAllPrivilege } = jest.requireMock('../../../lib/capabilities');
+      hasAllPrivilege.mockReturnValue(false);
+      renderWithProviders(<RulesList />);
+      expect(await screen.findAllByTestId('rulesList')).toHaveLength(1);
+      expect(await screen.findAllByTestId('rule-row')).toHaveLength(2);
+      expect(screen.queryByTestId('deleteActionHoverButton')).not.toBeInTheDocument();
+
+      hasAllPrivilege.mockReturnValue(true);
+    });
+
+    it('renders table of rules with actions menu collapsedItemActions', async () => {
+      renderWithProviders(<RulesList />);
+      expect(await screen.findAllByTestId('rulesList')).toHaveLength(1);
+      expect(await screen.findAllByTestId('rule-row')).toHaveLength(2);
+      expect(await screen.findAllByTestId('collapsedItemActions')).toHaveLength(2);
+    });
+  });
+
+  describe('rules_list with disabled items', () => {
+    beforeEach(() => {
+      loadRulesWithKueryFilter.mockResolvedValue({
+        page: 1,
+        perPage: 10000,
+        total: 2,
+        data: [
+          {
+            id: '1',
+            name: 'test rule',
+            tags: ['tag1'],
+            enabled: true,
+            ruleTypeId: 'test_rule_type',
+            schedule: { interval: '5d' },
+            actions: [],
+            params: { name: 'test rule type name' },
+            scheduledTaskId: null,
+            createdBy: null,
+            updatedBy: null,
+            apiKeyOwner: null,
+            throttle: '1m',
+            muteAll: false,
+            mutedInstanceIds: [],
+            executionStatus: {
+              status: 'active',
+              lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+              error: null,
+            },
+          },
+          {
+            id: '2',
+            name: 'test rule 2',
+            tags: ['tag1'],
+            enabled: true,
+            ruleTypeId: 'test_rule_type_disabled_by_license',
+            schedule: { interval: '5d' },
+            actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
+            params: { name: 'test rule type name' },
+            scheduledTaskId: null,
+            createdBy: null,
+            updatedBy: null,
+            apiKeyOwner: null,
+            throttle: '1m',
+            muteAll: false,
+            mutedInstanceIds: [],
+            executionStatus: {
+              status: 'active',
+              lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+              error: null,
+            },
+          },
+        ],
+      });
+      loadRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi()]);
+      const ruleTypeRegistry = ruleTypeRegistryMock.create();
+      ruleTypeRegistry.has.mockReturnValue(false);
+
+      useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+    });
+
+    it('renders rules list with disabled indicator if disabled due to license', async () => {
+      renderWithProviders(<RulesList />);
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+
+      const rows = await screen.findAllByTestId('rule-row');
+      expect(rows[0].className).not.toContain('actRulesList__tableRowDisabled');
+      expect(rows[1].className).toContain('actRulesList__tableRowDisabled');
+      fireEvent.mouseOver(await screen.findByText('Info'));
+      const tooltip = await screen.findByTestId('ruleDisabledByLicenseTooltip');
+      expect(tooltip).toHaveTextContent('This rule type requires a Platinum license.');
+    });
+
+    it('clicking the notify badge shows the snooze panel', async () => {
+      renderWithProviders(<RulesList />);
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+      expect(screen.queryByTestId('snoozePanel]')).not.toBeInTheDocument();
+      fireEvent.mouseOver((await screen.findAllByTestId('rulesTableCell-rulesListNotify'))[0]);
+      expect((await screen.findAllByTestId('rulesListNotifyBadge'))[0]).toBeVisible();
+      fireEvent.click((await screen.findAllByTestId('rulesListNotifyBadge-unsnoozed'))[0]);
+      expect(await screen.findByTestId('snoozePanel')).toBeInTheDocument();
+    });
+  });
+});
