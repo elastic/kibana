@@ -44,7 +44,7 @@ export function getColorForAgentStatus(agentStatus: SimplifiedAgentStatus): stri
     case 'updating':
       return colorToHexMap.primary;
     default:
-      throw new Error(`Insuported Agent status ${agentStatus}`);
+      throw new Error(`Unsupported Agent status ${agentStatus}`);
   }
 }
 
@@ -71,6 +71,6 @@ export function getLabelForAgentStatus(agentStatus: SimplifiedAgentStatus): stri
         defaultMessage: 'Updating',
       });
     default:
-      throw new Error(`Insuported Agent status ${agentStatus}`);
+      throw new Error(`Unsupported Agent status ${agentStatus}`);
   }
 }

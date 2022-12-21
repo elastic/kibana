@@ -19,7 +19,7 @@ export const slo: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      name: { type: 'text' },
+      name: { type: 'keyword' },
       description: { type: 'text' },
       indicator: {
         properties: {
@@ -44,6 +44,13 @@ export const slo: SavedObjectsType = {
           target: { type: 'float' },
           timeslice_target: { type: 'float' },
           timeslice_window: { type: 'keyword' },
+        },
+      },
+      settings: {
+        properties: {
+          timestamp_field: { type: 'keyword' },
+          sync_delay: { type: 'keyword' },
+          frequency: { type: 'keyword' },
         },
       },
       revision: { type: 'short' },

@@ -135,6 +135,7 @@ export const EndpointList = () => {
   const {
     canReadEndpointList,
     canAccessFleet,
+    canReadPolicyManagement,
     loading: endpointPrivilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
   const { search } = useFormatUrl(SecurityPageName.administration);
@@ -177,23 +178,6 @@ export const EndpointList = () => {
   const backToPolicyList = (
     <BackToExternalAppButton {...backLinkOptions} data-test-subj="endpointListBackLink" />
   );
-
-  const missingFleetAccessInfo = useMemo(() => {
-    return (
-      <EuiText size="s" color="subdued" data-test-subj="noFleetAccess">
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.onboarding.enableFleetAccess"
-          defaultMessage="Deploying Agents for the first time requires Fleet access. For more information, "
-        />
-        <EuiLink external href={`${services.docLinks.links.securitySolution.privileges}`}>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policyList.onboardingDocsLink"
-            defaultMessage="view the Elastic Security documentation"
-          />
-        </EuiLink>
-      </EuiText>
-    );
-  }, [services.docLinks.links.securitySolution.privileges]);
 
   useEffect(() => {
     // if no endpoint policy, skip transform check
@@ -406,14 +390,18 @@ export const EndpointList = () => {
           return (
             <>
               <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
-                <EndpointPolicyLink
-                  policyId={policy.id}
-                  className="eui-textTruncate"
-                  data-test-subj="policyNameCellLink"
-                  backLink={backToEndpointList}
-                >
-                  {policy.name}
-                </EndpointPolicyLink>
+                {canReadPolicyManagement ? (
+                  <EndpointPolicyLink
+                    policyId={policy.id}
+                    className="eui-textTruncate"
+                    data-test-subj="policyNameCellLink"
+                    backLink={backToEndpointList}
+                  >
+                    {policy.name}
+                  </EndpointPolicyLink>
+                ) : (
+                  <>{policy.name}</>
+                )}
               </EuiToolTip>
               {policy.endpoint_policy_version && (
                 <EuiText
@@ -553,7 +541,7 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [queryParams, search, getAppUrl, backToEndpointList, PAD_LEFT]);
+  }, [queryParams, search, getAppUrl, canReadPolicyManagement, backToEndpointList, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist || areEndpointsEnrolling) {
@@ -572,11 +560,7 @@ export const EndpointList = () => {
     } else if (canReadEndpointList && !canAccessFleet) {
       return (
         <ManagementEmptyStateWrapper>
-          <PolicyEmptyState
-            loading={endpointPrivilegesLoading}
-            actionHidden
-            additionalInfo={missingFleetAccessInfo}
-          />
+          <PolicyEmptyState loading={endpointPrivilegesLoading} />
         </ManagementEmptyStateWrapper>
       );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
@@ -616,7 +600,6 @@ export const EndpointList = () => {
     canAccessFleet,
     canReadEndpointList,
     endpointPrivilegesLoading,
-    missingFleetAccessInfo,
   ]);
 
   const hasListData = listData && listData.length > 0;

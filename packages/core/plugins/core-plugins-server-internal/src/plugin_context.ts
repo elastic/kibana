@@ -250,6 +250,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     uiSettings: {
       register: deps.uiSettings.register,
+      registerGlobal: deps.uiSettings.registerGlobal,
     },
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
@@ -311,6 +312,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
+      globalAsScopedToClient: deps.uiSettings.globalAsScopedToClient,
     },
     coreUsageData: deps.coreUsageData,
   };

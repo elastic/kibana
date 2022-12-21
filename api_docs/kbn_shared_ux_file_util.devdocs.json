@@ -143,7 +143,9 @@
           "\nExtract image metadata, assumes that file or blob as an image!"
         ],
         "signature": [
-          "(file: Blob | File) => Promise<any>"
+          "(file: Blob | File) => Promise<",
+          "FileImageMetadata",
+          " | undefined>"
         ],
         "path": "packages/shared-ux/file/util/src/image_metadata.ts",
         "deprecated": false,
@@ -212,6 +214,42 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-util",
+        "id": "def-common.useBehaviorSubject",
+        "type": "Function",
+        "tags": [],
+        "label": "useBehaviorSubject",
+        "description": [],
+        "signature": [
+          "(o$: ",
+          "BehaviorSubject",
+          "<T>) => T"
+        ],
+        "path": "packages/shared-ux/file/util/src/use_behavior_subject.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-util",
+            "id": "def-common.useBehaviorSubject.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "o$",
+            "description": [],
+            "signature": [
+              "BehaviorSubject",
+              "<T>"
+            ],
+            "path": "packages/shared-ux/file/util/src/use_behavior_subject.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
@@ -225,7 +263,9 @@
         "label": "ImageMetadataFactory",
         "description": [],
         "signature": [
-          "(file: Blob | File) => Promise<any>"
+          "(file: Blob | File) => Promise<",
+          "FileImageMetadata",
+          " | undefined>"
         ],
         "path": "packages/shared-ux/file/util/src/image_metadata.ts",
         "deprecated": false,

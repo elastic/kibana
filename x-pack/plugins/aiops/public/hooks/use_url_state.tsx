@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { parse, stringify } from 'query-string';
 import { createContext, useCallback, useContext, useMemo } from 'react';
-import { decode, encode } from 'rison-node';
+import { decode, encode } from '@kbn/rison';
 import { useHistory, useLocation } from 'react-router-dom';
 import { isEqual } from 'lodash';
 

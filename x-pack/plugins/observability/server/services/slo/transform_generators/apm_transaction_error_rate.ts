@@ -16,8 +16,8 @@ import {
   getSLOTransformId,
 } from '../../../assets/constants';
 import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
+import { DEFAULT_APM_INDEX } from './constants';
 
-const APM_SOURCE_INDEX = 'metrics-apm*';
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
 const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
 
@@ -32,7 +32,8 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildCommonGroupBy(slo),
-      this.buildAggregations(slo, slo.indicator)
+      this.buildAggregations(slo, slo.indicator),
+      this.buildSettings(slo)
     );
   }
 
@@ -75,7 +76,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     }
 
     return {
-      index: APM_SOURCE_INDEX,
+      index: indicator.params.index ?? DEFAULT_APM_INDEX,
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {

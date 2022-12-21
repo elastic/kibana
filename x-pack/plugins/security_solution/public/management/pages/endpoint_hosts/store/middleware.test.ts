@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import type { Store } from 'redux';
 import { applyMiddleware, createStore } from 'redux';
@@ -56,11 +57,13 @@ jest.mock('../../../services/policies/ingest', () => ({
 }));
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('rxjs');
 
 type EndpointListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
 
 describe('endpoint list middleware', () => {
   const getKibanaServicesMock = KibanaServices.get as jest.Mock;
+  const firstValueFromMock = firstValueFrom as jest.Mock;
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
@@ -120,6 +123,7 @@ describe('endpoint list middleware', () => {
   });
 
   it('handles `appRequestedEndpointList`', async () => {
+    firstValueFromMock.mockResolvedValue({ indexFields: [] });
     endpointPageHttpMock(fakeHttpServices);
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.get.mockResolvedValue(apiResponse);

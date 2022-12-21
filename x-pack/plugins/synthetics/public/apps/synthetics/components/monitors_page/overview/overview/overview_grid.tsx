@@ -132,9 +132,9 @@ export const OverviewGrid = memo(() => {
       ) : (
         <OverviewLoader />
       )}
-      <span ref={intersectionRef}>
+      <div ref={intersectionRef}>
         <EuiSpacer size="l" />
-      </span>
+      </div>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         {currentMonitors.length === monitors.length && (
           <EuiFlexItem grow={false}>

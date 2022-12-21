@@ -12,4 +12,5 @@ export {
   getImageMetadata,
   isImage,
   type ImageMetadataFactory,
+  useBehaviorSubject,
 } from './src';

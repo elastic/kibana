@@ -6,6 +6,7 @@
  */
 
 import { validateSLO } from '.';
+import { oneMinute, sixHours } from '../../services/slo/fixtures/duration';
 import { createSLO } from '../../services/slo/fixtures/slo';
 import { Duration, DurationUnit } from '../models/duration';
 
@@ -33,6 +34,30 @@ describe('validateSLO', () => {
         time_window: { duration: new Duration(1, DurationUnit.Hour), is_rolling: true },
       });
       expect(() => validateSLO(slo)).toThrowError('Invalid time_window.duration');
+    });
+
+    describe('settings', () => {
+      it("throws when frequency is longer or equal than '1h'", () => {
+        const slo = createSLO({
+          settings: {
+            frequency: sixHours(),
+            timestamp_field: '@timestamp',
+            sync_delay: oneMinute(),
+          },
+        });
+        expect(() => validateSLO(slo)).toThrowError('Invalid settings.frequency');
+      });
+
+      it("throws when sync_delay is longer or equal than '6h'", () => {
+        const slo = createSLO({
+          settings: {
+            frequency: oneMinute(),
+            timestamp_field: '@timestamp',
+            sync_delay: sixHours(),
+          },
+        });
+        expect(() => validateSLO(slo)).toThrowError('Invalid settings.sync_delay');
+      });
     });
   });
 

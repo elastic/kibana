@@ -10,6 +10,7 @@ import {
   AggregationsCalendarInterval,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
 import {
   calendarAlignedTimeWindowSchema,
   rollingTimeWindowSchema,
@@ -140,12 +141,21 @@ export abstract class TransformGenerator {
           },
         },
       }),
+      // Field used in the destination index, using @timestamp as per mapping definition
       '@timestamp': {
         date_histogram: {
-          field: '@timestamp',
+          field: slo.settings.timestamp_field,
           calendar_interval: '1m' as AggregationsCalendarInterval,
         },
       },
+    };
+  }
+
+  public buildSettings(slo: SLO): TransformSettings {
+    return {
+      frequency: slo.settings.frequency.format(),
+      sync_field: slo.settings.timestamp_field,
+      sync_delay: slo.settings.sync_delay.format(),
     };
   }
 }

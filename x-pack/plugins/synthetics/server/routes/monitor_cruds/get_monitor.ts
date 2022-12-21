@@ -53,27 +53,30 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
     query: QuerySchema,
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
-    const queryResult = await getMonitors(
-      request.query,
-      syntheticsMonitorClient.syntheticsService,
-      savedObjectsClient
-    );
-
-    const countResult = isMonitorsQueryFiltered(request.query)
-      ? await savedObjectsClient.find({
+    const totalCountQuery = async () => {
+      if (isMonitorsQueryFiltered(request.query)) {
+        return savedObjectsClient.find({
           type: syntheticsMonitorType,
           perPage: 0,
           page: 1,
-        })
-      : queryResult;
+        });
+      }
+    };
+
+    const [queryResult, totalCount] = await Promise.all([
+      getMonitors(request.query, syntheticsMonitorClient.syntheticsService, savedObjectsClient),
+      totalCountQuery(),
+    ]);
+
+    const absoluteTotal = totalCount?.total ?? queryResult.total;
 
     const { saved_objects: monitors, per_page: perPageT, ...rest } = queryResult;
 
     return {
       ...rest,
       monitors,
+      absoluteTotal,
       perPage: perPageT,
-      absoluteTotal: countResult.total,
       syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
     };
   },

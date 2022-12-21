@@ -7,7 +7,7 @@
 
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
-import { MockApmPluginContextWrapper } from '../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmPluginStorybook } from '../../context/apm_plugin/mock_apm_plugin_storybook';
 import { DependencyLink } from './dependency_link';
 
 type Args = ComponentProps<typeof DependencyLink>;
@@ -18,9 +18,9 @@ export default {
   decorators: [
     (StoryComponent: ComponentType) => {
       return (
-        <MockApmPluginContextWrapper>
+        <MockApmPluginStorybook>
           <StoryComponent />
-        </MockApmPluginContextWrapper>
+        </MockApmPluginStorybook>
       );
     },
   ],

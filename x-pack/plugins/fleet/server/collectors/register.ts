@@ -19,12 +19,29 @@ import type { PackageUsage } from './package_collectors';
 import { getFleetServerUsage, getFleetServerConfig } from './fleet_server_collector';
 import type { FleetServerUsage } from './fleet_server_collector';
 import { getAgentPoliciesUsage } from './agent_policies';
+import { getAgentLogsTopErrors } from './agent_logs';
 
 export interface Usage {
   agents_enabled: boolean;
   agents: AgentUsage;
   packages: PackageUsage[];
   fleet_server: FleetServerUsage;
+}
+
+export interface FleetUsage extends Usage {
+  fleet_server_config: { policies: Array<{ input_config: any }> };
+  agent_policies: { count: number; output_types: string[] };
+  agents_per_version: Array<{
+    version: string;
+    count: number;
+  }>;
+  agent_checkin_status: {
+    error: number;
+    degraded: number;
+  };
+  agents_per_policy: number[];
+  agent_logs_top_errors: string[];
+  fleet_server_logs_top_errors: string[];
 }
 
 export const fetchFleetUsage = async (
@@ -44,6 +61,7 @@ export const fetchFleetUsage = async (
     ...(await getAgentData(esClient, abortController)),
     fleet_server_config: await getFleetServerConfig(soClient),
     agent_policies: await getAgentPoliciesUsage(esClient, abortController),
+    ...(await getAgentLogsTopErrors(esClient)),
   };
   return usage;
 };

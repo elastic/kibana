@@ -26,8 +26,6 @@ export const createMockConfig = (): ConfigType => {
     packagerTaskInterval: '60s',
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
-    prebuiltRulesFromFileSystem: true,
-    prebuiltRulesFromSavedObjects: false,
 
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
   };

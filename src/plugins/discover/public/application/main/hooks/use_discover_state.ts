@@ -8,6 +8,7 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { type DataViewListItem, type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -125,6 +126,7 @@ export function useDiscoverState({
   /**
    * Adhoc data views functionality
    */
+  const isTextBasedMode = state?.query && isOfAggregateQueryType(state?.query);
   const { adHocDataViewList, persistDataView, updateAdHocDataViewId, onAddAdHocDataViews } =
     useAdHocDataViews({
       dataView,
@@ -135,6 +137,7 @@ export function useDiscoverState({
       filterManager,
       toastNotifications,
       trackUiMetric,
+      isTextBasedMode,
     });
 
   const [savedDataViewList, setSavedDataViewList] = useState(initialDataViewList);
@@ -169,7 +172,7 @@ export function useDiscoverState({
     documents$: data$.documents$,
     dataViews,
     stateContainer,
-    dataViewList: savedDataViewList,
+    dataViewList: [...savedDataViewList, ...adHocDataViewList],
     savedSearch,
   });
 
@@ -194,10 +197,12 @@ export function useDiscoverState({
    */
   useEffect(() => {
     const unsubscribe = appStateContainer.subscribe(async (nextState) => {
-      const { hideChart, interval, sort, index } = state;
-      // chart was hidden, now it should be displayed, so data is needed
-      const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
+      const { hideChart, interval, breakdownField, sort, index } = state;
+      // Cast to boolean to avoid false positives when comparing
+      // undefined and false, which would trigger a refetch
+      const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
       const chartIntervalChanged = nextState.interval !== interval;
+      const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
       const docTableSortChanged = !isEqual(nextState.sort, sort);
       const dataViewChanged = !isEqual(nextState.index, index);
       // NOTE: this is also called when navigating from discover app to context app
@@ -230,9 +235,15 @@ export function useDiscoverState({
         reset();
       }
 
-      if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
+      if (
+        chartDisplayChanged ||
+        chartIntervalChanged ||
+        breakdownFieldChanged ||
+        docTableSortChanged
+      ) {
         refetch$.next(undefined);
       }
+
       setState(nextState);
     });
     return () => unsubscribe();
@@ -326,5 +337,6 @@ export function useDiscoverState({
     persistDataView,
     updateAdHocDataViewId,
     updateDataViewList,
+    searchSessionManager,
   };
 }
