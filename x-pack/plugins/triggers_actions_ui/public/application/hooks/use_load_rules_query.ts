@@ -79,6 +79,7 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
     },
     enabled,
     keepPreviousData: true,
+    cacheTime: 0,
   });
 
   const hasEmptyTypesFilter = hasDefaultRuleTypesFiltersOn ? true : isEmpty(filters.types);

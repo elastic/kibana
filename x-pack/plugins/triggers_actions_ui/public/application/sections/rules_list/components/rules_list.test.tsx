@@ -14,7 +14,6 @@ import {
   waitFor,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
-import { nextTick } from '@kbn/test-jest-helpers';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { percentileFields, RulesList } from './rules_list';
@@ -112,6 +111,11 @@ const queryClient = new QueryClient({
   },
 });
 
+afterEach(() => {
+  jest.clearAllMocks();
+  queryClient.clear();
+});
+
 // FLAKY: https://github.com/elastic/kibana/issues/134922
 // FLAKY: https://github.com/elastic/kibana/issues/134923
 // FLAKY: https://github.com/elastic/kibana/issues/134924
@@ -134,10 +138,6 @@ describe.skip('Update Api Key', () => {
       addSuccess,
       addError,
     } as unknown as IToasts;
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   it('Updates the Api Key successfully', async () => {
@@ -247,10 +247,6 @@ describe('rules_list component empty', () => {
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('renders empty list', async () => {
     const { findByTestId } = renderWithProviders(<RulesList />);
     expect(await findByTestId('createFirstRuleEmptyPrompt')).toBeInTheDocument();
@@ -327,14 +323,6 @@ describe('rules_list ', () => {
       ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
       useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-      const modals = document.querySelectorAll('.euiToolTipPopover');
-      const spinners = document.querySelectorAll('[data-test-subj="centerJustifiedSpinner"]');
-      modals.forEach((modal) => modal.parentNode?.removeChild(modal));
-      spinners.forEach((spinner) => spinner.parentNode?.removeChild(spinner));
     });
 
     describe('Status filter', () => {
@@ -478,13 +466,14 @@ describe('rules_list ', () => {
         );
       });
 
-      it('Last run tooltip', async () => {
-        const { findByText, getAllByText } = renderWithProviders(<RulesList />);
+      it.only('Last run tooltip', async () => {
+        const view = renderWithProviders(<RulesList />);
+        await waitForElementToBeRemoved(() => view.queryByTestId('centerJustifiedSpinner'));
 
-        await waitFor(() => getAllByText('Last run')[0]);
-        fireEvent.mouseOver(getAllByText('Last run')[0]);
+        await waitFor(() => view.getByText('Last run'));
+        fireEvent.mouseOver(view.getByText('Last run'));
 
-        expect(await findByText('Start time of the last run.')).toBeInTheDocument();
+        expect(await view.findByText('Start time of the last run.')).toBeInTheDocument();
       });
 
       it('Schedule interval column', async () => {

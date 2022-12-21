@@ -655,11 +655,17 @@ export const RulesList = ({
     setIsDeleteModalVisibility(false);
     setIsBulkEditing(true);
 
-    const { errors, total } = await bulkDeleteRules({
-      filter: rulesToBulkEditFilter,
-      ids: rulesToBulkEdit.map((rule) => rule.id),
-      http,
-    });
+    const bulkDeleteRulesArguments =
+      isAllSelected && rulesToBulkEditFilter
+        ? {
+            filter: rulesToBulkEditFilter,
+            http,
+          }
+        : {
+            ids: rulesToBulkEdit.map((rule) => rule.id),
+            http,
+          };
+    const { errors, total } = await bulkDeleteRules(bulkDeleteRulesArguments);
 
     setIsBulkEditing(false);
     showToast({ action: 'DELETE', errors, total });
