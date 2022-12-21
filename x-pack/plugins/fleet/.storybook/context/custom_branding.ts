@@ -10,9 +10,6 @@ export const getCustomBranding = () => {
   return {
     customBranding$: of({}),
     hasCustomBranding$: of(false),
-    get: () => {
-      return {};
-    },
     set: () => {},
   };
 };
