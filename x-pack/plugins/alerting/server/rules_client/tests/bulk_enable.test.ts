@@ -21,8 +21,6 @@ import { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_sched
 import {
   disabledRule1,
   disabledRule2,
-  disabledRuleWithAction1,
-  disabledRuleWithAction2,
   enabledRule1,
   enabledRule2,
   savedObjectWith409Error,
