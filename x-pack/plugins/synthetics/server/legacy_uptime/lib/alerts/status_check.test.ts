@@ -206,7 +206,9 @@ describe('status check alert', () => {
       } = options;
 
       expect(executorResult?.state).not.toBeUndefined();
-      expect(executorResult?.state instanceof Object ? executorResult.state.isTriggered : true).toBe(false);
+      expect(
+        executorResult?.state instanceof Object ? executorResult.state.isTriggered : true
+      ).toBe(false);
       expect(alertWithLifecycle).not.toHaveBeenCalled();
       expect(mockGetter).toHaveBeenCalledTimes(1);
       expect(mockGetter.mock.calls[0][0]).toEqual(
