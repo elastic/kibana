@@ -159,7 +159,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     !diskQueueCompressionEnabled.value ?? false
   );
 
-  // These parameters are yet tbd
+  // These parameters are yet tbd - https://github.com/elastic/kibana/issues/147613
   const memQueueEvents = useNumberInput(output?.shipper?.mem_queue_events);
   const queueFlushTimeout = useNumberInput(output?.shipper?.queue_flush_timeout);
   const maxBatchBytes = useNumberInput(output?.shipper?.max_batch_bytes);

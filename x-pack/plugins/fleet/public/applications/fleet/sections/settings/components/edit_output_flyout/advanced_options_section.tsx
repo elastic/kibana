@@ -75,7 +75,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               <EuiFieldNumber {...maxBatchBytes.props} placeholder="Batching Bytes" min={0} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText>
+              <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.maxBatchSizeDescription"
                   defaultMessage="Data will be sent to the output when the agent has events which total larger then this configured maximum."
@@ -100,7 +100,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               <EuiFieldNumber {...queueFlushTimeout.props} placeholder="Seconds" min={0} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText>
+              <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.queueFlushTimeoutDescription"
                   defaultMessage="Upon expiry the output queue is flushed and data is written to the output."
@@ -125,7 +125,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               <EuiFieldNumber {...memQueueEvents.props} placeholder="Events" min={0} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText>
+              <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.memQueueEventsSizeDescription"
                   defaultMessage="Maximum number of events that can be stored in the queue. Default is set to 4096."
@@ -152,7 +152,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText>
+              <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.diskQueueSwitchDescription"
                   defaultMessage="Once enabled, events will be queued on disk when there's a requirement to cache them on the agents in the event of connection loss."
@@ -178,7 +178,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText>
+              <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.diskQueueEncryptionDescription"
                   defaultMessage="Enable encryption of data at rest."
@@ -226,7 +226,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               <EuiFieldNumber {...diskQueueMaxSizeInput.props} placeholder="Bytes" min={0} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText>
+              <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.diskQueueMaxSizeDescription"
                   defaultMessage="Limits the disk size for spooling of data. If set too low, data may be lost when agent can't write data to the destination."
@@ -253,7 +253,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText>
+              <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.loadBalancingDescription"
                   defaultMessage="Once enabled, the agents will balance the load across all the hosts defined for this output. This will increase the number of connections opened by the agent."
@@ -288,7 +288,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText>
+              <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.compressionSwitchDescription"
                   defaultMessage="Level 1 compression is the fastest, Level 9 however would provide the best compression."

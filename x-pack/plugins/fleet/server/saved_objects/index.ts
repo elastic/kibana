@@ -53,7 +53,6 @@ import {
   migrateInstallationToV860,
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
-import { migrateOutputToV870 } from './migrations/to_v8_7_0';
 
 /*
  * Saved object types and mappings
@@ -152,7 +151,7 @@ const getSavedObjectTypes = (
             disk_queue_encryption_enabled: { type: 'boolean', index: false },
             disk_queue_compression_enabled: { type: 'boolean', index: false },
             compression_level: { type: 'integer', index: false },
-            loadbalance: { type: 'boolean' },
+            loadbalance: { type: 'boolean', index: false },
             mem_queue_events: { type: 'integer', index: false },
             queue_flush_timeout: { type: 'integer', index: false },
             max_batch_bytes: { type: 'integer', index: false },
@@ -163,7 +162,6 @@ const getSavedObjectTypes = (
     migrations: {
       '7.13.0': migrateOutputToV7130,
       '8.0.0': migrateOutputToV800,
-      '8.7.0': migrateOutputToV870,
     },
   },
   [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
