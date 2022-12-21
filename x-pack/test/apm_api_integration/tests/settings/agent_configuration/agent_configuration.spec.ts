@@ -525,9 +525,9 @@ async function expectStatusCode(
   }>,
   statusCode: number
 ) {
-  let res;
+  let response;
   try {
-    res = await fn();
+    response = await fn();
   } catch (e) {
     if (e && e.response && e.response.status) {
       if (e.response.status === statusCode) {
