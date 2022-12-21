@@ -66,44 +66,8 @@ const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
   'activeSnoozes',
 ];
 
-  constructor({
-    ruleTypeRegistry,
-    minimumScheduleInterval,
-    unsecuredSavedObjectsClient,
-    authorization,
-    taskManager,
-    logger,
-    spaceId,
-    namespace,
-    getUserName,
-    createAPIKey,
-    encryptedSavedObjectsClient,
-    getActionsClient,
-    actionsAuthorization,
-    getEventLogClient,
-    kibanaVersion,
-    auditLogger,
-    eventLogger,
-  }: ConstructorOptions) {
-    this.logger = logger;
-    this.getUserName = getUserName;
-    this.spaceId = spaceId;
-    this.namespace = namespace;
-    this.taskManager = taskManager;
-    this.ruleTypeRegistry = ruleTypeRegistry;
-    this.minimumScheduleInterval = minimumScheduleInterval;
-    this.minimumScheduleIntervalInMs = parseDuration(minimumScheduleInterval.value);
-    this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
-    this.authorization = authorization;
-    this.createAPIKey = createAPIKey;
-    this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
-    this.getActionsClient = getActionsClient;
-    this.actionsAuthorization = actionsAuthorization;
-    this.getEventLogClient = getEventLogClient;
-    this.kibanaVersion = kibanaVersion;
-    this.auditLogger = auditLogger;
-    this.eventLogger = eventLogger;
-  }
+export class RulesClient {
+  private readonly context: RulesClientContext;
 
   constructor(context: ConstructorOptions) {
     this.context = {
