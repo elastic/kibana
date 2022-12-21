@@ -274,11 +274,11 @@ describe('benchmarks API', () => {
           ],
         } as unknown as SavedObjectsFindResponse);
 
-        const cspRulesStatus = await getRulesCountForPolicy(mockSoClient, benchmark);
+        const rulesCount = await getRulesCountForPolicy(mockSoClient, benchmark);
 
         const expectedFilter = `csp-rule-template.attributes.metadata.benchmark.id: "${benchmark}"`;
         expect(mockSoClient.find.mock.calls[0][0].filter).toEqual(expectedFilter);
-        expect(cspRulesStatus).toEqual(3);
+        expect(rulesCount).toEqual(3);
       });
     });
   });
