@@ -231,6 +231,7 @@ export class SavedSearchEmbeddable
           dataView,
           this.services.data,
           this.services.expressions,
+          this.services.inspector,
           this.input.filters,
           this.input.query
         );

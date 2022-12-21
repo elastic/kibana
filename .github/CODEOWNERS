@@ -877,6 +877,7 @@ packages/home/sample_data_types @elastic/kibana-global-experience
 packages/kbn-ace @elastic/platform-deployment-management
 packages/kbn-alerts @elastic/security-solution
 packages/kbn-ambient-common-types @elastic/kibana-operations
+packages/kbn-ambient-ftr-types @elastic/kibana-operations
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core

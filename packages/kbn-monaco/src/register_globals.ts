@@ -11,11 +11,12 @@ import { PainlessLang } from './painless';
 import { SQLLang } from './sql';
 import { monaco } from './monaco_imports';
 import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
-
 import { registerLanguage, registerTheme } from './helpers';
 import { createWorkersRegistry } from './workers_registry';
 
 export const DEFAULT_WORKER_ID = 'default';
+
+const Yaml = 'yaml';
 
 const workerRegistry = createWorkersRegistry(DEFAULT_WORKER_ID);
 
@@ -42,6 +43,11 @@ workerRegistry.register(
 workerRegistry.register(
   monaco.languages.json.jsonDefaults.languageId,
   async () => await import('!!raw-loader!../../target_workers/json.editor.worker.js')
+);
+
+workerRegistry.register(
+  Yaml,
+  async () => await import('!!raw-loader!../../target_workers/yaml.editor.worker.js')
 );
 
 /**

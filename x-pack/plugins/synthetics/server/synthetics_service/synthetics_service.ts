@@ -294,7 +294,6 @@ export class SyntheticsService {
   async pushConfigs() {
     const service = this;
     const subject = new Subject<SyntheticsMonitorWithId[]>();
-    const output = await this.getOutput();
 
     subject.subscribe(async (monitorConfigs) => {
       try {
@@ -304,6 +303,8 @@ export class SyntheticsService {
           this.logger.debug('No monitor found which can be pushed to service.');
           return null;
         }
+
+        const output = await this.getOutput();
 
         if (!output) {
           sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
