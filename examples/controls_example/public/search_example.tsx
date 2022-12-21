@@ -100,8 +100,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
       </EuiTitle>
       <EuiText>
         <p>
-          Pass filters, query, and time range to narrow controls. Combine search bar filters
-          with controls filters to narrow results.
+          Pass filters, query, and time range to narrow controls. Combine search bar filters with
+          controls filters to narrow results.
         </p>
       </EuiText>
       <EuiPanel hasBorder={true}>

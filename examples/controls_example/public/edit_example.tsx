@@ -7,7 +7,17 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingContent,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
@@ -27,7 +37,7 @@ export const EditExample = () => {
     localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroup.getInput()));
 
     // simulated async save await
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     setIsSaving(false);
   }
@@ -36,7 +46,7 @@ export const EditExample = () => {
     setIsLoading(true);
 
     // simulated async load await
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     let input = {};
     const inputAsString = localStorage.getItem(INPUT_KEY);
@@ -47,7 +57,7 @@ export const EditExample = () => {
         // ignore parse errors
       }
     }
-    
+
     setIsLoading(false);
     return input;
   }
@@ -61,10 +71,7 @@ export const EditExample = () => {
         <p>Customize controls and persist state to local storage.</p>
       </EuiText>
       <EuiPanel hasBorder={true}>
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-        >
+        <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               color="primary"
@@ -89,7 +96,12 @@ export const EditExample = () => {
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {isLoading ? <><EuiSpacer/><EuiLoadingContent lines={1} /></> : null}
+        {isLoading ? (
+          <>
+            <EuiSpacer />
+            <EuiLoadingContent lines={1} />
+          </>
+        ) : null}
         <ControlGroupRenderer
           getInitialInput={async (initialInput, builder) => {
             const persistedInput = await onLoad();
