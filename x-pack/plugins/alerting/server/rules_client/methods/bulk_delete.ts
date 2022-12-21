@@ -119,7 +119,7 @@ const bulkDeleteWithOCC = async (
           if (rule.attributes.scheduledTaskId) {
             taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
           }
-          rules.push(rule);
+          rulesToDelete.push(rule);
 
           context.auditLogger?.log(
             ruleAuditEvent({
