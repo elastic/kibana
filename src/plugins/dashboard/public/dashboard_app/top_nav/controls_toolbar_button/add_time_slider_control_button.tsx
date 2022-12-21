@@ -9,7 +9,10 @@
 import React, { useEffect, useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ControlGroupContainer, TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/public';
-import { getAddTimeSliderControlButtonTitle, getOnlyOneTimeSliderControlMsg } from '../../_dashboard_app_strings';
+import {
+  getAddTimeSliderControlButtonTitle,
+  getOnlyOneTimeSliderControlMsg,
+} from '../../_dashboard_app_strings';
 
 interface Props {
   closePopover: () => void;
@@ -33,7 +36,7 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroup }: Props
     return () => {
       subscription.unsubscribe();
     };
-  }, [controlGroup, setHasTimeSliderControl]);
+  }, [controlGroup, hasTimeSliderControl, setHasTimeSliderControl]);
 
   return (
     <EuiContextMenuItem
@@ -45,11 +48,7 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroup }: Props
       }}
       data-test-subj="controls-create-timeslider-button"
       disabled={hasTimeSliderControl}
-      toolTipContent={
-        hasTimeSliderControl
-          ? getOnlyOneTimeSliderControlMsg()
-          : null
-      }
+      toolTipContent={hasTimeSliderControl ? getOnlyOneTimeSliderControlMsg() : null}
     >
       {getAddTimeSliderControlButtonTitle()}
     </EuiContextMenuItem>
