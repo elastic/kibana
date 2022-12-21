@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { AGENTS_INDEX, ES_SEARCH_LIMIT } from '../../../common/constants';
+import { AGENTS_INDEX } from '../../../common';
 
 /**
  * Given a list of Agent Policy IDs, an object will be returned with the agent policy id as the key
@@ -49,7 +49,7 @@ export const getAgentCountForAgentPolicies = async (
         agent_counts: {
           terms: {
             field: 'policy_id',
-            size: ES_SEARCH_LIMIT,
+            size: agentPolicyIds.length,
           },
         },
       },
