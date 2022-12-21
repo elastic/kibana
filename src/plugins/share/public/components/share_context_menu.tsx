@@ -34,6 +34,7 @@ export interface ShareContextMenuProps {
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
   panelTitle?: string;
+  disabledShareUrl?: boolean;
 }
 
 export class ShareContextMenu extends Component<ShareContextMenuProps> {
@@ -79,6 +80,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
       icon: 'link',
       panel: permalinkPanel.id,
       sortOrder: 0,
+      disabled: this.props.disabledShareUrl,
     });
     panels.push(permalinkPanel);
 

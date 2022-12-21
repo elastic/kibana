@@ -899,11 +899,11 @@ describe('Lens App', () => {
     });
   });
 
-  describe('download button', () => {
+  describe('share button', () => {
     function getButton(inst: ReactWrapper): TopNavMenuData {
       return (
         inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
-      ).find((button) => button.testId === 'lnsApp_downloadCSVButton')!;
+      ).find((button) => button.testId === 'lnsApp_shareButton')!;
     }
 
     it('should be disabled when no data is available', async () => {
@@ -911,7 +911,7 @@ describe('Lens App', () => {
       expect(getButton(instance).disableButton).toEqual(true);
     });
 
-    it('should disable download when not saveable', async () => {
+    it('should not disable share when not saveable', async () => {
       const { instance } = await mountWith({
         preloadedState: {
           isSaveable: false,
@@ -919,7 +919,7 @@ describe('Lens App', () => {
         },
       });
 
-      expect(getButton(instance).disableButton).toEqual(true);
+      expect(getButton(instance).disableButton).toEqual(false);
     });
 
     it('should still be enabled even if the user is missing save permissions', async () => {
@@ -928,7 +928,7 @@ describe('Lens App', () => {
         ...services.application,
         capabilities: {
           ...services.application.capabilities,
-          visualize: { save: false, saveQuery: false, show: true },
+          visualize: { save: false, saveQuery: false, show: true, createShortUrl: true },
         },
       };
 
@@ -940,6 +940,46 @@ describe('Lens App', () => {
         },
       });
       expect(getButton(instance).disableButton).toEqual(false);
+    });
+
+    it('should still be enabled even if the user is missing shortUrl permissions', async () => {
+      const services = makeDefaultServicesForApp();
+      services.application = {
+        ...services.application,
+        capabilities: {
+          ...services.application.capabilities,
+          visualize: { save: true, saveQuery: false, show: true, createShortUrl: false },
+        },
+      };
+
+      const { instance } = await mountWith({
+        services,
+        preloadedState: {
+          isSaveable: true,
+          activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
+        },
+      });
+      expect(getButton(instance).disableButton).toEqual(false);
+    });
+
+    it('should be disabled if the user is missing both save and shortUrl permissions', async () => {
+      const services = makeDefaultServicesForApp();
+      services.application = {
+        ...services.application,
+        capabilities: {
+          ...services.application.capabilities,
+          visualize: { save: false, saveQuery: false, show: true, createShortUrl: false },
+        },
+      };
+
+      const { instance } = await mountWith({
+        services,
+        preloadedState: {
+          isSaveable: true,
+          activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
+        },
+      });
+      expect(getButton(instance).disableButton).toEqual(true);
     });
   });
 

@@ -11,7 +11,6 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useStore } from 'react-redux';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -571,19 +570,6 @@ export const LensTopNavMenu = ({
                 defaultMessage: 'The visualization has no data to share.',
               });
             }
-            if (activeData) {
-              const datatables = Object.values(activeData);
-              const formulaDetected = datatables.some((datatable) => {
-                return tableHasFormulas(datatable.columns, datatable.rows);
-              });
-              if (formulaDetected) {
-                return i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
-                  defaultMessage:
-                    'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
-                });
-              }
-            }
-            return undefined;
           },
           execute: async (anchorElement) => {
             if (!share) {
@@ -616,22 +602,23 @@ export const LensTopNavMenu = ({
             const serializableDatasourceStates =
               datasourceStates as LensAppState['datasourceStates'] & SerializableRecord;
 
-            const shareableUrl = await shortUrlService?.({
-              filters,
-              query,
-              resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
-              visualization: serializableVisualization,
-              datasourceStates: serializableDatasourceStates,
-              activeDatasourceId,
-              searchSessionId: data.search.session.getSessionId(),
-              references,
-            });
+            const shareableUrl =
+              (await shortUrlService?.({
+                filters,
+                query,
+                resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+                visualization: serializableVisualization,
+                datasourceStates: serializableDatasourceStates,
+                activeDatasourceId,
+                searchSessionId: data.search.session.getSessionId(),
+                references,
+              })) || '';
 
             share.toggleShareContextMenu({
               anchorElement,
               allowEmbed: false,
               allowShortUrl: false, // we'll manage this implicitly via the new service
-              shareableUrl: shareableUrl || '',
+              shareableUrl,
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens_visualization',
               panelTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
@@ -639,6 +626,9 @@ export const LensTopNavMenu = ({
               }),
               sharingData,
               isDirty: isCurrentStateDirty,
+              // disable the menu if both shortURL permission and the visualization has not been saved
+              // TODO: improve here the disabling state with more specific checks
+              disabledShareUrl: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
               showPublicUrlSwitch: () => false,
               onClose: () => {
                 anchorElement?.focus();

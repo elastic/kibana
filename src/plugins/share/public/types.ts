@@ -100,4 +100,5 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   snapshotShareWarning?: string;
   onClose?: () => void;
   panelTitle?: string;
+  disabledShareUrl?: boolean;
 }
