@@ -92,7 +92,7 @@ export type LifecycleRuleExecutor<
     ActionGroupIds,
     LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds>
   >
-) => Promise<{ state: State } | void>;
+) => Promise<{ state: State }>;
 
 const trackedAlertStateRt = rt.type({
   alertId: rt.string,
@@ -126,7 +126,7 @@ const wrappedStateRt = <State extends RuleTypeState>() =>
  * factory function.
  */
 export type WrappedLifecycleRuleState<State extends RuleTypeState> = RuleTypeState & {
-  wrapped: State | void;
+  wrapped: State;
   trackedAlerts: Record<string, TrackedLifecycleAlertState>;
   trackedAlertsRecovered: Record<string, TrackedLifecycleAlertState>;
 };

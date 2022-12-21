@@ -148,7 +148,9 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
   });
@@ -701,7 +703,9 @@ describe('update()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -1198,7 +1202,9 @@ describe('update()', () => {
           param1: schema.string(),
         }),
       },
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
     await expect(
@@ -1528,7 +1534,9 @@ describe('update()', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
-        async executor() {},
+        async executor() {
+          return { state: {} };
+        },
         producer: 'alerts',
       });
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({

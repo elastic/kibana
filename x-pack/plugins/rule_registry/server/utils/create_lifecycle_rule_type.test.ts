@@ -51,6 +51,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         services.alertWithLifecycle(alert);
       });
       nextAlerts = [];
+      return { state: {} };
     },
     id: 'ruleTypeId',
     isExportable: true,

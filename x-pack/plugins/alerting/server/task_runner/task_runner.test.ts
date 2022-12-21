@@ -314,6 +314,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -396,6 +397,7 @@ describe('Task Runner', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -521,6 +523,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -574,6 +577,7 @@ describe('Task Runner', () => {
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -640,6 +644,7 @@ describe('Task Runner', () => {
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -702,6 +707,7 @@ describe('Task Runner', () => {
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -742,6 +748,7 @@ describe('Task Runner', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -814,6 +821,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -889,6 +897,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -980,6 +989,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -1123,6 +1133,7 @@ describe('Task Runner', () => {
 
           // create an instance, but don't schedule any actions, so it doesn't go active
           executorServices.alertFactory.create('3');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -1228,6 +1239,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -1325,6 +1337,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
 
@@ -1400,6 +1413,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
 
@@ -1470,6 +1484,7 @@ describe('Task Runner', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const date = new Date().toISOString();
@@ -1861,6 +1876,7 @@ describe('Task Runner', () => {
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -1951,6 +1967,7 @@ describe('Task Runner', () => {
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -2034,6 +2051,7 @@ describe('Task Runner', () => {
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -2096,7 +2114,9 @@ describe('Task Runner', () => {
   test('end is logged for active alerts when alert state contains start time and alert recovers', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-    ruleType.executor.mockImplementation(async () => {});
+    ruleType.executor.mockImplementation(async () => {
+      return { state: {} };
+    });
     const taskRunner = new TaskRunner(
       ruleType,
       {
@@ -2177,7 +2197,9 @@ describe('Task Runner', () => {
         AlertInstanceState,
         AlertInstanceContext,
         string
-      >) => {}
+      >) => {
+        return { state: {} };
+      }
     );
     const taskRunner = new TaskRunner(
       ruleType,
@@ -2505,6 +2527,7 @@ describe('Task Runner', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
 
@@ -2670,6 +2693,7 @@ describe('Task Runner', () => {
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
       }
     );
 

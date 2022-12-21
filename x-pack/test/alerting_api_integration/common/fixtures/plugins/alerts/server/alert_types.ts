@@ -310,6 +310,8 @@ function getExceedsAlertLimitRuleType() {
           numAlerts: alertsToCreate,
         },
       });
+
+      return { state: {} };
     },
   };
   return result;
@@ -402,6 +404,8 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
           source: 'alert:test.authorization',
         },
       });
+
+      return { state: {} };
     },
   };
   return result;
@@ -428,7 +432,9 @@ function getValidationAlertType() {
     validate: {
       params: paramsSchema,
     },
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
   };
   return result;
 }
@@ -480,7 +486,7 @@ function getPatternFiringAlertType() {
       // get the pattern index, return if past it
       const patternIndex = state.patternIndex ?? 0;
       if (patternIndex >= maxPatternLength) {
-        return { patternIndex };
+        return { state: { patternIndex } };
       }
 
       // fire if pattern says to
@@ -530,7 +536,7 @@ function getPatternSuccessOrFailureAlertType() {
       // get the pattern index, return if past it
       const patternIndex = state.patternIndex ?? 0;
       if (patternIndex >= pattern.length) {
-        return { patternIndex };
+        return { state: { patternIndex } };
       }
 
       if (!pattern[patternIndex]) {
@@ -578,7 +584,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
       // get the pattern index, return if past it
       if (globalPatternIndex >= pattern.length) {
         globalPatternIndex = 0;
-        return {};
+        return { state: {} };
       }
 
       services.alertFactory.create('alert').scheduleActions('default', {});
@@ -646,6 +652,8 @@ function getCancellableRuleType() {
       if (services.shouldStopExecution()) {
         throw new Error('execution short circuited!');
       }
+
+      return { state: {} };
     },
   };
   return result;
@@ -717,6 +725,8 @@ function getAlwaysFiringAlertAsDataRuleType(
           ruleInfo,
         },
       });
+
+      return { state: {} };
     },
   });
 }
@@ -734,7 +744,9 @@ export function defineAlertTypes(
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
   };
   const goldNoopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.gold.noop',
@@ -744,7 +756,9 @@ export function defineAlertTypes(
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'gold',
     isExportable: true,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
   };
   const onlyContextVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.onlyContextVariables',
@@ -757,7 +771,9 @@ export function defineAlertTypes(
     actionVariables: {
       context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
     },
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
   };
   const onlyStateVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.onlyStateVariables',
@@ -770,7 +786,9 @@ export function defineAlertTypes(
     },
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
   };
   const throwAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.throw',
@@ -811,6 +829,7 @@ export function defineAlertTypes(
       async executor(ruleExecutorOptions) {
         const { params } = ruleExecutorOptions;
         await new Promise((resolve) => setTimeout(resolve, params.delay ?? 5000));
+        return { state: {} };
       },
     };
     return result;
@@ -826,7 +845,9 @@ export function defineAlertTypes(
     defaultActionGroupId: 'small',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'alertsFixture',
   };
   const multipleSearchesRuleType: RuleType<
@@ -878,6 +899,8 @@ export function defineAlertTypes(
       for (i = 0; i < numSearches; ++i) {
         await services.scopedClusterClient.asCurrentUser.search(query as any);
       }
+
+      return { state: {} };
     },
   };
 

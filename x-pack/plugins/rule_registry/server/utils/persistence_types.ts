@@ -69,7 +69,7 @@ export type PersistenceAlertType<
     > & {
       services: PersistenceServices;
     }
-  ) => Promise<{ state: TState } | void>;
+  ) => Promise<{ state: TState }>;
 };
 
 export type CreatePersistenceRuleTypeWrapper = (options: {

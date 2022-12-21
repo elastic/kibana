@@ -277,6 +277,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
     const stopTime = Date.now();
     logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
+
+    return { state: {} };
   });
 
 const formatThreshold = (metric: SnapshotMetricType, value: number | number[]) => {

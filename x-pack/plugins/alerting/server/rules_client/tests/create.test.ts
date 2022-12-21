@@ -1197,7 +1197,9 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -1365,7 +1367,9 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -2133,7 +2137,9 @@ describe('create()', () => {
       },
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -2582,7 +2588,9 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -2647,7 +2655,9 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -2676,7 +2686,9 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -2763,7 +2775,9 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -2803,7 +2817,9 @@ describe('create()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),

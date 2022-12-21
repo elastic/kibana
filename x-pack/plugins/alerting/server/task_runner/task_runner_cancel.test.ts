@@ -264,6 +264,7 @@ describe('Task Runner Cancel', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     // setting cancelAlertsOnRuleTimeout to false here
@@ -331,6 +332,7 @@ describe('Task Runner Cancel', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     // setting cancelAlertsOnRuleTimeout for ruleType to false here
@@ -392,6 +394,7 @@ describe('Task Runner Cancel', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(

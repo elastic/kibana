@@ -307,7 +307,7 @@ export class TaskRunner<
           return reachedLimit;
         };
 
-        let executorResult: { state: RuleState } | void;
+        let executorResult: { state: RuleState } | undefined;
         try {
           const ctx = {
             type: 'alert',
