@@ -26,7 +26,6 @@
       "syncAlerts": false
     },
     "severity": "low",
-    "status": "open",
     "tags": [
       "super",
       "awesome"
@@ -122,7 +121,7 @@
       "syncAlerts": false
     },
     "severity": "high",
-    "status": "open",
+    "status": "in-progress",
     "tags": [
       "super",
       "awesome"
@@ -170,7 +169,7 @@
       "syncAlerts": false
     },
     "severity": "critical",
-    "status": "open",
+    "status": "closed",
     "tags": [
       "super",
       "awesome"
