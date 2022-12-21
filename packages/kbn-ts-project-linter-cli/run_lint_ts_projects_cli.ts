@@ -12,15 +12,11 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { RepoPath } from '@kbn/repo-path';
 import { getRepoFiles } from '@kbn/get-repo-files';
-import { readPackageMap } from '@kbn/package-map';
 import { PROJECTS as ALL_PROJECTS, type Project } from '@kbn/ts-projects';
 import { lintProjects, ProjectFileMap } from '@kbn/ts-project-linter';
 
 run(
   async ({ log, flagsReader }) => {
-    const pkgMap = readPackageMap();
-    const pkgDirMap = new Map(Array.from(pkgMap).map(([k, v]) => [v, k]));
-
     const projectFilter = new Set(
       flagsReader.arrayOfStrings('project')?.map((i) => Path.resolve(i))
     );
@@ -33,8 +29,6 @@ run(
 
     const { lintingErrorCount } = await lintProjects(log, projects, {
       fix: flagsReader.boolean('fix'),
-      pkgMap,
-      pkgDirMap,
       projectFileMap,
       skipRefs:
         flagsReader.boolean('refs-check') === false ||
@@ -105,7 +99,7 @@ run(
     if (failed) {
       throw createFailError('see above errors');
     } else {
-      log.success('All ts files belong to a single ts project');
+      log.success('All TS files belong to a single ts project');
     }
   },
   {

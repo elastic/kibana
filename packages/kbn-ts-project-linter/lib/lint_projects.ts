@@ -18,8 +18,6 @@ import { Rule, NamedViolation } from './rule';
 
 export interface LintOptions {
   fix: boolean;
-  pkgMap: Map<string, string>;
-  pkgDirMap: Map<string, string>;
   projectFileMap: ProjectFileMap;
   skipRefs?: boolean;
 }

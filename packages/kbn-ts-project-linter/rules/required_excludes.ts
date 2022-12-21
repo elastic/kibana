@@ -11,15 +11,6 @@ import { setExclude } from '../ast';
 
 const REQUIRED_EXCLUDES = ['target/**/*'];
 
-function isEql(required: string, existing: string) {
-  if (required !== 'target/**/*') {
-    return false;
-  }
-
-  const normal = existing.startsWith('./') ? existing.slice(2) : existing;
-  return normal === 'target' || normal.startsWith('target/');
-}
-
 export const requiredExcludes = Rule.create('requiredExcludes', {
   check(project) {
     const existing = project.config.exclude;
@@ -36,7 +27,12 @@ export const requiredExcludes = Rule.create('requiredExcludes', {
         msg: `excludes must include "${REQUIRED_EXCLUDES.join('", "')}"`,
         fix: (source) =>
           setExclude(source, [
-            ...existing.filter((e) => !missing.some((r) => isEql(r, e))),
+            ...(missing.includes('target/**/*')
+              ? existing.filter((e) => {
+                  const normalized = e.startsWith('./') ? e.slice(2) : e;
+                  return normalized === 'target' || normalized.startsWith('target/');
+                })
+              : existing),
             ...missing,
           ]),
       };

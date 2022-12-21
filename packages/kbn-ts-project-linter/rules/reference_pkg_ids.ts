@@ -21,12 +21,8 @@ export const refPkgsIds = Rule.create('refPkgIds', {
       return new Map(Array.from(pkgMap).map(([k, v]) => [v, k]));
     });
 
-    const getPkgIdJson = (tsconfigPath: string) => {
-      const pkgId = dirsToPkgIds.get(Path.relative(REPO_ROOT, Path.dirname(tsconfigPath)));
-      if (pkgId) {
-        return JSON.stringify(pkgId);
-      }
-    };
+    const getPkgId = (tsconfigPath: string) =>
+      dirsToPkgIds.get(Path.relative(REPO_ROOT, Path.dirname(tsconfigPath)));
 
     const replaceWithPkgId: Array<[string, string]> = [];
 
@@ -36,7 +32,7 @@ export const refPkgsIds = Rule.create('refPkgIds', {
       }
 
       const refPath = Path.resolve(proj.directory, ref.path);
-      const pkgIdJson = getPkgIdJson(refPath);
+      const pkgIdJson = getPkgId(refPath);
       if (pkgIdJson) {
         replaceWithPkgId.push([ref.path, pkgIdJson]);
       }
@@ -47,7 +43,7 @@ export const refPkgsIds = Rule.create('refPkgIds', {
     }
 
     const list = replaceWithPkgId
-      .map(([from, to]) => `  - {"path": "${from}"} => ${to}`)
+      .map(([from, to]) => `  - {"path": "${from}"} => ${JSON.stringify(to)}`)
       .join('\n');
 
     return {

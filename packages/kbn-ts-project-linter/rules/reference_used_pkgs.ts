@@ -49,9 +49,7 @@ export const referenceUsedPkgs = Rule.create('referenceUsedPkgs', {
       const list = ids.map((id) => ` - ${id}`).join('\n');
       this.err(
         `the following packages are referenced in the code of this package but not listed in kbn_references:\n${list}`,
-        (source) => {
-          return addReferences(source, ids);
-        }
+        (source) => addReferences(source, ids)
       );
     }
 
@@ -60,9 +58,7 @@ export const referenceUsedPkgs = Rule.create('referenceUsedPkgs', {
       const list = ids.map((id) => ` - ${id}`).join('\n');
       this.err(
         `the following packages are listed in kbn_references but there are no detectable references in the code:\n${list}`,
-        (source) => {
-          return removeReferences(source, ids);
-        }
+        (source) => removeReferences(source, ids)
       );
     }
   },
