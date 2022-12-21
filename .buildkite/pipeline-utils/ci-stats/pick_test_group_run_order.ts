@@ -294,14 +294,14 @@ export async function pickTestGroupRunOrder() {
     groups: [
       {
         type: UNIT_TYPE,
-        defaultMin: 3,
+        defaultMin: 60,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
         names: jestUnitConfigs,
       },
       {
         type: INTEGRATION_TYPE,
-        defaultMin: 10,
+        defaultMin: 60,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
         names: jestIntegrationConfigs,
