@@ -131,7 +131,7 @@ export const waitForTheRuleToBeExecuted = () => {
   });
 };
 
-export const goBackToAllRulesTable = () => {
+export const goBackToRulesTable = () => {
   cy.get(BACK_TO_RULES_TABLE).click();
 };
 
