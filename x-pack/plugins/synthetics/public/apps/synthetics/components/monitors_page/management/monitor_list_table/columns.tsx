@@ -45,6 +45,10 @@ export function useMonitorListColumns({
 
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable({ reloadPage });
 
+  const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
+    return alertStatus(fields[ConfigKey.CONFIG_ID]) !== FETCH_STATUS.LOADING;
+  };
+
   return [
     {
       align: 'left' as const,
@@ -136,7 +140,7 @@ export function useMonitorListColumns({
           description: labels.EDIT_LABEL,
           icon: 'pencil',
           type: 'icon',
-          enabled: () => canEditSynthetics,
+          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
           onClick: (fields) => {
             history.push({
               pathname: `/edit-monitor/${fields[ConfigKey.CONFIG_ID]}`,
@@ -151,7 +155,7 @@ export function useMonitorListColumns({
           icon: 'trash',
           type: 'icon',
           color: 'danger',
-          enabled: () => canEditSynthetics,
+          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
           onClick: (fields) => {
             setMonitorPendingDeletion(fields);
           },
@@ -165,8 +169,7 @@ export function useMonitorListColumns({
           icon: (fields) => (fields[ConfigKey.STATUS_ALERT_ENABLED] ? 'bellSlash' : 'bell'),
           type: 'icon',
           color: 'danger',
-          enabled: (fields) =>
-            canEditSynthetics && alertStatus(fields[ConfigKey.CONFIG_ID]) !== FETCH_STATUS.LOADING,
+          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
           onClick: (fields) => {
             updateAlertEnabledState({
               monitor: {
