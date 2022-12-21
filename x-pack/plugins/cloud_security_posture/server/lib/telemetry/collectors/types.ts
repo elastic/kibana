@@ -7,7 +7,7 @@
 
 export interface CspmUsage {
   indices: CspmIndicesStats;
-  accounts: CspmAccountsStats[] | [];
+  resources_stats: CspmResourcesStats[];
 }
 
 export interface CspmIndicesStats {
@@ -26,10 +26,12 @@ export interface IndexStats {
 export interface ResourceStats {
   [key: string]: { doc_count: number; passed: number; failed: number };
 }
-export interface CspmAccountsStats {
+export interface CspmResourcesStats {
   account_id: string;
-  account_score: number;
-  latest_findings_doc_count: number;
-  agents_count: number;
-  resource_type: ResourceStats;
+  resource_type: string;
+  resource_type_doc_count: number;
+  resource_sub_type: string;
+  resource_sub_type_doc_count: number;
+  passed: number;
+  failed: number;
 }

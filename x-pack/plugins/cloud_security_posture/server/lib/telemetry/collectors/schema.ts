@@ -6,13 +6,7 @@
  */
 
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import type { CspmUsage, ResourceStats } from './types';
-
-const byResourceType: MakeSchemaFrom<ResourceStats[string]> = {
-  doc_count: { type: 'long' },
-  passed: { type: 'long' },
-  failed: { type: 'long' },
-};
+import type { CspmUsage } from './types';
 
 export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
   indices: {
@@ -59,21 +53,16 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       },
     },
   },
-  accounts: {
+  resources_stats: {
     type: 'array',
     items: {
       account_id: { type: 'keyword' },
-      latest_findings_doc_count: { type: 'long' },
-      agents_count: { type: 'long' },
-      account_score: { type: 'float' },
-      resource_type: {
-        // byResourceType,
-        DYNAMIC_KEY: {
-          doc_count: { type: 'long' },
-          passed: { type: 'long' },
-          failed: { type: 'long' },
-        },
-      },
+      resource_type: { type: 'keyword' },
+      resource_type_doc_count: { type: 'long' },
+      resource_sub_type: { type: 'keyword' },
+      resource_sub_type_doc_count: { type: 'long' },
+      passed: { type: 'long' },
+      failed: { type: 'long' },
     },
   },
 };
