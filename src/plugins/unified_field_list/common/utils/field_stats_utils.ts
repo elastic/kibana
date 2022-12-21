@@ -12,7 +12,11 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldStatsResponse } from '../types';
-import { getFieldExampleBuckets, canProvideExamplesForField } from './field_examples_calculator';
+import {
+  getFieldExampleBuckets,
+  canProvideExamplesForField,
+  showExamplesForField,
+} from './field_examples_calculator';
 
 export type SearchHandler = ({
   aggs,
@@ -146,8 +150,7 @@ function canProvideAggregatedStatsForField(field: DataViewField): boolean {
 
 export function canProvideStatsForField(field: DataViewField): boolean {
   return (
-    (field.aggregatable && canProvideAggregatedStatsForField(field)) ||
-    (!field.aggregatable && canProvideExamplesForField(field))
+    (field.aggregatable && canProvideAggregatedStatsForField(field)) || showExamplesForField(field)
   );
 }
 
