@@ -50,6 +50,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     isLoading,
     onPageChange,
     onSortChange,
+    refresh,
     sort: sortingFields,
   } = alertsData;
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
@@ -118,9 +119,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       onResetColumns,
       browserFields,
       additionalControls: props.additionalControls,
+      refresh,
     });
   }, [
     props.additionalControls,
+    refresh,
     bulkActionsState,
     bulkActions,
     alertsCount,

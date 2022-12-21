@@ -19,6 +19,7 @@ interface BulkActionsProps {
   totalItems: number;
   items: BulkActionsConfig[];
   alerts: EcsFieldsResponse[];
+  refresh: () => void;
 }
 
 // Duplicated just for legacy reasons. Timelines plugin will be removed but
@@ -61,7 +62,8 @@ const selectedIdsToTimelineItemMapper = (
 
 const useBulkActionsToMenuItemMapper = (
   items: BulkActionsConfig[],
-  alerts: EcsFieldsResponse[]
+  alerts: EcsFieldsResponse[],
+  refresh: () => void
 ) => {
   const [{ isAllSelected, rowSelection }] = useContext(BulkActionsContext);
 
@@ -75,27 +77,31 @@ const useBulkActionsToMenuItemMapper = (
             data-test-subj={item['data-test-subj']}
             disabled={isDisabled}
             onClick={() => {
-              debugger;
               const selectedAlertIds = selectedIdsToTimelineItemMapper(alerts, rowSelection);
-              item.onClick(selectedAlertIds, isAllSelected);
+              item.onClick(selectedAlertIds, isAllSelected, refresh);
             }}
           >
             {isDisabled && item.disabledLabel ? item.disabledLabel : item.label}
           </EuiContextMenuItem>
         );
       }),
-    [alerts, isAllSelected, items, rowSelection]
+    [alerts, isAllSelected, items, rowSelection, refresh]
   );
 
   return bulkActionsItems;
 };
 
-const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, items, alerts }) => {
+const BulkActionsComponent: React.FC<BulkActionsProps> = ({
+  totalItems,
+  items,
+  alerts,
+  refresh,
+}) => {
   const [{ rowSelection, isAllSelected }, updateSelectedRows] = useContext(BulkActionsContext);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [showClearSelection, setShowClearSelectiong] = useState(false);
-  const bulkActionItems = useBulkActionsToMenuItemMapper(items, alerts);
+  const bulkActionItems = useBulkActionsToMenuItemMapper(items, alerts, refresh);
 
   useEffect(() => {
     setShowClearSelectiong(isAllSelected);

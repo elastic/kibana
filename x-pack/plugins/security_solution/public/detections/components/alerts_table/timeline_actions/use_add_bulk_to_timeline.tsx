@@ -204,8 +204,6 @@ export const useAddBulkToTimelineAction = ({
        * and selectAll is used when using DataTable
        * */
 
-      console.warn({ isAllSelected });
-
       if (isAllSelected || selectAll) {
         dispatch(
           setEventsLoading({

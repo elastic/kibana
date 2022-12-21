@@ -30,13 +30,12 @@ import { useBulkAddToCaseActions } from '../../../detections/components/alerts_t
 import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { APP_ID, CASES_FEATURE_ID } from '../../../../common/constants';
 import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
+import { TimelineId, TableId } from '../../../../common/types';
 import type {
   ColumnHeaderOptions,
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../common/types';
-import { TimelineId } from '../../../../common/types';
-import { TableId } from '../../../../common/types';
 import { getColumns } from '../../../detections/configurations/security_solution_detections';
 import { useRenderCellValue } from '../../../detections/configurations/security_solution_detections/render_cell_value';
 import { useToGetInternalFlyout } from '../../../timelines/components/side_panel/event_details/flyout';
@@ -48,13 +47,14 @@ import { defaultCellActions } from '../cell_actions/default_cell_actions';
 import { useGlobalTime } from '../../containers/use_global_time';
 import { useLicense } from '../../hooks/use_license';
 import { RowAction } from '../../components/control_columns/row_action';
-import type { State } from '../../../../common/store';
+import type { State } from '../../store';
 import { eventsViewerSelector } from '../../components/events_viewer/selectors';
 import { defaultHeaders } from '../../store/data_table/defaults';
 import { dataTableActions } from '../../store/data_table';
 import type { OnRowSelected } from '../../components/data_table/types';
 import { getEventIdToDataMapping } from '../../components/data_table/helpers';
 import { checkBoxControlColumn } from '../../components/control_columns';
+import { useBulkAlertActionItems } from './use_alert_actions';
 
 function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] {
   if (isKnownEmptyQuery(datafeedQuery)) {
@@ -117,8 +117,10 @@ const registerAlertsTableConfiguration = (
       tableId: TableId.alertsOnAlertsPage,
     });
 
+    const alertActions = useBulkAlertActionItems({ scopeId: SourcererScopeName.detections });
+
     const caseActions = useBulkAddToCaseActions();
-    return [timelineAction, ...caseActions];
+    return [...alertActions, ...caseActions, timelineAction];
   };
 
   const useActionsColumn: AlertsTableConfigurationRegistry['useActionsColumn'] = (

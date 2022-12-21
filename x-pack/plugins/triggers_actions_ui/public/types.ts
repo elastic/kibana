@@ -516,7 +516,11 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
-  onClick: (selectedIds: TimelineItem[], isAllSelected: boolean) => void;
+  onClick: (
+    selectedIds: TimelineItem[],
+    isAllSelected: boolean,
+    refresh: () => void
+  ) => void | Promise<void>;
 }
 
 export type UseBulkActionsRegistry = (
