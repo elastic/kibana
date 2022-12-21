@@ -19,7 +19,7 @@ export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' 
   refetch: (() => void) | null;
   uniqueQueryId: string;
   loading: boolean;
-  searchSessionId: string;
+  searchSessionId?: string;
 }
 
 /**

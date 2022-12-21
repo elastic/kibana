@@ -10,6 +10,8 @@ import { waitFor, act } from '@testing-library/react';
 import { mount } from 'enzyme';
 
 import { AlertsCountPanel } from '.';
+
+import type { Status } from '../../../../../common/detection_engine/schemas/common';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
@@ -58,6 +60,9 @@ describe('AlertsCountPanel', () => {
     stackByField1: DEFAULT_STACK_BY_FIELD1,
     setStackByField0: jest.fn(),
     setStackByField1: jest.fn(),
+    showBuildingBlockAlerts: false,
+    showOnlyThreatIndicatorAlerts: false,
+    status: 'open' as Status,
   };
   const mockSetToggle = jest.fn();
   const mockUseQueryToggle = useQueryToggle as jest.Mock;

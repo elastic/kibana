@@ -9,6 +9,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useAlertsLocalStorage } from './alerts_local_storage';
+import type { Status } from '../../../../../common/detection_engine/schemas/common';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../common/components/chart_settings_popover/translations';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
@@ -112,6 +113,9 @@ const defaultProps = {
   runtimeMappings: {},
   signalIndexName: '.alerts-security.alerts-default',
   updateDateRangeCallback: jest.fn(),
+  showBuildingBlockAlerts: false,
+  filterGroup: 'open' as Status,
+  showOnlyThreatIndicatorAlerts: false,
 };
 
 const resetGroupByFields = () => {

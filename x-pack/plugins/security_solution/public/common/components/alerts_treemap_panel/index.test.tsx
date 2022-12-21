@@ -9,6 +9,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
+import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { SecurityPageName } from '../../../../common/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
 import {
@@ -121,6 +122,9 @@ const defaultProps: Props = {
   stackByField0: 'kibana.alert.rule.name',
   stackByField1: 'host.name',
   title: <ChartSelect alertViewSelection="treemap" setAlertViewSelection={jest.fn()} />,
+  showBuildingBlockAlerts: false,
+  status: 'open' as Status,
+  showOnlyThreatIndicatorAlerts: false,
 };
 
 describe('AlertsTreemapPanel', () => {
