@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export class FileNotFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-    Error.captureStackTrace(this);
-  }
+export interface CloudHealth {
+  has_min_connector_memory: boolean;
 }
