@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { css } from '@emotion/react';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { DV_RANDOM_SAMPLER_PREFERENCE, useStorage } from '../../hooks/use_storage';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
@@ -503,15 +502,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiPageContentBody>
-        <EuiFlexGroup
-          gutterSize="m"
-          css={
-            compact &&
-            css`
-              flex-direction: column;
-            `
-          }
-        >
+        <EuiFlexGroup gutterSize="m" direction={compact ? 'column' : 'row'}>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder>
               <SearchPanel
