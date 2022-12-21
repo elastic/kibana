@@ -38,6 +38,13 @@
               }
             }
           },
+          "event": {
+            "properties": {
+              "created": {
+                "type": "keyword"
+              }
+            }
+          },
           "dll": {
             "properties": {
               "code_signature": {

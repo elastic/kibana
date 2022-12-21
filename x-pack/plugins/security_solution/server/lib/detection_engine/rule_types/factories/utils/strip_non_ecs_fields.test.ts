@@ -354,15 +354,15 @@ describe('stripNonEcsFields', () => {
     it('should not strip string or number date field', () => {
       const { result, removed } = stripNonEcsFields({
         event: {
-          created: '2020/12/12',
-          end: [2345562, '2022/10/12'],
+          created: '2020-12-12',
+          end: [2345562, '2022-10-12'],
         },
       });
 
       expect(result).toEqual({
         event: {
-          created: '2020/12/12',
-          end: [2345562, '2022/10/12'],
+          created: '2020-12-12',
+          end: [2345562, '2022-10-12'],
         },
       });
       expect(removed).toEqual([]);

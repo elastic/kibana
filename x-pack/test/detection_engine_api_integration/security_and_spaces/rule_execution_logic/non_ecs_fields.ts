@@ -185,8 +185,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should remove source non date field from alert if ECS field mapping is date', async () => {
       const document = {
         event: {
-          created: true,
-          end: '2022-12-19',
+          end: true,
         },
       };
 
@@ -196,10 +195,42 @@ export default ({ getService }: FtrProviderContext) => {
 
       // invalid ECS field is getting removed
       // event properties getting flattened, so we make sure event.created was removed
-      expect(alertSource).not.toHaveProperty(['event.created']);
-      expect(alertSource).not.toHaveProperty('event.created');
+      expect(alertSource).not.toHaveProperty(['event.end']);
+      expect(alertSource).not.toHaveProperty('event.end');
+    });
 
-      expect(alertSource).toHaveProperty(['event.end'], '2022-12-19');
+    it('should not remove valid dates from ECS source field', async () => {
+      const validDates = [
+        '2015-01-01T12:10:30.666Z',
+        '2015-01-01T12:10:30.666',
+        '2015-01-01T12:10:30Z',
+        '2015-01-01T12:10:30',
+        '2015-01-01T12:10Z',
+        '2015-01-01T12:10',
+        '2015-01-01T12Z',
+        '2015-01-01T12',
+        '2015-01-01',
+        '2015-01',
+        '2015-01-02T',
+        123.3,
+        '23242',
+        -1,
+        '-1',
+        0,
+        '0',
+      ];
+      const document = {
+        event: {
+          created: validDates,
+        },
+      };
+
+      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+      expect(errors).toEqual([]);
+
+      // event properties getting flattened
+      expect(alertSource).toHaveProperty(['event.created'], validDates);
     });
 
     // source threat.enrichments is keyword, ECS mapping for threat.enrichments is nested
