@@ -8,7 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/public';
+import { ControlGroupContainer, TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/public';
 import { getAddTimeSliderControlButtonTitle, getOnlyOneTimeSliderControlMsg } from '../../_dashboard_app_strings';
 
 interface Props {
@@ -22,7 +22,7 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroup }: Props
   useEffect(() => {
     const subscription = controlGroup.getInput$().subscribe(() => {
       const childIds = controlGroup.getChildIds();
-      const nextHasTimeSliderControl = childIds.some((id) => {
+      const nextHasTimeSliderControl = childIds.some((id: string) => {
         const child = controlGroup.getChild(id);
         return child.type === TIME_SLIDER_CONTROL;
       });

@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
+import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { getAddControlButtonTitle } from '../../_dashboard_app_strings';
 
 interface Props {
