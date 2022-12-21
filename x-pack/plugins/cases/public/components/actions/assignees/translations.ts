@@ -28,14 +28,14 @@ export const SEARCH_ASSIGNEES_PLACEHOLDER = i18n.translate(
 );
 
 export const NO_SELECTED_ASSIGNEES = i18n.translate(
-  'xpack.cases.actions.assignees.searchPlaceholder',
+  'xpack.cases.actions.assignees.noSelectedAssigneesTitle',
   {
     defaultMessage: 'The selected cases do not have any assigned users',
   }
 );
 
 export const NO_SELECTED_ASSIGNEES_HELP_TEXT = i18n.translate(
-  'xpack.cases.actions.assignees.searchPlaceholder',
+  'xpack.cases.actions.assignees.noSelectedAssigneesHelpText',
   {
     defaultMessage: 'Search to assign users.',
   }
