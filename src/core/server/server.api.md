@@ -861,6 +861,7 @@ export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
 // @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
+    readonly enabledOnAnonymousPages?: boolean;
     readonly id: PluginName;
     readonly optionalPlugins: readonly PluginName[];
     readonly requiredBundles: readonly PluginName[];
@@ -1009,6 +1010,14 @@ export interface ExecutionContextSetup {
 
 // @public (undocumented)
 export type ExecutionContextStart = ExecutionContextSetup;
+
+// Warning: (ae-forgotten-export) The symbol "Maybe" needs to be exported by the entry point index.d.ts
+//
+// @public
+export type ExposedToBrowserDescriptor<T> = {
+    [Key in keyof T]?: T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? // can be nested for objects
+    ExposedToBrowserDescriptor<T[Key]> | boolean : boolean;
+};
 
 // @public
 export interface FakeRequest {
@@ -1266,7 +1275,7 @@ export interface IntervalHistogram {
 
 // @public (undocumented)
 export interface IRenderOptions {
-    includeUserSettings?: boolean;
+    isAnonymousPage?: boolean;
     // @internal @deprecated
     vars?: Record<string, any>;
 }
@@ -1465,8 +1474,6 @@ export { LogMeta }
 
 export { LogRecord }
 
-// Warning: (ae-forgotten-export) The symbol "Maybe" needs to be exported by the entry point index.d.ts
-//
 // @public
 export type MakeUsageFromSchema<T> = {
     [Key in keyof T]?: T[Key] extends Maybe<object[]> ? false : T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
@@ -1658,9 +1665,7 @@ export { Plugin_2 as Plugin }
 export interface PluginConfigDescriptor<T = any> {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
     deprecations?: ConfigDeprecationProvider;
-    exposeToBrowser?: {
-        [P in keyof T]?: boolean;
-    };
+    exposeToBrowser?: ExposedToBrowserDescriptor<T>;
     exposeToUsage?: MakeUsageFromSchema<T>;
     schema: PluginConfigSchema<T>;
 }
@@ -1699,6 +1704,7 @@ export interface PluginManifest {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
     readonly configPath: ConfigPath;
     readonly description?: string;
+    readonly enabledOnAnonymousPages?: boolean;
     // @deprecated
     readonly extraPublicDirs?: string[];
     readonly id: PluginName;
@@ -3173,8 +3179,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:93:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:375:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:483:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:404:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:406:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:512:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

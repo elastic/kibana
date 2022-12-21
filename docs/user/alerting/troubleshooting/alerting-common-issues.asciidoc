@@ -1,4 +1,3 @@
-[role="xpack"]
 [[alerting-common-issues]]
 === Common Issues
 
