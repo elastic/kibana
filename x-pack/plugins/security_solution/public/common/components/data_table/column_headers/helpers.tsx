@@ -195,7 +195,7 @@ const eventRenderedViewColumns: ColumnHeaderOptions[] = [
 export const getColumnHeaders = (
   headers: ColumnHeaderOptions[],
   browserFields: BrowserFields,
-  isEventRenderedView: boolean
+  isEventRenderedView?: boolean
 ): ColumnHeaderOptions[] => {
   const browserFieldByName = getAllFieldsByName(browserFields);
   const headersToMap = isEventRenderedView ? eventRenderedViewColumns : headers;

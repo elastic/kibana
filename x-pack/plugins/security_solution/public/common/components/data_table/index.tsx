@@ -447,7 +447,6 @@ export const DataTableComponent = React.memo<DataTableProps>(
             pagination={pagination}
             ref={dataGridRef}
             rowHeightsOptions={rowHeightsOptions}
-            width={isEventRenderedView ? '100%' : 'inherit'}
           />
         </EuiDataGridContainer>
       </>

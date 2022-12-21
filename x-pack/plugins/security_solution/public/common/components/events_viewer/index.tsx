@@ -54,7 +54,6 @@ import {
   StyledEuiPanel,
 } from './styles';
 import { getDefaultViewSelection, getCombinedFilterQuery } from './helpers';
-import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../event_rendered_view/helpers';
 import { useTimelineEvents } from './use_timelines_events';
 import { TableContext, EmptyTable, TableLoading } from './shared';
 import { DataTableComponent } from '../data_table';
@@ -75,6 +74,8 @@ import { defaultUnit } from '../toolbar/unit';
 const storage = new Storage(localStorage);
 
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
+/** This local storage key stores the `Grid / Event rendered view` selection */
+export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';
 
 export interface EventsViewerProps {
   defaultCellActions?: DataTableCellAction[];
