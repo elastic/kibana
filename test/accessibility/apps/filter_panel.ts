@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('editQueryDSL');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);
+      await filterBar.pressConfirmOnFilterEditorConfirmModal();
     });
 
     // the following tests are for the new saved query panel which also has filter panel options

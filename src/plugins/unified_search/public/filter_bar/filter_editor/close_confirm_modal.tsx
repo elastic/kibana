@@ -39,6 +39,7 @@ export const CloseFilterEditorConfirmModal = memo(function CloseFilterEditorConf
 ) {
   return (
     <EuiConfirmModal
+      data-test-subj="close-filter-editor-confirm-modal"
       title={strings.getTitle()}
       cancelButtonText={strings.getCancelButton()}
       confirmButtonText={strings.getConfirmButton()}
