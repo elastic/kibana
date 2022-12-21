@@ -276,7 +276,7 @@ describe('IndexPatterns', () => {
       result = err;
     }
 
-    expect(result.respomse.status).toBe(409);
+    expect(result.res.status).toBe(409);
   });
 
   test('create', async () => {
