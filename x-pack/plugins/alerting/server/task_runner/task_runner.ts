@@ -37,6 +37,7 @@ import {
   RuleTaskState,
   RuleTypeRegistry,
   RawRuleLastRun,
+  ExecutorType
 } from '../types';
 import { asErr, asOk, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -307,7 +308,7 @@ export class TaskRunner<
           return reachedLimit;
         };
 
-        let updatedState: void | Record<string, unknown>;
+        let executorResult: { state: RuleState } | void;
         try {
           const ctx = {
             type: 'alert',
@@ -322,7 +323,7 @@ export class TaskRunner<
             includedHiddenTypes: ['alert', 'action'],
           });
 
-          updatedState = await this.context.executionContext.withContext(ctx, () =>
+          executorResult = await this.context.executionContext.withContext(ctx, () =>
             this.ruleType.executor({
               executionId: this.executionId,
               services: {
@@ -396,7 +397,7 @@ export class TaskRunner<
         return {
           originalAlerts: alertsCopy,
           originalRecoveredAlerts: recoveredAlerts,
-          updatedRuleTypeState: updatedState || undefined,
+          updatedRuleTypeState: executorResult?.state || undefined,
           hasReachedAlertLimit: alertFactory.hasReachedAlertLimit(),
         };
       });
