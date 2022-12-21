@@ -14,13 +14,14 @@ import type {
 import type { BucketItem } from '../../../../../common/search_strategy/security_solution/cti';
 
 export type AggregationType = 'Severity' | 'Detections' | 'Host';
-export type DetectionType = 'Detections' | 'Preventions';
+export type AlertType = 'Detection' | 'Prevention';
 
 export interface ChartsPanelProps {
   data: SummaryChartsData[] | null;
   isLoading: boolean;
   uniqueQueryId: string;
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
+  option?: number;
 }
 export interface UseAlertsQueryProps {
   aggregations: {};
@@ -56,8 +57,9 @@ interface RuleByEventType {
 
 export interface DetectionsData {
   rule: string;
-  type: string;
+  type: AlertType;
   value: number;
+  color: string;
 }
 
 export interface AlertsBySeverityAgg {

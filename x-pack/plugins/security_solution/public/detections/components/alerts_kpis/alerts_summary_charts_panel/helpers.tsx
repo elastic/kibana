@@ -14,6 +14,7 @@ import type {
   DetectionsData,
   HostData,
   AggregationType,
+  AlertType,
 } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
@@ -65,7 +66,10 @@ export const parseDetectionsData = (
         return getAggregateDetections(rule.key, events);
       });
 };
-
+export const EVENT_TYPE_COLOUR = {
+  Detection: '#54B399',
+  Prevention: '#D36086',
+};
 const getAggregateDetections = (
   ruleName: string,
   ruleEvents: Array<{ key: string; doc_count: number }>
@@ -81,10 +85,20 @@ const getAggregateDetections = (
 
   const ret = [];
   if (preventions > 0) {
-    ret.push({ rule: ruleName, type: 'Preventions', value: preventions });
+    ret.push({
+      rule: ruleName,
+      type: 'Prevention' as AlertType,
+      value: preventions,
+      color: EVENT_TYPE_COLOUR.Prevention,
+    });
   }
   if (detections > 0) {
-    ret.push({ rule: ruleName, type: 'Detections', value: detections });
+    ret.push({
+      rule: ruleName,
+      type: 'Detection' as AlertType,
+      value: detections,
+      color: EVENT_TYPE_COLOUR.Detection,
+    });
   }
   return ret;
 };

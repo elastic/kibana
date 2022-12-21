@@ -34,8 +34,8 @@ export const SEVERITY_LEVEL_COLUMN_TITLE = i18n.translate(
   }
 );
 
-export const SEVERITY_COUNT_COULMN_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.severity.severityTableCountColumn',
+export const COUNT_COULMN_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.countColumn',
   {
     defaultMessage: 'Counts',
   }
@@ -65,6 +65,6 @@ export const DETECTIONS_PREVENTIONS_COLUMN_TITLE = i18n.translate(
 export const ALERT_BY_HOST_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.alertsBySeverity.chartAlertHostTitle',
   {
-    defaultMessage: 'Alert by host type',
+    defaultMessage: 'Top 10 hosts by alerts',
   }
 );
