@@ -18,7 +18,20 @@ let indexPatternsContract: DataViewsContract | null = null;
 export async function loadIndexPatterns(indexPatterns: DataViewsContract) {
   indexPatternsContract = indexPatterns;
   const dataViewsContract = getDataViews();
-  indexPatternCache = await dataViewsContract.find('*', 10000);
+  const idsAndTitles = await dataViewsContract.getIdsWithTitle();
+
+  const dataViewsThatExist = (
+    await Promise.allSettled(
+      idsAndTitles.map(({ title }) => dataViewsContract.getFieldsForIndexPattern({ title }))
+    )
+  ).reduce<string[]>((acc, { status }, i) => {
+    if (status === 'fulfilled') {
+      acc.push(idsAndTitles[i].id);
+    }
+    return acc;
+  }, []);
+
+  indexPatternCache = await Promise.all(dataViewsThatExist.map(dataViewsContract.get));
   return indexPatternCache;
 }
 
