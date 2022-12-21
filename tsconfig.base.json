@@ -816,6 +816,8 @@
       "@kbn/maps-plugin/*": ["x-pack/plugins/maps/*"],
       "@kbn/ml-agg-utils": ["x-pack/packages/ml/agg_utils"],
       "@kbn/ml-agg-utils/*": ["x-pack/packages/ml/agg_utils/*"],
+      "@kbn/ml-date-picker": ["x-pack/packages/ml/date_picker"],
+      "@kbn/ml-date-picker/*": ["x-pack/packages/ml/date_picker/*"],
       "@kbn/ml-is-defined": ["x-pack/packages/ml/is_defined"],
       "@kbn/ml-is-defined/*": ["x-pack/packages/ml/is_defined/*"],
       "@kbn/ml-is-populated-object": ["x-pack/packages/ml/is_populated_object"],
