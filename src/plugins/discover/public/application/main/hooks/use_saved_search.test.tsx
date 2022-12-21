@@ -14,8 +14,6 @@ import { RecordRawType, useSavedSearch } from './use_saved_search';
 import { getDiscoverStateContainer } from '../services/discover_state';
 import { useDiscoverState } from './use_discover_state';
 import { FetchStatus } from '../../types';
-import { dataViewMock } from '../../../__mocks__/data_view';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { setUrlTracker } from '../../../kibana_services';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
 import React from 'react';
@@ -67,7 +65,6 @@ describe('test useSavedSearch', () => {
           history,
           savedSearch: savedSearchMock,
           setExpandedDoc: jest.fn(),
-          dataViewList: [dataViewMock as DataViewListItem],
         });
       },
       {
@@ -118,7 +115,6 @@ describe('test useSavedSearch', () => {
           history,
           savedSearch: savedSearchMock,
           setExpandedDoc: jest.fn(),
-          dataViewList: [dataViewMock as DataViewListItem],
         });
       },
       {

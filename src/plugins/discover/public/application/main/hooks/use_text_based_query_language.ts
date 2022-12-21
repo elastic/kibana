@@ -92,7 +92,7 @@ export function useTextBasedQueryLanguage({
           dataViewObj = await dataViews.create({
             title: indexPatternFromQuery,
           });
-          stateContainer.internalState.transitions.appendAdHocDataViews(dataViewObj);
+          stateContainer.internalState.transitions.setAdHocDataViews([dataViewObj]);
 
           if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
             dataViewObj.timeFieldName = '@timestamp';
