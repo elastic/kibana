@@ -24,8 +24,8 @@ const RESPONSE_METRICS_NAMES = [
 ];
 const DEFAULT_THRESHOLD = {
   threshold1: 3000,
-  threshold2: 9000,
-  threshold3: 15000,
+  threshold2: 6000,
+  threshold3: 12000,
 };
 const DEFAULT_METRIC = '85%';
 const REQUESTS_REGEXP = /(?<=var requests = unpack\(\[)(.*)(?=\]\);)/g;

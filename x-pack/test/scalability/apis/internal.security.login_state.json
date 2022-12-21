@@ -1,6 +1,11 @@
 {
   "journeyName": "GET /internal/security/login_state",
   "scalabilitySetup": {
+    "responseTimeThreshold": {
+      "threshold1": 100,
+      "threshold2": 500,
+      "threshold3": 800
+    },
     "warmup": [
       {
         "action": "constantUsersPerSec",
