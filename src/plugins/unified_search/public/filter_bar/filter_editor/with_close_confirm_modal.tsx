@@ -43,7 +43,7 @@ export function withCloseFilterEditorConfirmModal<
             index: true,
             alias: true,
           }) ||
-          updated.meta.type === FILTERS.CUSTOM
+          updated.meta.type === FILTERS.CUSTOM // show always if Query DSL mode is enabled
         ) {
           setShowConfirmModal(true);
           setActionsOnClose(actions);
