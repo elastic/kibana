@@ -8,11 +8,8 @@
 
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import type {
-  CustomBranding,
-  CustomBrandingStart,
-  CustomBrandingSetup,
-} from '@kbn/core-custom-branding-browser';
+import type { CustomBrandingStart, CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 const CUSTOM_BRANDING_PLUGIN = 'customBranding';
 

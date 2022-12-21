@@ -2957,6 +2957,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-custom-branding-common@link:bazel-bin/packages/core/custom-branding/core-custom-branding-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-deprecations-browser-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-browser-internal":
   version "0.0.0"
   uid ""

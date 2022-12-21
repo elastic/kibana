@@ -2,13 +2,12 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "core-custom-branding-browser-internal"
-PKG_REQUIRE_NAME = "@kbn/core-custom-branding-browser-internal"
+PKG_DIRNAME = "core-custom-branding-common"
+PKG_REQUIRE_NAME = "@kbn/core-custom-branding-common"
 
 SOURCE_FILES = glob(
   [
     "**/*.ts",
-    "**/*.tsx",
   ],
   exclude = [
     "**/*.config.js",
@@ -47,8 +46,6 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//react",
-  "@npm//rxjs",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -62,24 +59,12 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@types/node",
-  "@npm//@types/jest",
-  "@npm//@types/react",
-  "@npm//rxjs",
-  "//packages/core/custom-branding/core-custom-branding-browser:npm_module_types",
-  "//packages/core/custom-branding/core-custom-branding-common:npm_module_types",
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
-)
-
-jsts_transpiler(
-  name = "target_web",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-  web = True,
 )
 
 ts_config(
@@ -105,7 +90,7 @@ ts_project(
 js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -113,7 +98,7 @@ js_library(
 js_library(
   name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

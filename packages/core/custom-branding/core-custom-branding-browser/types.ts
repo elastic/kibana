@@ -7,25 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-
-export interface CustomBranding {
-  /**
-   * Custom replacement for the Elastic logo in the top lef *
-   * */
-  logo?: string;
-  /**
-   * Custom replacement for favicon
-   */
-  favicon?: string;
-
-  /** Custom page title */
-  pageTitle?: string;
-  /**
-   * Custom replacement for Elastic Mark
-   * @link packages/core/chrome/core-chrome-browser-internal/src/ui/header/elastic_mark.tsx
-   */
-  customizedLogo?: string;
-}
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 export interface CustomBrandingStart {
   get: () => CustomBranding;

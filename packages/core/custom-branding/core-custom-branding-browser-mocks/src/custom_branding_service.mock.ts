@@ -7,7 +7,7 @@
  */
 
 import { serviceContractMock } from './service_contract.mock';
-import { CustomBranding } from '@kbn/core-custom-branding-browser';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
 import { of } from 'rxjs';
 
 const mockCustomBranding: CustomBranding = {

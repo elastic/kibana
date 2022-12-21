@@ -182,6 +182,7 @@
     "@kbn/core-custom-branding-browser": "link:bazel-bin/packages/core/custom-branding/core-custom-branding-browser",
     "@kbn/core-custom-branding-browser-internal": "link:bazel-bin/packages/core/custom-branding/core-custom-branding-browser-internal",
     "@kbn/core-custom-branding-browser-mocks": "link:bazel-bin/packages/core/custom-branding/core-custom-branding-browser-mocks",
+    "@kbn/core-custom-branding-common": "link:bazel-bin/packages/core/custom-branding/core-custom-branding-common",
     "@kbn/core-deprecations-browser": "link:bazel-bin/packages/core/deprecations/core-deprecations-browser",
     "@kbn/core-deprecations-browser-internal": "link:bazel-bin/packages/core/deprecations/core-deprecations-browser-internal",
     "@kbn/core-deprecations-browser-mocks": "link:bazel-bin/packages/core/deprecations/core-deprecations-browser-mocks",
