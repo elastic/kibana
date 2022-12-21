@@ -162,8 +162,6 @@ export class AuditService {
         const spaceId = getSpaceId(request);
         const user = getCurrentUser(request);
         const sessionId = await getSID(request);
-        const forwardedFor = getForwardedFor(request);
-
         log({
           ...event,
           user:
@@ -179,18 +177,6 @@ export class AuditService {
             ...event.kibana,
           },
           trace: { id: request.id },
-          client: { ip: request.socket.remoteAddress },
-          http: forwardedFor
-            ? {
-                ...event.http,
-                request: {
-                  ...event.http?.request,
-                  headers: {
-                    'x-forwarded-for': forwardedFor,
-                  },
-                },
-              }
-            : event.http,
         });
       },
       enabled,
@@ -256,17 +242,4 @@ export function filterEvent(
     );
   }
   return true;
-}
-
-/**
- * Extracts `X-Forwarded-For` header(s) from `KibanaRequest`.
- */
-export function getForwardedFor(request: KibanaRequest) {
-  const forwardedFor = request.headers['x-forwarded-for'];
-
-  if (Array.isArray(forwardedFor)) {
-    return forwardedFor.join(', ');
-  }
-
-  return forwardedFor;
 }

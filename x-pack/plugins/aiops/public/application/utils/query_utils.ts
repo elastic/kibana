@@ -15,7 +15,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { Query } from '@kbn/es-query';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
 import type { GroupTableItem } from '../../components/spike_analysis_table/spike_analysis_table_groups';
 
 /*
@@ -52,11 +52,10 @@ export function buildBaseFilterCriteria(
 
   const groupFilter = [];
   if (selectedGroup) {
-    const allItems = { ...selectedGroup.group, ...selectedGroup.repeatedValues };
-    for (const fieldName in allItems) {
-      if (allItems.hasOwnProperty(fieldName)) {
-        groupFilter.push({ term: { [fieldName]: allItems[fieldName] } });
-      }
+    const allItems: FieldValuePair[] = [...selectedGroup.group, ...selectedGroup.repeatedValues];
+    for (const item of allItems) {
+      const { fieldName, fieldValue } = item;
+      groupFilter.push({ term: { [fieldName]: fieldValue } });
     }
   }
 
