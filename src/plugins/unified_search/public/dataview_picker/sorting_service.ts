@@ -23,25 +23,23 @@ export interface Sorting {
 }
 
 export class SortingService<T = unknown> {
-  private localStorage: IStorageWrapper;
   public column: Sorting['column'];
   public direction: Sorting['direction'];
 
   constructor(
     private callbacks: Record<Sorting['column'], (arg: T) => string>,
-    private storage?: IStorageWrapper
+    private storage: IStorageWrapper = new Storage(window.localStorage)
   ) {
     const { column, direction } = this.getSorting();
     this.column = column;
     this.direction = direction;
-    this.localStorage = this.storage ? this.storage : new Storage(window.localStorage);
   }
 
   private getSorting(): Sorting {
     let parsedSorting: Sorting | undefined;
 
     try {
-      parsedSorting = this.localStorage.get(storageKey);
+      parsedSorting = this.storage.get(storageKey);
     } catch (e) {
       parsedSorting = undefined;
     }
@@ -51,12 +49,12 @@ export class SortingService<T = unknown> {
 
   setDirection(direction: Sorting['direction']) {
     this.direction = direction;
-    this.localStorage.set(storageKey, { direction, column: this.column });
+    this.storage.set(storageKey, { direction, column: this.column });
   }
 
   setColumn(column: Sorting['column']) {
     this.column = column;
-    this.localStorage.set(storageKey, { column, direction: this.direction });
+    this.storage.set(storageKey, { column, direction: this.direction });
   }
 
   getOrderDirections(): Array<Sorting['direction']> {

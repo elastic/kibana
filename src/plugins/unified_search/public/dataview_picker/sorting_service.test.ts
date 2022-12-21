@@ -34,14 +34,15 @@ describe('Sorting service', () => {
     expect(sortingService.direction).toEqual(SortDirection.ASC);
   });
 
-  it('should set sorting direction', () => {
-    sortingService.setColumn(ALPHABETICALLY);
-    expect(storage.get('unified_search_sorting').column).toEqual(ALPHABETICALLY);
-  });
+  it('should set sorting direction ', () => {
+    const setSpy = jest.spyOn(storage, 'set');
 
-  it('should set sorting column ', () => {
-    sortingService.setDirection(SortDirection.ASC);
-    expect(storage.get('unified_search_sorting').direction).toEqual(SortDirection.ASC);
+    sortingService.setDirection(SortDirection.DESC);
+    expect(sortingService.direction).toEqual(SortDirection.DESC);
+    expect(setSpy).toHaveBeenCalledWith('unified_search_sorting', {
+      column: 'alphabetically',
+      direction: 'desc',
+    });
   });
 
   it('should get sorting order directions', () => {
