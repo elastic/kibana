@@ -1059,4 +1059,6 @@ x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
 x-pack/packages/ml/aiops_utils @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
+x-pack/packages/ml/nested_property @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
+x-pack/packages/ml/url_state @elastic/ml-ui
