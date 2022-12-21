@@ -27,7 +27,7 @@ export const InlineRadioGroup = ({ idSelected, size, options, onChange }: Props)
         disabled: o.disabled,
         ['data-enabled']: idSelected === o.id,
         ['data-disabled']: o.disabled,
-        className: '__extendedRadio',
+        className: '__extendedRadioOption',
       }))}
       onChange={onChange}
       css={css`
@@ -37,11 +37,11 @@ export const InlineRadioGroup = ({ idSelected, size, options, onChange }: Props)
         column-gap: ${euiTheme.size.s};
         align-items: center;
 
-        > .__extendedRadio {
+        > .__extendedRadioOption {
           margin-top: 0;
           height: 100%;
-          padding-left: ${euiTheme.size.s};
-          padding-right: ${euiTheme.size.s};
+          padding-left: ${euiTheme.size.m};
+          padding-right: ${euiTheme.size.m};
 
           display: grid;
           grid-template-columns: auto 1fr;
@@ -62,7 +62,9 @@ export const InlineRadioGroup = ({ idSelected, size, options, onChange }: Props)
             background: ${euiTheme.colors.emptyShade};
           }
 
-          &.__extendedRadio {
+          // EuiRadio shows an absolute positioned div as a circle instead of input[type=radio] which is hidden
+          // removing the absolute position to make it part of document flow, set by css grid
+          &.__extendedRadioOption {
             & > *:not(label):not(input) {
               position: inherit;
               top: 0;
