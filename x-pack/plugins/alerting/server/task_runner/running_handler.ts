@@ -48,24 +48,21 @@ export class RunningHandler {
 
   private setRunning(ruleId: string, namespace?: string) {
     this.isUpdating = true;
-    try {
-      this.runningPromise = partiallyUpdateAlert(this.client, ruleId, { running: true }, {
-        ignore404: true,
-        namespace: namespace,
-        refresh: false,
-      });
-      this.runningPromise
-      .then((mail) => {
-        this.runningPromise = undefined;
-        this.isUpdating = false
-      })
-      .catch((err) => {
-        this.runningPromise = undefined;
-        this.isUpdating = false
-      })
-    } catch (err) {
+    this.runningPromise = partiallyUpdateAlert(this.client, ruleId, { running: true }, {
+      ignore404: true,
+      namespace: namespace,
+      refresh: false,
+    });
+    this.runningPromise
+    .then((mail) => {
+      this.runningPromise = undefined;
+      this.isUpdating = false
+    })
+    .catch((err) => {
+      this.runningPromise = undefined;
+      this.isUpdating = false
       this.logger.error(`error updating running attribute rule for ${this.ruleTypeId}:${ruleId} ${err.message}`);
-    }
+    })
   }
 
 }

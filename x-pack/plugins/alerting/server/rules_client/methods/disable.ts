@@ -76,7 +76,6 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
       updateMeta(context, {
         ...attributes,
         enabled: false,
-        running: false,
         scheduledTaskId: attributes.scheduledTaskId === id ? attributes.scheduledTaskId : null,
         updatedBy: await context.getUserName(),
         updatedAt: new Date().toISOString(),

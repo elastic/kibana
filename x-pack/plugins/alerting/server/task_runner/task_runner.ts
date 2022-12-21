@@ -151,7 +151,7 @@ export class TaskRunner<
     this.ruleRunning = new RunningHandler(this.context.internalSavedObjectsRepository, this.logger, loggerId )
   }
 
-  private async updateRuleSavedObject(
+  private async updateRuleSavedObjectPostRun(
     ruleId: string,
     namespace: string | undefined,
     attributes: {
@@ -166,7 +166,7 @@ export class TaskRunner<
       await this.ruleRunning.waitFor();
     } catch {}
     try {
-      await partiallyUpdateAlert(client, ruleId, attributes, {
+      await partiallyUpdateAlert(client, ruleId, {...attributes, running: false}, {
         ignore404: true,
         namespace,
         refresh: false,
@@ -643,7 +643,7 @@ export class TaskRunner<
           executionStatus
         )} - ${JSON.stringify(lastRun)}`
       );
-      await this.updateRuleSavedObject(ruleId, namespace, {
+      await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
         nextRun,
         lastRun: lastRunToRaw(lastRun),
@@ -839,7 +839,7 @@ export class TaskRunner<
     this.logger.debug(
       `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
     );
-    await this.updateRuleSavedObject(ruleId, namespace, {
+    await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
       lastRun: {
         outcome: 'failed',
