@@ -1756,11 +1756,11 @@
           },
           ", indexPatterns: ",
           {
-            "pluginId": "dataViews",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
           },
           "[]) => string"
         ],
@@ -1798,11 +1798,11 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "dataViews",
+                "pluginId": "@kbn/es-query",
                 "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
               },
               "[]"
             ],
@@ -1832,6 +1832,14 @@
             "text": "Filter"
           },
           ", indexPatterns: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
+          "[] | ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1869,11 +1877,19 @@
           {
             "parentPluginId": "data",
             "id": "def-public.getFieldDisplayValueFromFilter.$2",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "indexPatterns",
             "description": [],
             "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
+              },
+              "[] | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1908,23 +1924,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          ", indexPatterns: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "[]) => ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          " | undefined"
+          ", indexPatterns: T[]) => T | undefined"
         ],
         "path": "src/plugins/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts",
         "deprecated": false,
@@ -1959,14 +1959,7 @@
             "label": "indexPatterns",
             "description": [],
             "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[]"
+              "T[]"
             ],
             "path": "src/plugins/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts",
             "deprecated": false,
