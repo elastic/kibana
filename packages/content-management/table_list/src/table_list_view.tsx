@@ -885,7 +885,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         {showFetchError && renderFetchError()}
 
         {/* Table of items */}
-        {/* insert here the div-stub */}
         <div
           data-test-subj={
             hasInitialFetchReturned && !isFetchingItems ? 'table-is-ready' : 'table-is-loading'
