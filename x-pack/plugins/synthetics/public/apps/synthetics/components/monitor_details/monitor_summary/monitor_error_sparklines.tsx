@@ -49,6 +49,7 @@ export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
           selectedMetricField: 'monitor_errors',
           name: 'Monitor errors',
           color: euiTheme.colors.danger,
+          operationType: 'unique_count',
         },
       ]}
     />
