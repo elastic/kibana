@@ -80,7 +80,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   } = useSpikeAnalysisTableRowContext();
 
   const [aiopsListState, setAiopsListState] = usePageUrlState(
-    'explain-log-rate-spikes',
+    'AIOPS_INDEX_VIEWER',
     restorableDefaults
   );
   const [globalState, setGlobalState] = useUrlState('_g');
