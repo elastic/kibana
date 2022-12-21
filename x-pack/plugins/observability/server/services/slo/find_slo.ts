@@ -15,8 +15,8 @@ import {
   Pagination,
   SLORepository,
   Sort,
-  SORT_FIELD,
-  SORT_DIRECTION,
+  SortField,
+  SortDirection,
 } from './slo_repository';
 
 const DEFAULT_PAGE = 1;
@@ -86,7 +86,7 @@ function toCriteria(params: FindSLOParams): Criteria {
 
 function toSort(params: FindSLOParams): Sort {
   return {
-    field: params.sort_by === 'indicator_type' ? SORT_FIELD.IndicatorType : SORT_FIELD.Name,
-    direction: params.sort_direction === 'desc' ? SORT_DIRECTION.Desc : SORT_DIRECTION.Asc,
+    field: params.sort_by === 'indicator_type' ? SortField.IndicatorType : SortField.Name,
+    direction: params.sort_direction === 'desc' ? SortDirection.Desc : SortDirection.Asc,
   };
 }

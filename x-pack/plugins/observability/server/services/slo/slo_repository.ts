@@ -29,19 +29,19 @@ export interface Pagination {
   perPage: number;
 }
 
-export const SORT_DIRECTION = {
+export const SortDirection = {
   Asc: 'Asc',
   Desc: 'Desc',
 } as const;
 
-type SortDirection = ObjectValues<typeof SORT_DIRECTION>;
+type SortDirection = ObjectValues<typeof SortDirection>;
 
-export const SORT_FIELD = {
+export const SortField = {
   Name: 'Name',
   IndicatorType: 'IndicatorType',
 };
 
-type SortField = ObjectValues<typeof SORT_FIELD>;
+type SortField = ObjectValues<typeof SortField>;
 
 export interface Sort {
   field: SortField;
@@ -132,10 +132,10 @@ function buildFilterKuery(criteria: Criteria): string | undefined {
 function buildSortQuery(sort: Sort): { sortField: string; sortOrder: 'asc' | 'desc' } {
   let sortField: string;
   switch (sort.field) {
-    case SORT_FIELD.IndicatorType:
+    case SortField.IndicatorType:
       sortField = 'indicator.type';
       break;
-    case SORT_FIELD.Name:
+    case SortField.Name:
     default:
       sortField = 'name';
       break;
@@ -143,7 +143,7 @@ function buildSortQuery(sort: Sort): { sortField: string; sortOrder: 'asc' | 'de
 
   return {
     sortField,
-    sortOrder: sort.direction === SORT_DIRECTION.Desc ? 'desc' : 'asc',
+    sortOrder: sort.direction === SortDirection.Desc ? 'desc' : 'asc',
   };
 }
 

@@ -11,7 +11,7 @@ import { FindSLO } from './find_slo';
 import { createSLO, createPaginatedSLO } from './fixtures/slo';
 import { createSLIClientMock, createSLORepositoryMock } from './mocks';
 import { SLIClient } from './sli_client';
-import { SLORepository, SORT_FIELD, SORT_DIRECTION } from './slo_repository';
+import { SLORepository, SortField, SortDirection } from './slo_repository';
 
 describe('FindSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -34,7 +34,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
+        { field: SortField.Name, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
 
@@ -96,7 +96,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
+        { field: SortField.Name, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -110,7 +110,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: 'Availability' },
-        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
+        { field: SortField.Name, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -124,7 +124,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { indicatorType: 'sli.kql.custom' },
-        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
+        { field: SortField.Name, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -138,7 +138,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: 'My SLO*' },
-        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
+        { field: SortField.Name, direction: SortDirection.Asc },
         { page: 2, perPage: 100 }
       );
     });
@@ -152,7 +152,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
+        { field: SortField.Name, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -166,7 +166,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SORT_FIELD.Name, direction: SORT_DIRECTION.Asc },
+        { field: SortField.Name, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -180,7 +180,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SORT_FIELD.IndicatorType, direction: SORT_DIRECTION.Asc },
+        { field: SortField.IndicatorType, direction: SortDirection.Asc },
         { page: 1, perPage: 25 }
       );
     });
@@ -194,7 +194,7 @@ describe('FindSLO', () => {
 
       expect(mockRepository.find).toHaveBeenCalledWith(
         { name: undefined },
-        { field: SORT_FIELD.IndicatorType, direction: SORT_DIRECTION.Desc },
+        { field: SortField.IndicatorType, direction: SortDirection.Desc },
         { page: 1, perPage: 25 }
       );
     });
