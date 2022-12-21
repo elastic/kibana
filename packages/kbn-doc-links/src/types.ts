@@ -352,6 +352,9 @@ export interface DocLinks {
     syntheticsProjectMonitors: string;
   }>;
   readonly alerting: Record<string, string>;
+  readonly taskManager: Readonly<{
+    healthMonitoring: string;
+  }>;
   readonly maps: Readonly<{
     guide: string;
     importGeospatialPrivileges: string;
