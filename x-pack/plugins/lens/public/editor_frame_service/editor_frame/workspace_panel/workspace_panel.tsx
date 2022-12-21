@@ -265,11 +265,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const configurationValidationErrors = getUserMessages('workspace', 'error');
+  const workspaceErrors = getUserMessages('workspace', 'error');
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
-    if (!configurationValidationErrors?.length) {
+    if (!workspaceErrors?.length) {
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
@@ -291,8 +291,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           return null;
         }
       } catch (e) {
-        const errors = getUserMessages('workspace', 'error');
-
         // TODO consider pushing this user message to a global store/subscription somewhere instead of using it directly here
         // this will allow us to show these errors outside just the workspace
         const defaultMessage: UserMessage = {
@@ -307,12 +305,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         // Most likely an error in the expression provided by a datasource or visualization
         setLocalState((s) => ({
           ...s,
-          expressionBuildErrors: errors.length ? errors : [defaultMessage],
+          expressionBuildErrors: [defaultMessage],
         }));
       }
     }
   }, [
-    configurationValidationErrors?.length,
+    workspaceErrors?.length,
     activeVisualization,
     visualization.state,
     datasourceMap,
@@ -321,7 +319,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     dataViews.indexPatterns,
     framePublicAPI.dateRange,
     searchSessionId,
-    getUserMessages,
   ]);
 
   useEffect(() => {
@@ -533,7 +530,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         setLocalState={setLocalState}
-        localState={{ ...localState, configurationValidationErrors }}
+        localState={{ ...localState }}
+        errors={workspaceErrors}
         ExpressionRendererComponent={ExpressionRendererComponent}
         core={core}
         activeDatasourceId={activeDatasourceId}
@@ -610,6 +608,7 @@ export const VisualizationWrapper = ({
   hasCompatibleActions,
   setLocalState,
   localState,
+  errors,
   ExpressionRendererComponent,
   core,
   activeDatasourceId,
@@ -622,9 +621,8 @@ export const VisualizationWrapper = ({
   onEvent: (event: ExpressionRendererEvent) => void;
   hasCompatibleActions: (event: ExpressionRendererEvent) => Promise<boolean>;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
-  localState: WorkspaceState & {
-    configurationValidationErrors?: UserMessage[];
-  };
+  localState: WorkspaceState;
+  errors: UserMessage[];
   ExpressionRendererComponent: ReactExpressionRendererType;
   core: CoreStart;
   activeDatasourceId: string | null;
@@ -646,9 +644,9 @@ export const VisualizationWrapper = ({
   );
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
-  if (localState.configurationValidationErrors?.length) {
+  if (errors?.length) {
     const showExtraErrorsAction =
-      !localState.expandError && localState.configurationValidationErrors.length > 1 ? (
+      !localState.expandError && errors.length > 1 ? (
         <EuiButtonEmpty
           onClick={() => {
             setLocalState((prevState: WorkspaceState) => ({
@@ -660,12 +658,12 @@ export const VisualizationWrapper = ({
         >
           {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
             defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
-            values: { errors: localState.configurationValidationErrors.length - 1 },
+            values: { errors: errors.length - 1 },
           })}
         </EuiButtonEmpty>
       ) : null;
 
-    const [firstMessage, ...rest] = localState.configurationValidationErrors;
+    const [firstMessage, ...rest] = errors;
 
     return (
       <EuiFlexGroup data-test-subj="configuration-failure">
@@ -694,9 +692,7 @@ export const VisualizationWrapper = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }
-
-  if (localState.expressionBuildErrors.length) {
+  } else if (localState.expressionBuildErrors.length) {
     const firstError = localState.expressionBuildErrors[0];
     return (
       <EuiFlexGroup>

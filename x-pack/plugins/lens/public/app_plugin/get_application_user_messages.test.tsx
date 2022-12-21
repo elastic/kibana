@@ -49,21 +49,33 @@ describe('application-level user messages', () => {
   });
 
   describe('missing index pattern errors', () => {
-    const core = {
-      application: {
-        getUrlForApp: jest.fn(() => 'fake/url'),
-        capabilities: {
-          management: {
-            kibana: {
-              indexPatterns: true,
+    const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
+      navLinks: { management: true },
+      management: { kibana: { indexPatterns: true } },
+    };
+
+    function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
+      const core = {
+        application: {
+          getUrlForApp: jest.fn(() => 'fake/url'),
+          capabilities: {
+            management: {
+              kibana: {
+                indexPatterns: true,
+              },
+            },
+            navLinks: {
+              management: true,
             },
           },
-          navLinks: {
-            management: true,
-          },
         },
-      },
-    } as unknown as CoreStart;
+      } as unknown as CoreStart;
+      (core.application.capabilities as unknown as Record<
+        string,
+        Record<string, boolean | Record<string, boolean>>
+      >) = newCapabilities;
+      return core;
+    }
 
     const irrelevantProps = {
       dataViews: {} as DataViewsState,
@@ -78,7 +90,7 @@ describe('application-level user messages', () => {
             checkIntegrity: jest.fn(() => ['missing_pattern']),
           } as unknown as Datasource,
           activeDatasourceState: { state: {} },
-          core,
+          core: createCoreStartWithPermissions(),
           ...irrelevantProps,
         })
       ).toMatchSnapshot();
@@ -94,20 +106,11 @@ describe('application-level user messages', () => {
                   checkIntegrity: jest.fn(() => ['missing_pattern']),
                 } as unknown as Datasource,
                 activeDatasourceState: { state: {} },
-                core: {
-                  ...core,
-                  application: {
-                    ...core.application,
-                    capabilities: {
-                      ...core.application.capabilities,
-                      management: {
-                        kibana: {
-                          indexPattern: false,
-                        },
-                      },
-                    },
-                  },
-                },
+                // user can go to management, but indexPatterns management is not accessible
+                core: createCoreStartWithPermissions({
+                  navLinks: { management: true },
+                  management: { kibana: { indexPatterns: false } },
+                }),
                 ...irrelevantProps,
               })[0].longMessage
             }
@@ -124,18 +127,11 @@ describe('application-level user messages', () => {
                   checkIntegrity: jest.fn(() => ['missing_pattern']),
                 } as unknown as Datasource,
                 activeDatasourceState: { state: {} },
-                core: {
-                  ...core,
-                  application: {
-                    ...core.application,
-                    capabilities: {
-                      ...core.application.capabilities,
-                      navLinks: {
-                        management: false,
-                      },
-                    },
-                  },
-                },
+                // user can't go to management at all
+                core: createCoreStartWithPermissions({
+                  navLinks: { management: false },
+                  management: { kibana: { indexPatterns: true } },
+                }),
                 ...irrelevantProps,
               })[0].longMessage
             }
