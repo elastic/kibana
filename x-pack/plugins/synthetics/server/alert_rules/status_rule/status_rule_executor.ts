@@ -5,16 +5,33 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { GetMonitorDownStatusMessageParams } from '../../legacy_uptime/lib/requests/get_monitor_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { createUptimeESClient, UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { StatusRuleParams } from '../../../common/rules/status_rule';
-import { ConfigKey, OverviewStatus } from '../../../common/runtime_types';
+import {
+  ConfigKey,
+  EncryptedSyntheticsMonitor,
+  OverviewStatus,
+  OverviewStatusMetaData,
+} from '../../../common/runtime_types';
 import { statusCheckTranslations } from '../../legacy_uptime/lib/alerts/translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+
+export interface StaleDownConfig extends OverviewStatusMetaData {
+  isDeleted?: boolean;
+  isLocationRemoved?: boolean;
+}
+
+export interface AlertOverviewStatus extends Omit<OverviewStatus, 'disabledCount'> {
+  staleDownConfigs: Record<string, StaleDownConfig>;
+}
 
 export class StatusRuleExecutor {
   previousStartedAt: Date | null;
@@ -22,6 +39,7 @@ export class StatusRuleExecutor {
   esClient: UptimeEsClient;
   soClient: SavedObjectsClientContract;
   syntheticsMonitorClient: SyntheticsMonitorClient;
+  monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];
 
   constructor(
     previousStartedAt: Date | null,
@@ -41,23 +59,27 @@ export class StatusRuleExecutor {
   }
 
   async getMonitors() {
-    const monitors = await getAllMonitors(
-      this.soClient,
-      'attributes.status_alert_enabled: true and attributes.enabled: true'
-    );
+    this.monitors = await getAllMonitors(this.soClient, 'attributes.status_alert_enabled: true');
+    const allIds: string[] = [];
     const enabledIds: string[] = [];
     let maxLocations = 1;
 
-    monitors.forEach((monitor) => {
+    this.monitors.forEach((monitor) => {
       const attrs = monitor.attributes;
-      enabledIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
+      allIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
+      if (attrs[ConfigKey.ENABLED] === true) {
+        enabledIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
+      }
+
       maxLocations = Math.max(maxLocations, attrs[ConfigKey.LOCATIONS].length);
     });
 
-    return { enabledIds, maxLocations };
+    return { enabledIds, maxLocations, allIds };
   }
 
-  async getDownChecks(prevDownConfigs: OverviewStatus['downConfigs'] = {}) {
+  async getDownChecks(
+    prevDownConfigs: OverviewStatus['downConfigs'] = {}
+  ): Promise<AlertOverviewStatus> {
     const { maxLocations, enabledIds } = await this.getMonitors();
     if (enabledIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
@@ -76,9 +98,42 @@ export class StatusRuleExecutor {
         }
       });
 
-      return currentStatus;
+      const staleDownConfigs = this.markDeletedConfigs(downConfigs);
+
+      return { ...currentStatus, staleDownConfigs };
     }
-    return { downConfigs: { ...prevDownConfigs }, upConfigs: {} };
+    const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);
+    return {
+      downConfigs: { ...prevDownConfigs },
+      upConfigs: {},
+      staleDownConfigs,
+      down: 0,
+      up: 0,
+      enabledIds,
+    };
+  }
+
+  markDeletedConfigs(downConfigs: OverviewStatus['downConfigs']) {
+    const monitors = this.monitors;
+    const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {};
+    Object.keys(downConfigs).forEach((locPlusId) => {
+      const downConfig = downConfigs[locPlusId];
+      const monitor = monitors.find((m) => {
+        return m.id === downConfig.configId;
+      });
+      if (!monitor) {
+        staleDownConfigs[locPlusId] = { ...downConfig, isDeleted: true };
+        delete downConfigs[locPlusId];
+      } else {
+        const { locations } = monitor.attributes;
+        if (!locations.some((l) => l.label === downConfig.location)) {
+          staleDownConfigs[locPlusId] = { ...downConfig, isLocationRemoved: true };
+          delete downConfigs[locPlusId];
+        }
+      }
+    });
+
+    return staleDownConfigs;
   }
 
   async getStatusMessage(downMonParams?: GetMonitorDownStatusMessageParams) {

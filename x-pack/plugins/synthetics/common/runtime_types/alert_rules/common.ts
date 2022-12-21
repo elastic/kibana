@@ -14,6 +14,7 @@ export const SyntheticsCommonStateType = t.intersection([
     lastTriggeredAt: t.string,
     lastResolvedAt: t.string,
     meta: t.record(t.string, t.unknown),
+    idWithLocation: t.string,
   }),
   t.type({
     firstCheckedAt: t.string,

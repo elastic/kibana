@@ -14,7 +14,8 @@ import {
   SyntheticsCommonState,
   SyntheticsCommonStateType,
 } from '../../common/runtime_types/alert_rules/common';
-import { ALERT_DETAILS_URL } from './action_variables';
+import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
+import { AlertOverviewStatus } from './status_rule/status_rule_executor';
 
 export const updateState = (
   state: SyntheticsCommonState,
@@ -86,21 +87,36 @@ export const setRecoveredAlertsContext = ({
   basePath,
   getAlertUuid,
   spaceId,
+  staleDownConfigs,
 }: {
   alertFactory: RuleExecutorServices['alertFactory'];
   basePath?: IBasePath;
   getAlertUuid?: (alertId: string) => string | null;
   spaceId?: string;
+  staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
 }) => {
   const { getRecoveredAlerts } = alertFactory.done();
   for (const alert of getRecoveredAlerts()) {
     const recoveredAlertId = alert.getId();
     const alertUuid = getAlertUuid?.(recoveredAlertId) || undefined;
 
-    const state = alert.getState();
+    const state = alert.getState() as SyntheticsCommonState;
+
+    let recoveryReason = '';
+
+    if (state?.idWithLocation && staleDownConfigs[state.idWithLocation]) {
+      const { idWithLocation } = state;
+      const downConfig = staleDownConfigs[idWithLocation];
+      if (downConfig.isDeleted) {
+        recoveryReason = 'because Monitor was deleted';
+      } else if (downConfig.isLocationRemoved) {
+        recoveryReason = 'because Location was removed from monitor.';
+      }
+    }
 
     alert.setContext({
       ...state,
+      [RECOVERY_REASON]: recoveryReason,
       ...(basePath && spaceId && alertUuid
         ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }
         : {}),

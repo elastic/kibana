@@ -14,6 +14,7 @@ export const MONITOR_WITH_GEO = 'downMonitorsWithGeo';
 export const ALERT_REASON_MSG = 'reason';
 export const ALERT_DETAILS_URL = 'alertDetailsUrl';
 export const VIEW_IN_APP_URL = 'viewInAppUrl';
+export const RECOVERY_REASON = 'recoveryReason';
 
 export const getActionVariables = ({ plugins }: { plugins: UptimeCorePluginsSetup }) => {
   return {
@@ -25,6 +26,7 @@ export const getActionVariables = ({ plugins }: { plugins: UptimeCorePluginsSetu
         : []),
       ACTION_VARIABLES[ALERT_REASON_MSG],
       ACTION_VARIABLES[VIEW_IN_APP_URL],
+      ACTION_VARIABLES[RECOVERY_REASON],
       ...commonMonitorStateI18,
     ],
     state: [...commonMonitorStateI18, ...commonStateTranslations],
@@ -77,6 +79,15 @@ export const ACTION_VARIABLES = {
       {
         defaultMessage:
           'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+      }
+    ),
+  },
+  [RECOVERY_REASON]: {
+    name: RECOVERY_REASON,
+    description: i18n.translate(
+      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.recoveryReason.description',
+      {
+        defaultMessage: 'A concise description of the reason for the recovery',
       }
     ),
   },

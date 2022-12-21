@@ -17,7 +17,12 @@ import {
   MONITOR_STATUS,
   SYNTHETICS_ALERT_RULE_TYPES,
 } from '../../../common/constants/synthetics_alerts';
-import { updateState } from '../common';
+import {
+  setRecoveredAlertsContext,
+  updateState,
+  getAlertDetailsUrl,
+  getViewInAppUrl,
+} from '../common';
 import { getActionVariables } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
 import { getMonitorRouteFromMonitorId } from '../../../common/utils/get_monitor_url';
@@ -25,11 +30,6 @@ import {
   ALERT_DETAILS_URL,
   VIEW_IN_APP_URL,
 } from '../../legacy_uptime/lib/alerts/action_variables';
-import {
-  getAlertDetailsUrl,
-  getViewInAppUrl,
-  setRecoveredAlertsContext,
-} from '../../legacy_uptime/lib/alerts/common';
 import {
   getInstanceId,
   getMonitorAlertDocument,
@@ -86,13 +86,13 @@ export const registerSyntheticsStatusCheckRule = (
         syntheticsMonitorClient
       );
 
-      const { downConfigs } = await statusRule.getDownChecks(
+      const { downConfigs, staleDownConfigs } = await statusRule.getDownChecks(
         ruleState.meta?.downConfigs as OverviewStatus['downConfigs']
       );
 
-      Object.entries(downConfigs).forEach(([locId, { ping }]) => {
+      Object.entries(downConfigs).forEach(([idWithLocation, { ping }]) => {
         const monitorSummary = getMonitorSummary(ping, 'is down.');
-        const alertId = getInstanceId(ping, locId);
+        const alertId = getInstanceId(ping, idWithLocation);
         const alert = alertWithLifecycle({
           id: alertId,
           fields: getMonitorAlertDocument(monitorSummary),
@@ -107,6 +107,7 @@ export const registerSyntheticsStatusCheckRule = (
         alert.replaceState({
           ...updateState(ruleState, true),
           ...context,
+          idWithLocation,
         });
 
         const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
@@ -125,7 +126,13 @@ export const registerSyntheticsStatusCheckRule = (
         });
       });
 
-      setRecoveredAlertsContext({ alertFactory, basePath, getAlertUuid, spaceId });
+      setRecoveredAlertsContext({
+        alertFactory,
+        basePath,
+        getAlertUuid,
+        spaceId,
+        staleDownConfigs,
+      });
 
       return updateState(ruleState, !isEmpty(downConfigs), { downConfigs });
     },

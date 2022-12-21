@@ -144,7 +144,10 @@ export const getMonitorSummary = (
 ) => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
+  const checkedAt = moment(monitorInfo['@timestamp'] ?? monitorInfo.timestamp).format('LLL');
+
   const summary = {
+    checkedAt,
     monitorUrl: monitorInfo.url?.full,
     monitorId: monitorInfo.monitor?.id,
     monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
@@ -178,7 +181,7 @@ export const getReasonMessage = ({
 }) => {
   const checkedAt = moment(timestamp).format('LLL');
 
-  return `${name} from ${location} ${status} Checked at ${checkedAt}`;
+  return `Monitor "${name}" from ${location} ${status} Checked at ${checkedAt}`;
 };
 
 export const getMonitorAlertDocument = (monitorSummary: Record<string, string | undefined>) => ({
