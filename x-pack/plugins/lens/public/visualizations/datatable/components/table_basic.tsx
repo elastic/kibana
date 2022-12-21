@@ -90,14 +90,18 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [props]);
 
   useEffect(() => {
-    setPagination(
-      props.args.pageSize && props.args.pageSize < firstLocalTable.rows.length
+    setPagination((pag) => {
+      if (pag && pag.pageSize === props.args.pageSize) {
+        return pag;
+      }
+
+      return props.args.pageSize && props.args.pageSize < firstLocalTable.rows.length
         ? {
             pageIndex: 0,
             pageSize: props.args.pageSize ?? DEFAULT_PAGE_SIZE,
           }
-        : undefined
-    );
+        : undefined;
+    });
   }, [props.args.pageSize, firstLocalTable]);
 
   useDeepCompareEffect(() => {
