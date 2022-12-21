@@ -14,6 +14,7 @@ import { Datatable, DatatableColumn, DatatableColumnType, getType } from '../../
 export type MathColumnArguments = MathArguments & {
   id: string;
   name?: string;
+  castColumns?: string[];
   copyMetaFrom?: string | null;
 };
 
@@ -21,19 +22,18 @@ export const mathColumn: ExpressionFunctionDefinition<
   'mathColumn',
   Datatable,
   MathColumnArguments,
-  Datatable
+  Promise<Datatable>
 > = {
   name: 'mathColumn',
   type: 'datatable',
   inputTypes: ['datatable'],
   help: i18n.translate('expressions.functions.mathColumnHelpText', {
     defaultMessage:
-      'Adds a column calculated as the result of other columns. ' +
-      'Changes are made only when you provide arguments.' +
-      'See also {alterColumnFn} and {staticColumnFn}.',
+      'Adds a column by evaluating {tinymath} on each row. ' +
+      'This function is optimized for math and performs better than using a math expression in {mapColumnFn}.',
     values: {
-      alterColumnFn: '`alterColumn`',
-      staticColumnFn: '`staticColumn`',
+      mapColumnFn: '`mapColumn`',
+      tinymath: '`TinyMath`',
     },
   }),
   args: {
@@ -53,6 +53,14 @@ export const mathColumn: ExpressionFunctionDefinition<
       }),
       required: true,
     },
+    castColumns: {
+      types: ['string'],
+      multi: true,
+      help: i18n.translate('expressions.functions.mathColumn.args.castColumnsHelpText', {
+        defaultMessage: 'The ids of columns to cast to numbers before applying the formula',
+      }),
+      required: false,
+    },
     copyMetaFrom: {
       types: ['string', 'null'],
       help: i18n.translate('expressions.functions.mathColumn.args.copyMetaFromHelpText', {
@@ -63,7 +71,7 @@ export const mathColumn: ExpressionFunctionDefinition<
       default: null,
     },
   },
-  fn: (input, args, context) => {
+  fn: async (input, args, context) => {
     const columns = [...input.columns];
     const existingColumnIndex = columns.findIndex(({ id }) => {
       return id === args.id;
@@ -76,38 +84,60 @@ export const mathColumn: ExpressionFunctionDefinition<
       );
     }
 
-    const newRows = input.rows.map((row) => {
-      const result = math.fn(
-        {
-          type: 'datatable',
-          columns: input.columns,
-          rows: [row],
-        },
-        {
-          expression: args.expression,
-          onError: args.onError,
-        },
-        context
-      );
-
-      if (Array.isArray(result)) {
-        if (result.length === 1) {
-          return { ...row, [args.id]: result[0] };
+    const newRows = await Promise.all(
+      input.rows.map(async (row) => {
+        let preparedRow = row;
+        if (args.castColumns) {
+          preparedRow = { ...row };
+          args.castColumns.forEach((columnId) => {
+            switch (typeof row[columnId]) {
+              case 'string':
+                const parsedAsDate = Number(new Date(preparedRow[columnId]));
+                if (!isNaN(parsedAsDate)) {
+                  preparedRow[columnId] = parsedAsDate;
+                  return;
+                } else {
+                  preparedRow[columnId] = Number(preparedRow[columnId]);
+                  return;
+                }
+              case 'boolean':
+                preparedRow[columnId] = Number(preparedRow[columnId]);
+                return;
+            }
+          });
         }
-        throw new Error(
-          i18n.translate('expressions.functions.mathColumn.arrayValueError', {
-            defaultMessage: 'Cannot perform math on array values at {name}',
-            values: { name: args.name },
-          })
+        const result = await math.fn(
+          {
+            ...input,
+            columns: input.columns,
+            rows: [preparedRow],
+          },
+          {
+            expression: args.expression,
+            onError: args.onError,
+          },
+          context
         );
-      }
 
-      return { ...row, [args.id]: result };
-    });
+        if (Array.isArray(result)) {
+          if (result.length === 1) {
+            return { ...row, [args.id]: result[0] };
+          }
+          throw new Error(
+            i18n.translate('expressions.functions.mathColumn.arrayValueError', {
+              defaultMessage: 'Cannot perform math on array values at {name}',
+              values: { name: args.name },
+            })
+          );
+        }
+
+        return { ...row, [args.id]: result };
+      })
+    );
     let type: DatatableColumnType = 'null';
     if (newRows.length) {
       for (const row of newRows) {
-        const rowType = getType(row[args.id]);
+        const rowType = getType(row[args.id]) as DatatableColumnType;
         if (rowType !== 'null') {
           type = rowType;
           break;
@@ -127,7 +157,7 @@ export const mathColumn: ExpressionFunctionDefinition<
     columns.push(newColumn);
 
     return {
-      type: 'datatable',
+      ...input,
       columns,
       rows: newRows,
     } as Datatable;

@@ -7,12 +7,13 @@
  */
 
 import { isUndefined } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';
-import { BoolQuery, IndexPatternBase } from './types';
-import { handleNestedFilter } from './handle_nested_filter';
+import { BoolQuery, DataViewBase } from './types';
+import { fromNestedFilter } from './from_nested_filter';
+import { fromCombinedFilter } from './from_combined_filter';
 
 /**
  * Create a filter that can be reversed for filters with negate set
@@ -35,13 +36,25 @@ const filterNegate = (reverse: boolean) => (filter: Filter) => {
  * @return {Object} the query version of that filter
  */
 const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContainer => {
-  if (filter.query) {
-    return filter.query as estypes.QueryDslQueryContainer;
-  }
-
-  // TODO: investigate what's going on here! What does this mean for filters that don't have a query!
-  return filter as estypes.QueryDslQueryContainer;
+  return filter.query || filter;
 };
+
+/**
+ * Options for building query for filters
+ */
+export interface EsQueryFiltersConfig {
+  /**
+   * by default filters that use fields that can't be found in the specified index pattern are not applied. Set this to true if you want to apply them anyway.
+   */
+  ignoreFilterIfFieldNotInIndex?: boolean;
+
+  /**
+   * the nested field type requires a special query syntax, which includes an optional ignore_unmapped parameter that indicates whether to ignore an unmapped path and not return any documents instead of an error.
+   * The optional ignore_unmapped parameter defaults to false.
+   * This `nestedIgnoreUnmapped` param allows creating queries with "ignore_unmapped": true
+   */
+  nestedIgnoreUnmapped?: boolean;
+}
 
 /**
  * @param filters
@@ -52,23 +65,36 @@ const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContain
  * @public
  */
 export const buildQueryFromFilters = (
-  filters: Filter[] = [],
-  indexPattern: IndexPatternBase | undefined,
-  ignoreFilterIfFieldNotInIndex: boolean = false
+  inputFilters: Filter[] = [],
+  inputDataViews: DataViewBase | DataViewBase[] | undefined,
+  options: EsQueryFiltersConfig = {
+    ignoreFilterIfFieldNotInIndex: false,
+  }
 ): BoolQuery => {
-  filters = filters.filter((filter) => filter && !isFilterDisabled(filter));
+  const { ignoreFilterIfFieldNotInIndex = false, nestedIgnoreUnmapped } = options;
+  const filters = inputFilters.filter((filter) => filter && !isFilterDisabled(filter));
+  const indexPatterns = Array.isArray(inputDataViews) ? inputDataViews : [inputDataViews];
+
+  const findIndexPattern = (id: string | undefined) => {
+    return indexPatterns.find((index) => index?.id === id) || indexPatterns[0];
+  };
 
   const filtersToESQueries = (negate: boolean) => {
     return filters
       .filter((f) => !!f)
       .filter(filterNegate(negate))
-      .filter(
-        (filter) => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern)
-      )
-      .map((filter) => {
-        return migrateFilter(filter, indexPattern);
+      .filter((filter) => {
+        const indexPattern = findIndexPattern(filter.meta?.index);
+        return !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern);
       })
-      .map((filter) => handleNestedFilter(filter, indexPattern))
+      .map((filter) => {
+        const indexPattern = findIndexPattern(filter.meta?.index);
+        const migratedFilter = migrateFilter(filter, indexPattern);
+        return fromNestedFilter(migratedFilter, indexPattern, {
+          ignoreUnmapped: nestedIgnoreUnmapped,
+        });
+      })
+      .map((filter) => fromCombinedFilter(filter, inputDataViews, options))
       .map(cleanFilter)
       .map(translateToQuery);
   };

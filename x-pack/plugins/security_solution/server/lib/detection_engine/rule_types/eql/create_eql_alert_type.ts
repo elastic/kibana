@@ -6,33 +6,20 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { EQL_RULE_TYPE_ID } from '../../../../../common/constants';
-import { eqlRuleParams, EqlRuleParams } from '../../schemas/rule_schemas';
-import { eqlExecutor } from '../../signals/executors/eql';
-import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { CreateRuleOptions } from '../types';
+import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
-export const createEqlAlertType = (createOptions: CreateRuleOptions) => {
-  const {
-    experimentalFeatures,
-    lists,
-    logger,
-    ignoreFields,
-    mergeStrategy,
-    ruleDataClient,
-    version,
-    ruleDataService,
-  } = createOptions;
-  const createSecurityRuleType = createSecurityRuleTypeFactory({
-    lists,
-    logger,
-    ignoreFields,
-    mergeStrategy,
-    ruleDataClient,
-    ruleDataService,
-  });
-  return createSecurityRuleType<EqlRuleParams, {}, PersistenceServices, {}>({
+import { SERVER_APP_ID } from '../../../../../common/constants';
+import type { EqlRuleParams } from '../../rule_schema';
+import { eqlRuleParams } from '../../rule_schema';
+import { eqlExecutor } from '../../signals/executors/eql';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateIndexPatterns } from '../utils';
+
+export const createEqlAlertType = (
+  createOptions: CreateRuleOptions
+): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
+  const { version } = createOptions;
+  return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
     validate: {
@@ -46,6 +33,17 @@ export const createEqlAlertType = (createOptions: CreateRuleOptions) => {
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
         },
       },
     },
@@ -61,36 +59,43 @@ export const createEqlAlertType = (createOptions: CreateRuleOptions) => {
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {
-          bulkCreate,
-          exceptionItems,
-          rule,
-          searchAfterSize,
+          completeRule,
           tuple,
+          inputIndex,
+          runtimeMappings,
+          ruleExecutionLogger,
+          bulkCreate,
           wrapHits,
           wrapSequences,
+          primaryTimestamp,
+          secondaryTimestamp,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         state,
       } = execOptions;
-
       const result = await eqlExecutor({
-        bulkCreate,
-        exceptionItems,
-        experimentalFeatures,
-        logger,
-        rule,
-        searchAfterSize,
-        services,
+        completeRule,
         tuple,
+        inputIndex,
+        runtimeMappings,
+        ruleExecutionLogger,
+        services,
         version,
+        bulkCreate,
         wrapHits,
         wrapSequences,
+        primaryTimestamp,
+        secondaryTimestamp,
+        exceptionFilter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },
-  });
+  };
 };

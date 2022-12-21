@@ -20,10 +20,16 @@ import {
   EuiFieldText,
   EuiModal,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SWIMLANE_TYPE, SwimlaneType } from '../../application/explorer/explorer_constants';
 import { AnomalySwimlaneEmbeddableInput } from '..';
+
+interface ExplicitInput {
+  panelTitle: string;
+  swimlaneType: SwimlaneType;
+  viewBy?: string;
+}
 
 export interface AnomalySwimlaneInitializerProps {
   defaultTitle: string;
@@ -31,11 +37,7 @@ export interface AnomalySwimlaneInitializerProps {
   initialInput?: Partial<
     Pick<AnomalySwimlaneEmbeddableInput, 'jobIds' | 'swimlaneType' | 'viewBy' | 'perPage'>
   >;
-  onCreate: (swimlaneProps: {
-    panelTitle: string;
-    swimlaneType: SwimlaneType;
-    viewBy?: string;
-  }) => void;
+  onCreate: (swimlaneProps: ExplicitInput) => void;
   onCancel: () => void;
 }
 
@@ -47,7 +49,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
   initialInput,
 }) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
-  const [swimlaneType, setSwimlaneType] = useState(
+  const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>(
     initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL
   );
   const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState(initialInput?.viewBy);
@@ -80,6 +82,12 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
     isPanelTitleValid &&
     (swimlaneType === SWIMLANE_TYPE.OVERALL ||
       (swimlaneType === SWIMLANE_TYPE.VIEW_BY && !!viewBySwimlaneFieldName));
+
+  const resultInput = {
+    panelTitle,
+    swimlaneType,
+    ...(viewBySwimlaneFieldName ? { viewBy: viewBySwimlaneFieldName } : {}),
+  };
 
   return (
     <EuiModal initialFocus="[name=panelTitle]" onClose={onCancel}>
@@ -162,15 +170,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
           />
         </EuiButtonEmpty>
 
-        <EuiButton
-          isDisabled={!isFormValid}
-          onClick={onCreate.bind(null, {
-            panelTitle,
-            swimlaneType,
-            viewBy: viewBySwimlaneFieldName,
-          })}
-          fill
-        >
+        <EuiButton isDisabled={!isFormValid} onClick={onCreate.bind(null, resultInput)} fill>
           <FormattedMessage
             id="xpack.ml.swimlaneEmbeddable.setupModal.confirmButtonLabel"
             defaultMessage="Confirm"

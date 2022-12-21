@@ -9,10 +9,9 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import bbox from '@turf/bbox';
 import uuid from 'uuid/v4';
-import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
 import {
   KBN_IS_CENTROID_FEATURE,
@@ -24,15 +23,16 @@ import {
   getDataRequestDescriptor,
   getLayerById,
   getLayerList,
+  getEditState,
 } from '../selectors/map_selectors';
 import {
   cancelRequest,
   registerCancelCallback,
   unregisterCancelCallback,
   getEventHandlers,
+  getInspectorAdapters,
   ResultMeta,
 } from '../reducers/non_serializable_instances';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
 import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
@@ -47,7 +47,9 @@ import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
 import { DataRequestMeta, MapExtent, DataFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
-import { scaleBounds, turfBboxToBounds } from '../../common/elasticsearch_util';
+import { scaleBounds } from '../../common/elasticsearch_util';
+import { getLayersExtent } from './get_layers_extent';
+import { isLayerGroup } from '../classes/layers/layer_group';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
@@ -61,12 +63,14 @@ export type DataRequestContext = {
   ): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
   onJoinError(errorMessage: string): void;
-  updateSourceData(newData: unknown): void;
+  updateSourceData(newData: object): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
   dataFilters: DataFilters;
   forceRefreshDueToDrawing: boolean; // Boolean signaling data request triggered by a user updating layer features via drawing tools. When true, layer will re-load regardless of "source.applyForceRefresh" flag.
   isForceRefresh: boolean; // Boolean signaling data request triggered by auto-refresh timer or user clicking refresh button. When true, layer will re-load only when "source.applyForceRefresh" flag is set to true.
+  isFeatureEditorOpenForLayer: boolean; // Boolean signaling that feature editor menu is open for a layer. When true, layer will ignore all global and layer filtering so drawn features are displayed and not filtered out.
+  inspectorAdapters: Adapters;
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -97,7 +101,7 @@ export function cancelAllInFlightRequests() {
 export function updateStyleMeta(layerId: string | null) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
-    if (!layer) {
+    if (!layer || isLayerGroup(layer)) {
       return;
     }
 
@@ -145,6 +149,8 @@ function getDataRequestContext(
       dispatch(registerCancelCallback(requestToken, callback)),
     forceRefreshDueToDrawing,
     isForceRefresh,
+    isFeatureEditorOpenForLayer: getEditState(getState())?.layerId === layerId,
+    inspectorAdapters: getInspectorAdapters(getState()),
   };
 }
 
@@ -220,7 +226,7 @@ export function syncDataForLayerId(layerId: string | null, isForceRefresh: boole
   };
 }
 
-function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
+export function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
   return {
     type: SET_LAYER_ERROR_STATUS,
     isInErrorState: errorMessage !== null,
@@ -281,12 +287,12 @@ function endDataLoad(
     }
 
     const features = data && 'features' in data ? (data as FeatureCollection).features : [];
+    const layer = getLayerById(layerId, getState());
 
     const eventHandlers = getEventHandlers(getState());
     if (eventHandlers && eventHandlers.onDataLoadEnd) {
-      const layer = getLayerById(layerId, getState());
       const resultMeta: ResultMeta = {};
-      if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
+      if (layer && layer.getType() === LAYER_TYPE.GEOJSON_VECTOR) {
         const featuresWithoutCentroids = features.filter((feature) => {
           return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
         });
@@ -300,7 +306,6 @@ function endDataLoad(
       });
     }
 
-    dispatch(cleanTooltipStateForLayer(layerId, features));
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
       layerId,
@@ -340,7 +345,6 @@ function onDataLoadError(
       });
     }
 
-    dispatch(cleanTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
       layerId,
@@ -353,7 +357,10 @@ function onDataLoadError(
 }
 
 export function updateSourceDataRequest(layerId: string, newData: object) {
-  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,
       dataId: SOURCE_DATA_REQUEST_ID,
@@ -371,8 +378,8 @@ export function fitToLayerExtent(layerId: string) {
 
     if (targetLayer) {
       try {
-        const bounds = await targetLayer.getBounds(
-          getDataRequestContext(dispatch, getState, layerId, false, false)
+        const bounds = await targetLayer.getBounds((boundsLayerId) =>
+          getDataRequestContext(dispatch, getState, boundsLayerId, false, false)
         );
         if (bounds) {
           await dispatch(setGotoWithBounds(scaleBounds(bounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
@@ -394,65 +401,22 @@ export function fitToLayerExtent(layerId: string) {
 
 export function fitToDataBounds(onNoBounds?: () => void) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const layerList = getLayerList(getState());
-
-    if (!layerList.length) {
-      return;
-    }
-
-    const boundsPromises = layerList.map(async (layer: ILayer) => {
-      if (!(await layer.isFittable())) {
-        return null;
-      }
-      return layer.getBounds(
-        getDataRequestContext(dispatch, getState, layer.getId(), false, false)
-      );
+    const rootLayers = getLayerList(getState()).filter((layer) => {
+      return layer.getParent() === undefined;
     });
 
-    let bounds;
-    try {
-      bounds = await Promise.all(boundsPromises);
-    } catch (error) {
-      if (!(error instanceof DataRequestAbortError)) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          'Unhandled getBounds error for layer. Only DataRequestAbortError should be surfaced',
-          error
-        );
-      }
-      // new fitToDataBounds request has superseded this thread of execution. Results no longer needed.
-      return;
-    }
+    const extent = await getLayersExtent(rootLayers, (boundsLayerId) =>
+      getDataRequestContext(dispatch, getState, boundsLayerId, false, false)
+    );
 
-    const corners = [];
-    for (let i = 0; i < bounds.length; i++) {
-      const b = bounds[i];
-
-      // filter out undefined bounds (uses Infinity due to turf responses)
-      if (
-        b === null ||
-        b.minLon === Infinity ||
-        b.maxLon === Infinity ||
-        b.minLat === -Infinity ||
-        b.maxLat === -Infinity
-      ) {
-        continue;
-      }
-
-      corners.push([b.minLon, b.minLat]);
-      corners.push([b.maxLon, b.maxLat]);
-    }
-
-    if (!corners.length) {
+    if (extent === null) {
       if (onNoBounds) {
         onNoBounds();
       }
       return;
     }
 
-    const dataBounds = turfBboxToBounds(bbox(multiPoint(corners)));
-
-    dispatch(setGotoWithBounds(scaleBounds(dataBounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
+    dispatch(setGotoWithBounds(scaleBounds(extent, FIT_TO_BOUNDS_SCALE_FACTOR)));
   };
 }
 

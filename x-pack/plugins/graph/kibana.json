@@ -1,6 +1,6 @@
 {
   "id": "graph",
-  "version": "8.0.0",
+  "version": "8.2.0",
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
@@ -9,7 +9,8 @@
     "data",
     "navigation",
     "savedObjects",
-    "kibanaLegacy"
+    "unifiedSearch",
+    "inspector"
   ],
   "optionalPlugins": [
     "home",
@@ -21,9 +22,9 @@
     "graph"
   ],
   "requiredBundles": [
+    "unifiedSearch",
     "kibanaUtils",
-    "kibanaReact",
-    "home"
+    "kibanaReact"
   ],
   "owner": {
     "name": "Data Discovery",

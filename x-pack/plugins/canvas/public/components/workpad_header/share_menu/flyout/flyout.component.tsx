@@ -22,9 +22,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
+import type { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
 import { useDownloadRenderedWorkpad } from '../../../hooks';
 import { useDownloadRuntime, useDownloadZippedRuntime } from './hooks';
 import { ZIP, CANVAS, HTML } from '../../../../../i18n/constants';

@@ -7,5 +7,3 @@
  */
 
 export { PainlessWorker } from './painless_worker';
-
-export { PainlessError } from './lib';

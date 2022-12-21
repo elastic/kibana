@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { CloudEcs } from '../../../../ecs/cloud';
-import { HostEcs, OsEcs } from '../../../../ecs/host';
-import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
-import { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
+import type { CloudEcs } from '../../../../ecs/cloud';
+import type { HostEcs, OsEcs } from '../../../../ecs/host';
+import type { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
+import type { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
+import type { CommonFields } from '../..';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',
@@ -31,6 +32,7 @@ export interface EndpointFields {
   /** A count of pending endpoint actions against the host */
   pendingActions?: Maybe<EndpointPendingActions['pending_actions']>;
   elasticAgentStatus?: Maybe<HostStatus>;
+  fleetAgentId?: Maybe<string>;
   id?: Maybe<string>;
 }
 
@@ -45,6 +47,7 @@ export interface HostItem {
   endpoint?: Maybe<EndpointFields>;
   host?: Maybe<HostEcs>;
   lastSeen?: Maybe<string[]>;
+  risk?: string;
 }
 
 export interface HostValue {
@@ -62,12 +65,17 @@ export interface HostBuckets {
   buckets: HostBucketItem[];
 }
 
+type HostOsFields = CommonFields &
+  Partial<{
+    [Property in keyof OsEcs as `host.os.${Property}`]: unknown[];
+  }>;
+
 export interface HostOsHitsItem {
   hits: {
     total: TotalValue | number;
     max_score: number | null;
     hits: Array<{
-      _source: { host: { os: Maybe<OsEcs> } };
+      fields: HostOsFields;
       sort?: [number];
       _index?: string;
       _type?: string;
@@ -97,28 +105,18 @@ export interface HostAggEsItem {
   os?: HostOsHitsItem;
 }
 
-export interface HostEsData extends SearchHit {
-  sort: string[];
-  aggregations: {
-    host_count: {
-      value: number;
-    };
-    host_data: {
-      buckets: HostAggEsItem[];
-    };
-  };
-}
-
 export interface HostAggEsData extends SearchHit {
   sort: string[];
   aggregations: HostAggEsItem;
 }
 
+type HostFields = CommonFields &
+  Partial<{
+    [Property in keyof HostEcs as `host.${Property}`]: unknown[];
+  }>;
+
 export interface HostHit extends Hit {
-  _source: {
-    '@timestamp'?: string;
-    host: HostEcs;
-  };
+  fields: HostFields;
   cursor?: string;
   firstSeen?: string;
   sort?: StringOrNumber[];

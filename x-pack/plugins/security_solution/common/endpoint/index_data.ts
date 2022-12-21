@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { KbnClient } from '@kbn/test';
-import { AxiosResponse } from 'axios';
-import { merge } from 'lodash';
-import { EndpointDocGenerator, TreeOptions } from './generate_data';
-import {
-  CreatePackagePolicyResponse,
-  EPM_API_ROUTES,
-  GetPackagesResponse,
-} from '../../../fleet/common';
-import {
-  deleteIndexedEndpointHosts,
+import type { KbnClient } from '@kbn/test';
+import type { AxiosResponse } from 'axios';
+import type { CreatePackagePolicyResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import { EPM_API_ROUTES } from '@kbn/fleet-plugin/common';
+import type { TreeOptions } from './generate_data';
+import { EndpointDocGenerator } from './generate_data';
+import type {
   DeleteIndexedEndpointHostsResponse,
   IndexedHostsResponse,
+} from './data_loaders/index_endpoint_hosts';
+import {
+  deleteIndexedEndpointHosts,
   indexEndpointHostDocs,
 } from './data_loaders/index_endpoint_hosts';
 import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server';
 import { indexAlerts } from './data_loaders/index_alerts';
 import { setupFleetForEndpoint } from './data_loaders/setup_fleet_for_endpoint';
+import { mergeAndAppendArrays } from './data_loaders/utils';
 
 export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
 
@@ -44,6 +43,7 @@ export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
  * @param alertsPerHost
  * @param fleet
  * @param options
+ * @param DocGenerator
  */
 export async function indexHostsAndAlerts(
   client: Client,
@@ -57,8 +57,8 @@ export async function indexHostsAndAlerts(
   alertIndex: string,
   alertsPerHost: number,
   fleet: boolean,
-  logsEndpoint: boolean,
-  options: TreeOptions = {}
+  options: TreeOptions = {},
+  DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
@@ -93,7 +93,7 @@ export async function indexHostsAndAlerts(
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
 
   for (let i = 0; i < numHosts; i++) {
-    const generator = new EndpointDocGenerator(random);
+    const generator = new DocGenerator(random);
     const indexedHosts = await indexEndpointHostDocs({
       numDocs,
       client,
@@ -103,11 +103,10 @@ export async function indexHostsAndAlerts(
       metadataIndex,
       policyResponseIndex,
       enrollFleet: fleet,
-      addEndpointActions: logsEndpoint,
       generator,
     });
 
-    merge(response, indexedHosts);
+    mergeAndAppendArrays(response, indexedHosts);
 
     await indexAlerts({
       client,
@@ -124,13 +123,13 @@ export async function indexHostsAndAlerts(
 
 const getEndpointPackageInfo = async (
   kbnClient: KbnClient
-): Promise<GetPackagesResponse['response'][0]> => {
+): Promise<GetPackagesResponse['items'][0]> => {
   const endpointPackage = (
     (await kbnClient.request({
       path: `${EPM_API_ROUTES.LIST_PATTERN}?category=security`,
       method: 'GET',
     })) as AxiosResponse<GetPackagesResponse>
-  ).data.response.find((epmPackage) => epmPackage.name === 'endpoint');
+  ).data.items.find((epmPackage) => epmPackage.name === 'endpoint');
 
   if (!endpointPackage) {
     throw new Error('EPM Endpoint package was not found!');

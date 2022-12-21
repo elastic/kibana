@@ -4,22 +4,64 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SerializedConcreteTaskInstance } from '../../../../plugins/task_manager/server/task';
+import type { Client } from '@elastic/elasticsearch';
+import { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 
 export interface TaskManagerDoc {
   type: string;
   task: SerializedConcreteTaskInstance;
 }
 export class TaskManagerUtils {
-  private readonly es: any;
+  private readonly es: Client;
   private readonly retry: any;
 
-  constructor(es: any, retry: any) {
+  constructor(es: Client, retry: any) {
     this.es = es;
     this.retry = retry;
   }
 
+  async waitForDisabled(id: string, taskRunAtFilter: Date) {
+    return await this.retry.try(async () => {
+      const searchResult = await this.es.search({
+        index: '.kibana_task_manager',
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    'task.id': `task:${id}`,
+                  },
+                },
+                {
+                  terms: {
+                    'task.scope': ['actions', 'alerting'],
+                  },
+                },
+                {
+                  range: {
+                    'task.scheduledAt': {
+                      gte: taskRunAtFilter.getTime().toString(),
+                    },
+                  },
+                },
+                {
+                  term: {
+                    'task.enabled': true,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+      // @ts-expect-error
+      if (searchResult.hits.total.value) {
+        // @ts-expect-error
+        throw new Error(`Expected 0 tasks but received ${searchResult.hits.total.value}`);
+      }
+    });
+  }
   async waitForEmpty(taskRunAtFilter: Date) {
     return await this.retry.try(async () => {
       const searchResult = await this.es.search({
@@ -36,7 +78,7 @@ export class TaskManagerUtils {
                 {
                   range: {
                     'task.scheduledAt': {
-                      gte: taskRunAtFilter,
+                      gte: taskRunAtFilter.getTime().toString(),
                     },
                   },
                 },
@@ -45,8 +87,10 @@ export class TaskManagerUtils {
           },
         },
       });
-      if (searchResult.body.hits.total.value) {
-        throw new Error(`Expected 0 tasks but received ${searchResult.body.hits.total.value}`);
+      // @ts-expect-error
+      if (searchResult.hits.total.value) {
+        // @ts-expect-error
+        throw new Error(`Expected 0 tasks but received ${searchResult.hits.total.value}`);
       }
     });
   }
@@ -67,7 +111,7 @@ export class TaskManagerUtils {
                 {
                   range: {
                     'task.scheduledAt': {
-                      gte: taskRunAtFilter,
+                      gte: taskRunAtFilter.getTime().toString(),
                     },
                   },
                 },
@@ -83,10 +127,10 @@ export class TaskManagerUtils {
           },
         },
       });
-      if (searchResult.body.hits.total.value) {
-        throw new Error(
-          `Expected 0 non-idle tasks but received ${searchResult.body.hits.total.value}`
-        );
+      // @ts-expect-error
+      if (searchResult.hits.total.value) {
+        // @ts-expect-error
+        throw new Error(`Expected 0 non-idle tasks but received ${searchResult.hits.total.value}`);
       }
     });
   }
@@ -107,7 +151,7 @@ export class TaskManagerUtils {
                 {
                   range: {
                     updated_at: {
-                      gte: createdAtFilter,
+                      gte: createdAtFilter.getTime().toString(),
                     },
                   },
                 },
@@ -116,9 +160,11 @@ export class TaskManagerUtils {
           },
         },
       });
-      if (searchResult.body.hits.total.value) {
+      // @ts-expect-error
+      if (searchResult.hits.total.value) {
         throw new Error(
-          `Expected 0 action_task_params objects but received ${searchResult.body.hits.total.value}`
+          // @ts-expect-error
+          `Expected 0 action_task_params objects but received ${searchResult.hits.total.value}`
         );
       }
     });

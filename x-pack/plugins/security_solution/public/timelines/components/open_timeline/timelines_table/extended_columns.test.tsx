@@ -6,16 +6,17 @@
  */
 
 import { cloneDeep, omit } from 'lodash/fp';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import '../../../../common/mock/match_media';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
-import { OpenTimelineResult } from '../types';
+import type { OpenTimelineResult } from '../types';
 
-import { TimelinesTable, TimelinesTableProps } from '.';
+import type { TimelinesTableProps } from '.';
+import { TimelinesTable } from '.';
 
 import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';

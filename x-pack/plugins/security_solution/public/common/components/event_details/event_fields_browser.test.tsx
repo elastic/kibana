@@ -22,7 +22,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -51,7 +50,7 @@ describe('EventFieldsBrowser', () => {
               browserFields={mockBrowserFields}
               data={mockDetailItemData}
               eventId={mockDetailItemDataId}
-              timelineId="test"
+              scopeId="timeline-test"
               timelineTabType={TimelineTabs.query}
             />
           </TestProviders>
@@ -70,7 +69,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -92,7 +91,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -108,7 +107,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -124,13 +123,32 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="more-actions-@timestamp"]').exists()).toBeTruthy();
+    });
+
+    test('it does not render hover actions when readOnly prop is passed', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            data={mockDetailItemData}
+            eventId={eventId}
+            scopeId="timeline-test"
+            timelineTabType={TimelineTabs.query}
+            isReadOnly
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="hover-actions-filter-for"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="hover-actions-filter-out"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="more-actions-@timestamp"]').exists()).toBeFalsy();
     });
 
     test('it renders a column toggle button', () => {
@@ -140,7 +158,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -158,7 +176,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -176,7 +194,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -196,7 +214,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -221,7 +239,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -236,7 +254,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -261,7 +279,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -280,7 +298,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>

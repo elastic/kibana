@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 import type {
   CreateExceptionListItemSchema,
+  CreateRuleExceptionListItemSchema,
   Entry,
   EntryExists,
   EntryMatch,
@@ -18,6 +19,7 @@ import type {
   ExceptionListItemSchema,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
+  NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_NAMESPACE,
@@ -33,13 +35,13 @@ export interface OperatorOption {
 
 export interface FormattedBuilderEntry {
   id: string;
-  field: IndexPatternFieldBase | undefined;
+  field: DataViewFieldBase | undefined;
   operator: OperatorOption;
   value: string | string[] | undefined;
   nested: 'parent' | 'child' | undefined;
   entryIndex: number;
   parent: { parent: BuilderEntryNested; parentIndex: number } | undefined;
-  correspondingKeywordField: IndexPatternFieldBase | undefined;
+  correspondingKeywordField: DataViewFieldBase | undefined;
 }
 
 export interface EmptyEntry {
@@ -93,15 +95,22 @@ export type ExceptionListItemBuilderSchema = Omit<ExceptionListItemSchema, 'entr
 
 export type CreateExceptionListItemBuilderSchema = Omit<
   CreateExceptionListItemSchema,
-  'meta' | 'entries'
+  'meta' | 'entries' | 'list_id' | 'namespace_type'
 > & {
   meta: { temporaryUuid: string };
   entries: BuilderEntry[];
+  list_id: string | undefined;
+  namespace_type: NamespaceType | undefined;
 };
 
 export type ExceptionsBuilderExceptionItem =
   | ExceptionListItemBuilderSchema
   | CreateExceptionListItemBuilderSchema;
+
+export type ExceptionsBuilderReturnExceptionItem =
+  | ExceptionListItemSchema
+  | CreateExceptionListItemSchema
+  | CreateRuleExceptionListItemSchema;
 
 export const exceptionListSavedObjectType = EXCEPTION_LIST_NAMESPACE;
 export const exceptionListAgnosticSavedObjectType = EXCEPTION_LIST_NAMESPACE_AGNOSTIC;

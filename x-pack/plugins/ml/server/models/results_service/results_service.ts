@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
@@ -24,10 +25,11 @@ import {
   defaultSearchQuery,
   DatafeedResultsChartDataParams,
 } from '../../../common/types/results';
-import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
 import { datafeedsProvider } from '../job_service/datafeeds';
 import { annotationServiceProvider } from '../annotation_service';
+import { showActualForFunction, showTypicalForFunction } from '../../../common/util/anomaly_utils';
+import { anomalyChartsDataProvider } from './anomaly_charts';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -43,6 +45,39 @@ export interface CriteriaField {
 interface Influencer {
   fieldName: string;
   fieldValue: any;
+}
+
+/**
+ * Extracts typical and actual values from the anomaly record.
+ * @param source
+ */
+export function getTypicalAndActualValues(source: AnomalyRecordDoc) {
+  const result: { actual?: number[]; typical?: number[] } = {};
+
+  const functionDescription = source.function_description || '';
+  const causes = source.causes || [];
+
+  if (showActualForFunction(functionDescription)) {
+    if (source.actual !== undefined) {
+      result.actual = source.actual;
+    } else {
+      if (causes.length === 1) {
+        result.actual = causes[0].actual;
+      }
+    }
+  }
+
+  if (showTypicalForFunction(functionDescription)) {
+    if (source.typical !== undefined) {
+      result.typical = source.typical;
+    } else {
+      if (causes.length === 1) {
+        result.typical = causes[0].typical;
+      }
+    }
+  }
+
+  return result;
 }
 
 export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClusterClient) {
@@ -156,10 +191,10 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       });
     }
 
-    const { body } = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
-        size: maxRecords,
         body: {
+          size: maxRecords,
           query: {
             bool: {
               filter: [
@@ -180,7 +215,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           sort: [{ record_score: { order: 'desc' } }],
         },
       },
-      []
+      jobIds
     );
 
     const tableData: {
@@ -191,8 +226,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       anomalies: [],
       interval: 'second',
     };
-    // @ts-expect-error incorrect search response type
-    if (body.hits.total.value > 0) {
+
+    if ((body.hits.total as estypes.SearchTotalHits).value > 0) {
       let records: AnomalyRecordDoc[] = [];
       body.hits.hits.forEach((hit: any) => {
         records.push(hit._source);
@@ -311,7 +346,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       },
     };
 
-    const { body } = await mlClient.anomalySearch(query, []);
+    const body = await mlClient.anomalySearch(query, jobIds);
     const maxScore = get(body, ['aggregations', 'max_score', 'value'], null);
 
     return { maxScore };
@@ -349,10 +384,10 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     // Size of job terms agg, consistent with maximum number of jobs supported by Java endpoints.
     const maxJobs = 10000;
 
-    const { body } = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
-        size: 0,
         body: {
+          size: 0,
           query: {
             bool: {
               filter,
@@ -375,7 +410,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      jobIds
     );
 
     const bucketsByJobId: Array<{ key: string; maxTimestamp: { value?: number } }> = get(
@@ -395,10 +430,10 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
   // from the given index and job ID.
   // Returned response consists of a list of examples against category ID.
   async function getCategoryExamples(jobId: string, categoryIds: any, maxExamples: number) {
-    const { body } = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
-        size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
         body: {
+          size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
           query: {
             bool: {
               filter: [{ term: { job_id: jobId } }, { terms: { category_id: categoryIds } }],
@@ -406,7 +441,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      [jobId]
     );
 
     const examplesByCategoryId: { [key: string]: any } = {};
@@ -432,10 +467,10 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
   // Returned response contains four properties - categoryId, regex, examples
   // and terms (space delimited String of the common tokens matched in values of the category).
   async function getCategoryDefinition(jobId: string, categoryId: string) {
-    const { body } = await mlClient.anomalySearch<any>(
+    const body = await mlClient.anomalySearch<any>(
       {
-        size: 1,
         body: {
+          size: 1,
           query: {
             bool: {
               filter: [{ term: { job_id: jobId } }, { term: { category_id: categoryId } }],
@@ -443,7 +478,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      [jobId]
     );
 
     const definition = { categoryId, terms: null, regex: null, examples: [] };
@@ -475,7 +510,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         },
       });
     }
-    const { body } = await mlClient.anomalySearch<AnomalyCategorizerStatsDoc>(
+    const body = await mlClient.anomalySearch<AnomalyCategorizerStatsDoc>(
       {
         body: {
           query: {
@@ -492,7 +527,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      [jobId]
     );
     return body ? body.hits.hits.map((r) => r._source) : [];
   }
@@ -506,7 +541,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     };
     // first determine from job config if stop_on_warn is true
     // if false return []
-    const { body } = await mlClient.getJobs<MlJobsResponse>({
+    const body = await mlClient.getJobs({
       job_id: jobIds.join(),
     });
 
@@ -564,10 +599,10 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       ];
-      const { body: results } = await mlClient.anomalySearch<any>(
+      const results = await mlClient.anomalySearch<any>(
         {
-          size: 0,
           body: {
+            size: 0,
             query: {
               bool: {
                 must: mustMatchClauses,
@@ -583,7 +618,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
             aggs,
           },
         },
-        []
+        jobIds
       );
       if (fieldToBucket === JOB_ID) {
         finalResults = {
@@ -623,12 +658,11 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       datafeedResults: [],
       annotationResultsRect: [],
       annotationResultsLine: [],
-      modelSnapshotResultsLine: [],
     };
 
     const { getDatafeedByJobId } = datafeedsProvider(client!, mlClient);
 
-    const [datafeedConfig, { body: jobsResponse }] = await Promise.all([
+    const [datafeedConfig, jobsResponse] = await Promise.all([
       getDatafeedByJobId(jobId),
       mlClient.getJobs({ job_id: jobId }),
     ]);
@@ -638,7 +672,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     }
 
     const jobConfig = jobsResponse.jobs[0];
-    const timefield = jobConfig.data_description.time_field;
+    const timefield = jobConfig.data_description.time_field!;
     const bucketSpan = jobConfig.analysis_config.bucket_span;
 
     if (datafeedConfig === undefined) {
@@ -691,9 +725,9 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     };
 
     if (client) {
-      const {
-        body: { aggregations },
-      } = await client.asCurrentUser.search(esSearchRequest);
+      const { aggregations } = await client.asCurrentUser.search(esSearchRequest, {
+        maxRetries: 0,
+      });
 
       finalResults.datafeedResults =
         // @ts-expect-error incorrect search response type
@@ -705,7 +739,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
     const { getAnnotations } = annotationServiceProvider(client!);
 
-    const [bucketResp, annotationResp, { body: modelSnapshotsResp }] = await Promise.all([
+    const [bucketResp, annotationResp] = await Promise.all([
       mlClient.getBuckets({
         job_id: jobId,
         body: { desc: true, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
@@ -716,14 +750,9 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         latestMs: end,
         maxAnnotations: 1000,
       }),
-      mlClient.getModelSnapshots({
-        job_id: jobId,
-        start: String(start),
-        end: String(end),
-      }),
     ]);
 
-    const bucketResults = bucketResp?.body?.buckets ?? [];
+    const bucketResults = bucketResp?.buckets ?? [];
     bucketResults.forEach((dataForTime) => {
       const timestamp = Number(dataForTime?.timestamp);
       const eventCount = dataForTime?.event_count;
@@ -746,22 +775,19 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
             x1: endTimestamp,
           },
           details: annotation.annotation,
+          // Added for custom RectAnnotation tooltip with formatted timestamp
+          header: timestamp,
         });
       }
     });
 
-    const modelSnapshots = modelSnapshotsResp?.model_snapshots ?? [];
-    modelSnapshots.forEach((modelSnapshot) => {
-      const timestamp = Number(modelSnapshot?.timestamp);
-
-      finalResults.modelSnapshotResultsLine.push({
-        dataValue: timestamp,
-        details: modelSnapshot.description,
-      });
-    });
-
     return finalResults;
   }
+
+  const { getAnomalyChartsData, getRecordsForCriteria } = anomalyChartsDataProvider(
+    mlClient,
+    client!
+  );
 
   return {
     getAnomaliesTableData,
@@ -773,5 +799,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     getCategorizerStats,
     getCategoryStoppedPartitions,
     getDatafeedResultsChartData,
+    getAnomalyChartsData,
+    getRecordsForCriteria,
   };
 }

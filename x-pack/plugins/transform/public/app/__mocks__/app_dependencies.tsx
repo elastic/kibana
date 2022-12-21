@@ -7,14 +7,17 @@
 
 import { useContext } from 'react';
 
-import type { ScopedHistory } from 'kibana/public';
+import type { ScopedHistory } from '@kbn/core/public';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { savedObjectsPluginMock } from '../../../../../../src/plugins/saved_objects/public/mocks';
-import { SharePluginStart } from '../../../../../../src/plugins/share/public';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import type { AppDependencies } from '../app_dependencies';
 import { MlSharedContext } from './shared_context';
@@ -23,6 +26,7 @@ import type { GetMlSharedImportsReturnType } from '../../shared_imports';
 const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
 const dataStart = dataPluginMock.createStartContract();
+const dataViewsStart = dataViewPluginMocks.createStartContract();
 
 // Replace mock to support syntax using `.then()` as used in transform code.
 coreStart.savedObjects.client.find = jest.fn().mockResolvedValue({ savedObjects: [] });
@@ -31,6 +35,7 @@ const appDependencies: AppDependencies = {
   application: coreStart.application,
   chrome: coreStart.chrome,
   data: dataStart,
+  dataViews: dataViewsStart,
   docLinks: coreStart.docLinks,
   i18n: coreStart.i18n,
   notifications: coreSetup.notifications,
@@ -38,11 +43,14 @@ const appDependencies: AppDependencies = {
   savedObjects: coreStart.savedObjects,
   storage: { get: jest.fn() } as unknown as Storage,
   overlays: coreStart.overlays,
+  theme: themeServiceMock.createStartContract(),
   http: coreSetup.http,
   history: {} as ScopedHistory,
   savedObjectsPlugin: savedObjectsPluginMock.createStartContract(),
   share: { urlGenerators: { getUrlGenerator: jest.fn() } } as unknown as SharePluginStart,
   ml: {} as GetMlSharedImportsReturnType,
+  triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
+  unifiedSearch: {} as jest.Mocked<UnifiedSearchPublicPluginStart>,
 };
 
 export const useAppDependencies = () => {

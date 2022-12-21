@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticUser } from '../types';
-import {
+import type { ElasticUser } from '../types';
+import type {
   ActionConnector,
   ActionTypeConnector,
   ActionType,
@@ -15,9 +15,9 @@ import {
   CasesConfigure,
   ClosureType,
   ThirdPartyField,
-} from '../../../common';
+} from '../../../common/api';
 
-export {
+export type {
   ActionConnector,
   ActionTypeConnector,
   ActionType,

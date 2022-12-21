@@ -19,10 +19,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { policyConfig } from '../store/policy_details/selectors';
-import { usePolicyDetailsSelector } from './policy_hooks';
+import { useShowEditableFormFields, usePolicyDetailsSelector } from './policy_hooks';
 import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
 
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
@@ -95,7 +95,7 @@ const warningMessage = i18n.translate(
   }
 );
 
-export const AdvancedPolicyForms = React.memo(() => {
+export const AdvancedPolicyForms = React.memo(({ isPlatinumPlus }: { isPlatinumPlus: boolean }) => {
   return (
     <>
       <EuiCallOut title={calloutTitle} color="warning" iconType="alert">
@@ -113,14 +113,17 @@ export const AdvancedPolicyForms = React.memo(() => {
       <EuiPanel data-test-subj="advancedPolicyPanel" paddingSize="s">
         {AdvancedPolicySchema.map((advancedField, index) => {
           const configPath = advancedField.key.split('.');
+          const failsPlatinumLicenseCheck = !isPlatinumPlus && advancedField.license === 'platinum';
           return (
-            <PolicyAdvanced
-              key={index}
-              configPath={configPath}
-              firstSupportedVersion={advancedField.first_supported_version}
-              lastSupportedVersion={advancedField.last_supported_version}
-              documentation={advancedField.documentation}
-            />
+            !failsPlatinumLicenseCheck && (
+              <PolicyAdvanced
+                key={index}
+                configPath={configPath}
+                firstSupportedVersion={advancedField.first_supported_version}
+                lastSupportedVersion={advancedField.last_supported_version}
+                documentation={advancedField.documentation}
+              />
+            )
           );
         })}
       </EuiPanel>
@@ -142,6 +145,7 @@ const PolicyAdvanced = React.memo(
     lastSupportedVersion?: string;
     documentation: string;
   }) => {
+    const showEditableFormFields = useShowEditableFormFields();
     const dispatch = useDispatch();
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const onChange = useCallback(
@@ -171,10 +175,10 @@ const PolicyAdvanced = React.memo(
         <EuiFormRow
           fullWidth
           label={
-            <EuiFlexGroup>
-              <EuiFlexItem>{configPath.join('.')}</EuiFlexItem>
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem grow={true}>{configPath.join('.')}</EuiFlexItem>
               {documentation && (
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiIconTip content={documentation} position="right" />
                 </EuiFlexItem>
               )}
@@ -193,6 +197,7 @@ const PolicyAdvanced = React.memo(
             fullWidth
             value={value as string}
             onChange={onChange}
+            disabled={!showEditableFormFields}
           />
         </EuiFormRow>
       </>

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiBasicTable } from '@elastic/eui';
+import type { EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
@@ -29,7 +29,7 @@ import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import * as i18n from './translations';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-import { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
+import type { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
 
 const QueryText = styled.span`
   white-space: normal;
@@ -44,6 +44,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     isLoading,
     itemIdToExpandedNotesRowMap,
     importDataModalToggle,
+    onCreateRule,
     onDeleteSelected,
     onlyFavorites,
     onOpenTimeline,
@@ -148,7 +149,12 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [setImportDataModalToggle, refetch]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
-      const timelineActions: ActionTimelineToShow[] = ['createFrom', 'duplicate'];
+      const createRule: ActionTimelineToShow[] = ['createRule'];
+      const timelineActions: ActionTimelineToShow[] = [
+        'createFrom',
+        'duplicate',
+        ...(onCreateRule != null ? createRule : []),
+      ];
 
       if (timelineStatus !== TimelineStatus.immutable) {
         timelineActions.push('export');
@@ -164,7 +170,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       }
 
       return timelineActions;
-    }, [onDeleteSelected, deleteTimelines, timelineStatus]);
+    }, [onCreateRule, timelineStatus, onDeleteSelected, deleteTimelines]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
 
@@ -194,7 +200,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           title={i18n.IMPORT_TIMELINE}
         />
 
-        <EuiPanel className={OPEN_TIMELINE_CLASS_NAME} hasBorder>
+        <div className={OPEN_TIMELINE_CLASS_NAME}>
           {!!timelineFilter && timelineFilter}
           <SearchRow
             data-test-subj="search-row"
@@ -257,6 +263,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             loading={isLoading}
             itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
             enableExportTimelineDownloader={enableExportTimelineDownloader}
+            onCreateRule={onCreateRule}
             onOpenDeleteTimelineModal={onOpenDeleteTimelineModal}
             onOpenTimeline={onOpenTimeline}
             onSelectionChange={onSelectionChange}
@@ -272,7 +279,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             tableRef={tableRef}
             totalSearchResultsCount={totalSearchResultsCount}
           />
-        </EuiPanel>
+        </div>
       </>
     );
   }

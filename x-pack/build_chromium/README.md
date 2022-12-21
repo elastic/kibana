@@ -1,31 +1,33 @@
 # Chromium build
 
-We ship our own headless build of Chromium for Linux and Mac OS, using a
-version of the source that corresponds to the requirements of the Puppeteer
-node module. The scripts in this folder can be used to accept a commit hash
-from the Chromium repository, and initialize the build in a workspace.
+We ship our own headless build of Chromium which is significantly smaller than
+the standard binaries shipped by Google. The scripts in this folder can be used
+to accept a commit hash from the Chromium repository, and initialize the build
+on Ubuntu Linux.
 
 ## Why do we do this
 
-**Linux**: By default, Puppeteer will download a zip file containing the
-Chromium browser for any OS. This creates problems on Linux, because Chromium
-has a dependency on X11, which is often not installed for a server environment.
-We don't want to make a requirement for Linux that you need X11 to run Kibana.
-To work around this, we create our own Chromium build, using the
+By default, Puppeteer will download a zip file containing the Chromium browser for any
+OS. This creates problems on Linux, because Chromium has a dependency on X11, which
+is often not installed for a server environment. We don't want to make a requirement
+for Linux that you need X11 to run Kibana. To work around this, we create our own Chromium
+build, using the
 [`headless_shell`](https://chromium.googlesource.com/chromium/src/+/5cf4b8b13ed518472038170f8de9db2f6c258fe4/headless)
-build target. There are no (trustworthy) sources of these builds available
-elsewhere.
+build target. There are no (trustworthy) sources of these builds available elsewhere.
 
-**Mac**: We do this on Mac because Elastic signs the Kibanna release artifact
-with Apple to work with Gatekeeper on Mac OS. Having our own binary of Chromium
-and bundling it with Kibana is integral to the artifact signing process.
-
-**Windows**: No custom build is necessary for Windows. We are able to use the
-full build of Chromium, downloaded from the main [Chromium download
-location](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html),
-using the revision that corresponds with the Puppeteer dependency.
+Fortunately, creating the custom builds is only necessary for Linux. When you have a build
+of Kibana for Linux, or if you use a Linux desktop to develop Kibana, you have a copy of
+`headless_shell` bundled inside. When you have a Windows or Mac build of Kibana, or use
+either of those for development, you have a copy of the full build of Chromium, which
+was downloaded from the main [Chromium download
+location](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html).
 
 ## Build Script Usage
+
+The system OS requires a few setup steps:
+1. Required packages: `bzip2`, `git`, `lsb_release`, `python3`
+2. The `python` command needs to launch Python 3.
+3. Recommended: `tmux`, as your ssh session may get interrupted
 
 These commands show how to set up an environment to build:
 ```sh
@@ -39,13 +41,13 @@ mkdir ~/chromium && cd ~/chromium
 gsutil cp -r gs://headless_shell_staging/build_chromium .
 
 # Install the OS packages, configure the environment, download the chromium source (25GB)
-python ./build_chromium/init.py [arch_name]
+python ./build_chromium/init.py
 
 # Run the build script with the path to the chromium src directory, the git commit hash
-python ./build_chromium/build.py <commit_id> x64
+python ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 x64
 
 # OR You can build for ARM
-python ./build_chromium/build.py <commit_id> arm64
+python ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 arm64
 ```
 
 **NOTE:** The `init.py` script updates git config to make it more possible for
@@ -56,7 +58,7 @@ with "early EOF" errors, the instance could be low on memory or disk space.
 
 If you need to bump the version of Puppeteer, you need to get a new git commit hash for Chromium that corresponds to the Puppeteer version.
 ```
-node x-pack/dev-tools/chromium_version.js [PuppeteerVersion]
+node scripts/chromium_version.js [PuppeteerVersion]
 ```
 
 When bumping the Puppeteer version, make sure you also update the `ChromiumArchivePaths.revision` variable in
@@ -70,7 +72,7 @@ A good how-to on building Chromium from source is
 We have an `linux/args.gn` file that is automatically copied to the build target directory.
 
 To get a list of the build arguments that are enabled, install `depot_tools` and run
-`gn args out/headless --list`. It prints out all of the flags and their
+`gn args out/headless --list` from the `chromium/src` directory. It prints out all of the flags and their
 settings, including the defaults. Some build flags are documented
 [here](https://www.chromium.org/developers/gn-build-configuration).
 
@@ -89,17 +91,21 @@ are created in x64 using cross-compiling. CentOS is not supported for building C
    - 8 CPU
    - 30GB memory
    - 80GB free space on disk (Try `ncdu /home` to see where space is used.)
-   - git
-   - python2 (`python` must link to `python2`)
-   - lsb_release
-   - tmux is recommended in case your ssh session is interrupted
    - "Cloud API access scopes": must have **read / write** scope for the Storage API
 4. Install [Google Cloud SDK](https://cloud.google.com/sdk) locally to ssh into the GCP instance
 
 ## Artifacts
 
 After the build completes, there will be a .zip file and a .md5 file in `~/chromium/chromium/src/out/headless`. These are named like so: `chromium-{first_7_of_SHA}-{platform}-{arch}`, for example: `chromium-4747cc2-linux-x64`.
-The zip files and md5 files are copied to a staging bucket in GCP storage.
+The zip files and md5 files are copied to a **staging** bucket in GCP storage.
+
+To publish the built artifacts for bunding in Kibana, copy the files from the `headless_shell_staging` bucket to the `headless_shell` bucket.
+```
+gsutil cp gs://headless_shell_staging/chromium-d163fd7-linux_arm64.md5 gs://headless_shell/
+gsutil cp gs://headless_shell_staging/chromium-d163fd7-linux_arm64.zip gs://headless_shell/
+```
+
+IMPORTANT: Do not replace builds in the `headless_shell` bucket that are referenced in an active Kibana branch. CI tests on that branch will fail since the archive checksum no longer matches the original version.
 
 ## Testing
 Search the Puppeteer Github repo for known issues that could affect our use case, and make sure to test anywhere that is affected.

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonIcon,
   EuiComboBox,
@@ -56,11 +56,13 @@ export const CalendarsSelection: FC = () => {
 
   useEffect(() => {
     loadCalendars();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     jobCreator.calendars = selectedCalendars;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCalendars.join()]);
 
   const comboBoxProps: EuiComboBoxProps<Calendar> = {

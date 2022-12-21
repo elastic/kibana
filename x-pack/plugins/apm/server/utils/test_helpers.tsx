@@ -5,43 +5,31 @@
  * 2.0.
  */
 
-import { APMConfig } from '../';
-import { PromiseReturnType } from '../../../observability/typings/common';
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '../../../../../src/core/types/elasticsearch';
-import { UxUIFilters } from '../../typings/ui_filters';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import { APMConfig } from '..';
+import { APMEventClient } from '../lib/helpers/create_es_client/create_apm_event_client';
+import { APMInternalESClient } from '../lib/helpers/create_es_client/create_internal_es_client';
+import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
 
 interface Options {
   mockResponse?: (
     request: ESSearchRequest
   ) => ESSearchResponse<unknown, ESSearchRequest>;
-  uiFilters?: Record<string, string>;
   config?: Partial<APMConfig>;
 }
 
-interface MockSetup {
-  apmEventClient: any;
-  internalClient: any;
-  config: APMConfig;
-  uiFilters: UxUIFilters;
-  indices: {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.sourcemapIndices': string;
-    'apm_oss.errorIndices': string;
-    'apm_oss.onboardingIndices': string;
-    'apm_oss.spanIndices': string;
-    'apm_oss.transactionIndices': string;
-    'apm_oss.metricsIndices': string;
-    /* eslint-enable @typescript-eslint/naming-convention */
-    apmAgentConfigurationIndex: string;
-    apmCustomLinkIndex: string;
-  };
-}
-
 export async function inspectSearchParams(
-  fn: (mockSetup: MockSetup) => Promise<any>,
+  fn: ({
+    mockApmEventClient,
+    mockConfig,
+    mockInternalESClient,
+    mockIndices,
+  }: {
+    mockApmEventClient: APMEventClient;
+    mockConfig: APMConfig;
+    mockInternalESClient: APMInternalESClient;
+    mockIndices: ApmIndicesConfig;
+  }) => Promise<any>,
   options: Options = {}
 ) {
   const spy = jest.fn().mockImplementation(async (request) => {
@@ -60,46 +48,51 @@ export async function inspectSearchParams(
 
   let response;
   let error;
-
-  const mockSetup = {
-    apmEventClient: { search: spy } as any,
-    internalClient: { search: spy } as any,
-    config: new Proxy(
-      {},
-      {
-        get: (_, key: keyof APMConfig) => {
-          const { config } = options;
-          if (config?.[key]) {
-            return config?.[key];
-          }
-
-          switch (key) {
-            default:
-              return 'myIndex';
-
-            case 'xpack.apm.metricsInterval':
-              return 30;
-          }
-        },
-      }
-    ) as APMConfig,
-    uiFilters: options?.uiFilters ?? {},
-    indices: {
-      /* eslint-disable @typescript-eslint/naming-convention */
-      'apm_oss.sourcemapIndices': 'myIndex',
-      'apm_oss.errorIndices': 'myIndex',
-      'apm_oss.onboardingIndices': 'myIndex',
-      'apm_oss.spanIndices': 'myIndex',
-      'apm_oss.transactionIndices': 'myIndex',
-      'apm_oss.metricsIndices': 'myIndex',
-      /* eslint-enable @typescript-eslint/naming-convention */
-      apmAgentConfigurationIndex: 'myIndex',
-      apmCustomLinkIndex: 'myIndex',
-    },
-    dynamicIndexPattern: null as any,
+  const mockApmEventClient = { search: spy } as any;
+  const indices: {
+    [Property in keyof APMConfig['indices']]: string;
+  } = {
+    error: 'myIndex',
+    onboarding: 'myIndex',
+    span: 'myIndex',
+    transaction: 'myIndex',
+    metric: 'myIndex',
   };
+  const mockConfig = new Proxy(
+    {},
+    {
+      get: (_, key: keyof APMConfig) => {
+        const { config } = options;
+        if (config?.[key]) {
+          return config?.[key];
+        }
+
+        switch (key) {
+          default:
+            return 'myIndex';
+          case 'indices':
+            return indices;
+          case 'ui':
+            return {
+              enabled: true,
+              transactionGroupBucketSize: 1000,
+              maxTraceItems: 1000,
+            };
+          case 'metricsInterval':
+            return 30;
+        }
+      },
+    }
+  ) as APMConfig;
+  const mockInternalESClient = { search: spy } as any;
+
   try {
-    response = await fn(mockSetup);
+    response = await fn({
+      mockIndices: indices,
+      mockApmEventClient,
+      mockConfig,
+      mockInternalESClient,
+    });
   } catch (err) {
     error = err;
     // we're only extracting the search params
@@ -114,7 +107,7 @@ export async function inspectSearchParams(
   };
 }
 
-export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
+export type SearchParamsMock = Awaited<ReturnType<typeof inspectSearchParams>>;
 
 export function mockNow(date: string | number | Date) {
   const fakeNow = new Date(date).getTime();

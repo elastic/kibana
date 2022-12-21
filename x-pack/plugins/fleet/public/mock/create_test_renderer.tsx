@@ -10,12 +10,23 @@ import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react-hooks';
+import { Router } from 'react-router-dom';
 
-import { ScopedHistory } from '../../../../../src/core/public';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { ScopedHistory } from '@kbn/core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
+
+import { allowedExperimentalValues } from '../../common/experimental_features';
+
 import { FleetAppContext } from '../applications/fleet/app';
 import { IntegrationsAppContext } from '../applications/integrations/app';
 import type { FleetConfigType } from '../plugin';
 import type { UIExtensionsStorage } from '../types';
+import { ExperimentalFeaturesService } from '../services';
 
 import { createConfigurationMock } from './plugin_configuration';
 import { createStartMock } from './plugin_interfaces';
@@ -40,7 +51,12 @@ export interface TestRenderer {
   startInterface: MockedFleetStart;
   kibanaVersion: string;
   AppWrapper: React.FC<any>;
+  HookWrapper: React.FC<any>;
   render: UiRender;
+  renderHook: <TProps, TResult>(
+    callback: (props: TProps) => TResult
+  ) => RenderHookResult<TProps, TResult>;
+  setHeaderActionMenu: Function;
 }
 
 export const createFleetTestRendererMock = (): TestRenderer => {
@@ -48,28 +64,49 @@ export const createFleetTestRendererMock = (): TestRenderer => {
   const extensions: UIExtensionsStorage = {};
   const startServices = createStartServices(basePath);
   const history = createMemoryHistory({ initialEntries: [basePath] });
+  const mountHistory = new CoreScopedHistory(history, basePath);
+
+  ExperimentalFeaturesService.init(allowedExperimentalValues);
+
+  const HookWrapper = memo(({ children }) => {
+    return (
+      <startServices.i18n.Context>
+        <Router history={mountHistory}>
+          <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
+        </Router>
+      </startServices.i18n.Context>
+    );
+  });
+
   const testRendererMocks: TestRenderer = {
     history,
-    mountHistory: new ScopedHistory(history, basePath),
+    mountHistory,
     startServices,
     config: createConfigurationMock(),
     startInterface: createStartMock(extensions),
     kibanaVersion: '8.0.0',
+    setHeaderActionMenu: jest.fn(),
     AppWrapper: memo(({ children }) => {
       return (
         <FleetAppContext
-          basepath={basePath}
           startServices={testRendererMocks.startServices}
           config={testRendererMocks.config}
           history={testRendererMocks.mountHistory}
           kibanaVersion={testRendererMocks.kibanaVersion}
           extensions={extensions}
           routerHistory={testRendererMocks.history}
+          theme$={themeServiceMock.createTheme$()}
         >
           {children}
         </FleetAppContext>
       );
     }),
+    HookWrapper,
+    renderHook: (callback) => {
+      return renderHook(callback, {
+        wrapper: testRendererMocks.HookWrapper,
+      });
+    },
     render: (ui, options) => {
       let renderResponse: RenderResult;
       act(() => {
@@ -89,13 +126,24 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
   const startServices = createStartServices(basePath);
+  const HookWrapper = memo(({ children }) => {
+    return (
+      <startServices.i18n.Context>
+        <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
+      </startServices.i18n.Context>
+    );
+  });
   const testRendererMocks: TestRenderer = {
     history: createMemoryHistory(),
-    mountHistory: new ScopedHistory(createMemoryHistory({ initialEntries: [basePath] }), basePath),
+    mountHistory: new CoreScopedHistory(
+      createMemoryHistory({ initialEntries: [basePath] }),
+      basePath
+    ),
     startServices,
     config: createConfigurationMock(),
     startInterface: createStartMock(extensions),
     kibanaVersion: '8.0.0',
+    setHeaderActionMenu: jest.fn(),
     AppWrapper: memo(({ children }) => {
       return (
         <IntegrationsAppContext
@@ -106,11 +154,14 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
           kibanaVersion={testRendererMocks.kibanaVersion}
           extensions={extensions}
           routerHistory={testRendererMocks.history}
+          theme$={themeServiceMock.createTheme$()}
+          setHeaderActionMenu={() => {}}
         >
           {children}
         </IntegrationsAppContext>
       );
     }),
+    HookWrapper,
     render: (ui, options) => {
       let renderResponse: RenderResult;
       act(() => {
@@ -120,6 +171,11 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
         });
       });
       return renderResponse!;
+    },
+    renderHook: (callback) => {
+      return renderHook(callback, {
+        wrapper: testRendererMocks.HookWrapper,
+      });
     },
   };
 

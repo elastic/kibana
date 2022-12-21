@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
+import { ActionIconItem } from '../../../../common/components/header_actions/action_icon_item';
 
-import { Ecs } from '../../../../../common/ecs';
-import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
-import { ActionIconItem } from '../../../../timelines/components/timeline/body/actions/action_icon_item';
+import type { Ecs } from '../../../../../common/ecs';
 
 import {
   ACTION_INVESTIGATE_IN_TIMELINE,
@@ -18,26 +17,20 @@ import {
 import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 
 interface InvestigateInTimelineActionProps {
-  ecsRowData?: Ecs | Ecs[] | null;
-  nonEcsRowData?: TimelineNonEcsData[];
+  ecsRowData?: Ecs | null;
   ariaLabel?: string;
-  alertIds?: string[];
   buttonType?: 'text' | 'icon';
   onInvestigateInTimelineAlertClick?: () => void;
 }
 
 const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
   ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
-  alertIds,
   ecsRowData,
-  nonEcsRowData,
   buttonType,
   onInvestigateInTimelineAlertClick,
 }) => {
   const { investigateInTimelineAlertClick } = useInvestigateInTimeline({
     ecsRowData,
-    nonEcsRowData,
-    alertIds,
     onInvestigateInTimelineAlertClick,
   });
 

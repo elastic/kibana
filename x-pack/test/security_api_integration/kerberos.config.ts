@@ -15,6 +15,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kerberosKeytabPath = resolve(__dirname, './fixtures/kerberos/krb5.keytab');
   const kerberosConfigPath = resolve(__dirname, './fixtures/kerberos/krb5.conf');
 
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../security_functional/fixtures/common/test_endpoints'
+  );
+
+  const auditLogPath = resolve(__dirname, './fixtures/audit/kerberos.log');
+
   return {
     testFiles: [require.resolve('./tests/kerberos')],
     servers: xPackAPITestsConfig.get('servers'),
@@ -42,7 +49,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${testEndpointsPlugin}`,
         `--xpack.security.authc.providers=${JSON.stringify(['kerberos', 'basic'])}`,
+        '--xpack.security.audit.enabled=true',
+        '--xpack.security.audit.appender.type=file',
+        `--xpack.security.audit.appender.fileName=${auditLogPath}`,
+        '--xpack.security.audit.appender.layout.type=json',
+        `--xpack.security.audit.ignore_filters=${JSON.stringify([
+          { actions: ['http_request'] },
+          { categories: ['database'] },
+        ])}`,
       ],
     },
   };

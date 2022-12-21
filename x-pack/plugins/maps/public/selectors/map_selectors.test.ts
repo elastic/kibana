@@ -7,10 +7,8 @@
 
 import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../../common/constants';
 
-jest.mock('../classes/layers/tiled_vector_layer/tiled_vector_layer', () => {});
-jest.mock('../classes/layers/blended_vector_layer/blended_vector_layer', () => {});
 jest.mock('../classes/layers/heatmap_layer', () => {});
-jest.mock('../classes/layers/vector_tile_layer/vector_tile_layer', () => {});
+jest.mock('../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer', () => {});
 jest.mock('../classes/joins/inner_join', () => {});
 jest.mock('../kibana_services', () => ({
   getTimeFilter: () => ({
@@ -39,7 +37,7 @@ import {
 
 import { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
-import { Filter } from '../../../../../src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ESSearchSource } from '../classes/sources/es_search_source';
 
 describe('getDataFilters', () => {
@@ -59,6 +57,7 @@ describe('getDataFilters', () => {
   const timeFilters = { to: '2001-01-01', from: '2001-12-31' };
   const timeslice = undefined;
   const query = undefined;
+  const embeddableSearchContext = undefined;
   const filters: Filter[] = [];
   const searchSessionId = '12345';
   const searchSessionMapBuffer = {
@@ -78,6 +77,7 @@ describe('getDataFilters', () => {
       timeslice,
       query,
       filters,
+      embeddableSearchContext,
       searchSessionId,
       searchSessionMapBuffer,
       isReadOnly
@@ -94,6 +94,7 @@ describe('getDataFilters', () => {
       timeslice,
       query,
       filters,
+      embeddableSearchContext,
       searchSessionId,
       undefined,
       isReadOnly
@@ -234,7 +235,7 @@ describe('getQueryableUniqueIndexPatternIds', () => {
     indexPatternId: string;
   }) {
     return {
-      type: LAYER_TYPE.VECTOR,
+      type: LAYER_TYPE.GEOJSON_VECTOR,
       style: {
         type: LAYER_STYLE_TYPE.VECTOR,
       },

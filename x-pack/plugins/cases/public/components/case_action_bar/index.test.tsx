@@ -7,14 +7,37 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { basicCase } from '../../containers/mock';
+import { basicCase, caseUserActions, getAlertUserAction } from '../../containers/mock';
+import type { CaseActionBarProps } from '.';
 import { CaseActionBar } from '.';
-import { TestProviders } from '../../common/mock';
+import {
+  allCasesPermissions,
+  noDeleteCasesPermissions,
+  noUpdateCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
+import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+
+jest.mock('../../containers/use_get_case_user_actions');
+jest.mock('../case_view/use_on_refresh_case_view_page');
+
+const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
+const defaultUseGetCaseUserActions = {
+  data: {
+    caseUserActions: [...caseUserActions, getAlertUserAction()],
+    caseServices: {},
+    hasDataToPush: false,
+    participants: [basicCase.createdBy],
+  },
+  isLoading: false,
+  isError: false,
+};
 
 describe('CaseActionBar', () => {
-  const onRefresh = jest.fn();
   const onUpdateField = jest.fn();
   const defaultProps = {
     allCasesNavigation: {
@@ -24,17 +47,17 @@ describe('CaseActionBar', () => {
     caseData: basicCase,
     disableAlerting: false,
     isLoading: false,
-    onRefresh,
     onUpdateField,
     currentExternalIncident: null,
-    userCanCrud: true,
+    metricsFeatures: [],
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
   });
 
-  it('it renders', () => {
+  it('renders', () => {
     const wrapper = mount(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
@@ -47,9 +70,24 @@ describe('CaseActionBar', () => {
     expect(wrapper.find(`[data-test-subj="sync-alerts-switch"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="case-refresh"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="case-view-actions"]`).exists()).toBeTruthy();
+    // no loading bar
+    expect(wrapper.find(`[data-test-subj="case-view-action-bar-spinner"]`).exists()).toBeFalsy();
   });
 
-  it('it should show correct status', () => {
+  it('shows a loading bar when user actions are loaded', async () => {
+    useGetCaseUserActionsMock.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+    expect(wrapper.find(`[data-test-subj="case-view-action-bar-spinner"]`).exists()).toBeTruthy();
+  });
+
+  it('should show correct status', () => {
     const wrapper = mount(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
@@ -61,7 +99,7 @@ describe('CaseActionBar', () => {
     );
   });
 
-  it('it should show the correct date', () => {
+  it('should show the correct date', () => {
     const wrapper = mount(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
@@ -73,7 +111,7 @@ describe('CaseActionBar', () => {
     );
   });
 
-  it('it call onRefresh', () => {
+  it('invalidates the queryClient cache onRefresh', () => {
     const wrapper = mount(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
@@ -81,10 +119,11 @@ describe('CaseActionBar', () => {
     );
 
     wrapper.find(`[data-test-subj="case-refresh"]`).first().simulate('click');
-    expect(onRefresh).toHaveBeenCalled();
+
+    expect(useRefreshCaseViewPage()).toHaveBeenCalled();
   });
 
-  it('it should call onUpdateField when changing status', () => {
+  it('should call onUpdateField when changing status', () => {
     const wrapper = mount(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
@@ -99,7 +138,7 @@ describe('CaseActionBar', () => {
     expect(onUpdateField).toHaveBeenCalledWith({ key: 'status', value: 'in-progress' });
   });
 
-  it('it should call onUpdateField when changing syncAlerts setting', () => {
+  it('should call onUpdateField when changing syncAlerts setting', () => {
     const wrapper = mount(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
@@ -118,8 +157,8 @@ describe('CaseActionBar', () => {
 
   it('should not show the sync alerts toggle when alerting is disabled', () => {
     const { queryByText } = render(
-      <TestProviders>
-        <CaseActionBar {...defaultProps} disableAlerting={true} />
+      <TestProviders features={{ alerts: { sync: false, enabled: true }, metrics: [] }}>
+        <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
@@ -134,5 +173,78 @@ describe('CaseActionBar', () => {
     );
 
     expect(queryByText('Sync alerts')).toBeInTheDocument();
+  });
+
+  it('should not show the Case open text when the lifespan feature is enabled', () => {
+    const props: CaseActionBarProps = { ...defaultProps };
+    const { queryByText } = render(
+      <TestProviders features={{ metrics: ['lifespan'] }}>
+        <CaseActionBar {...props} />
+      </TestProviders>
+    );
+
+    expect(queryByText('Case opened')).not.toBeInTheDocument();
+  });
+
+  it('should show the Case open text when the lifespan feature is disabled', () => {
+    const { getByText } = render(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(getByText('Case opened')).toBeInTheDocument();
+  });
+
+  it('should show the change status text when the user has update privileges', () => {
+    render(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTitle('Change status')).toBeInTheDocument();
+  });
+
+  it('should not show the change status text when the user does not have update privileges', () => {
+    render(
+      <TestProviders permissions={noUpdateCasesPermissions()}>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTitle('Change status')).not.toBeInTheDocument();
+  });
+
+  it('should not show the sync alerts toggle when the user does not have update privileges', () => {
+    const { queryByText } = render(
+      <TestProviders permissions={noUpdateCasesPermissions()}>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(queryByText('Sync alerts')).not.toBeInTheDocument();
+  });
+
+  it('should not show the delete item in the menu when the user does not have delete privileges', () => {
+    const { queryByText, queryByTestId } = render(
+      <TestProviders permissions={noDeleteCasesPermissions()}>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('property-actions-ellipses')).not.toBeInTheDocument();
+    expect(queryByText('Delete case')).not.toBeInTheDocument();
+  });
+
+  it('should show the the delete item in the menu when the user does have delete privileges', () => {
+    const { queryByText } = render(
+      <TestProviders permissions={allCasesPermissions()}>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('property-actions-ellipses'));
+    expect(queryByText('Delete case')).toBeInTheDocument();
   });
 });

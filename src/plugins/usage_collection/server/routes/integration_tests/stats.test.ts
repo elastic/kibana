@@ -7,26 +7,26 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { UnwrapPromise } from '@kbn/utility-types';
 
 import {
-  MetricsServiceSetup,
+  type MetricsServiceSetup,
+  RequestHandlerContext,
   ServiceStatus,
   ServiceStatusLevels,
-} from '../../../../../core/server';
+} from '@kbn/core/server';
 import {
   contextServiceMock,
   loggingSystemMock,
   metricsServiceMock,
   executionContextServiceMock,
-} from '../../../../../core/server/mocks';
-import { createHttpServer } from '../../../../../core/server/test_utils';
+} from '@kbn/core/server/mocks';
+import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { registerStatsRoute } from '../stats';
 import supertest from 'supertest';
 import { CollectorSet } from '../../collector';
 
 type HttpService = ReturnType<typeof createHttpServer>;
-type HttpSetup = UnwrapPromise<ReturnType<HttpService['setup']>>;
+type HttpSetup = Awaited<ReturnType<HttpService['setup']>>;
 
 describe('/api/stats', () => {
   let server: HttpService;
@@ -47,11 +47,12 @@ describe('/api/stats', () => {
     });
     metrics = metricsServiceMock.createSetupContract();
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter<RequestHandlerContext>('');
     registerStatsRoute({
       router,
       collectorSet: new CollectorSet({
         logger: loggingSystemMock.create().asLoggerFactory().get(),
+        executionContext: executionContextServiceMock.createSetupContract(),
       }),
       config: {
         allowAnonymous: true,

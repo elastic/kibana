@@ -9,7 +9,8 @@ import { EuiCallOut, EuiButton, EuiDescriptionList } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo } from 'react';
 
-import { CLOSED_CASE_PUSH_ERROR_ID, ErrorMessage } from './types';
+import type { ErrorMessage } from './types';
+import { CLOSED_CASE_PUSH_ERROR_ID } from './types';
 import * as i18n from './translations';
 
 export interface CallOutProps {
@@ -59,7 +60,7 @@ const CallOutComponent = ({
       {!isCaseClosed && !hasLicenseError && (
         <EuiButton
           data-test-subj={`callout-onclick-${id}`}
-          color={type === 'success' ? 'secondary' : type}
+          color={type === 'success' ? 'success' : type}
           onClick={handleCallOut}
         >
           {i18n.ADD_CONNECTOR}
@@ -68,5 +69,6 @@ const CallOutComponent = ({
     </EuiCallOut>
   ) : null;
 };
+CallOutComponent.displayName = 'CallOut';
 
 export const CallOut = memo(CallOutComponent);

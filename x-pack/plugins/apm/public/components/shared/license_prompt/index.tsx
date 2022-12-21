@@ -8,7 +8,7 @@
 import { EuiButton, EuiCard, EuiTextColor } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibanaUrl } from '../../../hooks/useKibanaUrl';
+import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 
 export interface LicensePromptProps {
   text: string;
@@ -27,19 +27,20 @@ export function LicensePrompt({
     <EuiCard
       display={showBetaBadge ? undefined : 'plain'}
       paddingSize="l"
-      betaBadgeLabel={
+      betaBadgeProps={
         showBetaBadge
-          ? i18n.translate('xpack.apm.license.betaBadge', {
-              defaultMessage: 'Beta',
-            })
-          : undefined
-      }
-      betaBadgeTooltipContent={
-        showBetaBadge
-          ? i18n.translate('xpack.apm.license.betaTooltipMessage', {
-              defaultMessage:
-                'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
-            })
+          ? {
+              label: i18n.translate('xpack.apm.license.betaBadge', {
+                defaultMessage: 'Beta',
+              }),
+              tooltipContent: i18n.translate(
+                'xpack.apm.license.betaTooltipMessage',
+                {
+                  defaultMessage:
+                    'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
+                }
+              ),
+            }
           : undefined
       }
       title={i18n.translate('xpack.apm.license.title', {

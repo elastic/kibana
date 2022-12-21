@@ -6,60 +6,72 @@
  */
 
 import { EuiFacetButton, EuiFacetGroup } from '@elastic/eui';
+import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../../components';
-import type { CategoryCount } from '../../../../../../../../../../src/plugins/custom_integrations/common';
-import { CATEGORY_DISPLAY } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
-interface ALL_CATEGORY {
-  id: '';
+export interface CategoryFacet {
   count: number;
+  id: string;
+  title: string;
 }
 
-export type CategoryFacet = CategoryCount | ALL_CATEGORY;
+export const UPDATES_AVAILABLE = 'updates_available';
+export type ExtendedIntegrationCategory = IntegrationCategory | typeof UPDATES_AVAILABLE | '';
+
+export const ALL_CATEGORY = {
+  id: '',
+  title: i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
+    defaultMessage: 'All categories',
+  }),
+};
+
+export const ALL_INSTALLED_CATEGORY = {
+  id: '',
+  title: i18n.translate('xpack.fleet.epmList.allPackagesInstalledFilterLinkText', {
+    defaultMessage: 'All installed',
+  }),
+};
+
+export const UPDATES_AVAILABLE_CATEGORY = {
+  id: UPDATES_AVAILABLE,
+  title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
+    defaultMessage: 'Updates available',
+  }),
+};
+
+export interface Props {
+  isLoading?: boolean;
+  categories: CategoryFacet[];
+  selectedCategory: string;
+  onCategoryChange: (category: CategoryFacet) => unknown;
+}
 
 export function CategoryFacets({
   isLoading,
   categories,
   selectedCategory,
   onCategoryChange,
-}: {
-  isLoading?: boolean;
-  categories: CategoryFacet[];
-  selectedCategory: string;
-  onCategoryChange: (category: CategoryFacet) => unknown;
-}) {
+}: Props) {
   const controls = (
     <EuiFacetGroup>
       {isLoading ? (
         <Loading />
       ) : (
         categories.map((category) => {
-          let title;
-
-          if (category.id === 'updates_available') {
-            title = i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
-              defaultMessage: 'Updates available',
-            });
-          } else if (category.id === '') {
-            title = i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
-              defaultMessage: 'All',
-            });
-          } else {
-            title = CATEGORY_DISPLAY[category.id];
-          }
           return (
             <EuiFacetButton
+              data-test-subj={`epmList.categories.${category.id}`}
               isSelected={category.id === selectedCategory}
               key={category.id}
               id={category.id}
               quantity={category.count}
               onClick={() => onCategoryChange(category)}
             >
-              {title}
+              {category.title}
             </EuiFacetButton>
           );
         })

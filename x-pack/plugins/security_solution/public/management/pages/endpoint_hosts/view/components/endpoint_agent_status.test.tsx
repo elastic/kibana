@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { endpointPageHttpMock } from '../../mocks';
 import { act } from '@testing-library/react';
-import { EndpointAgentStatus, EndpointAgentStatusProps } from './endpoint_agent_status';
-import { HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
+import type { EndpointAgentStatusProps } from './endpoint_agent_status';
+import { EndpointAgentStatus } from './endpoint_agent_status';
+import type { HostMetadata } from '../../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../../common/endpoint/types';
 import { isLoadedResourceState } from '../../../../state';
 import { KibanaServices } from '../../../../../common/lib/kibana';
 
@@ -34,7 +34,7 @@ describe('When using the EndpointAgentStatus component', () => {
     (KibanaServices.get as jest.Mock).mockReturnValue(mockedContext.startServices);
     httpMocks = endpointPageHttpMock(mockedContext.coreStart.http);
     waitForAction = mockedContext.middlewareSpy.waitForAction;
-    endpointMeta = httpMocks.responseProvider.metadataList().hosts[0].metadata;
+    endpointMeta = httpMocks.responseProvider.metadataList().data[0].metadata;
     render = async (props: EndpointAgentStatusProps) => {
       renderResult = mockedContext.render(<EndpointAgentStatus {...props} />);
       return renderResult;

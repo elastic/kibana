@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { getColumns } from './columns';
 import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { EventFieldsData } from './types';
+import type { EventFieldsData } from './types';
 import { get } from 'lodash/fp';
 
 jest.mock('../../lib/kibana');
@@ -30,7 +30,7 @@ describe('getColumns', () => {
     eventId: 'some-event',
     getLinkValue: jest.fn(),
     onUpdateColumns: jest.fn(),
-    timelineId: 'some-timeline',
+    scopeId: 'some-timeline',
     toggleColumn: jest.fn(),
   };
 
@@ -134,6 +134,19 @@ describe('getColumns', () => {
         expect(
           get(['items', 3, 'key'], wrapper.find('[data-test-subj="more-actions-agent.id"]').props())
         ).toEqual('hover-actions-copy-button');
+      });
+    });
+
+    describe('does not render hover actions when readOnly prop is passed', () => {
+      test('it renders a filter for (+) button', () => {
+        actionsColumn = getColumns({ ...defaultProps, isReadOnly: true })[0] as Column;
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(wrapper.find('[data-test-subj="hover-actions-filter-for"]').exists()).toBeFalsy();
+        expect(wrapper.find('[data-test-subj="hover-actions-filter-out"]').exists()).toBeFalsy();
+        expect(wrapper.find('[data-test-subj="more-actions-agent.id"]').exists()).toBeFalsy();
       });
     });
   });

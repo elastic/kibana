@@ -9,15 +9,15 @@
 import { resolve } from 'path';
 import { services } from '../plugin_functional/services';
 import fs from 'fs';
-import { KIBANA_ROOT } from '@kbn/test';
+import { REPO_ROOT } from '@kbn/utils';
 
 export default async function ({ readConfigFile }) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   // Find all folders in /examples and /x-pack/examples since we treat all them as plugin folder
-  const examplesFiles = fs.readdirSync(resolve(KIBANA_ROOT, 'examples'));
+  const examplesFiles = fs.readdirSync(resolve(REPO_ROOT, 'examples'));
   const examples = examplesFiles.filter((file) =>
-    fs.statSync(resolve(KIBANA_ROOT, 'examples', file)).isDirectory()
+    fs.statSync(resolve(REPO_ROOT, 'examples', file)).isDirectory()
   );
 
   return {
@@ -30,9 +30,10 @@ export default async function ({ readConfigFile }) {
       require.resolve('./state_sync'),
       require.resolve('./routing'),
       require.resolve('./expressions_explorer'),
-      require.resolve('./index_pattern_field_editor_example'),
+      require.resolve('./data_view_field_editor_example'),
       require.resolve('./field_formats'),
       require.resolve('./partial_results'),
+      require.resolve('./search'),
     ],
     services: {
       ...functionalConfig.get('services'),
@@ -42,7 +43,6 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'telemetry:optIn': false,
       },
     },
     pageObjects: functionalConfig.get('pageObjects'),
@@ -62,8 +62,9 @@ export default async function ({ readConfigFile }) {
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
+        '--telemetry.optIn=false',
         ...examples.map(
-          (exampleDir) => `--plugin-path=${resolve(KIBANA_ROOT, 'examples', exampleDir)}`
+          (exampleDir) => `--plugin-path=${resolve(REPO_ROOT, 'examples', exampleDir)}`
         ),
       ],
     },

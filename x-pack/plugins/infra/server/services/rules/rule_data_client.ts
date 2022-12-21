@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from 'src/core/server';
-import { Dataset, RuleRegistryPluginSetupContract } from '../../../../rule_registry/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
+import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
+import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+
+import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
 import type { InfraFeatureId } from '../../../common/constants';
 import { RuleRegistrationContext, RulesServiceStartDeps } from './types';
 
@@ -27,11 +31,11 @@ export const createRuleDataClient = ({
     feature: ownerFeatureId,
     registrationContext,
     dataset: Dataset.alerts,
-    componentTemplateRefs: [],
+    componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
     componentTemplates: [
       {
         name: 'mappings',
-        mappings: {},
+        mappings: mappingFromFieldMap(experimentalRuleFieldMap, 'strict'),
       },
     ],
   });

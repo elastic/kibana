@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Observable, Subject, Subscription, asyncScheduler, identity } from 'rxjs';
-import { filter, map, delay, throttleTime } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+import { delay, filter, map, shareReplay } from 'rxjs/operators';
 import { defaults } from 'lodash';
-import { UnwrapObservable } from '@kbn/utility-types';
-import { Adapters } from '../../inspector/public';
+import { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
 import { ExecutionContract } from '../common/execution/execution_contract';
@@ -18,7 +18,7 @@ import { ExecutionContract } from '../common/execution/execution_contract';
 import { ExpressionRenderHandler } from './render';
 import { getExpressionsService } from './services';
 
-type Data = any;
+type Data = unknown;
 
 export class ExpressionLoader {
   data$: ReturnType<ExecutionContract['getData']>;
@@ -48,6 +48,7 @@ export class ExpressionLoader {
     // as loading$ could emit straight away in the constructor
     // and we want to notify subscribers about it, but all subscriptions will happen later
     this.loading$ = this.loadingSubject.asObservable().pipe(
+      shareReplay(1),
       filter((_) => _ === true),
       map(() => void 0)
     );
@@ -57,7 +58,11 @@ export class ExpressionLoader {
       onRenderError: params && params.onRenderError,
       renderMode: params?.renderMode,
       syncColors: params?.syncColors,
+      syncTooltips: params?.syncTooltips,
+      syncCursor: params?.syncCursor,
       hasCompatibleActions: params?.hasCompatibleActions,
+      getCompatibleCellValueActions: params?.getCompatibleCellValueActions,
+      executionContext: params?.executionContext,
     });
     this.render$ = this.renderHandler.render$;
     this.update$ = this.renderHandler.update$;
@@ -141,22 +146,21 @@ export class ExpressionLoader {
       searchSessionId: params.searchSessionId,
       debug: params.debug,
       syncColors: params.syncColors,
+      syncCursor: params?.syncCursor,
+      syncTooltips: params.syncTooltips,
       executionContext: params.executionContext,
+      partial: params.partial,
+      throttle: params.throttle,
     });
     this.subscription = this.execution
       .getData()
-      .pipe(
-        delay(0), // delaying until the next tick since we execute the expression in the constructor
-        filter(({ partial }) => params.partial || !partial),
-        params.partial && params.throttle
-          ? throttleTime(params.throttle, asyncScheduler, { leading: true, trailing: true })
-          : identity
-      )
+      // delaying until the next tick since we execute the expression in the constructor
+      .pipe(delay(0))
       .subscribe((value) => this.dataSubject.next(value));
   };
 
   private render(data: Data): void {
-    this.renderHandler.render(data, this.params.uiState);
+    this.renderHandler.render(data as SerializableRecord, this.params.uiState);
   }
 
   private setParams(params?: IExpressionLoaderParams) {
@@ -169,7 +173,7 @@ export class ExpressionLoader {
         {},
         params.searchContext,
         this.params.searchContext || {}
-      ) as any;
+      );
     }
     if (params.uiState && this.params) {
       this.params.uiState = params.uiState;
@@ -181,6 +185,8 @@ export class ExpressionLoader {
       this.params.searchSessionId = params.searchSessionId;
     }
     this.params.syncColors = params.syncColors;
+    this.params.syncCursor = params.syncCursor;
+    this.params.syncTooltips = params.syncTooltips;
     this.params.debug = Boolean(params.debug);
     this.params.partial = Boolean(params.partial);
     this.params.throttle = Number(params.throttle ?? 1000);
@@ -194,10 +200,10 @@ export class ExpressionLoader {
 
 export type IExpressionLoader = (
   element: HTMLElement,
-  expression: string | ExpressionAstExpression,
-  params: IExpressionLoaderParams
-) => ExpressionLoader;
+  expression?: string | ExpressionAstExpression,
+  params?: IExpressionLoaderParams
+) => Promise<ExpressionLoader>;
 
-export const loader: IExpressionLoader = (element, expression, params) => {
+export const loader: IExpressionLoader = async (element, expression?, params?) => {
   return new ExpressionLoader(element, expression, params);
 };

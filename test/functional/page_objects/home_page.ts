@@ -13,6 +13,7 @@ export class HomePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
+  public readonly log = this.ctx.getService('log');
 
   async clickSynopsis(title: string) {
     await this.testSubjects.click(`homeSynopsisLink${title}`);
@@ -26,12 +27,37 @@ export class HomePageObject extends FtrService {
     return await this.testSubjects.exists(`sampleDataSetCard${id}`);
   }
 
+  async openSampleDataAccordion() {
+    const accordionButton = await this.testSubjects.find('showSampleDataButton');
+    let expandedAttribute = await accordionButton.getAttribute('aria-expanded');
+    let expanded = expandedAttribute.toLocaleLowerCase().includes('true');
+    this.log.debug(`Sample data accordion expanded: ${expanded}`);
+
+    if (!expanded) {
+      await this.retry.waitFor('sample data according to be expanded', async () => {
+        this.log.debug(`Opening sample data accordion`);
+        await accordionButton.click();
+        expandedAttribute = await accordionButton.getAttribute('aria-expanded');
+        expanded = expandedAttribute.toLocaleLowerCase().includes('true');
+        return expanded;
+      });
+      this.log.debug(`Sample data accordion expanded: ${expanded}`);
+    }
+  }
+
   async isSampleDataSetInstalled(id: string) {
-    return !(await this.testSubjects.exists(`addSampleDataSet${id}`));
+    const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
+    const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
+    this.log.debug(`Sample data installed: ${deleteButton.length > 0}`);
+    return deleteButton.length > 0;
   }
 
   async isWelcomeInterstitialDisplayed() {
     return await this.testSubjects.isDisplayed('homeWelcomeInterstitial');
+  }
+
+  async isGuidedOnboardingLandingDisplayed() {
+    return await this.testSubjects.isDisplayed('onboarding--landing-page');
   }
 
   async getVisibileSolutions() {
@@ -42,11 +68,23 @@ export class HomePageObject extends FtrService {
     return panelAttributes.map((attributeValue) => attributeValue.split('homSolutionPanel_')[1]);
   }
 
+  async goToSampleDataPage() {
+    await this.testSubjects.click('addSampleData');
+    await this.doesSampleDataSetExist('ecommerce');
+  }
+
   async addSampleDataSet(id: string) {
+    await this.openSampleDataAccordion();
     const isInstalled = await this.isSampleDataSetInstalled(id);
     if (!isInstalled) {
-      await this.retry.waitFor('wait until sample data is installed', async () => {
+      this.log.debug(`Attempting to add sample data: ${id}`);
+      await this.retry.waitFor('sample data to be installed', async () => {
+        // Echoing the adjustments made to 'removeSampleDataSet', as we are seeing flaky test cases here as well
+        // https://github.com/elastic/kibana/issues/52714
+        await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
+        await this.common.sleep(1010);
         await this.testSubjects.click(`addSampleDataSet${id}`);
+        await this.common.sleep(1010);
         await this._waitForSampleDataLoadingAction(id);
         return await this.isSampleDataSetInstalled(id);
       });
@@ -54,14 +92,23 @@ export class HomePageObject extends FtrService {
   }
 
   async removeSampleDataSet(id: string) {
-    // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
-    await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
-    // https://github.com/elastic/kibana/issues/65949
-    // Even after waiting for the "Remove" button to be enabled we still have failures
-    // where it appears the click just didn't work.
-    await this.common.sleep(1010);
-    await this.testSubjects.click(`removeSampleDataSet${id}`);
-    await this._waitForSampleDataLoadingAction(id);
+    await this.openSampleDataAccordion();
+    const isInstalled = await this.isSampleDataSetInstalled(id);
+    if (isInstalled) {
+      this.log.debug(`Attempting to remove sample data: ${id}`);
+      await this.retry.waitFor('sample data to be removed', async () => {
+        // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
+        await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
+        // https://github.com/elastic/kibana/issues/65949
+        // Even after waiting for the "Remove" button to be enabled we still have failures
+        // where it appears the click just didn't work.
+        await this.common.sleep(1010);
+        await this.testSubjects.click(`removeSampleDataSet${id}`);
+        await this.common.sleep(1010);
+        await this._waitForSampleDataLoadingAction(id);
+        return !(await this.isSampleDataSetInstalled(id));
+      });
+    }
   }
 
   // loading action is either uninstall and install
@@ -70,8 +117,14 @@ export class HomePageObject extends FtrService {
     await this.retry.try(async () => {
       // waitForDeletedByCssSelector needs to be inside retry because it will timeout at least once
       // before action is complete
+      this.log.debug(`Waiting for loading spinner to be deleted for sampleDataSetCard${id}`);
       await sampleDataCard.waitForDeletedByCssSelector('.euiLoadingSpinner');
     });
+  }
+
+  async launchSampleDiscover(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Discover');
   }
 
   async launchSampleDashboard(id: string) {
@@ -79,10 +132,40 @@ export class HomePageObject extends FtrService {
     await this.find.clickByLinkText('Dashboard');
   }
 
+  async launchSampleCanvas(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Canvas');
+  }
+
+  async launchSampleMap(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Map');
+  }
+
+  async launchSampleLogs(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Logs');
+  }
+
+  async launchSampleGraph(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Graph');
+  }
+
+  async launchSampleML(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('ML jobs');
+  }
+
   async launchSampleDataSet(id: string) {
     await this.addSampleDataSet(id);
     await this.common.closeToastIfExists();
-    await this.testSubjects.click(`launchSampleDataSet${id}`);
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`launchSampleDataSet${id}`);
+      await this.find.byCssSelector(
+        `.euiPopover-isOpen[data-test-subj="launchSampleDataSet${id}"]`
+      );
+    });
   }
 
   async clickAllKibanaPlugins() {
@@ -100,6 +183,7 @@ export class HomePageObject extends FtrService {
   async clickOnConsole() {
     await this.clickSynopsis('console');
   }
+
   async clickOnLogo() {
     await this.testSubjects.click('logo');
   }

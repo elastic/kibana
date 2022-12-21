@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common';
-import { userActionsMigrations } from './migrations';
+import type { SavedObjectsType } from '@kbn/core/server';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
+import type { UserActionsMigrationsDeps } from './migrations/user_actions';
+import { createUserActionsMigrations } from './migrations/user_actions';
 
-export const caseUserActionSavedObjectType: SavedObjectsType = {
+export const createCaseUserActionSavedObjectType = (
+  migrationDeps: UserActionsMigrationsDeps
+): SavedObjectsType => ({
   name: CASE_USER_ACTION_SAVED_OBJECT,
   hidden: true,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
-      action_field: {
-        type: 'keyword',
-      },
       action: {
         type: 'keyword',
       },
-      action_at: {
+      created_at: {
         type: 'date',
       },
-      action_by: {
+      created_by: {
         properties: {
           email: {
             type: 'keyword',
@@ -35,22 +36,34 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
           full_name: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
-      new_value: {
-        type: 'text',
-      },
-      old_value: {
-        type: 'text',
+      payload: {
+        dynamic: false,
+        properties: {
+          connector: {
+            properties: {
+              // connector.type
+              type: { type: 'keyword' },
+            },
+          },
+        },
       },
       owner: {
         type: 'keyword',
       },
+      // The type of the action
+      type: {
+        type: 'keyword',
+      },
     },
   },
-  migrations: userActionsMigrations,
+  migrations: () => createUserActionsMigrations(migrationDeps),
   management: {
     importableAndExportable: true,
     visibleInManagement: false,
   },
-};
+});

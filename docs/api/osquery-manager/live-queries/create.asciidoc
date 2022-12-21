@@ -1,0 +1,184 @@
+[[osquery-manager-live-queries-api-create]]
+=== Create live query API
+++++
+<titleabbrev>Create live query</titleabbrev>
+++++
+
+experimental[] Create live queries.
+
+
+[[osquery-manager-live-queries-api-create-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/osquery/live_queries`
+
+`POST <kibana host>:<port>/s/<space_id>/api/osquery/live_queries`
+
+
+[[osquery-manager-live-queries-api-create-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. When `space_id` is not provided in the URL, the default space is used.
+
+
+[[osquery-manager-live-queries-api-create-body-params]]
+==== Request body
+
+`agent_ids`:: (Optional, array) A list of agent IDs to run the query on.
+
+`agent_all`:: (Optional, boolean) When `true`, the query runs on all agents.
+
+`agent_platforms`:: (Optional, array) A list of agent platforms to run the query on.
+
+`agent_policy_ids`:: (Optional, array) A list of agent policy IDs to run the query on.
+
+`query`:: (Optional, string) The SQL query you want to run.
+
+`saved_query_id`:: (Optional, string) The ID of a saved query.
+
+`ecs_mapping`:: (Optional, object) Map osquery results columns or static values to Elastic Common Schema (ECS) fields.
+
+`pack_id`:: (Optional, string) The ID of the pack you want to run.
+
+`alert_ids`:: (Optional, array) A list of alert IDs associated to the live query.
+
+`case_ids`:: (Optional, array) A list of case IDs associated to the live query.
+
+`event_ids`:: (Optional, array) A list of event IDs associated to the live query.
+
+`metadata`:: (Optional, object) Custom metadata object associated to the live query.
+
+
+[[osquery-manager-live-queries-api-create-request-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+
+[[osquery-manager-live-queries-api-create-example]]
+==== Examples
+
+Run a live query on all supported agents:
+
+ TIP: `osquery_manager` integration has to be added to the agent policy.
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/osquery/live_queries \
+{
+  "query": "select * from uptime;",
+
+  "ecs_mapping": {
+    "host.uptime": {
+      "field": "total_seconds"
+    }
+  },
+  "agent_all": true,
+}
+
+--------------------------------------------------
+// KIBANA
+
+
+The API returns the live query object:
+
+[source,sh]
+--------------------------------------------------
+{
+  "data": {
+    "action_id": "3c42c847-eb30-4452-80e0-728584042334",
+    "@timestamp": "2022-07-26T09:59:32.220Z",
+    "expiration": "2022-07-26T10:04:32.220Z", # after this time no more agents will run the query
+    "type": "INPUT_ACTION",
+    "input_type": "osquery",
+    "agent_ids": [],
+    "agent_all": true,
+    "agent_platforms": [],
+    "agent_policy_ids": [],
+    "agents": ["16d7caf5-efd2-4212-9b62-73dafc91fa13"], # stores the actual queried agent IDs 
+    "user_id": "elastic",
+    "metadata": {
+      "execution_context": {
+        "name": "osquery",
+        "url": "/app/osquery/live_queries/new"
+      }
+    },
+    "queries": [
+      {
+        "action_id": "609c4c66-ba3d-43fa-afdd-53e244577aa0", # unique ID of the query, use it when querying the live query API to get the single query results
+        "id": "6724a474-cbba-41ef-a1aa-66aebf0879e2", # ID of the query, doesn't have to be unique
+        "query": "select * from uptime;",
+        "ecs_mapping": {
+          "host.uptime": {
+            "field": "total_seconds"
+          }
+        },
+        "agents": [
+          "16d7caf5-efd2-4212-9b62-73dafc91fa13" # stores the actual queried agent IDs 
+        ]
+      }
+    ]
+  }
+}
+--------------------------------------------------
+
+
+Run a pack on Darwin-supported agents: 
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/osquery/live_queries \
+{
+  "pack_id": "bbe5b070-0c51-11ed-b0f8-ad31b008e832"
+  "agent_platforms": ["darwin"]
+}
+
+--------------------------------------------------
+// KIBANA
+
+The API returns the live query object:
+
+[source,sh]
+--------------------------------------------------
+{
+  "data": {
+    "action_id": "3c42c847-eb30-4452-80e0-728584042334",
+    "@timestamp": "2022-07-26T09:59:32.220Z",
+    "expiration": "2022-07-26T10:04:32.220Z", # after this time no more agents will run the query
+    "type": "INPUT_ACTION",
+    "input_type": "osquery",
+    "agent_ids": [],
+    "agent_all": false,
+    "agent_platforms": ["darwin"],
+    "agent_policy_ids": [],
+    "agents": ["16d7caf5-efd2-4212-9b62-73dafc91fa13"], # stores the actual queried agent IDs 
+    "user_id": "elastic",
+    "pack_id": "bbe5b070-0c51-11ed-b0f8-ad31b008e832",
+    "pack_name": "test_pack",
+    "pack_prebuilt": false,
+    "metadata": {
+      "execution_context": {
+        "name": "osquery",
+        "url": "/app/osquery/live_queries/new"
+      }
+    },
+    "queries": [
+      {
+        "action_id": "609c4c66-ba3d-43fa-afdd-53e244577aa0", # unique ID of the query, use it when querying the live query API to get the single query results
+        "id": "uptime", # ID of the query, doesn't have to be unique
+        "query": "select * from uptime;",
+        "ecs_mapping": {
+          "host.uptime": {
+            "field": "total_seconds"
+          }
+        },
+        "agents": [
+          "16d7caf5-efd2-4212-9b62-73dafc91fa13" # stores the actual queried agent IDs 
+        ]
+      }
+    ]
+  }
+}
+--------------------------------------------------

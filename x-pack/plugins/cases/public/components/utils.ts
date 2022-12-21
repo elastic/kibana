@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui';
-import { ConnectorTypes } from '../../common';
-import { FieldConfig, ValidationConfig } from '../common/shared_imports';
-import { StartPlugins } from '../types';
+import type { IconType } from '@elastic/eui';
+import type {
+  FieldConfig,
+  ValidationConfig,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ConnectorTypes } from '../../common/api';
+import type { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
-import { CaseActionConnector } from './types';
+import type { CaseActionConnector } from './types';
 
 export const getConnectorById = (
   id: string,
@@ -22,6 +25,16 @@ const validators: Record<
   (connector: CaseActionConnector) => ReturnType<ValidationConfig['validator']>
 > = {
   [ConnectorTypes.swimlane]: swimlaneConnectorValidator,
+};
+
+export const connectorDeprecationValidator = (
+  connector: CaseActionConnector
+): ReturnType<ValidationConfig['validator']> => {
+  if (connector.isDeprecated) {
+    return {
+      message: 'Deprecated connector',
+    };
+  }
 };
 
 export const getConnectorsFormValidators = ({
@@ -37,6 +50,14 @@ export const getConnectorsFormValidators = ({
       validator: ({ value: connectorId }) => {
         const connector = getConnectorById(connectorId as string, connectors);
         if (connector != null) {
+          return connectorDeprecationValidator(connector);
+        }
+      },
+    },
+    {
+      validator: ({ value: connectorId }) => {
+        const connector = getConnectorById(connectorId as string, connectors);
+        if (connector != null) {
           return validators[connector.actionTypeId]?.(connector);
         }
       },
@@ -45,7 +66,7 @@ export const getConnectorsFormValidators = ({
 });
 
 export const getConnectorIcon = (
-  triggersActionsUi: StartPlugins['triggersActionsUi'],
+  triggersActionsUi: CasesPluginStart['triggersActionsUi'],
   type?: string
 ): IconType => {
   /**
@@ -67,4 +88,12 @@ export const getConnectorIcon = (
   }
 
   return emptyResponse;
+};
+
+export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean => {
+  return connector?.isDeprecated ?? false;
+};
+
+export const removeItemFromSessionStorage = (key: string) => {
+  window.sessionStorage.removeItem(key);
 };

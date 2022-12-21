@@ -10,9 +10,13 @@ import { CustomIntegration } from '../common';
 
 export interface CustomIntegrationsSetup {
   getAppendCustomIntegrations: () => Promise<CustomIntegration[]>;
+  getReplacementCustomIntegrations: () => Promise<CustomIntegration[]>;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CustomIntegrationsStart {}
+
+export interface CustomIntegrationsStart {
+  ContextProvider: React.FC;
+  languageClientsUiComponents: Record<string, React.FC>;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AppPluginStartDependencies {}
+export interface CustomIntegrationsStartDependencies {}

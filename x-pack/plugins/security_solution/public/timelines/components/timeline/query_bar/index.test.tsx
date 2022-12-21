@@ -8,22 +8,19 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../../common/constants';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
+import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { mockIndexPattern, TestProviders } from '../../../../common/mock';
 import { QueryBar } from '../../../../common/components/query_bar';
-import { esFilters, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { FilterStateStore } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { buildGlobalQuery } from '../helpers';
 
-import {
-  QueryBarTimeline,
-  QueryBarTimelineComponentProps,
-  getDataProviderFilter,
-  TIMELINE_FILTER_DROP_AREA,
-} from './index';
+import type { QueryBarTimelineComponentProps } from '.';
+import { QueryBarTimeline, getDataProviderFilter, TIMELINE_FILTER_DROP_AREA } from '.';
 import { waitFor } from '@testing-library/dom';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
@@ -44,7 +41,7 @@ describe('Timeline QueryBar ', () => {
   test('check if we format the appropriate props to QueryBar', () => {
     const filters = [
       {
-        $state: { store: esFilters.FilterStateStore.APP_STATE },
+        $state: { store: FilterStateStore.APP_STATE },
         meta: {
           alias: null,
           controlledBy: TIMELINE_FILTER_DROP_AREA,
@@ -58,7 +55,7 @@ describe('Timeline QueryBar ', () => {
         query: { match: { 'event.category': { query: 'file', type: 'phrase' } } },
       },
       {
-        $state: { store: esFilters.FilterStateStore.APP_STATE },
+        $state: { store: FilterStateStore.APP_STATE },
         meta: {
           alias: null,
           controlledBy: undefined,

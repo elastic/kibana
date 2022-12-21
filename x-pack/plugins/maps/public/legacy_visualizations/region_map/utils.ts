@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Vis } from '../../../../../../src/plugins/visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { RegionMapVisParams } from './types';
 import { title } from './region_map_vis_type';
 
@@ -29,7 +29,6 @@ export function extractLayerDescriptorParams(vis: Vis<RegionMapVisParams>) {
     leftFieldName: vis.params.selectedLayer.isEMS ? vis.params.selectedJoinField.name : undefined,
     colorSchema: vis.params.colorSchema,
     indexPatternId: vis.data.indexPattern?.id,
-    indexPatternTitle: vis.data.indexPattern?.title,
     metricAgg: 'count',
   };
 

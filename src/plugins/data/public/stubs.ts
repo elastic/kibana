@@ -7,4 +7,4 @@
  */
 
 export * from '../common/stubs';
-export { createStubDataView } from './data_views/data_views/data_view.stub';
+export { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';

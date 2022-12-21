@@ -8,19 +8,17 @@
 import React, { memo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
-import { EuiForm } from '@elastic/eui';
+import type { Dispatch } from 'redux';
+import { EuiForm, EuiFlyoutBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HostMetadata } from '../../../../../../../common/endpoint/types';
-import { BackToEndpointDetailsFlyoutSubHeader } from './back_to_endpoint_details_flyout_subheader';
+import type { HostMetadata } from '../../../../../../../common/endpoint/types';
+import type { EndpointIsolatedFormProps } from '../../../../../../common/components/endpoint/host_isolation';
 import {
-  EndpointIsolatedFormProps,
   EndpointIsolateForm,
   EndpointIsolateSuccess,
   EndpointUnisolateForm,
   ActionCompletionReturnButton,
 } from '../../../../../../common/components/endpoint/host_isolation';
-import { FlyoutBodyNoTopPadding } from './flyout_body_no_top_padding';
 import { getEndpointDetailsPath } from '../../../../../common/routing';
 import { useEndpointSelector } from '../../hooks';
 import {
@@ -30,7 +28,7 @@ import {
   uiQueryParams,
   getIsEndpointHostIsolated,
 } from '../../../store/selectors';
-import { AppAction } from '../../../../../../common/store/actions';
+import type { AppAction } from '../../../../../../common/store/actions';
 
 /**
  * Component handles both isolate and un-isolate for a given endpoint
@@ -87,15 +85,13 @@ export const EndpointIsolationFlyoutPanel = memo<{
 
   return (
     <>
-      <BackToEndpointDetailsFlyoutSubHeader endpointId={hostMeta.agent.id} />
-
       {wasSuccessful && (
         <EndpointIsolateSuccess
           hostName={hostMeta.host.name}
           isolateAction={isCurrentlyIsolated ? 'unisolateHost' : 'isolateHost'}
         />
       )}
-      <FlyoutBodyNoTopPadding>
+      <EuiFlyoutBody>
         {wasSuccessful ? (
           <ActionCompletionReturnButton
             onClick={handleCancel}
@@ -120,7 +116,7 @@ export const EndpointIsolationFlyoutPanel = memo<{
             />
           </EuiForm>
         )}
-      </FlyoutBodyNoTopPadding>
+      </EuiFlyoutBody>
     </>
   );
 });

@@ -1,0 +1,497 @@
+{
+  "id": "@kbn/io-ts-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.createLiteralValueFromUndefinedRT",
+        "type": "Function",
+        "tags": [],
+        "label": "createLiteralValueFromUndefinedRT",
+        "description": [],
+        "signature": [
+          "<LiteralValue extends string | number | boolean>(literalValue: LiteralValue) => ",
+          "Type",
+          "<LiteralValue, undefined, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/literal_value_from_undefined_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.createLiteralValueFromUndefinedRT.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "literalValue",
+            "description": [],
+            "signature": [
+              "LiteralValue"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/literal_value_from_undefined_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.deepExactRt",
+        "type": "Function",
+        "tags": [],
+        "label": "deepExactRt",
+        "description": [],
+        "signature": [
+          "(type: T) => T"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/deep_exact_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.deepExactRt.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/deep_exact_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.deepExactRt",
+        "type": "Function",
+        "tags": [],
+        "label": "deepExactRt",
+        "description": [],
+        "signature": [
+          "(type: ",
+          "Type",
+          "<any, any, unknown> | ",
+          "ParseableType",
+          ") => ",
+          "Type",
+          "<any, any, unknown> | ",
+          "StringType",
+          " | ",
+          "BooleanType",
+          " | ",
+          "NumberType",
+          " | ",
+          "RecordC",
+          "<",
+          "Mixed",
+          ", ",
+          "Mixed",
+          "> | ",
+          "ArrayC",
+          "<",
+          "Mixed",
+          "> | ",
+          "ExactC",
+          "<",
+          "TypeC",
+          "<{ [x: string]: ",
+          "Mixed",
+          "; }>> | ",
+          "ExactC",
+          "<",
+          "PartialC",
+          "<{ [x: string]: ",
+          "Mixed",
+          "; }>>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/deep_exact_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.deepExactRt.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "Type",
+              "<any, any, unknown> | ",
+              "ParseableType"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/deep_exact_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.mergeRt",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeRt",
+        "description": [],
+        "signature": [
+          "(a: T1, b: T2) => ",
+          "MergeType",
+          "<T1, T2>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.mergeRt.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "a",
+            "description": [],
+            "signature": [
+              "T1"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.mergeRt.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "b",
+            "description": [],
+            "signature": [
+              "T2"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.mergeRt",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeRt",
+        "description": [],
+        "signature": [
+          "(types: ",
+          "Any",
+          "[]) => { _tag: string; types: ",
+          "Any",
+          "[]; name: string; is: ",
+          "Is",
+          "<any>; validate: ",
+          "Validate",
+          "<unknown, any>; encode: ",
+          "Encode",
+          "<any, any>; _A: any; _O: any; _I: unknown; }"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.mergeRt.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "types",
+            "description": [],
+            "signature": [
+              "Any",
+              "[]"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.strictKeysRt",
+        "type": "Function",
+        "tags": [],
+        "label": "strictKeysRt",
+        "description": [],
+        "signature": [
+          "(type: T) => ",
+          "Type",
+          "<any, any, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/strict_keys_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.strictKeysRt.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/strict_keys_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.toJsonSchema",
+        "type": "Function",
+        "tags": [],
+        "label": "toJsonSchema",
+        "description": [],
+        "signature": [
+          "(type: ",
+          "Mixed",
+          ") => JSONSchema"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/to_json_schema/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.toJsonSchema.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "Mixed"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/to_json_schema/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.NonEmptyStringBrand",
+        "type": "Interface",
+        "tags": [],
+        "label": "NonEmptyStringBrand",
+        "description": [],
+        "path": "packages/kbn-io-ts-utils/src/non_empty_string_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.NonEmptyStringBrand.NonEmptyString",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "NonEmptyString",
+            "description": [],
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "@kbn/io-ts-utils",
+                "scope": "common",
+                "docId": "kibKbnIoTsUtilsPluginApi",
+                "section": "def-common.NonEmptyStringBrand",
+                "text": "NonEmptyStringBrand"
+              },
+              "[\"NonEmptyString\"]"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/non_empty_string_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.IndexPatternType",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexPatternType",
+        "description": [],
+        "signature": [
+          "string & ",
+          "Brand",
+          "<",
+          "IndexPatternBrand",
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/index_pattern_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.indexPatternRt",
+        "type": "Object",
+        "tags": [],
+        "label": "indexPatternRt",
+        "description": [],
+        "signature": [
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          "IndexPatternBrand",
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/index_pattern_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.isoToEpochRt",
+        "type": "Object",
+        "tags": [],
+        "label": "isoToEpochRt",
+        "description": [],
+        "signature": [
+          "Type",
+          "<number, string, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/iso_to_epoch_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.jsonRt",
+        "type": "Object",
+        "tags": [],
+        "label": "jsonRt",
+        "description": [],
+        "signature": [
+          "Type",
+          "<any, string, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/json_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.nonEmptyStringRt",
+        "type": "Object",
+        "tags": [],
+        "label": "nonEmptyStringRt",
+        "description": [],
+        "signature": [
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/non_empty_string_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.toBooleanRt",
+        "type": "Object",
+        "tags": [],
+        "label": "toBooleanRt",
+        "description": [],
+        "signature": [
+          "Type",
+          "<boolean, unknown, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/to_boolean_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.toNumberRt",
+        "type": "Object",
+        "tags": [],
+        "label": "toNumberRt",
+        "description": [],
+        "signature": [
+          "Type",
+          "<number, unknown, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/to_number_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

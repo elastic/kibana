@@ -7,25 +7,14 @@
 
 import { find } from 'lodash/fp';
 import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiTextColor } from '@elastic/eui';
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from 'react';
-import { SimpleSavedObject } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { useHistory, useLocation } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { useWatch, useFormContext } from 'react-hook-form';
+import { QUERIES_DROPDOWN_LABEL, QUERIES_DROPDOWN_SEARCH_FIELD_LABEL } from './constants';
+import { OsquerySchemaLink } from '../components/osquery_schema_link';
 
 import { useSavedQueries } from './use_saved_queries';
-
-export interface SavedQueriesDropdownRef {
-  clearSelection: () => void;
-}
+import type { SavedQuerySO } from '../routes/saved_queries/list';
 
 const TextTruncate = styled.div`
   overflow: hidden;
@@ -38,41 +27,49 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
   }
 `;
 
-interface SavedQueriesDropdownProps {
+export interface SavedQueriesDropdownProps {
   disabled?: boolean;
   onChange: (
     value:
-      | SimpleSavedObject<{
-          id: string;
-          description?: string | undefined;
-          query: string;
-        }>['attributes']
+      | (Pick<SavedQuerySO['attributes'], 'id' | 'description' | 'query' | 'ecs_mapping'> & {
+          savedQueryId: string;
+        })
       | null
   ) => void;
 }
 
-const SavedQueriesDropdownComponent = forwardRef<
-  SavedQueriesDropdownRef,
-  SavedQueriesDropdownProps
->(({ disabled, onChange }, ref) => {
-  const { replace } = useHistory();
-  const location = useLocation();
-  const [selectedOptions, setSelectedOptions] = useState([]);
+interface SelectedOption {
+  label: string;
+  value: Pick<SavedQuerySO['attributes'], 'id' | 'description' | 'query' | 'ecs_mapping'> & {
+    savedQueryId: string;
+  };
+}
+
+const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
+  disabled,
+  onChange,
+}) => {
+  const savedQueryId = useWatch({ name: 'savedQueryId' });
+  const context = useFormContext();
+  const { errors } = context.formState;
+  const queryFieldError = errors?.query?.message;
+  const [selectedOptions, setSelectedOptions] = useState<SelectedOption[]>([]);
 
   const { data } = useSavedQueries({});
 
   const queryOptions = useMemo(
     () =>
-      data?.savedObjects?.map((savedQuery) => ({
+      data?.data?.map((savedQuery) => ({
         label: savedQuery.attributes.id ?? '',
         value: {
-          savedObjectId: savedQuery.id,
+          savedQueryId: savedQuery.id,
           id: savedQuery.attributes.id,
           description: savedQuery.attributes.description,
           query: savedQuery.attributes.query,
+          ecs_mapping: savedQuery.attributes.ecs_mapping,
         },
       })) ?? [],
-    [data?.savedObjects]
+    [data]
   );
 
   const handleSavedQueryChange = useCallback(
@@ -80,20 +77,22 @@ const SavedQueriesDropdownComponent = forwardRef<
       if (!newSelectedOptions.length) {
         onChange(null);
         setSelectedOptions(newSelectedOptions);
+
         return;
       }
 
       const selectedSavedQuery = find(
         ['attributes.id', newSelectedOptions[0].value.id],
-        data?.savedObjects
+        data?.data
       );
 
       if (selectedSavedQuery) {
-        onChange(selectedSavedQuery.attributes);
+        onChange({ ...selectedSavedQuery.attributes, savedQueryId: selectedSavedQuery.id });
       }
+
       setSelectedOptions(newSelectedOptions);
     },
-    [data?.savedObjects, onChange]
+    [data, onChange]
   );
 
   const renderOption = useCallback(
@@ -111,46 +110,35 @@ const SavedQueriesDropdownComponent = forwardRef<
     []
   );
 
-  const clearSelection = useCallback(() => setSelectedOptions([]), []);
-
   useEffect(() => {
-    const savedQueryId = location.state?.form?.savedQueryId;
-
     if (savedQueryId) {
-      const savedQueryOption = find(['value.savedObjectId', savedQueryId], queryOptions);
+      const savedQueryOption = find(['value.savedQueryId', savedQueryId], queryOptions);
 
       if (savedQueryOption) {
-        handleSavedQueryChange([savedQueryOption]);
+        setSelectedOptions([savedQueryOption]);
       }
-
-      replace({ state: null });
     }
-  }, [handleSavedQueryChange, replace, location.state, queryOptions]);
+  }, [savedQueryId, queryOptions]);
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      clearSelection,
-    }),
-    [clearSelection]
-  );
+  useEffect(() => {
+    if (selectedOptions.length && selectedOptions[0].value.savedQueryId !== savedQueryId) {
+      setSelectedOptions([]);
+    }
+  }, [savedQueryId, selectedOptions]);
 
   return (
     <EuiFormRow
-      label={
-        <FormattedMessage
-          id="xpack.osquery.savedQueries.dropdown.searchFieldLabel"
-          defaultMessage="Build from a saved query (optional)"
-        />
-      }
+      isInvalid={!!queryFieldError}
+      error={queryFieldError}
+      label={QUERIES_DROPDOWN_SEARCH_FIELD_LABEL}
+      labelAppend={<OsquerySchemaLink />}
       fullWidth
     >
       <EuiComboBox
+        data-test-subj={'savedQuerySelect'}
         isDisabled={disabled}
         fullWidth
-        placeholder={i18n.translate('xpack.osquery.savedQueries.dropdown.searchFieldPlaceholder', {
-          defaultMessage: 'Search for saved queries',
-        })}
+        placeholder={QUERIES_DROPDOWN_LABEL}
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         singleSelection={{ asPlainText: true }}
         options={queryOptions}
@@ -161,6 +149,8 @@ const SavedQueriesDropdownComponent = forwardRef<
       />
     </EuiFormRow>
   );
-});
+};
+
+SavedQueriesDropdownComponent.displayName = 'SavedQueriesDropdown';
 
 export const SavedQueriesDropdown = React.memo(SavedQueriesDropdownComponent);

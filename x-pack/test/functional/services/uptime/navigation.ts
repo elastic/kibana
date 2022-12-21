@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
@@ -28,13 +29,11 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     });
   };
 
-  const refreshApp = async () => {
-    await testSubjects.click('superDatePickerApplyTimeButton', 10000);
-  };
-
   return {
     async refreshApp() {
-      await refreshApp();
+      await browser.refresh();
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async goToUptime() {
@@ -61,7 +60,9 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     goToMonitor: async (monitorId: string) => {
       // only go to monitor page if not already there
       if (!(await testSubjects.exists('uptimeMonitorPage', { timeout: 0 }))) {
-        await testSubjects.click(`monitor-page-link-${monitorId}`);
+        return retry.try(async () => {
+          await testSubjects.click(`monitor-page-link-${monitorId}`);
+        });
         await testSubjects.existOrFail('uptimeMonitorPage', {
           timeout: 30000,
         });
@@ -81,6 +82,10 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     },
 
     async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {
+      const hasTour = await testSubjects.exists('syntheticsManagementTourDismiss');
+      if (hasTour) {
+        await testSubjects.click('syntheticsManagementTourDismiss');
+      }
       await PageObjects.timePicker.setAbsoluteRange(dateStart, dateEnd);
       await this.goToMonitor(monitorId);
     },

@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "server/**/*",
@@ -13,7 +12,7 @@
     "public/**/*",
     "common/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../actions/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
@@ -22,6 +21,7 @@
     { "path": "../task_manager/tsconfig.json" },
     { "path": "../event_log/tsconfig.json" },
     { "path": "../encrypted_saved_objects/tsconfig.json" },
+    { "path": "../monitoring_collection/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" }

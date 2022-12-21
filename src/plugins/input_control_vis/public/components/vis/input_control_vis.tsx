@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CONTROL_TYPES } from '../../editor_utils';
 import { ListControl } from '../../control/list_control_factory';
 import { RangeControl } from '../../control/range_control_factory';
@@ -25,6 +25,10 @@ function isRangeControl(control: RangeControl | ListControl): control is RangeCo
   return control.type === CONTROL_TYPES.RANGE;
 }
 
+interface UnknownControl {
+  type: string;
+}
+
 interface InputControlVisProps {
   stageFilter: (controlIndex: number, newValue: any) => void;
   submitFilters: () => void;
@@ -35,6 +39,7 @@ interface InputControlVisProps {
   hasChanges: () => boolean;
   hasValues: () => boolean;
   refreshControl: (controlIndex: number, query: any) => Promise<void>;
+  isDarkMode?: boolean;
 }
 
 export class InputControlVis extends Component<InputControlVisProps> {
@@ -79,6 +84,7 @@ export class InputControlVis extends Component<InputControlVisProps> {
             fetchOptions={(query) => {
               this.props.refreshControl(index, query);
             }}
+            isDarkMode={this.props.isDarkMode}
           />
         );
       } else if (isRangeControl(control)) {
@@ -90,7 +96,7 @@ export class InputControlVis extends Component<InputControlVisProps> {
           />
         );
       } else {
-        throw new Error(`Unhandled control type ${control!.type}`);
+        throw new Error(`Unhandled control type ${(control as UnknownControl)!.type}`);
       }
 
       return (

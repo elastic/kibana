@@ -7,14 +7,11 @@
 
 import * as Rx from 'rxjs';
 
-import {
-  elasticsearchServiceMock,
-  pluginInitializerContextConfigMock,
-} from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type { ILicense, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-import { createCollectorFetchContextMock } from '../../../../../src/plugins/usage_collection/server/mocks';
-import type { KibanaFeature } from '../../../features/server';
-import type { ILicense, LicensingPluginSetup } from '../../../licensing/server';
 import type { PluginsSetup } from '../plugin';
 import type { UsageStats } from '../usage_stats';
 import { usageStatsClientMock } from '../usage_stats/usage_stats_client.mock';
@@ -43,6 +40,8 @@ const MOCK_USAGE_STATS: UsageStats = {
   'apiCalls.disableLegacyUrlAliases.total': 17,
 };
 
+const kibanaIndex = '.kibana-tests';
+
 function setup({
   license = { isAvailable: true },
   features = [{ id: 'feature1' } as KibanaFeature, { id: 'feature2' } as KibanaFeature],
@@ -53,6 +52,7 @@ function setup({
     constructor({ fetch }: any) {
       this.fetch = fetch;
     }
+
     // to make typescript happy
     public fakeFetchUsage() {
       return this.fetch;
@@ -82,9 +82,18 @@ function setup({
   };
 }
 
-const defaultEsClientSearchMock = jest.fn().mockResolvedValue({
-  body: {
+const getMockFetchContext = (mockedEsClient: any) => {
+  return {
+    ...createCollectorFetchContextMock(),
+    esClient: mockedEsClient,
+  };
+};
+
+const getMockedEsClient = () => {
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  esClient.search.mockResponse({
     hits: {
+      // @ts-expect-error incomplete definition
       total: {
         value: 2,
       },
@@ -99,19 +108,7 @@ const defaultEsClientSearchMock = jest.fn().mockResolvedValue({
         ],
       },
     },
-  },
-});
-
-const getMockFetchContext = (mockedEsClient: any) => {
-  return {
-    ...createCollectorFetchContextMock(),
-    esClient: mockedEsClient,
-  };
-};
-
-const getMockedEsClient = (esClientMock: jest.Mock) => {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.search = esClientMock;
+  });
   return esClient;
 };
 
@@ -121,7 +118,7 @@ describe('error handling', () => {
       license: { isAvailable: true, type: 'basic' },
     });
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
@@ -145,15 +142,15 @@ describe('with a basic license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    const esClient = getMockedEsClient(defaultEsClientSearchMock);
+    const esClient = getMockedEsClient();
     usageData = await collector.fetch(getMockFetchContext(esClient));
 
-    expect(defaultEsClientSearchMock).toHaveBeenCalledWith({
+    expect(esClient.search).toHaveBeenCalledWith({
       body: {
         aggs: {
           disabledFeatures: {
@@ -164,7 +161,7 @@ describe('with a basic license', () => {
         size: 0,
         track_total_hits: true,
       },
-      index: '.kibana-tests',
+      index: kibanaIndex,
     });
   });
 
@@ -204,12 +201,12 @@ describe('with no license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    const esClient = getMockedEsClient(defaultEsClientSearchMock);
+    const esClient = getMockedEsClient();
 
     usageData = await collector.fetch(getMockFetchContext(esClient));
   });
@@ -245,12 +242,12 @@ describe('with platinum license', () => {
 
   beforeAll(async () => {
     const collector = getSpacesUsageCollector(usageCollection as any, {
-      kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
+      kibanaIndex,
       features,
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    const esClient = getMockedEsClient(defaultEsClientSearchMock);
+    const esClient = getMockedEsClient();
 
     usageData = await collector.fetch(getMockFetchContext(esClient));
   });

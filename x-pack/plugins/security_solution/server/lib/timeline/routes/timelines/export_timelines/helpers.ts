@@ -6,18 +6,17 @@
  */
 
 import { omit } from 'lodash/fp';
+import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import {
+import type {
   ExportedTimelines,
   ExportedNotes,
   ExportTimelineNotFoundError,
 } from '../../../../../../common/types/timeline';
-import { NoteSavedObject } from '../../../../../../common/types/timeline/note';
-import { PinnedEventSavedObject } from '../../../../../../common/types/timeline/pinned_event';
+import type { NoteSavedObject } from '../../../../../../common/types/timeline/note';
+import type { PinnedEventSavedObject } from '../../../../../../common/types/timeline/pinned_event';
 
-import { transformDataToNdjson } from '../../../../../utils/read_stream/create_stream_from_ndjson';
-
-import { FrameworkRequest } from '../../../../framework';
+import type { FrameworkRequest } from '../../../../framework';
 import * as noteLib from '../../../saved_object/notes';
 import * as pinnedEventLib from '../../../saved_object/pinned_events';
 

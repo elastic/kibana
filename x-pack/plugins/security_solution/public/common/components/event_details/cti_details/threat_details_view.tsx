@@ -16,7 +16,7 @@ import React from 'react';
 import { groupBy } from 'lodash';
 
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
-import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
+import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import * as i18n from './translations';
 import { EnrichmentIcon } from './enrichment_icon';
 import { EnrichmentAccordionGroup } from './enrichment_accordion_group';
@@ -30,8 +30,8 @@ const EnrichmentSectionHeader: React.FC<{ type?: ENRICHMENT_TYPES }> = ({ type }
           <EuiTitle size="xxxs">
             <h5>
               {type === ENRICHMENT_TYPES.IndicatorMatchRule
-                ? i18n.INDICATOR_TOOLTIP_TITLE
-                : i18n.INVESTIGATION_TOOLTIP_TITLE}
+                ? i18n.INDICATOR_ENRICHMENT_TITLE
+                : i18n.INVESTIGATION_ENRICHMENT_TITLE}
             </h5>
           </EuiTitle>
         </EuiFlexItem>

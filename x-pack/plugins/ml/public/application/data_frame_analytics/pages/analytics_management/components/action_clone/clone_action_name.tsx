@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiLink, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IIndexPattern } from 'src/plugins/data/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
@@ -401,12 +402,16 @@ export const useNavigateToWizardWithClonedJob = () => {
   const {
     services: {
       notifications: { toasts },
-      savedObjects,
+      data: { dataViews },
+      http: { basePath },
+      application: { capabilities },
+      theme,
     },
   } = useMlKibana();
+  const theme$ = theme.theme$;
   const navigateToPath = useNavigateToPath();
-
-  const savedObjectsClient = savedObjects.client;
+  const canCreateDataView =
+    capabilities.savedObjectsManagement.edit === true || capabilities.indexPatterns.save === true;
 
   return async (item: Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>) => {
     const sourceIndex = Array.isArray(item.config.source.index)
@@ -415,40 +420,55 @@ export const useNavigateToWizardWithClonedJob = () => {
     let sourceIndexId;
 
     try {
-      const response = await savedObjectsClient.find<IIndexPattern>({
-        type: 'index-pattern',
-        perPage: 10,
-        search: `"${sourceIndex}"`,
-        searchFields: ['title'],
-        fields: ['title'],
-      });
-
-      const ip = response.savedObjects.find(
-        (obj) => obj.attributes.title.toLowerCase() === sourceIndex.toLowerCase()
-      );
-      if (ip !== undefined) {
-        sourceIndexId = ip.id;
+      const dv = (await dataViews.find(sourceIndex)).find(({ title }) => title === sourceIndex);
+      if (dv !== undefined) {
+        sourceIndexId = dv.id;
       } else {
-        toasts.addDanger(
-          i18n.translate('xpack.ml.dataframe.analyticsList.noSourceIndexPatternForClone', {
-            defaultMessage:
-              'Unable to clone the analytics job. No index pattern exists for index {indexPattern}.',
-            values: { indexPattern: sourceIndex },
-          })
-        );
+        toasts.addDanger({
+          title: toMountPoint(
+            wrapWithTheme(
+              <>
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsList.noSourceDataViewForClone"
+                  defaultMessage="Unable to clone the analytics job. No data view exists for index {sourceIndex}."
+                  values={{ sourceIndex }}
+                />
+                {canCreateDataView ? (
+                  <EuiText size="xs" color="text">
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.cloneAction.dataViewPromptLink"
+                      defaultMessage="{linkToDataViewManagement}"
+                      values={{
+                        linkToDataViewManagement: (
+                          <EuiLink
+                            href={`${basePath.get()}/app/management/kibana/dataViews/create`}
+                            target="_blank"
+                          >
+                            <FormattedMessage
+                              id="xpack.ml.dataframe.analytics.cloneAction.dataViewPromptLinkText"
+                              defaultMessage="Create a data view for {sourceIndex}"
+                              values={{ sourceIndex }}
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiText>
+                ) : null}
+              </>,
+              theme$
+            )
+          ),
+        });
       }
     } catch (e) {
       const error = extractErrorMessage(e);
 
       toasts.addDanger(
-        i18n.translate(
-          'xpack.ml.dataframe.analyticsList.fetchSourceIndexPatternForCloneErrorMessage',
-          {
-            defaultMessage:
-              'An error occurred checking if index pattern {indexPattern} exists: {error}',
-            values: { indexPattern: sourceIndex, error },
-          }
-        )
+        i18n.translate('xpack.ml.dataframe.analyticsList.fetchSourceDataViewForCloneErrorMessage', {
+          defaultMessage: 'An error occurred checking if data view {dataView} exists: {error}',
+          values: { dataView: sourceIndex, error },
+        })
       );
     }
 

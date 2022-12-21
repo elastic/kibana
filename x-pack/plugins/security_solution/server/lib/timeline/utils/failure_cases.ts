@@ -6,11 +6,8 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import {
-  TimelineSavedObject,
-  TimelineStatus,
-  TimelineTypeLiteral,
-} from '../../../../common/types/timeline';
+import type { TimelineSavedObject, TimelineTypeLiteral } from '../../../../common/types/timeline';
+import { TimelineStatus } from '../../../../common/types/timeline';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'You cannot create new timelines with PATCH. Use POST instead.';
@@ -227,7 +224,7 @@ export const checkIsUpdateViaImportFailureCases = (
       return { body: UPDAT_TIMELINE_VIA_IMPORT_NOT_ALLOWED_ERROR_MESSAGE, statusCode: 405 };
     } else {
       return {
-        body: getImportExistingTimelineError(existTimeline!.savedObjectId),
+        body: getImportExistingTimelineError(existTimeline.savedObjectId),
         statusCode: 405,
       };
     }

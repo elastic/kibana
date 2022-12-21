@@ -9,11 +9,10 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart } from 'kibana/public';
-import { RedirectAppLinks, useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { FeatureCatalogueEntry } from '../../../../../../src/plugins/home/public';
-// @ts-expect-error untyped component
+import { FormattedMessage } from '@kbn/i18n-react';
+import { CoreStart } from '@kbn/core/public';
+import { RedirectAppLinks, useKibana } from '@kbn/kibana-react-plugin/public';
+import { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
 import { Synopsis } from '../synopsis';
 import { METRIC_TYPE, trackUiMetric } from '../../lib/ui_metric';
 
@@ -95,7 +94,7 @@ AddData.propTypes = {
       path: PropTypes.string.isRequired,
       showOnHomePage: PropTypes.bool.isRequired,
       category: PropTypes.string.isRequired,
-      order: PropTypes.number,
-    })
-  ),
+      order: PropTypes.number as PropTypes.Validator<number | undefined>,
+    }).isRequired
+  ).isRequired,
 };

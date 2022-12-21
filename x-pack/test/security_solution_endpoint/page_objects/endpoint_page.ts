@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function EndpointPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -25,10 +25,28 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
+    async ensureIsOnEndpointListPage() {
+      await testSubjects.existOrFail('endpointPage');
+    },
+
     async waitForTableToHaveData(dataTestSubj: string, timeout = 2000) {
       await retry.waitForWithTimeout('table to have data', timeout, async () => {
         const tableData = await pageObjects.endpointPageUtils.tableData(dataTestSubj);
         if (tableData[1][0] === 'No items found') {
+          return false;
+        }
+        return true;
+      });
+    },
+
+    async waitForTableToHaveNumberOfEntries(
+      dataTestSubj: string,
+      numberOfEntries = 1,
+      timeout = 2000
+    ) {
+      await retry.waitForWithTimeout('table to have data', timeout, async () => {
+        const tableData = await pageObjects.endpointPageUtils.tableData(dataTestSubj);
+        if (tableData[1][0] === 'No items found' || tableData.length < numberOfEntries + 1) {
           return false;
         }
         return true;
@@ -81,6 +99,79 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
             .replace(/&nbsp;/g, '')
             .trim();
         });
+    },
+
+    /**
+     * Returns an Endpoint table row (`<tr>`)
+     *
+     * @param [endpointAgentId] if defined, then it will look for the row matching this endpoint id
+     */
+    async getEndpointTableRow(endpointAgentId?: string) {
+      await this.ensureIsOnEndpointListPage();
+      const table = await testSubjects.find('endpointListTable');
+
+      let endpointRow: WebElementWrapper;
+
+      if (endpointAgentId) {
+        endpointRow = await testSubjects.findService.descendantDisplayedByCssSelector(
+          `[data-endpoint-id="${endpointAgentId}"]`,
+          table
+        );
+      } else {
+        endpointRow = (
+          await testSubjects.findService.allDescendantDisplayedByTagName('tr', table)
+        )[0];
+      }
+
+      return endpointRow;
+    },
+
+    /**
+     * Displays the Endpoint details for an endpoint
+     * @param [endpointAgentId] if defined, then the details for this specific endpoint will be opened.
+     */
+    async showEndpointDetails(endpointAgentId?: string) {
+      const endpointRow = await this.getEndpointTableRow(endpointAgentId);
+
+      await (await testSubjects.findDescendant('hostnameCellLink', endpointRow)).click();
+      await testSubjects.existOrFail('endpointDetailsFlyout');
+    },
+
+    /**
+     * Display the Responder page overlay for one of the Endpoints on the Endpoint list.
+     *
+     * @param [endpointAgentId] If defined, will be used as the endpoint for which Responder
+     * will be opened. If not, then the first endpoint on the list will be used.
+     */
+    async showResponderFromEndpointList(endpointAgentId?: string) {
+      const endpointRow = await this.getEndpointTableRow(endpointAgentId);
+
+      // Click the row menu
+      await (await testSubjects.findDescendant('endpointTableRowActions', endpointRow)).click();
+      await testSubjects.existOrFail('tableRowActionsMenuPanel');
+      const rowMenuPanel = await testSubjects.findDescendant(
+        'console',
+        await testSubjects.find('tableRowActionsMenuPanel')
+      );
+
+      await rowMenuPanel.click();
+      await testSubjects.existOrFail('consolePageOverlay');
+    },
+
+    /**
+     * Shows the details panel for the given a given endpoint and displays Responder
+     * from the details action menu
+     *
+     * @param [endpointAgentId]
+     */
+    async showResponderFromEndpointDetails(endpointAgentId?: string) {
+      await this.showEndpointDetails(endpointAgentId);
+
+      await testSubjects.click('endpointDetailsActionsButton');
+      await testSubjects.existOrFail('endpointDetailsActionsPopover');
+
+      await testSubjects.click('console');
+      await testSubjects.existOrFail('consolePageOverlay');
     },
   };
 }

@@ -8,7 +8,8 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../../..';
+import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 
 jest.mock('../grammar');
 
@@ -17,11 +18,12 @@ import * as exists from './exists';
 
 describe('kuery functions', () => {
   describe('exists', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 
@@ -38,7 +40,7 @@ describe('kuery functions', () => {
           arguments: [arg],
         } = exists.buildNodeParams('response');
 
-        expect(arg).toHaveProperty('type', 'literal');
+        expect(arg).toHaveProperty('type', KQL_NODE_TYPE_LITERAL);
         expect(arg).toHaveProperty('value', 'response');
       });
     });

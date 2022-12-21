@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
+import { useUrlState } from '../../../../../util/url_state';
 
 import {
   DEFAULT_REFRESH_INTERVAL_MS,
@@ -20,6 +21,7 @@ export const useRefreshInterval = (
   setBlockRefresh: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
   const { services } = useMlKibana();
+  const [globalState] = useUrlState('_g');
   const { timefilter } = services.data.query.timefilter;
 
   const { refresh } = useRefreshAnalyticsList();
@@ -35,8 +37,10 @@ export const useRefreshInterval = (
     initAutoRefresh();
 
     function initAutoRefresh() {
-      const { value } = timefilter.getRefreshInterval();
-      if (value === 0) {
+      const interval = globalState?.refreshInterval ?? timefilter.getRefreshInterval();
+      const { pause, value } = interval;
+
+      if (pause === true || value === 0) {
         // the auto refresher starts in an off state
         // so switch it on and set the interval to 30s
         timefilter.setRefreshInterval({
@@ -81,5 +85,6 @@ export const useRefreshInterval = (
       refreshIntervalSubscription.unsubscribe();
       clearRefreshInterval();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // [] as comparator makes sure this only runs once
 };

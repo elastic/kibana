@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PolicyConfig, ProtectionModes } from '../types';
+import type { PolicyConfig } from '../types';
+import { ProtectionModes } from '../types';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
@@ -24,6 +25,7 @@ export const policyFactory = (): PolicyConfig => {
       },
       malware: {
         mode: ProtectionModes.prevent,
+        blocklist: true,
       },
       ransomware: {
         mode: ProtectionModes.prevent,
@@ -61,6 +63,11 @@ export const policyFactory = (): PolicyConfig => {
       antivirus_registration: {
         enabled: false,
       },
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: true,
+        },
+      },
     },
     mac: {
       events: {
@@ -70,8 +77,13 @@ export const policyFactory = (): PolicyConfig => {
       },
       malware: {
         mode: ProtectionModes.prevent,
+        blocklist: true,
       },
       behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      memory_protection: {
         mode: ProtectionModes.prevent,
         supported: true,
       },
@@ -81,6 +93,10 @@ export const policyFactory = (): PolicyConfig => {
           enabled: true,
         },
         behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
           message: '',
           enabled: true,
         },
@@ -94,11 +110,18 @@ export const policyFactory = (): PolicyConfig => {
         process: true,
         file: true,
         network: true,
+        session_data: false,
+        tty_io: false,
       },
       malware: {
         mode: ProtectionModes.prevent,
+        blocklist: true,
       },
       behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      memory_protection: {
         mode: ProtectionModes.prevent,
         supported: true,
       },
@@ -108,6 +131,10 @@ export const policyFactory = (): PolicyConfig => {
           enabled: true,
         },
         behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
           message: '',
           enabled: true,
         },
@@ -125,10 +152,33 @@ export const policyFactory = (): PolicyConfig => {
 export const policyFactoryWithoutPaidFeatures = (
   policy: PolicyConfig = policyFactory()
 ): PolicyConfig => {
+  const rollbackConfig = {
+    rollback: {
+      self_healing: {
+        enabled: false,
+      },
+    },
+  };
+
   return {
     ...policy,
     windows: {
       ...policy.windows,
+      advanced:
+        policy.windows.advanced === undefined
+          ? undefined
+          : {
+              ...policy.windows.advanced,
+              alerts:
+                policy.windows.advanced.alerts === undefined
+                  ? {
+                      ...rollbackConfig,
+                    }
+                  : {
+                      ...policy.windows.advanced.alerts,
+                      ...rollbackConfig,
+                    },
+            },
       ransomware: {
         mode: ProtectionModes.off,
         supported: false,
@@ -141,11 +191,16 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         supported: false,
       },
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: false,
+        },
+      },
       popup: {
         ...policy.windows.popup,
         malware: {
           message: '',
-          enabled: true,
+          enabled: true, // disabling/configuring malware popup is a paid feature
         },
         ransomware: {
           message: '',
@@ -167,11 +222,19 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         supported: false,
       },
+      memory_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       popup: {
         ...policy.mac.popup,
         malware: {
           message: '',
-          enabled: true,
+          enabled: true, // disabling/configuring malware popup is a paid feature
+        },
+        memory_protection: {
+          message: '',
+          enabled: false,
         },
         behavior_protection: {
           message: '',
@@ -185,11 +248,19 @@ export const policyFactoryWithoutPaidFeatures = (
         mode: ProtectionModes.off,
         supported: false,
       },
+      memory_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       popup: {
         ...policy.linux.popup,
         malware: {
           message: '',
-          enabled: true,
+          enabled: true, // disabling/configuring malware popup is a paid feature
+        },
+        memory_protection: {
+          message: '',
+          enabled: false,
         },
         behavior_protection: {
           message: '',
@@ -201,7 +272,7 @@ export const policyFactoryWithoutPaidFeatures = (
 };
 
 /**
- * Strips paid features from an existing or new `PolicyConfig` for gold and below license
+ * Enables support for paid features for an existing or new `PolicyConfig` for platinum and above license
  */
 export const policyFactoryWithSupportedFeatures = (
   policy: PolicyConfig = policyFactory()
@@ -229,11 +300,19 @@ export const policyFactoryWithSupportedFeatures = (
         ...policy.windows.behavior_protection,
         supported: true,
       },
+      memory_protection: {
+        ...policy.mac.memory_protection,
+        supported: true,
+      },
     },
     linux: {
       ...policy.linux,
       behavior_protection: {
         ...policy.windows.behavior_protection,
+        supported: true,
+      },
+      memory_protection: {
+        ...policy.linux.memory_protection,
         supported: true,
       },
     },

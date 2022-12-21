@@ -27,13 +27,14 @@ export const INSTRUCTION_VARIANT = {
   LINUX: 'linux',
   PHP: 'php',
   FLEET: 'fleet',
+  OPEN_TELEMETRY: 'openTelemetry',
 };
 
 const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.ESC]: 'Elastic Cloud',
   [INSTRUCTION_VARIANT.OSX]: 'macOS',
-  [INSTRUCTION_VARIANT.DEB]: 'DEB',
-  [INSTRUCTION_VARIANT.RPM]: 'RPM',
+  [INSTRUCTION_VARIANT.DEB]: 'Linux DEB',
+  [INSTRUCTION_VARIANT.RPM]: 'Linux RPM',
   [INSTRUCTION_VARIANT.DOCKER]: 'Docker',
   [INSTRUCTION_VARIANT.WINDOWS]: 'Windows',
   [INSTRUCTION_VARIANT.NODE]: 'Node.js',
@@ -50,6 +51,7 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.FLEET]: i18n.translate('home.tutorial.instruction_variant.fleet', {
     defaultMessage: 'Elastic APM in Fleet',
   }),
+  [INSTRUCTION_VARIANT.OPEN_TELEMETRY]: 'OpenTelemetry',
 };
 
 /**

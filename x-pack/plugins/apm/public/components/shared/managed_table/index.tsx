@@ -10,8 +10,8 @@ import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { fromQuery, toQuery } from '../Links/url_helpers';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
+import { fromQuery, toQuery } from '../links/url_helpers';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T> {
@@ -29,22 +29,21 @@ export interface ITableColumn<T> {
 interface Props<T> {
   items: T[];
   columns: Array<ITableColumn<T>>;
+  initialPageSize: number;
   initialPageIndex?: number;
-  initialPageSize?: number;
   initialSortField?: ITableColumn<T>['field'];
   initialSortDirection?: 'asc' | 'desc';
-  hidePerPageOptions?: boolean;
+  showPerPageOptions?: boolean;
   noItemsMessage?: React.ReactNode;
   sortItems?: boolean;
-  sortFn?: (
-    items: T[],
-    sortField: string,
-    sortDirection: 'asc' | 'desc'
-  ) => T[];
+  sortFn?: SortFunction<T>;
   pagination?: boolean;
   isLoading?: boolean;
   error?: boolean;
+  tableLayout?: 'auto' | 'fixed';
 }
+
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 function defaultSortFn<T extends any>(
   items: T[],
@@ -54,22 +53,29 @@ function defaultSortFn<T extends any>(
   return orderBy(items, sortField, sortDirection);
 }
 
+export type SortFunction<T> = (
+  items: T[],
+  sortField: string,
+  sortDirection: 'asc' | 'desc'
+) => T[];
+
 function UnoptimizedManagedTable<T>(props: Props<T>) {
   const history = useHistory();
   const {
     items,
     columns,
     initialPageIndex = 0,
-    initialPageSize = 10,
+    initialPageSize,
     initialSortField = props.columns[0]?.field || '',
     initialSortDirection = 'asc',
-    hidePerPageOptions = true,
+    showPerPageOptions = true,
     noItemsMessage,
     sortItems = true,
     sortFn = defaultSortFn,
     pagination = true,
     isLoading = false,
     error = false,
+    tableLayout,
   } = props;
 
   const {
@@ -79,7 +85,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
       sortField = initialSortField,
       sortDirection = initialSortDirection,
     },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const renderedItems = useMemo(() => {
     const sortedItems = sortItems
@@ -122,12 +128,13 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
       return;
     }
     return {
-      hidePerPageOptions,
+      showPerPageOptions,
       totalItemCount: items.length,
       pageIndex: page,
       pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
-  }, [hidePerPageOptions, items, page, pageSize, pagination]);
+  }, [showPerPageOptions, items, page, pageSize, pagination]);
 
   const showNoItemsMessage = useMemo(() => {
     return isLoading
@@ -138,8 +145,10 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
   }, [isLoading, noItemsMessage]);
 
   return (
+    // @ts-expect-error TS thinks pagination should be non-nullable, but it's not
     <EuiBasicTable
       loading={isLoading}
+      tableLayout={tableLayout}
       error={
         error
           ? i18n.translate('xpack.apm.managedTable.errorMessage', {

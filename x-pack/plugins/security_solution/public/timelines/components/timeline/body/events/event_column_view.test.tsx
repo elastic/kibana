@@ -5,64 +5,85 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
 import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
-import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
-import * as i18n from '../translations';
 
 import { EventColumnView } from './event_column_view';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { TimelineTabs, TimelineType, TimelineId } from '../../../../../../common/types/timeline';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { defaultControlColumn } from '../control_columns';
+import { getDefaultControlColumn } from '../control_columns';
 import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeline_control_columns';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import {
+  NOTES_DISABLE_TOOLTIP,
+  NOTES_TOOLTIP,
+} from '../../../../../common/components/header_actions/translations';
+import { getActionsColumnWidth } from '../../../../../common/components/header_actions';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-jest.mock('../../../../../common/hooks/use_selector');
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      timelines: { ...mockTimelines },
-      application: {
-        capabilities: {
-          siem: { crud_alerts: true, read_alerts: true },
-        },
-      },
-    },
-  }),
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-  }),
-  useGetUserCasesPermissions: jest.fn(),
+jest.mock('../../../../../common/hooks/use_selector', () => ({
+  useShallowEqualSelector: jest.fn(),
+  useDeepEqualSelector: jest.fn(),
 }));
+jest.mock('../../../../../common/components/user_privileges', () => {
+  return {
+    useUserPrivileges: () => ({
+      listPrivileges: { loading: false, error: undefined, result: undefined },
+      detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+      endpointPrivileges: {},
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    }),
+  };
+});
 
-jest.mock(
-  '../../../../../../../timelines/public/components/actions/timeline/cases/add_to_case_action',
-  () => {
-    return {
-      AddToCasePopover: () => {
-        return <div data-test-subj="add-to-case-action">{'Add to case'}</div>;
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
+
+  return {
+    useKibana: () => ({
+      services: {
+        timelines: { ...mockTimelines },
+        data: {
+          search: jest.fn(),
+          query: jest.fn(),
+        },
+        application: {
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        cases: mockCasesContract(),
       },
-    };
-  }
-);
+    }),
+    useNavigateTo: () => ({
+      navigateTo: jest.fn(),
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+      remove: jest.fn(),
+    }),
+    useGetUserCasesPermissions: originalModule.useGetUserCasesPermissions,
+  };
+});
 
 describe('EventColumnView', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
   (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
+  const ACTION_BUTTON_COUNT = 4;
+  const leadingControlColumns = getDefaultControlColumn(ACTION_BUTTON_COUNT);
 
   const props = {
     ariaRowindex: 2,
     id: 'event-id',
-    actionsColumnWidth: DEFAULT_ACTIONS_COLUMN_WIDTH,
+    actionsColumnWidth: getActionsColumnWidth(ACTION_BUTTON_COUNT),
     associateNote: jest.fn(),
     columnHeaders: [],
     columnRenderers: [],
@@ -92,7 +113,7 @@ describe('EventColumnView', () => {
     toggleShowNotes: jest.fn(),
     updateNote: jest.fn(),
     isEventPinned: false,
-    leadingControlColumns: [defaultControlColumn],
+    leadingControlColumns,
     trailingControlColumns: [],
     setEventsLoading: jest.fn(),
     setEventsDeleted: jest.fn(),
@@ -119,7 +140,7 @@ describe('EventColumnView', () => {
   test('it renders correct tooltip for NotesButton - timeline', () => {
     const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(i18n.NOTES_TOOLTIP);
+    expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(NOTES_TOOLTIP);
   });
 
   test('it renders correct tooltip for NotesButton - timeline template', () => {
@@ -128,7 +149,7 @@ describe('EventColumnView', () => {
     const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
 
     expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(
-      i18n.NOTES_DISABLE_TOOLTIP
+      NOTES_DISABLE_TOOLTIP
     );
     (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
   });
@@ -145,8 +166,7 @@ describe('EventColumnView', () => {
     const wrapper = mount(
       <EventColumnView
         {...props}
-        timelineId="timeline-test"
-        leadingControlColumns={[testLeadingControlColumn, defaultControlColumn]}
+        leadingControlColumns={[testLeadingControlColumn, ...leadingControlColumns]}
       />,
       {
         wrappingComponent: TestProviders,

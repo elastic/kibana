@@ -6,8 +6,8 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiTab, EuiTabs, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
-import { EndpointIndexUIQueryParams } from '../../../types';
+import { EuiTab, EuiTabs, EuiFlyoutBody } from '@elastic/eui';
+import type { EndpointIndexUIQueryParams } from '../../../types';
 
 import { EndpointDetailsFlyoutHeader } from './flyout_header';
 import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
@@ -18,11 +18,7 @@ export enum EndpointDetailsTabsTypes {
   activityLog = 'activity_log',
 }
 
-export type EndpointDetailsTabsId =
-  | EndpointDetailsTabsTypes.overview
-  | EndpointDetailsTabsTypes.activityLog;
-
-interface EndpointDetailsTabs {
+export interface EndpointDetailsTabs {
   id: string;
   name: string;
   content: JSX.Element;
@@ -39,7 +35,7 @@ const EndpointDetailsTab = memo(
         onClick={onClick}
         isSelected={isSelected}
         key={tab.id}
-        data-test-subj={tab.id}
+        data-test-subj={`endpoint-details-flyout-tab-${tab.id}`}
       >
         {tab.name}
       </EuiTab>
@@ -62,16 +58,21 @@ export const EndpointDetailsFlyoutTabs = memo(
     const selectedTab = useMemo(() => tabs.find((tab) => tab.id === show), [tabs, show]);
 
     const renderTabs = tabs.map((tab) => (
-      <EndpointDetailsTab tab={tab} isSelected={tab.id === selectedTab?.id} />
+      <EndpointDetailsTab key={tab.id} tab={tab} isSelected={tab.id === selectedTab?.id} />
     ));
 
     return (
       <>
         <EndpointDetailsFlyoutHeader hostname={hostname} hasBorder>
-          <EuiSpacer size="s" />
-          <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs}</EuiTabs>
+          <EuiTabs bottomBorder={false} style={{ marginBottom: '-25px' }}>
+            {renderTabs}
+          </EuiTabs>
         </EndpointDetailsFlyoutHeader>
-        <EuiFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
+        <EuiFlyoutBody
+          data-test-subj={`endpoint${
+            selectedTab?.id === 'details' ? 'Details' : 'ActivityLog'
+          }FlyoutBody`}
+        >
           {selectedTab?.content}
         </EuiFlyoutBody>
       </>

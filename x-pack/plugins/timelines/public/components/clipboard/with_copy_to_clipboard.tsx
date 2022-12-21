@@ -8,13 +8,10 @@
 import { EuiToolTip } from '@elastic/eui';
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { COPY_TO_CLIPBOARD } from '../hover_actions/actions/translations';
 import { TooltipWithKeyboardShortcut } from '../tooltip_with_keyboard_shortcut';
-import { Clipboard } from '.';
 
-export const COPY_TO_CLIPBOARD = i18n.translate('xpack.timelines.copyToClipboardTooltip', {
-  defaultMessage: 'Copy to Clipboard',
-});
+import { Clipboard } from './clipboard';
 
 /**
  * Renders `children` with an adjacent icon that when clicked, copies `text` to
@@ -26,7 +23,7 @@ export const WithCopyToClipboard = React.memo<{
   showTooltip?: boolean;
   text: string;
   titleSummary?: string;
-}>(({ isHoverAction, keyboardShortcut = '', showTooltip = false, text, titleSummary }) => {
+}>(({ isHoverAction, keyboardShortcut = '', showTooltip = true, text, titleSummary }) => {
   return showTooltip ? (
     <EuiToolTip
       content={

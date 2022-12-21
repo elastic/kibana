@@ -27,7 +27,7 @@ import {
 import { ESTermSourceDescriptor, VectorStyleDescriptor } from '../../../../common/descriptor_types';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { IVectorSource } from '../../sources/vector_source';
-import { VectorLayer } from './vector_layer';
+import { AbstractVectorLayer } from './vector_layer';
 
 class MockSource {
   cloneDescriptor() {
@@ -64,7 +64,7 @@ describe('cloneDescriptor', () => {
     };
 
     test('Should update data driven styling properties using join fields', async () => {
-      const layerDescriptor = VectorLayer.createDescriptor({
+      const layerDescriptor = AbstractVectorLayer.createDescriptor({
         style: styleDescriptor,
         joins: [
           {
@@ -72,7 +72,6 @@ describe('cloneDescriptor', () => {
             right: {
               id: '557d0f15',
               indexPatternId: 'myIndexPattern',
-              indexPatternTitle: 'logs-*',
               metrics: [{ type: AGG_TYPE.COUNT }],
               term: 'myTermField',
               type: SOURCE_TYPES.ES_TERM_SOURCE,
@@ -83,11 +82,14 @@ describe('cloneDescriptor', () => {
           },
         ],
       });
-      const layer = new VectorLayer({
+      const layer = new AbstractVectorLayer({
         layerDescriptor,
         source: new MockSource() as unknown as IVectorSource,
+        customIcons: [],
       });
-      const clonedDescriptor = await layer.cloneDescriptor();
+      const clones = await layer.cloneDescriptor();
+      expect(clones.length).toBe(1);
+      const clonedDescriptor = clones[0];
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
       // Should update style field belonging to join
       // @ts-expect-error
@@ -105,7 +107,7 @@ describe('cloneDescriptor', () => {
     });
 
     test('Should update data driven styling properties using join fields when metrics are not provided', async () => {
-      const layerDescriptor = VectorLayer.createDescriptor({
+      const layerDescriptor = AbstractVectorLayer.createDescriptor({
         style: styleDescriptor,
         joins: [
           {
@@ -113,18 +115,20 @@ describe('cloneDescriptor', () => {
             right: {
               id: '557d0f15',
               indexPatternId: 'myIndexPattern',
-              indexPatternTitle: 'logs-*',
               term: 'myTermField',
               type: 'joinSource',
             } as unknown as ESTermSourceDescriptor,
           },
         ],
       });
-      const layer = new VectorLayer({
+      const layer = new AbstractVectorLayer({
         layerDescriptor,
         source: new MockSource() as unknown as IVectorSource,
+        customIcons: [],
       });
-      const clonedDescriptor = await layer.cloneDescriptor();
+      const clones = await layer.cloneDescriptor();
+      expect(clones.length).toBe(1);
+      const clonedDescriptor = clones[0];
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
       // Should update style field belonging to join
       // @ts-expect-error

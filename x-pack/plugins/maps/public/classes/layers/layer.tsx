@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { Query } from 'src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
@@ -20,15 +20,16 @@ import {
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
-  SOURCE_BOUNDS_DATA_REQUEST_ID,
   SOURCE_DATA_REQUEST_ID,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   Attribution,
+  CustomIcon,
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
+  TileMetaFeature,
   Timeslice,
   StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
@@ -39,7 +40,9 @@ import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
 
 export interface ILayer {
-  getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
+  getBounds(
+    getDataRequestContext: (layerId: string) => DataRequestContext
+  ): Promise<MapExtent | null>;
   getDataRequest(id: string): DataRequest | undefined;
   getDisplayName(source?: ISource): Promise<string>;
   getId(): string;
@@ -51,6 +54,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
+  getLocale(): string | null;
   hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
@@ -63,13 +67,22 @@ export interface ILayer {
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
-  isLoadingBounds(): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
+
+  /*
+   * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
+   */
   getMbLayerIds(): string[];
+
+  /*
+   * ILayer.getMbSourceId returns mapbox source id assoicated with this layer.
+   */
+  getMbSourceId(): string;
+
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
@@ -77,29 +90,37 @@ export interface ILayer {
   isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getType(): LAYER_TYPE | undefined;
+  getType(): LAYER_TYPE;
   isVisible(): boolean;
-  cloneDescriptor(): Promise<LayerDescriptor>;
+  cloneDescriptor(): Promise<LayerDescriptor[]>;
   renderStyleEditor(
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ): ReactElement<any> | null;
   getInFlightRequestTokens(): symbol[];
   getPrevRequestToken(dataId: string): symbol | undefined;
-  destroy: () => void;
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
+  supportsLabelLocales: () => boolean;
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
+
+  /*
+   * ILayer.getLayerIcon returns layer icon and associated state.
+   * isTocIcon is set to true when icon is generated for Table of Contents.
+   * Icons in Table of Contents may contain additional layer status, for example, indicate when a layer has incomplete results.
+   */
+  getLayerIcon(isTocIcon: boolean): LayerIcon;
   getDescriptor(): LayerDescriptor;
   getGeoFieldNames(): string[];
   getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null>;
   isBasemap(order: number): boolean;
+  getParent(): string | undefined;
 }
 
-export type CustomIconAndTooltipContent = {
+export type LayerIcon = {
   icon: ReactElement;
   tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
@@ -132,12 +153,6 @@ export class AbstractLayer implements ILayer {
     };
   }
 
-  destroy() {
-    if (this._source) {
-      this._source.destroy();
-    }
-  }
-
   constructor({ layerDescriptor, source }: ILayerArguments) {
     this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
@@ -160,14 +175,14 @@ export class AbstractLayer implements ILayer {
     return this._descriptor;
   }
 
-  async cloneDescriptor(): Promise<LayerDescriptor> {
+  async cloneDescriptor(): Promise<LayerDescriptor[]> {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox
     clonedDescriptor.id = uuid();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
-    return clonedDescriptor;
+    return [clonedDescriptor];
   }
 
   makeMbLayerId(layerNameSuffix: string): string {
@@ -238,7 +253,11 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.label ? this._descriptor.label : '';
   }
 
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
+  getLocale(): string | null {
+    return null;
+  }
+
+  getLayerIcon(isTocIcon: boolean): LayerIcon {
     return {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
     };
@@ -284,7 +303,7 @@ export class AbstractLayer implements ILayer {
     return this._source.getMinZoom();
   }
 
-  _getMbSourceId() {
+  getMbSourceId() {
     return this.getId();
   }
 
@@ -325,9 +344,8 @@ export class AbstractLayer implements ILayer {
     return await source.getImmutableProperties();
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
-    const source = this.getSourceForEditing();
-    return source.renderSourceSettingsEditor({ onChange, currentLayerType: this._descriptor.type });
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
+    return this.getSourceForEditing().renderSourceSettingsEditor(sourceEditorArgs);
   }
 
   getPrevRequestToken(dataId: string): symbol | undefined {
@@ -364,11 +382,6 @@ export class AbstractLayer implements ILayer {
         ? !this._descriptor.__areTilesLoaded
         : false;
     return areTilesLoading || this._dataRequests.some((dataRequest) => dataRequest.isLoading());
-  }
-
-  isLoadingBounds() {
-    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
-    return !!boundsDataRequest && boundsDataRequest.isLoading();
   }
 
   hasErrors(): boolean {
@@ -410,18 +423,21 @@ export class AbstractLayer implements ILayer {
     return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
 
-  async getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null> {
+  async getBounds(
+    getDataRequestContext: (layerId: string) => DataRequestContext
+  ): Promise<MapExtent | null> {
     return null;
   }
 
   renderStyleEditor(
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ): ReactElement<any> | null {
     const style = this.getStyleForEditing();
     if (!style) {
       return null;
     }
-    return style.renderEditor(onStyleDescriptorChange);
+    return style.renderEditor(onStyleDescriptorChange, onCustomIconsChange);
   }
 
   getIndexPatternIds(): string[] {
@@ -437,7 +453,7 @@ export class AbstractLayer implements ILayer {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
-  getType(): LAYER_TYPE | undefined {
+  getType(): LAYER_TYPE {
     return this._descriptor.type as LAYER_TYPE;
   }
 
@@ -446,6 +462,10 @@ export class AbstractLayer implements ILayer {
   }
 
   supportsLabelsOnTop(): boolean {
+    return false;
+  }
+
+  supportsLabelLocales(): boolean {
     return false;
   }
 
@@ -462,7 +482,15 @@ export class AbstractLayer implements ILayer {
     return null;
   }
 
-  isBasemap(): boolean {
+  isBasemap(order: number): boolean {
     return false;
+  }
+
+  getParent(): string | undefined {
+    return this._descriptor.parent;
+  }
+
+  _getMetaFromTiles(): TileMetaFeature[] {
+    return this._descriptor.__metaFromTiles || [];
   }
 }

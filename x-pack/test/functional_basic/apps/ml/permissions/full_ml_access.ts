@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import path from 'path';
-
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
 import { USER } from '../../../../functional/services/ml/security_common';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const browser = getService('browser');
 
   const testUsers = [
     { user: USER.ML_POWERUSER, discoverAvailable: true },
@@ -26,18 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
         const ecIndexPattern = 'ft_module_sample_ecommerce';
         const ecExpectedTotalCount = '287';
 
-        const uploadFilePath = path.join(
-          __dirname,
-          '..',
-          '..',
-          '..',
-          '..',
-          'functional',
-          'apps',
-          'ml',
-          'data_visualizer',
-          'files_to_import',
-          'artificial_server_log'
+        const uploadFilePath = require.resolve(
+          '../../../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
         );
         const expectedUploadFileTitle = 'artificial_server_log';
 
@@ -53,6 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         after(async () => {
+          // NOTE: Logout needs to happen before anything else to avoid flaky behavior
           await ml.securityUI.logout();
         });
 
@@ -67,6 +57,10 @@ export default function ({ getService }: FtrProviderContext) {
         it('should display tabs in the ML app correctly', async () => {
           await ml.testExecution.logTestStep('should load the ML app');
           await ml.navigation.navigateToMl();
+
+          await ml.testExecution.logTestStep('should redirect to the "Data Visualizer" page');
+          const browserURl = await browser.getCurrentUrl();
+          expect(browserURl).to.contain('/ml/datavisualizer');
 
           await ml.testExecution.logTestStep('should display the disabled "Overview" tab');
           await ml.navigation.assertOverviewTabEnabled(false);

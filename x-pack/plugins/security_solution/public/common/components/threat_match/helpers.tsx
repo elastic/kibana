@@ -8,24 +8,24 @@
 import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { addIdToItem } from '@kbn/securitysolution-utils';
-import { ThreatMap, threatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import { threatMap } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { IndexPatternFieldBase } from '@kbn/es-query';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
-import { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
-import { ValidationFunc } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { ERROR_CODE } from '../../../../../../../src/plugins/es_ui_shared/static/forms/helpers/field_validators/types';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
+import type { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
 
 /**
  * Formats the entry into one that is easily usable for the UI.
  *
- * @param patterns IndexPattern containing available fields on rule index
+ * @param patterns DataViewBase containing available fields on rule index
  * @param item item entry
  * @param itemIndex entry index
  */
 export const getFormattedEntry = (
-  indexPattern: IndexPattern,
-  threatIndexPatterns: IndexPattern,
+  indexPattern: DataViewBase,
+  threatIndexPatterns: DataViewBase,
   item: Entry,
   itemIndex: number,
   uuidGen: () => string = uuid.v4
@@ -51,12 +51,12 @@ export const getFormattedEntry = (
 /**
  * Formats the entries to be easily usable for the UI
  *
- * @param patterns IndexPattern containing available fields on rule index
+ * @param patterns DataViewBase containing available fields on rule index
  * @param entries item entries
  */
 export const getFormattedEntries = (
-  indexPattern: IndexPattern,
-  threatIndexPatterns: IndexPattern,
+  indexPattern: DataViewBase,
+  threatIndexPatterns: DataViewBase,
   entries: Entry[]
 ): FormattedEntry[] => {
   return entries.reduce<FormattedEntry[]>((acc, item, index) => {
@@ -91,7 +91,7 @@ export const getUpdatedEntriesOnDelete = (
  */
 export const getEntryOnFieldChange = (
   item: FormattedEntry,
-  newField: IndexPatternFieldBase
+  newField: DataViewFieldBase
 ): { updatedEntry: Entry; index: number } => {
   const { entryIndex } = item;
   return {
@@ -114,7 +114,7 @@ export const getEntryOnFieldChange = (
  */
 export const getEntryOnThreatFieldChange = (
   item: FormattedEntry,
-  newField: IndexPatternFieldBase
+  newField: DataViewFieldBase
 ): { updatedEntry: Entry; index: number } => {
   const { entryIndex } = item;
   return {

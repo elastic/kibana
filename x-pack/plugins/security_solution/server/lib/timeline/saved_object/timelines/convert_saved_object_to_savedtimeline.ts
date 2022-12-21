@@ -10,10 +10,10 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import type { TimelineSavedObject } from '../../../../../common/types/timeline';
 import {
   SavedTimelineRuntimeType,
   TimelineTypeLiteralWithNullRt,
-  TimelineSavedObject,
   TimelineType,
   TimelineStatus,
 } from '../../../../../common/types/timeline';
@@ -51,8 +51,8 @@ const getTimelineTypeAndStatus = (
   };
 };
 
-export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
-  const timeline = pipe(
+export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject =>
+  pipe(
     TimelineSavedObjectWithDraftRuntime.decode(savedObject),
     map((savedTimeline) => {
       const attributes = {
@@ -78,6 +78,3 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
       throw new Error(failure(errors).join('\n'));
     }, identity)
   );
-
-  return timeline;
-};

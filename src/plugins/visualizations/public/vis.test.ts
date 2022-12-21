@@ -21,11 +21,11 @@ jest.mock('./services', () => {
     destroy() {}
   }
 
-  // eslint-disable-next-line
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { BaseVisType } = require('./vis_types/base_vis_type');
-  // eslint-disable-next-line
+  // eslint-disable-next-line @typescript-eslint/no-var-requires,@kbn/imports/uniform_imports
   const { SearchSource } = require('../../data/common/search/search_source');
-  // eslint-disable-next-line
+  // eslint-disable-next-line @typescript-eslint/no-var-requires,@kbn/imports/uniform_imports
   const stubIndexPattern = require('../../data/common/stubs');
   const visType = new BaseVisType({
     name: 'pie',
@@ -38,13 +38,13 @@ jest.mock('./services', () => {
     getTypes: () => ({ get: () => visType }),
     getAggs: () => ({
       createAggConfigs: (indexPattern: any, cfg: any) => ({
-        aggs: cfg.map((aggConfig: any) => ({ ...aggConfig, toJSON: () => aggConfig })),
+        aggs: cfg.map((aggConfig: any) => ({ ...aggConfig, serialize: () => aggConfig })),
       }),
     }),
     getSearch: () => ({
       searchSource: {
         create: () => {
-          return new SearchSource({ index: stubIndexPattern });
+          return new SearchSource({ index: stubIndexPattern.stubDataView });
         },
       },
     }),

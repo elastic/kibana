@@ -13,3 +13,31 @@ export const STACK_BY_LABEL = i18n.translate(
     defaultMessage: 'Stack by',
   }
 );
+
+export const GROUP_BY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.histogram.stackByOptions.groupByLabel',
+  {
+    defaultMessage: 'Group by',
+  }
+);
+
+export const STACK_BY_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.histogram.stackByOptions.stackByPlaceholder',
+  {
+    defaultMessage: 'Select a field to stack by',
+  }
+);
+
+export const STACK_BY_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.histogram.stackByOptions.stackByAriaLabel',
+  {
+    defaultMessage: 'Stack the alerts histogram by a field value',
+  }
+);
+
+export const GROUP_BY_TOP_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.histogram.stackByOptions.groupByTopLabel',
+  {
+    defaultMessage: 'Group by top',
+  }
+);

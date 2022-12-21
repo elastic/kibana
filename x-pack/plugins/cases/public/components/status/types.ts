@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { CaseStatuses, StatusAllType } from '../../../common';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { StatusAllType } from '../../../common/ui/types';
+import type { CaseStatuses } from '../../../common/api';
 
 export type AllCaseStatus = Record<StatusAllType, { color: string; label: string }>;
 
@@ -17,9 +18,6 @@ export type Statuses = Record<
     label: string;
     icon: EuiIconType;
     actions: {
-      bulk: {
-        title: string;
-      };
       single: {
         title: string;
         description?: string;

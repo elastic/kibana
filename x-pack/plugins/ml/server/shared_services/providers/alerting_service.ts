@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
-import { GetGuards } from '../shared_services';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { GetGuards } from '../shared_services';
 import { alertingServiceProvider, MlAlertingService } from '../../lib/alerts/alerting_service';
 import { datafeedsProvider } from '../../models/job_service/datafeeds';
 
@@ -16,27 +16,34 @@ export function getAlertingServiceProvider(getGuards: GetGuards) {
       savedObjectsClient: SavedObjectsClientContract,
       request: KibanaRequest
     ) {
+      const guards = getGuards(request, savedObjectsClient);
       return {
         preview: async (...args: Parameters<MlAlertingService['preview']>) => {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(({ mlClient, scopedClient }) =>
-              alertingServiceProvider(mlClient, datafeedsProvider(scopedClient, mlClient)).preview(
-                ...args
-              )
+            .ok(({ mlClient, scopedClient, getFieldsFormatRegistry, getDataViewsService }) =>
+              alertingServiceProvider(
+                mlClient,
+                datafeedsProvider(scopedClient, mlClient),
+                getFieldsFormatRegistry,
+                getDataViewsService
+              ).preview(...args)
             );
         },
         execute: async (
           ...args: Parameters<MlAlertingService['execute']>
         ): ReturnType<MlAlertingService['execute']> => {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(({ mlClient, scopedClient }) =>
-              alertingServiceProvider(mlClient, datafeedsProvider(scopedClient, mlClient)).execute(
-                ...args
-              )
+            .ok(({ mlClient, scopedClient, getFieldsFormatRegistry, getDataViewsService }) =>
+              alertingServiceProvider(
+                mlClient,
+                datafeedsProvider(scopedClient, mlClient),
+                getFieldsFormatRegistry,
+                getDataViewsService
+              ).execute(...args)
             );
         },
       };

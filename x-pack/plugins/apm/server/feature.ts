@@ -6,14 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SubFeaturePrivilegeGroupType } from '../../features/common';
-import { LicenseType } from '../../licensing/common/types';
-import { AlertType, APM_SERVER_FEATURE_ID } from '../common/alert_types';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   LicensingPluginSetup,
   LicensingApiRequestHandlerContext,
-} from '../../licensing/server';
+} from '@kbn/licensing-plugin/server';
+import {
+  ApmRuleType,
+  APM_SERVER_FEATURE_ID,
+} from '../common/rules/apm_rule_types';
 
 export const APM_FEATURE = {
   id: APM_SERVER_FEATURE_ID,
@@ -27,7 +29,7 @@ export const APM_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: Object.values(AlertType),
+  alerting: Object.values(ApmRuleType),
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
@@ -39,8 +41,11 @@ export const APM_FEATURE = {
         read: [],
       },
       alerting: {
+        alert: {
+          all: Object.values(ApmRuleType),
+        },
         rule: {
-          all: Object.values(AlertType),
+          all: Object.values(ApmRuleType),
         },
       },
       management: {
@@ -57,8 +62,11 @@ export const APM_FEATURE = {
         read: [],
       },
       alerting: {
+        alert: {
+          read: Object.values(ApmRuleType),
+        },
         rule: {
-          read: Object.values(AlertType),
+          read: Object.values(ApmRuleType),
         },
       },
       management: {
@@ -67,60 +75,6 @@ export const APM_FEATURE = {
       ui: ['show', 'alerting:show'],
     },
   },
-  subFeatures: [
-    {
-      name: i18n.translate('xpack.apm.featureRegistry.manageAlertsName', {
-        defaultMessage: 'Alerts',
-      }),
-      privilegeGroups: [
-        {
-          groupType: 'mutually_exclusive' as SubFeaturePrivilegeGroupType,
-          privileges: [
-            {
-              id: 'alerts_all',
-              name: i18n.translate(
-                'xpack.apm.featureRegistry.subfeature.alertsAllName',
-                {
-                  defaultMessage: 'All',
-                }
-              ),
-              includeIn: 'all' as 'all',
-              alerting: {
-                alert: {
-                  all: Object.values(AlertType),
-                },
-              },
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: [],
-            },
-            {
-              id: 'alerts_read',
-              name: i18n.translate(
-                'xpack.apm.featureRegistry.subfeature.alertsReadName',
-                {
-                  defaultMessage: 'Read',
-                }
-              ),
-              includeIn: 'read' as 'read',
-              alerting: {
-                alert: {
-                  read: Object.values(AlertType),
-                },
-              },
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: [],
-            },
-          ],
-        },
-      ],
-    },
-  ],
 };
 
 interface Feature {

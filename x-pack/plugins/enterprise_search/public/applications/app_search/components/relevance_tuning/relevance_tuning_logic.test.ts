@@ -12,11 +12,13 @@ import {
 } from '../../../__mocks__/kea_logic';
 import { mockEngineValues, mockEngineActions } from '../../__mocks__';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from './types';
 
-import { RelevanceTuningLogic } from './';
+import { RelevanceTuningLogic } from '.';
 
 describe('RelevanceTuningLogic', () => {
   const { mount } = new LogicMounter(RelevanceTuningLogic);
@@ -33,6 +35,7 @@ describe('RelevanceTuningLogic', () => {
     },
     search_fields: {},
     precision: 10,
+    precision_enabled: true,
   };
   const schema = {};
   const schemaConflicts = {};
@@ -62,6 +65,7 @@ describe('RelevanceTuningLogic', () => {
       boosts: {},
       search_fields: {},
       precision: 2,
+      precision_enabled: false,
     },
     unsavedChanges: false,
     filterInputValue: '',
@@ -73,6 +77,16 @@ describe('RelevanceTuningLogic', () => {
     schemaFieldsWithConflicts: [],
     filteredSchemaFields: [],
     filteredSchemaFieldsWithConflicts: [],
+    isPrecisionTuningEnabled: false,
+  };
+
+  const DEFAULT_VALUES_WITH_PRECISION_TUNING = {
+    ...DEFAULT_VALUES,
+    searchSettings: {
+      ...DEFAULT_VALUES.searchSettings,
+      precision_enabled: true,
+    },
+    isPrecisionTuningEnabled: true,
   };
 
   beforeEach(() => {
@@ -96,7 +110,7 @@ describe('RelevanceTuningLogic', () => {
         RelevanceTuningLogic.actions.onInitializeRelevanceTuning(relevanceTuningProps);
 
         expect(RelevanceTuningLogic.values).toEqual({
-          ...DEFAULT_VALUES,
+          ...DEFAULT_VALUES_WITH_PRECISION_TUNING,
           searchSettings,
           schema,
           dataLoading: false,
@@ -125,7 +139,7 @@ describe('RelevanceTuningLogic', () => {
         RelevanceTuningLogic.actions.setSearchSettings(searchSettings);
 
         expect(RelevanceTuningLogic.values).toEqual({
-          ...DEFAULT_VALUES,
+          ...DEFAULT_VALUES_WITH_PRECISION_TUNING,
           searchSettings,
           unsavedChanges: true,
         });
@@ -221,17 +235,17 @@ describe('RelevanceTuningLogic', () => {
         RelevanceTuningLogic.actions.setSearchSettingsResponse(searchSettings);
 
         expect(RelevanceTuningLogic.values).toEqual({
-          ...DEFAULT_VALUES,
+          ...DEFAULT_VALUES_WITH_PRECISION_TUNING,
           searchSettings,
           unsavedChanges: false,
         });
       });
     });
 
-    describe('updatePrecision', () => {
+    describe('setPrecision', () => {
       it('should set precision inside search settings and set unsavedChanges to true', () => {
         mount();
-        RelevanceTuningLogic.actions.updatePrecision(9);
+        RelevanceTuningLogic.actions.setPrecision(9);
 
         expect(RelevanceTuningLogic.values).toEqual({
           ...DEFAULT_VALUES,
@@ -319,20 +333,15 @@ describe('RelevanceTuningLogic', () => {
         });
       });
 
-      it('handles errors', async () => {
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-        http.get.mockReturnValueOnce(Promise.reject('error'));
-
         RelevanceTuningLogic.actions.initializeRelevanceTuning();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
     describe('getSearchResults', () => {
       beforeAll(() => {
-        jest.useFakeTimers();
+        jest.useFakeTimers({ legacyFakeTimers: true });
       });
 
       afterAll(() => {
@@ -356,9 +365,11 @@ describe('RelevanceTuningLogic', () => {
               weight: 1,
             },
           },
+          precision: 7,
+          precision_enabled: true,
         };
 
-        const searchSettingsWithoutNewBoostProp = {
+        const { ['precision_enabled']: precisionEnabled, ...searchSettingsWithoutNewBoostProp } = {
           ...searchSettingsWithNewBoostProp,
           boosts: {
             foo: [
@@ -369,6 +380,7 @@ describe('RelevanceTuningLogic', () => {
               },
             ],
           },
+          precision: 7,
         };
 
         mount({
@@ -404,6 +416,38 @@ describe('RelevanceTuningLogic', () => {
           searchSettings: {
             searchField: {},
             boosts: {},
+            precision: 7,
+            precision_enabled: true,
+          },
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
+        http.post.mockReturnValueOnce(
+          Promise.resolve({
+            results: searchResults,
+          })
+        );
+
+        RelevanceTuningLogic.actions.getSearchResults();
+
+        jest.runAllTimers();
+        await nextTick();
+
+        expect(http.post).toHaveBeenCalledWith('/internal/app_search/engines/test-engine/search', {
+          body: JSON.stringify({ precision: 7 }),
+          query: {
+            query: 'foo',
+          },
+        });
+      });
+
+      it("won't send precision on the API call if it is not enabled", async () => {
+        mount({
+          query: 'foo',
+          searchSettings: {
+            searchField: {},
+            boosts: {},
+            precision: 7,
+            precision_enabled: false,
           },
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
@@ -505,6 +549,8 @@ describe('RelevanceTuningLogic', () => {
               },
             ],
           },
+          precision: 5,
+          precision_enabled: true,
         };
 
         const searchSettingsWithoutNewBoostProp = {
@@ -517,6 +563,7 @@ describe('RelevanceTuningLogic', () => {
               },
             ],
           },
+          precision: 5,
         };
         mount({
           searchSettings: searchSettingsWithNewBoostProp,
@@ -933,7 +980,7 @@ describe('RelevanceTuningLogic', () => {
       it('will parse the provided provided value and set the center to that parsed value', () => {
         mount({
           schema: {
-            foo: 'number',
+            foo: { type: 'number', capabilities: { boost: true } },
           },
           searchSettings: searchSettingsWithBoost({
             factor: 1,
@@ -1007,15 +1054,24 @@ describe('RelevanceTuningLogic', () => {
       });
     });
 
-    describe('updateSearchValue', () => {
-      it('should update the query then update search results', () => {
+    describe('setSearchQuery', () => {
+      it('should update search results', () => {
         mount();
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchQuery');
         jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
-        RelevanceTuningLogic.actions.updateSearchValue('foo');
+        RelevanceTuningLogic.actions.setSearchQuery('foo');
 
-        expect(RelevanceTuningLogic.actions.setSearchQuery).toHaveBeenCalledWith('foo');
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+      });
+    });
+
+    describe('setPrecision', () => {
+      it('should update search results', () => {
+        mount();
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.setPrecision(9);
+
         expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
     });
@@ -1028,7 +1084,7 @@ describe('RelevanceTuningLogic', () => {
         // consider a tunable field.
         mount({
           schema: {
-            id: 'foo',
+            id: { type: 'text', capabilities: {} },
           },
         });
         expect(RelevanceTuningLogic.values.engineHasSchemaFields).toEqual(false);
@@ -1037,8 +1093,8 @@ describe('RelevanceTuningLogic', () => {
       it('should return true otherwise', () => {
         mount({
           schema: {
-            id: 'foo',
-            bar: 'bar',
+            id: { type: 'text', capabilities: {} },
+            text_field: { type: 'text', capabilities: { fulltext: true } },
           },
         });
         expect(RelevanceTuningLogic.values.engineHasSchemaFields).toEqual(true);
@@ -1049,11 +1105,39 @@ describe('RelevanceTuningLogic', () => {
       it('should return the list of field names from the schema', () => {
         mount({
           schema: {
-            id: 'foo',
-            bar: 'bar',
+            fulltext_only_field: {
+              type: 'text',
+              capabilities: {
+                fulltext: true,
+              },
+            },
+            boost_only_field: {
+              type: 'text',
+              capabilities: {
+                boost: true,
+              },
+            },
+            fulltext_and_boost_field: {
+              type: 'text',
+              capabilities: {
+                fulltext: true,
+                boost: true,
+              },
+            },
+            ignored_field: {
+              type: 'text',
+              capabilities: {
+                fulltext: false,
+                boost: false,
+              },
+            },
           },
         });
-        expect(RelevanceTuningLogic.values.schemaFields).toEqual(['id', 'bar']);
+        expect(RelevanceTuningLogic.values.schemaFields).toEqual([
+          'fulltext_only_field',
+          'boost_only_field',
+          'fulltext_and_boost_field',
+        ]);
       });
     });
 
@@ -1074,15 +1158,40 @@ describe('RelevanceTuningLogic', () => {
     describe('filteredSchemaFields', () => {
       it('should return a list of schema field names that contain the text from filterInputValue ', () => {
         mount({
-          filterInputValue: 'ba',
+          filterInputValue: 'fu',
           schema: {
-            id: 'string',
-            foo: 'string',
-            bar: 'string',
-            baz: 'string',
+            fulltext_only_field: {
+              type: 'text',
+              capabilities: {
+                fulltext: true,
+              },
+            },
+            boost_only_field: {
+              type: 'text',
+              capabilities: {
+                boost: true,
+              },
+            },
+            fulltext_and_boost_field: {
+              type: 'text',
+              capabilities: {
+                fulltext: true,
+                boost: true,
+              },
+            },
+            ignored_field: {
+              type: 'text',
+              capabilities: {
+                fulltext: false,
+                boost: false,
+              },
+            },
           },
         });
-        expect(RelevanceTuningLogic.values.filteredSchemaFields).toEqual(['bar', 'baz']);
+        expect(RelevanceTuningLogic.values.filteredSchemaFields).toEqual([
+          'fulltext_only_field',
+          'fulltext_and_boost_field',
+        ]);
       });
     });
 
@@ -1090,12 +1199,7 @@ describe('RelevanceTuningLogic', () => {
       it('should return a list of schema field names that contain the text from filterInputValue, and if that field has a schema conflict', () => {
         mount({
           filterInputValue: 'ba',
-          schema: {
-            id: 'string',
-            foo: 'string',
-            bar: 'string',
-            baz: 'string',
-          },
+          schema: {},
           schemaConflicts: {
             bar: {
               text: ['source_engine_1'],
@@ -1104,6 +1208,18 @@ describe('RelevanceTuningLogic', () => {
           },
         });
         expect(RelevanceTuningLogic.values.filteredSchemaFieldsWithConflicts).toEqual(['bar']);
+      });
+    });
+
+    describe('isPrecisionTuningEnabled', () => {
+      it('should be set based on precision enabled', () => {
+        mount({
+          searchSettings: {
+            precision_enabled: true,
+          },
+        });
+
+        expect(RelevanceTuningLogic.values.isPrecisionTuningEnabled).toEqual(true);
       });
     });
   });

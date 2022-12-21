@@ -7,19 +7,25 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiCard } from '@elastic/eui';
+import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
 
-import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from './release_badge';
+import { InlineReleaseBadge, WithGuidedOnboardingTour } from '../../../components';
+import { useStartServices, useIsGuidedOnboardingActive } from '../../../hooks';
+import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
 
 export type PackageCardProps = IntegrationCardItem;
 
-// adding the `href` causes EuiCard to use a `a` instead of a `button`
-// `a` tags use `euiLinkColor` which results in blueish Badge text
+// Min-height is roughly 3 lines of content.
+// This keeps the cards from looking overly unbalanced because of content differences.
 const Card = styled(EuiCard)`
-  color: inherit;
+  min-height: 127px;
 `;
 
 export function PackageCard({
@@ -29,29 +35,113 @@ export function PackageCard({
   version,
   icons,
   integration,
-  uiInternalPathUrl,
+  url,
   release,
+  id,
+  fromIntegrations,
+  isUnverified,
+  isUpdateAvailable,
+  showLabels = true,
 }: PackageCardProps) {
-  const betaBadgeLabel = release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined;
-  const betaBadgeLabelTooltipContent =
-    release && release !== 'ga' ? RELEASE_BADGE_DESCRIPTION[release] : undefined;
+  let releaseBadge: React.ReactNode | null = null;
 
+  if (release && release !== 'ga') {
+    releaseBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <InlineReleaseBadge release={release} />
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
+  let verifiedBadge: React.ReactNode | null = null;
+
+  if (isUnverified && showLabels) {
+    verifiedBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiBadge color="warning">
+            <FormattedMessage
+              id="xpack.fleet.packageCard.unverifiedLabel"
+              defaultMessage="Unverified"
+            />
+          </EuiBadge>
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
+  let updateAvailableBadge: React.ReactNode | null = null;
+
+  if (isUpdateAvailable && showLabels) {
+    updateAvailableBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiBadge color="warning">
+            <FormattedMessage
+              id="xpack.fleet.packageCard.updateAvailableLabel"
+              defaultMessage="Update available"
+            />
+          </EuiBadge>
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
+  const { application } = useStartServices();
+  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(name);
+
+  const onCardClick = () => {
+    if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
+      application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+        path: url.slice(INTEGRATIONS_BASE_PATH.length),
+        state: { fromIntegrations },
+      });
+    } else if (url.startsWith('http') || url.startsWith('https')) {
+      window.open(url, '_blank');
+    } else {
+      application.navigateToUrl(url);
+    }
+  };
+
+  const testid = `integration-card:${id}`;
   return (
-    <Card
-      title={title || ''}
-      description={description}
-      icon={
-        <CardIcon
-          icons={icons}
-          packageName={name}
-          integrationName={integration}
-          version={version}
-          size="xl"
-        />
-      }
-      href={uiInternalPathUrl}
-      betaBadgeLabel={betaBadgeLabel}
-      betaBadgeTooltipContent={betaBadgeLabelTooltipContent}
-    />
+    <WithGuidedOnboardingTour
+      packageKey={name}
+      isTourVisible={isGuidedOnboardingActive}
+      tourType={'integrationCard'}
+      tourOffset={10}
+    >
+      <TrackApplicationView viewId={testid}>
+        <Card
+          data-test-subj={testid}
+          layout="horizontal"
+          title={title || ''}
+          titleSize="xs"
+          description={description}
+          hasBorder
+          icon={
+            <CardIcon
+              icons={icons}
+              packageName={name}
+              integrationName={integration}
+              version={version}
+              size="xl"
+            />
+          }
+          onClick={onCardClick}
+        >
+          <EuiFlexGroup gutterSize="xs">
+            {verifiedBadge}
+            {updateAvailableBadge}
+            {releaseBadge}
+          </EuiFlexGroup>
+        </Card>
+      </TrackApplicationView>
+    </WithGuidedOnboardingTour>
   );
 }

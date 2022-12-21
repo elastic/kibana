@@ -5,47 +5,88 @@
  * 2.0.
  */
 
+import { castArray, isEmpty, pickBy } from 'lodash';
 import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { OsqueryIcon } from '../components/osquery_icon';
+import type { AgentSelection } from '../agents/types';
 
 interface LiveQueryProps {
   agentId?: string;
-  agentPolicyId?: string;
+  agentIds?: string[];
+  alertIds?: string[];
+  agentPolicyIds?: string[];
   onSuccess?: () => void;
   query?: string;
+  savedQueryId?: string;
+  ecs_mapping?: ECSMapping;
+  agentsField?: boolean;
+  queryField?: boolean;
+  ecsMappingField?: boolean;
+  enabled?: boolean;
+  formType?: 'steps' | 'simple';
+  hideAgentsField?: boolean;
+  packId?: string;
+  agentSelection?: AgentSelection;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   agentId,
-  agentPolicyId,
+  agentIds,
+  alertIds,
+  agentPolicyIds,
   onSuccess,
   query,
+  savedQueryId,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  ecs_mapping,
+  queryField,
+  ecsMappingField,
+  formType,
+  enabled,
+  hideAgentsField,
+  packId,
+  agentSelection,
 }) => {
-  const { data: hasActionResultsPrivileges, isFetched } = useActionResultsPrivileges();
+  const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
-  const defaultValue = useMemo(() => {
-    if (agentId || agentPolicyId || query) {
+  const initialAgentSelection = useMemo(() => {
+    if (agentSelection) {
+      return agentSelection;
+    }
+
+    if (agentId || agentPolicyIds?.length) {
       return {
-        agentSelection: {
-          allAgentsSelected: false,
-          agents: agentId ? [agentId] : [],
-          platformsSelected: [],
-          policiesSelected: agentPolicyId ? [agentPolicyId] : [],
-        },
-        query,
+        allAgentsSelected: false,
+        agents: castArray(agentId ?? agentIds ?? []),
+        platformsSelected: [],
+        policiesSelected: agentPolicyIds ?? [],
       };
     }
 
-    return undefined;
-  }, [agentId, agentPolicyId, query]);
+    return null;
+  }, [agentId, agentIds, agentPolicyIds, agentSelection]);
 
-  if (!isFetched) {
+  const defaultValue = useMemo(() => {
+    const initialValue = {
+      ...(initialAgentSelection ? { agentSelection: initialAgentSelection } : {}),
+      alertIds,
+      query,
+      savedQueryId,
+      ecs_mapping,
+      packId,
+    };
+
+    return !isEmpty(pickBy(initialValue, (value) => !isEmpty(value))) ? initialValue : undefined;
+  }, [alertIds, ecs_mapping, initialAgentSelection, packId, query, savedQueryId]);
+
+  if (isLoading) {
     return <EuiLoadingContent lines={10} />;
   }
 
@@ -80,7 +121,15 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   }
 
   return (
-    <LiveQueryForm singleAgentMode={!!agentId} defaultValue={defaultValue} onSuccess={onSuccess} />
+    <LiveQueryForm
+      queryField={queryField}
+      ecsMappingField={ecsMappingField}
+      defaultValue={defaultValue}
+      onSuccess={onSuccess}
+      formType={formType}
+      enabled={enabled}
+      hideAgentsField={hideAgentsField}
+    />
   );
 };
 

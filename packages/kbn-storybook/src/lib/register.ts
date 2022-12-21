@@ -16,12 +16,12 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Kibana Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/master/packages/kbn-storybook',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/packages/kbn-storybook',
   }),
   showPanel: false,
   isFullscreen: false,
   panelPosition: 'bottom',
-  isToolshown: true,
+  showToolbar: true,
 });
 
 registerThemeSwitcherAddon();

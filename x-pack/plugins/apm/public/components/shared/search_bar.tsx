@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiFlexGroup,
   EuiFlexGroupProps,
@@ -13,8 +13,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
+import { isMobileAgentName } from '../../../common/agent_name';
+import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
 import { useBreakpoints } from '../../hooks/use_breakpoints';
-import { DatePicker } from './DatePicker';
+import { ApmDatePicker } from './date_picker/apm_date_picker';
 import { KueryBar } from './kuery_bar';
 import { TimeComparison } from './time_comparison';
 import { TransactionTypeSelect } from './transaction_type_select';
@@ -36,6 +38,9 @@ export function SearchBar({
   kueryBarBoolFilter,
   kueryBarPlaceholder,
 }: Props) {
+  const { agentName } = useApmServiceContext();
+  const isMobileAgent = isMobileAgentName(agentName);
+
   const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakpoints();
 
   if (hidden) {
@@ -87,12 +92,12 @@ export function SearchBar({
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <DatePicker />
+              <ApmDatePicker />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size={isMobileAgent ? 's' : 'm'} />
     </>
   );
 }

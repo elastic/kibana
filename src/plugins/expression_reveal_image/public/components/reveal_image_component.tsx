@@ -8,10 +8,10 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { css, CSSObject } from '@emotion/react';
+import { isValidUrl } from '@kbn/presentation-util-plugin/common';
 import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
-import { isValidUrl } from '../../../presentation_util/public';
 
 const revealImageParentStyle = css`
   height: 100%;
@@ -46,7 +46,7 @@ interface AlignerStyles {
   backgroundImage?: string;
 }
 
-function RevealImageComponent({
+export function RevealImageComponent({
   onLoaded,
   parentNode,
   percent,
@@ -118,11 +118,11 @@ function RevealImageComponent({
     return imgStyles;
   }
 
-  const additionaAlignerStyles: AlignerStyles = {};
+  const additionalAlignerStyles: AlignerStyles = {};
 
   if (isValidUrl(emptyImage ?? '')) {
     // only use empty image if one is provided
-    additionaAlignerStyles.backgroundImage = `url(${emptyImage})`;
+    additionalAlignerStyles.backgroundImage = `url(${emptyImage})`;
   }
 
   let additionalImgStyles: ImageStyles = {};
@@ -136,10 +136,10 @@ function RevealImageComponent({
   return (
     <div
       className="revealImageAligner"
-      css={css({
+      css={{
         ...revealImageAlignerStyle,
-        ...additionaAlignerStyles,
-      })}
+        ...additionalAlignerStyles,
+      }}
     >
       <img
         ref={imgRef}
@@ -152,7 +152,3 @@ function RevealImageComponent({
     </div>
   );
 }
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { RevealImageComponent as default };

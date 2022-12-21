@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as rt from 'io-ts';
 import {
   LogEntryAfterCursor,
@@ -39,10 +39,10 @@ export const createGetLogEntriesQuery = (
   return {
     index: logEntriesIndex,
     allow_no_indices: true,
-    track_scores: false,
-    track_total_hits: false,
     body: {
       size,
+      track_scores: false,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [
@@ -53,7 +53,6 @@ export const createGetLogEntriesQuery = (
         },
       },
       fields,
-      // @ts-expect-error @elastic/elasticsearch doesn't declare "runtime_mappings" property
       runtime_mappings: runtimeMappings,
       _source: false,
       ...createSortClause(sortDirection, timestampField, tiebreakerField),
@@ -87,7 +86,7 @@ const createHighlightClause = (highlightQuery: JsonObject | undefined, fields: s
   highlightQuery
     ? {
         highlight: {
-          boundary_scanner: 'word',
+          boundary_scanner: 'word' as const,
           fields: fields.reduce(
             (highlightFieldConfigs, fieldName) => ({
               ...highlightFieldConfigs,

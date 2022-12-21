@@ -7,7 +7,7 @@
 
 import React, { Dispatch, SetStateAction, useContext, useEffect, useState, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
@@ -28,11 +28,13 @@ export const CategorizationPerPartitionFieldDropdown = ({
 
   const filteredCategories = useMemo(
     () => categoryFields.filter((c) => c.id !== jobCreator.categorizationFieldName),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [categoryFields, jobCreatorUpdated]
   );
   useEffect(() => {
     jobCreator.categorizationPerPartitionField = categorizationPartitionFieldName;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categorizationPartitionFieldName]);
 
   useEffect(() => {
@@ -48,6 +50,7 @@ export const CategorizationPerPartitionFieldDropdown = ({
     }
     setCategorizationPartitionFieldName(jobCreator.categorizationPerPartitionField);
     setEnablePerPartitionCategorization(jobCreator.perPartitionCategorization);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
   return (
     <EuiFormRow

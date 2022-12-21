@@ -8,11 +8,11 @@
 import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiDataGridColumn, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import {
   isClassificationAnalysis,
@@ -37,11 +37,7 @@ import {
   getAnalysisType,
 } from '../../../../common';
 
-import {
-  ExpandableSection,
-  ExpandableSectionProps,
-  HEADER_ITEMS_LOADING,
-} from '../expandable_section';
+import { ExpandableSection, ExpandableSectionProps, HEADER_ITEMS_LOADING } from '.';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 const showingDocs = i18n.translate(
@@ -104,7 +100,7 @@ const getResultsSectionHeaderItems = (
 interface ExpandableSectionResultsProps {
   colorRange?: ReturnType<typeof useColorRange>;
   indexData: UseIndexDataReturnType;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   jobConfig?: DataFrameAnalyticsConfig;
   needsDestIndexPattern: boolean;
   searchQuery: SavedSearchQuery;

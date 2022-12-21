@@ -6,17 +6,18 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButton, EuiTableFieldDataColumnType } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { SecurityPageName } from '../../../../common/constants';
+import { SecuritySolutionLinkButton } from '../../../common/components/links';
 
-import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
-import { LinkPanel, InnerLinkPanel, LinkPanelListItem } from '../link_panel';
-import { LinkPanelViewProps } from '../link_panel/types';
+import type { LinkPanelListItem } from '../link_panel';
+import { LinkPanel } from '../link_panel';
+import type { LinkPanelViewProps } from '../link_panel/types';
 import { shortenCountIntoString } from '../../../common/utils/shorten_count_into_string';
 import { Link } from '../link_panel/link';
-import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_cti_event_counts';
-import { LINK_COPY } from '../overview_risky_host_links/translations';
+import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_ti_data_sources';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   { name: 'Name', field: 'title', sortable: true, truncateText: true, width: '100%' },
@@ -26,7 +27,7 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     render: shortenCountIntoString,
     sortable: true,
     truncateText: true,
-    width: '20%',
+    width: '70px',
     align: 'right',
   },
   {
@@ -34,58 +35,21 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     field: 'path',
     truncateText: true,
     width: '80px',
-    // eslint-disable-next-line react/display-name
-    render: (path: string) => <Link path={path} copy={LINK_COPY} />,
+    render: (path: string) => <Link path={path} copy={i18n.LINK_COPY} />,
   },
 ];
 
 export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
-  buttonHref = '',
-  isPluginDisabled,
   isInspectEnabled = true,
   listItems,
   splitPanel,
   totalCount = 0,
 }) => {
-  const threatIntelDashboardDocLink = `${
-    useKibana().services.docLinks.links.filebeat.base
-  }/load-kibana-dashboards.html`;
-
   return (
     <LinkPanel
       {...{
-        button: useMemo(
-          () => (
-            <EuiButton
-              href={buttonHref}
-              isDisabled={!buttonHref}
-              data-test-subj="cti-view-dashboard-button"
-              target="_blank"
-            >
-              {i18n.VIEW_DASHBOARD}
-            </EuiButton>
-          ),
-          [buttonHref]
-        ),
         columns,
         dataTestSubj: 'cti-dashboard-links',
-        infoPanel: useMemo(
-          () =>
-            isPluginDisabled ? (
-              <InnerLinkPanel
-                dataTestSubj="cti-inner-panel-info"
-                color={'primary'}
-                title={i18n.INFO_TITLE}
-                body={i18n.INFO_BODY}
-                button={
-                  <EuiButton href={threatIntelDashboardDocLink} target="_blank">
-                    {i18n.INFO_BUTTON}
-                  </EuiButton>
-                }
-              />
-            ) : null,
-          [isPluginDisabled, threatIntelDashboardDocLink]
-        ),
         inspectQueryId: isInspectEnabled ? CTIEventCountQueryId : undefined,
         listItems,
         panelTitle: i18n.PANEL_TITLE,
@@ -100,6 +64,20 @@ export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
             />
           ),
           [totalCount]
+        ),
+        button: useMemo(
+          () => (
+            <SecuritySolutionLinkButton
+              data-test-subj="cti-view-indicators"
+              deepLinkId={SecurityPageName.threatIntelligenceIndicators}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.overview.threatIndicatorsAction"
+                defaultMessage="View indicators"
+              />
+            </SecuritySolutionLinkButton>
+          ),
+          []
         ),
       }}
     />

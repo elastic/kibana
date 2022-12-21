@@ -6,8 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import type { estypes } from '@elastic/elasticsearch';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import url from 'url';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
 import { omitBy, isUndefined } from 'lodash';
@@ -18,39 +19,66 @@ import {
   SavedObject,
   KibanaRequest,
   SavedObjectsUtils,
-} from '../../../../src/core/server';
-import { AuditLogger } from '../../security/server';
+  Logger,
+} from '@kbn/core/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
+import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
-import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
+import {
+  validateConfig,
+  validateSecrets,
+  ActionExecutorContract,
+  validateConnector,
+  ActionExecutionSource,
+} from './lib';
 import {
   ActionResult,
   FindActionResult,
   RawAction,
   PreConfiguredAction,
   ActionTypeExecutorResult,
+  ConnectorTokenClientContract,
 } from './types';
 import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
 import { ExecuteOptions } from './lib/action_executor';
 import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
+  BulkExecutionEnqueuer,
 } from './create_execute_function';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
+  getBulkAuthorizationModeBySource,
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
-import { RunNowResult } from '../../task_manager/server';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
+import { isConnectorDeprecated } from './lib/is_connector_deprecated';
+import { ActionsConfigurationUtilities } from './actions_config';
+import {
+  OAuthClientCredentialsParams,
+  OAuthJwtParams,
+  OAuthParams,
+} from './routes/get_oauth_access_token';
+import {
+  getOAuthJwtAccessToken,
+  GetOAuthJwtConfig,
+  GetOAuthJwtSecrets,
+} from './lib/get_oauth_jwt_access_token';
+import {
+  getOAuthClientCredentialsAccessToken,
+  GetOAuthClientCredentialsConfig,
+  GetOAuthClientCredentialsSecrets,
+} from './lib/get_oauth_client_credentials_access_token';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
 // We'll set this max setting assuming it's never reached.
 export const MAX_ACTIONS_RETURNED = 10000;
 
-interface ActionUpdate extends SavedObjectAttributes {
+interface ActionUpdate {
   name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
@@ -65,6 +93,7 @@ export interface CreateOptions {
 }
 
 interface ConstructorOptions {
+  logger: Logger;
   defaultKibanaIndex: string;
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
@@ -73,10 +102,12 @@ interface ConstructorOptions {
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer<void>;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
+  bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
+  connectorTokenClient: ConnectorTokenClientContract;
 }
 
 export interface UpdateOptions {
@@ -85,6 +116,7 @@ export interface UpdateOptions {
 }
 
 export class ActionsClient {
+  private readonly logger: Logger;
   private readonly defaultKibanaIndex: string;
   private readonly scopedClusterClient: IScopedClusterClient;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -95,10 +127,13 @@ export class ActionsClient {
   private readonly authorization: ActionsAuthorization;
   private readonly executionEnqueuer: ExecutionEnqueuer<void>;
   private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
+  private readonly bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
   private readonly auditLogger?: AuditLogger;
   private readonly usageCounter?: UsageCounter;
+  private readonly connectorTokenClient: ConnectorTokenClientContract;
 
   constructor({
+    logger,
     actionTypeRegistry,
     defaultKibanaIndex,
     scopedClusterClient,
@@ -107,11 +142,14 @@ export class ActionsClient {
     actionExecutor,
     executionEnqueuer,
     ephemeralExecutionEnqueuer,
+    bulkExecutionEnqueuer,
     request,
     authorization,
     auditLogger,
     usageCounter,
+    connectorTokenClient,
   }: ConstructorOptions) {
+    this.logger = logger;
     this.actionTypeRegistry = actionTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
@@ -120,10 +158,12 @@ export class ActionsClient {
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
     this.ephemeralExecutionEnqueuer = ephemeralExecutionEnqueuer;
+    this.bulkExecutionEnqueuer = bulkExecutionEnqueuer;
     this.request = request;
     this.authorization = authorization;
     this.auditLogger = auditLogger;
     this.usageCounter = usageCounter;
+    this.connectorTokenClient = connectorTokenClient;
   }
 
   /**
@@ -148,9 +188,16 @@ export class ActionsClient {
     }
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    const validatedActionTypeConfig = validateConfig(actionType, config);
-    const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
-
+    const configurationUtilities = this.actionTypeRegistry.getUtils();
+    const validatedActionTypeConfig = validateConfig(actionType, config, {
+      configurationUtilities,
+    });
+    const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
+      configurationUtilities,
+    });
+    if (actionType.validate?.connector) {
+      validateConnector(actionType, { config, secrets });
+    }
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     this.auditLogger?.log(
@@ -180,6 +227,7 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
 
@@ -219,8 +267,16 @@ export class ActionsClient {
     const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    const validatedActionTypeConfig = validateConfig(actionType, config);
-    const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+    const configurationUtilities = this.actionTypeRegistry.getUtils();
+    const validatedActionTypeConfig = validateConfig(actionType, config, {
+      configurationUtilities,
+    });
+    const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
+      configurationUtilities,
+    });
+    if (actionType.validate?.connector) {
+      validateConnector(actionType, { config, secrets });
+    }
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
@@ -253,6 +309,14 @@ export class ActionsClient {
       )
     );
 
+    try {
+      await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
+    } catch (e) {
+      this.logger.error(
+        `Failed to delete auth tokens for connector "${id}" after update: ${e.message}`
+      );
+    }
+
     return {
       id,
       actionTypeId: result.attributes.actionTypeId as string,
@@ -260,6 +324,7 @@ export class ActionsClient {
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
+      isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
 
@@ -296,6 +361,7 @@ export class ActionsClient {
         actionTypeId: preconfiguredActionsList.actionTypeId,
         name: preconfiguredActionsList.name,
         isPreconfigured: true,
+        isDeprecated: isConnectorDeprecated(preconfiguredActionsList),
       };
     }
 
@@ -315,6 +381,7 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
 
@@ -339,7 +406,9 @@ export class ActionsClient {
         perPage: MAX_ACTIONS_RETURNED,
         type: 'action',
       })
-    ).saved_objects.map(actionFromSavedObject);
+    ).saved_objects.map((rawAction) =>
+      actionFromSavedObject(rawAction, isConnectorDeprecated(rawAction.attributes))
+    );
 
     savedObjectsActions.forEach(({ id }) =>
       this.auditLogger?.log(
@@ -357,6 +426,7 @@ export class ActionsClient {
         actionTypeId: preconfiguredAction.actionTypeId,
         name: preconfiguredAction.name,
         isPreconfigured: true,
+        isDeprecated: isConnectorDeprecated(preconfiguredAction),
       })),
     ].sort((a, b) => a.name.localeCompare(b.name));
     return await injectExtraFindData(
@@ -425,9 +495,100 @@ export class ActionsClient {
           `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
         );
       }
-      actionResults.push(actionFromSavedObject(action));
+      actionResults.push(actionFromSavedObject(action, isConnectorDeprecated(action.attributes)));
     }
     return actionResults;
+  }
+
+  public async getOAuthAccessToken(
+    { type, options }: OAuthParams,
+    configurationUtilities: ActionsConfigurationUtilities
+  ) {
+    // Verify that user has edit access
+    await this.authorization.ensureAuthorized('update');
+
+    // Verify that token url is allowed by allowed hosts config
+    try {
+      configurationUtilities.ensureUriAllowed(options.tokenUrl);
+    } catch (err) {
+      throw Boom.badRequest(err.message);
+    }
+
+    // Verify that token url contains a hostname and uses https
+    const parsedUrl = url.parse(
+      options.tokenUrl,
+      false /* parseQueryString */,
+      true /* slashesDenoteHost */
+    );
+
+    if (!parsedUrl.hostname) {
+      throw Boom.badRequest(`Token URL must contain hostname`);
+    }
+
+    if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+      throw Boom.badRequest(`Token URL must use http or https`);
+    }
+
+    let accessToken: string | null = null;
+    if (type === 'jwt') {
+      const tokenOpts = options as OAuthJwtParams;
+
+      try {
+        accessToken = await getOAuthJwtAccessToken({
+          logger: this.logger,
+          configurationUtilities,
+          credentials: {
+            config: tokenOpts.config as GetOAuthJwtConfig,
+            secrets: tokenOpts.secrets as GetOAuthJwtSecrets,
+          },
+          tokenUrl: tokenOpts.tokenUrl,
+        });
+
+        this.logger.debug(
+          `Successfully retrieved access token using JWT OAuth with tokenUrl ${
+            tokenOpts.tokenUrl
+          } and config ${JSON.stringify(tokenOpts.config)}`
+        );
+      } catch (err) {
+        this.logger.debug(
+          `Failed to retrieve access token using JWT OAuth with tokenUrl ${
+            tokenOpts.tokenUrl
+          } and config ${JSON.stringify(tokenOpts.config)} - ${err.message}`
+        );
+        throw Boom.badRequest(`Failed to retrieve access token`);
+      }
+    } else if (type === 'client') {
+      const tokenOpts = options as OAuthClientCredentialsParams;
+      try {
+        accessToken = await getOAuthClientCredentialsAccessToken({
+          logger: this.logger,
+          configurationUtilities,
+          credentials: {
+            config: tokenOpts.config as GetOAuthClientCredentialsConfig,
+            secrets: tokenOpts.secrets as GetOAuthClientCredentialsSecrets,
+          },
+          tokenUrl: tokenOpts.tokenUrl,
+          oAuthScope: tokenOpts.scope,
+        });
+
+        this.logger.debug(
+          `Successfully retrieved access token using Client Credentials OAuth with tokenUrl ${
+            tokenOpts.tokenUrl
+          }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)}`
+        );
+      } catch (err) {
+        this.logger.debug(
+          `Failed to retrieved access token using Client Credentials OAuth with tokenUrl ${
+            tokenOpts.tokenUrl
+          }, scope ${tokenOpts.scope} and config ${JSON.stringify(tokenOpts.config)} - ${
+            err.message
+          }`
+        );
+        throw Boom.badRequest(`Failed to retrieve access token`);
+      }
+    }
+
+    return { accessToken };
   }
 
   /**
@@ -470,6 +631,14 @@ export class ActionsClient {
       })
     );
 
+    try {
+      await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
+    } catch (e) {
+      this.logger.error(
+        `Failed to delete auth tokens for connector "${id}" after delete: ${e.message}`
+      );
+    }
+
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 
@@ -509,6 +678,30 @@ export class ActionsClient {
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
+  public async bulkEnqueueExecution(options: EnqueueExecutionOptions[]): Promise<void> {
+    const sources: Array<ActionExecutionSource<unknown>> = [];
+    options.forEach((option) => {
+      if (option.source) {
+        sources.push(option.source);
+      }
+    });
+    const authCounts = await getBulkAuthorizationModeBySource(
+      this.unsecuredSavedObjectsClient,
+      sources
+    );
+    if (authCounts[AuthorizationMode.RBAC] > 0) {
+      await this.authorization.ensureAuthorized('execute');
+    }
+    if (authCounts[AuthorizationMode.Legacy] > 0) {
+      trackLegacyRBACExemption(
+        'bulkEnqueueExecution',
+        this.usageCounter,
+        authCounts[AuthorizationMode.Legacy]
+      );
+    }
+    return this.bulkExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
+  }
+
   public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
     const { source } = options;
     if (
@@ -522,8 +715,8 @@ export class ActionsClient {
     return this.ephemeralExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
-  public async listTypes(): Promise<ActionType[]> {
-    return this.actionTypeRegistry.list();
+  public async listTypes(featureId?: string): Promise<ActionType[]> {
+    return this.actionTypeRegistry.list(featureId);
   }
 
   public isActionTypeEnabled(
@@ -538,11 +731,15 @@ export class ActionsClient {
   }
 }
 
-function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResult {
+function actionFromSavedObject(
+  savedObject: SavedObject<RawAction>,
+  isDeprecated: boolean
+): ActionResult {
   return {
     id: savedObject.id,
     ...savedObject.attributes,
     isPreconfigured: false,
+    isDeprecated,
   };
 }
 
@@ -585,7 +782,7 @@ async function injectExtraFindData(
       },
     };
   }
-  const { body: aggregationResult } = await scopedClusterClient.asInternalUser.search({
+  const aggregationResult = await scopedClusterClient.asInternalUser.search({
     index: defaultKibanaIndex,
     body: {
       aggs,

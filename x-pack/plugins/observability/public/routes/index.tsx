@@ -7,17 +7,21 @@
 
 import * as t from 'io-ts';
 import React from 'react';
-import { alertWorkflowStatusRt } from '../../common/typings';
-import { ExploratoryViewPage } from '../components/shared/exploratory_view';
-import { AlertsPage } from '../pages/alerts';
-import { AllCasesPage } from '../pages/cases/all_cases';
-import { CaseDetailsPage } from '../pages/cases/case_details';
-import { ConfigureCasesPage } from '../pages/cases/configure_cases';
-import { CreateCasePage } from '../pages/cases/create_case';
-import { HomePage } from '../pages/home';
-import { LandingPage } from '../pages/landing';
+import { useHistory } from 'react-router-dom';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { casesPath } from '../../common';
+import { CasesPage } from '../pages/cases';
+import { AlertsPage } from '../pages/alerts/containers/alerts_page';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
+import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
+import { RulesPage } from '../pages/rules';
+import { RuleDetailsPage } from '../pages/rule_details';
+import { AlertingPages } from '../config';
+import { AlertDetails } from '../pages/alert_details';
+import { DatePickerContextProvider } from '../context/date_picker_context';
+import { SlosPage } from '../pages/slos';
+import { SloDetailsPage } from '../pages/slo_details';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -30,78 +34,67 @@ export interface Params {
   path?: t.HasProps;
 }
 
+// Note: React Router DOM <Redirect> component was not working here
+// so I've recreated this simple version for this purpose.
+function SimpleRedirect({ to }: { to: string }) {
+  const history = useHistory();
+  history.replace(to);
+  return null;
+}
+
 export const routes = {
   '/': {
     handler: () => {
-      return <HomePage />;
+      return <SimpleRedirect to="/overview" />;
     },
     params: {},
+    exact: true,
   },
   '/landing': {
     handler: () => {
-      return <LandingPage />;
+      return <SimpleRedirect to="/overview" />;
     },
     params: {},
+    exact: true,
   },
   '/overview': {
     handler: ({ query }: any) => {
-      return <OverviewPage routeParams={{ query }} />;
-    },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
-    },
-  },
-  '/cases': {
-    handler: () => {
-      return <AllCasesPage />;
+      return (
+        <DatePickerContextProvider>
+          <OverviewPage />
+        </DatePickerContextProvider>
+      );
     },
     params: {},
+    exact: true,
   },
-  '/cases/create': {
+  [casesPath]: {
     handler: () => {
-      return <CreateCasePage />;
+      return (
+        <TrackApplicationView viewId={AlertingPages.cases}>
+          <CasesPage />
+        </TrackApplicationView>
+      );
     },
     params: {},
-  },
-  '/cases/configure': {
-    handler: () => {
-      return <ConfigureCasesPage />;
-    },
-    params: {},
-  },
-  '/cases/:detailName': {
-    handler: () => {
-      return <CaseDetailsPage />;
-    },
-    params: {
-      path: t.partial({
-        detailName: t.string,
-      }),
-    },
+    exact: false,
   },
   '/alerts': {
-    handler: (routeParams: any) => {
-      return <AlertsPage routeParams={routeParams} />;
-    },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        kuery: t.string,
-        workflowStatus: alertWorkflowStatusRt,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
-    },
-  },
-  '/exploratory-view': {
     handler: () => {
-      return <ExploratoryViewPage />;
+      return (
+        <TrackApplicationView viewId={AlertingPages.alerts}>
+          <AlertsPage />
+        </TrackApplicationView>
+      );
+    },
+    params: {
+      // Technically gets a '_a' param by using Kibana URL state sync helpers
+    },
+    exact: true,
+  },
+  '/exploratory-view/': {
+    handler: () => {
+      return <ObservabilityExploratoryView />;
     },
     params: {
       query: t.partial({
@@ -111,19 +104,45 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
+    exact: true,
   },
-  // enable this to test multi series architecture
-  // '/exploratory-view/multi': {
-  //   handler: () => {
-  //     return <ExploratoryViewPage multiSeries={true} />;
-  //   },
-  //   params: {
-  //     query: t.partial({
-  //       rangeFrom: t.string,
-  //       rangeTo: t.string,
-  //       refreshPaused: jsonRt.pipe(t.boolean),
-  //       refreshInterval: jsonRt.pipe(t.number),
-  //     }),
-  //   },
-  // },
+  '/alerts/rules': {
+    handler: () => {
+      return (
+        <TrackApplicationView viewId={AlertingPages.rules}>
+          <RulesPage />
+        </TrackApplicationView>
+      );
+    },
+    params: {},
+    exact: true,
+  },
+  '/alerts/rules/:ruleId': {
+    handler: () => {
+      return <RuleDetailsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/alerts/:alertId': {
+    handler: () => {
+      return <AlertDetails />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos': {
+    handler: () => {
+      return <SlosPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/:sloId': {
+    handler: () => {
+      return <SloDetailsPage />;
+    },
+    params: {},
+    exact: true,
+  },
 };

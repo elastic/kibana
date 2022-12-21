@@ -6,48 +6,38 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
-
-import { createMetricVisFn } from './metric_vis_fn';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
-import { ChartsPluginSetup } from '../../../charts/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import { setFormatService } from './services';
 import { ConfigSchema } from '../config';
-import { metricVisRenderer } from './metric_vis_renderer';
+import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface MetricVisPluginSetupDependencies {
-  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  charts: ChartsPluginSetup;
 }
 
 /** @internal */
 export interface MetricVisPluginStartDependencies {
-  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 /** @internal */
-export class MetricVisPlugin implements Plugin<void, void> {
+export class MetricVisPlugin
+  implements Plugin<void, void, MetricVisPluginSetupDependencies, MetricVisPluginStartDependencies>
+{
   initializerContext: PluginInitializerContext<ConfigSchema>;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
-  public setup(
-    core: CoreSetup,
-    { expressions, visualizations, charts }: MetricVisPluginSetupDependencies
-  ) {
-    expressions.registerFunction(createMetricVisFn);
-    expressions.registerRenderer(metricVisRenderer);
+  public setup(core: CoreSetup, { visualizations }: MetricVisPluginSetupDependencies) {
     visualizations.createBaseVisualization(createMetricVisTypeDefinition());
   }
 
-  public start(core: CoreStart, { data }: MetricVisPluginStartDependencies) {
-    setFormatService(data.fieldFormats);
+  public start(core: CoreStart, { dataViews }: MetricVisPluginStartDependencies) {
+    setDataViewsStart(dataViews);
   }
 }

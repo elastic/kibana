@@ -6,11 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SERVICE_ENVIRONMENT } from './elasticsearch_fieldnames';
+import { SERVICE_ENVIRONMENT } from './es_fields/apm';
 import { Environment } from './environment_rt';
 
 const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
 const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED' as const;
+
+export const allOptionText = i18n.translate(
+  'xpack.apm.filter.environment.allLabel',
+  {
+    defaultMessage: 'All',
+  }
+);
 
 export function getEnvironmentLabel(environment: string) {
   if (!environment || environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
@@ -20,9 +27,7 @@ export function getEnvironmentLabel(environment: string) {
   }
 
   if (environment === ENVIRONMENT_ALL_VALUE) {
-    return i18n.translate('xpack.apm.filter.environment.allLabel', {
-      defaultMessage: 'All',
-    });
+    return allOptionText;
   }
 
   return environment;
@@ -30,12 +35,12 @@ export function getEnvironmentLabel(environment: string) {
 
 export const ENVIRONMENT_ALL = {
   value: ENVIRONMENT_ALL_VALUE,
-  text: getEnvironmentLabel(ENVIRONMENT_ALL_VALUE),
+  label: getEnvironmentLabel(ENVIRONMENT_ALL_VALUE),
 };
 
 export const ENVIRONMENT_NOT_DEFINED = {
   value: ENVIRONMENT_NOT_DEFINED_VALUE,
-  text: getEnvironmentLabel(ENVIRONMENT_NOT_DEFINED_VALUE),
+  label: getEnvironmentLabel(ENVIRONMENT_NOT_DEFINED_VALUE),
 };
 
 export function getEnvironmentEsField(environment: string) {

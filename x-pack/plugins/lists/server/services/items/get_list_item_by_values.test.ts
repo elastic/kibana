@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
   DATE_NOW,
@@ -37,9 +36,7 @@ describe('get_list_item_by_values', () => {
     const data = getSearchListItemMock();
     data.hits.hits = [];
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
-    );
+    esClient.search.mockResponse(data);
     const listItem = await getListItemByValues({
       esClient,
       listId: LIST_ID,
@@ -54,9 +51,7 @@ describe('get_list_item_by_values', () => {
   test('Returns transformed list item if the data exists within ES', async () => {
     const data = getSearchListItemMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
-    );
+    esClient.search.mockResponse(data);
     const listItem = await getListItemByValues({
       esClient,
       listId: LIST_ID,

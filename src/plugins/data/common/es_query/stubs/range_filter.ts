@@ -25,5 +25,5 @@ export const rangeFilter: RangeFilter = {
   $state: {
     store: FilterStateStore.APP_STATE,
   },
-  range: {},
+  query: { range: { bytes: { gt: 0, lt: 10 } } },
 };

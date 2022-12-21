@@ -22,7 +22,7 @@ import {
 } from '../../../common/constants';
 import { VectorStyle } from '../styles/vector/vector_style';
 import { EMSFileSource } from '../sources/ems_file_source';
-import { VectorLayer } from './vector_layer';
+import { GeoJsonVectorLayer } from './vector_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
 import { getJoinAggKey } from '../../../common/get_agg_key';
@@ -37,7 +37,6 @@ export interface CreateRegionMapLayerDescriptorParams {
   termsSize?: number;
   colorSchema: string;
   indexPatternId?: string;
-  indexPatternTitle?: string;
   metricAgg: string;
   metricFieldName?: string;
 }
@@ -65,7 +64,6 @@ export function createRegionMapLayerDescriptor({
   termsSize,
   colorSchema,
   indexPatternId,
-  indexPatternTitle,
   metricAgg,
   metricFieldName,
 }: CreateRegionMapLayerDescriptorParams): LayerDescriptor | null {
@@ -87,7 +85,6 @@ export function createRegionMapLayerDescriptor({
     type: SOURCE_TYPES.ES_TERM_SOURCE,
     id: joinId,
     indexPatternId,
-    indexPatternTitle: indexPatternTitle ? indexPatternTitle : indexPatternId,
     term: termsFieldName,
     metrics: [metricsDescriptor],
     applyGlobalQuery: true,
@@ -97,7 +94,7 @@ export function createRegionMapLayerDescriptor({
   if (termsSize !== undefined) {
     termSourceDescriptor.size = termsSize;
   }
-  return VectorLayer.createDescriptor({
+  return GeoJsonVectorLayer.createDescriptor({
     label,
     joins: [
       {

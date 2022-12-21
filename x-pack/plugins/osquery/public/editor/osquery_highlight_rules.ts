@@ -7,7 +7,7 @@
 
 import ace from 'brace';
 import 'brace/ext/language_tools';
-import { AceInterface } from './ace_types';
+import type { AceInterface } from './ace_types';
 import { getOsqueryTableNames } from './osquery_tables';
 
 const osqueryTables = getOsqueryTableNames().join('|');
@@ -108,6 +108,7 @@ const dataTypes = [
 (ace as unknown as AceInterface).define(
   'ace/mode/osquery_highlight_rules',
   ['require', 'exports', 'ace/mode/sql_highlight_rules'],
+  // eslint-disable-next-line prefer-arrow-callback
   function (acequire, exports) {
     'use strict';
 

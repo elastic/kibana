@@ -5,54 +5,44 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  AlertServiceContract,
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  AlertService,
   CaseConfigureService,
   CasesService,
   CaseUserActionService,
   ConnectorMappingsService,
   AttachmentService,
 } from '.';
+import type { LicensingService } from './licensing';
+import type { EmailNotificationService } from './notifications/email_notification_service';
 
 export type CaseServiceMock = jest.Mocked<CasesService>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureService>;
 export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsService>;
 export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionService>;
-export type AlertServiceMock = jest.Mocked<AlertServiceContract>;
+export type AlertServiceMock = jest.Mocked<AlertService>;
 export type AttachmentServiceMock = jest.Mocked<AttachmentService>;
+export type LicensingServiceMock = jest.Mocked<LicensingService>;
+export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
-  const service: PublicMethodsOf<CasesService> = {
-    createSubCase: jest.fn(),
+  const service = {
     deleteCase: jest.fn(),
-    deleteSubCase: jest.fn(),
     findCases: jest.fn(),
-    findSubCases: jest.fn(),
-    findSubCasesByCaseId: jest.fn(),
     getAllCaseComments: jest.fn(),
-    getAllSubCaseComments: jest.fn(),
     getCase: jest.fn(),
     getCases: jest.fn(),
     getCaseIdsByAlertId: jest.fn(),
-    getMostRecentSubCase: jest.fn(),
     getResolveCase: jest.fn(),
-    getSubCase: jest.fn(),
-    getSubCases: jest.fn(),
     getTags: jest.fn(),
     getReporters: jest.fn(),
-    getUser: jest.fn(),
     postNewCase: jest.fn(),
     patchCase: jest.fn(),
     patchCases: jest.fn(),
-    patchSubCase: jest.fn(),
-    patchSubCases: jest.fn(),
-    findSubCaseStatusStats: jest.fn(),
-    getCommentsByAssociation: jest.fn(),
-    getCaseCommentStats: jest.fn(),
-    findSubCasesGroupByCase: jest.fn(),
-    findCaseStatusStats: jest.fn(),
     findCasesGroupedByID: jest.fn(),
+    getCaseStatusStats: jest.fn(),
+    executeAggregations: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
@@ -85,29 +75,74 @@ export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => 
 
 export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
   const service: PublicMethodsOf<CaseUserActionService> = {
+    bulkAuditLogCaseDeletion: jest.fn(),
+    bulkCreateUpdateCase: jest.fn(),
+    bulkCreateAttachmentDeletion: jest.fn(),
+    bulkCreateAttachmentCreation: jest.fn(),
+    createUserAction: jest.fn(),
     getAll: jest.fn(),
-    bulkCreate: jest.fn(),
+    findStatusChanges: jest.fn(),
+    getUniqueConnectors: jest.fn(),
+    getUserActionIdsForCases: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as CaseUserActionServiceMock;
 };
 
-export const createAlertServiceMock = (): AlertServiceMock => ({
-  updateAlertsStatus: jest.fn(),
-  getAlerts: jest.fn(),
-});
+export const createAlertServiceMock = (): AlertServiceMock => {
+  const service: PublicMethodsOf<AlertService> = {
+    updateAlertsStatus: jest.fn(),
+    getAlerts: jest.fn(),
+    executeAggregations: jest.fn(),
+  };
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as AlertServiceMock;
+};
 
 export const createAttachmentServiceMock = (): AttachmentServiceMock => {
   const service: PublicMethodsOf<AttachmentService> = {
     get: jest.fn(),
     delete: jest.fn(),
     create: jest.fn(),
+    bulkCreate: jest.fn(),
     update: jest.fn(),
     bulkUpdate: jest.fn(),
+    find: jest.fn(),
     getAllAlertsAttachToCase: jest.fn(),
+    countAlertsAttachedToCase: jest.fn(),
+    executeCaseActionsAggregations: jest.fn(),
+    getCaseCommentStats: jest.fn(),
+    valueCountAlertsAttachedToCase: jest.fn(),
+    executeCaseAggregations: jest.fn(),
+    getAttachmentIdsForCases: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
   return service as unknown as AttachmentServiceMock;
+};
+
+export const createLicensingServiceMock = (): LicensingServiceMock => {
+  const service: PublicMethodsOf<LicensingService> = {
+    notifyUsage: jest.fn(),
+    getLicenseInformation: jest.fn(),
+    isAtLeast: jest.fn(),
+    isAtLeastPlatinum: jest.fn().mockReturnValue(true),
+    isAtLeastGold: jest.fn(),
+    isAtLeastEnterprise: jest.fn(),
+  };
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as LicensingServiceMock;
+};
+
+export const createNotificationServiceMock = (): NotificationServiceMock => {
+  const service: PublicMethodsOf<EmailNotificationService> = {
+    notifyAssignees: jest.fn(),
+    bulkNotifyAssignees: jest.fn(),
+  };
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as NotificationServiceMock;
 };

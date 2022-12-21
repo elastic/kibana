@@ -35,6 +35,40 @@ exports[`LayerControl is rendered 1`] = `
           grow={false}
         >
           <EuiToolTip
+            content="Hide all layers"
+            delay="long"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Hide all layers"
+              color="text"
+              iconType="eyeClosed"
+              onClick={[Function]}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiToolTip
+            content="Show all layers"
+            delay="long"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Show all layers"
+              color="text"
+              iconType="eye"
+              onClick={[Function]}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiToolTip
             content="Collapse layers panel"
             delay="long"
             display="inlineBlock"
@@ -63,11 +97,13 @@ exports[`LayerControl is rendered 1`] = `
   />
   <EuiButton
     className="mapLayerControl__addLayerButton"
+    color="primary"
     data-test-subj="addLayerButton"
     fill={true}
     fullWidth={true}
     isDisabled={false}
     onClick={[Function]}
+    size="m"
   >
     <FormattedMessage
       defaultMessage="Add layer"
@@ -89,6 +125,7 @@ exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
     aria-label="Expand layers panel"
     className="mapLayerControl__openLayerTOCButton"
     color="text"
+    data-test-subj="mapExpandLayerControlButton"
     iconType="menuLeft"
     onClick={[Function]}
   />
@@ -106,6 +143,7 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with error icon
     aria-label="Expand layers panel"
     className="mapLayerControl__openLayerTOCButton"
     color="text"
+    data-test-subj="mapExpandLayerControlButton"
     iconType="alert"
     onClick={[Function]}
   />
@@ -123,6 +161,7 @@ exports[`LayerControl isLayerTOCOpen spinner icon Should not render expand butto
     aria-label="Expand layers panel"
     className="mapLayerControl__openLayerTOCButton"
     color="text"
+    data-test-subj="mapExpandLayerControlButton"
     iconType="menuLeft"
     onClick={[Function]}
   />
@@ -139,6 +178,7 @@ exports[`LayerControl isLayerTOCOpen spinner icon Should render expand button wi
   <button
     aria-label="Expand layers panel"
     className="euiButtonIcon euiButtonIcon--text mapLayerControl__openLayerTOCButton"
+    data-test-subj="mapExpandLayerControlButton"
     onClick={[Function]}
     type="button"
   >
@@ -179,6 +219,40 @@ exports[`LayerControl isReadOnly 1`] = `
               />
             </h2>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiToolTip
+            content="Hide all layers"
+            delay="long"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Hide all layers"
+              color="text"
+              iconType="eyeClosed"
+              onClick={[Function]}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiToolTip
+            content="Show all layers"
+            delay="long"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Show all layers"
+              color="text"
+              iconType="eye"
+              onClick={[Function]}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem
           grow={false}
@@ -245,6 +319,40 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
           grow={false}
         >
           <EuiToolTip
+            content="Hide all layers"
+            delay="long"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Hide all layers"
+              color="text"
+              iconType="eyeClosed"
+              onClick={[Function]}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiToolTip
+            content="Show all layers"
+            delay="long"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Show all layers"
+              color="text"
+              iconType="eye"
+              onClick={[Function]}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiToolTip
             content="Collapse layers panel"
             delay="long"
             display="inlineBlock"
@@ -273,11 +381,13 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
   />
   <EuiButton
     className="mapLayerControl__addLayerButton"
+    color="primary"
     data-test-subj="addLayerButton"
     fill={true}
     fullWidth={true}
     isDisabled={true}
     onClick={[Function]}
+    size="m"
   >
     <FormattedMessage
       defaultMessage="Add layer"

@@ -5,8 +5,23 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
-import { Logger } from '../../../../src/core/server';
+
+/**
+ * Types that are no longer registered and will be marked as unregistered
+ */
+export const REMOVED_TYPES: string[] = [
+  // for testing
+  'sampleTaskRemovedType',
+
+  // deprecated in https://github.com/elastic/kibana/pull/121442
+  'alerting:siem.signals',
+
+  'search_sessions_monitor',
+  'search_sessions_cleanup',
+  'search_sessions_expire',
+];
 
 /**
  * Defines a task which can be scheduled and run by the Kibana
@@ -107,6 +122,11 @@ export class TaskTypeDictionary {
     const duplicate = Object.keys(taskDefinitions).find((type) => this.definitions.has(type));
     if (duplicate) {
       throw new Error(`Task ${duplicate} is already defined!`);
+    }
+
+    const removed = Object.keys(taskDefinitions).find((type) => REMOVED_TYPES.indexOf(type) >= 0);
+    if (removed) {
+      throw new Error(`Task ${removed} has been removed from registration!`);
     }
 
     try {

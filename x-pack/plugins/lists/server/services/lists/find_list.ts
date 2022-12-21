@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Filter,
   FoundListSchema,
@@ -35,6 +36,7 @@ interface FindListOptions {
   sortOrder: SortOrderOrUndefined;
   esClient: ElasticsearchClient;
   listIndex: string;
+  runtimeMappings: MappingRuntimeFields | undefined;
 }
 
 export const findList = async ({
@@ -47,6 +49,7 @@ export const findList = async ({
   sortField,
   listIndex,
   sortOrder,
+  runtimeMappings,
 }: FindListOptions): Promise<FoundListSchema> => {
   const query = getQueryFilter({ filter });
 
@@ -58,12 +61,13 @@ export const findList = async ({
     index: listIndex,
     page,
     perPage,
+    runtimeMappings,
     searchAfter,
     sortField,
     sortOrder,
   });
 
-  const { body: totalCount } = await esClient.count({
+  const totalCount = await esClient.count({
     body: {
       query,
     },
@@ -75,7 +79,7 @@ export const findList = async ({
     // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
     // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
     // to explicitly define the type <T>.
-    const { body: response } = await esClient.search<SearchEsListSchema>({
+    const response = await esClient.search<SearchEsListSchema>({
       body: {
         query,
         search_after: scroll.searchAfter,

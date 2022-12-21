@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 
@@ -23,6 +23,8 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 
+import { FILE_FORMATS, NO_TIME_FORMAT } from '../../../../../common/constants';
+
 import {
   getFormatOptions,
   getTimestampFormatOptions,
@@ -31,7 +33,17 @@ import {
   // getCharsetOptions,
 } from './options';
 import { isTimestampFormatValid } from './overrides_validation';
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { replaceFieldInGrokPattern } from '../../../common/util/grok_pattern';
+import {
+  convertDelimiter,
+  convertDelimiterBack,
+  getColumnNames,
+  getGrokFieldNames,
+  isLinesToSampleValid,
+  LINES_TO_SAMPLE_VALUE_MIN,
+  LINES_TO_SAMPLE_VALUE_MAX,
+} from './overrides_utils';
 
 import { TIMESTAMP_OPTIONS, CUSTOM_DROPDOWN_OPTION } from './options/option_lists';
 
@@ -39,10 +51,6 @@ const formatOptions = getFormatOptions();
 const timestampFormatOptions = getTimestampFormatOptions();
 const delimiterOptions = getDelimiterOptions();
 const quoteOptions = getQuoteOptions();
-// const charsetOptions = getCharsetOptions();
-
-const LINES_TO_SAMPLE_VALUE_MIN = 3;
-const LINES_TO_SAMPLE_VALUE_MAX = 1000000;
 
 class OverridesUI extends Component {
   constructor(props) {
@@ -93,11 +101,14 @@ class OverridesUI extends Component {
 
     const { newColumnNames, originalColumnNames } = getColumnNames(columnNames, originalSettings);
 
+    const newGrokFieldNames = getGrokFieldNames(grokPattern, originalSettings.grokPattern);
+
     const overrides = {
       charset: charset === undefined ? originalSettings.charset : charset,
       format: format === undefined ? originalSettings.format : format,
       hasHeaderRow: hasHeaderRow === undefined ? originalSettings.hasHeaderRow : hasHeaderRow,
       columnNames: newColumnNames,
+      grokFieldNames: newGrokFieldNames,
       delimiter: d,
       quote: quote === undefined ? originalSettings.quote : quote,
       shouldTrimFields:
@@ -112,11 +123,13 @@ class OverridesUI extends Component {
 
     return {
       originalColumnNames,
+      originalGrokFieldNames: newGrokFieldNames,
       customDelimiter: customD === undefined ? '' : customD,
       customTimestampFormat: '',
       linesToSampleValid: true,
       timestampFormatValid: true,
       timestampFormatError: null,
+      containsTimeField: overrides.timestampFormat !== NO_TIME_FORMAT,
       overrides,
       ...state,
     };
@@ -191,6 +204,17 @@ class OverridesUI extends Component {
     this.setOverride({ timestampField });
   };
 
+  onContainsTimeFieldChange = (e) => {
+    this.setState({ containsTimeField: e.target.checked });
+    if (e.target.checked === false) {
+      this.setOverride({ timestampFormat: NO_TIME_FORMAT });
+    } else {
+      this.setOverride({
+        timestampFormat: this.props.originalSettings.timestampFormat,
+      });
+    }
+  };
+
   onDelimiterChange = ([opt]) => {
     const delimiter = opt ? opt.label : '';
     this.setOverride({ delimiter });
@@ -224,8 +248,17 @@ class OverridesUI extends Component {
     this.setOverride({ columnNames });
   };
 
+  onGrokPatternFieldChange = (e, i) => {
+    const name = e.target.value;
+    const newGrokPattern = replaceFieldInGrokPattern(this.state.overrides.grokPattern, name, i);
+    const newGrokFieldNames = getGrokFieldNames(newGrokPattern, this.state.overrides.grokPattern);
+    this.setOverride({ grokPattern: newGrokPattern, grokFieldNames: newGrokFieldNames });
+  };
+
   grokPatternChange = (e) => {
-    this.setOverride({ grokPattern: e.target.value });
+    const newGrokPattern = e.target.value;
+    const newGrokFieldNames = getGrokFieldNames(newGrokPattern, this.state.overrides.grokPattern);
+    this.setOverride({ grokPattern: newGrokPattern, grokFieldNames: newGrokFieldNames });
   };
 
   onLinesToSampleChange = (e) => {
@@ -247,9 +280,11 @@ class OverridesUI extends Component {
       customDelimiter,
       customTimestampFormat,
       originalColumnNames,
+      originalGrokFieldNames,
       linesToSampleValid,
       timestampFormatError,
       timestampFormatValid,
+      containsTimeField,
       overrides,
     } = this.state;
 
@@ -263,6 +298,7 @@ class OverridesUI extends Component {
       shouldTrimFields,
       // charset,
       columnNames,
+      grokFieldNames,
       grokPattern,
       linesToSample,
     } = overrides;
@@ -319,7 +355,7 @@ class OverridesUI extends Component {
             isClearable={false}
           />
         </EuiFormRow>
-        {format === 'delimited' && (
+        {format === FILE_FORMATS.DELIMITED && (
           <React.Fragment>
             <EuiFormRow
               label={
@@ -396,7 +432,7 @@ class OverridesUI extends Component {
             </EuiFormRow>
           </React.Fragment>
         )}
-        {format === 'semi_structured_text' && (
+        {format === FILE_FORMATS.SEMI_STRUCTURED_TEXT && (
           <React.Fragment>
             <EuiFormRow
               label={
@@ -414,70 +450,78 @@ class OverridesUI extends Component {
             </EuiFormRow>
           </React.Fragment>
         )}
-        <EuiFormRow
-          helpText={timestampFormatHelp}
-          label={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.editFlyout.overrides.timestampFormatFormRowLabel"
-              defaultMessage="Timestamp format"
-            />
-          }
-        >
-          <EuiComboBox
-            options={timestampFormatOptions}
-            selectedOptions={selectedOption(timestampFormat)}
-            onChange={this.onTimestampFormatChange}
-            singleSelection={{ asPlainText: true }}
-            isClearable={false}
-          />
-        </EuiFormRow>
-        {timestampFormat === CUSTOM_DROPDOWN_OPTION && (
-          <EuiFormRow
-            error={timestampFormatErrorsList}
-            isInvalid={timestampFormatValid === false}
+
+        <EuiFormRow>
+          <EuiCheckbox
+            id={'shouldTrimFields'}
             label={
               <FormattedMessage
-                id="xpack.dataVisualizer.file.editFlyout.overrides.customTimestampFormatFormRowLabel"
-                defaultMessage="Custom timestamp format"
+                id="xpack.dataVisualizer.file.editFlyout.overrides.containsTimeFieldLabel"
+                defaultMessage="Contains time field"
               />
             }
-          >
-            <EuiFieldText
-              value={customTimestampFormat}
-              onChange={this.onCustomTimestampFormatChange}
-              isInvalid={timestampFormatValid === false}
-            />
-          </EuiFormRow>
-        )}
-
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.editFlyout.overrides.timeFieldFormRowLabel"
-              defaultMessage="Time field"
-            />
-          }
-        >
-          <EuiComboBox
-            options={fieldOptions}
-            selectedOptions={selectedOption(timestampField)}
-            onChange={this.onTimestampFieldChange}
-            singleSelection={{ asPlainText: true }}
-            isClearable={false}
+            checked={containsTimeField}
+            onChange={this.onContainsTimeFieldChange}
           />
         </EuiFormRow>
 
-        {/* <EuiFormRow
-          label="Charset"
-        >
-          <EuiComboBox
-            options={charsetOptions}
-            selectedOptions={selectedOption(charset)}
-            singleSelection={{ asPlainText: true }}
-            isClearable={false}
-          />
-        </EuiFormRow> */}
-        {format === 'delimited' && originalColumnNames.length > 0 && (
+        {containsTimeField ? (
+          <>
+            <EuiFormRow
+              helpText={timestampFormatHelp}
+              label={
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.editFlyout.overrides.timestampFormatFormRowLabel"
+                  defaultMessage="Timestamp format"
+                />
+              }
+            >
+              <EuiComboBox
+                options={timestampFormatOptions}
+                selectedOptions={selectedOption(timestampFormat)}
+                onChange={this.onTimestampFormatChange}
+                singleSelection={{ asPlainText: true }}
+                isClearable={false}
+              />
+            </EuiFormRow>
+            {timestampFormat === CUSTOM_DROPDOWN_OPTION && (
+              <EuiFormRow
+                error={timestampFormatErrorsList}
+                isInvalid={timestampFormatValid === false}
+                label={
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.editFlyout.overrides.customTimestampFormatFormRowLabel"
+                    defaultMessage="Custom timestamp format"
+                  />
+                }
+              >
+                <EuiFieldText
+                  value={customTimestampFormat}
+                  onChange={this.onCustomTimestampFormatChange}
+                  isInvalid={timestampFormatValid === false}
+                />
+              </EuiFormRow>
+            )}
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.editFlyout.overrides.timeFieldFormRowLabel"
+                  defaultMessage="Time field"
+                />
+              }
+            >
+              <EuiComboBox
+                options={fieldOptions}
+                selectedOptions={selectedOption(timestampField)}
+                onChange={this.onTimestampFieldChange}
+                singleSelection={{ asPlainText: true }}
+                isClearable={false}
+              />
+            </EuiFormRow>
+          </>
+        ) : null}
+
+        {format === FILE_FORMATS.DELIMITED && originalColumnNames.length > 0 && (
           <React.Fragment>
             <EuiSpacer />
             <EuiTitle size="s">
@@ -494,6 +538,29 @@ class OverridesUI extends Component {
                 <EuiFieldText
                   value={columnNames[i]}
                   onChange={(e) => this.onColumnNameChange(e, i)}
+                />
+              </EuiFormRow>
+            ))}
+          </React.Fragment>
+        )}
+
+        {format === FILE_FORMATS.SEMI_STRUCTURED_TEXT && originalGrokFieldNames.length > 0 && (
+          <React.Fragment>
+            <EuiSpacer />
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.editFlyout.overrides.editFieldNamesTitle"
+                  defaultMessage="Edit field names"
+                />
+              </h3>
+            </EuiTitle>
+
+            {originalGrokFieldNames.map((f, i) => (
+              <EuiFormRow label={f} key={f}>
+                <EuiFieldText
+                  value={grokFieldNames[i]}
+                  onChange={(e) => this.onGrokPatternFieldChange(e, i, grokPattern)}
                 />
               </EuiFormRow>
             ))}
@@ -516,76 +583,4 @@ function getSortedFields(fields) {
   return fields
     .map((f) => ({ label: f }))
     .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
-}
-
-// Some delimiter characters cannot be used as items in select list.
-// so show a textual description of the character instead.
-function convertDelimiter(d) {
-  switch (d) {
-    case ',':
-      return {
-        delimiter: 'comma',
-      };
-    case '\t':
-      return {
-        delimiter: 'tab',
-      };
-    case ';':
-      return {
-        delimiter: 'semicolon',
-      };
-    case '|':
-      return {
-        delimiter: 'pipe',
-      };
-    case ' ':
-      return {
-        delimiter: 'space',
-      };
-
-    default:
-      return {
-        delimiter: CUSTOM_DROPDOWN_OPTION,
-        customDelimiter: d,
-      };
-  }
-}
-
-// Convert the delimiter textual descriptions back to their real characters.
-function convertDelimiterBack(delimiter, customDelimiter) {
-  switch (delimiter) {
-    case 'comma':
-      return ',';
-    case 'tab':
-      return '\t';
-    case 'semicolon':
-      return ';';
-    case 'pipe':
-      return '|';
-    case 'space':
-      return ' ';
-    case CUSTOM_DROPDOWN_OPTION:
-      return customDelimiter;
-
-    default:
-      return undefined;
-  }
-}
-
-function getColumnNames(columnNames, originalSettings) {
-  const newColumnNames =
-    columnNames === undefined && originalSettings.columnNames !== undefined
-      ? [...originalSettings.columnNames]
-      : columnNames;
-
-  const originalColumnNames = newColumnNames !== undefined ? [...newColumnNames] : [];
-
-  return {
-    newColumnNames,
-    originalColumnNames,
-  };
-}
-
-function isLinesToSampleValid(linesToSample) {
-  return linesToSample > LINES_TO_SAMPLE_VALUE_MIN && linesToSample <= LINES_TO_SAMPLE_VALUE_MAX;
 }

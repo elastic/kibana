@@ -6,19 +6,20 @@
  */
 
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   LEGACY_RULES,
   LEGACY_RULE_DETAILS,
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
-import { MonitoringConfig } from '../../types';
-import { Expression } from './expression';
-import { Props } from '../components/param_details_form/expression';
+import type { MonitoringConfig } from '../../types';
+import { LazyExpression, LazyExpressionProps } from './lazy_expression';
 
-export function createLegacyAlertTypes(config: MonitoringConfig): AlertTypeModel[] {
+const DEFAULT_VALIDATE = () => ({ errors: {} });
+
+export function createLegacyAlertTypes(config: MonitoringConfig): RuleTypeModel[] {
   return LEGACY_RULES.map((legacyAlert) => {
+    const validate = LEGACY_RULE_DETAILS[legacyAlert].validate ?? DEFAULT_VALIDATE;
     return {
       id: legacyAlert,
       description: LEGACY_RULE_DETAILS[legacyAlert].description,
@@ -26,9 +27,16 @@ export function createLegacyAlertTypes(config: MonitoringConfig): AlertTypeModel
       documentationUrl(docLinks) {
         return `${docLinks.links.monitoring.alertsKibanaClusterAlerts}`;
       },
-      alertParamsExpression: (props: Props) => <Expression {...props} config={config} />,
+      ruleParamsExpression: (props: LazyExpressionProps) => (
+        <LazyExpression
+          {...props}
+          defaults={LEGACY_RULE_DETAILS[legacyAlert].defaults}
+          expressionConfig={LEGACY_RULE_DETAILS[legacyAlert].expressionConfig}
+          config={config}
+        />
+      ),
       defaultActionMessage: '{{context.internalFullMessage}}',
-      validate: () => ({ errors: {} }),
+      validate,
       requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
     };
   });

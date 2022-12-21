@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { CanvasWorkpad, CanvasTemplate } from '../../types';
-import { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
+import type { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
 
 export type FoundWorkpads = Array<Pick<CanvasWorkpad, 'name' | 'id' | '@timestamp' | '@created'>>;
 export type FoundWorkpad = FoundWorkpads[number];
@@ -18,9 +19,19 @@ export interface WorkpadFindResponse {
 export interface TemplateFindResponse {
   templates: CanvasTemplate[];
 }
+
+export interface ResolveWorkpadResponse {
+  workpad: CanvasWorkpad;
+  outcome: ResolvedSimpleSavedObject['outcome'];
+  aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
+  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+}
+
 export interface CanvasWorkpadService {
   get: (id: string) => Promise<CanvasWorkpad>;
+  resolve: (id: string) => Promise<ResolveWorkpadResponse>;
   create: (workpad: CanvasWorkpad) => Promise<CanvasWorkpad>;
+  import: (workpad: CanvasWorkpad) => Promise<CanvasWorkpad>;
   createFromTemplate: (templateId: string) => Promise<CanvasWorkpad>;
   find: (term: string) => Promise<WorkpadFindResponse>;
   remove: (id: string) => Promise<void>;

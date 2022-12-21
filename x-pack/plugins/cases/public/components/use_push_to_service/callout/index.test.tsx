@@ -10,7 +10,8 @@ import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../common/mock';
 import { createCalloutId } from './helpers';
-import { CaseCallOut, CaseCallOutProps } from '.';
+import type { CaseCallOutProps } from '.';
+import { CaseCallOut } from '.';
 
 describe('CaseCallOut ', () => {
   beforeEach(() => {
@@ -18,10 +19,6 @@ describe('CaseCallOut ', () => {
   });
 
   const defaultProps: CaseCallOutProps = {
-    configureCasesNavigation: {
-      href: 'testHref',
-      onClick: jest.fn(),
-    },
     hasConnectors: true,
     messages: [
       { id: 'message-one', title: 'title', description: <p>{'we have two messages'}</p> },
@@ -83,7 +80,6 @@ describe('CaseCallOut ', () => {
     const id = createCalloutId(['message-one', 'message-two']);
     wrapper.find(`[data-test-subj="callout-onclick-${id}"]`).last().simulate('click');
     expect(defaultProps.onEditClick).toHaveBeenCalled();
-    expect(defaultProps.configureCasesNavigation.onClick).not.toHaveBeenCalled();
   });
 
   it('Redirects to configure page when hasConnectors=false', () => {
@@ -100,6 +96,5 @@ describe('CaseCallOut ', () => {
     const id = createCalloutId(['message-one', 'message-two']);
     wrapper.find(`[data-test-subj="callout-onclick-${id}"]`).last().simulate('click');
     expect(defaultProps.onEditClick).not.toHaveBeenCalled();
-    expect(defaultProps.configureCasesNavigation.onClick).toHaveBeenCalled();
   });
 });

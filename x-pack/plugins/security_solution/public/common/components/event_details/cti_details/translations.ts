@@ -6,23 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getRiskEntityTranslation } from '../../../../explore/components/risk_score/translations';
+import type { RiskScoreEntity } from '../../../../../common/search_strategy';
+export * from '../../../../explore/components/risk_score/translations';
 
-export const PROVIDER_PREPOSITION = i18n.translate(
-  'xpack.securitySolution.eventDetails.ctiSummary.providerPreposition',
+export const FEED_NAME_PREPOSITION = i18n.translate(
+  'xpack.securitySolution.eventDetails.ctiSummary.feedNamePreposition',
   {
     defaultMessage: 'from',
   }
 );
 
-export const INDICATOR_TOOLTIP_TITLE = i18n.translate(
-  'xpack.securitySolution.eventDetails.ctiSummary.indicatorEnrichmentTooltipTitle',
+export const INDICATOR_ENRICHMENT_TITLE = i18n.translate(
+  'xpack.securitySolution.eventDetails.ctiSummary.indicatorEnrichmentTitle',
   {
     defaultMessage: 'Threat Match Detected',
   }
 );
 
-export const INVESTIGATION_TOOLTIP_TITLE = i18n.translate(
-  'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTooltipTitle',
+export const INVESTIGATION_ENRICHMENT_TITLE = i18n.translate(
+  'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTitle',
   {
     defaultMessage: 'Enriched with Threat Intelligence',
   }
@@ -36,26 +39,18 @@ export const INDICATOR_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
+export const INFORMATION_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.eventDetails.ctiSummary.informationAriaLabel',
+  {
+    defaultMessage: 'Information',
+  }
+);
+
 export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTooltipContent',
   {
     defaultMessage:
       'This field value has additional information available from threat intelligence sources.',
-  }
-);
-
-export const NO_INDICATOR_ENRICHMENTS_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.alertDetails.noIndicatorEnrichmentsDescription',
-  {
-    defaultMessage:
-      'We did not find any threat intelligence indicators with any of the indicator match rules.',
-  }
-);
-
-export const NO_INVESTIGATION_ENRICHMENTS_TITLE = i18n.translate(
-  'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsTitle',
-  {
-    defaultMessage: 'No Threat Intelligence Enrichment Found',
   }
 );
 
@@ -67,13 +62,6 @@ export const NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION = i18n.translate(
   }
 );
 
-export const NO_ENRICHMENTS_FOUND_TITLE = i18n.translate(
-  'xpack.securitySolution.alertDetails.noEnrichmentsFoundTitle',
-  {
-    defaultMessage: 'No Indicator Match or Threat Intel Enrichment Found',
-  }
-);
-
 export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alertDetails.noEnrichmentsFoundDescription',
   {
@@ -82,21 +70,10 @@ export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
   }
 );
 
-export const CHECK_DOCS = i18n.translate('xpack.securitySolution.alertDetails.checkDocs', {
-  defaultMessage: 'please check out our documentation',
-});
-
 export const INVESTIGATION_QUERY_TITLE = i18n.translate(
   'xpack.securitySolution.alertDetails.investigationTimeQueryTitle',
   {
     defaultMessage: 'Enrichment with Threat Intelligence',
-  }
-);
-
-export const CHANGE_ENRICHMENT_LOOKBACK = i18n.translate(
-  'xpack.securitySolution.alertDetails.changeEnrichmentQueryLookback',
-  {
-    defaultMessage: 'search a different time range',
   }
 );
 
@@ -117,3 +94,34 @@ export const ENRICHMENT_LOOKBACK_END_DATE = i18n.translate(
 export const REFRESH = i18n.translate('xpack.securitySolution.alertDetails.refresh', {
   defaultMessage: 'Refresh',
 });
+
+export const ENRICHED_DATA = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.enrichedDataTitle',
+  {
+    defaultMessage: 'Enriched data',
+  }
+);
+
+export const CURRENT_RISK_CLASSIFICATION = (riskEntity: RiskScoreEntity) =>
+  i18n.translate('xpack.securitySolution.alertDetails.overview.hostRiskClassification', {
+    defaultMessage: 'Current {riskEntity} risk classification',
+    values: {
+      riskEntity: getRiskEntityTranslation(riskEntity, true),
+    },
+  });
+
+export const ORIGINAL_RISK_CLASSIFICATION = (riskEntity: RiskScoreEntity) =>
+  i18n.translate('xpack.securitySolution.alertDetails.overview.originalHostRiskClassification', {
+    defaultMessage: 'Original {riskEntity} risk classification',
+    values: {
+      riskEntity: getRiskEntityTranslation(riskEntity, true),
+    },
+  });
+
+export const RISK_DATA_TITLE = (riskEntity: RiskScoreEntity) =>
+  i18n.translate('xpack.securitySolution.alertDetails.overview.hostRiskDataTitle', {
+    defaultMessage: '{riskEntity} Risk Data',
+    values: {
+      riskEntity: getRiskEntityTranslation(riskEntity),
+    },
+  });

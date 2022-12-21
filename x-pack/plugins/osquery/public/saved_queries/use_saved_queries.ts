@@ -5,42 +5,45 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
+import type { SavedObjectsFindResponse } from '@kbn/core/public';
 import { useKibana } from '../common/lib/kibana';
-import { savedQuerySavedObjectType } from '../../common/types';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 import { SAVED_QUERIES_ID } from './constants';
+import type { SavedQuerySO } from '../routes/saved_queries/list';
 
 export const useSavedQueries = ({
   isLive = false,
   pageIndex = 0,
   pageSize = 10000,
   sortField = 'updated_at',
-  sortDirection = 'desc',
+  sortOrder = 'desc',
 }) => {
-  const { savedObjects } = useKibana().services;
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
-  return useQuery(
-    [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortDirection }],
-    async () =>
-      savedObjects.client.find<{
-        id: string;
-        description?: string;
-        query: string;
-        updated_at: string;
-        updated_by: string;
-        created_at: string;
-        created_by: string;
-      }>({
-        type: savedQuerySavedObjectType,
-        page: pageIndex + 1,
-        perPage: pageSize,
-        sortField,
+  return useQuery<
+    Omit<SavedObjectsFindResponse, 'savedObjects'> & {
+      data: SavedQuerySO[];
+    },
+    { body: { error: string; message: string } }
+  >(
+    [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortOrder }],
+    () =>
+      http.get('/api/osquery/saved_queries', {
+        query: { page: pageIndex + 1, pageSize, sort: sortField, sortOrder },
       }),
     {
       keepPreviousData: true,
-      // Refetch the data every 10 seconds
-      refetchInterval: isLive ? 5000 : false,
+      refetchInterval: isLive ? 10000 : false,
+      onError: (error) => {
+        setErrorToast(error, {
+          title: error.body.error,
+          toastMessage: error.body.message,
+        });
+      },
+      refetchOnWindowFocus: !!isLive,
     }
   );
 };

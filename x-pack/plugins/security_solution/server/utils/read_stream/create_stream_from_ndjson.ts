@@ -9,7 +9,7 @@ import { Transform } from 'stream';
 import { has, isString } from 'lodash/fp';
 import { createMapStream, createFilterStream } from '@kbn/utils';
 
-import { ImportRulesSchemaDecoded } from '../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { RuleToImport } from '../../../common/detection_engine/rule_management';
 
 export interface RulesObjectsExportResultDetails {
   /** number of successfully exported objects */
@@ -29,7 +29,7 @@ export const parseNdjsonStrings = (): Transform => {
 };
 
 export const filterExportedCounts = (): Transform => {
-  return createFilterStream<ImportRulesSchemaDecoded | RulesObjectsExportResultDetails>(
+  return createFilterStream<RuleToImport | RulesObjectsExportResultDetails>(
     (obj) => obj != null && !has('exported_count', obj)
   );
 };
@@ -49,11 +49,15 @@ export const createLimitStream = (limit: number): Transform => {
   });
 };
 
-export const transformDataToNdjson = (data: unknown[]): string => {
-  if (data.length !== 0) {
-    const dataString = data.map((rule) => JSON.stringify(rule)).join('\n');
-    return `${dataString}\n`;
-  } else {
-    return '';
-  }
+// // Adaptation from: saved_objects/import/create_limit_stream.ts
+export const createRulesLimitStream = (limit: number): Transform => {
+  return new Transform({
+    objectMode: true,
+    async transform(obj, _, done) {
+      if (obj.rules.length >= limit) {
+        return done(new Error(`Can't import more than ${limit} rules`));
+      }
+      done(undefined, obj);
+    },
+  });
 };

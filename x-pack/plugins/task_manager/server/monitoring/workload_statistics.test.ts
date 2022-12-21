@@ -6,7 +6,7 @@
  */
 
 import { first, take, bufferCount } from 'rxjs/operators';
-import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   TaskTypeAggregation,
   WorkloadAggregationResponse,
@@ -21,7 +21,7 @@ import { times } from 'lodash';
 import { taskStoreMock } from '../task_store.mock';
 import { of, Subject } from 'rxjs';
 import { sleep } from '../test_utils';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 type ResponseWithAggs = Omit<estypes.SearchResponse<ConcreteTaskInstance>, 'aggregations'> & {
   aggregations: WorkloadAggregationResponse;
@@ -65,7 +65,9 @@ describe('Workload Statistics Aggregator', () => {
             doc_count: 13,
           },
           ownerIds: {
-            value: 1,
+            ownerIds: {
+              value: 1,
+            },
           },
           // The `FiltersAggregate` doesn't cover the case of a nested `AggregationsAggregationContainer`, in which `FiltersAggregate`
           // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
@@ -121,14 +123,26 @@ describe('Workload Statistics Aggregator', () => {
             schedule: {
               terms: {
                 field: 'task.schedule.interval',
+                size: 100,
               },
             },
             nonRecurringTasks: {
               missing: { field: 'task.schedule' },
             },
             ownerIds: {
-              cardinality: {
-                field: 'task.ownerId',
+              filter: {
+                range: {
+                  'task.startedAt': {
+                    gte: 'now-1w/w',
+                  },
+                },
+              },
+              aggs: {
+                ownerIds: {
+                  cardinality: {
+                    field: 'task.ownerId',
+                  },
+                },
               },
             },
             idleTasks: {
@@ -264,7 +278,9 @@ describe('Workload Statistics Aggregator', () => {
           doc_count: 13,
         },
         ownerIds: {
-          value: 1,
+          ownerIds: {
+            value: 1,
+          },
         },
         // The `FiltersAggregate` doesn't cover the case of a nested `AggregationsAggregationContainer`, in which `FiltersAggregate`
         // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
@@ -605,7 +621,9 @@ describe('Workload Statistics Aggregator', () => {
             doc_count: 13,
           },
           ownerIds: {
-            value: 3,
+            ownerIds: {
+              value: 3,
+            },
           },
           // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
           // would not have a `buckets` property, but rather a keyed property that's inferred from the request.

@@ -5,6 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { LegendSize } from '@kbn/visualizations-plugin/common';
+
+const mockUiStateGet = jest.fn().mockReturnValue(() => false);
+
 export const sampleAreaVis = {
   type: {
     name: 'area',
@@ -14,7 +19,6 @@ export const sampleAreaVis = {
     stage: 'production',
     options: {
       showTimePicker: true,
-      showQueryBar: true,
       showFilterBar: true,
       showIndexSelection: true,
       hierarchicalData: false,
@@ -105,6 +109,7 @@ export const sampleAreaVis = {
       },
     },
     editorConfig: {
+      enableDataViewChange: true,
       optionTabs: [
         {
           name: 'advanced',
@@ -149,7 +154,16 @@ export const sampleAreaVis = {
             title: 'X-axis',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: [
+              '!geohash_grid',
+              '!geotile_grid',
+              '!filter',
+              '!sampler',
+              '!diversified_sampler',
+              '!rare_terms',
+              '!multi_terms',
+              '!significant_text',
+            ],
             editor: false,
             params: [],
           },
@@ -159,7 +173,16 @@ export const sampleAreaVis = {
             title: 'Split series',
             min: 0,
             max: 3,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: [
+              '!geohash_grid',
+              '!geotile_grid',
+              '!filter',
+              '!sampler',
+              '!diversified_sampler',
+              '!rare_terms',
+              '!multi_terms',
+              '!significant_text',
+            ],
             editor: false,
             params: [],
           },
@@ -169,7 +192,16 @@ export const sampleAreaVis = {
             title: 'Split chart',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: [
+              '!geohash_grid',
+              '!geotile_grid',
+              '!filter',
+              '!sampler',
+              '!diversified_sampler',
+              '!rare_terms',
+              '!multi_terms',
+              '!significant_text',
+            ],
             params: [
               {
                 name: 'row',
@@ -255,6 +287,7 @@ export const sampleAreaVis = {
     addTooltip: true,
     addLegend: true,
     legendPosition: 'top',
+    legendSize: LegendSize.SMALL,
     times: [],
     addTimeMarker: false,
     truncateLegend: true,
@@ -1780,11 +1813,33 @@ export const sampleAreaVis = {
     },
     aggs: {
       typesRegistry: {},
-      getResponseAggs: () => [
+      bySchemaName: () => [
         {
           id: '1',
           enabled: true,
           type: 'sum',
+          params: {
+            field: 'total_quantity',
+          },
+          schema: 'metric',
+          makeLabel: () => 'Total quantity',
+          toSerializedFieldFormat: () => ({
+            id: 'number',
+            params: {
+              parsedUrl: {
+                origin: 'http://localhost:5801',
+                pathname: '/app/visualize',
+                basePath: '',
+              },
+            },
+          }),
+        },
+      ],
+      getResponseAggs: () => [
+        {
+          id: '1',
+          enabled: true,
+          type: { name: 'sum' },
           params: {
             field: 'total_quantity',
           },
@@ -1803,7 +1858,7 @@ export const sampleAreaVis = {
         {
           id: '2',
           enabled: true,
-          type: 'date_histogram',
+          type: { name: 'date_histogram' },
           params: {
             field: 'order_date',
             timeRange: {
@@ -1818,6 +1873,14 @@ export const sampleAreaVis = {
             extended_bounds: {},
           },
           schema: 'segment',
+          buckets: {
+            getInterval: () => ({ esUnit: 'h', esValue: '1' }),
+            getScaledDateFormat: () => ({}),
+            getBounds: () => ({}),
+            setBounds: () => {},
+            setInterval: () => {},
+          },
+          fieldIsTimeField: () => false,
           toSerializedFieldFormat: () => ({
             id: 'date',
             params: { pattern: 'HH:mm:ss.SSS' },
@@ -1826,7 +1889,7 @@ export const sampleAreaVis = {
         {
           id: '3',
           enabled: true,
-          type: 'terms',
+          type: { name: 'terms' },
           params: {
             field: 'category.keyword',
             orderBy: '1',
@@ -1856,5 +1919,10 @@ export const sampleAreaVis = {
     },
   },
   isHierarchical: () => false,
-  uiState: {},
+  uiState: {
+    vis: {
+      legendOpen: false,
+    },
+    get: mockUiStateGet,
+  },
 };

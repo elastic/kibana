@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
     });
 
     const jobId = `ihp_1_${Date.now()}`;
@@ -61,19 +62,20 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           scatterplotMatrixColorsWizard: [
             // markers
-            { color: '#52B398', percentage: 15 },
+            { color: '#5078AA', percentage: 15 },
             // grey boilerplate
-            { color: '#6A717D', percentage: 33 },
+            { color: '#69707D', percentage: 12 },
           ],
           scatterplotMatrixColorStatsResults: [
-            // red markers
-            { color: '#D98071', percentage: 1 },
-            // tick/grid/axis, grey markers
-            { color: '#6A717D', percentage: 33 },
-            { color: '#D3DAE6', percentage: 8 },
-            { color: '#98A1B3', percentage: 12 },
+            // outlier markers
+            { color: '#BE6E96', percentage: 1 },
+            // regular markers
+            { color: '#6496BE', percentage: 15 },
+            // tick/grid/axis
+            { color: '#69707D', percentage: 12 },
+            { color: '#D2DCE6', percentage: 10 },
             // anti-aliasing
-            { color: '#F5F7FA', percentage: 30 },
+            { color: '#F5F7FA', percentage: 35 },
           ],
           runtimeFieldsEditorContent: [
             '{',
@@ -118,8 +120,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
 
-          await ml.testExecution.logTestStep('loads the source selection modal');
-
           // Disable anti-aliasing to stabilize canvas image rendering assertions
           await ml.commonUI.disableAntiAliasing();
 
@@ -161,12 +161,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the source data preview');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
-
-          await ml.testExecution.logTestStep('enables the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts(true);
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramChartEnabled(true);
 
           await ml.testExecution.logTestStep('displays the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramCharts(
+          await ml.dataFrameAnalyticsCreation.enableAndAssertSourceDataPreviewHistogramCharts(
             testData.expected.histogramCharts
           );
 
@@ -217,12 +215,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
 
-          await ml.testExecution.logTestStep('sets the create index pattern switch');
-          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
-            testData.createIndexPattern
-          );
-
           await ml.testExecution.logTestStep('continues to the validation step');
           await ml.dataFrameAnalyticsCreation.continueToValidationStep();
 
@@ -232,6 +224,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
+
+          await ml.testExecution.logTestStep('sets the create data view switch');
+          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
+          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
+            testData.createIndexPattern
+          );
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {

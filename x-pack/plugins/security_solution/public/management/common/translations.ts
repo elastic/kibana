@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { OperatingSystem } from '../../../common/endpoint/types';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import type { ServerApiError } from '../../common/types';
 
 export const ENDPOINTS_TAB = i18n.translate('xpack.securitySolution.endpointsTab', {
   defaultMessage: 'Endpoints',
@@ -25,10 +25,6 @@ export const EVENT_FILTERS_TAB = i18n.translate('xpack.securitySolution.eventFil
   defaultMessage: 'Event filters',
 });
 
-export const BETA_BADGE_LABEL = i18n.translate('xpack.securitySolution.administration.list.beta', {
-  defaultMessage: 'Beta',
-});
-
 export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   [OperatingSystem.WINDOWS]: i18n.translate('xpack.securitySolution.administration.os.windows', {
     defaultMessage: 'Windows',
@@ -39,4 +35,11 @@ export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   [OperatingSystem.LINUX]: i18n.translate('xpack.securitySolution.administration.os.linux', {
     defaultMessage: 'Linux',
   }),
+};
+
+export const getLoadPoliciesError = (error: ServerApiError) => {
+  return i18n.translate('xpack.securitySolution.exceptions.failedLoadPolicies', {
+    defaultMessage: 'There was an error loading policies: "{error}"',
+    values: { error: error.message },
+  });
 };

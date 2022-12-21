@@ -18,13 +18,9 @@ import {
   EuiToolTip,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  getLayerWizards,
-  LayerWizard,
-  LayerWizardWithMeta,
-} from '../../../classes/layers/layer_wizard_registry';
+import { getLayerWizards, LayerWizard, LayerWizardWithMeta } from '../../../classes/layers';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import './layer_wizard_select.scss';
 
@@ -115,6 +111,7 @@ export class LayerWizardSelect extends Component<Props, State> {
           key={category}
           isSelected={category === this.state.selectedCategory}
           onClick={() => this._filterByCategory(category)}
+          minWidth={false}
         >
           {getCategoryLabel(category)}
         </EuiFacetButton>
@@ -127,6 +124,7 @@ export class LayerWizardSelect extends Component<Props, State> {
           key="all"
           isSelected={!this.state.selectedCategory}
           onClick={() => this._filterByCategory(null)}
+          minWidth={false}
         >
           <FormattedMessage id="xpack.maps.layerWizardSelect.allCategories" defaultMessage="All" />
         </EuiFacetButton>
@@ -161,7 +159,7 @@ export class LayerWizardSelect extends Component<Props, State> {
           <EuiCard
             title={layerWizard.title}
             titleSize="xs"
-            betaBadgeLabel={layerWizard.isBeta ? 'beta' : undefined}
+            betaBadgeProps={{ label: layerWizard.isBeta ? 'beta' : '' }}
             icon={icon}
             onClick={onClick}
             description={layerWizard.description}

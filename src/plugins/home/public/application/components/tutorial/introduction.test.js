@@ -7,24 +7,23 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { Introduction } from './introduction';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { TutorialsCategory } from '../../../../common/constants';
 
-jest.mock('../../../../../kibana_react/public', () => {
-  return {
-    Markdown: () => <div className="markdown" />,
-  };
-});
+const basePathMock = httpServiceMock.createBasePath();
 
 test('render', () => {
   const component = shallowWithIntl(
     <Introduction.WrappedComponent
       description="this is a great tutorial about..."
       title="Great tutorial"
+      basePath={basePathMock}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 describe('props', () => {
@@ -33,10 +32,11 @@ describe('props', () => {
       <Introduction.WrappedComponent
         description="this is a great tutorial about..."
         title="Great tutorial"
+        basePath={basePathMock}
         iconType="logoElastic"
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('exportedFieldsUrl', () => {
@@ -44,10 +44,11 @@ describe('props', () => {
       <Introduction.WrappedComponent
         description="this is a great tutorial about..."
         title="Great tutorial"
+        basePath={basePathMock}
         exportedFieldsUrl="exported_fields_url"
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('previewUrl', () => {
@@ -55,10 +56,11 @@ describe('props', () => {
       <Introduction.WrappedComponent
         description="this is a great tutorial about..."
         title="Great tutorial"
+        basePath={basePathMock}
         previewUrl="preview_image_url"
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('isBeta', () => {
@@ -66,9 +68,36 @@ describe('props', () => {
       <Introduction.WrappedComponent
         description="this is a great tutorial about..."
         title="Great tutorial"
+        basePath={basePathMock}
         isBeta={true}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
+  });
+
+  test('Beats badge should show', () => {
+    const component = shallowWithIntl(
+      <Introduction.WrappedComponent
+        description="this is a great tutorial about..."
+        title="Great tutorial"
+        basePath={basePathMock}
+        isBeta={true}
+        category={TutorialsCategory.METRICS}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('Beats badge should not show', () => {
+    const component = shallowWithIntl(
+      <Introduction.WrappedComponent
+        description="this is a great tutorial about..."
+        title="Great tutorial"
+        basePath={basePathMock}
+        isBeta={true}
+        category={TutorialsCategory.SECURITY_SOLUTION}
+      />
+    );
+    expect(component).toMatchSnapshot();
   });
 });

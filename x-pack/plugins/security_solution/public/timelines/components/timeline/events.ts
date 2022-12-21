@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ColumnId } from './body/column_id';
-import { DataProvider, QueryOperator } from './data_providers/data_provider';
-export {
+import type { ColumnId } from './body/column_id';
+import type { DataProvider, QueryOperator } from './data_providers/data_provider';
+export type {
   OnColumnSorted,
   OnColumnsSorted,
   OnColumnRemoved,
@@ -36,7 +36,7 @@ export type OnDataProviderEdited = ({
   id: string;
   operator: QueryOperator;
   providerId: string;
-  value: string | number;
+  value: string | number | Array<string | number>;
   type: DataProvider['type'];
 }) => void;
 

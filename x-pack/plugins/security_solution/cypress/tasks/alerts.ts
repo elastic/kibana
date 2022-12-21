@@ -7,37 +7,81 @@
 
 import {
   ADD_EXCEPTION_BTN,
-  ALERT_RISK_SCORE_HEADER,
   ALERT_CHECKBOX,
+  CHART_SELECT,
   CLOSE_ALERT_BTN,
   CLOSE_SELECTED_ALERTS_BTN,
   CLOSED_ALERTS_FILTER_BTN,
   EXPAND_ALERT_BTN,
+  GROUP_BY_TOP_INPUT,
   ACKNOWLEDGED_ALERTS_FILTER_BTN,
   LOADING_ALERTS_PANEL,
   MANAGE_ALERT_DETECTION_RULES_BTN,
   MARK_ALERT_ACKNOWLEDGED_BTN,
-  MARK_SELECTED_ALERTS_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
   OPENED_ALERTS_FILTER_BTN,
   SEND_ALERT_TO_TIMELINE_BTN,
+  SELECT_TABLE,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
-  SELECT_EVENT_CHECKBOX,
+  CLOSE_FLYOUT,
+  OPEN_ANALYZER_BTN,
+  TAKE_ACTION_BTN,
+  TAKE_ACTION_MENU,
+  ADD_ENDPOINT_EXCEPTION_BTN,
 } from '../screens/alerts';
-import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
-import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
+import { REFRESH_BUTTON } from '../screens/security_header';
+import {
+  ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE,
+  TIMELINE_COLUMN_SPINNER,
+} from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
   ENRICHMENT_QUERY_END_INPUT,
   ENRICHMENT_QUERY_RANGE_PICKER,
   ENRICHMENT_QUERY_START_INPUT,
   THREAT_INTEL_TAB,
+  CELL_EXPAND_VALUE,
+  CELL_EXPANSION_POPOVER,
+  USER_DETAILS_LINK,
 } from '../screens/alerts_details';
+import { FIELD_INPUT } from '../screens/exceptions';
+import { LOADING_SPINNER } from '../screens/common/page';
 
 export const addExceptionFromFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
-  cy.get(ADD_EXCEPTION_BTN).click();
+  expandFirstAlertActions();
+  cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).should('be.visible');
+  cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).first().click();
+  cy.get(LOADING_SPINNER).should('exist');
+  cy.get(LOADING_SPINNER).should('not.exist');
+};
+
+export const openAddEndpointExceptionFromFirstAlert = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ADD_ENDPOINT_EXCEPTION_BTN).trigger('click');
+      return $el.find(FIELD_INPUT);
+    })
+    .should('be.visible');
+};
+
+export const openAddExceptionFromAlertDetails = () => {
+  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
+
+  cy.root()
+    .pipe(($el) => {
+      $el.find(TAKE_ACTION_BTN).trigger('click');
+      return $el.find(TAKE_ACTION_MENU);
+    })
+    .should('be.visible');
+
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ADD_EXCEPTION_BTN).trigger('click');
+      return $el.find(ADD_EXCEPTION_BTN);
+    })
+    .should('not.be.visible');
 };
 
 export const closeFirstAlert = () => {
@@ -62,20 +106,23 @@ export const closeAlerts = () => {
     .should('not.be.visible');
 };
 
+export const expandFirstAlertActions = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN, { timeout: 10000 }).should('be.visible');
+  cy.get(TIMELINE_CONTEXT_MENU_BTN, { timeout: 10000 }).first().click({ force: true });
+};
+
 export const expandFirstAlert = () => {
   cy.get(EXPAND_ALERT_BTN).should('exist');
 
   cy.get(EXPAND_ALERT_BTN)
     .first()
-    .pipe(($el) => $el.trigger('click'))
-    .should('exist');
+    .should('exist')
+    .pipe(($el) => $el.trigger('click'));
 };
+
+export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
 
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
-
-export const viewThreatDetails = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
-};
 
 export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
@@ -91,8 +138,8 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
 
 export const goToClosedAlerts = () => {
   cy.get(CLOSED_ALERTS_FILTER_BTN).click();
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
-  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
@@ -102,10 +149,8 @@ export const goToManageAlertsDetectionRules = () => {
 
 export const goToOpenedAlerts = () => {
   cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
-  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
-  cy.get(LOADING_INDICATOR).should('exist');
-  cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
 };
 
 export const openFirstAlert = () => {
@@ -118,10 +163,20 @@ export const openAlerts = () => {
   cy.get(OPEN_ALERT_BTN).click();
 };
 
+export const selectCountTable = () => {
+  cy.get(CHART_SELECT).click({ force: true });
+  cy.get(SELECT_TABLE).click();
+};
+
+export const clearGroupByTopInput = () => {
+  cy.get(GROUP_BY_TOP_INPUT).focus();
+  cy.get(GROUP_BY_TOP_INPUT).type('{backspace}');
+};
+
 export const goToAcknowledgedAlerts = () => {
   cy.get(ACKNOWLEDGED_ALERTS_FILTER_BTN).click();
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
-  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
@@ -130,44 +185,27 @@ export const markAcknowledgedFirstAlert = () => {
   cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
 };
 
-export const markAcknowledgedAlerts = () => {
-  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
-  cy.get(MARK_SELECTED_ALERTS_ACKNOWLEDGED_BTN).click();
-};
-
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   for (let i = 0; i < numberOfAlerts; i++) {
     cy.get(ALERT_CHECKBOX).eq(i).click({ force: true });
   }
 };
 
-export const sortRiskScore = () => {
-  cy.get(ALERT_RISK_SCORE_HEADER).click();
-  cy.get(TIMELINE_COLUMN_SPINNER).should('exist');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
-};
-
 export const investigateFirstAlertInTimeline = () => {
   cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click({ force: true });
 };
 
-export const waitForAlerts = () => {
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+export const openAnalyzerForFirstAlertInTimeline = () => {
+  cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
-export const waitForAlertsIndexToBeCreated = () => {
-  cy.request({
-    url: '/api/detection_engine/index',
-    failOnStatusCode: false,
-  }).then((response) => {
-    if (response.status !== 200) {
-      cy.request({
-        method: 'POST',
-        url: `/api/detection_engine/index`,
-        headers: { 'kbn-xsrf': 'create-signals-index' },
-      });
-    }
-  });
+export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: number) => {
+  cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
+  cy.get(ALERT_TABLE_CELL_ACTIONS_ADD_TO_TIMELINE).first().click({ force: true });
+};
+
+export const waitForAlerts = () => {
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
 };
 
 export const waitForAlertsPanelToBeLoaded = () => {
@@ -175,7 +213,20 @@ export const waitForAlertsPanelToBeLoaded = () => {
   cy.get(LOADING_ALERTS_PANEL).should('not.exist');
 };
 
-export const waitForAlertsToBeLoaded = () => {
-  const expectedNumberOfDisplayedAlerts = 25;
-  cy.get(SELECT_EVENT_CHECKBOX).should('have.length', expectedNumberOfDisplayedAlerts);
+export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {
+  cy.get(columnSelector).eq(1).focus().find(CELL_EXPAND_VALUE).click({ force: true });
+};
+
+export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
+  cy.get(columnSelector).eq(0).scrollIntoView();
+
+  // Wait for data grid to populate column
+  cy.waitUntil(() => cy.get(columnSelector).then(($el) => $el.length > 1), {
+    interval: 500,
+    timeout: 12000,
+  });
+};
+
+export const openUserDetailsFlyout = () => {
+  cy.get(CELL_EXPANSION_POPOVER).find(USER_DETAILS_LINK).click();
 };

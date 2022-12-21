@@ -4,9 +4,9 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
+    "../../../typings/**/*",
     "__jest__/**/*",
     "common/**/*",
     "public/**/*",
@@ -15,7 +15,7 @@
     "public/**/*.json",
     "server/**/*.json"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },

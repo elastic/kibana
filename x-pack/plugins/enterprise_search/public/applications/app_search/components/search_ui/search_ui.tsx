@@ -10,9 +10,9 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DOCS_PREFIX } from '../../routes';
+import { SEARCH_UI_DOCS_URL } from '../../routes';
 import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
@@ -21,6 +21,7 @@ import { SearchUIForm } from './components/search_ui_form';
 import { SearchUIGraphic } from './components/search_ui_graphic';
 import { SEARCH_UI_TITLE } from './i18n';
 import { SearchUILogic } from './search_ui_logic';
+import './search_ui.scss';
 
 export const SearchUI: React.FC = () => {
   const { loadFieldData } = useActions(SearchUILogic);
@@ -62,7 +63,7 @@ export const SearchUI: React.FC = () => {
                 defaultMessage="Use the fields below to generate a sample search experience built with Search UI. Use the sample to preview search results, or build upon it to create your own custom search experience. {link}."
                 values={{
                   link: (
-                    <EuiLink target="_blank" href={`${DOCS_PREFIX}/reference-ui-guide.html`}>
+                    <EuiLink target="_blank" href={SEARCH_UI_DOCS_URL}>
                       <FormattedMessage
                         id="xpack.enterpriseSearch.appSearch.engine.searchUI.guideLinkText"
                         defaultMessage="Learn more about Search UI"
@@ -76,7 +77,7 @@ export const SearchUI: React.FC = () => {
           <EuiSpacer />
           <SearchUIForm />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem className="searchUIGraphicContainer">
           <SearchUIGraphic />
         </EuiFlexItem>
       </EuiFlexGroup>

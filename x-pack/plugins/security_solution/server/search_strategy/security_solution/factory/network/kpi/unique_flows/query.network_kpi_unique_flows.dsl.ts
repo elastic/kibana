@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NetworkKpiUniqueFlowsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
+import type { NetworkKpiUniqueFlowsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { getIpFilter } from '../common';
 
@@ -30,8 +30,8 @@ export const buildUniqueFlowsQuery = ({
 
   const dslQuery = {
     index: defaultIndex,
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       aggregations: {

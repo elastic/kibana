@@ -7,7 +7,8 @@
 
 // Can not use public Layer classes to extract references since this logic must run in both client and server.
 
-import { SavedObjectReference } from '../../../../../src/core/types';
+import type { DataViewSpec } from '@kbn/data-plugin/common';
+import { SavedObjectReference } from '@kbn/core/types';
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
 import { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 
@@ -27,12 +28,40 @@ export function extractReferences({
     return { attributes, references };
   }
 
+  const adhocDataViewIds: string[] = [];
+  if (attributes.mapStateJSON) {
+    try {
+      const mapState = JSON.parse(attributes.mapStateJSON);
+      if (mapState.adHocDataViews && mapState.adHocDataViews.length > 0) {
+        (mapState.adHocDataViews as DataViewSpec[]).forEach((spec) => {
+          if (spec.id) {
+            adhocDataViewIds.push(spec.id);
+          }
+        });
+      }
+    } catch (e) {
+      throw new Error('Unable to parse attribute mapStateJSON');
+    }
+  }
+
   const extractedReferences: SavedObjectReference[] = [];
 
-  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  let layerList: LayerDescriptor[] = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layer, layerIndex) => {
     // Extract index-pattern references from source descriptor
-    if (layer.sourceDescriptor && 'indexPatternId' in layer.sourceDescriptor) {
+    if (
+      layer.sourceDescriptor &&
+      'indexPatternId' in layer.sourceDescriptor &&
+      !adhocDataViewIds.includes(
+        (layer.sourceDescriptor as IndexPatternReferenceDescriptor).indexPatternId!
+      )
+    ) {
       const sourceDescriptor = layer.sourceDescriptor as IndexPatternReferenceDescriptor;
       const refName = `layer_${layerIndex}_source_index_pattern`;
       extractedReferences.push({
@@ -49,7 +78,12 @@ export function extractReferences({
       const vectorLayer = layer as VectorLayerDescriptor;
       const joins = vectorLayer.joins ? vectorLayer.joins : [];
       joins.forEach((join, joinIndex) => {
-        if ('indexPatternId' in join.right) {
+        if (
+          'indexPatternId' in join.right &&
+          !adhocDataViewIds.includes(
+            (join.right as IndexPatternReferenceDescriptor).indexPatternId!
+          )
+        ) {
           const sourceDescriptor = join.right as IndexPatternReferenceDescriptor;
           const refName = `layer_${layerIndex}_join_${joinIndex}_index_pattern`;
           extractedReferences.push({
@@ -92,7 +126,13 @@ export function injectReferences({
     return { attributes };
   }
 
-  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  let layerList: LayerDescriptor[] = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layer) => {
     // Inject index-pattern references into source descriptor
     if (layer.sourceDescriptor && 'indexPatternRefName' in layer.sourceDescriptor) {

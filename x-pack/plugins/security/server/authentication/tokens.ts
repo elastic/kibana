@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from 'src/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { AuthenticationInfo } from '../elasticsearch';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
@@ -59,21 +59,21 @@ export class Tokens {
         access_token: accessToken,
         refresh_token: refreshToken,
         authentication: authenticationInfo,
-      } = (
-        await this.options.client.security.getToken({
-          body: {
-            grant_type: 'refresh_token',
-            refresh_token: existingRefreshToken,
-          },
-        })
-      ).body;
+      } = await this.options.client.security.getToken({
+        body: {
+          grant_type: 'refresh_token',
+          refresh_token: existingRefreshToken,
+        },
+      });
 
       this.logger.debug('Access token has been successfully refreshed.');
 
       return {
         accessToken,
-        refreshToken,
-        // @ts-expect-error @elastic/elasticsearch user metadata defined as Record<string, any>
+        // We can safely use a non-null assertion for the refresh token since `refresh_token` grant type guarantees that
+        // getToken API will always return a new refresh token, unlike some other grant types (e.g. client_credentials).
+        refreshToken: refreshToken!,
+        // @ts-expect-error many optional properties are string | null | undefined while we declare them as string | undefined
         authenticationInfo: authenticationInfo as AuthenticationInfo,
       };
     } catch (err) {
@@ -118,10 +118,10 @@ export class Tokens {
       let invalidatedTokensCount;
       try {
         invalidatedTokensCount = (
-          await this.options.client.security.invalidateToken<{ invalidated_tokens: number }>({
+          await this.options.client.security.invalidateToken({
             body: { refresh_token: refreshToken },
           })
-        ).body.invalidated_tokens;
+        ).invalidated_tokens;
       } catch (err) {
         this.logger.debug(`Failed to invalidate refresh token: ${getDetailedErrorMessage(err)}`);
 
@@ -150,10 +150,10 @@ export class Tokens {
       let invalidatedTokensCount;
       try {
         invalidatedTokensCount = (
-          await this.options.client.security.invalidateToken<{ invalidated_tokens: number }>({
+          await this.options.client.security.invalidateToken({
             body: { token: accessToken },
           })
-        ).body.invalidated_tokens;
+        ).invalidated_tokens;
       } catch (err) {
         this.logger.debug(`Failed to invalidate access token: ${getDetailedErrorMessage(err)}`);
 

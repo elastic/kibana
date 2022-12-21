@@ -17,7 +17,6 @@ export const compressionAlgorithmDispatch = t.keyof({
   zlib: null,
   none: null,
 });
-export type CompressionAlgorithmDispatch = t.TypeOf<typeof compressionAlgorithmDispatch>;
 
 export const encryptionAlgorithm = t.keyof({
   none: null,

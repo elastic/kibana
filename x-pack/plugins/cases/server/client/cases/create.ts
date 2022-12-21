@@ -10,25 +10,25 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsUtils } from '../../../../../../src/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 
+import type { CaseResponse, CasePostRequest } from '../../../common/api';
 import {
   throwErrors,
-  excess,
   CaseResponseRt,
-  CaseResponse,
-  CasesClientPostRequestRt,
-  CasePostRequest,
-  CaseType,
-  OWNER_FIELD,
-  ENABLE_CASE_CONNECTOR,
-  MAX_TITLE_LENGTH,
-} from '../../../common';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
+  ActionTypes,
+  CasePostRequestRt,
+  excess,
+  CaseSeverity,
+} from '../../../common/api';
+import { MAX_ASSIGNEES_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
+import { isInvalidTag, areTotalAssigneesInvalid } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
-import { createCaseError, flattenCaseSavedObject, transformNewCase } from '../../common';
-import { CasesClientArgs } from '..';
+import { createCaseError } from '../../common/error';
+import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
+import type { CasesClientArgs } from '..';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
 /**
  * Creates a new case.
@@ -40,28 +40,15 @@ export const create = async (
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
   const {
-    unsecuredSavedObjectsClient,
-    caseService,
-    userActionService,
+    services: { caseService, userActionService, licensingService, notificationService },
     user,
     logger,
     authorization: auth,
   } = clientArgs;
 
-  // default to an individual case if the type is not defined.
-  const { type = CaseType.individual, ...nonTypeCaseFields } = data;
-
-  if (!ENABLE_CASE_CONNECTOR && type === CaseType.collection) {
-    throw Boom.badRequest(
-      'Case type cannot be collection when the case connector feature is disabled'
-    );
-  }
-
   const query = pipe(
-    // decode with the defaulted type field
-    excess(CasesClientPostRequestRt).decode({
-      type,
-      ...nonTypeCaseFields,
+    excess(CasePostRequestRt).decode({
+      ...data,
     }),
     fold(throwErrors(Boom.badRequest), identity)
   );
@@ -72,6 +59,10 @@ export const create = async (
     );
   }
 
+  if (query.tags.some(isInvalidTag)) {
+    throw Boom.badRequest('A tag must contain at least one non-space character');
+  }
+
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
@@ -80,43 +71,65 @@ export const create = async (
       entities: [{ owner: query.owner, id: savedObjectID }],
     });
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { username, full_name, email } = user;
-    const createdDate = new Date().toISOString();
+    /**
+     * Assign users to a case is only available to Platinum+
+     */
+
+    if (query.assignees && query.assignees.length !== 0) {
+      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+      if (!hasPlatinumLicenseOrGreater) {
+        throw Boom.forbidden(
+          'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+        );
+      }
+
+      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+    }
+
+    if (areTotalAssigneesInvalid(query.assignees)) {
+      throw Boom.badRequest(
+        `You cannot assign more than ${MAX_ASSIGNEES_PER_CASE} assignees to a case.`
+      );
+    }
 
     const newCase = await caseService.postNewCase({
-      unsecuredSavedObjectsClient,
       attributes: transformNewCase({
-        createdDate,
+        user,
         newCase: query,
-        username,
-        full_name,
-        email,
-        connector: query.connector,
       }),
       id: savedObjectID,
+      refresh: false,
     });
 
-    await userActionService.bulkCreate({
-      unsecuredSavedObjectsClient,
-      actions: [
-        buildCaseUserActionItem({
-          action: 'create',
-          actionAt: createdDate,
-          actionBy: { username, full_name, email },
-          caseId: newCase.id,
-          fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
-          newValue: query,
-          owner: newCase.attributes.owner,
-        }),
-      ],
+    await userActionService.createUserAction({
+      type: ActionTypes.create_case,
+      caseId: newCase.id,
+      user,
+      payload: {
+        ...query,
+        severity: query.severity ?? CaseSeverity.LOW,
+        assignees: query.assignees ?? [],
+      },
+      owner: newCase.attributes.owner,
     });
 
-    return CaseResponseRt.encode(
-      flattenCaseSavedObject({
-        savedObject: newCase,
-      })
-    );
+    const flattenedCase = flattenCaseSavedObject({
+      savedObject: newCase,
+    });
+
+    if (query.assignees && query.assignees.length !== 0) {
+      const assigneesWithoutCurrentUser = query.assignees.filter(
+        (assignee) => assignee.uid !== user.profile_uid
+      );
+
+      await notificationService.notifyAssignees({
+        assignees: assigneesWithoutCurrentUser,
+        theCase: newCase,
+      });
+    }
+
+    return CaseResponseRt.encode(flattenedCase);
   } catch (error) {
     throw createCaseError({ message: `Failed to create case: ${error}`, error, logger });
   }

@@ -8,8 +8,8 @@
 
 import { takeUntil, finalize, map } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
-import type { ISavedObjectsRepository } from 'kibana/server';
-import type { EventLoopDelaysMonitor } from '../../../../../core/server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';
 import {
   MONITOR_EVENT_LOOP_DELAYS_START,
   MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
@@ -21,12 +21,13 @@ import { storeHistogram } from './saved_objects';
  * The monitoring of the event loop starts immediately.
  * The first collection of the histogram happens after 1 minute.
  * The daily histogram data is updated every 1 hour.
+ * The histogram metrics are in milliseconds.
  */
 export function startTrackingEventLoopDelaysUsage(
   internalRepository: ISavedObjectsRepository,
   instanceUuid: string,
   stopMonitoringEventLoop$: Observable<void>,
-  eventLoopDelaysMonitor: EventLoopDelaysMonitor,
+  eventLoopDelaysMonitor: IEventLoopDelaysMonitor<IntervalHistogram>,
   configs: {
     collectionStartDelay?: number;
     collectionInterval?: number;
@@ -52,6 +53,10 @@ export function startTrackingEventLoopDelaysUsage(
       if (shouldReset) {
         eventLoopDelaysMonitor.reset();
       }
-      await storeHistogram(histogram, internalRepository, instanceUuid);
+      try {
+        await storeHistogram(histogram, internalRepository, instanceUuid);
+      } catch (e) {
+        // do not crash if cannot store a histogram.
+      }
     });
 }

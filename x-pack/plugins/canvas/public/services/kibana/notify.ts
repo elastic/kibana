@@ -6,10 +6,10 @@
  */
 
 import { get } from 'lodash';
-import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
-import { formatMsg } from '../../../../../../src/plugins/kibana_legacy/public';
-import { ToastInputFields } from '../../../../../../src/core/public';
+import { ToastInputFields } from '@kbn/core/public';
+import { formatMsg } from '../../lib/format_msg';
 import { CanvasStartDeps } from '../../plugin';
 import { CanvasNotifyService } from '../notify';
 
@@ -42,7 +42,7 @@ export const notifyServiceFactory: CanvasNotifyServiceFactory = ({ coreStart }) 
   return {
     /*
      * @param {(string | Object)} err: message or Error object
-     * @param {Object} opts: option to override toast title or icon, see https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/notify/toasts/TOAST_NOTIFICATIONS.md
+     * @param {Object} opts: option to override toast title or icon, see https://github.com/elastic/kibana/blob/main/src/legacy/ui/public/notify/toasts/TOAST_NOTIFICATIONS.md
      */
     error(err, opts) {
       toasts.addDanger(getToast(err, opts));

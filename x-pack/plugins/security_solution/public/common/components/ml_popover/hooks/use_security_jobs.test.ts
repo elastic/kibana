@@ -13,7 +13,7 @@ import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../hooks/use_app_toasts.mock';
 import { getJobsSummary } from '../../ml/api/get_jobs_summary';
 import { checkRecognizer, getModules } from '../api';
-import { SecurityJob } from '../types';
+import type { SecurityJob } from '../types';
 import {
   mockJobsSummaryResponse,
   mockGetModuleResponse,
@@ -68,9 +68,10 @@ describe('useSecurityJobs', () => {
         moduleId: '',
         processed_record_count: 582251,
         awaitingNodeAssignment: false,
+        bucketSpanSeconds: 900,
       };
 
-      const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs(false));
+      const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs());
       await waitForNextUpdate();
 
       expect(result.current.jobs).toHaveLength(6);
@@ -78,7 +79,7 @@ describe('useSecurityJobs', () => {
     });
 
     it('returns those permissions', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs(false));
+      const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs());
       await waitForNextUpdate();
 
       expect(result.current.isMlAdmin).toEqual(true);
@@ -87,7 +88,7 @@ describe('useSecurityJobs', () => {
 
     it('renders a toast error if an ML call fails', async () => {
       (getModules as jest.Mock).mockRejectedValue('whoops');
-      const { waitForNextUpdate } = renderHook(() => useSecurityJobs(false));
+      const { waitForNextUpdate } = renderHook(() => useSecurityJobs());
       await waitForNextUpdate();
 
       expect(appToastsMock.addError).toHaveBeenCalledWith('whoops', {
@@ -103,7 +104,7 @@ describe('useSecurityJobs', () => {
     });
 
     it('returns empty jobs and false predicates', () => {
-      const { result } = renderHook(() => useSecurityJobs(false));
+      const { result } = renderHook(() => useSecurityJobs());
 
       expect(result.current.jobs).toEqual([]);
       expect(result.current.isMlAdmin).toEqual(false);

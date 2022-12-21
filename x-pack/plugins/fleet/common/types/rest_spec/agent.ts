@@ -5,24 +5,34 @@
  * 2.0.
  */
 
-import type { Agent, AgentAction, NewAgentAction } from '../models';
+import type { SearchHit } from '@kbn/es-types';
+
+import type {
+  Agent,
+  AgentAction,
+  ActionStatus,
+  CurrentUpgrade,
+  NewAgentAction,
+  AgentDiagnostics,
+} from '../models';
+
+import type { ListResult, ListWithKuery } from './common';
 
 export interface GetAgentsRequest {
-  query: {
-    page: number;
-    perPage: number;
-    kuery?: string;
+  query: ListWithKuery & {
     showInactive: boolean;
     showUpgradeable?: boolean;
   };
 }
 
-export interface GetAgentsResponse {
-  list: Agent[];
-  total: number;
+export interface GetAgentsResponse extends ListResult<Agent> {
   totalInactive: number;
-  page: number;
-  perPage: number;
+  // deprecated in 8.x
+  list?: Agent[];
+}
+
+export interface GetAgentTagsResponse {
+  items: string[];
 }
 
 export interface GetOneAgentRequest {
@@ -35,9 +45,13 @@ export interface GetOneAgentResponse {
   item: Agent;
 }
 
+export interface GetAgentUploadsResponse {
+  items: AgentDiagnostics[];
+}
+
 export interface PostNewAgentActionRequest {
   body: {
-    action: NewAgentAction;
+    action: Omit<NewAgentAction, 'agents'>;
   };
   params: {
     agentId: string;
@@ -69,13 +83,11 @@ export interface PostBulkAgentUnenrollRequest {
   };
 }
 
-export type PostBulkAgentUnenrollResponse = Record<
-  Agent['id'],
-  {
-    success: boolean;
-    error?: string;
-  }
->;
+export interface BulkAgentAction {
+  actionId: string;
+}
+
+export type PostBulkAgentUnenrollResponse = BulkAgentAction;
 
 export interface PostAgentUpgradeRequest {
   params: {
@@ -92,16 +104,12 @@ export interface PostBulkAgentUpgradeRequest {
     agents: string[] | string;
     source_uri?: string;
     version: string;
+    rollout_duration_seconds?: number;
+    start_time?: string;
   };
 }
 
-export type PostBulkAgentUpgradeResponse = Record<
-  Agent['id'],
-  {
-    success: boolean;
-    error?: string;
-  }
->;
+export type PostBulkAgentUpgradeResponse = BulkAgentAction;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
@@ -120,16 +128,23 @@ export interface PostBulkAgentReassignRequest {
   body: {
     policy_id: string;
     agents: string[] | string;
+    batchSize?: number;
   };
 }
 
-export type PostBulkAgentReassignResponse = Record<
-  Agent['id'],
-  {
-    success: boolean;
-    error?: string;
-  }
->;
+export type PostRequestDiagnosticsResponse = BulkAgentAction;
+export type PostBulkRequestDiagnosticsResponse = BulkAgentAction;
+
+export interface PostRequestBulkDiagnosticsRequest {
+  body: {
+    agents: string[] | string;
+    batchSize?: number;
+  };
+}
+
+export type PostBulkAgentReassignResponse = BulkAgentAction;
+
+export type PostBulkUpdateAgentTagsResponse = BulkAgentAction;
 
 export interface DeleteAgentRequest {
   params: {
@@ -142,7 +157,16 @@ export interface UpdateAgentRequest {
     agentId: string;
   };
   body: {
-    user_provided_metadata: Record<string, any>;
+    user_provided_metadata?: Record<string, any>;
+    tags?: string[];
+  };
+}
+
+export interface PostBulkUpdateAgentTagsRequest {
+  body: {
+    agents: string[] | string;
+    tagsToAdd?: string[];
+    tagsToRemove?: string[];
   };
 }
 
@@ -163,4 +187,29 @@ export interface GetAgentStatusResponse {
     other: number;
     updating: number;
   };
+}
+
+export interface GetAgentIncomingDataRequest {
+  query: {
+    agentsIds: string[];
+    previewData?: boolean;
+  };
+}
+
+export interface IncomingDataList {
+  [key: string]: { data: boolean };
+}
+export interface GetAgentIncomingDataResponse {
+  items: IncomingDataList[];
+  dataPreview: SearchHit[];
+}
+
+export interface GetCurrentUpgradesResponse {
+  items: CurrentUpgrade[];
+}
+export interface GetActionStatusResponse {
+  items: ActionStatus[];
+}
+export interface GetAvailableVersionsResponse {
+  items: string[];
 }

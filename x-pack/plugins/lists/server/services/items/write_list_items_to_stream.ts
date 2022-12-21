@@ -7,8 +7,8 @@
 
 import { PassThrough } from 'stream';
 
-import type { estypes } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { findSourceValue } from '../utils/find_source_value';
@@ -97,7 +97,6 @@ export const getSearchAfterFromResponse = <T>({
 }: {
   response: estypes.SearchResponse<T>;
 }): string[] | undefined =>
-  // @ts-expect-error @elastic/elasticsearch SortResults contains null
   response.hits.hits.length > 0
     ? response.hits.hits[response.hits.hits.length - 1].sort
     : undefined;
@@ -117,22 +116,20 @@ export const getResponse = async ({
   listItemIndex,
   size = SIZE,
 }: GetResponseOptions): Promise<estypes.SearchResponse<SearchEsListItemSchema>> => {
-  return (
-    await esClient.search<SearchEsListItemSchema>({
-      body: {
-        query: {
-          term: {
-            list_id: listId,
-          },
+  return (await esClient.search<SearchEsListItemSchema>({
+    body: {
+      query: {
+        term: {
+          list_id: listId,
         },
-        search_after: searchAfter,
-        sort: [{ tie_breaker_id: 'asc' }],
       },
-      ignore_unavailable: true,
-      index: listItemIndex,
-      size,
-    })
-  ).body as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
+      search_after: searchAfter,
+      sort: [{ tie_breaker_id: 'asc' }],
+    },
+    ignore_unavailable: true,
+    index: listItemIndex,
+    size,
+  })) as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
 };
 
 export interface WriteResponseHitsToStreamOptions {

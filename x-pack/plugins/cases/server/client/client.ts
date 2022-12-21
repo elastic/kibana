@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { CasesClientArgs } from './types';
-import { CasesSubClient, createCasesSubClient } from './cases/client';
-import { AttachmentsSubClient, createAttachmentsSubClient } from './attachments/client';
-import { UserActionsSubClient, createUserActionsSubClient } from './user_actions/client';
-import { CasesClientInternal, createCasesClientInternal } from './client_internal';
-import { createSubCasesClient, SubCasesClient } from './sub_cases/client';
-import { ENABLE_CASE_CONNECTOR } from '../../common';
-import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
-import { createStatsSubClient, StatsSubClient } from './stats/client';
+import type { CasesClientArgs } from './types';
+import type { CasesSubClient } from './cases/client';
+import { createCasesSubClient } from './cases/client';
+import type { AttachmentsSubClient } from './attachments/client';
+import { createAttachmentsSubClient } from './attachments/client';
+import type { UserActionsSubClient } from './user_actions/client';
+import { createUserActionsSubClient } from './user_actions/client';
+import type { CasesClientInternal } from './client_internal';
+import { createCasesClientInternal } from './client_internal';
+import type { ConfigureSubClient } from './configure/client';
+import { createConfigurationSubClient } from './configure/client';
+import type { MetricsSubClient } from './metrics/client';
+import { createMetricsSubClient } from './metrics/client';
 
 /**
  * Client wrapper that contains accessor methods for individual entities within the cases system.
@@ -23,18 +27,16 @@ export class CasesClient {
   private readonly _cases: CasesSubClient;
   private readonly _attachments: AttachmentsSubClient;
   private readonly _userActions: UserActionsSubClient;
-  private readonly _subCases: SubCasesClient;
   private readonly _configure: ConfigureSubClient;
-  private readonly _stats: StatsSubClient;
+  private readonly _metrics: MetricsSubClient;
 
   constructor(args: CasesClientArgs) {
     this._casesClientInternal = createCasesClientInternal(args);
     this._cases = createCasesSubClient(args, this, this._casesClientInternal);
     this._attachments = createAttachmentsSubClient(args, this, this._casesClientInternal);
     this._userActions = createUserActionsSubClient(args);
-    this._subCases = createSubCasesClient(args, this._casesClientInternal);
     this._configure = createConfigurationSubClient(args, this._casesClientInternal);
-    this._stats = createStatsSubClient(args);
+    this._metrics = createMetricsSubClient(args, this);
   }
 
   /**
@@ -59,18 +61,6 @@ export class CasesClient {
   }
 
   /**
-   * Retrieves an interface for interacting with the case as a connector entities.
-   *
-   * Currently this functionality is disabled and will throw an error if this function is called.
-   */
-  public get subCases() {
-    if (!ENABLE_CASE_CONNECTOR) {
-      throw new Error('The case connector feature is disabled');
-    }
-    return this._subCases;
-  }
-
-  /**
    * Retrieves an interface for interacting with the configuration of external connectors for the plugin entities.
    */
   public get configure() {
@@ -78,10 +68,10 @@ export class CasesClient {
   }
 
   /**
-   * Retrieves an interface for retrieving statistics related to the cases entities.
+   * Retrieves an interface for retrieving metrics related to the cases entities.
    */
-  public get stats() {
-    return this._stats;
+  public get metrics() {
+    return this._metrics;
   }
 }
 

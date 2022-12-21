@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AuditLogger } from '../../../../plugins/security/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { Operations } from '.';
 import { AuthorizationAuditLogger } from './audit_logger';
-import { ReadOperations } from './types';
+import type { ReadOperations } from './types';
 
 describe('audit_logger', () => {
   it('creates a failure message without any owners', () => {
@@ -30,32 +30,12 @@ describe('audit_logger', () => {
   });
 
   describe('log function', () => {
-    const mockLogger: jest.Mocked<AuditLogger> = {
-      log: jest.fn(),
-    };
-
+    const mockLogger = auditLoggerMock.create();
     let logger: AuthorizationAuditLogger;
 
     beforeEach(() => {
       mockLogger.log.mockReset();
       logger = new AuthorizationAuditLogger(mockLogger);
-    });
-
-    it('does not throw an error when the underlying audit logger is undefined', () => {
-      const authLogger = new AuthorizationAuditLogger();
-      jest.spyOn(authLogger, 'log');
-
-      expect(() => {
-        authLogger.log({
-          operation: Operations.createCase,
-          entity: {
-            owner: 'a',
-            id: '1',
-          },
-        });
-      }).not.toThrow();
-
-      expect(authLogger.log).toHaveBeenCalledTimes(1);
     });
 
     it('logs a message with a saved object ID in the message field', () => {

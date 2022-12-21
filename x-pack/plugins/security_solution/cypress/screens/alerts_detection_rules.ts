@@ -7,6 +7,8 @@
 
 export const BULK_ACTIONS_BTN = '[data-test-subj="bulkActions"] span';
 
+export const BULK_ACTIONS_PROGRESS_BTN = '[data-test-subj="bulkActions-progress"]';
+
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
 
 export const COLLAPSED_ACTION_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
@@ -20,30 +22,35 @@ export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
 
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
+export const CONFIRM_DUPLICATE_RULE = '[data-test-subj="confirmModalConfirmButton"]';
 
-export const REFRESH_BTN = '[data-test-subj="refreshRulesAction"] button';
+export const ENABLE_RULE_BULK_BTN = '[data-test-subj="enableRuleBulk"]';
 
-export const ACTIVATE_RULE_BULK_BTN = '[data-test-subj="activateRuleBulk"]';
-
-export const DEACTIVATE_RULE_BULK_BTN = '[data-test-subj="deactivateRuleBulk"]';
-
-export const EXPORT_RULE_BULK_BTN = '[data-test-subj="exportRuleBulk"]';
+export const DISABLE_RULE_BULK_BTN = '[data-test-subj="disableRuleBulk"]';
 
 export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
 
+export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
+
 export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
 
-export const FIFTH_RULE = 4;
+export const BULK_EXPORT_ACTION_BTN = '[data-test-subj="exportRuleBulk"]';
 
 export const FIRST_RULE = 0;
 
 export const FOURTH_RULE = 3;
 
+export const INTEGRATIONS_POPOVER = '[data-test-subj="IntegrationsDisplayPopover"]';
+
+export const INTEGRATIONS_POPOVER_TITLE = '[data-test-subj="IntegrationsPopoverTitle"]';
+
 export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
+
+export const LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN = '[data-test-subj="loadPrebuiltRulesBtn"]';
 
 export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
@@ -53,8 +60,6 @@ export const RULES_TABLE_REFRESH_INDICATOR = '[data-test-subj="loading-spinner"]
 export const RULES_TABLE_AUTOREFRESH_INDICATOR = '[data-test-subj="loadingRulesInfoProgress"]';
 
 export const RISK_SCORE = '[data-test-subj="riskScore"]';
-
-export const RELOAD_PREBUILT_RULES_BTN = '[data-test-subj="reloadPrebuiltRulesBtn"]';
 
 export const SECOND_RULE = 1;
 
@@ -70,19 +75,11 @@ export const RULES_TABLE = '[data-test-subj="rules-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 
-export const RULES_MONIROTING_TABLE = '[data-test-subj="allRulesTableTab-monitoring"]';
-
-export const SEVENTH_RULE = 6;
+export const RULES_MONITORING_TABLE = '[data-test-subj="allRulesTableTab-monitoring"]';
 
 export const SEVERITY = '[data-test-subj="severity"]';
 
-export const SHOWING_RULES_TEXT = '[data-test-subj="showingRules"]';
-
 export const SORT_RULES_BTN = '[data-test-subj="tableHeaderSortButton"]';
-
-export const RULE_AUTO_REFRESH_IDLE_MODAL = '[data-test-subj="allRulesIdleModal"]';
-
-export const RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE = '[data-test-subj="allRulesIdleModal"] button';
 
 export const PAGINATION_POPOVER_BTN = '[data-test-subj="tablePaginationPopoverButton"]';
 
@@ -92,8 +89,6 @@ export const rowsPerPageSelector = (count: number) =>
 export const pageSelector = (pageNumber: number) =>
   `[data-test-subj="pagination-button-${pageNumber - 1}"]`;
 
-export const NEXT_BTN = '[data-test-subj="pagination-button-next"]';
-
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 
 export const RULES_EMPTY_PROMPT = '[data-test-subj="rulesEmptyPrompt"]';
@@ -102,4 +97,51 @@ export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="allRulesDeleteC
 
 export const MODAL_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
+export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"]';
+
+export const MODAL_CONFIRMATION_BODY = '[data-test-subj="confirmModalBodyText"]';
+
+export const MODAL_ERROR_BODY = '[data-test-subj="errorModalBody"]';
+
+export const MODAL_CONFIRMATION_CANCEL_BTN = '[data-test-subj="confirmModalCancelButton"]';
+
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
+
+export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
+
+export const SELECT_ALL_RULES_ON_PAGE_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';
+
+export const RULE_IMPORT_MODAL = '[data-test-subj="rules-import-modal-button"]';
+
+export const RULE_IMPORT_MODAL_BUTTON = '[data-test-subj="import-data-modal-button"]';
+
+export const INPUT_FILE = 'input[type=file]';
+
+export const TOASTER = '[data-test-subj="euiToastHeader"]';
+
+export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj="euiToastBody"]';
+
+export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
+
+export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="import-data-modal-checkbox-label"]';
+
+export const RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX =
+  '[id="import-data-modal-exceptions-checkbox-label"]';
+
+export const RULES_TAGS_POPOVER_BTN = '[data-test-subj="tagsDisplayPopoverButton"]';
+
+export const RULES_TAGS_POPOVER_WRAPPER = '[data-test-subj="tagsDisplayPopoverWrapper"]';
+
+export const RULES_TAGS_FILTER_BTN = '[data-test-subj="tags-filter-popover-button"]';
+
+export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
+
+export const REFRESH_SETTINGS_POPOVER = '[data-test-subj="refreshSettings-popover"]';
+
+export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]';
+
+export const REFRESH_SETTINGS_SELECTION_NOTE = '[data-test-subj="refreshSettingsSelectionNote"]';
+
+export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';
+
+export const RULE_DETAILS_BACK_TO_ALL_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';

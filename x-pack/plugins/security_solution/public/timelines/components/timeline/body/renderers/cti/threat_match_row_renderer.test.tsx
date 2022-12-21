@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TimelineId } from '../../../../../../../common/types';
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -54,10 +55,9 @@ describe('threatMatchRowRenderer', () => {
   describe('#renderRow', () => {
     it('renders correctly against snapshot', () => {
       const children = threatMatchRowRenderer.renderRow({
-        browserFields: {},
         data: threatMatchData,
         isDraggable: true,
-        timelineId: 'test',
+        scopeId: TimelineId.test,
       });
       const wrapper = shallow(<span>{children}</span>);
       expect(wrapper).toMatchSnapshot();

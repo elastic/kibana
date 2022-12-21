@@ -24,17 +24,12 @@ import { cloneDeep } from 'lodash';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';
-import {
-  PivotSupportedAggs,
-  PIVOT_SUPPORTED_AGGS,
-} from '../../../../../../common/types/pivot_aggs';
+import { PivotSupportedAggs } from '../../../../../../common/types/pivot_aggs';
 
 import {
   isAggName,
-  isPivotAggsConfigPercentiles,
-  isPivotAggsConfigWithUiSupport,
+  isPivotAggsConfigWithUiBase,
   getEsAggFromAggConfig,
-  PERCENTILES_AGG_DEFAULT_PERCENTS,
   PivotAggsConfig,
   PivotAggsConfigWithUiSupportDict,
 } from '../../../../common';
@@ -48,50 +43,23 @@ interface Props {
   onChange(d: PivotAggsConfig): void;
 }
 
-function getDefaultPercents(defaultData: PivotAggsConfig): number[] | undefined {
-  if (isPivotAggsConfigPercentiles(defaultData)) {
-    return defaultData.percents;
-  }
-}
-
-function parsePercentsInput(inputValue: string | undefined) {
-  if (inputValue !== undefined) {
-    const strVals: string[] = inputValue.split(',');
-    const percents: number[] = [];
-    for (const str of strVals) {
-      if (str.trim().length > 0 && isNaN(str as any) === false) {
-        const val = Number(str);
-        if (val >= 0 && val <= 100) {
-          percents.push(val);
-        } else {
-          return [];
-        }
-      }
-    }
-
-    return percents;
-  }
-
-  return [];
-}
-
 export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
   const [aggConfigDef, setAggConfigDef] = useState(cloneDeep(defaultData));
 
   const [aggName, setAggName] = useState(defaultData.aggName);
   const [agg, setAgg] = useState(defaultData.agg);
-  const [field, setField] = useState<string | string[]>(
-    isPivotAggsConfigWithUiSupport(defaultData) ? defaultData.field : ''
+  const [field, setField] = useState<string | string[] | null>(
+    isPivotAggsConfigWithUiBase(defaultData) ? defaultData.field : ''
   );
 
-  const [percents, setPercents] = useState(getDefaultPercents(defaultData));
-
-  const isUnsupportedAgg = !isPivotAggsConfigWithUiSupport(defaultData);
+  const isUnsupportedAgg = !isPivotAggsConfigWithUiBase(defaultData);
 
   // Update configuration based on the aggregation type
   useEffect(() => {
     if (agg === aggConfigDef.agg) return;
     const config = getAggFormConfig(agg, {
+      parentAgg: aggConfigDef.parentAgg,
+      subAggs: aggConfigDef.subAggs,
       agg,
       aggName,
       dropDownName: aggName,
@@ -99,7 +67,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     });
     setAggConfigDef(config);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agg]);
+  }, [agg, aggConfigDef]);
 
   useUpdateEffect(() => {
     if (isPivotAggsWithExtendedForm(aggConfigDef)) {
@@ -115,21 +83,12 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
 
   function updateAgg(aggVal: PivotSupportedAggs) {
     setAgg(aggVal);
-    if (aggVal === PIVOT_SUPPORTED_AGGS.PERCENTILES && percents === undefined) {
-      setPercents(PERCENTILES_AGG_DEFAULT_PERCENTS);
-    }
-  }
-
-  function updatePercents(inputValue: string) {
-    setPercents(parsePercentsInput(inputValue));
   }
 
   function getUpdatedItem(): PivotAggsConfig {
-    let updatedItem: PivotAggsConfig;
-
     let resultField = field;
     if (
-      isPivotAggsConfigWithUiSupport(aggConfigDef) &&
+      isPivotAggsConfigWithUiBase(aggConfigDef) &&
       !aggConfigDef.isMultiField &&
       Array.isArray(field)
     ) {
@@ -137,23 +96,13 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       resultField = field[0];
     }
 
-    if (agg !== PIVOT_SUPPORTED_AGGS.PERCENTILES) {
-      updatedItem = {
-        ...aggConfigDef,
-        agg,
-        aggName,
-        field: resultField,
-        dropDownName: defaultData.dropDownName,
-      };
-    } else {
-      updatedItem = {
-        agg,
-        aggName,
-        field: resultField,
-        dropDownName: defaultData.dropDownName,
-        percents,
-      };
-    }
+    const updatedItem = {
+      ...aggConfigDef,
+      agg,
+      aggName,
+      dropDownName: defaultData.dropDownName,
+      ...(isUnsupportedAgg ? {} : { field: resultField }),
+    };
 
     return updatedItem;
   }
@@ -170,7 +119,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     optionsArr
       .filter(
         (o) =>
-          isPivotAggsConfigWithUiSupport(defaultData) &&
+          isPivotAggsConfigWithUiBase(defaultData) &&
           (Array.isArray(defaultData.field)
             ? defaultData.field.includes(o.field as string)
             : o.field === defaultData.field)
@@ -197,24 +146,14 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     });
   }
 
-  let percentsText;
-  if (percents !== undefined) {
-    percentsText = percents.toString();
-  }
-
-  const validPercents =
-    agg === PIVOT_SUPPORTED_AGGS.PERCENTILES && parsePercentsInput(percentsText).length > 0;
-
   let formValid = validAggName;
-  if (formValid && agg === PIVOT_SUPPORTED_AGGS.PERCENTILES) {
-    formValid = validPercents;
-  }
+
   if (isPivotAggsWithExtendedForm(aggConfigDef)) {
     formValid = validAggName && aggConfigDef.isValid();
   }
 
   return (
-    <EuiForm style={{ width: '300px' }} data-test-subj={'transformAggPopoverForm_' + aggName}>
+    <EuiForm css={{ width: '300px' }} data-test-subj={'transformAggPopoverForm_' + aggName}>
       <EuiFormRow
         error={!validAggName && [aggNameError]}
         isInvalid={!validAggName}
@@ -252,10 +191,14 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
                   label: v.text as string,
                 };
               })}
-              selectedOptions={(typeof field === 'string' ? [field] : field).map((v) => ({
-                value: v,
-                label: v,
-              }))}
+              selectedOptions={
+                !!field
+                  ? (typeof field === 'string' ? [field] : field).map((v) => ({
+                      value: v,
+                      label: v,
+                    }))
+                  : []
+              }
               onChange={(e) => {
                 const res = e.map((v) => v.value as string);
                 setField(res);
@@ -293,7 +236,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           />
         </EuiFormRow>
       )}
-      {isPivotAggsWithExtendedForm(aggConfigDef) && (
+      {isPivotAggsWithExtendedForm(aggConfigDef) ? (
         <aggConfigDef.AggFormComponent
           aggConfig={aggConfigDef.aggConfig}
           selectedField={field as string}
@@ -303,28 +246,9 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
               aggConfig: update,
             });
           }}
+          isValid={aggConfigDef.isValid()}
         />
-      )}
-      {agg === PIVOT_SUPPORTED_AGGS.PERCENTILES && (
-        <EuiFormRow
-          label={i18n.translate('xpack.transform.agg.popoverForm.percentsLabel', {
-            defaultMessage: 'Percents',
-          })}
-          error={
-            !validPercents && [
-              i18n.translate('xpack.transform.groupBy.popoverForm.intervalPercents', {
-                defaultMessage: 'Enter a comma-separated list of percentiles',
-              }),
-            ]
-          }
-          isInvalid={!validPercents}
-        >
-          <EuiFieldText
-            defaultValue={percentsText}
-            onChange={(e) => updatePercents(e.target.value)}
-          />
-        </EuiFormRow>
-      )}
+      ) : null}
       {isUnsupportedAgg && (
         <EuiCodeBlock
           aria-label={i18n.translate('xpack.transform.agg.popoverForm.codeBlock', {
@@ -333,7 +257,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           fontSize="s"
           language="json"
           paddingSize="s"
-          style={{ width: '100%', height: '200px' }}
+          css={{ width: '100%', height: '200px' }}
         >
           {JSON.stringify(getEsAggFromAggConfig(defaultData), null, 2)}
         </EuiCodeBlock>

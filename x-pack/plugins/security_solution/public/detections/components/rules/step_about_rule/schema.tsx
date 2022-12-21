@@ -7,15 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  FIELD_TYPES,
-  fieldValidators,
-  FormSchema,
-  ValidationFunc,
-  ERROR_CODE,
-  VALIDATION_TYPES,
-} from '../../../../shared_imports';
-import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import type { FormSchema, ValidationFunc, ERROR_CODE } from '../../../../shared_imports';
+import { FIELD_TYPES, fieldValidators, VALIDATION_TYPES } from '../../../../shared_imports';
+import type { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
@@ -242,6 +236,17 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+  timestampOverrideFallbackDisabled: {
+    type: FIELD_TYPES.CHECKBOX,
+    defaultValue: false,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimestampOverrideFallbackDisabledLabel',
+      {
+        defaultMessage: 'Do not use @timestamp as a fallback timestamp field',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
   tags: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
@@ -290,4 +295,34 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+};
+
+export const threatIndicatorPathRequiredSchemaValue = {
+  type: FIELD_TYPES.TEXT,
+  label: i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
+    {
+      defaultMessage: 'Indicator prefix override',
+    }
+  ),
+  helpText: i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathHelpText',
+    {
+      defaultMessage:
+        'Specify the document prefix containing your indicator fields. Used for enrichment of indicator match alerts.',
+    }
+  ),
+  validations: [
+    {
+      validator: emptyField(
+        i18n.translate(
+          'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.threatIndicatorPathFieldEmptyError',
+          {
+            defaultMessage: 'Indicator prefix override must not be empty',
+          }
+        )
+      ),
+      type: VALIDATION_TYPES.FIELD,
+    },
+  ],
 };

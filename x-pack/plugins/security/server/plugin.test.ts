@@ -8,11 +8,11 @@
 import { of } from 'rxjs';
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { coreMock } from 'src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import { featuresPluginMock } from '../../features/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
 import { ConfigSchema } from './config';
 import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
@@ -67,7 +67,10 @@ describe('Security Plugin', () => {
         Object {
           "audit": Object {
             "asScoped": [Function],
-            "getLogger": [Function],
+            "withoutRequest": Object {
+              "enabled": false,
+              "log": [Function],
+            },
           },
           "authc": Object {
             "getCurrentUser": [Function],
@@ -108,13 +111,8 @@ describe('Security Plugin', () => {
           },
           "license": Object {
             "features$": Observable {
-              "_isScalar": false,
-              "operator": MapOperator {
-                "project": [Function],
-                "thisArg": undefined,
-              },
+              "operator": [Function],
               "source": Observable {
-                "_isScalar": false,
                 "_subscribe": [Function],
               },
             },
@@ -122,6 +120,9 @@ describe('Security Plugin', () => {
             "hasAtLeast": [Function],
             "isEnabled": [Function],
             "isLicenseAvailable": [Function],
+          },
+          "privilegeDeprecationsService": Object {
+            "getKibanaRolesByFeatureId": [Function],
           },
         }
       `);
@@ -140,6 +141,8 @@ describe('Security Plugin', () => {
               "grantAsInternalUser": [Function],
               "invalidate": [Function],
               "invalidateAsInternalUser": [Function],
+              "update": [Function],
+              "validate": [Function],
             },
             "getCurrentUser": [Function],
           },
@@ -176,6 +179,11 @@ describe('Security Plugin', () => {
             "mode": Object {
               "useRbacForRequest": [Function],
             },
+          },
+          "userProfiles": Object {
+            "bulkGet": [Function],
+            "getCurrent": [Function],
+            "suggest": [Function],
           },
         }
       `);

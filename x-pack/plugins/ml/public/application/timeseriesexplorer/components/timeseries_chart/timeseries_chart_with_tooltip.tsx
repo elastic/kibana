@@ -15,7 +15,6 @@ import { extractErrorMessage } from '../../../../../common/util/errors';
 import { Annotation } from '../../../../../common/types/annotations';
 import { useMlKibana, useNotifications } from '../../../contexts/kibana';
 import { getBoundsRoundedToInterval } from '../../../util/time_buckets';
-import { ANNOTATION_EVENT_USER } from '../../../../../common/constants/annotations';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
@@ -66,6 +65,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
       ),
       ...(error ? { text: extractErrorMessage(error) } : {}),
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -88,12 +88,6 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
           earliestMs: searchBounds.min.valueOf(),
           latestMs: searchBounds.max.valueOf(),
           maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-          fields: [
-            {
-              field: 'event',
-              missing: ANNOTATION_EVENT_USER,
-            },
-          ],
           detectorIndex,
           entities: nonBlankEntities,
         });
@@ -112,6 +106,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     return () => {
       unmounted = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedJob.job_id,
     detectorIndex,

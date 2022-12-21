@@ -6,7 +6,7 @@
  */
 
 import React, { FC, Fragment, useMemo, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiComboBox,
@@ -227,6 +227,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       setFetchingAdvancedParamErrors(false);
       setAdvancedParamErrors(paramErrors);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     alpha,
     downsampleFactor,

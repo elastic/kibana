@@ -5,116 +5,69 @@
  * 2.0.
  */
 
-import React from 'react';
-import styled from 'styled-components';
-import { EuiText, EuiSpacer, EuiLink, EuiCodeBlock, EuiSelect } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import type { FleetProxy } from '../../../types';
 
-import type { EnrollmentAPIKey } from '../../../types';
-import { PLATFORM_OPTIONS, usePlatform, useStartServices } from '../../../hooks';
-import type { PLATFORM_TYPE } from '../../../hooks';
+function getfleetServerHostsEnrollArgs(
+  apiKey: string,
+  fleetServerHosts: string[],
+  fleetProxy?: FleetProxy
+) {
+  const proxyHeadersArgs = fleetProxy?.proxy_headers
+    ? Object.entries(fleetProxy.proxy_headers).reduce((acc, [proxyKey, proyVal]) => {
+        acc += ` --proxy-header ${proxyKey}=${proyVal}`;
 
-interface Props {
-  fleetServerHosts: string[];
-  apiKey: EnrollmentAPIKey;
+        return acc;
+      }, '')
+    : '';
+  const proxyArgs = fleetProxy ? ` --proxy-url=${fleetProxy.url}${proxyHeadersArgs}` : '';
+  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey}${proxyArgs}`;
 }
 
-// Otherwise the copy button is over the text
-const CommandCode = styled.pre({
-  overflow: 'scroll',
-});
-
-function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHosts: string[]) {
-  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey.api_key}`;
-}
-
-export const ManualInstructions: React.FunctionComponent<Props> = ({
+export const ManualInstructions = ({
   apiKey,
   fleetServerHosts,
+  fleetProxy,
+  kibanaVersion,
+}: {
+  apiKey: string;
+  fleetServerHosts: string[];
+  fleetProxy?: FleetProxy;
+  kibanaVersion: string;
 }) => {
-  const { platform, setPlatform } = usePlatform();
-  const { docLinks } = useStartServices();
+  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts, fleetProxy);
 
-  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
+  const k8sCommand = 'kubectl apply -f elastic-agent-managed-kubernetes.yaml';
 
-  const linuxMacCommand = `sudo ./elastic-agent install -f ${enrollArgs}`;
+  const linuxCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
+tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
+cd elastic-agent-${kibanaVersion}-linux-x86_64
+sudo ./elastic-agent install ${enrollArgs}`;
 
-  const windowsCommand = `.\\elastic-agent.exe install -f ${enrollArgs}`;
+  const macCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
+tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
+cd elastic-agent-${kibanaVersion}-darwin-x86_64
+sudo ./elastic-agent install ${enrollArgs}`;
 
-  return (
-    <>
-      <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.enrollmentInstructions.descriptionText"
-          defaultMessage="From the agent directory, run the appropriate command to install, enroll, and start an Elastic Agent. You can reuse these commands to set up agents on more than one host. Requires administrator privileges."
-        />
-      </EuiText>
-      <EuiSpacer size="l" />
-      <EuiSelect
-        prepend={
-          <EuiText>
-            <FormattedMessage
-              id="xpack.fleet.enrollmentInstructions.platformSelectLabel"
-              defaultMessage="Platform"
-            />
-          </EuiText>
-        }
-        options={PLATFORM_OPTIONS}
-        value={platform}
-        onChange={(e) => setPlatform(e.target.value as PLATFORM_TYPE)}
-        aria-label={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
-          defaultMessage: 'Platform',
-        })}
-      />
-      <EuiSpacer size="s" />
-      {platform === 'linux-mac' && (
-        <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-          <CommandCode>{linuxMacCommand}</CommandCode>
-        </EuiCodeBlock>
-      )}
-      {platform === 'windows' && (
-        <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-          <CommandCode>{windowsCommand}</CommandCode>
-        </EuiCodeBlock>
-      )}
+  const windowsCommand = `$ProgressPreference = 'SilentlyContinue'
+Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
+Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip -DestinationPath .
+cd elastic-agent-${kibanaVersion}-windows-x86_64
+.\\elastic-agent.exe install ${enrollArgs}`;
 
-      {platform === 'rpm-deb' && (
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.enrollmentInstructions.moreInstructionsText"
-            defaultMessage="See the {link} for RPM / DEB deploy instructions."
-            values={{
-              link: (
-                <EuiLink target="_blank" external href={docLinks.links.fleet.elasticAgent}>
-                  <FormattedMessage
-                    id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
-                    defaultMessage="Elastic Agent docs"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
-      )}
+  const linuxDebCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-amd64.deb
+sudo dpkg -i elastic-agent-${kibanaVersion}-amd64.deb
+sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
 
-      <EuiSpacer size="l" />
-      <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.enrollmentInstructions.troubleshootingText"
-          defaultMessage="If you are having trouble connecting, see our {link}."
-          values={{
-            link: (
-              <EuiLink target="_blank" external href={docLinks.links.fleet.troubleshooting}>
-                <FormattedMessage
-                  id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
-                  defaultMessage="troubleshooting guide"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
-    </>
-  );
+  const linuxRpmCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-x86_64.rpm
+sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm
+sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
+
+  return {
+    linux: linuxCommand,
+    mac: macCommand,
+    windows: windowsCommand,
+    deb: linuxDebCommand,
+    rpm: linuxRpmCommand,
+    kubernetes: k8sCommand,
+  };
 };

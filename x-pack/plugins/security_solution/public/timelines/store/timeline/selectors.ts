@@ -6,14 +6,10 @@
  */
 
 import { createSelector } from 'reselect';
+import type { State } from '../../../common/store/types';
 
-import { tGridSelectors } from '../../../../../timelines/public';
-import { State } from '../../../common/store/types';
-
-import { TimelineModel } from './model';
-import { AutoSavedWarningMsg, InsertTimeline, TimelineById } from './types';
-
-export const { getManageTimelineById } = tGridSelectors;
+import type { TimelineModel } from './model';
+import type { AutoSavedWarningMsg, InsertTimeline, TimelineById } from './types';
 
 const selectTimelineById = (state: State): TimelineById => state.timeline.timelineById;
 
@@ -40,8 +36,6 @@ export const getShowCallOutUnauthorizedMsg = () =>
     selectCallOutUnauthorizedMsg,
     (showCallOutUnauthorizedMsg) => showCallOutUnauthorizedMsg
   );
-
-export const getTimelines = () => timelineByIdSelector;
 
 export const getTimelineByIdSelector = () => createSelector(selectTimeline, (timeline) => timeline);
 

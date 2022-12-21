@@ -8,7 +8,7 @@
 
 import React, { ReactElement, useEffect, useState } from 'react';
 import { times } from 'lodash';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { RepeatImageRendererConfig } from '../../common';
 
 interface RepeatImageComponentProps extends RepeatImageRendererConfig {
@@ -46,12 +46,14 @@ function setImageSize(img: HTMLImageElement, size: number) {
 }
 
 function createImageJSX(img: HTMLImageElement | null) {
-  if (!img) return null;
-  const params = img.width > img.height ? { heigth: img.height } : { width: img.width };
+  if (!img) {
+    return null;
+  }
+  const params = img.width > img.height ? { height: img.height } : { width: img.width };
   return <img src={img.src} {...params} alt="" />;
 }
 
-function RepeatImageComponent({
+export function RepeatImageComponent({
   max,
   count,
   emptyImage: emptyImageSrc,
@@ -80,12 +82,14 @@ function RepeatImageComponent({
 
   if (image) {
     setImageSize(image, size);
-    times(count, () => imagesToRender.push(createImageJSX(image)));
+    const imgJSX = createImageJSX(image);
+    times(count, () => imagesToRender.push(imgJSX));
   }
 
   if (emptyImage) {
     setImageSize(emptyImage, size);
-    times(max - count, () => imagesToRender.push(createImageJSX(emptyImage)));
+    const imgJSX = createImageJSX(emptyImage);
+    times(max - count, () => imagesToRender.push(imgJSX));
   }
 
   return (
@@ -94,6 +98,3 @@ function RepeatImageComponent({
     </div>
   );
 }
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { RepeatImageComponent as default };

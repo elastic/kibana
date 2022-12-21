@@ -12,13 +12,14 @@ import { i18n } from '@kbn/i18n';
 
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { Schema, SchemaConflicts } from '../../../shared/schema/types';
+import { AdvancedSchema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
 import { EngineLogic } from '../engine';
 
 import { DEFAULT_SNIPPET_SIZE } from './constants';
 import {
   FieldResultSetting,
   FieldResultSettingObject,
+  ServerFieldResultSetting,
   ServerFieldResultSettingObject,
 } from './types';
 
@@ -35,11 +36,11 @@ import {
 interface ResultSettingsActions {
   initializeResultFields(
     serverResultFields: ServerFieldResultSettingObject,
-    schema: Schema,
+    schema: AdvancedSchema,
     schemaConflicts?: SchemaConflicts
   ): {
     resultFields: FieldResultSettingObject;
-    schema: Schema;
+    schema: AdvancedSchema;
     schemaConflicts: SchemaConflicts;
   };
   clearAllFields(): void;
@@ -67,9 +68,10 @@ interface ResultSettingsValues {
   saving: boolean;
   resultFields: FieldResultSettingObject;
   lastSavedResultFields: FieldResultSettingObject;
-  schema: Schema;
+  schema: AdvancedSchema;
   schemaConflicts: SchemaConflicts;
   // Selectors
+  validResultFields: FieldResultSettingObject;
   textResultFields: FieldResultSettingObject;
   nonTextResultFields: FieldResultSettingObject;
   serverResultFields: ServerFieldResultSettingObject;
@@ -78,6 +80,7 @@ interface ResultSettingsValues {
   stagedUpdates: true;
   reducedServerResultFields: ServerFieldResultSettingObject;
   queryPerformanceScore: number;
+  isSnippetAllowed: (fieldName: string) => boolean;
 }
 
 const SAVE_CONFIRMATION_MESSAGE = i18n.translate(
@@ -169,22 +172,38 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     ],
   }),
   selectors: ({ selectors }) => ({
-    textResultFields: [
+    validResultFields: [
       () => [selectors.resultFields, selectors.schema],
-      (resultFields: FieldResultSettingObject, schema: Schema) => {
+      (resultFields: FieldResultSettingObject, schema: AdvancedSchema): FieldResultSettingObject =>
+        Object.entries(resultFields).reduce((validResultFields, [fieldName, fieldSettings]) => {
+          if (!schema[fieldName] || schema[fieldName].type === SchemaType.Nested) {
+            return validResultFields;
+          }
+          return { ...validResultFields, [fieldName]: fieldSettings };
+        }, {}),
+    ],
+    textResultFields: [
+      () => [selectors.validResultFields, selectors.schema],
+      (resultFields: FieldResultSettingObject, schema: AdvancedSchema) => {
         const { textResultFields } = splitResultFields(resultFields, schema);
         return textResultFields;
       },
     ],
     nonTextResultFields: [
-      () => [selectors.resultFields, selectors.schema],
-      (resultFields: FieldResultSettingObject, schema: Schema) => {
+      () => [selectors.validResultFields, selectors.schema],
+      (resultFields: FieldResultSettingObject, schema: AdvancedSchema) => {
         const { nonTextResultFields } = splitResultFields(resultFields, schema);
         return nonTextResultFields;
       },
     ],
+    isSnippetAllowed: [
+      () => [selectors.schema],
+      (schema: AdvancedSchema) => {
+        return (fieldName: string): boolean => !!schema[fieldName]?.capabilities.snippet;
+      },
+    ],
     serverResultFields: [
-      () => [selectors.resultFields],
+      () => [selectors.validResultFields],
       (resultFields: FieldResultSettingObject) => {
         return Object.entries(resultFields).reduce((serverResultFields, [fieldName, settings]) => {
           return {
@@ -195,11 +214,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       },
     ],
     resultFieldsAtDefaultSettings: [
-      () => [selectors.resultFields],
+      () => [selectors.validResultFields],
       (resultFields) => areFieldsAtDefaultSettings(resultFields),
     ],
     resultFieldsEmpty: [
-      () => [selectors.resultFields],
+      () => [selectors.validResultFields],
       (resultFields) => areFieldsEmpty(resultFields),
     ],
     stagedUpdates: [
@@ -221,11 +240,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     ],
     queryPerformanceScore: [
       () => [selectors.serverResultFields, selectors.schema],
-      (serverResultFields: ServerFieldResultSettingObject, schema: Schema) => {
+      (serverResultFields: ServerFieldResultSettingObject, schema: AdvancedSchema) => {
         return Object.entries(serverResultFields).reduce((acc, [fieldName, resultField]) => {
           let newAcc = acc;
           if (resultField.raw) {
-            if (schema[fieldName] !== 'text') {
+            if (schema[fieldName].type !== SchemaType.Text) {
               newAcc += 0.2;
             } else if (
               typeof resultField.raw === 'object' &&
@@ -271,7 +290,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       actions.updateField(fieldName, {
         ...omit(field, ['snippetSize']),
         snippet,
-        ...(snippet ? { snippetSize: DEFAULT_SNIPPET_SIZE } : {}),
+        ...(snippet ? { snippetSize: DEFAULT_SNIPPET_SIZE } : { snippetFallback: false }),
       });
     },
     toggleSnippetFallbackForField: ({ fieldName }) => {
@@ -299,7 +318,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
           schema,
           schemaConflicts,
           searchSettings: { result_fields: serverFieldResultSettings },
-        } = await http.get(url);
+        } = await http.get<{
+          schema: AdvancedSchema;
+          schemaConflicts?: SchemaConflicts;
+          searchSettings: { result_fields: Record<string, ServerFieldResultSetting> };
+        }>(url);
 
         actions.initializeResultFields(serverFieldResultSettings, schema, schemaConflicts);
       } catch (e) {
@@ -322,7 +345,9 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         actions.saving();
 
         try {
-          const response = await http.put(url, {
+          const response = await http.put<{
+            result_fields: Record<string, ServerFieldResultSetting>;
+          }>(url, {
             body: JSON.stringify({
               result_fields: values.reducedServerResultFields,
             }),

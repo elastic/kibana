@@ -6,14 +6,19 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { DocValueFields } from '../../../../../../common/search_strategy';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export const buildTimelineDetailsQuery = (
-  indexName: string,
-  id: string,
-  docValueFields: DocValueFields[],
-  authFilter?: JsonObject
-) => {
+export const buildTimelineDetailsQuery = ({
+  authFilter,
+  id,
+  indexName,
+  runtimeMappings,
+}: {
+  authFilter?: JsonObject;
+  id: string;
+  indexName: string;
+  runtimeMappings: MappingRuntimeFields;
+}) => {
   const basicFilter = {
     terms: {
       _id: [id],
@@ -33,14 +38,30 @@ export const buildTimelineDetailsQuery = (
         };
 
   return {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: indexName,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
-      docvalue_fields: docValueFields,
       query,
-      fields: [{ field: '*', include_unmapped: true }],
-      _source: true,
+      fields: [
+        { field: '*', include_unmapped: true },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+        {
+          field: 'code_signature.timestamp',
+          format: 'strict_date_optional_time',
+        },
+        {
+          field: 'dll.code_signature.timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      // Remove and instead pass index_pattern.id once issue resolved: https://github.com/elastic/kibana/issues/111762
+      runtime_mappings: runtimeMappings,
+      stored_fields: ['*'],
+      _source: false,
     },
     size: 1,
   };

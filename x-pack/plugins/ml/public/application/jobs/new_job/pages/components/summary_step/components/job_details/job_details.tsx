@@ -8,7 +8,7 @@
 import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
@@ -82,6 +82,7 @@ export const JobDetails: FC = () => {
       title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.bucketSpan.title', {
         defaultMessage: 'Bucket span',
       }),
+      // @ts-expect-error bucketSpan is of type estypes.Duration
       description: jobCreator.bucketSpan,
     },
   ];

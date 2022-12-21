@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from '../../../../../src/core/public';
-import { KibanaPageTemplateProps } from '../../../../../src/plugins/kibana_react/public';
+import { IBasePath } from '@kbn/core/public';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 
 export function getNoDataConfig({
   docsLink,
@@ -17,19 +17,22 @@ export function getNoDataConfig({
   docsLink: string;
   basePath: IBasePath;
   hasData?: boolean;
-}): KibanaPageTemplateProps['noDataConfig'] {
+}): NoDataConfig | undefined {
   if (hasData === false) {
     return {
       solution: i18n.translate('xpack.observability.noDataConfig.solutionName', {
         defaultMessage: 'Observability',
       }),
-      actions: {
-        beats: {
+      action: {
+        elasticAgent: {
+          title: i18n.translate('xpack.observability.noDataConfig.beatsCard.title', {
+            defaultMessage: 'Add integrations',
+          }),
           description: i18n.translate('xpack.observability.noDataConfig.beatsCard.description', {
             defaultMessage:
               'Use Beats and APM agents to send observability data to Elasticsearch. We make it easy with support for many popular systems, apps, and languages.',
           }),
-          href: basePath.prepend(`/app/home#/tutorial_directory/logging`),
+          href: basePath.prepend(`/app/integrations/browse`),
         },
       },
       docsLink,

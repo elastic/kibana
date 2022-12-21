@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
-import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
+import '@kbn/core-provider-plugin/types';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   describe('execution context', function () {
@@ -30,12 +30,16 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
               name: 'execution_context_app',
               // add a non-ASCII symbols to make sure it doesn't break the context propagation mechanism
               id: 'Visualization☺漢字',
+              meta: {
+                foo: 'какая-то странная мета',
+              },
               description: 'какое-то странное описание',
             };
 
-            const result = await coreStart.http.get('/execution_context/pass', {
-              context,
-            });
+            const result = await coreStart.http.get<{ ['x-opaque-id']: string }>(
+              '/execution_context/pass',
+              { context }
+            );
 
             return result['x-opaque-id'];
           })

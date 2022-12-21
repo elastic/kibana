@@ -10,18 +10,21 @@ import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 
 import * as is from './is';
-import { IndexPatternBase } from '../..';
-import { estypes } from '@elastic/elasticsearch';
+import { DataViewBase } from '../../..';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
+import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 
 jest.mock('../grammar');
 
 describe('kuery functions', () => {
   describe('is', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 
@@ -31,9 +34,9 @@ describe('kuery functions', () => {
           arguments: [fieldName, value],
         } = is.buildNodeParams('response', 200);
 
-        expect(fieldName).toHaveProperty('type', 'literal');
+        expect(fieldName).toHaveProperty('type', KQL_NODE_TYPE_LITERAL);
         expect(fieldName).toHaveProperty('value', 'response');
-        expect(value).toHaveProperty('type', 'literal');
+        expect(value).toHaveProperty('type', KQL_NODE_TYPE_LITERAL);
         expect(value).toHaveProperty('value', 200);
       });
 
@@ -42,22 +45,22 @@ describe('kuery functions', () => {
           arguments: [fieldName, value],
         } = is.buildNodeParams('machine*', 'win*');
 
-        expect(fieldName).toHaveProperty('type', 'wildcard');
-        expect(value).toHaveProperty('type', 'wildcard');
+        expect(fieldName).toHaveProperty('type', KQL_NODE_TYPE_WILDCARD);
+        expect(value).toHaveProperty('type', KQL_NODE_TYPE_WILDCARD);
       });
 
       test('should default to a non-phrase query', () => {
         const {
-          arguments: [, , isPhrase],
+          arguments: [, value],
         } = is.buildNodeParams('response', 200);
-        expect(isPhrase.value).toBe(false);
+        expect(value.isQuoted).toBe(false);
       });
 
       test('should allow specification of a phrase query', () => {
         const {
-          arguments: [, , isPhrase],
-        } = is.buildNodeParams('response', 200, true);
-        expect(isPhrase.value).toBe(true);
+          arguments: [, value],
+        } = is.buildNodeParams('response', '"200"');
+        expect(value.isQuoted).toBe(true);
       });
     });
 
@@ -177,7 +180,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg', true);
+        const node = nodeTypes.function.buildNode('is', 'extension', '"jpg"');
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -198,6 +201,25 @@ describe('kuery functions', () => {
           },
         };
         const node = nodeTypes.function.buildNode('is', 'extension', 'jpg*');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+
+        expect(result).toEqual(expected);
+      });
+
+      test('should create a wildcard query for keyword fields', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                wildcard: {
+                  'machine.os.keyword': 'win*',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'win*');
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -312,6 +334,49 @@ describe('kuery functions', () => {
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
+      });
+
+      test('should allow to configure ignore_unmapped for a nested query', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                nested: {
+                  path: 'nestedField.nestedChild',
+                  query: {
+                    match: {
+                      'nestedField.nestedChild.doublyNestedChild': 'foo',
+                    },
+                  },
+                  score_mode: 'none',
+                  ignore_unmapped: true,
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode('is', '*doublyNested*', 'foo');
+        const result = is.toElasticsearchQuery(node, indexPattern, { nestedIgnoreUnmapped: true });
+
+        expect(result).toEqual(expected);
+      });
+
+      test('should use a term query for keyword fields', () => {
+        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'Win 7');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+        expect(result).toEqual({
+          bool: {
+            should: [
+              {
+                term: {
+                  'machine.os.keyword': 'Win 7',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
       });
     });
   });

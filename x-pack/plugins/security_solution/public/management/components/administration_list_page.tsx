@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, memo, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { CommonProps } from '@elastic/eui';
 import {
-  CommonProps,
   EuiPageHeader,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { SecurityPageName } from '../../../common/constants';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useTestIdGenerator } from './hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 interface AdministrationListPageProps {
   title: React.ReactNode;
@@ -26,6 +25,7 @@ interface AdministrationListPageProps {
   actions?: React.ReactNode;
   restrictWidth?: boolean | number;
   hasBottomBorder?: boolean;
+  hideHeader?: boolean;
   headerBackComponent?: React.ReactNode;
 }
 
@@ -37,6 +37,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     children,
     restrictWidth = false,
     hasBottomBorder = true,
+    hideHeader = false,
     headerBackComponent,
     ...otherProps
   }) => {
@@ -63,15 +64,20 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
 
     return (
       <div {...otherProps}>
-        <EuiPageHeader
-          pageTitle={header}
-          description={description}
-          bottomBorder={hasBottomBorder}
-          rightSideItems={[actions]}
-          restrictWidth={restrictWidth}
-          data-test-subj={getTestId('header')}
-        />
-        <EuiSpacer size="l" />
+        {!hideHeader && (
+          <>
+            <EuiPageHeader
+              pageTitle={header}
+              description={description}
+              bottomBorder={hasBottomBorder}
+              rightSideItems={actions ? [actions] : undefined}
+              restrictWidth={restrictWidth}
+              data-test-subj={getTestId('header')}
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
         <EuiPageContent
           hasBorder={false}
           hasShadow={false}
@@ -81,8 +87,6 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
         >
           <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
         </EuiPageContent>
-
-        <SpyRoute pageName={SecurityPageName.administration} />
       </div>
     );
   }

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { ReactNode, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback } from 'react';
 import { EuiRadioGroup } from '@elastic/eui';
 
-import { ClosureType } from '../../containers/configure/types';
+import type { ClosureType } from '../../containers/configure/types';
 import * as i18n from './translations';
 
 interface ClosureRadios {
@@ -56,5 +57,6 @@ const ClosureOptionsRadioComponent: React.FC<ClosureOptionsRadioComponentProps> 
     />
   );
 };
+ClosureOptionsRadioComponent.displayName = 'ClosureOptionsRadio';
 
 export const ClosureOptionsRadio = React.memo(ClosureOptionsRadioComponent);

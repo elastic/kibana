@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
@@ -16,6 +16,8 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import moment from 'moment';
 import { EuiTabs } from '@elastic/eui';
 import { EuiTab } from '@elastic/eui';
+import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
 import {
@@ -25,7 +27,6 @@ import {
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { LoadingPrompt } from '../../../../../../components/loading_page';
-import { useLinkProps } from '../../../../../../hooks/use_link_props';
 import { AnomaliesTable } from './anomalies_table/anomalies_table';
 
 interface Props {
@@ -120,14 +121,18 @@ export const FlyoutHome = (props: Props) => {
 
         <EuiFlyoutBody
           banner={
-            tab === 'jobs' &&
-            hasJobs && (
-              <JobsEnabledCallout
-                hasHostJobs={hostJobSummaries.length > 0}
-                hasK8sJobs={k8sJobSummaries.length > 0}
-                jobIds={jobIds}
-              />
-            )
+            <>
+              {tab === 'jobs' && hasJobs && (
+                <>
+                  <JobsEnabledCallout
+                    hasHostJobs={hostJobSummaries.length > 0}
+                    hasK8sJobs={k8sJobSummaries.length > 0}
+                    jobIds={jobIds}
+                  />
+                </>
+              )}
+              <MLJobsAwaitingNodeWarning jobIds={jobIds} />
+            </>
           }
         >
           {tab === 'jobs' && (

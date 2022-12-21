@@ -7,8 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover } from '@elastic/eui';
-import { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
+import { EuiPopover, EuiPopoverProps } from '@elastic/eui';
 
 import { SolutionToolbarButton, Props as ButtonProps } from './button';
 
@@ -18,13 +17,17 @@ type AllowedPopoverProps = Omit<
   'button' | 'isOpen' | 'closePopover' | 'anchorPosition'
 >;
 
-export type Props = AllowedButtonProps & AllowedPopoverProps;
+export type Props = AllowedButtonProps &
+  AllowedPopoverProps & {
+    children: (arg: { closePopover: () => void }) => React.ReactNode;
+  };
 
 export const SolutionToolbarPopover = ({
   label,
   iconType,
   primary,
   iconSide,
+  children,
   ...popover
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,10 +36,21 @@ export const SolutionToolbarPopover = ({
   const closePopover = () => setIsOpen(false);
 
   const button = (
-    <SolutionToolbarButton {...{ label, iconType, primary, iconSide }} onClick={onButtonClick} />
+    <SolutionToolbarButton
+      {...{ label, iconType, primary, iconSide }}
+      onClick={onButtonClick}
+      data-test-subj={popover['data-test-subj']}
+    />
   );
 
   return (
-    <EuiPopover anchorPosition="downLeft" {...{ isOpen, button, closePopover }} {...popover} />
+    <EuiPopover
+      anchorPosition="downLeft"
+      panelPaddingSize="none"
+      {...{ isOpen, button, closePopover }}
+      {...popover}
+    >
+      {children({ closePopover })}
+    </EuiPopover>
   );
 };

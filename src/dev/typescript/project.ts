@@ -12,7 +12,6 @@ import { IMinimatch, Minimatch } from 'minimatch';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { parseTsConfig } from './ts_configfile';
-import { ProjectSet } from './project_set';
 
 function makeMatchers(directory: string, patterns: string[]) {
   return patterns.map(
@@ -66,8 +65,10 @@ export class Project {
     const disableTypeCheck = projectOptions?.disableTypeCheck || false;
     const name =
       projectOptions?.name || Path.relative(REPO_ROOT, directory) || Path.basename(directory);
-    const include = config.include ? makeMatchers(directory, config.include) : undefined;
-    const exclude = config.exclude ? makeMatchers(directory, config.exclude) : undefined;
+    const includePatterns = config.include;
+    const include = includePatterns ? makeMatchers(directory, includePatterns) : undefined;
+    const excludePatterns = config.exclude;
+    const exclude = excludePatterns ? makeMatchers(directory, excludePatterns) : undefined;
 
     let baseProject;
     if (config.extends) {
@@ -99,11 +100,15 @@ export class Project {
       disableTypeCheck,
       baseProject,
       include,
-      exclude
+      includePatterns,
+      exclude,
+      excludePatterns
     );
     cache.set(tsConfigPath, project);
     return project;
   }
+
+  public readonly typeCheckConfigPath: string;
 
   constructor(
     public readonly tsConfigPath: string,
@@ -114,8 +119,23 @@ export class Project {
 
     public readonly baseProject?: Project,
     private readonly include?: IMinimatch[],
-    private readonly exclude?: IMinimatch[]
-  ) {}
+    private readonly includePatterns?: string[],
+    private readonly exclude?: IMinimatch[],
+    private readonly excludePatterns?: string[]
+  ) {
+    this.typeCheckConfigPath = Path.resolve(this.directory, 'tsconfig.type_check.json');
+  }
+
+  public getIncludePatterns(): string[] {
+    return this.includePatterns
+      ? this.includePatterns
+      : this.baseProject?.getIncludePatterns() ?? [];
+  }
+  public getExcludePatterns(): string[] {
+    return this.excludePatterns
+      ? this.excludePatterns
+      : this.baseProject?.getExcludePatterns() ?? [];
+  }
 
   private getInclude(): IMinimatch[] {
     return this.include ? this.include : this.baseProject?.getInclude() ?? [];
@@ -127,11 +147,6 @@ export class Project {
 
   public isAbsolutePathSelected(path: string) {
     return testMatchers(this.getExclude(), path) ? false : testMatchers(this.getInclude(), path);
-  }
-
-  public isCompositeProject(): boolean {
-    const own = this.config.compilerOptions?.composite;
-    return !!(own === undefined ? this.baseProject?.isCompositeProject() : own);
   }
 
   public getOutDir(): string | undefined {
@@ -154,24 +169,13 @@ export class Project {
     return this.baseProject ? this.baseProject.getRefdPaths() : [];
   }
 
-  public getProjectsDeep(cache?: Map<string, Project>) {
-    const projects = new Set<Project>();
-    const queue = new Set<string>([this.tsConfigPath]);
-
-    for (const path of queue) {
-      const project = Project.load(path, {}, { skipConfigValidation: true, cache });
-      projects.add(project);
-      for (const refPath of project.getRefdPaths()) {
-        queue.add(refPath);
-      }
-    }
-
-    return new ProjectSet(projects);
-  }
-
   public getConfigPaths(): string[] {
     return this.baseProject
       ? [this.tsConfigPath, ...this.baseProject.getConfigPaths()]
       : [this.tsConfigPath];
+  }
+
+  public getProjectsDeep(): Project[] {
+    return this.baseProject ? [this, ...this.baseProject.getProjectsDeep()] : [this];
   }
 }

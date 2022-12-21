@@ -1,18 +1,29 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-monaco"
+PKG_DIRNAME = "kbn-monaco"
 PKG_REQUIRE_NAME = "@kbn/monaco"
 
 SOURCE_FILES = glob(
   [
     "src/**/*",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
-    "**/README.md",
+    "**/*.stories.*",
+    "**/__jest_/**",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -31,17 +42,23 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-babel-preset",
   "//packages/kbn-i18n",
+  "//packages/kbn-ui-theme",
+  "@npm//@babel/runtime",
   "@npm//antlr4ts",
   "@npm//babel-loader",
   "@npm//monaco-editor",
+  "@npm//monaco-yaml",
   "@npm//raw-loader",
-  "@npm//regenerator-runtime",
+  "@npm//rxjs",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-i18n",
+  "//packages/kbn-i18n:npm_module_types",
+  "//packages/kbn-ui-theme:npm_module_types",
   "@npm//antlr4ts",
   "@npm//monaco-editor",
+  "@npm//rxjs",
+  "@npm//tslib",
   "@npm//@types/jest",
   "@npm//@types/node",
 ]
@@ -71,8 +88,9 @@ webpack(
     "$(location webpack.config.js)",
     "--output-path",
     "$(@D)",
-    "--env.prod",
-    "--display=minimal"
+    "--env",
+    "prod",
+    "--no-stats"
   ],
 )
 
@@ -91,16 +109,21 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":target_workers"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+js_library(
+  name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":target_web", ":target_workers", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
@@ -109,9 +132,7 @@ js_library(
 
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
@@ -119,5 +140,11 @@ filegroup(
   srcs = [
     ":npm_module",
   ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm(
+  name = "build_types",
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

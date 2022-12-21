@@ -15,17 +15,17 @@ import {
   queryTimelineById,
   dispatchUpdateTimeline,
 } from '../../../timelines/components/open_timeline/helpers';
-import { OnOpenTimeline } from '../../../timelines/components/open_timeline/types';
+import type { OnOpenTimeline } from '../../../timelines/components/open_timeline/types';
 import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
 
 import { RecentTimelines } from './recent_timelines';
 import * as i18n from './translations';
-import { FilterMode } from './types';
+import type { FilterMode } from './types';
 import { LoadingPlaceholders } from '../loading_placeholders';
 import { useTimelineStatus } from '../../../timelines/components/open_timeline/use_timeline_status';
 import { useKibana } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../app/types';
-import { APP_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkAnchor } from '../../../common/components/links';
 import { Direction } from '../../../../common/search_strategy';
@@ -61,7 +61,7 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   const goToTimelines = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.timelines,
       });
     },

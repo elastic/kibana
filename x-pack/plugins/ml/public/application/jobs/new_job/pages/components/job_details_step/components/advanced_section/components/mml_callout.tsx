@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../../job_creator_context';
 
@@ -17,6 +17,7 @@ export const MMLCallout: FC = () => {
   useEffect(() => {
     const value = jobValidator.latestValidationResult?.highCardinality?.value ?? null;
     setHighCardinality(value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   return jobCreator.modelPlot && highCardinality !== null ? (

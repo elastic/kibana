@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState, useEffect, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { FilterChecked } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,11 +19,10 @@ import {
   EuiFieldSearch,
   EuiFilterButton,
   EuiFilterSelectItem,
-  FilterChecked,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface PoliciesSelectorProps {
@@ -135,11 +136,12 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
     const dropdownItems = useMemo(
       () =>
         itemsList.map((item, index) =>
-          item.name.match(new RegExp(query, 'i')) ? (
+          item.name.toLowerCase().includes(query.toLowerCase()) ? (
             <EuiFilterSelectItem
               checked={item.checked}
               key={index}
               onClick={() => updateItem(index)}
+              data-test-subj={`policiesSelector-popover-items-${item.id}`}
             >
               {item.name}
             </EuiFilterSelectItem>
@@ -193,7 +195,9 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
                   value={query}
                 />
               </EuiPopoverTitle>
-              <div className="euiFilterSelect__items">{dropdownItems}</div>
+              <div data-test-subj="policiesSelector-popover" className="euiFilterSelect__items">
+                {dropdownItems}
+              </div>
             </EuiPopover>
           </EuiFilterGroup>
         </EuiFlexItem>

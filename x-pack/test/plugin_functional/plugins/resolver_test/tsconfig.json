@@ -1,0 +1,18 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "./target"
+  ],
+  "kbn_references": [
+    { "path": "../../../../../src/core/tsconfig.json" },
+    { "path": "../../../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../../plugins/security_solution/tsconfig.json" },
+  ]
+}

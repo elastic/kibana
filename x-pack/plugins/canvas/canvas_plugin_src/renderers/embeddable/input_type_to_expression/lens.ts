@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { toExpression as toExpressionString } from '@kbn/interpreter/common';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { SavedLensInput } from '../../../functions/external/saved_lens';
+import { toExpression as toExpressionString } from '@kbn/interpreter';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { SavedLensInput } from '../../../functions/external/saved_lens';
 
 export function toExpression(input: SavedLensInput, palettes: PaletteRegistry): string {
   const expressionParts = [] as string[];
 
   expressionParts.push('savedLens');
 
-  expressionParts.push(`id="${input.id}"`);
+  expressionParts.push(`id="${input.savedObjectId}"`);
 
   if (input.title !== undefined) {
     expressionParts.push(`title="${input.title}"`);

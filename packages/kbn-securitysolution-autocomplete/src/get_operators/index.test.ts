@@ -8,7 +8,8 @@
 
 import {
   doesNotExistOperator,
-  EXCEPTION_OPERATORS,
+  EVENT_FILTERS_OPERATORS,
+  ALL_OPERATORS,
   existsOperator,
   isNotOperator,
   isOperator,
@@ -40,9 +41,18 @@ describe('#getOperators', () => {
     expect(operator).toEqual([isOperator]);
   });
 
+  test('it includes a "matches" operator when field is "file.path.text"', () => {
+    const operator = getOperators({
+      name: 'file.path.text',
+      type: 'simple',
+    });
+
+    expect(operator).toEqual(EVENT_FILTERS_OPERATORS);
+  });
+
   test('it returns all operator types when field type is not null, boolean, or nested', () => {
     const operator = getOperators(getField('machine.os.raw'));
 
-    expect(operator).toEqual(EXCEPTION_OPERATORS);
+    expect(operator).toEqual(ALL_OPERATORS);
   });
 });

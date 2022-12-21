@@ -5,17 +5,28 @@
  * 2.0.
  */
 
-import type { PluginInitializer, PluginInitializerContext } from 'src/core/public';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 
-import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
-import { SecurityPlugin, SecurityPluginSetup, SecurityPluginStart } from './plugin';
+import type {
+  PluginSetupDependencies,
+  PluginStartDependencies,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from './plugin';
+import { SecurityPlugin } from './plugin';
 
-export { SecurityPluginSetup, SecurityPluginStart };
-export { AuthenticatedUser } from '../common/model';
-export { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
-export { UserMenuLink, SecurityNavControlServiceStart } from '../public/nav_control';
+export type { SecurityPluginSetup, SecurityPluginStart };
+export type { AuthenticatedUser } from '../common/model';
+export type { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
+export type { UiApi, ChangePasswordProps, PersonalInfoProps } from './ui_api';
+export type { UserMenuLink, SecurityNavControlServiceStart } from './nav_control';
+export type {
+  UserProfileBulkGetParams,
+  UserProfileGetCurrentParams,
+  UserProfileSuggestParams,
+} from './account_management';
 
-export { AuthenticationServiceStart, AuthenticationServiceSetup } from './authentication';
+export type { AuthenticationServiceStart, AuthenticationServiceSetup } from './authentication';
 
 export const plugin: PluginInitializer<
   SecurityPluginSetup,

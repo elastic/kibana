@@ -102,6 +102,13 @@ export const search = (specService: SpecDefinitionsService) => {
           },
         ],
       },
+      pit: {
+        __template: {
+          id: '',
+          keep_alive: '1m',
+        },
+      },
+      search_after: [],
       stored_fields: ['{field}'],
       suggest: {
         __template: {
@@ -215,15 +222,6 @@ export const search = (specService: SpecDefinitionsService) => {
       timeout: '1s',
       version: { __one_of: [true, false] },
       track_total_hits: { __one_of: [true, false] },
-    },
-  });
-
-  specService.addEndpointDescription('search_template', {
-    data_autocomplete_rules: {
-      template: {
-        __one_of: [{ __scope_link: 'search' }, { __scope_link: 'GLOBAL.script' }],
-      },
-      params: {},
     },
   });
 

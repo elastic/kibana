@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { TimelineResponse } from '../../common/types/timeline';
+import type { TimelineResponse } from '../../common/types/timeline';
 
 export interface Timeline {
   title: string;
   description: string;
   query: string;
   id?: string;
+  dataViewId?: string;
+  indexNames?: string[];
 }
 
 export interface CompleteTimeline extends Timeline {
@@ -32,11 +34,21 @@ export const getFilter = (): TimelineFilter => ({
   value: 'exists',
 });
 
+export const sharedTimelineTitleFragment = 'Timeline';
+
 export const getTimeline = (): CompleteTimeline => ({
-  title: 'Security Timeline',
+  title: `Security ${sharedTimelineTitleFragment}`,
   description: 'This is the best timeline',
   query: 'host.name: *',
   notes: 'Yes, the best timeline',
+  filter: getFilter(),
+});
+
+export const getFavoritedTimeline = (): CompleteTimeline => ({
+  title: `Darkest ${sharedTimelineTitleFragment}`,
+  description: 'This is the darkest timeline',
+  query: 'host.name: *',
+  notes: 'Yes, the darkest timeline, you heard me right',
   filter: getFilter(),
 });
 
@@ -46,6 +58,12 @@ export const getIndicatorMatchTimelineTemplate = (): CompleteTimeline => ({
   templateTimelineId: '495ad7a7-316e-4544-8a0f-9c098daee76e',
 });
 
+export const getTimelineModifiedSourcerer = () => ({
+  ...getTimeline(),
+  title: 'Auditbeat Timeline',
+  dataViewId: 'security-solution-default',
+  indexNames: ['auditbeat-*'],
+});
 /**
  * Timeline query that finds no valid data to cut down on test failures
  * or other issues for when we want to test one specific thing and not also
@@ -54,13 +72,6 @@ export const getIndicatorMatchTimelineTemplate = (): CompleteTimeline => ({
 export const getTimelineNonValidQuery = (): CompleteTimeline => ({
   ...getTimeline(),
   query: 'query_to_intentionally_find_nothing: *',
-});
-
-export const caseTimeline = (): Timeline => ({
-  title: 'SIEM test',
-  description: 'description',
-  query: 'host.name: *',
-  id: '0162c130-78be-11ea-9718-118a926974a4',
 });
 
 export const expectedExportedTimelineTemplate = (
@@ -87,6 +98,7 @@ export const expectedExportedTimelineTemplate = (
         },
       },
     },
+    dataViewId: timelineTemplateBody.dataViewId,
     dateRange: {
       start: timelineTemplateBody.dateRange?.start,
       end: timelineTemplateBody.dateRange?.end,
@@ -127,6 +139,7 @@ export const expectedExportedTimeline = (timelineResponse: Cypress.Response<Time
       },
     },
     dateRange: { start: timelineBody.dateRange?.start, end: timelineBody.dateRange?.end },
+    dataViewId: timelineBody.dataViewId,
     description: timelineBody.description,
     title: timelineBody.title,
     created: timelineBody.created,

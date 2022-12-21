@@ -10,14 +10,15 @@ import { uniq } from 'lodash';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   KibanaFeature,
-} from '../../../../features/server';
+} from '@kbn/features-plugin/server';
+
 import type { SecurityLicense } from '../../../common/licensing';
 import type { RawKibanaPrivileges } from '../../../common/model';
 import type { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 
 export interface PrivilegesService {
-  get(): RawKibanaPrivileges;
+  get(respectLicenseLevel?: boolean): RawKibanaPrivileges;
 }
 
 export function privilegesFactory(
@@ -28,7 +29,7 @@ export function privilegesFactory(
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
 
   return {
-    get() {
+    get(respectLicenseLevel: boolean = true) {
       const features = featuresService.getKibanaFeatures();
       const { allowSubFeaturePrivileges } = licenseService.getFeatures();
       const { hasAtLeast: licenseHasAtLeast } = licenseService;
@@ -70,18 +71,21 @@ export function privilegesFactory(
           ];
         }
 
-        if (allowSubFeaturePrivileges && feature.subFeatures?.length > 0) {
-          for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
-            augmentWithSubFeaturePrivileges: false,
-            licenseHasAtLeast,
-          })) {
-            featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
-              actions.login,
-              actions.version,
-              ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
-            ];
-          }
+        for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: false,
+          licenseHasAtLeast,
+        })) {
+          featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
+            actions.login,
+            actions.version,
+            ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
+          ];
+        }
 
+        if (
+          (!respectLicenseLevel || allowSubFeaturePrivileges) &&
+          feature.subFeatures?.length > 0
+        ) {
           for (const subFeaturePrivilege of featuresService.subFeaturePrivilegeIterator(
             feature,
             licenseHasAtLeast
@@ -106,6 +110,7 @@ export function privilegesFactory(
             actions.version,
             actions.api.get('decryptedTelemetry'),
             actions.api.get('features'),
+            actions.api.get('taskManager'),
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),

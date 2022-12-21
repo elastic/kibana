@@ -6,27 +6,36 @@
  */
 
 import * as rt from 'io-ts';
-import React, { useContext } from 'react';
-import { Query } from '../../../../../../../src/plugins/data/public';
+import React from 'react';
+import { Query } from '@kbn/es-query';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/url_state';
-import { LogFilterState } from './log_filter_state';
+import { useLogFilterStateContext, DEFAULT_QUERY } from './log_filter_state';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const WithLogFilterUrlState: React.FC = () => {
-  const { filterQuery, applyLogFilterQuery } = useContext(LogFilterState.Context);
+  const {
+    data: {
+      query: { queryString },
+    },
+  } = useKibanaContextForPlugin().services;
+
+  const { queryStringQuery } = useLogFilterStateContext();
 
   return (
     <UrlStateContainer
-      urlState={filterQuery?.originalQuery}
+      urlState={queryStringQuery}
       urlStateKey="logFilter"
       mapToUrlState={mapToFilterQuery}
       onChange={(urlState) => {
         if (urlState) {
-          applyLogFilterQuery(urlState);
+          queryString.setQuery(urlState);
         }
       }}
       onInitialize={(urlState) => {
         if (urlState) {
-          applyLogFilterQuery(urlState);
+          queryString.setQuery(urlState);
+        } else {
+          queryString.setQuery(DEFAULT_QUERY);
         }
       }}
     />

@@ -10,21 +10,29 @@
   "id":"cases",
   "kibanaVersion":"kibana",
   "optionalPlugins":[
-     "security",
-     "spaces"
+    "home",
+    "taskManager",
+    "usageCollection"
   ],
   "owner":{
-     "githubTeam":"security-threat-hunting",
-     "name":"Security Solution Threat Hunting"
+     "githubTeam":"response-ops",
+     "name":"ResponseOps"
   },
   "requiredPlugins":[
      "actions",
+     "data",
+     "embeddable",
      "esUiShared",
      "lens",
+     "licensing",
      "features",
      "kibanaReact",
      "kibanaUtils",
-     "triggersActionsUi"
+     "triggersActionsUi",
+     "management",
+     "spaces",
+     "security",
+     "notifications"
   ],
   "requiredBundles": [
     "savedObjects"

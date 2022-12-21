@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import {
-  ColumnHeaderOptions,
-  ColumnId,
-  RowRendererId,
-  TimelineExpandedDetail,
-  TimelineTypeLiteral,
-} from '.';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Filter } from '../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
+import type { RowRendererId, TimelineTypeLiteral } from '.';
 
-import { Direction } from '../../search_strategy';
-import { DataProvider } from './data_provider';
+import type { Direction } from '../../search_strategy';
+import type { ExpandedDetailTimeline } from '../detail_panel';
+import type { ColumnHeaderOptions, ColumnId } from '../header_actions';
+import type { DataProvider } from './data_provider';
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene' | 'eql';
 
@@ -34,23 +29,25 @@ export type SortDirection = 'none' | 'asc' | 'desc' | Direction;
 export interface SortColumnTimeline {
   columnId: string;
   columnType: string;
+  esTypes?: string[];
   sortDirection: SortDirection;
 }
 
 export interface TimelinePersistInput {
-  id: string;
+  columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];
+  dataViewId: string | null; // null if legacy pre-8.0 timeline
   dateRange?: {
     start: string;
     end: string;
   };
-  excludedRowRendererIds?: RowRendererId[];
-  expandedDetail?: TimelineExpandedDetail;
-  filters?: Filter[];
-  columns: ColumnHeaderOptions[];
   defaultColumns?: ColumnHeaderOptions[];
-  itemsPerPage?: number;
+  excludedRowRendererIds?: RowRendererId[];
+  expandedDetail?: ExpandedDetailTimeline;
+  filters?: Filter[];
+  id: string;
   indexNames: string[];
+  itemsPerPage?: number;
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
   };
@@ -60,6 +57,7 @@ export interface TimelinePersistInput {
   timelineType?: TimelineTypeLiteral;
   templateTimelineId?: string | null;
   templateTimelineVersion?: number | null;
+  title?: string;
 }
 
 /** Invoked when a column is sorted */

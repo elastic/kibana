@@ -7,11 +7,12 @@
  */
 
 import { Position } from '@elastic/charts';
-import Color from 'color';
+import chroma from 'chroma-js';
 
 import { FtrService } from '../ftr_provider_context';
 
-const pieChartSelector = 'visTypePieChart';
+const partitionVisChartSelector = 'partitionVisChart';
+const heatmapChartSelector = 'heatmapChart';
 
 export class VisualizeChartPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -31,14 +32,17 @@ export class VisualizeChartPageObject extends FtrService {
     return await this.elasticChart.getChartDebugData(chartSelector);
   }
 
+  public async getAllESChartsDebugDataByTestSubj(chartSelector: string) {
+    return await this.elasticChart.getAllChartsDebugDataByTestSubj(chartSelector);
+  }
+
   /**
    * Is new charts library advanced setting enabled
    */
-  public async isNewChartsLibraryEnabled(): Promise<boolean> {
-    const legacyChartsLibrary =
-      Boolean(
-        await this.kibanaServer.uiSettings.get('visualization:visualize:legacyPieChartsLibrary')
-      ) ?? true;
+  public async isNewChartsLibraryEnabled(
+    setting = 'visualization:visualize:legacyPieChartsLibrary'
+  ): Promise<boolean> {
+    const legacyChartsLibrary = Boolean(await this.kibanaServer.uiSettings.get(setting)) ?? true;
     const enabled = !legacyChartsLibrary;
     this.log.debug(`-- isNewChartsLibraryEnabled = ${enabled}`);
 
@@ -131,9 +135,7 @@ export class VisualizeChartPageObject extends FtrService {
    * @param axis axis value, 'ValueAxis-1' by default
    */
   public async getLineChartData(selector: string, dataLabel = 'Count') {
-    // For now lines are rendered as areas to enable stacking
-    const areas = (await this.getEsChartDebugState(selector))?.areas ?? [];
-    const lines = areas.map(({ lines: { y1 }, name, color }) => ({ ...y1, name, color }));
+    const lines = (await this.getEsChartDebugState(selector))?.lines ?? [];
     const points = lines.find(({ name }) => name === dataLabel)?.points ?? [];
     return points.map(({ y }) => y);
   }
@@ -149,7 +151,7 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   private async toggleLegend(force = false) {
-    const isVisTypePieChart = await this.isNewLibraryChart(pieChartSelector);
+    const isVisTypePieChart = await this.isNewLibraryChart(partitionVisChartSelector);
     const legendSelector = force || isVisTypePieChart ? '.echLegend' : '.visLegend';
 
     await this.retry.try(async () => {
@@ -163,6 +165,8 @@ export class VisualizeChartPageObject extends FtrService {
   public async filterLegend(name: string, force = false) {
     await this.toggleLegend(force);
     await this.testSubjects.click(`legend-${name}`);
+    // wait for a short amount of time for popover to stabilize as there is no good way to check for that
+    await this.common.sleep(250);
     const filterIn = await this.testSubjects.find(`legend-${name}-filterIn`);
     await filterIn.click();
     await this.waitForVisualizationRenderingStabilized();
@@ -181,21 +185,22 @@ export class VisualizeChartPageObject extends FtrService {
     return items.some(({ color: c }) => c === color);
   }
 
-  public async doesSelectedLegendColorExistForPie(color: string) {
-    if (await this.isNewLibraryChart(pieChartSelector)) {
+  public async doesSelectedLegendColorExistForPie(matchingColor: string) {
+    if (await this.isNewLibraryChart(partitionVisChartSelector)) {
+      const hexMatchingColor = chroma(matchingColor).hex().toUpperCase();
       const slices =
-        (await this.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ?? [];
-      return slices.some(({ color: c }) => {
-        const rgbColor = new Color(color).rgb().toString();
-        return c === rgbColor;
+        (await this.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]?.partitions ??
+        [];
+      return slices.some(({ color }) => {
+        return hexMatchingColor === chroma(color).hex().toUpperCase();
       });
     }
 
-    return await this.testSubjects.exists(`legendSelectedColor-${color}`);
+    return await this.testSubjects.exists(`legendSelectedColor-${matchingColor}`);
   }
 
   public async expectError() {
-    if (!this.isNewLibraryChart(pieChartSelector)) {
+    if (!this.isNewLibraryChart(partitionVisChartSelector)) {
       await this.testSubjects.existOrFail('vislibVisualizeError');
     }
   }
@@ -244,12 +249,20 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   public async getLegendEntries() {
-    const isVisTypePieChart = await this.isNewLibraryChart(pieChartSelector);
+    const isVisTypePieChart = await this.isNewLibraryChart(partitionVisChartSelector);
+    const isVisTypeHeatmapChart = await this.isNewLibraryChart(heatmapChartSelector);
 
     if (isVisTypePieChart) {
       const slices =
-        (await this.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ?? [];
+        (await this.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]?.partitions ??
+        [];
       return slices.map(({ name }) => name);
+    }
+
+    if (isVisTypeHeatmapChart) {
+      const legendItems =
+        (await this.getEsChartDebugState(heatmapChartSelector))?.legend?.items ?? [];
+      return legendItems.map(({ name }) => name);
     }
 
     const legendEntries = await this.find.allByCssSelector(
@@ -283,7 +296,7 @@ export class VisualizeChartPageObject extends FtrService {
   public async openLegendOptionColorsForPie(name: string, chartSelector: string) {
     await this.waitForVisualizationRenderingStabilized();
     await this.retry.try(async () => {
-      if (await this.isNewLibraryChart(pieChartSelector)) {
+      if (await this.isNewLibraryChart(partitionVisChartSelector)) {
         const chart = await this.find.byCssSelector(chartSelector);
         const legendItemColor = await chart.findByCssSelector(
           `[data-ech-series-name="${name}"] .echLegendItem__color`
@@ -342,10 +355,12 @@ export class VisualizeChartPageObject extends FtrService {
     return await this.testSubjects.getVisibleText('dataGridHeader');
   }
 
-  public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
-    const headers = await this.dataGrid.getHeaders();
-    const fieldColumnIndex = headers.indexOf(fieldName);
-    const cell = await this.dataGrid.getCellElement(rowIndex, fieldColumnIndex + 1);
+  public async getFieldLinkInVisTable(
+    fieldName: string,
+    rowIndex: number = 0,
+    colIndex: number = 0
+  ) {
+    const cell = await this.dataGrid.getCellElement(rowIndex, colIndex);
     return await cell.findByTagName('a');
   }
 
@@ -355,7 +370,7 @@ export class VisualizeChartPageObject extends FtrService {
   public async getTableVisContent({ stripEmptyRows = true } = {}) {
     return await this.retry.try(async () => {
       const container = await this.testSubjects.find('tbvChart');
-      const allTables = await this.testSubjects.findAllDescendant('dataGridWrapper', container);
+      const allTables = await this.testSubjects.findAllDescendant('euiDataGridBody', container);
 
       if (allTables.length === 0) {
         return [];
@@ -386,7 +401,7 @@ export class VisualizeChartPageObject extends FtrService {
 
   public async getMetric() {
     const elements = await this.find.allByCssSelector(
-      '[data-test-subj="visualizationLoader"] .mtrVis__container'
+      '[data-test-subj="visualizationLoader"] .legacyMtrVis__container'
     );
     const values = await Promise.all(
       elements.map(async (element) => {

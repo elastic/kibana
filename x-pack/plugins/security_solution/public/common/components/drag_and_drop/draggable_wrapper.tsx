@@ -8,19 +8,19 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Draggable,
+import type {
   DraggableProvided,
   DraggableStateSnapshot,
   DraggingStyle,
-  Droppable,
   NotDraggingStyle,
 } from 'react-beautiful-dnd';
+import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { TableId } from '../../../../common/types';
 import { dragAndDropActions } from '../../store/drag_and_drop';
-import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
 
 import { TruncatableText } from '../truncatable_text';
@@ -30,8 +30,8 @@ import { getDraggableId, getDroppableId } from './helpers';
 import { ProviderContainer } from './provider_container';
 
 import * as i18n from './translations';
-import { useKibana } from '../../lib/kibana';
 import { useHoverActions } from '../hover_actions/use_hover_actions';
+import { useDraggableKeyboardWrapper } from './draggable_keyboard_wrapper_hook';
 
 // As right now, we do not know what we want there, we will keep it as a placeholder
 export const DragEffects = styled.div``;
@@ -85,6 +85,10 @@ export const ProviderContentWrapper = styled.span`
   > span.euiToolTipAnchor {
     display: block; /* allow EuiTooltip content to be truncatable */
   }
+
+  > span.euiToolTipAnchor.eui-textTruncate {
+    display: inline-block; /* do not override display when a tooltip is truncated via eui-textTruncate */
+  }
 `;
 
 type RenderFunctionProp = (
@@ -95,15 +99,18 @@ type RenderFunctionProp = (
 
 interface Props {
   dataProvider: DataProvider;
-  disabled?: boolean;
   hideTopN?: boolean;
   isDraggable?: boolean;
-  inline?: boolean;
   render: RenderFunctionProp;
-  timelineId?: string;
+  isAggregatable?: boolean;
+  fieldType?: string;
+  scopeId?: string;
   truncate?: boolean;
   onFilterAdded?: () => void;
 }
+
+export const disableHoverActions = (timelineId: string | undefined): boolean =>
+  [TableId.rulePreview, ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID].includes(timelineId ?? '');
 
 /**
  * Wraps a draggable component to handle registration / unregistration of the
@@ -129,13 +136,14 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   hideTopN = false,
   onFilterAdded,
   render,
-  timelineId,
+  fieldType = '',
+  isAggregatable = false,
+  scopeId,
   truncate,
 }) => {
   const [providerRegistered, setProviderRegistered] = useState(false);
   const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
   const dispatch = useDispatch();
-  const { timelines } = useKibana().services;
   const {
     closePopOverTrigger,
     handleClosePopOverTrigger,
@@ -146,13 +154,15 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     openPopover,
     onFocus,
     setContainerRef,
-    showTopN,
+    isShowingTopN,
   } = useHoverActions({
     dataProvider,
     hideTopN,
     onFilterAdded,
     render,
-    timelineId,
+    fieldType,
+    isAggregatable,
+    scopeId,
     truncate,
   });
 
@@ -237,7 +247,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     [dataProvider, registerProvider, render, setContainerRef, truncate]
   );
 
-  const { onBlur, onKeyDown } = timelines.getUseDraggableKeyboardWrapper()({
+  const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
     closePopover: handleClosePopOverTrigger,
     draggableId: getDraggableId(dataProvider.id),
     fieldName: dataProvider.queryMatch.field,
@@ -296,7 +306,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
 
   return (
     <WithHoverActions
-      alwaysShow={showTopN || hoverActionsOwnFocus}
+      alwaysShow={isShowingTopN || hoverActionsOwnFocus}
       closePopOverTrigger={closePopOverTrigger}
       hoverContent={hoverContent}
       onCloseRequested={onCloseRequested}
@@ -311,7 +321,9 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   isDraggable = false,
   onFilterAdded,
   render,
-  timelineId,
+  isAggregatable = false,
+  fieldType = '',
+  scopeId,
   truncate,
 }) => {
   const {
@@ -320,14 +332,16 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     hoverContent,
     onCloseRequested,
     setContainerRef,
-    showTopN,
+    isShowingTopN,
   } = useHoverActions({
     dataProvider,
     hideTopN,
     isDraggable,
+    isAggregatable,
+    fieldType,
     onFilterAdded,
     render,
-    timelineId,
+    scopeId,
     truncate,
   });
   const renderContent = useCallback(
@@ -357,9 +371,9 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   if (!isDraggable) {
     return (
       <WithHoverActions
-        alwaysShow={showTopN || hoverActionsOwnFocus}
+        alwaysShow={isShowingTopN || hoverActionsOwnFocus}
         closePopOverTrigger={closePopOverTrigger}
-        hoverContent={hoverContent}
+        hoverContent={disableHoverActions(scopeId) ? undefined : hoverContent}
         onCloseRequested={onCloseRequested}
         render={renderContent}
       />
@@ -370,8 +384,10 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       dataProvider={dataProvider}
       hideTopN={hideTopN}
       onFilterAdded={onFilterAdded}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       render={render}
-      timelineId={timelineId}
+      scopeId={scopeId}
       truncate={truncate}
     />
   );

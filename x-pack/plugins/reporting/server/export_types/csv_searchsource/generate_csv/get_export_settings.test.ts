@@ -11,19 +11,19 @@ import {
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from '../../../../common/constants';
-import { IUiSettingsClient } from 'kibana/server';
-import { savedObjectsClientMock, uiSettingsServiceMock } from 'src/core/server/mocks';
+import { IUiSettingsClient } from '@kbn/core/server';
 import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockLevelLogger,
-} from '../../../test_helpers';
+  loggingSystemMock,
+  savedObjectsClientMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
 import { getExportSettings } from './get_export_settings';
 
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
-  const config = createMockConfig(createMockConfigSchema({}));
-  const logger = createMockLevelLogger();
+  const config = createMockConfig(createMockConfigSchema({})).get('csv');
+  const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
     uiSettingsClient = uiSettingsServiceMock
@@ -55,8 +55,8 @@ describe('getExportSettings', () => {
         "includeFrozen": false,
         "maxSizeBytes": undefined,
         "scroll": Object {
-          "duration": undefined,
-          "size": undefined,
+          "duration": "30s",
+          "size": 500,
         },
         "separator": ",",
         "timezone": "UTC",

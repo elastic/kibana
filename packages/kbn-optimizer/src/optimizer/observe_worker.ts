@@ -74,7 +74,6 @@ function usingWorkerProc<T>(
             ...(inspectFlag && config.inspectWorkers
               ? [`${inspectFlag}=${inspectPortCounter++}`]
               : []),
-            ...(config.maxWorkerCount <= 3 ? ['--max-old-space-size=2048'] : []),
           ],
           buffer: false,
           stderr: 'pipe',
@@ -159,7 +158,7 @@ export function observeWorker(
     let lastMsg: WorkerMsg;
     const worker$: Rx.Observable<WorkerMsg | WorkerStatus> = Rx.merge(
       Rx.of({
-        type: 'worker started',
+        type: 'worker started' as const,
         bundles,
       }),
       // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null

@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { esQuery } from '../../../../../../../data/server';
+import { buildEsQuery } from '@kbn/es-query';
 import { overwrite, bucketTransform } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 
 import type { TableRequestProcessorsFunction } from './types';
 import type { Metric } from '../../../../../common/types';
+import { BASIC_AGGS_TYPES } from '../../../../../common/enums';
 
 const filter = (metric: Metric) => metric.type === 'filter_ratio';
 
@@ -30,22 +31,23 @@ export const filterRatios: TableRequestProcessorsFunction = ({
           overwrite(
             doc,
             `${aggRoot}.timeseries.aggs.${metric.id}-numerator.filter`,
-            esQuery.buildEsQuery(indexPattern, metric.numerator!, [], esQueryConfig)
+            buildEsQuery(indexPattern, metric.numerator!, [], esQueryConfig)
           );
           overwrite(
             doc,
             `${aggRoot}.timeseries.aggs.${metric.id}-denominator.filter`,
-            esQuery.buildEsQuery(indexPattern, metric.denominator!, [], esQueryConfig)
+            buildEsQuery(indexPattern, metric.denominator!, [], esQueryConfig)
           );
-
+          const metricAgg = metric.metric_agg as BASIC_AGGS_TYPES;
           let numeratorPath = `${metric.id}-numerator>_count`;
           let denominatorPath = `${metric.id}-denominator>_count`;
 
-          if (metric.metric_agg !== 'count' && bucketTransform[metric.metric_agg]) {
+          if (metricAgg && metricAgg !== 'count' && bucketTransform[metricAgg]) {
             const aggBody = {
-              metric: bucketTransform[metric.metric_agg]({
-                type: metric.metric_agg,
+              metric: bucketTransform[metricAgg]({
+                type: metricAgg,
                 field: metric.field,
+                id: metric.id,
               }),
             };
             overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}-numerator.aggs`, aggBody);

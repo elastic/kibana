@@ -17,11 +17,25 @@ describe('parseEventEnrichmentResponse', () => {
     const response = buildEventEnrichmentRawResponseMock();
     const parsedResponse = await parseEventEnrichmentResponse(options, response);
 
-    const expectedInspect = expect.objectContaining({
-      allowNoIndices: true,
+    const expectedInspect = {
+      allow_no_indices: true,
       body: {
         _source: false,
-        fields: ['*'],
+        fields: [
+          { field: '*', include_unmapped: true },
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+          {
+            field: 'code_signature.timestamp',
+            format: 'strict_date_optional_time',
+          },
+          {
+            field: 'dll.code_signature.timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
         query: {
           bool: {
             filter: [
@@ -41,26 +55,27 @@ describe('parseEventEnrichmentResponse', () => {
             should: [
               {
                 match: {
-                  'threatintel.indicator.file.hash.md5': {
+                  'threat.indicator.file.hash.md5': {
                     _name: 'file.hash.md5',
                     query: '1eee2bf3f56d8abed72da2bc523e7431',
                   },
                 },
               },
-              { match: { 'threatintel.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
+              { match: { 'threat.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
               {
                 match: {
-                  'threatintel.indicator.url.full': { _name: 'url.full', query: 'elastic.co' },
+                  'threat.indicator.url.full': { _name: 'url.full', query: 'elastic.co' },
                 },
               },
             ],
           },
         },
+        stored_fields: ['*'],
       },
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       index: ['filebeat-*'],
-    });
-    const parsedInspect = JSON.parse(parsedResponse.inspect!.dsl[0]);
+    };
+    const parsedInspect = JSON.parse(parsedResponse.inspect.dsl[0]);
     expect(parsedInspect).toEqual(expectedInspect);
   });
 

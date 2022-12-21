@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CasePostRequest, ConnectorTypeFields, MAX_TITLE_LENGTH } from '../../../common';
-import {
-  FIELD_TYPES,
-  fieldValidators,
-  FormSchema,
-  VALIDATION_TYPES,
-} from '../../common/shared_imports';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FIELD_TYPES, VALIDATION_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import type { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
+import { isInvalidTag } from '../../../common/utils/validators';
+import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import * as i18n from './translations';
 
 import { OptionalFieldLabel } from './optional_field_label';
+import { SEVERITY_TITLE } from '../severity/translations';
 const { emptyField, maxLengthField } = fieldValidators;
 
 export const schemaTags = {
@@ -24,7 +24,16 @@ export const schemaTags = {
   labelAppend: OptionalFieldLabel,
   validations: [
     {
-      validator: emptyField(i18n.TAGS_EMPTY_ERROR),
+      validator: ({ value }: { value: string | string[] }) => {
+        if (
+          (!Array.isArray(value) && isInvalidTag(value)) ||
+          (Array.isArray(value) && value.length > 0 && value.find(isInvalidTag))
+        ) {
+          return {
+            message: i18n.TAGS_EMPTY_ERROR,
+          };
+        }
+      },
       type: VALIDATION_TYPES.ARRAY_ITEM,
       isBlocking: false,
     },
@@ -35,6 +44,7 @@ export type FormProps = Omit<CasePostRequest, 'connector' | 'settings' | 'owner'
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
   syncAlerts: boolean;
+  selectedOwner?: string | null;
 };
 
 export const schema: FormSchema<FormProps> = {
@@ -61,7 +71,19 @@ export const schema: FormSchema<FormProps> = {
       },
     ],
   },
+  selectedOwner: {
+    label: i18n.SOLUTION,
+    type: FIELD_TYPES.RADIO_GROUP,
+    validations: [
+      {
+        validator: emptyField(i18n.SOLUTION_REQUIRED),
+      },
+    ],
+  },
   tags: schemaTags,
+  severity: {
+    label: SEVERITY_TITLE,
+  },
   connectorId: {
     type: FIELD_TYPES.SUPER_SELECT,
     label: i18n.CONNECTORS,
@@ -75,4 +97,5 @@ export const schema: FormSchema<FormProps> = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
   },
+  assignees: {},
 };

@@ -6,11 +6,12 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import type { CoreStart } from 'kibana/public';
-import type { UiActionsStart } from 'src/plugins/ui_actions/public';
-import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import type { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import {
+  EmbeddableFactory,
   EmbeddableInput,
   EmbeddableOutput,
   EmbeddablePanel,
@@ -18,13 +19,16 @@ import {
   EmbeddableStart,
   IEmbeddable,
   useEmbeddableFactory,
-} from '../../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
-import type { IndexPatternPersistedState } from '../indexpattern_datasource/types';
-import type { XYState } from '../xy_visualization/types';
-import type { PieVisualizationState, MetricState } from '../../common/expressions';
-import type { DatatableVisualizationState } from '../datatable_visualization/visualization';
+import type { FormBasedPersistedState } from '../datasources/form_based/types';
+import type { XYState } from '../visualizations/xy/types';
+import type { PieVisualizationState, LegacyMetricState } from '../../common';
+import type { DatatableVisualizationState } from '../visualizations/datatable/visualization';
+import type { MetricVisualizationState } from '../visualizations/metric/visualization';
+import type { HeatmapVisualizationState } from '../visualizations/heatmap/types';
+import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 
 type LensAttributes<TVisType, TVisState> = Omit<
   Document,
@@ -33,7 +37,7 @@ type LensAttributes<TVisType, TVisState> = Omit<
   visualizationType: TVisType;
   state: Omit<Document['state'], 'datasourceStates' | 'visualization'> & {
     datasourceStates: {
-      indexpattern: IndexPatternPersistedState;
+      formBased: FormBasedPersistedState;
     };
     visualization: TVisState;
   };
@@ -48,11 +52,17 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
     | LensAttributes<'lnsXY', XYState>
     | LensAttributes<'lnsPie', PieVisualizationState>
     | LensAttributes<'lnsDatatable', DatatableVisualizationState>
-    | LensAttributes<'lnsMetric', MetricState>;
+    | LensAttributes<'lnsLegacyMetric', LegacyMetricState>
+    | LensAttributes<'lnsMetric', MetricVisualizationState>
+    | LensAttributes<'lnsHeatmap', HeatmapVisualizationState>
+    | LensAttributes<'lnsGauge', GaugeVisualizationState>
+    | LensAttributes<string, unknown>;
 };
 
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {
-  withActions?: boolean;
+  withDefaultActions?: boolean;
+  extraActions?: Action[];
+  showInspector?: boolean;
 };
 
 interface PluginsStartDependencies {
@@ -62,62 +72,98 @@ interface PluginsStartDependencies {
 }
 
 export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDependencies) {
+  const { embeddable: embeddableStart, uiActions, inspector } = plugins;
+  const factory = embeddableStart.getEmbeddableFactory('lens')!;
+  const theme = core.theme;
   return (props: EmbeddableComponentProps) => {
-    const { embeddable: embeddableStart, uiActions, inspector } = plugins;
-    const factory = embeddableStart.getEmbeddableFactory('lens')!;
     const input = { ...props };
-    const [embeddable, loading, error] = useEmbeddableFactory({ factory, input });
-    const hasActions = props.withActions === true;
+    const hasActions =
+      Boolean(input.withDefaultActions) || (input.extraActions && input.extraActions?.length > 0);
 
-    if (loading) {
-      return <EuiLoadingChart />;
-    }
-
-    if (embeddable && hasActions) {
+    if (hasActions) {
       return (
         <EmbeddablePanelWrapper
-          embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
+          factory={factory}
           uiActions={uiActions}
           inspector={inspector}
           actionPredicate={() => hasActions}
           input={input}
+          theme={theme}
+          extraActions={input.extraActions}
+          showInspector={input.showInspector}
+          withDefaultActions={input.withDefaultActions}
         />
       );
     }
-
-    return <EmbeddableRoot embeddable={embeddable} loading={loading} error={error} input={input} />;
+    return <EmbeddableRootWrapper factory={factory} input={input} />;
   };
 }
 
+function EmbeddableRootWrapper({
+  factory,
+  input,
+}: {
+  factory: EmbeddableFactory<EmbeddableInput, EmbeddableOutput>;
+  input: EmbeddableComponentProps;
+}) {
+  const [embeddable, loading, error] = useEmbeddableFactory({ factory, input });
+  if (loading) {
+    return <EuiLoadingChart />;
+  }
+  return <EmbeddableRoot embeddable={embeddable} loading={loading} error={error} input={input} />;
+}
+
 interface EmbeddablePanelWrapperProps {
-  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
+  factory: EmbeddableFactory<EmbeddableInput, EmbeddableOutput>;
   uiActions: PluginsStartDependencies['uiActions'];
   inspector: PluginsStartDependencies['inspector'];
   actionPredicate: (id: string) => boolean;
   input: EmbeddableComponentProps;
+  theme: ThemeServiceStart;
+  extraActions?: Action[];
+  showInspector?: boolean;
+  withDefaultActions?: boolean;
 }
 
 const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
-  embeddable,
+  factory,
   uiActions,
   actionPredicate,
   inspector,
   input,
+  theme,
+  extraActions,
+  showInspector = true,
+  withDefaultActions,
 }) => {
+  const [embeddable, loading] = useEmbeddableFactory({ factory, input });
   useEffect(() => {
-    embeddable.updateInput(input);
+    if (embeddable) {
+      embeddable.updateInput(input);
+    }
   }, [embeddable, input]);
+
+  if (loading || !embeddable) {
+    return <EuiLoadingChart />;
+  }
 
   return (
     <EmbeddablePanel
       hideHeader={false}
       embeddable={embeddable as IEmbeddable<EmbeddableInput, EmbeddableOutput>}
-      getActions={uiActions.getTriggerCompatibleActions}
-      inspector={inspector}
+      getActions={async (triggerId, context) => {
+        const actions = withDefaultActions
+          ? await uiActions.getTriggerCompatibleActions(triggerId, context)
+          : [];
+
+        return [...(extraActions ?? []), ...actions];
+      }}
+      inspector={showInspector ? inspector : undefined}
       actionPredicate={actionPredicate}
       showShadow={false}
       showBadges={false}
       showNotifications={false}
+      theme={theme}
     />
   );
 };

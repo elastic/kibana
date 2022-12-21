@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
 import React, { ChangeEvent } from 'react';
 
@@ -28,7 +28,6 @@ import { memoizeLast } from '../../legacy/memoize';
 import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { BaseVisType, TypesStart } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
-import './agg_based_selection.scss';
 
 interface VisTypeListEntry {
   type: BaseVisType;
@@ -58,10 +57,12 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
       <>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="visualizations.newVisWizard.title"
-              defaultMessage="New visualization"
-            />
+            <h1>
+              <FormattedMessage
+                id="visualizations.newVisWizard.title"
+                defaultMessage="New visualization"
+              />
+            </h1>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
@@ -137,8 +138,9 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
           description={visType.type.description || ''}
           layout="horizontal"
           isDisabled={isDisabled}
-          icon={<EuiIcon type={visType.type.icon || 'empty'} size="l" color="secondary" />}
+          icon={<EuiIcon type={visType.type.icon || 'empty'} size="l" color="success" />}
           className="aggBasedDialog__card"
+          hasBorder={true}
         />
       </EuiFlexItem>
     );

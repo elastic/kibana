@@ -6,7 +6,6 @@
  */
 
 import {
-  EXCEPTIONS_TABLE_TAB,
   EXCEPTIONS_TABLE,
   EXCEPTIONS_TABLE_SEARCH,
   EXCEPTIONS_TABLE_DELETE_BTN,
@@ -14,15 +13,36 @@ import {
   EXCEPTIONS_TABLE_MODAL,
   EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN,
   EXCEPTIONS_TABLE_EXPORT_BTN,
+  EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
 } from '../screens/exceptions';
 
-export const goToExceptionsTable = () => {
-  cy.get(EXCEPTIONS_TABLE_TAB).should('exist').click({ force: true });
+export const clearSearchSelection = () => {
+  cy.get(EXCEPTIONS_TABLE_SEARCH_CLEAR).first().click();
 };
 
-export const waitForExceptionsTableToBeLoaded = () => {
-  cy.get(EXCEPTIONS_TABLE).should('exist');
-  cy.get(EXCEPTIONS_TABLE_SEARCH).should('exist');
+export const expandExceptionActions = () => {
+  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
+};
+
+export const exportExceptionList = () => {
+  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
+  cy.get(EXCEPTIONS_TABLE_EXPORT_BTN).first().click();
+};
+
+export const deleteExceptionListWithoutRuleReference = () => {
+  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
+  cy.get(EXCEPTIONS_TABLE_DELETE_BTN).first().click();
+  cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');
+  cy.get(EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN).first().click();
+  cy.get(EXCEPTIONS_TABLE_MODAL).should('not.exist');
+};
+
+export const deleteExceptionListWithRuleReference = () => {
+  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).last().click();
+  cy.get(EXCEPTIONS_TABLE_DELETE_BTN).last().click();
+  cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');
+  cy.get(EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN).first().click();
+  cy.get(EXCEPTIONS_TABLE_MODAL).should('not.exist');
 };
 
 export const searchForExceptionList = (searchText: string) => {
@@ -33,22 +53,7 @@ export const searchForExceptionList = (searchText: string) => {
   }
 };
 
-export const deleteExceptionListWithoutRuleReference = () => {
-  cy.get(EXCEPTIONS_TABLE_DELETE_BTN).first().click();
-  cy.get(EXCEPTIONS_TABLE_MODAL).should('not.exist');
-};
-
-export const deleteExceptionListWithRuleReference = () => {
-  cy.get(EXCEPTIONS_TABLE_DELETE_BTN).first().click();
-  cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');
-  cy.get(EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN).first().click();
-  cy.get(EXCEPTIONS_TABLE_MODAL).should('not.exist');
-};
-
-export const exportExceptionList = () => {
-  cy.get(EXCEPTIONS_TABLE_EXPORT_BTN).first().click();
-};
-
-export const clearSearchSelection = () => {
-  cy.get(EXCEPTIONS_TABLE_SEARCH_CLEAR).first().click();
+export const waitForExceptionsTableToBeLoaded = () => {
+  cy.get(EXCEPTIONS_TABLE).should('exist');
+  cy.get(EXCEPTIONS_TABLE_SEARCH).should('exist');
 };

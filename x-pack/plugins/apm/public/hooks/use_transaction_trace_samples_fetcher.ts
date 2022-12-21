@@ -5,21 +5,16 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useFetcher } from './use_fetcher';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
-import { useApmParams } from './use_apm_params';
+import { useAnyOfApmParams } from './use_apm_params';
 import { useTimeRange } from './use_time_range';
 
-export interface TraceSample {
-  traceId: string;
-  transactionId: string;
-}
-
-const INITIAL_DATA = {
-  noHits: true,
-  traceSamples: [] as TraceSample[],
-};
+export type TraceSamplesFetchResult = ReturnType<
+  typeof useTransactionTraceSamplesFetcher
+>;
 
 export function useTransactionTraceSamplesFetcher({
   transactionName,
@@ -34,53 +29,42 @@ export function useTransactionTraceSamplesFetcher({
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const {
     urlParams: { transactionId, traceId, sampleRangeFrom, sampleRangeTo },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
-  const {
-    data = INITIAL_DATA,
-    status,
-    error,
-  } = useFetcher(
-    async (callApmApi) => {
+  const { data, status, error } = useFetcher(
+    (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
-        const response = await callApmApi({
-          endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/traces/samples',
-          params: {
-            path: {
-              serviceName,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
+          {
+            params: {
+              path: {
+                serviceName,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                transactionType,
+                transactionName,
+                transactionId,
+                traceId,
+                sampleRangeFrom,
+                sampleRangeTo,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionType,
-              transactionName,
-              transactionId,
-              traceId,
-              sampleRangeFrom,
-              sampleRangeTo,
-            },
-          },
-        });
-
-        if (response.noHits) {
-          return response;
-        }
-
-        const { traceSamples } = response;
-
-        return {
-          noHits: false,
-          traceSamples,
-        };
+          }
+        );
       }
     },
     // the samples should not be refetched if the transactionId or traceId changes
@@ -98,9 +82,12 @@ export function useTransactionTraceSamplesFetcher({
     ]
   );
 
-  return {
-    traceSamplesData: data,
-    traceSamplesStatus: status,
-    traceSamplesError: error,
-  };
+  return useMemo(
+    () => ({
+      data,
+      status,
+      error,
+    }),
+    [data, status, error]
+  );
 }

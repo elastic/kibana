@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from 'src/core/types';
-import { SearchSourceFields } from './types';
+import { SavedObjectReference } from '@kbn/core/types';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { SerializedSearchSourceFields } from './types';
 
 export const injectReferences = (
-  searchSourceFields: SearchSourceFields & { indexRefName: string },
+  searchSourceFields: SerializedSearchSourceFields & { indexRefName: string },
   references: SavedObjectReference[]
 ) => {
-  const searchSourceReturnFields: SearchSourceFields = { ...searchSourceFields };
+  const searchSourceReturnFields: SerializedSearchSourceFields = { ...searchSourceFields };
   // Inject index id if a reference is saved
   if (searchSourceFields.indexRefName) {
     const reference = references.find((ref) => ref.name === searchSourceFields.indexRefName);
@@ -24,6 +25,13 @@ export const injectReferences = (
     searchSourceReturnFields.index = reference.id;
     // @ts-ignore
     delete searchSourceReturnFields.indexRefName;
+  }
+
+  if (searchSourceFields.index && typeof searchSourceFields.index !== 'string') {
+    searchSourceFields.index = DataViewPersistableStateService.inject(
+      searchSourceFields.index,
+      references
+    );
   }
 
   if (searchSourceReturnFields.filter && Array.isArray(searchSourceReturnFields.filter)) {

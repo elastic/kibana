@@ -1,15 +1,30 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-utility-types"
+PKG_DIRNAME = "kbn-utility-types"
 PKG_REQUIRE_NAME = "@kbn/utility-types"
 
-SOURCE_FILES = glob([
-  "src/jest/index.ts",
-  "src/serializable/**",
-  "src/index.ts"
-])
+SOURCE_FILES = glob(
+  [
+    "src/serializable/**",
+    "src/dot.ts",
+    "index.ts"
+  ],
+  exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
 
 SRCS = SOURCE_FILES
 
@@ -19,9 +34,7 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "jest/package.json",
   "package.json",
-  "README.md",
 ]
 
 RUNTIME_DEPS = [
@@ -30,8 +43,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "@npm//utility-types",
-  "@npm//@types/node",
-  "@npm//@types/jest",
+  "@npm//@types/node"
 ]
 
 jsts_transpiler(
@@ -55,27 +67,30 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+js_library(
+  name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
-  package_name = "@kbn/utility-types",
+  package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
@@ -83,5 +98,11 @@ filegroup(
   srcs = [
     ":npm_module",
   ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm(
+  name = "build_types",
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

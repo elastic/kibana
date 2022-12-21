@@ -13,6 +13,7 @@ import { ContainerType } from '../../../../common/service_metadata';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getAgentIcon } from '../agent_icon/get_agent_icon';
 import { CloudDetails } from './cloud_details';
+import { ServerlessDetails } from './serverless_details';
 import { ContainerDetails } from './container_details';
 import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
@@ -47,13 +48,12 @@ export function getContainerIcon(container?: ContainerType) {
   }
 }
 
-type Icons = 'service' | 'container' | 'cloud' | 'alerts';
+type Icons = 'service' | 'container' | 'serverless' | 'cloud' | 'alerts';
 
-interface PopoverItem {
+export interface PopoverItem {
   key: Icons;
   icon: {
     type?: string;
-    color?: string;
     size?: 's' | 'm' | 'l';
   };
   isVisible: boolean;
@@ -70,13 +70,15 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
   const { data: icons, status: iconsFetchStatus } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/metadata/icons',
-          params: {
-            path: { serviceName },
-            query: { start, end },
-          },
-        });
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/metadata/icons',
+          {
+            params: {
+              path: { serviceName },
+              query: { start, end },
+            },
+          }
+        );
       }
     },
     [serviceName, start, end]
@@ -85,14 +87,16 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
   const { data: details, status: detailsFetchStatus } = useFetcher(
     (callApmApi) => {
       if (selectedIconPopover && serviceName && start && end) {
-        return callApmApi({
-          isCachable: true,
-          endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
-          params: {
-            path: { serviceName },
-            query: { start, end },
-          },
-        });
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/metadata/details',
+          {
+            isCachable: true,
+            params: {
+              path: { serviceName },
+              query: { start, end },
+            },
+          }
+        );
       }
     },
     [selectedIconPopover, serviceName, start, end]
@@ -125,7 +129,23 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
       title: i18n.translate('xpack.apm.serviceIcons.container', {
         defaultMessage: 'Container',
       }),
-      component: <ContainerDetails container={details?.container} />,
+      component: (
+        <ContainerDetails
+          container={details?.container}
+          kubernetes={details?.kubernetes}
+        />
+      ),
+    },
+    {
+      key: 'serverless',
+      icon: {
+        type: getAgentIcon(icons?.serverlessType, theme.darkMode) || 'node',
+      },
+      isVisible: !!icons?.serverlessType,
+      title: i18n.translate('xpack.apm.serviceIcons.serverless', {
+        defaultMessage: 'Serverless',
+      }),
+      component: <ServerlessDetails serverless={details?.serverless} />,
     },
     {
       key: 'cloud',
@@ -136,7 +156,12 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
       title: i18n.translate('xpack.apm.serviceIcons.cloud', {
         defaultMessage: 'Cloud',
       }),
-      component: <CloudDetails cloud={details?.cloud} />,
+      component: (
+        <CloudDetails
+          cloud={details?.cloud}
+          isServerless={!!details?.serverless}
+        />
+      ),
     },
   ];
 

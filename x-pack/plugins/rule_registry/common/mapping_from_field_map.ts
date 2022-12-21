@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { set } from '@elastic/safer-lodash-set';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { set } from '@kbn/safer-lodash-set';
 import { FieldMap } from './field_map/types';
 
 export function mappingFromFieldMap(

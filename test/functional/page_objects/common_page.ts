@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
-// @ts-ignore
-import fetch from 'node-fetch';
 import { getUrl } from '@kbn/test';
+import moment from 'moment';
 import { FtrService } from '../ftr_provider_context';
 
 interface NavigateProps {
@@ -30,6 +29,7 @@ export class CommonPageObject extends FtrService {
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly loginPage = this.ctx.getPageObject('login');
+  private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -67,10 +67,14 @@ export class CommonPageObject extends FtrService {
         await this.loginPage.login('test_user', 'changeme');
       }
 
-      await this.find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
-        6 * this.defaultFindTimeout
-      );
+      if (appUrl.includes('/status')) {
+        await this.testSubjects.find('statusPageRoot');
+      } else {
+        await this.find.byCssSelector(
+          '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
+          6 * this.defaultFindTimeout
+        );
+      }
       await this.browser.get(appUrl, insertTimestamp);
       currentUrl = await this.browser.getCurrentUrl();
       this.log.debug(`Finished login process currentUrl = ${currentUrl}`);
@@ -173,8 +177,8 @@ export class CommonPageObject extends FtrService {
   ) {
     const appConfig = {
       // subUrl following the basePath, assumes no hashes.  Ex: 'app/endpoint/management'
-      pathname: `${basePath}${this.config.get(['apps', appName]).pathname}${subUrl}`,
-      search,
+      pathname: `${basePath}${this.config.get(['apps', appName]).pathname}${subUrl || ''}`,
+      search: search || '',
     };
 
     await this.navigate({
@@ -208,7 +212,7 @@ export class CommonPageObject extends FtrService {
 
   async sleep(sleepMilliseconds: number) {
     this.log.debug(`... sleep(${sleepMilliseconds}) start`);
-    await delay(sleepMilliseconds);
+    await setTimeoutAsync(sleepMilliseconds);
     this.log.debug(`... sleep(${sleepMilliseconds}) end`);
   }
 
@@ -217,8 +221,9 @@ export class CommonPageObject extends FtrService {
     {
       basePath = '',
       shouldLoginIfPrompted = true,
-      disableWelcomePrompt = true,
       hash = '',
+      search = '',
+      disableWelcomePrompt = true,
       insertTimestamp = true,
     } = {}
   ) {
@@ -229,11 +234,13 @@ export class CommonPageObject extends FtrService {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}${appConfig.pathname}`,
         hash: hash || appConfig.hash,
+        search,
       });
     } else {
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
         pathname: `${basePath}/app/${appName}`,
         hash,
+        search,
       });
     }
 
@@ -258,6 +265,20 @@ export class CommonPageObject extends FtrService {
           await this.testSubjects.find('kibanaChrome');
         }
 
+        // If navigating to the `home` app, and we want to skip the Welcome page, but the chrome is still hidden,
+        // set the relevant localStorage key to skip the Welcome page and throw an error to try to navigate again.
+        if (
+          appName === 'home' &&
+          currentUrl.includes('app/home') &&
+          disableWelcomePrompt &&
+          (await this.isChromeHidden())
+        ) {
+          await this.browser.setLocalStorageItem('home:welcome:show', 'false');
+          const msg = `Failed to skip the Welcome page when navigating the app ${appName}`;
+          this.log.debug(msg);
+          throw new Error(msg);
+        }
+
         currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
 
         const navSuccessful = currentUrl
@@ -269,6 +290,9 @@ export class CommonPageObject extends FtrService {
           const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
           this.log.debug(msg);
           throw new Error(msg);
+        }
+        if (appName === 'discover') {
+          await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
         }
         return currentUrl;
       });
@@ -390,9 +414,9 @@ export class CommonPageObject extends FtrService {
   async closeToast() {
     const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
     await toast.moveMouseTo();
-    const title = await (await this.find.byCssSelector('.euiToastHeader__title')).getVisibleText();
+    const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
 
-    await this.find.clickByCssSelector('.euiToast__closeButton');
+    await this.testSubjects.click('toastCloseButton');
     return title;
   }
 
@@ -400,7 +424,7 @@ export class CommonPageObject extends FtrService {
     const toastShown = await this.find.existsByCssSelector('.euiToast');
     if (toastShown) {
       try {
-        await this.find.clickByCssSelector('.euiToast__closeButton');
+        await this.testSubjects.click('toastCloseButton');
       } catch (err) {
         // ignore errors, toast clear themselves after timeout
       }
@@ -412,7 +436,7 @@ export class CommonPageObject extends FtrService {
     for (const toastElement of toasts) {
       try {
         await toastElement.moveMouseTo();
-        const closeBtn = await toastElement.findByCssSelector('.euiToast__closeButton');
+        const closeBtn = await toastElement.findByTestSubject('toastCloseButton');
         await closeBtn.click();
       } catch (err) {
         // ignore errors, toast clear themselves after timeout
@@ -443,7 +467,7 @@ export class CommonPageObject extends FtrService {
   async waitForSaveModalToClose() {
     this.log.debug('Waiting for save modal to close');
     await this.retry.try(async () => {
-      if (await this.testSubjects.exists('savedObjectSaveModal')) {
+      if (await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 })) {
         throw new Error('save modal still open');
       }
     });
@@ -493,4 +517,48 @@ export class CommonPageObject extends FtrService {
       await this.testSubjects.exists(validator);
     }
   }
+
+  /**
+   * Due to a warning thrown, documented at:
+   * https://github.com/elastic/kibana/pull/114997#issuecomment-950823874
+   * this fn formats time in a format specified, or defaulted
+   * to the same format in
+   * [getTimeDurationInHours()](https://github.com/elastic/kibana/blob/main/test/functional/page_objects/time_picker.ts#L256)
+   * @param time
+   * @param fmt
+   */
+  formatTime(time: TimeStrings, fmt: string = 'MMM D, YYYY @ HH:mm:ss.SSS') {
+    return Object.keys(time)
+      .map((x) => moment.utc(time[x], [fmt]).format())
+      .reduce(
+        (acc, curr, idx) => {
+          if (idx === 0) acc.from = curr;
+          acc.to = curr;
+          return acc;
+        },
+        { from: '', to: '' }
+      );
+  }
+
+  /**
+   * Previously, many tests were using the time picker.
+   * To speed things up, we are now setting time here.
+   * The formatting fn is called here, such that the tests
+   * that were using the time picker can use the same time
+   * parameters as before, but they are auto-formatted.
+   * @param time
+   */
+  async setTime(time: TimeStrings) {
+    await this.kibanaServer.uiSettings.update({
+      'timepicker:timeDefaults': JSON.stringify(this.formatTime(time)),
+    });
+  }
+
+  async unsetTime() {
+    await this.kibanaServer.uiSettings.unset('timepicker:timeDefaults');
+  }
+}
+export interface TimeStrings extends Record<string, any> {
+  from: string;
+  to: string;
 }

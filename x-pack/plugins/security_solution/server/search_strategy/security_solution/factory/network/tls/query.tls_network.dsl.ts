@@ -8,12 +8,12 @@
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
-import {
+import type {
   Direction,
   NetworkTlsRequestOptions,
-  NetworkTlsFields,
   SortField,
 } from '../../../../../../common/search_strategy';
+import { NetworkTlsFields } from '../../../../../../common/search_strategy';
 
 const getAggs = (querySize: number, sort: SortField<NetworkTlsFields>) => ({
   count: {
@@ -75,9 +75,9 @@ export const buildNetworkTlsQuery = ({
   const filter = ip ? [...defaultFilter, { term: { [`${flowTarget}.ip`]: ip } }] : defaultFilter;
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       aggs: {

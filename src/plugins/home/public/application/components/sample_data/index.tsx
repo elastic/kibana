@@ -19,7 +19,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getServices } from '../../kibana_services';
 
 interface Props {
@@ -40,18 +40,18 @@ export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
       image={cardGraphicURL}
       textAlign="left"
       title={
-        <FormattedMessage id="home.letsStartTitle" defaultMessage="Start by adding your data" />
+        <FormattedMessage id="home.letsStartTitle" defaultMessage="Start by adding integrations" />
       }
       description={
         <FormattedMessage
           id="home.letsStartDescription"
-          defaultMessage="Add data to your cluster from any source, then analyze and visualize it in real time. Use our solutions to add search anywhere, observe your ecosystem, and protect against security threats."
+          defaultMessage="Add data to your cluster from any source, then analyze and visualize it in real time. Use our solutions to add search anywhere, observe your ecosystem, and defend against security threats."
         />
       }
       footer={
         <footer>
           <EuiButton fill className="homWelcome__footerAction" onClick={onConfirm}>
-            <FormattedMessage id="home.tryButtonLabel" defaultMessage="Add data" />
+            <FormattedMessage id="home.tryButtonLabel" defaultMessage="Add integrations" />
           </EuiButton>
           <EuiButtonEmpty
             className="homWelcome__footerAction"

@@ -1,0 +1,24 @@
+{
+  "extends": "<%- relativePathTo("tsconfig.bazel.json") %>",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "target_types",
+    "types": [
+    <%_ if (pkg.web) { _%>
+      "jest",
+      "node",
+      "react"
+    <%_ } else { _%>
+      "jest",
+      "node"
+    <%_ } _%>
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    <%_ if (pkg.web) { _%>
+      "**/*.tsx",
+    <%_ } _%>
+  ]
+}

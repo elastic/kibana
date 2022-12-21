@@ -5,17 +5,34 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from '@kbn/core/server';
 
 export class Plugin {
   constructor() {}
 
   public setup(core: CoreSetup) {
     // called when plugin is setting up during Kibana's startup sequence
-    core.savedObjects.registerType({
+    core.savedObjects.registerType<{ title: string }>({
       name: 'sharedtype',
       hidden: false,
       namespaceType: 'multiple',
+      management: {
+        icon: 'beaker',
+        importableAndExportable: true,
+        getTitle(obj) {
+          return obj.attributes.title;
+        },
+      },
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+        },
+      },
+    });
+    core.savedObjects.registerType<{ title: string }>({
+      name: 'isolatedtype',
+      hidden: false,
+      namespaceType: 'single',
       management: {
         icon: 'beaker',
         importableAndExportable: true,

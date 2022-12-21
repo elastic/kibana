@@ -7,18 +7,26 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { addOwnerToSO, SanitizedCaseOwner } from '.';
+import { cloneDeep, unset } from 'lodash';
+import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
+import type { SanitizedCaseOwner } from '.';
+import { addOwnerToSO } from '.';
+import type { ESConnectorFields } from '../../services';
+import type { CaseAttributes } from '../../../common/api';
+import { CaseSeverity, ConnectorTypes } from '../../../common/api';
+
 import {
-  SavedObjectUnsanitizedDoc,
-  SavedObjectSanitizedDoc,
-} from '../../../../../../src/core/server';
-import { ESConnectorFields } from '../../services';
-import { ConnectorTypes, CaseType } from '../../../common';
+  CONNECTOR_ID_REFERENCE_NAME,
+  PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  SEVERITY_EXTERNAL_TO_ESMODEL,
+} from '../../common/constants';
 import {
   transformConnectorIdToReference,
   transformPushConnectorIdToReference,
-} from '../../services/user_actions/transform';
-import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../../common';
+} from './user_actions/connector_id';
+import { CASE_TYPE_INDIVIDUAL } from './constants';
+import { pipeMigrations } from './utils';
+import { ESCaseSeverity } from '../../services/cases/types';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -75,6 +83,68 @@ export const caseConnectorIdMigration = (
   };
 };
 
+export const removeCaseType = (
+  doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+): SavedObjectSanitizedDoc<unknown> => {
+  const docCopy = cloneDeep(doc);
+  unset(docCopy, 'attributes.type');
+
+  return { ...docCopy, references: doc.references ?? [] };
+};
+
+export const addDuration = (
+  doc: SavedObjectUnsanitizedDoc<Omit<CaseAttributes, 'duration'>>
+): SavedObjectSanitizedDoc<CaseAttributes> => {
+  let duration = null;
+
+  try {
+    const createdAt = doc.attributes.created_at;
+    const closedAt = doc.attributes.closed_at;
+
+    if (createdAt != null && closedAt != null) {
+      const createdAtMillis = new Date(createdAt).getTime();
+      const closedAtMillis = new Date(closedAt).getTime();
+
+      if (!isNaN(createdAtMillis) && !isNaN(closedAtMillis) && closedAtMillis >= createdAtMillis) {
+        duration = Math.floor((closedAtMillis - createdAtMillis) / 1000);
+      }
+    }
+  } catch (err) {
+    // Silence date errors
+  }
+
+  /**
+   * Duration is the time from the creation of the case to the close of the case in seconds
+   * If an error occurs or the case has not been closed then the duration is set to null
+   */
+  return { ...doc, attributes: { ...doc.attributes, duration }, references: doc.references ?? [] };
+};
+
+export const addSeverity = (
+  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
+): SavedObjectSanitizedDoc<CaseAttributes> => {
+  const severity = doc.attributes.severity ?? CaseSeverity.LOW;
+  return { ...doc, attributes: { ...doc.attributes, severity }, references: doc.references ?? [] };
+};
+
+export const addAssignees = (
+  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
+): SavedObjectSanitizedDoc<CaseAttributes> => {
+  const assignees = doc.attributes.assignees ?? [];
+  return { ...doc, attributes: { ...doc.attributes, assignees }, references: doc.references ?? [] };
+};
+
+export const convertSeverity = (
+  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
+): SavedObjectSanitizedDoc<Omit<CaseAttributes, 'severity'> & { severity: ESCaseSeverity }> => {
+  const severity = SEVERITY_EXTERNAL_TO_ESMODEL[doc.attributes.severity] ?? ESCaseSeverity.LOW;
+  return {
+    ...doc,
+    attributes: { ...doc.attributes, severity },
+    references: doc.references ?? [],
+  };
+};
+
 export const caseMigrations = {
   '7.10.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedCaseConnector>
@@ -117,7 +187,7 @@ export const caseMigrations = {
       ...doc,
       attributes: {
         ...doc.attributes,
-        type: CaseType.individual,
+        type: CASE_TYPE_INDIVIDUAL,
         connector: {
           ...doc.attributes.connector,
           fields:
@@ -135,4 +205,8 @@ export const caseMigrations = {
     return addOwnerToSO(doc);
   },
   '7.15.0': caseConnectorIdMigration,
+  '8.1.0': removeCaseType,
+  '8.3.0': pipeMigrations(addDuration, addSeverity),
+  '8.5.0': addAssignees,
+  '8.7.0': convertSeverity,
 };

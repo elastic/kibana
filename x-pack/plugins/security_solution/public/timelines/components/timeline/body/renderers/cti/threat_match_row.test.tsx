@@ -10,7 +10,8 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
-import { ThreatMatchRowProps, ThreatMatchRowView } from './threat_match_row';
+import type { ThreatMatchRowProps } from './threat_match_row';
+import { ThreatMatchRowView } from './threat_match_row';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -22,7 +23,7 @@ describe('ThreatMatchRowView', () => {
       <ThreatMatchRowView
         contextId="contextId"
         eventId="eventId"
-        indicatorProvider="provider"
+        feedName="feedName"
         indicatorReference="http://example.com"
         indicatorType="domain"
         sourceField="host.name"
@@ -38,7 +39,7 @@ describe('ThreatMatchRowView', () => {
       <ThreatMatchRowView
         contextId="contextId"
         eventId="eventId"
-        indicatorProvider="provider"
+        feedName="feedName"
         indicatorReference="http://example.com"
         indicatorType="domain"
         sourceField="host.name"
@@ -62,7 +63,7 @@ describe('ThreatMatchRowView', () => {
       baseProps = {
         contextId: 'contextId',
         eventId: 'eventId',
-        indicatorProvider: 'provider',
+        feedName: 'feedName',
         indicatorReference: 'http://example.com',
         indicatorType: 'domain',
         sourceField: 'host.name',
@@ -114,14 +115,14 @@ describe('ThreatMatchRowView', () => {
       expect(indicatorType.exists()).toBeFalsy();
     });
 
-    it('renders the indicator provider, if present', () => {
+    it('renders the feed name, if present', () => {
       const wrapper = render(baseProps);
-      const indicatorProvider = wrapper.find(
-        '[data-test-subj="threat-match-indicator-details-indicator-provider"]'
+      const feedName = wrapper.find(
+        '[data-test-subj="threat-match-indicator-details-indicator-feedName"]'
       );
-      expect(indicatorProvider.props()).toEqual(
+      expect(feedName.props()).toEqual(
         expect.objectContaining({
-          value: 'provider',
+          value: 'feedName',
         })
       );
     });
@@ -129,10 +130,10 @@ describe('ThreatMatchRowView', () => {
     it('does not render the indicator provider, if absent', () => {
       const wrapper = render({
         ...baseProps,
-        indicatorProvider: undefined,
+        feedName: undefined,
       });
       const indicatorProvider = wrapper.find(
-        '[data-test-subj="threat-match-indicator-details-indicator-provider"]'
+        '[data-test-subj="threat-match-indicator-details-indicator-feedName"]'
       );
       expect(indicatorProvider.exists()).toBeFalsy();
     });

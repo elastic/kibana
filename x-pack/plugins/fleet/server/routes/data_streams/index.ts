@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
+import type { FleetAuthzRouter } from '../../services/security';
 
-import { PLUGIN_ID, DATA_STREAM_API_ROUTES } from '../../constants';
+import { DATA_STREAM_API_ROUTES } from '../../constants';
 
 import { getListHandler } from './handlers';
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter) => {
   // List of data streams
   router.get(
     {
       path: DATA_STREAM_API_ROUTES.LIST_PATTERN,
       validate: false,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     getListHandler
   );

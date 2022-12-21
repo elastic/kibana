@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from 'kibana/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
 } from '../../../../../../../common/endpoint/models/policy_config';
-import { MiddlewareRunner, UpdatePolicyResponse } from '../../../types';
+import type { MiddlewareRunner, UpdatePolicyResponse } from '../../../types';
 import {
   policyIdFromParams,
   isOnPolicyDetailsPage,
@@ -22,12 +22,12 @@ import {
   sendGetPackagePolicy,
   sendGetFleetAgentStatusForPolicy,
   sendPutPackagePolicy,
-} from '../../services/ingest';
-import { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
+} from '../../../../../services/policies/ingest';
+import type { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 
 export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
-  coreStart,
+  { coreStart },
   { dispatch, getState },
   action
 ) => {
@@ -55,6 +55,14 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
       }
       if (policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message === '') {
         policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message =
+          DefaultPolicyRuleNotificationMessage;
+      }
+      if (policyItem.inputs[0].config.policy.value.mac.popup.memory_protection.message === '') {
+        policyItem.inputs[0].config.policy.value.mac.popup.memory_protection.message =
+          DefaultPolicyRuleNotificationMessage;
+      }
+      if (policyItem.inputs[0].config.policy.value.linux.popup.memory_protection.message === '') {
+        policyItem.inputs[0].config.policy.value.linux.popup.memory_protection.message =
           DefaultPolicyRuleNotificationMessage;
       }
       if (

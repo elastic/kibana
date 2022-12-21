@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import { UnreachableError } from '../../common/lib';
 import { UserAtSpaceScenarios } from '../scenarios';
 
 export default function fooTests({ getService }: FtrProviderContext) {
@@ -26,6 +27,7 @@ export default function fooTests({ getService }: FtrProviderContext) {
           // these users have a read/write view
           case 'superuser at everything_space':
           case 'global_all at everything_space':
+          case 'foo_all at everything_space':
           case 'dual_privileges_all at everything_space':
           case 'everything_space_all at everything_space':
             expect(uiCapabilities.success).to.be(true);
@@ -39,6 +41,7 @@ export default function fooTests({ getService }: FtrProviderContext) {
             break;
           // these users have a read only view
           case 'global_read at everything_space':
+          case 'foo_read at everything_space':
           case 'dual_privileges_read at everything_space':
           case 'everything_space_read at everything_space':
             expect(uiCapabilities.success).to.be(true);
@@ -55,6 +58,8 @@ export default function fooTests({ getService }: FtrProviderContext) {
           case 'superuser at nothing_space':
           case 'global_all at nothing_space':
           case 'global_read at nothing_space':
+          case 'foo_all at nothing_space':
+          case 'foo_read at nothing_space':
           case 'dual_privileges_all at nothing_space':
           case 'dual_privileges_read at nothing_space':
           case 'nothing_space_all at nothing_space':

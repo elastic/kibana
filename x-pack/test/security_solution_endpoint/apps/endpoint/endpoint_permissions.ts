@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createUserAndRole,
   deleteUserAndRole,
   ROLES,
 } from '../../../common/services/security_solution';
-import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security', 'endpoint', 'detections', 'hosts']);
@@ -20,8 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
   const policyTestResources = getService('policyTestResources');
 
-  // failing ES promotion: https://github.com/elastic/kibana/issues/110309
-  describe.skip('Endpoint permissions:', () => {
+  describe('Endpoint permissions:', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
@@ -51,6 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         after(async () => {
           // Log the user back out
+          // NOTE: Logout needs to happen before anything else to avoid flaky behavior
           await PageObjects.security.forceLogout();
 
           // delete role/user
@@ -75,20 +75,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // The values for these are calculated, so let's just make sure its not teh default when no data is returned
           expect(endpointSummary['Policy status']).not.be('—');
           expect(endpointSummary['Agent status']).not.to.be('—');
-        });
-
-        // FIXME: this area (detections) is unstable and due to time, skipping it.
-        //        The page does not always (its intermittent) display with the created roles. Sometimes you get a
-        //        "not enought priviliges" and others the data shows up.
-        it.skip('should display endpoint data on Alert Details', async () => {
-          await PageObjects.detections.navigateToAlerts();
-          await PageObjects.detections.openFirstAlertDetailsForHostName(
-            indexedData.hosts[0].host.name
-          );
-
-          const hostAgentStatus = await testSubjects.getVisibleText('rowHostStatus');
-
-          expect(hostAgentStatus).to.eql('Healthy');
         });
       });
     }

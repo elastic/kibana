@@ -6,9 +6,12 @@
  */
 
 import React, { FC } from 'react';
+import { XJsonMode } from '@kbn/ace';
 
-import { EuiCodeEditor, EuiCodeEditorProps } from '@elastic/eui';
-import { expandLiteralStrings, XJsonMode } from '../../../../../../shared_imports';
+import { EuiCodeEditor, XJson } from '@kbn/es-ui-shared-plugin/public';
+import type { EuiCodeEditorProps } from '@kbn/es-ui-shared-plugin/public';
+
+const { expandLiteralStrings } = XJson;
 
 export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 
@@ -21,6 +24,7 @@ interface MlJobEditorProps {
   syntaxChecking?: boolean;
   theme?: string;
   onChange?: EuiCodeEditorProps['onChange'];
+  'data-test-subj'?: string;
 }
 export const MLJobEditor: FC<MlJobEditorProps> = ({
   value,
@@ -31,9 +35,15 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   syntaxChecking = true,
   theme = 'textmate',
   onChange = () => {},
+  'data-test-subj': dataTestSubj,
 }) => {
   if (mode === ML_EDITOR_MODE.XJSON) {
-    value = expandLiteralStrings(value);
+    try {
+      value = expandLiteralStrings(value);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
   }
 
   return (
@@ -53,6 +63,7 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
         useSoftTabs: true,
       }}
       onChange={onChange}
+      data-test-subj={dataTestSubj}
     />
   );
 };

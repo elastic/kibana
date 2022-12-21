@@ -4,12 +4,11 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../security_oss/tsconfig.json" }
+    { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../kibana_utils/tsconfig.json" }
   ]
 }

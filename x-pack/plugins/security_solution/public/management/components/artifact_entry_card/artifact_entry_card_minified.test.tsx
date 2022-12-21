@@ -6,18 +6,17 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import {
-  ArtifactEntryCardMinified,
-  ArtifactEntryCardMinifiedProps,
-} from './artifact_entry_card_minified';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { ArtifactEntryCardMinifiedProps } from './artifact_entry_card_minified';
+import { ArtifactEntryCardMinified } from './artifact_entry_card_minified';
 import { act, fireEvent } from '@testing-library/react';
-import { AnyArtifact } from './types';
-import { getTrustedAppProvider, getExceptionProvider } from './test_utils';
+import type { AnyArtifact } from './types';
+import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 
 describe.each([
-  ['trusted apps', getTrustedAppProvider],
-  ['exceptions/event filters', getExceptionProvider],
+  ['trusted apps', getTrustedAppProviderMock],
+  ['exceptions/event filters', getExceptionProviderMock],
 ])('when using the ArtifactEntryCardMinified component with %s', (_, generateItem) => {
   let item: AnyArtifact;
   let appTestContext: AppContextTestRender;
@@ -69,7 +68,7 @@ describe.each([
       await fireEvent.click(renderResult.getByTestId('testCard-collapse'));
     });
     expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
-      ' OSIS WindowsAND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS /one/two/three'
+      ' OSIS WindowsAND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS c:\\fol\\bin.exe'
     );
     expect(renderResult.getByTestId('testCard-collapse').textContent).toEqual('Hide details');
   });

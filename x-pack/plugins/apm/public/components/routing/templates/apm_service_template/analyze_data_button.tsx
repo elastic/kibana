@@ -8,34 +8,30 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
+import { ALL_VALUES_SELECTED } from '@kbn/observability-plugin/public';
 import {
-  createExploratoryViewUrl,
-  SeriesUrl,
-} from '../../../../../../observability/public';
-import { ALL_VALUES_SELECTED } from '../../../../../../observability/public';
-import {
-  isIosAgentName,
+  isMobileAgentName,
   isRumAgentName,
 } from '../../../../../common/agent_name';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+  TRANSACTION_DURATION,
+} from '../../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../common/environment_filter_values';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 
-function getEnvironmentDefinition(environment?: string) {
+function getEnvironmentDefinition(environment: string) {
   switch (environment) {
     case ENVIRONMENT_ALL.value:
       return { [SERVICE_ENVIRONMENT]: [ALL_VALUES_SELECTED] };
     case ENVIRONMENT_NOT_DEFINED.value:
-    case undefined:
-      return {};
     default:
       return { [SERVICE_ENVIRONMENT]: [environment] };
   }
@@ -47,28 +43,36 @@ export function AnalyzeDataButton() {
 
   const {
     query: { rangeFrom, rangeTo, environment },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const basepath = services.http?.basePath.get();
   const canShowDashboard = services.application?.capabilities.dashboard.show;
 
   if (
-    (isRumAgentName(agentName) || isIosAgentName(agentName)) &&
-    canShowDashboard
+    (isRumAgentName(agentName) || isMobileAgentName(agentName)) &&
+    rangeFrom &&
+    canShowDashboard &&
+    rangeTo
   ) {
     const href = createExploratoryViewUrl(
       {
-        'apm-series': {
-          dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
-          time: { from: rangeFrom, to: rangeTo },
-          reportType: 'kpi-over-time',
-          reportDefinitions: {
-            [SERVICE_NAME]: [serviceName],
-            ...getEnvironmentDefinition(environment),
+        reportType: 'kpi-over-time',
+        allSeries: [
+          {
+            name: `${serviceName}-response-latency`,
+            selectedMetricField: TRANSACTION_DURATION,
+            dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
+            time: { from: rangeFrom, to: rangeTo },
+            reportDefinitions: {
+              [SERVICE_NAME]: [serviceName],
+              ...(environment ? getEnvironmentDefinition(environment) : {}),
+            },
+            operationType: 'average',
           },
-          operationType: 'average',
-          isNew: true,
-        } as SeriesUrl,
+        ],
       },
       basepath
     );
@@ -78,12 +82,12 @@ export function AnalyzeDataButton() {
         position="top"
         content={i18n.translate('xpack.apm.analyzeDataButton.tooltip', {
           defaultMessage:
-            'EXPERIMENTAL - Analyze Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
+            'Explore Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
         })}
       >
         <EuiButtonEmpty href={href} iconType="visBarVerticalStacked">
           {i18n.translate('xpack.apm.analyzeDataButton.label', {
-            defaultMessage: 'Analyze data',
+            defaultMessage: 'Explore data',
           })}
         </EuiButtonEmpty>
       </EuiToolTip>

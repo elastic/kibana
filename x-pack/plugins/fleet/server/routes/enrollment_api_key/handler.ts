@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
+import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
@@ -19,15 +19,17 @@ import type {
   GetOneEnrollmentAPIKeyResponse,
   DeleteEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
-} from '../../../common';
+} from '../../../common/types';
 import * as APIKeyService from '../../services/api_keys';
-import { defaultIngestErrorHandler } from '../../errors';
+import { agentPolicyService } from '../../services/agent_policy';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetEnrollmentAPIKeysRequestSchema.query>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
   try {
     const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
@@ -35,11 +37,17 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
       perPage: request.query.perPage,
       kuery: request.query.kuery,
     });
-    const body: GetEnrollmentAPIKeysResponse = { list: items, total, page, perPage };
+    const body: GetEnrollmentAPIKeysResponse = {
+      list: items, // deprecated
+      items,
+      total,
+      page,
+      perPage,
+    };
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 export const postEnrollmentApiKeyHandler: RequestHandler<
@@ -47,9 +55,19 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostEnrollmentAPIKeyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const { elasticsearch, savedObjects } = await context.core;
+  const soClient = savedObjects.client;
+  const esClient = elasticsearch.client.asInternalUser;
   try {
+    // validate policy id
+    await agentPolicyService.get(soClient, request.body.policy_id).catch((err) => {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        throw new AgentPolicyNotFoundError(`Agent policy "${request.body.policy_id}" not found`);
+      }
+
+      throw err;
+    });
+
     const apiKey = await APIKeyService.generateEnrollmentAPIKey(soClient, esClient, {
       name: request.body.name,
       expiration: request.body.expiration,
@@ -60,14 +78,14 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
 export const deleteEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   try {
     await APIKeyService.deleteEnrollmentApiKey(esClient, request.params.keyId);
 
@@ -80,14 +98,15 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
         body: { message: `EnrollmentAPIKey ${request.params.keyId} not found` },
       });
     }
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
 export const getOneEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof GetOneEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   try {
     const apiKey = await APIKeyService.getEnrollmentAPIKey(esClient, request.params.keyId);
     const body: GetOneEnrollmentAPIKeyResponse = { item: apiKey };
@@ -100,6 +119,6 @@ export const getOneEnrollmentApiKeyHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

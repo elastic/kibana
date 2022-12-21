@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as rt from 'io-ts';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import { defaultRequestParameters } from './common';
@@ -22,6 +22,7 @@ export const createLogEntryCategoryExamplesQuery = (
 ): estypes.SearchRequest => ({
   ...defaultRequestParameters,
   body: {
+    size: exampleCount,
     query: {
       bool: {
         filter: [
@@ -30,6 +31,7 @@ export const createLogEntryCategoryExamplesQuery = (
               [timestampField]: {
                 gte: startTime,
                 lte: endTime,
+                format: 'epoch_millis',
               },
             },
           },
@@ -50,7 +52,6 @@ export const createLogEntryCategoryExamplesQuery = (
     fields: ['event.dataset', 'message', 'container.id', 'host.name', 'log.file.path'],
   },
   index: indices,
-  size: exampleCount,
 });
 
 export const logEntryCategoryExampleHitRT = rt.type({

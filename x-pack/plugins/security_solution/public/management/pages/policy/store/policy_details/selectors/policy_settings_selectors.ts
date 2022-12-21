@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
-import { ILicense } from '../../../../../../../../licensing/common/types';
+import { createSelector } from 'reselect';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
-import { PolicyDetailsState } from '../../../types';
-import {
+import type { PolicyDetailsState } from '../../../types';
+import type {
   Immutable,
   NewPolicyData,
   PolicyConfig,
@@ -20,11 +20,20 @@ import {
 import { policyFactory as policyConfigFactory } from '../../../../../../../common/endpoint/models/policy_config';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
 } from '../../../../../common/constants';
-import { ManagementRoutePolicyDetailsParams } from '../../../../../types';
-import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
-import { isOnPolicyTrustedAppsPage } from './trusted_apps_selectors';
+import type { ManagementRoutePolicyDetailsParams } from '../../../../../types';
+import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
+import {
+  isOnPolicyTrustedAppsView,
+  isOnPolicyEventFiltersView,
+  isOnHostIsolationExceptionsView,
+  isOnPolicyFormView,
+  isOnBlocklistsView,
+} from './policy_common_selectors';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
@@ -81,19 +90,13 @@ export const needsToRefresh = (state: Immutable<PolicyDetailsState>): boolean =>
   return !state.policyItem && !state.apiError;
 };
 
-/** Returns a boolean of whether the user is on the policy form page or not */
-export const isOnPolicyFormPage = (state: Immutable<PolicyDetailsState>) => {
-  return (
-    matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
-      exact: true,
-    }) !== null
-  );
-};
-
 /** Returns a boolean of whether the user is on some of the policy details page or not */
 export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) =>
-  isOnPolicyFormPage(state) || isOnPolicyTrustedAppsPage(state);
+  isOnPolicyFormView(state) ||
+  isOnPolicyTrustedAppsView(state) ||
+  isOnPolicyEventFiltersView(state) ||
+  isOnHostIsolationExceptionsView(state) ||
+  isOnBlocklistsView(state);
 
 /** Returns the license info fetched from the license service */
 export const license = (state: Immutable<PolicyDetailsState>) => {
@@ -102,13 +105,16 @@ export const license = (state: Immutable<PolicyDetailsState>) => {
 
 /** Returns the policyId from the url */
 export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => string = createSelector(
-  (state) => state.location,
+  (state: Immutable<PolicyDetailsState>) => state.location,
   (location: PolicyDetailsState['location']) => {
     return (
       matchPath<ManagementRoutePolicyDetailsParams>(location?.pathname ?? '', {
         path: [
           MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
         ],
         exact: true,
       })?.params?.policyId ?? ''
@@ -158,12 +164,14 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         behavior_protection: windows.behavior_protection,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
+        attack_surface_reduction: windows.attack_surface_reduction,
       },
       mac: {
         advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
         behavior_protection: mac.behavior_protection,
+        memory_protection: mac.memory_protection,
         popup: mac.popup,
       },
       linux: {
@@ -171,6 +179,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         events: linux.events,
         malware: linux.malware,
         behavior_protection: linux.behavior_protection,
+        memory_protection: linux.memory_protection,
         popup: linux.popup,
       },
     };
@@ -181,65 +190,9 @@ export const isAntivirusRegistrationEnabled = createSelector(policyConfig, (uiPo
   return uiPolicyConfig.windows.antivirus_registration.enabled;
 });
 
-/** Returns the total number of possible windows eventing configurations */
-export const totalWindowsEvents = (state: PolicyDetailsState): number => {
-  const config = policyConfig(state);
-  if (config) {
-    return Object.keys(config.windows.events).length;
-  }
-  return 0;
-};
-
-/** Returns the number of selected windows eventing configurations */
-export const selectedWindowsEvents = (state: PolicyDetailsState): number => {
-  const config = policyConfig(state);
-  if (config) {
-    return Object.values(config.windows.events).reduce((count, event) => {
-      return event === true ? count + 1 : count;
-    }, 0);
-  }
-  return 0;
-};
-
-/** Returns the total number of possible mac eventing configurations */
-export const totalMacEvents = (state: PolicyDetailsState): number => {
-  const config = policyConfig(state);
-  if (config) {
-    return Object.keys(config.mac.events).length;
-  }
-  return 0;
-};
-
-/** Returns the number of selected mac eventing configurations */
-export const selectedMacEvents = (state: PolicyDetailsState): number => {
-  const config = policyConfig(state);
-  if (config) {
-    return Object.values(config.mac.events).reduce((count, event) => {
-      return event === true ? count + 1 : count;
-    }, 0);
-  }
-  return 0;
-};
-
-/** Returns the total number of possible linux eventing configurations */
-export const totalLinuxEvents = (state: PolicyDetailsState): number => {
-  const config = policyConfig(state);
-  if (config) {
-    return Object.keys(config.linux.events).length;
-  }
-  return 0;
-};
-
-/** Returns the number of selected liinux eventing configurations */
-export const selectedLinuxEvents = (state: PolicyDetailsState): number => {
-  const config = policyConfig(state);
-  if (config) {
-    return Object.values(config.linux.events).reduce((count, event) => {
-      return event === true ? count + 1 : count;
-    }, 0);
-  }
-  return 0;
-};
+export const isCredentialHardeningEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
+  return uiPolicyConfig.windows.attack_surface_reduction.credential_hardening.enabled;
+});
 
 /** is there an api call in flight */
 export const isLoading = (state: PolicyDetailsState) => state.isLoading;

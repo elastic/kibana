@@ -20,7 +20,7 @@ import {
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { getDefaultIndex } from '../../lib/es_service';
+import { pluginServices } from '../../services';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 
@@ -39,6 +39,7 @@ const strings = {
       defaultMessage: 'Save',
     }),
 };
+
 export class DatasourceComponent extends PureComponent {
   static propTypes = {
     args: PropTypes.object.isRequired,
@@ -66,7 +67,12 @@ export class DatasourceComponent extends PureComponent {
   state = { defaultIndex: '' };
 
   componentDidMount() {
-    getDefaultIndex().then((defaultIndex) => this.setState({ defaultIndex }));
+    pluginServices
+      .getServices()
+      .dataViews.getDefaultDataView()
+      .then((defaultDataView) => {
+        this.setState({ defaultIndex: defaultDataView.title });
+      });
   }
 
   componentDidUpdate(prevProps) {
@@ -166,6 +172,7 @@ export class DatasourceComponent extends PureComponent {
             className="canvasDataSource__triggerButton"
             flush="left"
             size="s"
+            data-test-subj="canvasChangeDatasourceButton"
           >
             <EuiIcon type={stateDatasource.image} className="canvasDataSource__triggerButtonIcon" />
             {stateDatasource.displayName}
@@ -187,7 +194,8 @@ export class DatasourceComponent extends PureComponent {
                     size="s"
                     onClick={this.save}
                     fill
-                    color="secondary"
+                    color="success"
+                    data-test-subj="canvasSaveDatasourceButton"
                   >
                     {strings.getSaveButtonLabel()}
                   </EuiButton>

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import { useKibana } from '../lib/kibana';
 import { useErrorToast } from './use_error_toast';
@@ -15,14 +15,21 @@ export const useOsqueryIntegrationStatus = () => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery('integration', () => http.get('/internal/osquery/status'), {
-    onError: (error: Error) =>
-      setErrorToast(error, {
-        title: i18n.translate('xpack.osquery.osquery_integration.fetchError', {
-          defaultMessage: 'Error while fetching osquery integration',
+  return useQuery(
+    ['integration'],
+    () =>
+      http.get<{ name: string; version: string; title: string; install_status: string }>(
+        '/internal/osquery/status'
+      ),
+    {
+      onError: (error: Error) =>
+        setErrorToast(error, {
+          title: i18n.translate('xpack.osquery.osquery_integration.fetchError', {
+            defaultMessage: 'Error while fetching osquery integration',
+          }),
         }),
-      }),
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-  });
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    }
+  );
 };

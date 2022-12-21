@@ -6,19 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { MlLicense } from '../../../common/license';
-import { PluginsSetup } from '../../types';
 
-export function initSampleDataSets(mlLicense: MlLicense, plugins: PluginsSetup) {
+export function initSampleDataSets(mlLicense: MlLicense, home: HomeServerPluginSetup) {
   if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
     const sampleDataLinkLabel = i18n.translate('xpack.ml.sampleDataLinkLabel', {
       defaultMessage: 'ML jobs',
     });
-    const { addAppLinksToSampleDataset } = plugins.home.sampleData;
+    const { addAppLinksToSampleDataset } = home.sampleData;
+    const getCreateJobPath = (jobId: string, dataViewId: string) =>
+      `/app/ml/modules/check_view_or_create?id=${jobId}&index=${dataViewId}`;
 
     addAppLinksToSampleDataset('ecommerce', [
       {
-        path: '/app/ml/modules/check_view_or_create?id=sample_data_ecommerce&index=ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        sampleObject: {
+          type: 'index-pattern',
+          id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        },
+        getPath: (objectId) => getCreateJobPath('sample_data_ecommerce', objectId),
         label: sampleDataLinkLabel,
         icon: 'machineLearningApp',
       },
@@ -26,7 +32,11 @@ export function initSampleDataSets(mlLicense: MlLicense, plugins: PluginsSetup) 
 
     addAppLinksToSampleDataset('logs', [
       {
-        path: '/app/ml/modules/check_view_or_create?id=sample_data_weblogs&index=90943e30-9a47-11e8-b64d-95841ca0b247',
+        sampleObject: {
+          type: 'index-pattern',
+          id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        },
+        getPath: (objectId) => getCreateJobPath('sample_data_weblogs', objectId),
         label: sampleDataLinkLabel,
         icon: 'machineLearningApp',
       },

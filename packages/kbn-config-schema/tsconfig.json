@@ -2,12 +2,8 @@
   "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
     "declaration": true,
-    "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
-    "rootDir": "src",
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-config-schema/src",
     "stripInternal": true,
     "types": [
       "jest",
@@ -15,7 +11,6 @@
     ]
   },
   "include": [
-    "types/joi.d.ts",
-    "src/**/*.ts"
+    "**/*.ts"
   ]
 }

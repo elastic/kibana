@@ -6,17 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { staticColumn } from '../../../canvas_plugin_src/functions/common/staticColumn';
+import type { staticColumn } from '../../../canvas_plugin_src/functions/common/staticColumn';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof staticColumn>> = {
   help: i18n.translate('xpack.canvas.functions.staticColumnHelpText', {
     defaultMessage:
-      'Adds a column with the same static value in every row. See also {alterColumnFn} and {mapColumnFn}.',
+      'Adds a column with the same static value in every row. See also {alterColumnFn}, {mapColumnFn}, and {mathColumnFn}',
     values: {
       alterColumnFn: '`alterColumn`',
       mapColumnFn: '`mapColumn`',
+      mathColumnFn: '`mathColumn`',
     },
   }),
   args: {

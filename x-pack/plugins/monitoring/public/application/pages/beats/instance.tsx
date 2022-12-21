@@ -9,13 +9,12 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
-import { GlobalStateContext } from '../../global_state_context';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
-// @ts-ignore
 import { Beat } from '../../../components/beats/beat';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { BeatsTemplate } from './beats_template';
 
 export const BeatsInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
@@ -23,7 +22,7 @@ export const BeatsInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
 
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { zoomInfo, onBrush } = useCharts();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
@@ -59,7 +58,7 @@ export const BeatsInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/beats/beat/${instance}`;
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<{ summary: { name: string } }>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,
@@ -71,7 +70,7 @@ export const BeatsInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
     });
 
     setData(response);
-    setBeatName(response.summary.name);
+    setBeatName(response?.summary.name || '');
   }, [ccs, clusterUuid, instance, services.data?.query.timefilter.timefilter, services.http]);
 
   return (

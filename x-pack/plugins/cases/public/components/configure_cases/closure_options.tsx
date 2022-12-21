@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
-import { ClosureType } from '../../containers/configure/types';
+import type { ClosureType } from '../../containers/configure/types';
 import { ClosureOptionsRadio } from './closure_options_radio';
 import * as i18n from './translations';
 
@@ -29,7 +29,6 @@ const ClosureOptionsComponent: React.FC<ClosureOptionsProps> = ({
     description={
       <>
         <p>{i18n.CASE_CLOSURE_OPTIONS_DESC}</p>
-        <p>{i18n.CASE_CLOSURE_OPTIONS_SUB_CASES}</p>
       </>
     }
     data-test-subj="case-closure-options-form-group"
@@ -48,5 +47,6 @@ const ClosureOptionsComponent: React.FC<ClosureOptionsProps> = ({
     </EuiFormRow>
   </EuiDescribedFormGroup>
 );
+ClosureOptionsComponent.displayName = 'ClosureOptions';
 
 export const ClosureOptions = React.memo(ClosureOptionsComponent);

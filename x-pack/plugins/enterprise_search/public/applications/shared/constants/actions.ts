@@ -35,10 +35,19 @@ export const CANCEL_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Cancel' }
 );
 
+export const START_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.actions.startButtonLabel',
+  { defaultMessage: 'Start' }
+);
+
 export const CONTINUE_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.actions.continueButtonLabel',
   { defaultMessage: 'Continue' }
 );
+
+export const BACK_BUTTON_LABEL = i18n.translate('xpack.enterpriseSearch.actions.backButtonLabel', {
+  defaultMessage: 'Back',
+});
 
 export const CLOSE_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.actions.closeButtonLabel',

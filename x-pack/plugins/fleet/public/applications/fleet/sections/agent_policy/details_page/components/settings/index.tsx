@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { pick } from 'lodash';
 import {
   EuiBottomBar,
   EuiFlexGroup,
@@ -17,13 +18,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy } from '../../../../../types';
 import {
   useLink,
   useStartServices,
-  useCapabilities,
+  useAuthz,
   sendUpdateAgentPolicy,
   useConfig,
   sendGetAgentStatus,
@@ -35,6 +36,9 @@ import {
   agentPolicyFormValidation,
   ConfirmDeployAgentPolicyModal,
 } from '../../../components';
+import { DevtoolsRequestFlyoutButton } from '../../../../../components';
+import { ExperimentalFeaturesService } from '../../../../../services';
+import { generateUpdateAgentPolicyDevToolsRequest } from '../../../services';
 
 const FormWrapper = styled.div`
   max-width: 800px;
@@ -51,7 +55,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     } = useConfig();
     const history = useHistory();
     const { getPath } = useLink();
-    const hasWriteCapabilites = useCapabilities().write;
+    const hasFleetAllPrivileges = useAuthz().fleet.all;
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
       ...originalAgentPolicy,
@@ -73,14 +77,36 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const submitUpdateAgentPolicy = async () => {
       setIsLoading(true);
       try {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { name, description, namespace, monitoring_enabled, unenroll_timeout } = agentPolicy;
+        const {
+          name,
+          description,
+          namespace,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          monitoring_enabled,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          unenroll_timeout,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          inactivity_timeout,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          data_output_id,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          monitoring_output_id,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          download_source_id,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          fleet_server_host_id,
+        } = agentPolicy;
         const { data, error } = await sendUpdateAgentPolicy(agentPolicy.id, {
           name,
           description,
           namespace,
           monitoring_enabled,
           unenroll_timeout,
+          inactivity_timeout,
+          data_output_id,
+          monitoring_output_id,
+          download_source_id,
+          fleet_server_host_id,
         });
         if (data) {
           notifications.toasts.addSuccess(
@@ -109,6 +135,28 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       }
       setIsLoading(false);
     };
+
+    const { showDevtoolsRequest } = ExperimentalFeaturesService.get();
+    const devtoolRequest = useMemo(
+      () =>
+        generateUpdateAgentPolicyDevToolsRequest(
+          agentPolicy.id,
+          pick(
+            agentPolicy,
+            'name',
+            'description',
+            'namespace',
+            'monitoring_enabled',
+            'unenroll_timeout',
+            'inactivity_timeout',
+            'data_output_id',
+            'monitoring_output_id',
+            'download_source_id',
+            'fleet_server_host_id'
+          )
+        ),
+      [agentPolicy]
+    );
 
     const onSubmit = async () => {
       // Retrieve agent count if fleet is enabled
@@ -181,12 +229,29 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         />
                       </EuiButtonEmpty>
                     </EuiFlexItem>
+                    {showDevtoolsRequest ? (
+                      <EuiFlexItem grow={false}>
+                        <DevtoolsRequestFlyoutButton
+                          isDisabled={isLoading || Object.keys(validation).length > 0}
+                          btnProps={{
+                            color: 'ghost',
+                          }}
+                          description={i18n.translate(
+                            'xpack.fleet.editAgentPolicy.devtoolsRequestDescription',
+                            {
+                              defaultMessage: 'This Kibana request updates an agent policy.',
+                            }
+                          )}
+                          request={devtoolRequest}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         onClick={onSubmit}
                         isLoading={isLoading}
                         isDisabled={
-                          !hasWriteCapabilites || isLoading || Object.keys(validation).length > 0
+                          !hasFleetAllPrivileges || isLoading || Object.keys(validation).length > 0
                         }
                         iconType="save"
                         color="primary"

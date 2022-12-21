@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
-import {
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { GetGuards } from '../shared_services';
+import type {
   Job,
   JobStats,
   Datafeed,
   DatafeedStats,
 } from '../../../common/types/anomaly_detection_jobs';
-import { GetGuards } from '../shared_services';
 
 export interface AnomalyDetectorsProvider {
   anomalyDetectorsProvider(
@@ -32,52 +32,49 @@ export function getAnomalyDetectorsProvider(getGuards: GetGuards): AnomalyDetect
       request: KibanaRequest,
       savedObjectsClient: SavedObjectsClientContract
     ) {
+      const guards = getGuards(request, savedObjectsClient);
       return {
         async jobs(jobId?: string) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(async ({ mlClient }) => {
-              const { body } = await mlClient.getJobs<{
-                count: number;
-                jobs: Job[];
-              }>(jobId !== undefined ? { job_id: jobId } : undefined);
+              const body = await mlClient.getJobs(
+                jobId !== undefined ? { job_id: jobId } : undefined
+              );
               return body;
             });
         },
         async jobStats(jobId?: string) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(async ({ mlClient }) => {
-              const { body } = await mlClient.getJobStats<{
-                count: number;
-                jobs: JobStats[];
-              }>(jobId !== undefined ? { job_id: jobId } : undefined);
+              const body = await mlClient.getJobStats(
+                jobId !== undefined ? { job_id: jobId } : undefined
+              );
               return body;
             });
         },
         async datafeeds(datafeedId?: string) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetDatafeeds'])
             .ok(async ({ mlClient }) => {
-              const { body } = await mlClient.getDatafeeds<{
-                count: number;
-                datafeeds: Datafeed[];
-              }>(datafeedId !== undefined ? { datafeed_id: datafeedId } : undefined);
+              const body = await mlClient.getDatafeeds(
+                datafeedId !== undefined ? { datafeed_id: datafeedId } : undefined
+              );
               return body;
             });
         },
         async datafeedStats(datafeedId?: string) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetDatafeeds'])
             .ok(async ({ mlClient }) => {
-              const { body } = await mlClient.getDatafeedStats<{
-                count: number;
-                datafeeds: DatafeedStats[];
-              }>(datafeedId !== undefined ? { datafeed_id: datafeedId } : undefined);
+              const body = await mlClient.getDatafeedStats(
+                datafeedId !== undefined ? { datafeed_id: datafeedId } : undefined
+              );
               return body;
             });
         },

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { findInventoryFields, findInventoryModel } from '../../../../common/inventory_models';
-import { MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
+import { MetricsAPIMetric, MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { InfraSource } from '../../../lib/sources';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';
@@ -37,7 +38,6 @@ export const transformRequestToMetricsAPIRequest = async ({
   const metricsApiRequest: MetricsAPIRequest = {
     indexPattern: sourceOverrides?.indexPattern ?? source.configuration.metricAlias,
     timerange: {
-      field: sourceOverrides?.timestamp ?? source.configuration.fields.timestamp,
       from: timeRangeWithIntervalApplied.from,
       to: timeRangeWithIntervalApplied.to,
       interval: timeRangeWithIntervalApplied.interval,
@@ -48,6 +48,7 @@ export const transformRequestToMetricsAPIRequest = async ({
       : compositeSize,
     alignDataToEnd: true,
     dropPartialBuckets: true,
+    includeTimeseries: snapshotRequest.includeTimeseries,
   };
 
   const filters = [];
@@ -69,33 +70,38 @@ export const transformRequestToMetricsAPIRequest = async ({
     inventoryModel.nodeFilter?.forEach((f) => filters.push(f));
   }
 
-  const inventoryFields = findInventoryFields(
-    snapshotRequest.nodeType,
-    source.configuration.fields
-  );
+  const inventoryFields = findInventoryFields(snapshotRequest.nodeType);
   if (snapshotRequest.groupBy) {
     const groupBy = snapshotRequest.groupBy.map((g) => g.field).filter(Boolean) as string[];
     metricsApiRequest.groupBy = [...groupBy, inventoryFields.id];
   }
 
-  const metaAggregation = {
+  const topMetricMetrics = [{ field: inventoryFields.name }];
+  if (inventoryFields.ip) {
+    topMetricMetrics.push({ field: inventoryFields.ip });
+  }
+  if (inventoryFields.os) {
+    topMetricMetrics.push({ field: inventoryFields.os });
+  }
+  if (inventoryFields.cloudProvider) {
+    topMetricMetrics.push({ field: inventoryFields.cloudProvider });
+  }
+
+  const metaAggregation: MetricsAPIMetric = {
     id: META_KEY,
     aggregations: {
       [META_KEY]: {
         top_metrics: {
           size: 1,
-          metrics: [{ field: inventoryFields.name }],
+          metrics: topMetricMetrics,
           sort: {
-            [source.configuration.fields.timestamp]: 'desc',
+            [TIMESTAMP_FIELD]: 'desc',
           },
         },
       },
     },
   };
 
-  if (inventoryFields.ip) {
-    metaAggregation.aggregations[META_KEY].top_metrics.metrics.push({ field: inventoryFields.ip });
-  }
   metricsApiRequest.metrics.push(metaAggregation);
 
   if (filters.length) {

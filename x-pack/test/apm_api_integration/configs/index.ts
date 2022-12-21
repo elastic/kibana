@@ -8,26 +8,33 @@
 import { mapValues } from 'lodash';
 import { createTestConfig, CreateTestConfig } from '../common/config';
 
+const apmDebugLogger = {
+  name: 'plugins.apm',
+  level: 'debug',
+  appenders: ['console'],
+};
+
 const apmFtrConfigs = {
   basic: {
     license: 'basic' as const,
     kibanaConfig: {
-      // disable v2 migrations to prevent issue where kibana index is deleted
-      // during a migration
-      'migrations.enableV2': 'false',
+      'xpack.apm.forceSyntheticSource': 'true',
+      'logging.loggers': [apmDebugLogger],
     },
   },
   trial: {
     license: 'trial' as const,
     kibanaConfig: {
-      'migrations.enableV2': 'false',
+      'xpack.apm.forceSyntheticSource': 'true',
+      'logging.loggers': [apmDebugLogger],
     },
   },
   rules: {
     license: 'trial' as const,
     kibanaConfig: {
-      'migrations.enableV2': 'false',
       'xpack.ruleRegistry.write.enabled': 'true',
+      'xpack.apm.forceSyntheticSource': 'true',
+      'logging.loggers': [apmDebugLogger],
     },
   },
 };

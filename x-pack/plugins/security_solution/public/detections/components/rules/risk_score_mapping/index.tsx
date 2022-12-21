@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
+import { noop } from 'lodash/fp';
 import {
   EuiFormRow,
   EuiCheckbox,
@@ -16,15 +19,15 @@ import {
   EuiSpacer,
   EuiRange,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
-import { noop } from 'lodash/fp';
-import { RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { EuiRangeProps } from '@elastic/eui';
+
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
-import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import type { RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+
+import type { AboutStepRiskScore } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
-import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { AboutStepRiskScore } from '../../../pages/detection_engine/rules/types';
 
 const NestedContent = styled.div`
   margin-left: 24px;
@@ -46,7 +49,7 @@ interface RiskScoreFieldProps {
   dataTestSubj: string;
   field: FieldHook<AboutStepRiskScore>;
   idAria: string;
-  indices: IndexPatternBase;
+  indices: DataViewBase;
   isDisabled: boolean;
   placeholder?: string;
 }
@@ -65,8 +68,8 @@ export const RiskScoreField = ({
   const fieldTypeFilter = useMemo(() => ['number'], []);
   const selectedField = useMemo(() => getFieldTypeByMapping(mapping, indices), [mapping, indices]);
 
-  const handleDefaultRiskScoreChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>): void => {
+  const handleDefaultRiskScoreChange: EuiRangeProps['onChange'] = useCallback(
+    (e) => {
       const range = (e.target as HTMLInputElement).value;
       setValue({
         value: Number(range.trim()),
@@ -78,7 +81,7 @@ export const RiskScoreField = ({
   );
 
   const handleRiskScoreMappingChange = useCallback(
-    ([newField]: IndexPatternFieldBase[]): void => {
+    ([newField]: DataViewFieldBase[]): void => {
       setValue({
         value,
         isMappingChecked,
@@ -231,8 +234,8 @@ export const RiskScoreField = ({
 };
 
 /**
- * Looks for field metadata (IndexPatternFieldBase) in existing index pattern.
- * If specified field doesn't exist, returns a stub IndexPatternFieldBase created based on the mapping --
+ * Looks for field metadata (DataViewFieldBase) in existing index pattern.
+ * If specified field doesn't exist, returns a stub DataViewFieldBase created based on the mapping --
  * because the field might not have been indexed yet, but we still need to display the mapping.
  *
  * @param mapping Mapping of a specified field name to risk score.
@@ -240,8 +243,8 @@ export const RiskScoreField = ({
  */
 const getFieldTypeByMapping = (
   mapping: RiskScoreMapping,
-  pattern: IndexPatternBase
-): IndexPatternFieldBase => {
+  pattern: DataViewBase
+): DataViewFieldBase => {
   const field = mapping?.[0]?.field ?? '';
   const [knownFieldType] = pattern.fields.filter(({ name }) => field != null && field === name);
   return knownFieldType ?? { name: field, type: 'number' };

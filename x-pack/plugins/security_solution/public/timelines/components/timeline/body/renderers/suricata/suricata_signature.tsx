@@ -20,7 +20,8 @@ import { Provider } from '../../../data_providers/provider';
 import { TokensFlexItem } from '../helpers';
 import { getBeginningTokens } from './suricata_links';
 import { DefaultDraggable } from '../../../../../../common/components/draggables';
-import { IS_OPERATOR, QueryOperator } from '../../../data_providers/data_provider';
+import type { QueryOperator } from '../../../data_providers/data_provider';
+import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
 export const SURICATA_SIGNATURE_FIELD_NAME = 'suricata.eve.alert.signature';
 export const SURICATA_SIGNATURE_ID_FIELD_NAME = 'suricata.eve.alert.signature_id';
@@ -100,7 +101,13 @@ export const DraggableSignatureId = React.memo<{
 
   return (
     <SignatureFlexItem grow={false}>
-      <DraggableWrapper dataProvider={dataProviderProp} isDraggable={isDraggable} render={render} />
+      <DraggableWrapper
+        dataProvider={dataProviderProp}
+        isDraggable={isDraggable}
+        render={render}
+        isAggregatable={true}
+        fieldType={'keyword'}
+      />
     </SignatureFlexItem>
   );
 });
@@ -130,6 +137,7 @@ export const SuricataSignature = React.memo<{
           id={`suricata-signature-default-draggable-${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
           isDraggable={isDraggable}
           value={signature}
+          tooltipPosition="bottom"
         >
           <div>
             <GoogleLink link={signature}>

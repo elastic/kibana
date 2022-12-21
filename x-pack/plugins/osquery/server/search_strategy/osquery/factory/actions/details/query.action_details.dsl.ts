@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
-import { ActionDetailsRequestOptions } from '../../../../../../common/search_strategy';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
+import { ACTIONS_INDEX } from '../../../../../../common/constants';
+import type { ActionDetailsRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
 export const buildActionDetailsQuery = ({
   actionId,
   filterQuery,
+  componentTemplateExists,
 }: ActionDetailsRequestOptions): ISearchRequestParams => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -23,9 +26,9 @@ export const buildActionDetailsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
-    index: '.fleet-actions',
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
     body: {
       query: { bool: { filter } },
       size: 1,

@@ -6,10 +6,10 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useContext, useCallback, useMemo, useEffect } from 'react';
+import type { Query } from '@kbn/es-query';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import type { Query } from '../../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
@@ -18,28 +18,34 @@ import { LogMinimap } from '../../../components/logging/log_minimap';
 import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
 import { LogEntryStreamItem } from '../../../components/logging/log_text_stream/item';
 import { PageContent } from '../../../components/page';
-import { LogFilterState } from '../../../containers/logs/log_filter';
+import { useLogFilterStateContext } from '../../../containers/logs/log_filter';
 import {
   useLogEntryFlyoutContext,
   WithFlyoutOptionsUrlState,
 } from '../../../containers/logs/log_flyout';
-import { LogHighlightsState } from '../../../containers/logs/log_highlights';
-import { LogPositionState } from '../../../containers/logs/log_position';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { useLogHighlightsStateContext } from '../../../containers/logs/log_highlights';
+import { useLogPositionStateContext } from '../../../containers/logs/log_position';
 import { useLogStreamContext } from '../../../containers/logs/log_stream';
 import { WithSummary } from '../../../containers/logs/log_summary';
-import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
-import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
+import { useLogViewConfigurationContext } from '../../../containers/logs/log_view_configuration';
+import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
+import { useLogViewContext } from '../../../hooks/use_log_view';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 import { LogsToolbar } from './page_toolbar';
 import { PageViewLogInContext } from './page_view_log_in_context';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const PAGE_THRESHOLD = 2;
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { resolvedSourceConfiguration, sourceConfiguration, sourceId } = useLogSourceContext();
-  const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
+  const {
+    data: {
+      query: { queryString },
+    },
+  } = useKibanaContextForPlugin().services;
+  const { resolvedLogView, logView, logViewId } = useLogViewContext();
+  const { textScale, textWrap } = useLogViewConfigurationContext();
   const {
     surroundingLogsId,
     setSurroundingLogsId,
@@ -64,8 +70,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     endDateExpression,
     updateDateRange,
     lastCompleteDateRangeExpressionUpdate,
-  } = useContext(LogPositionState.Context);
-  const { filterQuery, applyLogFilterQuery } = useContext(LogFilterState.Context);
+  } = useLogPositionStateContext();
+  const { filterQuery } = useLogFilterStateContext();
 
   const {
     isReloading,
@@ -132,9 +138,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     prevLastCompleteDateRangeExpressionUpdate,
   ]);
 
-  const { logSummaryHighlights, currentHighlightKey, logEntryHighlightsById } = useContext(
-    LogHighlightsState.Context
-  );
+  const { logSummaryHighlights, currentHighlightKey, logEntryHighlightsById } =
+    useLogHighlightsStateContext();
 
   const items = useMemo(
     () =>
@@ -147,7 +152,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     [entries, isReloading, logEntryHighlightsById]
   );
 
-  const [, { setContextEntry }] = useContext(ViewLogInContext.Context);
+  const [, { setContextEntry }] = useViewLogInProviderContext();
 
   const handleDateRangeExtension = useCallback(
     (newDateRange) => {
@@ -194,14 +199,14 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
 
   const setFilter = useCallback(
     (filter: Query, flyoutItemId: string, timeKey: TimeKey | undefined | null) => {
-      applyLogFilterQuery(filter);
+      queryString.setQuery(filter);
       if (timeKey) {
         jumpToTargetPosition(timeKey);
       }
       setSurroundingLogsId(flyoutItemId);
       stopLiveStreaming();
     },
-    [applyLogFilterQuery, jumpToTargetPosition, setSurroundingLogsId, stopLiveStreaming]
+    [jumpToTargetPosition, queryString, setSurroundingLogsId, stopLiveStreaming]
   );
 
   return (
@@ -216,14 +221,12 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           logEntryId={flyoutLogEntryId}
           onCloseFlyout={closeLogEntryFlyout}
           onSetFieldFilter={setFilter}
-          sourceId={sourceId}
+          sourceId={logViewId}
         />
       ) : null}
-      <PageContent key={`${sourceId}-${sourceConfiguration?.version}`}>
+      <PageContent key={`${logViewId}-${logView?.version}`}>
         <ScrollableLogTextStreamView
-          columnConfigurations={
-            (resolvedSourceConfiguration && resolvedSourceConfiguration.columns) || []
-          }
+          columnConfigurations={(resolvedLogView && resolvedLogView.columns) || []}
           hasMoreAfterEnd={hasMoreAfterEnd}
           hasMoreBeforeStart={hasMoreBeforeStart}
           isLoadingMore={isLoadingMore}

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
-import { HostIsolationResponse, HostInfo } from '../../../../../common/endpoint/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getCasesFromAlertsUrl } from '@kbn/cases-plugin/common';
+import type { ResponseActionApiResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
   ALERTS_AS_DATA_FIND_URL,
+  DETECTION_ENGINE_ALERTS_INDEX_URL,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
-import {
+import type {
   BasicSignals,
   Privilege,
   QueryAlerts,
@@ -25,6 +26,7 @@ import {
   AlertsIndex,
   UpdateAlertStatusProps,
   CasesFromAlertsResponse,
+  CheckSignalIndex,
 } from './types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
@@ -107,6 +109,19 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIn
   });
 
 /**
+ * Check Signal Index
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const checkSignalIndex = async ({ signal }: BasicSignals): Promise<CheckSignalIndex> =>
+  KibanaServices.get().http.fetch<CheckSignalIndex>(DETECTION_ENGINE_ALERTS_INDEX_URL, {
+    method: 'GET',
+    signal,
+  });
+
+/**
  * Get User Privileges
  *
  * @param signal AbortSignal for cancelling request
@@ -149,7 +164,7 @@ export const createHostIsolation = async ({
   endpointId: string;
   comment?: string;
   caseIds?: string[];
-}): Promise<HostIsolationResponse> =>
+}): Promise<ResponseActionApiResponse> =>
   isolateHost({
     endpoint_ids: [endpointId],
     comment,
@@ -173,7 +188,7 @@ export const createHostUnIsolation = async ({
   endpointId: string;
   comment?: string;
   caseIds?: string[];
-}): Promise<HostIsolationResponse> =>
+}): Promise<ResponseActionApiResponse> =>
   unIsolateHost({
     endpoint_ids: [endpointId],
     comment,

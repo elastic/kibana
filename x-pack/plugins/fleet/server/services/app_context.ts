@@ -8,38 +8,51 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { kibanaPackageJson } from '@kbn/utils';
-import type { KibanaRequest } from 'src/core/server';
 import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
   HttpServiceSetup,
   Logger,
-} from 'src/core/server';
+  KibanaRequest,
+} from '@kbn/core/server';
 
-import type { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
-} from '../../../encrypted_saved_objects/server';
+} from '@kbn/encrypted-saved-objects-plugin/server';
 
-import type { SecurityPluginStart } from '../../../security/server';
-import type { FleetConfigType } from '../../common';
+import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
+
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+
+import type { FleetConfigType } from '../../common/types';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '../types';
 import type { FleetAppContext } from '../plugin';
-import type { CloudSetup } from '../../../cloud/server';
+import type { TelemetryEventsSender } from '../telemetry/sender';
+
+import type { BulkActionsResolver } from './agents';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
-  private security: SecurityPluginStart | undefined;
+  private experimentalFeatures?: ExperimentalFeatures;
+  private securitySetup: SecurityPluginSetup | undefined;
+  private securityStart: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
   private configSubject$?: BehaviorSubject<FleetConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
@@ -50,20 +63,28 @@ class AppContextService {
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
+  private telemetryEventsSender: TelemetryEventsSender | undefined;
+  private savedObjectsTagging: SavedObjectTaggingStart | undefined;
+  private bulkActionsResolver: BulkActionsResolver | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
     this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
-    this.security = appContext.security;
+    this.securitySetup = appContext.securitySetup;
+    this.securityStart = appContext.securityStart;
     this.savedObjects = appContext.savedObjects;
+    this.experimentalFeatures = appContext.experimentalFeatures;
     this.isProductionMode = appContext.isProductionMode;
     this.cloud = appContext.cloud;
     this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
     this.kibanaBranch = appContext.kibanaBranch;
     this.httpSetup = appContext.httpSetup;
+    this.telemetryEventsSender = appContext.telemetryEventsSender;
+    this.savedObjectsTagging = appContext.savedObjectsTagging;
+    this.bulkActionsResolver = appContext.bulkActionsResolver;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -92,14 +113,11 @@ class AppContextService {
   }
 
   public getSecurity() {
-    if (!this.security) {
-      throw new Error('Security service not set.');
-    }
-    return this.security;
+    return this.securityStart!;
   }
 
-  public hasSecurity() {
-    return !!this.security;
+  public getSecurityLicense() {
+    return this.securitySetup!.license;
   }
 
   public getCloud() {
@@ -121,6 +139,13 @@ class AppContextService {
     return this.config$;
   }
 
+  public getExperimentalFeatures() {
+    if (!this.experimentalFeatures) {
+      throw new Error('experimentalFeatures not set.');
+    }
+    return this.experimentalFeatures;
+  }
+
   public getSavedObjects() {
     if (!this.savedObjects) {
       throw new Error('Saved objects start service not set.');
@@ -128,10 +153,17 @@ class AppContextService {
     return this.savedObjects;
   }
 
+  public getSavedObjectsTagging() {
+    if (!this.savedObjectsTagging) {
+      throw new Error('Saved object tagging start service not set.');
+    }
+    return this.savedObjectsTagging;
+  }
+
   public getInternalUserSOClient(request: KibanaRequest) {
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
-      excludedWrappers: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }
 
@@ -181,6 +213,8 @@ class AppContextService {
           ? PostPackagePolicyCreateCallback
           : T extends 'postPackagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostCreate'
+          ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback
       >
     | undefined {
@@ -190,9 +224,19 @@ class AppContextService {
           ? PostPackagePolicyCreateCallback
           : T extends 'postPackagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostCreate'
+          ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback
       >;
     }
+  }
+
+  public getTelemetryEventsSender() {
+    return this.telemetryEventsSender;
+  }
+
+  public getBulkActionsResolver() {
+    return this.bulkActionsResolver;
   }
 }
 

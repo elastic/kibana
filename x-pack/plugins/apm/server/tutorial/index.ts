@@ -6,23 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APMConfig } from '..';
 import {
   ArtifactsSchema,
   TutorialsCategory,
   TutorialSchema,
-} from '../../../../../src/plugins/home/server';
-import { CloudSetup } from '../../../cloud/server';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
-import { getApmIndexPatternTitle } from '../lib/index_pattern/get_apm_index_pattern_title';
-import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
+} from '@kbn/home-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { APMConfig } from '..';
+import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
-import apmIndexPattern from './index_pattern.json';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
-    'Collect in-depth performance metrics and errors from inside your applications.',
+    'Collect performance metrics from your applications with Elastic APM.',
 });
 const moduleName = 'apm';
 
@@ -39,19 +36,6 @@ export const tutorialProvider =
     isFleetPluginEnabled: boolean;
   }) =>
   () => {
-    const indexPatternTitle = getApmIndexPatternTitle(apmIndices);
-
-    const savedObjects = [
-      {
-        ...apmIndexPattern,
-        id: APM_STATIC_INDEX_PATTERN_ID,
-        attributes: {
-          ...apmIndexPattern.attributes,
-          title: indexPatternTitle,
-        },
-      },
-    ];
-
     const artifacts: ArtifactsSchema = {
       dashboards: [
         {
@@ -67,7 +51,7 @@ export const tutorialProvider =
       ],
     };
 
-    if (apmConfig['xpack.apm.ui.enabled']) {
+    if (apmConfig.ui.enabled) {
       // @ts-expect-error artifacts.application is readonly
       artifacts.application = {
         path: '/app/apm',
@@ -98,23 +82,20 @@ It allows you to monitor the performance of thousands of applications in real ti
 [Learn more]({learnMoreLink}).',
           values: {
             learnMoreLink:
-              '{config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html',
+              '{config.docs.base_url}guide/en/apm/guide/{config.docs.version}/index.html',
           },
         }
       ),
       euiIconType: 'apmApp',
+      integrationBrowserCategories: ['web'],
       artifacts,
       customStatusCheckName: 'apm_fleet_server_status_check',
       onPrem: onPremInstructions({ apmConfig, isFleetPluginEnabled }),
-      elasticCloud: createElasticCloudInstructions(cloud),
+      elasticCloud: createElasticCloudInstructions({
+        apmConfig,
+        isFleetPluginEnabled,
+        cloudSetup: cloud,
+      }),
       previewImagePath: '/plugins/apm/assets/apm.png',
-      savedObjects,
-      savedObjectsInstallMsg: i18n.translate(
-        'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',
-        {
-          defaultMessage:
-            'An APM index pattern is required for some features in the APM UI.',
-        }
-      ),
     } as TutorialSchema;
   };

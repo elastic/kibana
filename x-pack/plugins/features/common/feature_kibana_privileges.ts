@@ -15,6 +15,19 @@ export interface FeatureKibanaPrivileges {
   excludeFromBasePrivileges?: boolean;
 
   /**
+   * Whether or not this privilege should only be granted to `All Spaces *`. Should be used for features that do not
+   * support Spaces. Defaults to `false`.
+   */
+  requireAllSpaces?: boolean;
+
+  /**
+   * Whether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`.
+   * @deprecated
+   * @removeBy 8.8.0
+   */
+  disabled?: boolean;
+
+  /**
    * If this feature includes management sections, you can specify them here to control visibility of those
    * pages based on user privileges.
    *
@@ -144,6 +157,26 @@ export interface FeatureKibanaPrivileges {
      */
     all?: readonly string[];
     /**
+     * List of case owners which users should have push access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    push: ['securitySolution']
+     *  }
+     * ```
+     */
+    push?: readonly string[];
+    /**
+     * List of case owners which users should have create access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    create: ['securitySolution']
+     *  }
+     * ```
+     */
+    create?: readonly string[];
+    /**
      * List of case owners which users should have read-only access to when granted this privilege.
      * @example
      * ```ts
@@ -153,6 +186,26 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     read?: readonly string[];
+    /**
+     * List of case owners which users should have update access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    update: ['securitySolution']
+     *  }
+     * ```
+     */
+    update?: readonly string[];
+    /**
+     * List of case owners which users should have delete access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    delete: ['securitySolution']
+     *  }
+     * ```
+     */
+    delete?: readonly string[];
   };
 
   /**

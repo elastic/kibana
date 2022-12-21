@@ -8,23 +8,25 @@
 import './management_app.scss';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
+import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 
+import { reactRouterNavigate, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import {
+  ManagementSection,
+  MANAGEMENT_BREADCRUMB,
+  MANAGEMENT_BREADCRUMB_NO_HREF,
+} from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateProps,
-  reactRouterNavigate,
-} from '../../../../kibana_react/public';
 import { SectionsServiceStart } from '../../types';
 
 interface ManagementAppProps {
   appBasePath: string;
   history: AppMountParameters['history'];
+  theme$: AppMountParameters['theme$'];
   dependencies: ManagementAppDependencies;
 }
 
@@ -34,7 +36,7 @@ export interface ManagementAppDependencies {
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
 
-export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => {
+export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppProps) => {
   const { setBreadcrumbs } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
@@ -51,8 +53,14 @@ export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => 
         ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
       });
 
+      // Clicking the Management breadcrumb to navigate back to the "root" only
+      // makes sense if there's a management app open. So when one isn't open
+      // this breadcrumb shouldn't be a clickable link.
+      const managementBreadcrumb = crumbs.length
+        ? MANAGEMENT_BREADCRUMB
+        : MANAGEMENT_BREADCRUMB_NO_HREF;
       setBreadcrumbs([
-        wrapBreadcrumb(MANAGEMENT_BREADCRUMB, history),
+        wrapBreadcrumb(managementBreadcrumb, history),
         ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || history)),
       ]);
     },
@@ -82,23 +90,24 @@ export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => 
 
   return (
     <I18nProvider>
-      <KibanaPageTemplate
-        restrictWidth={false}
-        // EUI TODO
-        // The different template options need to be manually recreated by the individual pages.
-        // These classes help enforce the layouts.
-        pageContentProps={{ className: 'kbnAppWrapper' }}
-        pageContentBodyProps={{ className: 'kbnAppWrapper' }}
-        solutionNav={solution}
-      >
-        <ManagementRouter
-          history={history}
-          setBreadcrumbs={setBreadcrumbsScoped}
-          onAppMounted={onAppMounted}
-          sections={sections}
-          dependencies={dependencies}
-        />
-      </KibanaPageTemplate>
+      <KibanaThemeProvider theme$={theme$}>
+        <KibanaPageTemplate
+          restrictWidth={false}
+          solutionNav={solution}
+          // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
+          // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
+          mainProps={{ paddingSize: 'l' }}
+        >
+          <ManagementRouter
+            history={history}
+            theme$={theme$}
+            setBreadcrumbs={setBreadcrumbsScoped}
+            onAppMounted={onAppMounted}
+            sections={sections}
+            dependencies={dependencies}
+          />
+        </KibanaPageTemplate>
+      </KibanaThemeProvider>
     </I18nProvider>
   );
 };

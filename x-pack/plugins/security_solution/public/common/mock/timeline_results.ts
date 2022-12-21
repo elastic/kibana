@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '../../../../../../src/plugins/data/common';
+import { FilterStateStore } from '@kbn/es-query';
 
+import type { TimelineResult } from '../../../common/types/timeline';
 import {
   TimelineId,
   TimelineType,
   TimelineStatus,
   TimelineTabs,
-  TimelineResult,
 } from '../../../common/types/timeline';
 
-import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
-import { Direction, TimelineEventsDetailsItem } from '../../../common/search_strategy';
-import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
-import { TimelineModel } from '../../timelines/store/timeline/model';
+import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
+import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
+import { Direction } from '../../../common/search_strategy';
+import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
+import type { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import type { DataTableModel } from '../store/data_table/model';
 
 export const mockOpenTimelineQueryResults = {
   totalCount: 11,
@@ -1955,6 +1957,7 @@ export const mockTimelineModel: TimelineModel = {
   columns: mockTimelineModelColumns,
   defaultColumns: mockTimelineModelColumns,
   dataProviders: [],
+  dataViewId: null,
   dateRange: {
     end: '2020-03-18T13:52:38.929Z',
     start: '2020-03-18T13:46:38.929Z',
@@ -1990,6 +1993,7 @@ export const mockTimelineModel: TimelineModel = {
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'ef579e40-jibber-jabber',
+  selectAll: false,
   indexNames: [],
   isFavorite: false,
   isLive: false,
@@ -2008,14 +2012,14 @@ export const mockTimelineModel: TimelineModel = {
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
   savedObjectId: 'ef579e40-jibber-jabber',
-  selectAll: false,
   selectedEventIds: {},
+  sessionViewConfig: null,
   show: false,
-  showCheckboxes: false,
   sort: [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ],
@@ -2025,6 +2029,52 @@ export const mockTimelineModel: TimelineModel = {
   templateTimelineId: null,
   templateTimelineVersion: null,
   version: '1',
+};
+
+export const mockDataTableModel: DataTableModel = {
+  columns: mockTimelineModelColumns,
+  defaultColumns: mockTimelineModelColumns,
+  dataViewId: null,
+  deletedEventIds: [],
+  expandedDetail: {},
+  filters: [
+    {
+      $state: {
+        store: FilterStateStore.APP_STATE,
+      },
+      meta: {
+        alias: null,
+        disabled: true,
+        key: 'host.name',
+        negate: false,
+        params: '"{"query":"placeholder"}"',
+        type: 'phrase',
+      },
+      query: { match_phrase: { 'host.name': 'placeholder' } },
+    },
+  ],
+  id: 'ef579e40-jibber-jabber',
+  indexNames: [],
+  isLoading: false,
+  isSelectAllChecked: false,
+  queryFields: [],
+  itemsPerPage: 25,
+  itemsPerPageOptions: [10, 25, 50, 100],
+  loadingEventIds: [],
+  selectedEventIds: {},
+  sessionViewConfig: null,
+  sort: [
+    {
+      columnId: '@timestamp',
+      columnType: 'date',
+      esTypes: ['date'],
+      sortDirection: Direction.desc,
+    },
+  ],
+  title: 'Test rule',
+  showCheckboxes: false,
+  selectAll: false,
+  totalCount: 0,
 };
 
 export const mockGetOneTimelineResult: TimelineResult = {
@@ -2064,7 +2114,13 @@ export const mockTimelineResult = {
 };
 
 const defaultTimelineColumns: CreateTimelineProps['timeline']['columns'] = [
-  { columnHeaderType: 'not-filtered', id: '@timestamp', type: 'number', initialWidth: 190 },
+  {
+    columnHeaderType: 'not-filtered',
+    id: '@timestamp',
+    type: 'date',
+    esTypes: ['date'],
+    initialWidth: 190,
+  },
   { columnHeaderType: 'not-filtered', id: 'message', initialWidth: 180 },
   { columnHeaderType: 'not-filtered', id: 'event.category', initialWidth: 180 },
   { columnHeaderType: 'not-filtered', id: 'event.action', initialWidth: 180 },
@@ -2091,6 +2147,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
         queryMatch: { field: '_id', operator: ':', value: '1' },
       },
     ],
+    dataViewId: null,
     dateRange: { end: '2018-11-05T19:03:25.937Z', start: '2018-11-05T18:58:25.937Z' },
     deletedEventIds: [],
     description: '',
@@ -2130,9 +2187,16 @@ export const defaultTimelineProps: CreateTimelineProps = {
     savedObjectId: null,
     selectAll: false,
     selectedEventIds: {},
+    sessionViewConfig: null,
     show: false,
-    showCheckboxes: false,
-    sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+    sort: [
+      {
+        columnId: '@timestamp',
+        columnType: 'date',
+        esTypes: ['date'],
+        sortDirection: Direction.desc,
+      },
+    ],
     status: TimelineStatus.draft,
     title: '',
     timelineType: TimelineType.default,
@@ -2143,6 +2207,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
   to: '2018-11-05T19:03:25.937Z',
   notes: null,
   ruleNote: '# this is some markdown documentation',
+  ruleAuthor: ['elastic'],
 };
 
 export const mockTimelineDetails: TimelineEventsDetailsItem[] = [
@@ -2159,16 +2224,3 @@ export const mockTimelineDetails: TimelineEventsDetailsItem[] = [
     isObjectArray: false,
   },
 ];
-
-export const mockTimelineDetailsApollo = {
-  data: {
-    source: {
-      TimelineDetails: {
-        data: mockTimelineDetails,
-      },
-    },
-  },
-  loading: false,
-  networkStatus: 7,
-  stale: false,
-};

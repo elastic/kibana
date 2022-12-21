@@ -7,11 +7,6 @@
 
 import { AddLicense } from '../public/application/sections/license_dashboard/add_license';
 import { createMockLicense, getComponent } from './util';
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
 
 describe('AddLicense component when license is active', () => {
   test('should display correct verbiage', () => {
@@ -21,7 +16,7 @@ describe('AddLicense component when license is active', () => {
       },
       AddLicense
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 });
 
@@ -33,6 +28,6 @@ describe('AddLicense component when license is expired', () => {
       },
       AddLicense
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 });

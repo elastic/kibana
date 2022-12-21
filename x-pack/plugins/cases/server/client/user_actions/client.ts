@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ICaseUserActionsResponse } from '../typedoc_interfaces';
-import { CasesClientArgs } from '../types';
+import type { ICaseUserActionsResponse } from '../typedoc_interfaces';
+import type { CasesClientArgs } from '../types';
 import { get } from './get';
 
 /**
@@ -17,10 +17,6 @@ export interface UserActionGet {
    * The ID of the case
    */
   caseId: string;
-  /**
-   * If specified then a sub case will be used for finding all the user actions
-   */
-  subCaseId?: string;
 }
 
 /**

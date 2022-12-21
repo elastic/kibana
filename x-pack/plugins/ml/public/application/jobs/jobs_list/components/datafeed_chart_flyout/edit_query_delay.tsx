@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -71,6 +71,7 @@ export const EditQueryDelay: FC<{
       );
     }
     setIsEditing(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datafeedId, newQueryDelay]);
 
   const editButton = (
@@ -109,6 +110,7 @@ export const EditQueryDelay: FC<{
             <EuiFlexItem grow={false}>
               <EuiFieldText
                 value={newQueryDelay || queryDelay}
+                // @ts-expect-error queryDelay is of type estypes.Duration = string | -1 | 0
                 placeholder={queryDelay}
                 onChange={(e) => {
                   setNewQueryDelay(e.target.value);

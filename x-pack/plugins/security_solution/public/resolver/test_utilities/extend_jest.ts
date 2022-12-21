@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MatcherHintOptions } from 'jest-matcher-utils';
+
 /**
  * Typescript won't allow global namespace stuff unless you're in a module.
  * This wouldn't otherwise be a module. The code runs as soon as it's imported.
@@ -36,7 +38,7 @@ expect.extend({
   ): Promise<{ pass: boolean; message: () => string }> {
     // Used in printing out the pass or fail message
     const matcherName = 'toYieldEqualTo';
-    const options: jest.MatcherHintOptions = {
+    const options: MatcherHintOptions = {
       comment: 'deep equality with any yielded value',
       isNot: this.isNot,
       promise: this.promise,
@@ -67,7 +69,7 @@ expect.extend({
       ? () =>
           `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n` +
           `Expected: not ${this.utils.printExpected(expected)}\n${
-            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1]!)
+            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1])
               ? `Received:     ${this.utils.printReceived(received[received.length - 1])}`
               : ''
           }`
@@ -82,7 +84,7 @@ expect.extend({
                   next,
                   'Expected',
                   'Received',
-                  this.expand
+                  Boolean(this.expand)
                 )}`
             )
             .join(`\n\n`)}`;
@@ -102,7 +104,7 @@ expect.extend({
   ): Promise<{ pass: boolean; message: () => string }> {
     // Used in printing out the pass or fail message
     const matcherName = 'toYieldObjectEqualTo';
-    const options: jest.MatcherHintOptions = {
+    const options: MatcherHintOptions = {
       comment: 'subset equality with any yielded value',
       isNot: this.isNot,
       promise: this.promise,
@@ -131,7 +133,7 @@ expect.extend({
       ? () =>
           `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n` +
           `Expected: not ${this.utils.printExpected(expected)}\n${
-            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1]!)
+            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1])
               ? `Received:     ${this.utils.printReceived(received[received.length - 1])}`
               : ''
           }`
@@ -146,7 +148,7 @@ expect.extend({
                   next,
                   'Expected',
                   'Received',
-                  this.expand
+                  Boolean(this.expand)
                 )}`
             )
             .join(`\n\n`)}`;

@@ -10,46 +10,48 @@ import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
-import { CreateThreatSignalOptions } from './types';
-import { SearchAfterAndBulkCreateReturnType } from '../types';
+import type { CreateThreatSignalOptions } from './types';
+import type { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
-  tuple,
-  threatMapping,
-  threatEnrichment,
-  query,
-  inputIndex,
-  type,
-  filters,
-  language,
-  savedId,
-  services,
-  exceptionItems,
-  listClient,
-  logger,
-  eventsTelemetry,
   alertId,
-  outputIndex,
-  ruleSO,
-  searchAfterSize,
-  buildRuleMessage,
-  currentThreatList,
-  currentResult,
   bulkCreate,
+  completeRule,
+  currentResult,
+  currentThreatList,
+  eventsTelemetry,
+  filters,
+  inputIndex,
+  language,
+  listClient,
+  outputIndex,
+  query,
+  ruleExecutionLogger,
+  savedId,
+  searchAfterSize,
+  services,
+  threatEnrichment,
+  threatMapping,
+  tuple,
+  type,
   wrapHits,
+  runtimeMappings,
+  primaryTimestamp,
+  secondaryTimestamp,
+  exceptionFilter,
+  unprocessedExceptions,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentThreatList,
+    entryKey: 'value',
   });
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
     // a hit so opt to return the existing result.
-    logger.debug(
-      buildRuleMessage(
-        'Indicator items are empty after filtering for missing data, returning without attempting a match'
-      )
+    ruleExecutionLogger.debug(
+      'Indicator items are empty after filtering for missing data, returning without attempting a match'
     );
     return currentResult;
   } else {
@@ -61,45 +63,40 @@ export const createThreatSignal = async ({
       savedId,
       services,
       index: inputIndex,
-      lists: exceptionItems,
+      exceptionFilter,
     });
 
-    logger.debug(
-      buildRuleMessage(
-        `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
-      )
+    ruleExecutionLogger.debug(
+      `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
     );
 
     const result = await searchAfterAndBulkCreate({
-      tuple,
-      listClient,
-      exceptionsList: exceptionItems,
-      ruleSO,
-      services,
-      logger,
-      eventsTelemetry,
-      id: alertId,
-      inputIndexPattern: inputIndex,
-      signalsIndex: outputIndex,
-      filter: esFilter,
-      pageSize: searchAfterSize,
-      buildRuleMessage,
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
-      enrichment: threatEnrichment,
       bulkCreate,
-      wrapHits,
+      enrichment: threatEnrichment,
+      eventsTelemetry,
+      exceptionsList: unprocessedExceptions,
+      filter: esFilter,
+      inputIndexPattern: inputIndex,
+      listClient,
+      pageSize: searchAfterSize,
+      ruleExecutionLogger,
+      services,
       sortOrder: 'desc',
       trackTotalHits: false,
+      tuple,
+      wrapHits,
+      runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
     });
 
-    logger.debug(
-      buildRuleMessage(
-        `${
-          threatFilter.query?.bool.should.length
-        } items have completed match checks and the total times to search were ${
-          result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
-        }ms`
-      )
+    ruleExecutionLogger.debug(
+      `${
+        threatFilter.query?.bool.should.length
+      } items have completed match checks and the total times to search were ${
+        result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
+      }ms`
     );
     return result;
   }

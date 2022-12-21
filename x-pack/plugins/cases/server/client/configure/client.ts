@@ -11,43 +11,41 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  SavedObject,
-  SavedObjectsFindResponse,
-  SavedObjectsUtils,
-} from '../../../../../../src/core/server';
-import {
-  CaseConfigurationsResponseRt,
-  CaseConfigureResponseRt,
+import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
+import type { FindActionResult } from '@kbn/actions-plugin/server/types';
+import type { ActionType } from '@kbn/actions-plugin/common';
+import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
+import type {
   CasesConfigurationsResponse,
   CasesConfigureAttributes,
   CasesConfigurePatch,
-  CasesConfigurePatchRt,
   CasesConfigureRequest,
   CasesConfigureResponse,
   ConnectorMappings,
   ConnectorMappingsAttributes,
-  excess,
   GetConfigureFindRequest,
+} from '../../../common/api';
+import {
+  CaseConfigurationsResponseRt,
+  CaseConfigureResponseRt,
+  CasesConfigurePatchRt,
+  excess,
   GetConfigureFindRequestRt,
-  MAX_CONCURRENT_SEARCHES,
-  SUPPORTED_CONNECTORS,
   throwErrors,
-} from '../../../common';
-import { createCaseError } from '../../common';
-import { CasesClientInternal } from '../client_internal';
-import { CasesClientArgs } from '../types';
+} from '../../../common/api';
+import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+import { createCaseError } from '../../common/error';
+import type { CasesClientInternal } from '../client_internal';
+import type { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FindActionResult } from '../../../../actions/server/types';
-import { ActionType } from '../../../../actions/common';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
-import { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
+import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
-import {
+import type {
   ICasesConfigurePatch,
   ICasesConfigureRequest,
   ICasesConfigureResponse,
@@ -137,7 +135,12 @@ async function get(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigurationsResponse> {
-  const { unsecuredSavedObjectsClient, caseConfigureService, logger, authorization } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseConfigureService },
+    logger,
+    authorization,
+  } = clientArgs;
   try {
     const queryParams = pipe(
       excess(GetConfigureFindRequestRt).decode(params),
@@ -204,17 +207,10 @@ async function get(
   }
 }
 
-async function getConnectors({
+export async function getConnectors({
   actionsClient,
   logger,
 }: CasesClientArgs): Promise<FindActionResult[]> {
-  const isConnectorSupported = (
-    action: FindActionResult,
-    actionTypes: Record<string, ActionType>
-  ): boolean =>
-    SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
-    actionTypes[action.actionTypeId]?.enabledInLicense;
-
   try {
     const actionTypes = (await actionsClient.listTypes()).reduce(
       (types, type) => ({ ...types, [type.id]: type }),
@@ -229,14 +225,30 @@ async function getConnectors({
   }
 }
 
+function isConnectorSupported(
+  action: FindActionResult,
+  actionTypes: Record<string, ActionType>
+): boolean {
+  return (
+    (actionTypes[action.actionTypeId]?.supportedFeatureIds ?? []).includes(
+      CasesConnectorFeatureId
+    ) && actionTypes[action.actionTypeId]?.enabledInLicense
+  );
+}
+
 async function update(
   configurationId: string,
   req: CasesConfigurePatch,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const { caseConfigureService, logger, unsecuredSavedObjectsClient, user, authorization } =
-    clientArgs;
+  const {
+    services: { caseConfigureService },
+    logger,
+    unsecuredSavedObjectsClient,
+    user,
+    authorization,
+  } = clientArgs;
 
   try {
     const request = pipe(
@@ -291,11 +303,13 @@ async function update(
           mappings = await casesClientInternal.configuration.updateMappings({
             connector,
             mappingId: resMappings[0].id,
+            refresh: false,
           });
         } else {
           mappings = await casesClientInternal.configuration.createMappings({
             connector,
             owner: configuration.attributes.owner,
+            refresh: false,
           });
         }
       }
@@ -342,8 +356,13 @@ async function create(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const { unsecuredSavedObjectsClient, caseConfigureService, logger, user, authorization } =
-    clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseConfigureService },
+    logger,
+    user,
+    authorization,
+  } = clientArgs;
   try {
     let error = null;
 
@@ -377,7 +396,11 @@ async function create(
 
     if (myCaseConfigure.saved_objects.length > 0) {
       const deleteConfigurationMapper = async (c: SavedObject<CasesConfigureAttributes>) =>
-        caseConfigureService.delete({ unsecuredSavedObjectsClient, configurationId: c.id });
+        caseConfigureService.delete({
+          unsecuredSavedObjectsClient,
+          configurationId: c.id,
+          refresh: false,
+        });
 
       // Ensuring we don't too many concurrent deletions running.
       await pMap(myCaseConfigure.saved_objects, deleteConfigurationMapper, {
@@ -399,6 +422,7 @@ async function create(
       mappings = await casesClientInternal.configuration.createMappings({
         connector: configuration.connector,
         owner: configuration.owner,
+        refresh: false,
       });
     } catch (e) {
       error = e.isBoom

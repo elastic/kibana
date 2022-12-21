@@ -7,7 +7,8 @@
  */
 
 import * as ast from '../ast';
-import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
+import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
+import type { KqlContext } from '../types';
 
 export function buildNodeParams(children: KueryNode[]) {
   return {
@@ -17,9 +18,9 @@ export function buildNodeParams(children: KueryNode[]) {
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
-  context: Record<string, any> = {}
+  context: KqlContext = {}
 ) {
   const { filtersInMustClause } = config;
   const children = node.arguments || [];

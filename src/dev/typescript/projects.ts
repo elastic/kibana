@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import glob from 'glob';
+import globby from 'globby';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
+import { BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
 import { Project, ProjectOptions } from './project';
 
 /**
@@ -22,17 +23,22 @@ const createProject = (rootRelativePath: string, options: ProjectOptions = {}) =
     cache: PROJECT_CACHE,
   });
 
-const findProjects = (pattern: string) =>
-  // NOTE: using glob.sync rather than glob-all or globby
-  // because it takes less than 10 ms, while the other modules
-  // both took closer to 1000ms.
-  glob.sync(pattern, { cwd: REPO_ROOT }).map((path) => createProject(path));
+const findProjects = (patterns: string[]) =>
+  globby.sync(patterns, { cwd: REPO_ROOT }).map((path) => createProject(path));
 
 export const PROJECTS = [
   createProject('tsconfig.json'),
   createProject('test/tsconfig.json', { name: 'kibana/test' }),
   createProject('x-pack/test/tsconfig.json', { name: 'x-pack/test' }),
-  createProject('src/core/tsconfig.json'),
+  createProject('x-pack/performance/tsconfig.json', { name: 'x-pack/performance' }),
+  ...findProjects(['src/*/tsconfig.json']),
+  createProject('.buildkite/tsconfig.json', {
+    // this directory has additionally dependencies which scripts/type_check can't guarantee
+    // are present or up-to-date, and users likely won't know how to manage either, so the
+    // type check is explicitly disabled in this project for now
+    disableTypeCheck: true,
+  }),
+  createProject('kbn_pm/tsconfig.json'),
 
   createProject('x-pack/plugins/drilldowns/url_drilldown/tsconfig.json', {
     name: 'security_solution/cypress',
@@ -45,7 +51,7 @@ export const PROJECTS = [
     { name: 'enterprise_search/shared/cypress' }
   ),
   createProject(
-    'x-pack/plugins/enterprise_search/public/applications/enterprise_search/cypress/tsconfig.json',
+    'x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/cypress/tsconfig.json',
     { name: 'enterprise_search/overview/cypress' }
   ),
   createProject(
@@ -63,20 +69,40 @@ export const PROJECTS = [
     name: 'apm/ftr_e2e',
     disableTypeCheck: true,
   }),
-
-  createProject('x-pack/plugins/uptime/e2e/tsconfig.json', {
+  createProject('x-pack/plugins/fleet/cypress/tsconfig.json', {
+    name: 'fleet/cypress',
+  }),
+  createProject('x-pack/plugins/synthetics/e2e/tsconfig.json', {
     name: 'uptime/synthetics-e2e-tests',
     disableTypeCheck: true,
   }),
+  createProject('x-pack/plugins/ux/e2e/tsconfig.json', {
+    name: 'ux/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
+  createProject('x-pack/plugins/observability/e2e/tsconfig.json', {
+    name: 'observability/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
+  createProject('x-pack/plugins/threat_intelligence/cypress/tsconfig.json', {
+    name: 'threat_intelligence/cypress',
+    disableTypeCheck: true,
+  }),
 
-  ...findProjects('packages/*/tsconfig.json'),
-  ...findProjects('src/plugins/*/tsconfig.json'),
-  ...findProjects('src/plugins/chart_expressions/*/tsconfig.json'),
-  ...findProjects('src/plugins/vis_types/*/tsconfig.json'),
-  ...findProjects('x-pack/plugins/*/tsconfig.json'),
-  ...findProjects('examples/*/tsconfig.json'),
-  ...findProjects('x-pack/examples/*/tsconfig.json'),
-  ...findProjects('test/plugin_functional/plugins/*/tsconfig.json'),
-  ...findProjects('test/interpreter_functional/plugins/*/tsconfig.json'),
-  ...findProjects('test/server_integration/__fixtures__/plugins/*/tsconfig.json'),
+  // Glob patterns to be all search at once
+  ...findProjects([
+    'src/plugins/*/tsconfig.json',
+    'src/plugins/chart_expressions/*/tsconfig.json',
+    'src/plugins/vis_types/*/tsconfig.json',
+    'examples/*/tsconfig.json',
+    'test/*/plugins/*/tsconfig.json',
+    'test/analytics/fixtures/plugins/*/tsconfig.json',
+    'test/server_integration/__fixtures__/plugins/*/tsconfig.json',
+    'test/interactive_setup_api_integration/fixtures/*/tsconfig.json',
+    'x-pack/plugins/*/tsconfig.json',
+    'x-pack/plugins/cloud_integrations/*/tsconfig.json',
+    'x-pack/examples/*/tsconfig.json',
+    'x-pack/test/*/plugins/*/tsconfig.json',
+    ...BAZEL_PACKAGE_DIRS.map((dir) => `${dir}/*/tsconfig.json`),
+  ]),
 ];

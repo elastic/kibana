@@ -10,10 +10,10 @@ import { waitFor } from '@testing-library/react';
 
 import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
-import { TimelineId, TimelineTabs } from '../../../../../../common';
-import { StatefulEventContext } from '../../../../../../../timelines/public';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { timelineActions } from '../../../../store/timeline';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
@@ -37,9 +37,19 @@ jest.mock('../../../../../common/lib/kibana/kibana_react', () => {
 });
 
 jest.mock('../../../../../common/components/draggables', () => ({
-  // eslint-disable-next-line react/display-name
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
+
+jest.mock('../../../../store/timeline', () => {
+  const original = jest.requireActual('../../../../store/timeline');
+  return {
+    ...original,
+    timelineActions: {
+      ...original.timelineActions,
+      toggleDetailPanel: jest.fn(),
+    },
+  };
+});
 
 describe('HostName', () => {
   const props = {
@@ -47,19 +57,18 @@ describe('HostName', () => {
     contextId: 'test-context-id',
     eventId: 'test-event-id',
     isDraggable: false,
+    fieldType: 'keyword',
+    isAggregatable: true,
     value: 'Mock Host',
   };
 
-  let toggleDetailPanel: jest.SpyInstance;
   let toggleExpandedDetail: jest.SpyInstance;
 
   beforeAll(() => {
-    toggleDetailPanel = jest.spyOn(timelineActions, 'toggleDetailPanel');
     toggleExpandedDetail = jest.spyOn(activeTimeline, 'toggleExpandedDetail');
   });
 
   afterEach(() => {
-    toggleDetailPanel.mockClear();
     toggleExpandedDetail.mockClear();
   });
   test('should render host name', () => {
@@ -95,9 +104,9 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(toggleDetailPanel).not.toHaveBeenCalled();
+      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });
   });
@@ -117,15 +126,15 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(toggleDetailPanel).toHaveBeenCalledWith({
+      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+        id: context.timelineID,
         panelView: 'hostDetail',
         params: {
           hostName: props.value,
         },
         tabType: context.tabType,
-        timelineId: context.timelineID,
       });
     });
   });
@@ -145,7 +154,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(toggleExpandedDetail).toHaveBeenCalledWith({
         panelView: 'hostDetail',
@@ -160,7 +169,7 @@ describe('HostName', () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
-      timelineID: 'detection',
+      timelineID: TimelineId.test,
       tabType: TimelineTabs.query,
     };
     const wrapper = mount(
@@ -171,15 +180,15 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(toggleDetailPanel).toHaveBeenCalledWith({
+      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+        id: context.timelineID,
         panelView: 'hostDetail',
         params: {
           hostName: props.value,
         },
         tabType: context.tabType,
-        timelineId: context.timelineID,
       });
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });

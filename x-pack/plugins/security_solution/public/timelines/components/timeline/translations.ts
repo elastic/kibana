@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TimelineTypeLiteral, TimelineType } from '../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline';
 
 export const DEFAULT_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.defaultTimelineTitle',
@@ -40,16 +41,13 @@ export const SEARCH_BOX_TIMELINE_PLACEHOLDER = (timelineType: TimelineTypeLitera
     defaultMessage: 'e.g. {timeline} name or description',
   });
 
-export const INSERT_TIMELINE = i18n.translate(
-  'xpack.securitySolution.insert.timeline.insertTimelineButton',
-  {
-    defaultMessage: 'Insert timeline link',
-  }
-);
-
 export const TIMELINE_TEMPLATE = i18n.translate(
   'xpack.securitySolution.timeline.flyoutTimelineTemplateLabel',
   {
     defaultMessage: 'Timeline template',
   }
 );
+
+export const PARTICIPANTS = i18n.translate('xpack.securitySolution.timeline.participantsTitle', {
+  defaultMessage: 'Participants',
+});

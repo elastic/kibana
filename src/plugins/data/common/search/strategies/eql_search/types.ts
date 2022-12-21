@@ -6,17 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { EqlSearch } from '@elastic/elasticsearch/api/requestParams';
-import { ApiResponse, TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
 
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 
 export const EQL_SEARCH_STRATEGY = 'eql';
 
-export type EqlRequestParams = EqlSearch<Record<string, unknown>>;
+export type EqlRequestParams = EqlSearchRequest;
 
 export interface EqlSearchStrategyRequest extends IKibanaSearchRequest<EqlRequestParams> {
+  /**
+   * @deprecated: use IAsyncSearchOptions.transport instead.
+   */
   options?: TransportRequestOptions;
 }
 
-export type EqlSearchStrategyResponse<T = unknown> = IKibanaSearchResponse<ApiResponse<T>>;
+export type EqlSearchStrategyResponse<T = unknown> = IKibanaSearchResponse<TransportResult<T>>;

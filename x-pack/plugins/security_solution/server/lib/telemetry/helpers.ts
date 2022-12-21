@@ -7,15 +7,31 @@
 
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
-import { copyAllowlistedFields, exceptionListEventFields } from './filters';
-import { ExceptionListItem, ListTemplate, TelemetryEvent } from './types';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import { merge } from 'lodash';
+import type { Logger } from '@kbn/core/server';
+import { copyAllowlistedFields, filterList } from './filterlists';
+import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
+import type {
+  ExceptionListItem,
+  ESClusterInfo,
+  ESLicense,
+  ListTemplate,
+  TelemetryEvent,
+  ValueListResponseAggregation,
+  ValueListExceptionListResponseAggregation,
+  ValueListItemsResponseAggregation,
+  ValueListIndicatorMatchResponseAggregation,
+  TaskMetric,
+} from './types';
 import {
+  LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
+  DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS,
 } from './constants';
-import { TrustedApp } from '../../../common/endpoint/types';
+import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -46,7 +62,7 @@ export const getPreviousDiagTaskTimestamp = (
  * @param lastExecutionTimestamp
  * @returns the timestamp to search from
  */
-export const getPreviousEpMetaTaskTimestamp = (
+export const getPreviousDailyTaskTimestamp = (
   executeTo: string,
   lastExecutionTimestamp?: string
 ) => {
@@ -96,19 +112,20 @@ export function isPackagePolicyList(
 /**
  * Maps trusted application to shared telemetry object
  *
- * @param exceptionListItem
- * @returns collection of endpoint exceptions
+ * @param trustedAppExceptionItem
+ * @returns collection of trusted applications
  */
-export const trustedApplicationToTelemetryEntry = (trustedApplication: TrustedApp) => {
+export const trustedApplicationToTelemetryEntry = (
+  trustedAppExceptionItem: ExceptionListItemSchema
+) => {
   return {
-    id: trustedApplication.id,
-    version: trustedApplication.version || '',
-    name: trustedApplication.name,
-    description: trustedApplication.description,
-    created_at: trustedApplication.created_at,
-    updated_at: trustedApplication.updated_at,
-    entries: trustedApplication.entries,
-    os: trustedApplication.os,
+    id: trustedAppExceptionItem.id,
+    name: trustedAppExceptionItem.name,
+    created_at: trustedAppExceptionItem.created_at,
+    updated_at: trustedAppExceptionItem.updated_at,
+    entries: trustedAppExceptionItem.entries,
+    os_types: trustedAppExceptionItem.os_types,
+    scope: tagsToEffectScope(trustedAppExceptionItem.tags),
   } as ExceptionListItem;
 };
 
@@ -121,9 +138,29 @@ export const trustedApplicationToTelemetryEntry = (trustedApplication: TrustedAp
 export const exceptionListItemToTelemetryEntry = (exceptionListItem: ExceptionListItemSchema) => {
   return {
     id: exceptionListItem.id,
-    version: exceptionListItem._version || '',
     name: exceptionListItem.name,
-    description: exceptionListItem.description,
+    created_at: exceptionListItem.created_at,
+    updated_at: exceptionListItem.updated_at,
+    entries: exceptionListItem.entries,
+    os_types: exceptionListItem.os_types,
+  } as ExceptionListItem;
+};
+
+/**
+ * Maps detection rule exception list items to shared telemetry object
+ *
+ * @param exceptionListItem
+ * @param ruleVersion
+ * @returns collection of detection rule exceptions
+ */
+export const ruleExceptionListItemToTelemetryEvent = (
+  exceptionListItem: ExceptionListItemSchema,
+  ruleVersion: number
+) => {
+  return {
+    id: exceptionListItem.item_id,
+    name: exceptionListItem.description,
+    rule_version: ruleVersion,
     created_at: exceptionListItem.created_at,
     updated_at: exceptionListItem.updated_at,
     entries: exceptionListItem.entries,
@@ -138,32 +175,43 @@ export const exceptionListItemToTelemetryEntry = (exceptionListItem: ExceptionLi
  * @param listType
  * @returns lists telemetry schema
  */
-export const templateExceptionList = (listData: ExceptionListItem[], listType: string) => {
+export const templateExceptionList = (
+  listData: ExceptionListItem[],
+  clusterInfo: ESClusterInfo,
+  licenseInfo: ESLicense | undefined,
+  listType: string
+) => {
   return listData.map((item) => {
     const template: ListTemplate = {
-      trusted_application: [],
-      endpoint_exception: [],
-      endpoint_event_filter: [],
+      '@timestamp': moment().toISOString(),
+      cluster_uuid: clusterInfo.cluster_uuid,
+      cluster_name: clusterInfo.cluster_name,
+      license_id: licenseInfo?.uid,
     };
 
     // cast exception list type to a TelemetryEvent for allowlist filtering
     const filteredListItem = copyAllowlistedFields(
-      exceptionListEventFields,
+      filterList.exceptionLists,
       item as unknown as TelemetryEvent
     );
 
+    if (listType === LIST_DETECTION_RULE_EXCEPTION) {
+      template.detection_rule = filteredListItem;
+      return template;
+    }
+
     if (listType === LIST_TRUSTED_APPLICATION) {
-      template.trusted_application.push(filteredListItem);
+      template.trusted_application = filteredListItem;
       return template;
     }
 
     if (listType === LIST_ENDPOINT_EXCEPTION) {
-      template.endpoint_exception.push(filteredListItem);
+      template.endpoint_exception = filteredListItem;
       return template;
     }
 
     if (listType === LIST_ENDPOINT_EVENT_FILTER) {
-      template.endpoint_event_filter.push(filteredListItem);
+      template.endpoint_event_filter = filteredListItem;
       return template;
     }
 
@@ -177,6 +225,76 @@ export const templateExceptionList = (listData: ExceptionListItem[], listType: s
  * @param label_list the list of labels to create standardized UsageCounter from
  * @returns a string label for usage in the UsageCounter
  */
-export function createUsageCounterLabel(labelList: string[]): string {
-  return labelList.join('-');
-}
+export const createUsageCounterLabel = (labelList: string[]): string => labelList.join('-');
+
+/**
+ * Resiliantly handles an edge case where the endpoint config details are not present
+ *
+ * @returns the endpoint policy configuration
+ */
+export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
+  const epPolicyConfig = policyData?.inputs[0]?.config?.policy;
+  return epPolicyConfig ? epPolicyConfig : null;
+};
+
+export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfig) => {
+  return merge(DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS, policyConfig);
+};
+
+export const metricsResponseToValueListMetaData = ({
+  listMetricsResponse,
+  itemMetricsResponse,
+  exceptionListMetricsResponse,
+  indicatorMatchMetricsResponse,
+}: {
+  listMetricsResponse: ValueListResponseAggregation;
+  itemMetricsResponse: ValueListItemsResponseAggregation;
+  exceptionListMetricsResponse: ValueListExceptionListResponseAggregation;
+  indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
+}) => ({
+  total_list_count: listMetricsResponse?.aggregations?.total_value_list_count ?? 0,
+  types:
+    listMetricsResponse?.aggregations?.type_breakdown?.buckets.map((breakdown) => ({
+      type: breakdown.key,
+      count: breakdown.doc_count,
+    })) ?? [],
+  lists:
+    itemMetricsResponse?.aggregations?.value_list_item_count?.buckets.map((itemCount) => ({
+      id: itemCount.key,
+      count: itemCount.doc_count,
+    })) ?? [],
+  included_in_exception_lists_count:
+    exceptionListMetricsResponse?.aggregations?.vl_included_in_exception_lists_count?.value ?? 0,
+  used_in_indicator_match_rule_count:
+    indicatorMatchMetricsResponse?.aggregations?.vl_used_in_indicator_match_rule_count?.value ?? 0,
+});
+
+export let isElasticCloudDeployment = false;
+export const setIsElasticCloudDeployment = (value: boolean) => {
+  isElasticCloudDeployment = value;
+};
+
+export const tlog = (logger: Logger, message: string) => {
+  if (isElasticCloudDeployment) {
+    logger.info(message);
+  } else {
+    logger.debug(message);
+  }
+};
+
+export const createTaskMetric = (
+  name: string,
+  passed: boolean,
+  startTime: number,
+  errorMessage?: string
+): TaskMetric => {
+  const endTime = Date.now();
+  return {
+    name,
+    passed,
+    time_executed_in_ms: endTime - startTime,
+    start_time: startTime,
+    end_time: endTime,
+    error_message: errorMessage,
+  };
+};

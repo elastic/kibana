@@ -7,61 +7,24 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INFO_TITLE = i18n.translate(
-  'xpack.securitySolution.overview.ctiDashboardInfoPanelTitle',
-  {
-    defaultMessage: 'Enable Kibana dashboard to view sources',
-  }
-);
-
-export const INFO_BODY = i18n.translate(
-  'xpack.securitySolution.overview.ctiDashboardInfoPanelBody',
-  {
-    defaultMessage:
-      'Follow this guide to enable your dashboard so that you can view your sources in visualizations.',
-  }
-);
-
-export const INFO_BUTTON = i18n.translate(
-  'xpack.securitySolution.overview.ctiDashboardInfoPanelButton',
-  {
-    defaultMessage: 'How to load Kibana dashboards',
-  }
-);
-
-export const WARNING_TITLE = i18n.translate(
-  'xpack.securitySolution.overview.ctiDashboardWarningPanelTitle',
-  {
-    defaultMessage: 'No threat intel data available to display',
-  }
-);
-
-export const WARNING_BODY = i18n.translate(
-  'xpack.securitySolution.overview.ctiDashboardWarningPanelBody',
-  {
-    defaultMessage: `We haven't detected any data from the selected time range, please try to search for another time range.`,
-  }
-);
-
 export const DANGER_TITLE = i18n.translate(
   'xpack.securitySolution.overview.ctiDashboardDangerPanelTitle',
   {
-    defaultMessage: 'No threat intel data available to display',
+    defaultMessage: 'No threat intelligence data',
   }
 );
 
 export const DANGER_BODY = i18n.translate(
   'xpack.securitySolution.overview.ctiDashboardEnableThreatIntel',
   {
-    defaultMessage:
-      'You need to enable the filebeat threatintel module in order to view data from different sources.',
+    defaultMessage: 'You need to enable threat intel sources in order to view data.',
   }
 );
 
 export const DANGER_BUTTON = i18n.translate(
-  'xpack.securitySolution.overview.ctiDashboardDangerPanelButton',
+  'xpack.securitySolution.overview.ctiDashboardDangerButton',
   {
-    defaultMessage: 'Enable Module',
+    defaultMessage: 'Enable sources',
   }
 );
 
@@ -71,4 +34,15 @@ export const PANEL_TITLE = i18n.translate('xpack.securitySolution.overview.ctiDa
 
 export const VIEW_DASHBOARD = i18n.translate('xpack.securitySolution.overview.ctiViewDasboard', {
   defaultMessage: 'View dashboard',
+});
+
+export const OTHER_DATA_SOURCE_TITLE = i18n.translate(
+  'xpack.securitySolution.overview.ctiDashboardOtherDatasourceTitle',
+  {
+    defaultMessage: 'Others',
+  }
+);
+
+export const LINK_COPY = i18n.translate('xpack.securitySolution.overview.ctiLinkSource', {
+  defaultMessage: 'Source',
 });

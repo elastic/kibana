@@ -7,24 +7,30 @@
 
 import * as t from 'io-ts';
 
+import type { Description } from '@kbn/osquery-io-ts-types';
 import {
   id,
-  description,
-  Description,
-  platform,
+  descriptionOrUndefined,
+  platformOrUndefined,
   query,
-  version,
+  versionOrUndefined,
   interval,
-} from '../../common/schemas';
-import { RequiredKeepUndefined } from '../../../types';
+  snapshotOrUndefined,
+  removedOrUndefined,
+  ecsMappingOrUndefined,
+} from '@kbn/osquery-io-ts-types';
+import type { RequiredKeepUndefined } from '../../../types';
 
 export const createSavedQueryRequestSchema = t.type({
   id,
-  description,
-  platform,
+  description: descriptionOrUndefined,
+  platform: platformOrUndefined,
   query,
-  version,
+  version: versionOrUndefined,
   interval,
+  snapshot: snapshotOrUndefined,
+  removed: removedOrUndefined,
+  ecs_mapping: ecsMappingOrUndefined,
 });
 
 export type CreateSavedQueryRequestSchema = t.OutputOf<typeof createSavedQueryRequestSchema>;

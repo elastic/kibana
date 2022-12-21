@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -36,7 +36,7 @@ describe('DeleteTimelineModal', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="title"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
       'Delete "Privilege Escalation"?'
     );
   });
@@ -50,7 +50,7 @@ describe('DeleteTimelineModal', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="title"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
       'Delete "Leading and trailing whitespace"?'
     );
   });
@@ -60,7 +60,7 @@ describe('DeleteTimelineModal', () => {
       <DeleteTimelineModal onDelete={jest.fn()} closeModal={jest.fn()} />
     );
 
-    expect(wrapper.find('[data-test-subj="title"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
       'Delete "Untitled timeline"?'
     );
   });
@@ -70,7 +70,7 @@ describe('DeleteTimelineModal', () => {
       <DeleteTimelineModal onDelete={jest.fn()} title={null} closeModal={jest.fn()} />
     );
 
-    expect(wrapper.find('[data-test-subj="title"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
       'Delete "Untitled timeline"?'
     );
   });
@@ -80,7 +80,7 @@ describe('DeleteTimelineModal', () => {
       <DeleteTimelineModal onDelete={jest.fn()} title={'    '} closeModal={jest.fn()} />
     );
 
-    expect(wrapper.find('[data-test-subj="title"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
       'Delete "Untitled timeline"?'
     );
   });
@@ -126,7 +126,7 @@ describe('DeleteTimelineModal', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
 
     expect(onDelete).toBeCalled();
   });

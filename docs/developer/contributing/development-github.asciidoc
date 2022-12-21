@@ -14,16 +14,14 @@ repo, which we'll refer to in later code snippets.
 
 At Elastic, all products in the stack, including Kibana, are released at the same time with the same version number. Most of these projects have the following branching strategy:
 
-* `master` is the next major version.
-* `<major>.x` is the next minor version.
-* `<major>.<minor>` is the next release of a minor version, including patch releases.
+* `main` points to the next minor version.
+* `<major>.<minor>` is the previously released minor version, including patch releases.
 
-As an example, let's assume that the `7.x` branch is currently a not-yet-released `7.6.0`. Once `7.6.0` has reached feature freeze, it will be branched to `7.6` and `7.x` will be updated to reflect `7.7.0`. The release of `7.6.0` and subsequent patch releases will be cut from the `7.6` branch. At any time, you can verify the current version of a branch by inspecting the `version` attribute in the `package.json` file within the Kibana source.
+As an example, let's assume that the main branch is currently a not-yet-released 8.1.0. Once 8.1.0 has reached feature freeze, it will be branched to 8.1 and main will be updated to reflect 8.2.0. The release of 8.1.0 and subsequent patch releases will be cut from the 8.1 branch. At any time, you can verify the current version of a branch by inspecting the version attribute in the package.json file within the Kibana source.
 
-Pull requests are made into the `master` branch and then backported when it is safe and appropriate.
+Pull requests are made into the `main` branch and then backported when it is safe and appropriate.
 
-* Breaking changes do not get backported and only go into `master`.
-* All non-breaking changes can be backported to the `<major>.x` branch.
+* Breaking changes can _only_ be made to `main` if there has been at least an 18 month deprecation period _and_ the breaking change has been approved. Telemetry showing current usage is crucial for gaining approval.
 * Features should not be backported to a `<major>.<minor>` branch.
 * Bug fixes can be backported to a `<major>.<minor>` branch if the changes are safe and appropriate. Safety is a judgment call you make based on factors like the bug's severity, test coverage, confidence in the changes, etc. Your reasoning should be included in the pull request description.
 * Documentation changes can be backported to any branch at any time.
@@ -41,6 +39,28 @@ explanation of _why_ you made the changes that you did.
 * Resolve merge conflicts by rebasing the target branch over your
 feature branch, and force-pushing (see below for instructions).
 * When merging, we'll squash your commits into a single commit.
+
+[discrete]
+==== Commit using your `@elastic.co` email address
+
+In order to assist with developer tooling we ask that all Elastic engineers use their `@elastic.co` email address when committing to the Kibana repo. We have implemented a CI check that validates any PR opened by a member of the `@elastic` organization has at least one commit that is attributed to an `@elastic.co` email address. If you have a PR that is failing because of this check you can fix your PR by following these steps:
+
+ 1. Ensure that you don't have any staged changes
+ 2. Checkout the branch for your PR
+ 3. Update the git config for your current repository to commit with your `@elastic.co` email:
++
+["source","shell"]
+-----------
+git config user.email YOUR_ELASTIC_EMAIL@elastic.co
+-----------
+ 4. Create a commit using the new email address
++
+["source","shell"]
+-----------
+git commit -m 'commit using @elastic.co' --allow-empty
+-----------
++
+ 5. Push the new commit to your PR and the status should now be green
 
 [discrete]
 ==== Rebasing and fixing merge conflicts

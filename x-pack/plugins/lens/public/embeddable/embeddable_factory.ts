@@ -5,39 +5,55 @@
  * 2.0.
  */
 
-import type { Capabilities, HttpSetup } from 'kibana/public';
+import type {
+  Capabilities,
+  HttpSetup,
+  IUiSettingsClient,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Ast } from '@kbn/interpreter/common';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { IndexPatternsContract, TimefilterContract } from '../../../../../src/plugins/data/public';
-import { ReactExpressionRendererType } from '../../../../../src/plugins/expressions/public';
+import { Ast } from '@kbn/interpreter';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { DataPublicPluginStart, FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import {
   EmbeddableFactoryDefinition,
   IContainer,
-} from '../../../../../src/plugins/embeddable/public';
-import { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
-import { Document } from '../persistence/saved_object_store';
-import { LensAttributeService } from '../lens_attribute_service';
+  ErrorEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
+import type { Document } from '../persistence/saved_object_store';
+import type { LensAttributeService } from '../lens_attribute_service';
 import { DOC_TYPE } from '../../common/constants';
-import { ErrorMessage } from '../editor_frame_service/types';
+import type { ErrorMessage } from '../editor_frame_service/types';
 import { extract, inject } from '../../common/embeddable_factory';
+import type { DatasourceMap, VisualizationMap } from '../types';
 
 export interface LensEmbeddableStartServices {
+  data: DataPublicPluginStart;
   timefilter: TimefilterContract;
   coreHttp: HttpSetup;
   inspector: InspectorStart;
   attributeService: LensAttributeService;
   capabilities: RecursiveReadonly<Capabilities>;
   expressionRenderer: ReactExpressionRendererType;
-  indexPatternService: IndexPatternsContract;
+  dataViews: DataViewsContract;
   uiActions?: UiActionsStart;
   usageCollection?: UsageCollectionSetup;
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  injectFilterReferences: FilterManager['inject'];
+  visualizationMap: VisualizationMap;
+  datasourceMap: DatasourceMap;
+  spaces?: SpacesPluginStart;
+  theme: ThemeServiceStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -63,7 +79,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
 
   getDisplayName() {
     return i18n.translate('xpack.lens.embeddableDisplayName', {
-      defaultMessage: 'lens',
+      defaultMessage: 'Lens',
     });
   }
 
@@ -79,41 +95,61 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 
   async create(input: LensEmbeddableInput, parent?: IContainer) {
-    const {
-      timefilter,
-      expressionRenderer,
-      documentToExpression,
-      uiActions,
-      coreHttp,
-      attributeService,
-      indexPatternService,
-      capabilities,
-      usageCollection,
-      inspector,
-    } = await this.getStartServices();
-
-    const { Embeddable } = await import('../async_services');
-
-    return new Embeddable(
-      {
-        attributeService,
-        indexPatternService,
+    try {
+      const {
+        data,
         timefilter,
-        inspector,
         expressionRenderer,
-        basePath: coreHttp.basePath,
-        getTrigger: uiActions?.getTrigger,
-        getTriggerCompatibleActions: uiActions?.getTriggerCompatibleActions,
         documentToExpression,
-        capabilities: {
-          canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
-          canSaveVisualizations: Boolean(capabilities.visualize.save),
-        },
+        injectFilterReferences,
+        visualizationMap,
+        datasourceMap,
+        uiActions,
+        coreHttp,
+        attributeService,
+        dataViews,
+        capabilities,
         usageCollection,
-      },
-      input,
-      parent
-    );
+        theme,
+        inspector,
+        spaces,
+        uiSettings,
+      } = await this.getStartServices();
+
+      const { Embeddable } = await import('../async_services');
+
+      return new Embeddable(
+        {
+          attributeService,
+          data,
+          dataViews,
+          timefilter,
+          inspector,
+          expressionRenderer,
+          basePath: coreHttp.basePath,
+          getTrigger: uiActions?.getTrigger,
+          getTriggerCompatibleActions: uiActions?.getTriggerCompatibleActions,
+          documentToExpression,
+          injectFilterReferences,
+          visualizationMap,
+          datasourceMap,
+          capabilities: {
+            canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
+            canSaveVisualizations: Boolean(capabilities.visualize.save),
+            navLinks: capabilities.navLinks,
+            discover: capabilities.discover,
+          },
+          usageCollection,
+          theme,
+          spaces,
+          uiSettings,
+        },
+        input,
+        parent
+      );
+    } catch (e) {
+      return new ErrorEmbeddable(e, input, parent);
+    }
   }
 
   extract = extract;

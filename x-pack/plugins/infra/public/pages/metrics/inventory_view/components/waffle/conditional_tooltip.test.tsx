@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ConditionalToolTip } from './conditional_tooltip';
 import { InfraWaffleMapNode } from '../../../../../lib/lib';
 
@@ -17,7 +16,7 @@ jest.mock('../../../../../containers/metrics_source', () => ({
 }));
 
 jest.mock('../../hooks/use_snaphot');
-import { useSnapshot } from '../../hooks/use_snaphot';
+import { useSnapshot, UseSnapshotRequest } from '../../hooks/use_snaphot';
 jest.mock('../../hooks/use_waffle_options');
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 const mockedUseSnapshot = useSnapshot as jest.Mock<ReturnType<typeof useSnapshot>>;
@@ -102,18 +101,18 @@ describe('ConditionalToolTip', () => {
       </EuiThemeProvider>
     );
     const tooltip = wrapper.find('[data-test-subj~="conditionalTooltipContent-host-01"]');
-    expect(toJson(tooltip)).toMatchSnapshot();
+    expect(tooltip.render()).toMatchSnapshot();
 
-    expect(mockedUseSnapshot).toBeCalledWith(
-      expectedQuery,
-      expectedMetrics,
-      [],
-      'host',
-      'default',
+    expect(mockedUseSnapshot).toBeCalledWith({
+      filterQuery: expectedQuery,
+      metrics: expectedMetrics,
+      groupBy: [],
+      nodeType: 'host',
+      sourceId: 'default',
       currentTime,
-      '',
-      ''
-    );
+      accountId: '',
+      region: '',
+    } as UseSnapshotRequest);
   });
 });
 

@@ -6,11 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+  CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+
+/**
+ * The order of appearance in the feature privilege page
+ * under the management section.
+ */
+const FEATURE_ORDER = 3000;
 
 export const ACTIONS_FEATURE = {
   id: 'actions',
@@ -19,8 +26,9 @@ export const ACTIONS_FEATURE = {
   }),
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],
+  order: FEATURE_ORDER,
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
   },
   privileges: {
     all: {
@@ -28,10 +36,14 @@ export const ACTIONS_FEATURE = {
       api: [],
       catalogue: [],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
       },
       savedObject: {
-        all: [ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE],
+        all: [
+          ACTION_SAVED_OBJECT_TYPE,
+          ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+          CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+        ],
         read: [],
       },
       ui: ['show', 'execute', 'save', 'delete'],
@@ -41,11 +53,11 @@ export const ACTIONS_FEATURE = {
       api: [],
       catalogue: [],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
       },
       savedObject: {
         // action execution requires 'read' over `actions`, but 'all' over `action_task_params`
-        all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE],
+        all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, CONNECTOR_TOKEN_SAVED_OBJECT_TYPE],
         read: [ACTION_SAVED_OBJECT_TYPE],
       },
       ui: ['show', 'execute'],

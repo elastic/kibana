@@ -5,80 +5,77 @@
  * 2.0.
  */
 
-import { Dispatch } from 'redux';
+import { firstValueFrom } from 'rxjs';
+import type { DataViewBase, Query } from '@kbn/es-query';
+import type { CoreStart, HttpStart } from '@kbn/core/public';
+import type { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
-
-import { CoreStart, HttpStart } from 'kibana/public';
+import type {
+  IndexFieldsStrategyRequest,
+  IndexFieldsStrategyResponse,
+} from '@kbn/timelines-plugin/common';
 import {
-  ActivityLog,
+  BASE_POLICY_RESPONSE_ROUTE,
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
+  metadataCurrentIndexPattern,
+  METADATA_UNITED_INDEX,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+} from '../../../../../common/endpoint/constants';
+import type {
+  GetHostPolicyResponse,
   HostInfo,
   HostIsolationRequestBody,
-  HostIsolationResponse,
+  ResponseActionApiResponse,
   HostResultList,
   Immutable,
   ImmutableObject,
+  MetadataListResponse,
 } from '../../../../../common/endpoint/types';
-import { GetPolicyListResponse } from '../../policy/types';
-import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
+import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
+import type { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
+import type { AppAction } from '../../../../common/store/actions';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import {
-  isOnEndpointPage,
-  hasSelectedEndpoint,
-  selectedAgent,
-  uiQueryParams,
-  listData,
-  endpointPackageInfo,
-  nonExistingPolicies,
-  patterns,
-  searchBarQuery,
-  getIsIsolationRequestPending,
-  getCurrentIsolationRequestState,
-  getActivityLogData,
-  getActivityLogDataPaging,
-  getLastLoadedActivityLogData,
-  getActivityLogError,
-  detailsData,
-  getIsEndpointPackageInfoUninitialized,
-  getIsOnEndpointDetailsActivityLog,
-  getMetadataTransformStats,
-  isMetadataTransformStatsLoading,
-  getActivityLogIsUninitializedOrHasSubsequentAPIError,
-  endpointPackageVersion,
-} from './selectors';
+  asStaleResourceState,
+  createFailedResourceState,
+  createLoadedResourceState,
+  createLoadingResourceState,
+} from '../../../state';
 import {
+  sendBulkGetPackagePolicies,
+  sendGetEndpointSecurityPackage,
+  sendGetFleetAgentsWithEndpoint,
+} from '../../../services/policies/ingest';
+import type { GetPolicyListResponse } from '../../policy/types';
+import type {
   AgentIdsPendingActions,
   EndpointState,
   PolicyIds,
   TransformStats,
   TransformStatsResponse,
 } from '../types';
+import type { EndpointPackageInfoStateChanged } from './action';
 import {
-  sendGetEndpointSpecificPackagePolicies,
-  sendGetEndpointSecurityPackage,
-  sendGetAgentPolicyList,
-  sendGetFleetAgentsWithEndpoint,
-} from '../../policy/store/services/ingest';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, PackageListItem } from '../../../../../../fleet/common';
-import {
-  ENDPOINT_ACTION_LOG_ROUTE,
-  HOST_METADATA_GET_ROUTE,
-  HOST_METADATA_LIST_ROUTE,
-  BASE_POLICY_RESPONSE_ROUTE,
-  metadataCurrentIndexPattern,
-  METADATA_UNITED_INDEX,
-} from '../../../../../common/endpoint/constants';
-import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
-import {
-  createFailedResourceState,
-  createLoadedResourceState,
-  createLoadingResourceState,
-} from '../../../state';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
-import { AppAction } from '../../../../common/store/actions';
-import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
-import { EndpointPackageInfoStateChanged } from './action';
-import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
-import { getIsInvalidDateRange } from '../utils';
-import { TRANSFORM_STATS_URL } from '../../../../../common/constants';
+  detailsData,
+  endpointPackageInfo,
+  endpointPackageVersion,
+  getCurrentIsolationRequestState,
+  getIsEndpointPackageInfoUninitialized,
+  getIsIsolationRequestPending,
+  getMetadataTransformStats,
+  hasSelectedEndpoint,
+  isMetadataTransformStatsLoading,
+  isOnEndpointPage,
+  listData,
+  nonExistingPolicies,
+  patterns,
+  searchBarQuery,
+  uiQueryParams,
+} from './selectors';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -93,7 +90,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
   // or else wrong pattern might be loaded
   async function fetchIndexPatterns(
     state: ImmutableObject<EndpointState>
-  ): Promise<IIndexPattern[]> {
+  ): Promise<DataViewBase[]> {
     const packageVersion = endpointPackageVersion(state) ?? '';
     const parsedPackageVersion = packageVersion.includes('-')
       ? packageVersion.substring(0, packageVersion.indexOf('-'))
@@ -103,13 +100,19 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       ? METADATA_UNITED_INDEX
       : metadataCurrentIndexPattern;
 
-    const { indexPatterns } = depsStart.data;
-    const fields = await indexPatterns.getFieldsForWildcard({
-      pattern: indexPatternToFetch,
-    });
-    const indexPattern: IIndexPattern = {
+    const res$ = depsStart.data.search.search<
+      IndexFieldsStrategyRequest<'indices'>,
+      IndexFieldsStrategyResponse
+    >(
+      { indices: [indexPatternToFetch], onlyCheckIfIndicesExist: false },
+      {
+        strategy: ENDPOINT_FIELDS_SEARCH_STRATEGY,
+      }
+    );
+    const response = await firstValueFrom(res$);
+    const indexPattern: DataViewBase = {
       title: indexPatternToFetch,
-      fields,
+      fields: response.indexFields,
     };
     return [indexPattern];
   }
@@ -137,25 +140,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
     if (action.type === 'endpointDetailsLoad') {
       await loadEndpointDetails({ store, coreStart, selectedEndpoint: action.payload.endpointId });
-    }
-
-    // get activity log API
-    if (
-      action.type === 'userChangedUrl' &&
-      hasSelectedEndpoint(getState()) === true &&
-      getIsOnEndpointDetailsActivityLog(getState()) &&
-      getActivityLogIsUninitializedOrHasSubsequentAPIError(getState())
-    ) {
-      await endpointDetailsActivityLogChangedMiddleware({ store, coreStart });
-    }
-
-    // page activity log API
-    if (
-      action.type === 'endpointDetailsActivityLogUpdatePaging' &&
-      !getActivityLogError(getState()) &&
-      hasSelectedEndpoint(getState())
-    ) {
-      await endpointDetailsActivityLogPagingMiddleware({ store, coreStart });
     }
 
     // Isolate Host
@@ -200,19 +184,12 @@ const getAgentAndPoliciesForEndpointsList = async (
   // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
   // exists.
   const policiesFound = (
-    await sendGetAgentPolicyList(http, {
-      query: {
-        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIdsToCheck.join(
-          ' or '
-        )})`,
-      },
-    })
+    await sendBulkGetPackagePolicies(http, policyIdsToCheck)
   ).items.reduce<PolicyIds>(
-    (list, agentPolicy) => {
-      (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
-        list.packagePolicy[packagePolicy as string] = true;
-        list.agentPolicy[packagePolicy as string] = agentPolicy.id;
-      });
+    (list, packagePolicy) => {
+      list.packagePolicy[packagePolicy.id as string] = true;
+      list.agentPolicy[packagePolicy.id as string] = packagePolicy.policy_id;
+
       return list;
     },
     { packagePolicy: {}, agentPolicy: {} }
@@ -244,10 +221,11 @@ const getAgentAndPoliciesForEndpointsList = async (
 const endpointsTotal = async (http: HttpStart): Promise<number> => {
   try {
     return (
-      await http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
-        body: JSON.stringify({
-          paging_properties: [{ page_index: 0 }, { page_size: 1 }],
-        }),
+      await http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+        query: {
+          page: 0,
+          pageSize: 1,
+        },
       })
     ).total;
   } catch (error) {
@@ -283,14 +261,14 @@ const handleIsolateEndpointHost = async (
 
   dispatch({
     type: 'endpointIsolationRequestStateChange',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState(getCurrentIsolationRequestState(state)),
+    payload: createLoadingResourceState(
+      asStaleResourceState(getCurrentIsolationRequestState(state))
+    ),
   });
 
   try {
     // Cast needed below due to the value of payload being `Immutable<>`
-    let response: HostIsolationResponse;
+    let response: ResponseActionApiResponse;
 
     if (action.payload.type === 'unisolate') {
       response = await unIsolateHost(action.payload.data as HostIsolationRequestBody);
@@ -300,12 +278,12 @@ const handleIsolateEndpointHost = async (
 
     dispatch({
       type: 'endpointIsolationRequestStateChange',
-      payload: createLoadedResourceState<HostIsolationResponse>(response),
+      payload: createLoadedResourceState<ResponseActionApiResponse>(response),
     });
   } catch (error) {
     dispatch({
       type: 'endpointIsolationRequestStateChange',
-      payload: createFailedResourceState<HostIsolationResponse>(error.body ?? error),
+      payload: createFailedResourceState<ResponseActionApiResponse>(error.body ?? error),
     });
   }
 };
@@ -319,9 +297,7 @@ async function getEndpointPackageInfo(
 
   dispatch({
     type: 'endpointPackageInfoStateChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState<PackageListItem>(endpointPackageInfo(state)),
+    payload: createLoadingResourceState(asStaleResourceState(endpointPackageInfo(state))),
   });
 
   try {
@@ -396,23 +372,23 @@ async function endpointDetailsListMiddleware({
 }: {
   store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
   coreStart: CoreStart;
-  fetchIndexPatterns: (state: ImmutableObject<EndpointState>) => Promise<IIndexPattern[]>;
+  fetchIndexPatterns: (state: ImmutableObject<EndpointState>) => Promise<DataViewBase[]>;
 }) {
   const { getState, dispatch } = store;
 
   const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
-  let endpointResponse;
+  let endpointResponse: MetadataListResponse | undefined;
 
   try {
     const decodedQuery: Query = searchBarQuery(getState());
 
-    endpointResponse = await coreStart.http.post<HostResultList>(HOST_METADATA_LIST_ROUTE, {
-      body: JSON.stringify({
-        paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-        filters: { kql: decodedQuery.query },
-      }),
+    endpointResponse = await coreStart.http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+      query: {
+        page: pageIndex,
+        pageSize,
+        kuery: decodedQuery.query as string,
+      },
     });
-    endpointResponse.request_page_index = Number(pageIndex);
 
     dispatch({
       type: 'serverReturnedEndpointList',
@@ -447,7 +423,7 @@ async function endpointDetailsListMiddleware({
       });
     }
 
-    dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.hosts, store });
+    dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
   } catch (error) {
     dispatch({
       type: 'serverFailedToReturnEndpointList',
@@ -474,7 +450,7 @@ async function endpointDetailsListMiddleware({
   }
 
   // No endpoints, so we should check to see if there are policies for onboarding
-  if (endpointResponse && endpointResponse.hosts.length === 0) {
+  if (endpointResponse && endpointResponse.data.length === 0) {
     const http = coreStart.http;
 
     // The original query to the list could have had an invalid param (ex. invalid page_size),
@@ -577,9 +553,10 @@ async function loadEndpointDetails({
 
   // call the policy response api
   try {
-    const policyResponse = await coreStart.http.get(BASE_POLICY_RESPONSE_ROUTE, {
-      query: { agentId: selectedEndpoint },
-    });
+    const policyResponse = await coreStart.http.get<GetHostPolicyResponse>(
+      BASE_POLICY_RESPONSE_ROUTE,
+      { query: { agentId: selectedEndpoint } }
+    );
     dispatch({
       type: 'serverReturnedEndpointPolicyResponse',
       payload: policyResponse,
@@ -610,18 +587,19 @@ async function endpointDetailsMiddleware({
   if (listData(getState()).length === 0) {
     const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
     try {
-      const response = await coreStart.http.post(HOST_METADATA_LIST_ROUTE, {
-        body: JSON.stringify({
-          paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-        }),
+      const response = await coreStart.http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+        query: {
+          page: pageIndex,
+          pageSize,
+        },
       });
-      response.request_page_index = Number(pageIndex);
+
       dispatch({
         type: 'serverReturnedEndpointList',
         payload: response,
       });
 
-      dispatchIngestPolicies({ http: coreStart.http, hosts: response.hosts, store });
+      dispatchIngestPolicies({ http: coreStart.http, hosts: response.data, store });
     } catch (error) {
       dispatch({
         type: 'serverFailedToReturnEndpointList',
@@ -639,134 +617,6 @@ async function endpointDetailsMiddleware({
   await loadEndpointDetails({ store, coreStart, selectedEndpoint });
 }
 
-async function endpointDetailsActivityLogChangedMiddleware({
-  store,
-  coreStart,
-}: {
-  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
-  coreStart: CoreStart;
-}) {
-  const { getState, dispatch } = store;
-  dispatch({
-    type: 'endpointDetailsActivityLogChanged',
-    // ts error to be fixed when AsyncResourceState is refactored (#830)
-    // @ts-expect-error
-    payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
-  });
-
-  try {
-    const { page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
-    const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
-      agent_id: selectedAgent(getState()),
-    });
-    const activityLog = await coreStart.http.get<ActivityLog>(route, {
-      query: { page, page_size: pageSize, start_date: startDate, end_date: endDate },
-    });
-    dispatch({
-      type: 'endpointDetailsActivityLogChanged',
-      payload: createLoadedResourceState<ActivityLog>(activityLog),
-    });
-  } catch (error) {
-    dispatch({
-      type: 'endpointDetailsActivityLogChanged',
-      payload: createFailedResourceState<ActivityLog>(error.body ?? error),
-    });
-  }
-}
-
-async function endpointDetailsActivityLogPagingMiddleware({
-  store,
-  coreStart,
-}: {
-  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
-  coreStart: CoreStart;
-}) {
-  const { getState, dispatch } = store;
-  try {
-    const { disabled, page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
-    // don't page when paging is disabled or when date ranges are invalid
-    if (disabled) {
-      return;
-    }
-    if (getIsInvalidDateRange({ startDate, endDate })) {
-      dispatch({
-        type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
-        payload: {
-          isInvalidDateRange: true,
-        },
-      });
-      return;
-    }
-
-    dispatch({
-      type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
-      payload: {
-        isInvalidDateRange: false,
-      },
-    });
-    dispatch({
-      type: 'endpointDetailsActivityLogChanged',
-      // ts error to be fixed when AsyncResourceState is refactored (#830)
-      // @ts-expect-error
-      payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
-    });
-    const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
-      agent_id: selectedAgent(getState()),
-    });
-    const activityLog = await coreStart.http.get<ActivityLog>(route, {
-      query: {
-        page,
-        page_size: pageSize,
-        start_date: startDate,
-        end_date: endDate,
-      },
-    });
-
-    const lastLoadedLogData = getLastLoadedActivityLogData(getState());
-    if (lastLoadedLogData !== undefined) {
-      const updatedLogDataItems = (
-        [...new Set([...lastLoadedLogData.data, ...activityLog.data])] as ActivityLog['data']
-      ).sort((a, b) =>
-        new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
-      );
-
-      const updatedLogData = {
-        page: activityLog.page,
-        pageSize: activityLog.pageSize,
-        startDate: activityLog.startDate,
-        endDate: activityLog.endDate,
-        data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
-      };
-      dispatch({
-        type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadedResourceState<ActivityLog>(updatedLogData),
-      });
-      if (!activityLog.data.length) {
-        dispatch({
-          type: 'endpointDetailsActivityLogUpdatePaging',
-          payload: {
-            disabled: true,
-            page: activityLog.page > 1 ? activityLog.page - 1 : 1,
-            pageSize: activityLog.pageSize,
-            startDate: activityLog.startDate,
-            endDate: activityLog.endDate,
-          },
-        });
-      }
-    } else {
-      dispatch({
-        type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadedResourceState<ActivityLog>(activityLog),
-      });
-    }
-  } catch (error) {
-    dispatch({
-      type: 'endpointDetailsActivityLogChanged',
-      payload: createFailedResourceState<ActivityLog>(error.body ?? error),
-    });
-  }
-}
-
 export async function handleLoadMetadataTransformStats(http: HttpStart, store: EndpointPageStore) {
   const { getState, dispatch } = store;
 
@@ -779,13 +629,13 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 
   dispatch({
     type: 'metadataTransformStatsChanged',
-    // ts error to be fixed when AsyncResourceState is refactored (#830)
-    // @ts-expect-error
-    payload: createLoadingResourceState<TransformStats[]>(getMetadataTransformStats(state)),
+    payload: createLoadingResourceState(asStaleResourceState(getMetadataTransformStats(state))),
   });
 
   try {
-    const transformStatsResponse: TransformStatsResponse = await http.get(TRANSFORM_STATS_URL);
+    const transformStatsResponse: TransformStatsResponse = await http.get(
+      METADATA_TRANSFORMS_STATUS_ROUTE
+    );
 
     dispatch({
       type: 'metadataTransformStatsChanged',

@@ -7,8 +7,8 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { Datatable } from 'src/plugins/expressions/public';
-import { Action, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { Action, createAction, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
 import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 
@@ -38,6 +38,10 @@ export function createValueClickAction(
     type: ACTION_VALUE_CLICK,
     id: ACTION_VALUE_CLICK,
     shouldAutoExecute: async () => true,
+    isCompatible: async (context: ValueClickContext) => {
+      const filters = await createFiltersFromValueClickAction(context.data);
+      return filters.length > 0;
+    },
     execute: async (context: ValueClickActionContext) => {
       try {
         const filters: Filter[] = await createFiltersFromValueClickAction(context.data);

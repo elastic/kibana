@@ -5,54 +5,70 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import type { ConfigType } from '../../../../config';
-import { filterDuplicateSignals } from '../../signals/filter_duplicate_signals';
-import { SearchAfterAndBulkCreateParams, SimpleHit, WrapHits } from '../../signals/types';
+import type { SignalSource, SimpleHit } from '../../signals/types';
+import type { CompleteRule, RuleParams } from '../../rule_schema';
 import { generateId } from '../../signals/utils';
 import { buildBulkBody } from './utils/build_bulk_body';
+import type { BuildReasonMessage } from '../../signals/reason_formatters';
+import type {
+  BaseFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/detection_engine/schemas/alerts';
 
 export const wrapHitsFactory =
   ({
-    logger,
+    completeRule,
     ignoreFields,
     mergeStrategy,
-    ruleSO,
     spaceId,
+    indicesToQuery,
+    alertTimestampOverride,
   }: {
-    logger: Logger;
-    ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
-    mergeStrategy: ConfigType['alertMergeStrategy'];
+    completeRule: CompleteRule<RuleParams>;
     ignoreFields: ConfigType['alertIgnoreFields'];
+    mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;
-  }): WrapHits =>
-  (events, buildReasonMessage) => {
-    try {
-      const wrappedDocs = events.map((event) => {
-        return {
-          _index: '',
-          _id: generateId(
-            event._index,
-            event._id,
-            String(event._version),
-            ruleSO.attributes.params.ruleId ?? ''
-          ),
-          _source: buildBulkBody(
+    indicesToQuery: string[];
+    alertTimestampOverride: Date | undefined;
+  }) =>
+  (
+    events: Array<estypes.SearchHit<SignalSource>>,
+    buildReasonMessage: BuildReasonMessage
+  ): Array<WrappedFieldsLatest<BaseFieldsLatest>> => {
+    const wrappedDocs = events.map((event): WrappedFieldsLatest<BaseFieldsLatest> => {
+      const id = generateId(
+        event._index,
+        event._id,
+        String(event._version),
+        `${spaceId}:${completeRule.alertId}`
+      );
+      return {
+        _id: id,
+        _index: '',
+        _source: {
+          ...buildBulkBody(
             spaceId,
-            ruleSO,
+            completeRule,
             event as SimpleHit,
             mergeStrategy,
             ignoreFields,
             true,
-            buildReasonMessage
+            buildReasonMessage,
+            indicesToQuery,
+            alertTimestampOverride
           ),
-        };
-      });
-
-      return filterDuplicateSignals(ruleSO.id, wrappedDocs, true);
-    } catch (error) {
-      logger.error(error);
-      return [];
-    }
+          [ALERT_UUID]: id,
+        },
+      };
+    });
+    return wrappedDocs.filter(
+      (doc) =>
+        !doc._source['kibana.alert.ancestors'].some(
+          (ancestor) => ancestor.rule === completeRule.alertId
+        )
+    );
   };

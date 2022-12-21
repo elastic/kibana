@@ -5,40 +5,46 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
-import { SearchHit } from '@elastic/elasticsearch/api/types';
-import { Logger } from '@kbn/logging';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { Logger } from '@kbn/logging';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { SavedObject } from '../../../../../../../src/core/server';
-import {
+import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+
+import type { RuleExecutorOptions, RuleType } from '@kbn/alerting-plugin/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
-} from '../../../../../alerting/common';
-import { AlertType } from '../../../../../alerting/server';
-import { ListClient } from '../../../../../lists/server';
-import { TechnicalRuleFieldMap } from '../../../../../rule_registry/common/assets/field_maps/technical_rule_field_map';
-import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
-import {
-  AlertTypeWithExecutor,
+  RuleTypeState,
+  WithoutReservedActionGroups,
+} from '@kbn/alerting-plugin/common';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type {
   PersistenceServices,
   IRuleDataClient,
-} from '../../../../../rule_registry/server';
-import { BaseHit } from '../../../../common/detection_engine/types';
-import { ConfigType } from '../../../config';
-import { SetupPlugins } from '../../../plugin';
-import { IRuleDataPluginService } from '../rule_execution_log/types';
-import { RuleParams } from '../schemas/rule_schemas';
-import { BuildRuleMessage } from '../signals/rule_messages';
-import { AlertAttributes, BulkCreate, WrapHits, WrapSequences } from '../signals/types';
-import { AlertsFieldMap, RulesFieldMap } from './field_maps';
-import { ExperimentalFeatures } from '../../../../common/experimental_features';
+  IRuleDataReader,
+} from '@kbn/rule-registry-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
-export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
+import type { Filter } from '@kbn/es-query';
+import type { ConfigType } from '../../../config';
+import type { SetupPlugins } from '../../../plugin';
+import type { CompleteRule, RuleParams } from '../rule_schema';
+import type {
+  BulkCreate,
+  SearchAfterAndBulkCreateReturnType,
+  WrapHits,
+  WrapSequences,
+} from '../signals/types';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import type { ITelemetryEventsSender } from '../../telemetry/sender';
+import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '../rule_monitoring';
+
+export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
+  enrichmentTimes: string[];
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
@@ -50,87 +56,90 @@ export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   warningMessages: string[];
 }
 
-type SimpleAlertType<
-  TState extends AlertTypeState,
-  TParams extends AlertTypeParams = {},
-  TAlertInstanceContext extends AlertInstanceContext = {}
-> = AlertType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
-
 export interface RunOpts<TParams extends RuleParams> {
-  buildRuleMessage: BuildRuleMessage;
-  bulkCreate: BulkCreate;
-  exceptionItems: ExceptionListItemSchema[];
-  listClient: ListClient;
-  rule: SavedObject<AlertAttributes<TParams>>;
-  searchAfterSize: number;
+  completeRule: CompleteRule<TParams>;
   tuple: {
     to: Moment;
     from: Moment;
     maxSignals: number;
   };
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  listClient: ListClient;
+  searchAfterSize: number;
+  bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
+  ruleDataReader: IRuleDataReader;
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+  aggregatableTimestampField: string;
+  unprocessedExceptions: ExceptionListItemSchema[];
+  exceptionFilter: Filter | undefined;
+  alertTimestampOverride: Date | undefined;
 }
 
-export type SecurityAlertTypeExecutor<
-  TState extends AlertTypeState,
-  TServices extends PersistenceServices<TAlertInstanceContext>,
+export type SecurityAlertType<
   TParams extends RuleParams,
-  TAlertInstanceContext extends AlertInstanceContext = {}
-> = (
-  options: Parameters<SimpleAlertType<TState, TParams, TAlertInstanceContext>['executor']>[0] & {
-    runOpts: RunOpts<TParams>;
-  } & { services: TServices }
-) => Promise<SecurityAlertTypeReturnValue<TState>>;
-
-type SecurityAlertTypeWithExecutor<
-  TState extends AlertTypeState,
-  TServices extends PersistenceServices<TAlertInstanceContext>,
-  TParams extends RuleParams,
-  TAlertInstanceContext extends AlertInstanceContext = {}
+  TState extends RuleTypeState,
+  TInstanceContext extends AlertInstanceContext = {},
+  TActionGroupIds extends string = never
 > = Omit<
-  AlertType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
+  RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
   'executor'
 > & {
-  executor: SecurityAlertTypeExecutor<TState, TServices, TParams, TAlertInstanceContext>;
+  executor: (
+    options: RuleExecutorOptions<
+      TParams,
+      TState,
+      AlertInstanceState,
+      TInstanceContext,
+      WithoutReservedActionGroups<TActionGroupIds, never>
+    > & {
+      services: PersistenceServices;
+      runOpts: RunOpts<TParams>;
+    }
+  ) => Promise<SearchAfterAndBulkCreateReturnType & { state: TState }>;
 };
 
-export type CreateSecurityRuleTypeFactory = (options: {
+export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
   logger: Logger;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  ignoreFields: ConfigType['alertIgnoreFields'];
+  config: ConfigType;
   ruleDataClient: IRuleDataClient;
-  ruleDataService: IRuleDataPluginService;
-}) => <
-  TParams extends RuleParams & { index?: string[] | undefined },
-  TAlertInstanceContext extends AlertInstanceContext,
-  TServices extends PersistenceServices<TAlertInstanceContext>,
-  TState extends AlertTypeState
+  ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
+  version: string;
+  isPreview?: boolean;
+}
+
+export type CreateSecurityRuleTypeWrapper = (
+  options: CreateSecurityRuleTypeWrapperProps
+) => <
+  TParams extends RuleParams,
+  TState extends RuleTypeState,
+  TInstanceContext extends AlertInstanceContext = {}
 >(
-  type: SecurityAlertTypeWithExecutor<TState, TServices, TParams, TAlertInstanceContext>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) => AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, any>;
-
-export type RACAlertSignal = TypeOfFieldMap<AlertsFieldMap> & TypeOfFieldMap<RulesFieldMap>;
-export type RACAlert = Exclude<
-  TypeOfFieldMap<TechnicalRuleFieldMap> & RACAlertSignal,
-  '@timestamp'
-> & {
-  '@timestamp': string;
-};
-
-export type RACSourceHit = SearchHit<RACAlert>;
-export type WrappedRACAlert = BaseHit<RACAlert>;
+  type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>
+) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
 
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
-  lists: SetupPlugins['lists'];
   logger: Logger;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  ignoreFields: ConfigType['alertIgnoreFields'];
   ml?: SetupPlugins['ml'];
-  ruleDataClient: IRuleDataClient;
+  eventsTelemetry?: ITelemetryEventsSender | undefined;
   version: string;
-  ruleDataService: IRuleDataPluginService;
+}
+
+export interface CreateQueryRuleAdditionalOptions {
+  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  licensing: LicensingPluginSetup;
+}
+
+export interface CreateQueryRuleOptions
+  extends CreateRuleOptions,
+    CreateQueryRuleAdditionalOptions {
+  id: typeof QUERY_RULE_TYPE_ID | typeof SAVED_QUERY_RULE_TYPE_ID;
+  name: 'Custom Query Rule' | 'Saved Query Rule';
 }

@@ -6,8 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES, ALL_SPACES_ID } from '../lib/spaces';
 import {
@@ -17,6 +16,8 @@ import {
   getRedactedNamespaces,
 } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
+import { FtrProviderContext } from '../ftr_provider_context';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
@@ -65,6 +66,7 @@ const INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES = Object.freeze({
   expectedNamespaces: [ALL_SPACES_ID], // expected namespaces of resulting object
   initialNamespaces: [ALL_SPACES_ID], // args passed to the bulkCreate method
 });
+const ALIAS_CONFLICT_OBJ = Object.freeze({ type: 'resolvetype', id: 'alias-match' }); // this fixture was created to test the resolve API, but we are reusing to test the alias conflict error
 const NEW_NAMESPACE_AGNOSTIC_OBJ = Object.freeze({ type: 'globaltype', id: 'new-globaltype-id' });
 export const TEST_CASES: Record<string, BulkCreateTestCase> = Object.freeze({
   ...CASES,
@@ -74,6 +76,7 @@ export const TEST_CASES: Record<string, BulkCreateTestCase> = Object.freeze({
   INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE,
   INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE,
   INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
+  ALIAS_CONFLICT_OBJ,
   NEW_NAMESPACE_AGNOSTIC_OBJ,
 });
 
@@ -83,7 +86,11 @@ const createRequest = ({ type, id, initialNamespaces }: BulkCreateTestCase) => (
   ...(initialNamespaces && { initialNamespaces }),
 });
 
-export function bulkCreateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function bulkCreateTestSuiteFactory(context: FtrProviderContext) {
+  const testDataLoader = getTestDataLoader(context);
+  const supertest = context.getService('supertestWithoutAuth');
+  const log = context.getService('log');
+
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody =
     (
@@ -103,13 +110,41 @@ export function bulkCreateTestSuiteFactory(esArchiver: any, supertest: SuperTest
         for (let i = 0; i < savedObjects.length; i++) {
           const object = savedObjects[i];
           const testCase = testCaseArray[i];
-          if (testCase.failure === 409 && testCase.fail409Param === 'unresolvableConflict') {
+          if (testCase.failure === 409) {
             const { type, id } = testCase;
-            const error = SavedObjectsErrorHelpers.createConflictError(type, id);
-            const payload = { ...error.output.payload, metadata: { isNotOverwritable: true } };
             expect(object.type).to.eql(type);
             expect(object.id).to.eql(id);
-            expect(object.error).to.eql(payload);
+            log.info(
+              `object type: ${object.type}, id: ${object.id}, namespaces: ${object.namespaces}`
+            );
+            let expectedMetadata;
+            if (testCase.fail409Param === 'unresolvableConflict') {
+              expectedMetadata = { isNotOverwritable: true };
+            } else if (testCase.fail409Param === 'aliasConflictDefaultSpace') {
+              expectedMetadata = { spacesWithConflictingAliases: ['default'] };
+            } else if (testCase.fail409Param === 'aliasConflictSpace1') {
+              expectedMetadata = { spacesWithConflictingAliases: ['space_1'] };
+            } else if (testCase.fail409Param === 'aliasConflictAllSpaces') {
+              expectedMetadata = {
+                spacesWithConflictingAliases: ['default', 'space_1', 'space_x'],
+              };
+            }
+            const expectedError = SavedObjectsErrorHelpers.createConflictError(type, id).output
+              .payload;
+            expect(object.error).be.an('object');
+            expect(object.error.statusCode).to.eql(expectedError.statusCode);
+            expect(object.error.error).to.eql(expectedError.error);
+            expect(object.error.message).to.eql(expectedError.message);
+            if (expectedMetadata) {
+              const actualMetadata = object.error.metadata ?? {};
+              if (actualMetadata.spacesWithConflictingAliases) {
+                actualMetadata.spacesWithConflictingAliases =
+                  actualMetadata.spacesWithConflictingAliases.sort();
+              }
+              expect(actualMetadata).to.eql(expectedMetadata);
+            } else {
+              expect(object.error.metadata).to.be(undefined);
+            }
             continue;
           }
           await expectResponses.permitted(object, testCase);
@@ -166,16 +201,54 @@ export function bulkCreateTestSuiteFactory(esArchiver: any, supertest: SuperTest
       const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
       describeFn(description, () => {
-        before(() =>
-          esArchiver.load(
-            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
-        after(() =>
-          esArchiver.unload(
-            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
+        before(async () => {
+          await testDataLoader.createFtrSpaces();
+          await testDataLoader.createFtrSavedObjectsData([
+            {
+              spaceName: null,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+            },
+            {
+              spaceName: SPACE_1.id,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
+            },
+            {
+              spaceName: SPACE_2.id,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
+            },
+          ]);
+          await testDataLoader.createLegacyUrlAliases([
+            {
+              spaceName: null,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+            },
+            {
+              spaceName: SPACE_1.id,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+            },
+            {
+              spaceName: 'space_x',
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+            },
+            {
+              spaceName: 'space_y',
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+              disabled: true,
+            },
+          ]);
+        });
+
+        after(async () => {
+          await testDataLoader.deleteAllSavedObjectsFromKibanaIndex();
+          await testDataLoader.deleteFtrSpaces();
+        });
 
         const attrs = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };
 

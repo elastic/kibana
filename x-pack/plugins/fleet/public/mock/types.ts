@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 
 import type { FleetSetupDeps, FleetStart, FleetStartDeps, FleetStartServices } from '../plugin';
 
@@ -15,4 +15,5 @@ export type MockedFleetSetupDeps = MockedKeys<FleetSetupDeps>;
 
 export type MockedFleetStartDeps = MockedKeys<FleetStartDeps>;
 
-export type MockedFleetStart = MockedKeys<FleetStart>;
+// Don't wrap the `authz` property which is a promise with `jest.Mocked`
+export type MockedFleetStart = MockedKeys<Omit<FleetStart, 'authz'>> & Pick<FleetStart, 'authz'>;

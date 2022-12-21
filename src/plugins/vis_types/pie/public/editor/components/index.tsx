@@ -7,19 +7,19 @@
  */
 
 import React, { lazy } from 'react';
-import { VisEditorOptionsProps } from '../../../../../visualizations/public';
-import { PieVisParams, PieTypeProps } from '../../types';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
+import { PieTypeProps } from '../../types';
 
 const PieOptionsLazy = lazy(() => import('./pie'));
 
 export const getPieOptions =
-  ({ showElasticChartsOptions, palettes, trackUiMetric }: PieTypeProps) =>
-  (props: VisEditorOptionsProps<PieVisParams>) =>
+  ({ showElasticChartsOptions, palettes }: PieTypeProps) =>
+  (props: VisEditorOptionsProps<PartitionVisParams>) =>
     (
       <PieOptionsLazy
         {...props}
         palettes={palettes}
         showElasticChartsOptions={showElasticChartsOptions}
-        trackUiMetric={trackUiMetric}
       />
     );

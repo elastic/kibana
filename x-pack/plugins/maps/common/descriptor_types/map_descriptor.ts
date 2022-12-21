@@ -11,6 +11,8 @@ import { ReactNode } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { Geometry } from 'geojson';
 import { DRAW_SHAPE, ES_SPATIAL_RELATIONS } from '../constants';
+import { CustomIcon } from './style_property_descriptor_types';
+import { INITIAL_LOCATION } from '../constants';
 
 export type MapExtent = {
   minLon: number;
@@ -33,19 +35,31 @@ export type Goto = {
   center?: MapCenterAndZoom;
 };
 
-export const GEOMETRY_FILTER_ACTION = 'GEOMETRY_FILTER_ACTION';
-
 export type TooltipFeatureAction = {
   label: string;
-  id: typeof GEOMETRY_FILTER_ACTION;
-  form: ReactNode;
+  id: string;
+  form?: ReactNode;
+  onClick?: () => void;
 };
 
 export type TooltipFeature = {
+  /*
+   * Feature id. Assigned by layer
+   */
   id?: number | string;
+
+  /*
+   * Id of layer that manages feature on the map
+   */
   layerId: string;
+
   geometry?: Geometry;
+
+  /*
+   * Feature properties. Retrieved from the map implemenation
+   */
   mbProperties: GeoJsonProperties;
+
   actions: TooltipFeatureAction[];
 };
 
@@ -67,4 +81,33 @@ export type DrawState = {
 export type EditState = {
   layerId: string;
   drawShape?: DRAW_SHAPE;
+};
+
+export type MapSettings = {
+  autoFitToDataBounds: boolean;
+  backgroundColor: string;
+  customIcons: CustomIcon[];
+  disableInteractive: boolean;
+  disableTooltipControl: boolean;
+  hideToolbarOverlay: boolean;
+  hideLayerControl: boolean;
+  hideViewControl: boolean;
+  initialLocation: INITIAL_LOCATION;
+  fixedLocation: {
+    lat: number;
+    lon: number;
+    zoom: number;
+  };
+  browserLocation: {
+    zoom: number;
+  };
+  keydownScrollZoom: boolean;
+  maxZoom: number;
+  minZoom: number;
+  showScaleControl: boolean;
+  showSpatialFilters: boolean;
+  showTimesliderToggleButton: boolean;
+  spatialFiltersAlpa: number;
+  spatialFiltersFillColor: string;
+  spatialFiltersLineColor: string;
 };

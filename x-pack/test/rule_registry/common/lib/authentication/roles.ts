@@ -109,6 +109,7 @@ export const observabilityOnlyAll: Role = {
       {
         feature: {
           apm: ['all'],
+          logs: ['all'],
         },
         spaces: ['space1'],
       },
@@ -126,6 +127,7 @@ export const observabilityOnlyAllSpace2: Role = {
       {
         feature: {
           apm: ['all'],
+          logs: ['all'],
         },
         spaces: ['space2'],
       },
@@ -143,6 +145,7 @@ export const observabilityOnlyRead: Role = {
       {
         feature: {
           apm: ['read'],
+          logs: ['read'],
         },
         spaces: ['space1'],
       },
@@ -160,6 +163,7 @@ export const observabilityOnlyReadSpace2: Role = {
       {
         feature: {
           apm: ['read'],
+          logs: ['read'],
         },
         spaces: ['space2'],
       },
@@ -214,8 +218,56 @@ export const observabilityOnlyAllSpacesAll: Role = {
       {
         feature: {
           apm: ['all'],
+          logs: ['all'],
         },
         spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const logsOnlyAllSpacesAll: Role = {
+  name: 'logs_only_all_spaces_all',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          logs: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+/**
+ * This role exists to test that the alert search strategy allows
+ * users who do not have access to security solutions the ability
+ * to see security solutions alerts. This is because security solutions
+ * does not properly leverage RBAC and we filter out the RBAC when
+ * searching for security solution alerts in the alert search strategy.
+ */
+export const observabilityOnlyAllSpacesAllWithReadESIndices: Role = {
+  name: 'obs_only_all_spaces_all_with_read_es_indices',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          apm: ['all'],
+          logs: ['all'],
+        },
+        spaces: ['default', 'space1'],
       },
     ],
   },
@@ -231,6 +283,7 @@ export const observabilityOnlyReadSpacesAll: Role = {
       {
         feature: {
           apm: ['read'],
+          logs: ['read'],
         },
         spaces: ['*'],
       },
@@ -246,6 +299,7 @@ export const roles = [
   observabilityOnlyAll,
   observabilityOnlyRead,
   observabilityOnlyReadSpacesAll,
+  observabilityOnlyAllSpacesAllWithReadESIndices,
 ];
 
 /**
@@ -416,7 +470,9 @@ export const allRoles = [
   securitySolutionOnlyAllSpacesAll,
   securitySolutionOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAll,
+  logsOnlyAllSpacesAll,
   observabilityOnlyReadSpacesAll,
+  observabilityOnlyAllSpacesAllWithReadESIndices,
   observabilityMinReadAlertsRead,
   observabilityMinReadAlertsReadSpacesAll,
   observabilityMinimalRead,

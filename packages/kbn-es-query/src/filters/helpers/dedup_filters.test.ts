@@ -6,38 +6,38 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternBase, IndexPatternFieldBase } from '../../es_query';
+import { DataViewBase, DataViewFieldBase } from '../../es_query';
 import { buildQueryFilter, buildRangeFilter, Filter, FilterStateStore } from '../build_filters';
 import { dedupFilters } from './dedup_filters';
 
 describe('filter manager utilities', () => {
-  let indexPattern: IndexPatternBase;
+  let indexPattern: DataViewBase;
 
   beforeEach(() => {
     indexPattern = {
       id: 'index',
-    } as IndexPatternBase;
+    } as DataViewBase;
   });
 
   describe('dedupFilters(existing, filters)', () => {
     test('should return only filters which are not in the existing', () => {
       const existing: Filter[] = [
         buildRangeFilter(
-          { name: 'bytes' } as IndexPatternFieldBase,
+          { name: 'bytes' } as DataViewFieldBase,
           { from: 0, to: 1024 },
           indexPattern,
           ''
         ),
-        buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
       ];
       const filters: Filter[] = [
         buildRangeFilter(
-          { name: 'bytes' } as IndexPatternFieldBase,
+          { name: 'bytes' } as DataViewFieldBase,
           { from: 1024, to: 2048 },
           indexPattern,
           ''
         ),
-        buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
       ];
       const results = dedupFilters(existing, filters);
 
@@ -48,28 +48,24 @@ describe('filter manager utilities', () => {
     test('should ignore the disabled attribute when comparing ', () => {
       const existing: Filter[] = [
         buildRangeFilter(
-          { name: 'bytes' } as IndexPatternFieldBase,
+          { name: 'bytes' } as DataViewFieldBase,
           { from: 0, to: 1024 },
           indexPattern,
           ''
         ),
         {
-          ...buildQueryFilter(
-            { match: { _term: { query: 'apache', type: 'phrase' } } },
-            'index1',
-            ''
-          ),
+          ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', ''),
           meta: { disabled: true, negate: false, alias: null },
         },
       ];
       const filters: Filter[] = [
         buildRangeFilter(
-          { name: 'bytes' } as IndexPatternFieldBase,
+          { name: 'bytes' } as DataViewFieldBase,
           { from: 1024, to: 2048 },
           indexPattern,
           ''
         ),
-        buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index1', ''),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', ''),
       ];
       const results = dedupFilters(existing, filters);
 
@@ -80,33 +76,25 @@ describe('filter manager utilities', () => {
     test('should ignore $state attribute', () => {
       const existing: Filter[] = [
         buildRangeFilter(
-          { name: 'bytes' } as IndexPatternFieldBase,
+          { name: 'bytes' } as DataViewFieldBase,
           { from: 0, to: 1024 },
           indexPattern,
           ''
         ),
         {
-          ...buildQueryFilter(
-            { match: { _term: { query: 'apache', type: 'phrase' } } },
-            'index',
-            ''
-          ),
+          ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
           $state: { store: FilterStateStore.APP_STATE },
         },
       ];
       const filters: Filter[] = [
         buildRangeFilter(
-          { name: 'bytes' } as IndexPatternFieldBase,
+          { name: 'bytes' } as DataViewFieldBase,
           { from: 1024, to: 2048 },
           indexPattern,
           ''
         ),
         {
-          ...buildQueryFilter(
-            { match: { _term: { query: 'apache', type: 'phrase' } } },
-            'index',
-            ''
-          ),
+          ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
           $state: { store: FilterStateStore.GLOBAL_STATE },
         },
       ];

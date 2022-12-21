@@ -24,12 +24,12 @@ export function ciscoLogsSpecProvider(context: TutorialContext): TutorialSchema 
   return {
     id: 'ciscoLogs',
     name: i18n.translate('home.tutorials.ciscoLogs.nameTitle', {
-      defaultMessage: 'Cisco logs',
+      defaultMessage: 'Cisco Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.ciscoLogs.shortDescription', {
-      defaultMessage: 'Collect Cisco network device logs over syslog or from a file.',
+      defaultMessage: 'Collect and parse logs from Cisco network devices with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.ciscoLogs.longDescription', {
       defaultMessage:
@@ -55,9 +55,10 @@ export function ciscoLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/cisco_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/cisco_logs/screenshot.webp',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
+    integrationBrowserCategories: ['network', 'security'],
   };
 }

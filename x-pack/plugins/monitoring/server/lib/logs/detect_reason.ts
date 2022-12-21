@@ -7,8 +7,9 @@
 
 import { LegacyRequest } from '../../types';
 import { createTimeFilter } from '../create_query';
+import { elasticsearchLogsFilter } from './logs_filter';
 
-interface Opts {
+export interface LogsIndexCheckOpts {
   start: number;
   end: number;
   clusterUuid?: string;
@@ -16,15 +17,14 @@ interface Opts {
   indexUuid?: string;
 }
 
-async function doesFilebeatIndexExist(
+async function doesLogsIndexExist(
   req: LegacyRequest,
-  filebeatIndexPattern: string,
-  { start, end, clusterUuid, nodeUuid, indexUuid }: Opts
+  logsIndexPattern: string,
+  { start, end, clusterUuid, nodeUuid, indexUuid }: LogsIndexCheckOpts
 ) {
   const metric = { timestampField: '@timestamp' };
   const filter = [createTimeFilter({ start, end, metric })];
 
-  const typeFilter = { term: { 'service.type': 'elasticsearch' } };
   const structuredLogsFilter = { exists: { field: 'elasticsearch.cluster' } };
   const clusterFilter = { term: { 'elasticsearch.cluster.uuid': clusterUuid } };
   const nodeFilter = { term: { 'elasticsearch.node.id': nodeUuid } };
@@ -41,7 +41,7 @@ async function doesFilebeatIndexExist(
   const typeExistsAtAnyTimeQuery = {
     query: {
       bool: {
-        filter: [typeFilter],
+        filter: [elasticsearchLogsFilter],
       },
     },
   };
@@ -49,7 +49,7 @@ async function doesFilebeatIndexExist(
   const typeExistsQuery = {
     query: {
       bool: {
-        filter: [...filter, typeFilter],
+        filter: [...filter, elasticsearchLogsFilter],
       },
     },
   };
@@ -57,7 +57,7 @@ async function doesFilebeatIndexExist(
   const usingStructuredLogsQuery = {
     query: {
       bool: {
-        filter: [...filter, typeFilter, structuredLogsFilter],
+        filter: [...filter, elasticsearchLogsFilter, structuredLogsFilter],
       },
     },
   };
@@ -65,7 +65,7 @@ async function doesFilebeatIndexExist(
   const clusterExistsQuery = {
     query: {
       bool: {
-        filter: [...filter, typeFilter, clusterFilter],
+        filter: [...filter, elasticsearchLogsFilter, clusterFilter],
       },
     },
   };
@@ -73,7 +73,7 @@ async function doesFilebeatIndexExist(
   const nodeExistsQuery = {
     query: {
       bool: {
-        filter: [...filter, typeFilter, clusterFilter, nodeFilter],
+        filter: [...filter, elasticsearchLogsFilter, clusterFilter, nodeFilter],
       },
     },
   };
@@ -81,7 +81,7 @@ async function doesFilebeatIndexExist(
   const indexExistsQuery = {
     query: {
       bool: {
-        filter: [...filter, typeFilter, clusterFilter, indexFilter],
+        filter: [...filter, elasticsearchLogsFilter, clusterFilter, indexFilter],
       },
     },
   };
@@ -91,28 +91,28 @@ async function doesFilebeatIndexExist(
   };
 
   const body = [
-    { index: filebeatIndexPattern },
+    { index: logsIndexPattern },
     { ...defaultParams },
-    { index: filebeatIndexPattern },
+    { index: logsIndexPattern },
     { ...defaultParams, ...indexPatternExistsQuery },
-    { index: filebeatIndexPattern },
+    { index: logsIndexPattern },
     { ...defaultParams, ...typeExistsAtAnyTimeQuery },
-    { index: filebeatIndexPattern },
+    { index: logsIndexPattern },
     { ...defaultParams, ...typeExistsQuery },
-    { index: filebeatIndexPattern },
+    { index: logsIndexPattern },
     { ...defaultParams, ...usingStructuredLogsQuery },
   ];
 
   if (clusterUuid) {
-    body.push(...[{ index: filebeatIndexPattern }, { ...defaultParams, ...clusterExistsQuery }]);
+    body.push(...[{ index: logsIndexPattern }, { ...defaultParams, ...clusterExistsQuery }]);
   }
 
   if (nodeUuid) {
-    body.push(...[{ index: filebeatIndexPattern }, { ...defaultParams, ...nodeExistsQuery }]);
+    body.push(...[{ index: logsIndexPattern }, { ...defaultParams, ...nodeExistsQuery }]);
   }
 
   if (indexUuid) {
-    body.push(...[{ index: filebeatIndexPattern }, { ...defaultParams, ...indexExistsQuery }]);
+    body.push(...[{ index: logsIndexPattern }, { ...defaultParams, ...indexExistsQuery }]);
   }
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
@@ -142,6 +142,10 @@ async function doesFilebeatIndexExist(
   };
 }
 
-export async function detectReason(req: LegacyRequest, filebeatIndexPattern: string, opts: Opts) {
-  return await doesFilebeatIndexExist(req, filebeatIndexPattern, opts);
+export async function detectReason(
+  req: LegacyRequest,
+  logsIndexPattern: string,
+  opts: LogsIndexCheckOpts
+) {
+  return await doesLogsIndexExist(req, logsIndexPattern, opts);
 }

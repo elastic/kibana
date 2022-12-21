@@ -7,9 +7,8 @@
 
 import React from 'react';
 
-import { LogStream, LogStreamProps } from '../../../../../infra/public';
-
-import { LOGS_SOURCE_ID } from '../../../../common/constants';
+import { LogStream, LogStreamProps } from '@kbn/infra-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 /*
  * EnterpriseSearchLogStream is a light wrapper on top of infra's embeddable LogStream component.
@@ -17,7 +16,7 @@ import { LOGS_SOURCE_ID } from '../../../../common/constants';
  * default for timestamps. All other props get passed as-is to the underlying LogStream.
  *
  * Documentation links for reference:
- * - https://github.com/elastic/kibana/blob/master/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx
+ * - https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx
  * - Run `yarn storybook infra` for live docs
  */
 
@@ -37,11 +36,8 @@ export const EntSearchLogStream: React.FC<Props> = ({
   if (!startTimestamp) startTimestamp = endTimestamp - hoursAgo * 60 * 60 * 1000;
 
   return (
-    <LogStream
-      sourceId={LOGS_SOURCE_ID}
-      startTimestamp={startTimestamp}
-      endTimestamp={endTimestamp}
-      {...props}
-    />
+    <EuiThemeProvider>
+      <LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} {...props} />
+    </EuiThemeProvider>
   );
 };

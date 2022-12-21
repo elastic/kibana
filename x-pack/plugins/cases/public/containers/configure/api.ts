@@ -6,34 +6,29 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
-import {
+import type {
   ActionConnector,
   ActionTypeConnector,
-  CASE_CONFIGURE_CONNECTORS_URL,
-  CASE_CONFIGURE_URL,
   CasesConfigurePatch,
   CasesConfigureRequest,
   CasesConfigureResponse,
   CasesConfigurationsResponse,
-  getCaseConfigurationDetailsUrl,
-} from '../../../common';
+} from '../../../common/api';
+import { getCaseConfigurationDetailsUrl } from '../../../common/api';
+import { CASE_CONFIGURE_CONNECTORS_URL, CASE_CONFIGURE_URL } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
-
-import { ApiProps } from '../types';
-import {
-  convertArrayToCamelCase,
-  convertToCamelCase,
-  decodeCaseConfigurationsResponse,
-  decodeCaseConfigureResponse,
-} from '../utils';
-import { CaseConfigure } from './types';
+import { convertToCamelCase, convertArrayToCamelCase } from '../../api/utils';
+import type { ApiProps } from '../types';
+import { decodeCaseConfigurationsResponse, decodeCaseConfigureResponse } from '../utils';
+import type { CaseConfigure } from './types';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
-  const response = await KibanaServices.get().http.fetch(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`, {
-    method: 'GET',
-    signal,
-  });
+  const response = await KibanaServices.get().http.fetch<ActionConnector[]>(
+    `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
+    { method: 'GET', signal }
+  );
 
   return response;
 };
@@ -97,10 +92,10 @@ export const patchCaseConfigure = async (
 };
 
 export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionTypeConnector[]> => {
-  const response = await KibanaServices.get().http.fetch(getAllConnectorTypesUrl(), {
-    method: 'GET',
-    signal,
-  });
+  const response = await KibanaServices.get().http.fetch<ActionTypeConnector[]>(
+    getAllConnectorTypesUrl(),
+    { method: 'GET', signal, query: { feature_id: CasesConnectorFeatureId } }
+  );
 
   return convertArrayToCamelCase(response) as ActionTypeConnector[];
 };

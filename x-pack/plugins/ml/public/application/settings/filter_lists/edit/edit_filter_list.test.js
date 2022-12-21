@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-jest.mock('../../../components/navigation_menu', () => ({
-  NavigationMenu: () => <div id="mockNavigationMenu" />,
-}));
-
 jest.mock('../../../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
 }));
@@ -49,13 +45,14 @@ jest.mock('../../../services/ml_api_service', () => ({
   },
 }));
 
-jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (node) => {
     return node;
   },
+  reactToUiComponent: jest.fn(),
 }));
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { EditFilterList } from './edit_filter_list';

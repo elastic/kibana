@@ -13,33 +13,49 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { TimelineTabs } from '../../../../../common/types/timeline';
-import { BrowserFields } from '../../../../common/containers/source';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { getAlertDetailsUrl } from '../../../../common/components/link_to';
+import {
+  SecuritySolutionLinkAnchor,
+  useGetSecuritySolutionLinkProps,
+} from '../../../../common/components/links';
+import type { Ecs } from '../../../../../common/ecs';
+import type { TimelineTabs } from '../../../../../common/types/timeline';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
-import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
+import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { SecurityPageName } from '../../../../../common/constants';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
   browserFields: BrowserFields;
   detailsData: TimelineEventsDetailsItem[] | null;
+  detailsEcsData: Ecs | null;
   event: { eventId: string; indexName: string };
   isAlert: boolean;
   isDraggable?: boolean;
   loading: boolean;
   messageHeight?: number;
+  rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
-  timelineId: string;
+  scopeId: string;
+  handleOnEventClosed: HandleOnEventClosed;
+  isReadOnly?: boolean;
 }
 
 interface ExpandableEventTitleProps {
+  eventId: string;
   isAlert: boolean;
   loading: boolean;
   ruleName?: string;
+  timestamp?: string;
   handleOnEventClosed?: HandleOnEventClosed;
 }
 
@@ -60,22 +76,50 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
-  ({ isAlert, loading, handleOnEventClosed, ruleName }) => (
-    <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
-      <EuiFlexItem grow={false}>
-        {!loading && (
-          <EuiTitle size="s">
-            <h4>{isAlert && !isEmpty(ruleName) ? ruleName : i18n.EVENT_DETAILS}</h4>
-          </EuiTitle>
-        )}
-      </EuiFlexItem>
-      {handleOnEventClosed && (
+  ({ eventId, isAlert, loading, handleOnEventClosed, ruleName, timestamp }) => {
+    const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
+    const { onClick } = useGetSecuritySolutionLinkProps()({
+      deepLinkId: SecurityPageName.alerts,
+      path: eventId && isAlert ? getAlertDetailsUrl(eventId) : '',
+    });
+    return (
+      <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={handleOnEventClosed} />
+          {!loading && (
+            <>
+              <EuiTitle size="s">
+                <h4>{isAlert && !isEmpty(ruleName) ? ruleName : i18n.EVENT_DETAILS}</h4>
+              </EuiTitle>
+              {timestamp && (
+                <>
+                  <EuiSpacer size="s" />
+                  <PreferenceFormattedDate value={new Date(timestamp)} />
+                </>
+              )}
+              {isAlert && eventId && isAlertDetailsPageEnabled && (
+                <>
+                  <EuiSpacer size="l" />
+                  <SecuritySolutionLinkAnchor
+                    data-test-subj="open-alert-details-page"
+                    deepLinkId={SecurityPageName.alerts}
+                    onClick={onClick}
+                  >
+                    {i18n.OPEN_ALERT_DETAILS_PAGE}
+                  </SecuritySolutionLinkAnchor>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+            </>
+          )}
         </EuiFlexItem>
-      )}
-    </StyledEuiFlexGroup>
-  )
+        {handleOnEventClosed && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={handleOnEventClosed} />
+          </EuiFlexItem>
+        )}
+      </StyledEuiFlexGroup>
+    );
+  }
 );
 
 ExpandableEventTitle.displayName = 'ExpandableEventTitle';
@@ -84,12 +128,16 @@ export const ExpandableEvent = React.memo<Props>(
   ({
     browserFields,
     event,
-    timelineId,
+    scopeId,
     timelineTabType,
     isAlert,
     isDraggable,
     loading,
     detailsData,
+    detailsEcsData,
+    rawEventData,
+    handleOnEventClosed,
+    isReadOnly,
   }) => {
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
@@ -105,11 +153,16 @@ export const ExpandableEvent = React.memo<Props>(
           <EventDetails
             browserFields={browserFields}
             data={detailsData ?? []}
-            id={event.eventId!}
+            detailsEcsData={detailsEcsData}
+            id={event.eventId}
             isAlert={isAlert}
+            indexName={event.indexName}
             isDraggable={isDraggable}
-            timelineId={timelineId}
+            rawEventData={rawEventData}
+            scopeId={scopeId}
             timelineTabType={timelineTabType}
+            handleOnEventClosed={handleOnEventClosed}
+            isReadOnly={isReadOnly}
           />
         </StyledEuiFlexItem>
       </StyledFlexGroup>

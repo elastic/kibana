@@ -5,96 +5,60 @@
  * 2.0.
  */
 
-import { find, map, uniq } from 'lodash/fp';
+import { filter, map, omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
-import { IRouter } from '../../../../../../src/core/server';
-import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { IRouter } from '@kbn/core/server';
+import { packSavedObjectType } from '../../../common/types';
+import { PLUGIN_ID } from '../../../common';
+import type { PackSavedObjectAttributes } from '../../common/types';
 
 export const findPackRoute = (router: IRouter) => {
   router.get(
     {
-      path: '/internal/osquery/pack',
+      path: '/api/osquery/packs',
       validate: {
-        query: schema.object({}, { unknowns: 'allow' }),
+        query: schema.object(
+          {
+            page: schema.maybe(schema.number()),
+            pageSize: schema.maybe(schema.number()),
+            sort: schema.maybe(schema.string()),
+            sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+          },
+          { unknowns: 'allow' }
+        ),
       },
+      options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
 
-      const soClientResponse = await savedObjectsClient.find<{
-        name: string;
-        description: string;
-        queries: Array<{ name: string; interval: string }>;
-      }>({
+      const soClientResponse = await savedObjectsClient.find<PackSavedObjectAttributes>({
         type: packSavedObjectType,
-        // @ts-expect-error update types
-        page: parseInt(request.query.pageIndex ?? 0, 10) + 1,
-        // @ts-expect-error update types
+        page: request.query.page ?? 1,
         perPage: request.query.pageSize ?? 20,
-        // @ts-expect-error update types
-        sortField: request.query.sortField ?? 'updated_at',
-        // @ts-expect-error update types
-        sortOrder: request.query.sortDirection ?? 'desc',
+        sortField: request.query.sort ?? 'updated_at',
+        sortOrder: request.query.sortOrder ?? 'desc',
       });
 
-      const packs = soClientResponse.saved_objects.map(({ attributes, references, ...rest }) => ({
-        ...rest,
-        ...attributes,
-        queries:
-          attributes.queries?.map((packQuery) => {
-            const queryReference = find(['name', packQuery.name], references);
+      const packSavedObjects = map(soClientResponse.saved_objects, (pack) => {
+        const policyIds = map(
+          filter(pack.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
+          'id'
+        );
 
-            if (queryReference) {
-              return {
-                ...packQuery,
-                id: queryReference?.id,
-              };
-            }
-
-            return packQuery;
-          }) ?? [],
-      }));
-
-      const savedQueriesIds = uniq<string>(
-        // @ts-expect-error update types
-        packs.reduce((acc, savedQuery) => [...acc, ...map('id', savedQuery.queries)], [])
-      );
-
-      const { saved_objects: savedQueries } = await savedObjectsClient.bulkGet(
-        savedQueriesIds.map((queryId) => ({
-          type: savedQuerySavedObjectType,
-          id: queryId,
-        }))
-      );
-
-      const packsWithSavedQueriesQueries = packs.map((pack) => ({
-        ...pack,
-        // @ts-expect-error update types
-        queries: pack.queries.reduce((acc, packQuery) => {
-          // @ts-expect-error update types
-          const savedQuerySO = find(['id', packQuery.id], savedQueries);
-
-          // @ts-expect-error update types
-          if (savedQuerySO?.attributes?.query) {
-            return [
-              ...acc,
-              {
-                ...packQuery,
-                // @ts-expect-error update types
-                query: find(['id', packQuery.id], savedQueries).attributes.query,
-              },
-            ];
-          }
-
-          return acc;
-        }, []),
-      }));
+        return {
+          ...pack,
+          policy_ids: policyIds,
+        };
+      });
 
       return response.ok({
         body: {
-          ...soClientResponse,
-          saved_objects: packsWithSavedQueriesQueries,
+          ...omit(soClientResponse, 'saved_objects'),
+          data: packSavedObjects,
         },
       });
     }

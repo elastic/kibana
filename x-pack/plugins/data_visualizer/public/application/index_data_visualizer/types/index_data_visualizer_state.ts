@@ -6,9 +6,9 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { Query } from '../../../../../../../src/plugins/data/common/query';
-import { SearchQueryLanguage } from './combined_query';
-
+import type { Query } from '@kbn/data-plugin/common/query';
+import type { RandomSamplerOption } from '../constants/random_sampler';
+import type { SearchQueryLanguage } from './combined_query';
 export interface ListingPageUrlState {
   pageSize: number;
   pageIndex: number;
@@ -27,4 +27,6 @@ export interface DataVisualizerIndexBasedAppState extends Omit<ListingPageUrlSta
   showAllFields?: boolean;
   showEmptyFields?: boolean;
   filters?: Filter[];
+  probability?: number | null;
+  rndSamplerPref?: RandomSamplerOption;
 }

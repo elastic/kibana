@@ -10,7 +10,7 @@ import Path from 'path';
 
 import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
-import { CiStatsMetric } from '@kbn/dev-utils';
+import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
 import { Bundle } from '../common';
 
@@ -79,7 +79,7 @@ export class BundleMetricsPlugin {
           id: bundle.id,
           value: entry.size,
           limit: bundle.pageLoadAssetSizeLimit,
-          limitConfigPath: `node_modules/@kbn/optimizer/limits.yml`,
+          limitConfigPath: `packages/kbn-optimizer/limits.yml`,
         },
         {
           group: `async chunks size`,

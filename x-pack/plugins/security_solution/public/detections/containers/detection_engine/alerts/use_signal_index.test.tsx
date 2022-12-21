@@ -6,14 +6,15 @@
  */
 import { renderHook, act } from '@testing-library/react-hooks';
 import { TestProvidersWithPrivileges } from '../../../../common/mock';
-import { useSignalIndex, ReturnSignalIndex } from './use_signal_index';
+import type { ReturnSignalIndex } from './use_signal_index';
+import { useSignalIndex } from './use_signal_index';
 import * as api from './api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 describe('useSignalIndex', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;

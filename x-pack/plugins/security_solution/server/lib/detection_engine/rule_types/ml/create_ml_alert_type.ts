@@ -6,25 +6,19 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { ML_RULE_TYPE_ID } from '../../../../../common/constants';
-import { machineLearningRuleParams, MachineLearningRuleParams } from '../../schemas/rule_schemas';
-import { mlExecutor } from '../../signals/executors/ml';
-import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { CreateRuleOptions } from '../types';
+import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 
-export const createMlAlertType = (createOptions: CreateRuleOptions) => {
-  const { lists, logger, mergeStrategy, ignoreFields, ml, ruleDataClient, ruleDataService } =
-    createOptions;
-  const createSecurityRuleType = createSecurityRuleTypeFactory({
-    lists,
-    logger,
-    mergeStrategy,
-    ignoreFields,
-    ruleDataClient,
-    ruleDataService,
-  });
-  return createSecurityRuleType<MachineLearningRuleParams, {}, PersistenceServices, {}>({
+import type { MachineLearningRuleParams } from '../../rule_schema';
+import { machineLearningRuleParams } from '../../rule_schema';
+import { mlExecutor } from '../../signals/executors/ml';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
+
+export const createMlAlertType = (
+  createOptions: CreateRuleOptions
+): SecurityAlertType<MachineLearningRuleParams, {}, {}, 'default'> => {
+  const { ml } = createOptions;
+  return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
     validate: {
@@ -53,35 +47,36 @@ export const createMlAlertType = (createOptions: CreateRuleOptions) => {
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {
-          buildRuleMessage,
           bulkCreate,
-          exceptionItems,
+          completeRule,
           listClient,
-          rule,
+          ruleExecutionLogger,
           tuple,
           wrapHits,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         state,
       } = execOptions;
 
       const result = await mlExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
-        listClient,
-        logger,
-        ml,
-        rule,
-        services,
+        completeRule,
         tuple,
+        ml,
+        listClient,
+        services,
+        ruleExecutionLogger,
+        bulkCreate,
         wrapHits,
+        exceptionFilter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },
-  });
+  };
 };

@@ -8,6 +8,7 @@
 export * from './create_endpoint_list_item_schema';
 export * from './create_exception_list_item_schema';
 export * from './create_exception_list_schema';
+export * from './create_rule_exception_item_schema';
 export * from './create_list_item_schema';
 export * from './create_list_schema';
 export * from './delete_endpoint_list_item_schema';
@@ -22,7 +23,10 @@ export * from './find_exception_list_schema';
 export * from './find_exception_list_item_schema';
 export * from './find_list_item_schema';
 export * from './find_list_schema';
+export * from './get_exception_filter_schema';
 export * from './import_list_item_query_schema';
+export * from './import_exception_list_schema';
+export * from './import_exception_item_schema';
 export * from './import_list_item_schema';
 export * from './patch_list_item_schema';
 export * from './patch_list_schema';
@@ -38,3 +42,6 @@ export * from './update_exception_list_item_validation';
 export * from './update_exception_list_schema';
 export * from './update_list_item_schema';
 export * from './update_list_schema';
+
+// Internal routes
+export * from './internal/create_exception_list_schema';

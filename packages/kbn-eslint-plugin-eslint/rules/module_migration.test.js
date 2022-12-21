@@ -11,9 +11,10 @@ const rule = require('./module_migration');
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({
-  parser: require.resolve('babel-eslint'),
+  parser: require.resolve('@babel/eslint-parser'),
   parserOptions: {
     ecmaVersion: 2018,
+    requireConfigFile: false,
   },
 });
 
@@ -32,6 +33,21 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
           {
             from: 'foo',
             to: 'bar',
+          },
+        ],
+      ],
+    },
+
+    {
+      code: dedent`
+        import "foo/bar"
+      `,
+      options: [
+        [
+          {
+            from: 'foo',
+            to: 'bar',
+            exact: true,
           },
         ],
       ],
@@ -69,6 +85,109 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
           message: 'Re-exported module "foo" should be "bar"',
         },
       ],
+      output: dedent`
+        import 'bar'
+        require('bar/foo2')
+        export { foo } from 'bar'
+        export const foo2 = 'bar'
+      `,
+    },
+    /**
+     * Given this tree:
+     * x-pack/
+     *  - common/
+     *    - foo.ts <-- the target import
+     *    - other/
+     *      - folder/
+     *        - bar.ts <-- the linted fle
+     * import "x-pack/common/foo" should be
+     * import ../../foo
+     */
+    {
+      code: dedent`
+        import "x-pack/common/foo"
+      `,
+      filename: 'x-pack/common/other/folder/bar.ts',
+      options: [
+        [
+          {
+            from: 'x-pack',
+            to: 'foo',
+            toRelative: 'x-pack',
+          },
+        ],
+      ],
+      errors: [
+        {
+          line: 1,
+          message: 'Imported module "x-pack/common/foo" should be "../../foo"',
+        },
+      ],
+      output: dedent`
+        import '../../foo'
+      `,
+    },
+    /**
+     * Given this tree:
+     * x-pack/
+     *  - common/
+     *    - foo.ts <-- the target import
+     *  - another/
+     *     - posible
+     *        - example <-- the linted file
+     *
+     * import "x-pack/common/foo" should be
+     * import ../../common/foo
+     */
+    {
+      code: dedent`
+        import "x-pack/common/foo"
+      `,
+      filename: 'x-pack/another/possible/example.ts',
+      options: [
+        [
+          {
+            from: 'x-pack',
+            to: 'foo',
+            toRelative: 'x-pack',
+          },
+        ],
+      ],
+      errors: [
+        {
+          line: 1,
+          message: 'Imported module "x-pack/common/foo" should be "../../common/foo"',
+        },
+      ],
+      output: dedent`
+        import '../../common/foo'
+      `,
+    },
+
+    {
+      code: dedent`
+        import 'foo'
+        import 'foo/bar'
+      `,
+      options: [
+        [
+          {
+            from: 'foo',
+            to: 'bar',
+            exact: true,
+          },
+        ],
+      ],
+      errors: [
+        {
+          line: 1,
+          message: 'Imported module "foo" should be "bar"',
+        },
+      ],
+      output: dedent`
+        import 'bar'
+        import 'foo/bar'
+      `,
     },
   ],
 });

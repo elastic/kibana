@@ -6,7 +6,8 @@
  */
 
 import { getBannerInfoMock } from './plugin.test.mocks';
-import { coreMock } from '../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { BannerConfiguration } from '../common/types';
 import { BannersPlugin } from './plugin';
 
@@ -25,11 +26,13 @@ describe('BannersPlugin', () => {
   let pluginInitContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
+  let screenshotModeStart: ReturnType<typeof screenshotModePluginMock.createStartContract>;
 
   beforeEach(() => {
     pluginInitContext = coreMock.createPluginInitializerContext();
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
+    screenshotModeStart = screenshotModePluginMock.createStartContract();
 
     getBannerInfoMock.mockResolvedValue({
       allowed: false,
@@ -37,11 +40,15 @@ describe('BannersPlugin', () => {
     });
   });
 
-  const startPlugin = async () => {
+  const startPlugin = async ({
+    screenshotPluginPresent = true,
+  }: { screenshotPluginPresent?: boolean } = {}) => {
     pluginInitContext = coreMock.createPluginInitializerContext();
     plugin = new BannersPlugin(pluginInitContext);
     plugin.setup(coreSetup);
-    plugin.start(coreStart);
+    plugin.start(coreStart, {
+      screenshotMode: screenshotPluginPresent ? screenshotModeStart : undefined,
+    });
     // await for the `getBannerInfo` promise to resolve
     await nextTick();
   };
@@ -79,6 +86,34 @@ describe('BannersPlugin', () => {
 
       expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(0);
     });
+
+    it('does not register the banner in screenshot mode', async () => {
+      getBannerInfoMock.mockResolvedValue({
+        allowed: true,
+        banner: createBannerConfig({
+          placement: 'top',
+        }),
+      });
+
+      screenshotModeStart.isScreenshotMode.mockReturnValue(true);
+
+      await startPlugin();
+
+      expect(coreStart.chrome.setHeaderBanner).not.toHaveBeenCalled();
+    });
+
+    it('registers the banner if screenshotMode plugin not present', async () => {
+      getBannerInfoMock.mockResolvedValue({
+        allowed: true,
+        banner: createBannerConfig({
+          placement: 'top',
+        }),
+      });
+
+      await startPlugin({ screenshotPluginPresent: false });
+
+      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalled();
+    });
   });
 
   describe('when banner is not allowed', () => {
@@ -105,7 +140,15 @@ describe('BannersPlugin', () => {
 
       await startPlugin();
 
-      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(0);
+      expect(coreStart.chrome.setHeaderBanner).not.toHaveBeenCalled();
+    });
+
+    it('does not register the banner in screenshot mode', async () => {
+      screenshotModeStart.isScreenshotMode.mockReturnValue(true);
+
+      await startPlugin();
+
+      expect(coreStart.chrome.setHeaderBanner).not.toHaveBeenCalled();
     });
   });
 });

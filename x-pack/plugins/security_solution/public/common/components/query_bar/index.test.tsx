@@ -7,12 +7,14 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { act, waitFor } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
-import { QueryBar, QueryBarComponentProps } from '.';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
+import type { QueryBarComponentProps } from '.';
+import { QueryBar } from '.';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
@@ -30,9 +32,9 @@ describe('QueryBar ', () => {
   // The data plugin's `SearchBar` is lazy loaded, so we need to ensure it is
   // available before we mount our component with Enzyme.
   const getWrapper = async (Component: ReturnType<typeof Proxy>) => {
-    const { getByTestId } = render(Component);
-    await waitFor(() => getByTestId('queryInput')); // check for presence of query input
-    return mount(Component);
+    const wrapper = mount(Component);
+    await waitFor(() => wrapper.find('[data-test-subj="queryInput"]').exists()); // check for presence of query input
+    return wrapper;
   };
   let abortSpy: jest.SpyInstance;
   beforeAll(() => {
@@ -84,6 +86,7 @@ describe('QueryBar ', () => {
       dataTestSubj: undefined,
       dateRangeFrom: 'now/d',
       dateRangeTo: 'now/d',
+      displayStyle: undefined,
       filters: [],
       indexPatterns: [
         {
@@ -199,40 +202,43 @@ describe('QueryBar ', () => {
       showAutoRefreshOnly: false,
       showDatePicker: false,
       showFilterBar: true,
-      showQueryBar: true,
       showQueryInput: true,
       showSaveQuery: true,
+      showSubmitButton: false,
     });
   });
 
-  describe('#onQuerySubmit', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/132659
+  describe.skip('#onQuerySubmit', () => {
     test(' is the only reference that changed when filterQuery props get updated', async () => {
-      const wrapper = await getWrapper(
-        <Proxy
-          dateRangeFrom={DEFAULT_FROM}
-          dateRangeTo={DEFAULT_TO}
-          hideSavedQuery={false}
-          indexPattern={mockIndexPattern}
-          isRefreshPaused={true}
-          filterQuery={{ query: 'here: query', language: 'kuery' }}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filters={[]}
-          onChangedQuery={mockOnChangeQuery}
-          onSubmitQuery={mockOnSubmitQuery}
-          onSavedQuery={mockOnSavedQuery}
-        />
-      );
-      const searchBarProps = wrapper.find(SearchBar).props();
-      const onChangedQueryRef = searchBarProps.onQueryChange;
-      const onSubmitQueryRef = searchBarProps.onQuerySubmit;
-      const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
+      await act(async () => {
+        const wrapper = await getWrapper(
+          <Proxy
+            dateRangeFrom={DEFAULT_FROM}
+            dateRangeTo={DEFAULT_TO}
+            hideSavedQuery={false}
+            indexPattern={mockIndexPattern}
+            isRefreshPaused={true}
+            filterQuery={{ query: 'here: query', language: 'kuery' }}
+            filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+            filters={[]}
+            onChangedQuery={mockOnChangeQuery}
+            onSubmitQuery={mockOnSubmitQuery}
+            onSavedQuery={mockOnSavedQuery}
+          />
+        );
+        const searchBarProps = wrapper.find(SearchBar).props();
+        const onChangedQueryRef = searchBarProps.onQueryChange;
+        const onSubmitQueryRef = searchBarProps.onQuerySubmit;
+        const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
 
-      wrapper.setProps({ filterQuery: { expression: 'new: one', kind: 'kuery' } });
-      wrapper.update();
+        wrapper.setProps({ filterQuery: { expression: 'new: one', kind: 'kuery' } });
+        wrapper.update();
 
-      expect(onSubmitQueryRef).not.toEqual(wrapper.find(SearchBar).props().onQuerySubmit);
-      expect(onChangedQueryRef).not.toEqual(wrapper.find(SearchBar).props().onQueryChange);
-      expect(onSavedQueryRef).toEqual(wrapper.find(SearchBar).props().onSavedQueryUpdated);
+        expect(onSubmitQueryRef).not.toEqual(wrapper.find(SearchBar).props().onQuerySubmit);
+        expect(onChangedQueryRef).not.toEqual(wrapper.find(SearchBar).props().onQueryChange);
+        expect(onSavedQueryRef).toEqual(wrapper.find(SearchBar).props().onSavedQueryUpdated);
+      });
     });
 
     test(' is only reference that changed when timelineId props get updated', async () => {
@@ -267,70 +273,74 @@ describe('QueryBar ', () => {
 
   describe('#onSavedQueryUpdated', () => {
     test('is only reference that changed when dataProviders props get updated', async () => {
-      const wrapper = await getWrapper(
-        <Proxy
-          dateRangeFrom={DEFAULT_FROM}
-          dateRangeTo={DEFAULT_TO}
-          hideSavedQuery={false}
-          indexPattern={mockIndexPattern}
-          isRefreshPaused={true}
-          filterQuery={{ query: 'here: query', language: 'kuery' }}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filters={[]}
-          onChangedQuery={mockOnChangeQuery}
-          onSubmitQuery={mockOnSubmitQuery}
-          onSavedQuery={mockOnSavedQuery}
-        />
-      );
-      const searchBarProps = wrapper.find(SearchBar).props();
-      const onChangedQueryRef = searchBarProps.onQueryChange;
-      const onSubmitQueryRef = searchBarProps.onQuerySubmit;
-      const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
-      wrapper.setProps({ onSavedQuery: jest.fn() });
-      wrapper.update();
+      await act(async () => {
+        const wrapper = await getWrapper(
+          <Proxy
+            dateRangeFrom={DEFAULT_FROM}
+            dateRangeTo={DEFAULT_TO}
+            hideSavedQuery={false}
+            indexPattern={mockIndexPattern}
+            isRefreshPaused={true}
+            filterQuery={{ query: 'here: query', language: 'kuery' }}
+            filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+            filters={[]}
+            onChangedQuery={mockOnChangeQuery}
+            onSubmitQuery={mockOnSubmitQuery}
+            onSavedQuery={mockOnSavedQuery}
+          />
+        );
+        const searchBarProps = wrapper.find(SearchBar).props();
+        const onChangedQueryRef = searchBarProps.onQueryChange;
+        const onSubmitQueryRef = searchBarProps.onQuerySubmit;
+        const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
+        wrapper.setProps({ onSavedQuery: jest.fn() });
+        wrapper.update();
 
-      expect(onSavedQueryRef).not.toEqual(wrapper.find(SearchBar).props().onSavedQueryUpdated);
-      expect(onChangedQueryRef).toEqual(wrapper.find(SearchBar).props().onQueryChange);
-      expect(onSubmitQueryRef).toEqual(wrapper.find(SearchBar).props().onQuerySubmit);
+        expect(onSavedQueryRef).not.toEqual(wrapper.find(SearchBar).props().onSavedQueryUpdated);
+        expect(onChangedQueryRef).toEqual(wrapper.find(SearchBar).props().onQueryChange);
+        expect(onSubmitQueryRef).toEqual(wrapper.find(SearchBar).props().onQuerySubmit);
+      });
     });
   });
 
   describe('SavedQueryManagementComponent state', () => {
-    test('popover should hidden when "Save current query" button was clicked', async () => {
-      const wrapper = await getWrapper(
-        <Proxy
-          dateRangeFrom={DEFAULT_FROM}
-          dateRangeTo={DEFAULT_TO}
-          hideSavedQuery={false}
-          indexPattern={mockIndexPattern}
-          isRefreshPaused={true}
-          filterQuery={{
-            query: 'here: query',
-            language: 'kuery',
-          }}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filters={[]}
-          onChangedQuery={mockOnChangeQuery}
-          onSubmitQuery={mockOnSubmitQuery}
-          onSavedQuery={mockOnSavedQuery}
-        />
-      );
-      const isSavedQueryPopoverOpen = () =>
-        wrapper.find('EuiPopover[id="savedQueryPopover"]').prop('isOpen');
+    test('popover should remain open when "Save current query" button was clicked', async () => {
+      await act(async () => {
+        const wrapper = await getWrapper(
+          <Proxy
+            dateRangeFrom={DEFAULT_FROM}
+            dateRangeTo={DEFAULT_TO}
+            hideSavedQuery={false}
+            indexPattern={mockIndexPattern}
+            isRefreshPaused={true}
+            filterQuery={{
+              query: 'here: query',
+              language: 'kuery',
+            }}
+            filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+            filters={[]}
+            onChangedQuery={mockOnChangeQuery}
+            onSubmitQuery={mockOnSubmitQuery}
+            onSavedQuery={mockOnSavedQuery}
+          />
+        );
+        const isSavedQueryPopoverOpen = () =>
+          wrapper.find('EuiPopover[data-test-subj="queryBarMenuPopover"]').prop('isOpen');
 
-      expect(isSavedQueryPopoverOpen()).toBeFalsy();
-
-      wrapper
-        .find('button[data-test-subj="saved-query-management-popover-button"]')
-        .simulate('click');
-
-      await waitFor(() => {
-        expect(isSavedQueryPopoverOpen()).toBeTruthy();
-      });
-      wrapper.find('button[data-test-subj="saved-query-management-save-button"]').simulate('click');
-
-      await waitFor(() => {
         expect(isSavedQueryPopoverOpen()).toBeFalsy();
+
+        wrapper.find('button[data-test-subj="showQueryBarMenu"]').simulate('click');
+
+        await waitFor(() => {
+          expect(isSavedQueryPopoverOpen()).toBeTruthy();
+        });
+        wrapper
+          .find('button[data-test-subj="saved-query-management-save-button"]')
+          .simulate('click');
+
+        await waitFor(() => {
+          expect(isSavedQueryPopoverOpen()).toBeTruthy();
+        });
       });
     });
   });

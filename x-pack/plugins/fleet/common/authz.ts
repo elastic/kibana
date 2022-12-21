@@ -1,0 +1,156 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+
+import { ENDPOINT_PRIVILEGES } from './constants';
+
+export interface FleetAuthz {
+  fleet: {
+    all: boolean;
+    setup: boolean;
+    readEnrollmentTokens: boolean;
+    readAgentPolicies: boolean;
+  };
+
+  integrations: {
+    readPackageInfo: boolean;
+    readInstalledPackages: boolean;
+    installPackages: boolean;
+    upgradePackages: boolean;
+    removePackages: boolean;
+    uploadPackages: boolean;
+
+    readPackageSettings: boolean;
+    writePackageSettings: boolean;
+
+    readIntegrationPolicies: boolean;
+    writeIntegrationPolicies: boolean;
+  };
+
+  packagePrivileges?: {
+    [packageName: string]: {
+      actions: {
+        [key: string]: {
+          executePackageAction: boolean;
+        };
+      };
+    };
+  };
+}
+
+interface CalculateParams {
+  fleet: {
+    all: boolean;
+    setup: boolean;
+  };
+
+  integrations: {
+    all: boolean;
+    read: boolean;
+  };
+
+  isSuperuser: boolean;
+}
+
+export const calculateAuthz = ({
+  fleet,
+  integrations,
+  isSuperuser,
+}: CalculateParams): FleetAuthz => ({
+  fleet: {
+    all: fleet.all && (integrations.all || integrations.read),
+
+    // These are currently used by Fleet Server setup
+    setup: fleet.all || fleet.setup,
+    readEnrollmentTokens: fleet.all || fleet.setup,
+    readAgentPolicies: fleet.all || fleet.setup,
+  },
+
+  integrations: {
+    readPackageInfo: fleet.all || fleet.setup || integrations.all || integrations.read,
+    readInstalledPackages: integrations.all || integrations.read,
+    installPackages: fleet.all && integrations.all,
+    upgradePackages: fleet.all && integrations.all,
+    removePackages: fleet.all && integrations.all,
+    uploadPackages: isSuperuser,
+
+    readPackageSettings: fleet.all && integrations.all,
+    writePackageSettings: fleet.all && integrations.all,
+
+    readIntegrationPolicies: fleet.all && (integrations.all || integrations.read),
+    writeIntegrationPolicies: fleet.all && integrations.all,
+  },
+});
+
+export function calculatePackagePrivilegesFromCapabilities(
+  capabilities: Capabilities | undefined
+): FleetAuthz['packagePrivileges'] {
+  if (!capabilities) {
+    return {};
+  }
+
+  const endpointActions = ENDPOINT_PRIVILEGES.reduce((acc, privilege) => {
+    return {
+      ...acc,
+      [privilege]: {
+        executePackageAction: capabilities.siem[privilege] || false,
+      },
+    };
+  }, {});
+
+  return {
+    endpoint: {
+      actions: endpointActions,
+    },
+  };
+}
+
+function getAuthorizationFromPrivileges(
+  kibanaPrivileges: Array<{
+    resource?: string;
+    privilege: string;
+    authorized: boolean;
+  }>,
+  searchPrivilege: string
+): boolean {
+  const privilege = kibanaPrivileges.find((p) =>
+    p.privilege.endsWith(`${DEFAULT_APP_CATEGORIES.security.id}-${searchPrivilege}`)
+  );
+  return privilege?.authorized || false;
+}
+
+export function calculatePackagePrivilegesFromKibanaPrivileges(
+  kibanaPrivileges:
+    | Array<{
+        resource?: string;
+        privilege: string;
+        authorized: boolean;
+      }>
+    | undefined
+): FleetAuthz['packagePrivileges'] {
+  if (!kibanaPrivileges || !kibanaPrivileges.length) {
+    return {};
+  }
+
+  const endpointActions = ENDPOINT_PRIVILEGES.reduce((acc, privilege: string) => {
+    const kibanaPrivilege = getAuthorizationFromPrivileges(kibanaPrivileges, privilege);
+    return {
+      ...acc,
+      [privilege]: {
+        executePackageAction: kibanaPrivilege,
+      },
+    };
+  }, {});
+
+  return {
+    endpoint: {
+      actions: endpointActions,
+    },
+  };
+}

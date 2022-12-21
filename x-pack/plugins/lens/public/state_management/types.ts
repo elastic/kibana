@@ -5,28 +5,46 @@
  * 2.0.
  */
 
-import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
-import { EmbeddableEditorState } from 'src/plugins/embeddable/public';
-import { Filter, Query, SavedQuery } from '../../../../../src/plugins/data/public';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
+import type { Filter, Query } from '@kbn/es-query';
+import { SavedQuery } from '@kbn/data-plugin/public';
 import { Document } from '../persistence';
 
-import { TableInspectorAdapter } from '../editor_frame_service/types';
+import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import { DateRange } from '../../common';
 import { LensAppServices } from '../app_plugin/types';
-import { DatasourceMap, VisualizationMap, SharingSavedObjectProps } from '../types';
+import {
+  DatasourceMap,
+  VisualizationMap,
+  SharingSavedObjectProps,
+  VisualizeEditorContext,
+  IndexPattern,
+  IndexPatternRef,
+} from '../types';
 export interface VisualizationState {
   activeId: string | null;
   state: unknown;
 }
 
-export type DatasourceStates = Record<string, { state: unknown; isLoading: boolean }>;
+export interface DataViewsState {
+  indexPatternRefs: IndexPatternRef[];
+  indexPatterns: Record<string, IndexPattern>;
+}
+
+export type DatasourceStates = Record<string, { isLoading: boolean; state: unknown }>;
 export interface PreviewState {
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;
+  activeData?: TableInspectorAdapter;
+  requestWarnings?: string[];
 }
 export interface EditorFrameState extends PreviewState {
   activeDatasourceId: string | null;
   stagedPreview?: PreviewState;
+  autoApplyDisabled?: boolean;
+  applyChangesCounter?: number;
+  changesApplied?: boolean;
   isFullscreenDatasource?: boolean;
 }
 export interface LensAppState extends EditorFrameState {
@@ -35,7 +53,6 @@ export interface LensAppState extends EditorFrameState {
   // Determines whether the lens editor shows the 'save and return' button, and the originating app breadcrumb.
   isLinkedToOriginatingApp?: boolean;
   isSaveable: boolean;
-  activeData?: TableInspectorAdapter;
 
   isLoading: boolean;
   query: Query;
@@ -43,7 +60,9 @@ export interface LensAppState extends EditorFrameState {
   savedQuery?: SavedQuery;
   searchSessionId: string;
   resolvedDateRange: DateRange;
-  sharingSavedObjectProps?: Omit<SharingSavedObjectProps, 'errorJSON'>;
+  sharingSavedObjectProps?: Omit<SharingSavedObjectProps, 'sourceId'>;
+  // Dataview/Indexpattern management has moved in here from datasource
+  dataViews: DataViewsState;
 }
 
 export type DispatchSetState = (state: Partial<LensAppState>) => {
@@ -59,6 +78,6 @@ export interface LensStoreDeps {
   lensServices: LensAppServices;
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
-  initialContext?: VisualizeFieldContext;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   embeddableEditorIncomingState?: EmbeddableEditorState;
 }

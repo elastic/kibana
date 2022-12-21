@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { LIST_ID, LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 import { getShardMock } from '../../schemas/common/get_shard.mock';
@@ -31,6 +30,7 @@ export const getFindListItemOptionsMock = (): FindListItemOptions => {
     listItemIndex: LIST_ITEM_INDEX,
     page: 1,
     perPage: 25,
+    runtimeMappings: undefined,
     searchAfter: undefined,
     sortField: undefined,
     sortOrder: undefined,

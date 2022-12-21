@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { OpenTimelineResult } from './types';
+import type { OpenTimelineResult } from './types';
 
 export const useEditTimelineActions = () => {
   const [actionItem, setActionTimeline] = useState<null | OpenTimelineResult>(null);

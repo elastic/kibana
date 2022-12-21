@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { map as mapAsync } from 'bluebird';
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
@@ -21,6 +20,7 @@ export class SettingsPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly savedObjects = this.ctx.getPageObject('savedObjects');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   async clickNavigation() {
     await this.find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
@@ -42,12 +42,25 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickKibanaIndexPatterns() {
-    this.log.debug('clickKibanaIndexPatterns link');
+    this.log.debug('clickKibanaDataViews link');
     const currentUrl = await this.browser.getCurrentUrl();
-    if (!currentUrl.endsWith('indexPatterns')) {
-      await this.testSubjects.click('indexPatterns');
+    if (!currentUrl.endsWith('dataViews')) {
+      await this.testSubjects.click('dataViews');
     }
 
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  async clickSnapshotRestore() {
+    await this.testSubjects.click('snapshot_restore');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitFor('snapshot restore header to be visible', async () => {
+      return (await this.testSubjects.getVisibleText('appTitle')) === 'Snapshot and Restore';
+    });
+  }
+
+  async clickIndexManagement() {
+    await this.testSubjects.click('index_management');
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -140,7 +153,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getIndexPatternField() {
-    return this.testSubjects.find('createIndexPatternNameInput');
+    return this.testSubjects.find('createIndexPatternTitleInput');
   }
 
   async getTimeFieldNameField() {
@@ -160,7 +173,30 @@ export class SettingsPageObject extends FtrService {
     return await this.find.displayedByCssSelector('option[value="' + selection + '"]');
   }
 
+  async getNameField() {
+    return this.testSubjects.find('createIndexPatternNameInput');
+  }
+
+  async setNameField(dataViewName: string) {
+    const field = await this.getNameField();
+    await field.clearValue();
+    await field.type(dataViewName);
+  }
+
   async getSaveIndexPatternButton() {
+    return await this.testSubjects.find('saveIndexPatternButton');
+  }
+
+  async getSaveDataViewButtonActive() {
+    await this.retry.try(async () => {
+      expect(
+        (
+          await this.find.allByCssSelector(
+            '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
+          )
+        ).length
+      ).to.be(1);
+    });
     return await this.testSubjects.find('saveIndexPatternButton');
   }
 
@@ -171,6 +207,10 @@ export class SettingsPageObject extends FtrService {
   async clickDefaultIndexButton() {
     await this.testSubjects.click('setDefaultIndexPatternButton');
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  async clickEditIndexButton() {
+    await this.testSubjects.click('editIndexPatternButton');
   }
 
   async clickDeletePattern() {
@@ -231,44 +271,102 @@ export class SettingsPageObject extends FtrService {
     });
   }
 
+  async getRelationshipsTabCount() {
+    return await this.retry.try(async () => {
+      const text = await this.testSubjects.getVisibleText('tab-relationships');
+      return text.split(' ')[1].replace(/\((.*)\)/, '$1');
+    });
+  }
+
   async getFieldNames() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldName');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async getFieldTypes() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldType');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
-    });
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
   }
 
   async getScriptedFieldLangs() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > scriptedFieldLang');
-    return await mapAsync(fieldNameCells, async (cell) => {
-      return (await cell.getVisibleText()).trim();
+    return await Promise.all(
+      fieldNameCells.map(async (cell) => {
+        return (await cell.getVisibleText()).trim();
+      })
+    );
+  }
+
+  async clearFieldTypeFilter(type: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
+      await this.find.byCssSelector(
+        '.euiPopover-isOpen[data-test-subj="indexedFieldTypeFilterDropdown-popover"]'
+      );
     });
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    });
+    await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
   async setFieldTypeFilter(type: string) {
-    await this.find.clickByCssSelector(
-      'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[value="' + type + '"]'
-    );
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
+      await this.find.byCssSelector(
+        '.euiPopover-isOpen[data-test-subj="indexedFieldTypeFilterDropdown-popover"]'
+      );
+    });
+    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
+    await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}`);
+    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+  }
+
+  async clearScriptedFieldLanguageFilter(type: string) {
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('scriptedFieldLanguageFilterDropdown');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
+    });
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(
+        `scriptedFieldLanguageFilterDropdown-option-${type}-checked`
+      );
+    });
+    await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${type}-checked`);
+    await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${type}`);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
   async setScriptedFieldLanguageFilter(language: string) {
-    await this.find.clickByCssSelector(
-      'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[value="' +
-        language +
-        '"]'
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(
+        'scriptedFieldLanguageFilterDropdown'
+      );
+      return await this.find.byCssSelector('div.euiPopover__panel[data-popover-open]');
+    });
+    await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
+    await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${language}`);
+    await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${language}`);
+    await this.testSubjects.existOrFail(
+      `scriptedFieldLanguageFilterDropdown-option-${language}-checked`
     );
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
   async filterField(name: string) {
     const input = await this.testSubjects.find('indexPatternFieldFilter');
-    await input.clearValue();
+    await input.clearValueWithKeyboard();
     await input.type(name);
   }
 
@@ -309,7 +407,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickIndexPatternByName(name: string) {
-    const indexLink = await this.find.byXPath(`//a[descendant::*[text()='${name}']]`);
+    const indexLink = await this.find.byXPath(`//a[text()='${name}']`);
     await indexLink.click();
   }
 
@@ -326,9 +424,11 @@ export class SettingsPageObject extends FtrService {
 
   async getAllIndexPatternNames() {
     const indexPatterns = await this.getIndexPatternList();
-    return await mapAsync(indexPatterns, async (index) => {
-      return await index.getVisibleText();
-    });
+    return await Promise.all(
+      indexPatterns.map(async (index) => {
+        return await index.getVisibleText();
+      })
+    );
   }
 
   async isIndexPatternListEmpty() {
@@ -342,21 +442,25 @@ export class SettingsPageObject extends FtrService {
     }
   }
 
+  async addCustomDataViewId(value: string) {
+    await this.testSubjects.click('toggleAdvancedSetting');
+    const customDataViewIdInput = await (
+      await this.testSubjects.find('savedObjectIdField')
+    ).findByTagName('input');
+    await customDataViewIdInput.type(value);
+  }
+
   async createIndexPattern(
     indexPatternName: string,
     // null to bypass default value
     timefield: string | null = '@timestamp',
-    isStandardIndexPattern = true
+    isStandardIndexPattern = true,
+    customDataViewId?: string,
+    dataViewName?: string
   ) {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
       await this.clickKibanaIndexPatterns();
-      const exists = await this.hasIndexPattern(indexPatternName);
-
-      if (exists) {
-        await this.clickIndexPatternByName(indexPatternName);
-        return;
-      }
 
       await this.header.waitUntilLoadingHasFinished();
       const flyOut = await this.testSubjects.exists('createAnyway');
@@ -377,45 +481,89 @@ export class SettingsPageObject extends FtrService {
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
+      if (customDataViewId) {
+        await this.addCustomDataViewId(customDataViewId);
+      }
+      if (dataViewName) {
+        await this.setNameField(dataViewName);
+      }
       await (await this.getSaveIndexPatternButton()).click();
     });
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();
       this.log.info('currentUrl', currentUrl);
-      if (!currentUrl.match(/indexPatterns\/.+\?/)) {
-        throw new Error('Index pattern not created');
+      if (!currentUrl.match(/dataViews\/.+\?/)) {
+        throw new Error('Data view not created');
       } else {
-        this.log.debug('Index pattern created: ' + currentUrl);
+        this.log.debug('Data view created: ' + currentUrl);
       }
     });
 
     if (!isStandardIndexPattern) {
       const badges = await this.find.allByCssSelector('.euiBadge__text');
-      const text = await badges[1].getVisibleText();
-      expect(text).to.equal('Rollup');
+      const rollupBadge = badges.filter(async (badge) => {
+        return (await badge.getVisibleText()) === 'Rollup';
+      });
+      expect(rollupBadge.length).to.equal(1);
     }
 
+    return await this.getIndexPatternIdFromUrl();
+  }
+
+  async editIndexPattern(
+    indexPatternName: string,
+    // null to bypass default value
+    timefield: string | null = '@timestamp',
+    dataViewName?: string,
+    errorCheck?: boolean
+  ) {
+    if (!indexPatternName) {
+      throw new Error('No Data View name provided for edit');
+    }
+
+    this.clickEditIndexButton();
+    await this.header.waitUntilLoadingHasFinished();
+
+    await this.retry.try(async () => {
+      await this.setIndexPatternField(indexPatternName);
+    });
+    if (dataViewName) {
+      await this.setNameField(dataViewName);
+    }
+    if (timefield) {
+      await this.selectTimeFieldOption(timefield);
+    }
+    await (await this.getSaveIndexPatternButton()).click();
+
+    if (errorCheck) {
+      await this.retry.try(async () => {
+        this.log.debug('getAlertText');
+        await this.testSubjects.getVisibleText('confirmModalTitleText');
+      });
+      await this.retry.try(async () => {
+        this.log.debug('acceptConfirmation');
+        await this.testSubjects.click('confirmModalConfirmButton');
+      });
+    }
+
+    await this.header.waitUntilLoadingHasFinished();
     return await this.getIndexPatternIdFromUrl();
   }
 
   async clickAddNewIndexPatternButton() {
     await this.common.scrollKibanaBodyTop();
 
-    // if flyout is open
-    const flyoutView = await this.testSubjects.exists('createIndexPatternButtonFlyout');
-    if (flyoutView) {
-      await this.testSubjects.click('createIndexPatternButtonFlyout');
+    // if showing no data view prompt
+    const noDataView = await this.testSubjects.exists('createDataViewButton');
+    if (noDataView) {
+      await this.testSubjects.click('createDataViewButton');
       return;
     }
 
     const tableView = await this.testSubjects.exists('createIndexPatternButton');
     if (tableView) {
       await this.testSubjects.click('createIndexPatternButton');
-    }
-    const flyoutView2 = await this.testSubjects.exists('createIndexPatternButtonFlyout');
-    if (flyoutView2) {
-      await this.testSubjects.click('createIndexPatternButtonFlyout');
     }
   }
 
@@ -436,7 +584,8 @@ export class SettingsPageObject extends FtrService {
   async setIndexPatternField(indexPatternName = 'logstash-*') {
     this.log.debug(`setIndexPatternField(${indexPatternName})`);
     const field = await this.getIndexPatternField();
-    await field.clearValue();
+    await field.clearValueWithKeyboard();
+
     if (
       indexPatternName.charAt(0) === '*' &&
       indexPatternName.charAt(indexPatternName.length - 1) === '*'
@@ -503,6 +652,11 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.click('tab-sourceFilters');
   }
 
+  async clickRelationshipsTab() {
+    this.log.debug('click Relationships tab');
+    await this.testSubjects.click('tab-relationships');
+  }
+
   async editScriptedField(name: string) {
     await this.filterField(name);
     await this.find.clickByCssSelector('.euiTableRowCell--hasActions button:first-child');
@@ -512,7 +666,7 @@ export class SettingsPageObject extends FtrService {
     name: string,
     language: string,
     type: string,
-    format: Record<string, any>,
+    format: Record<string, any> | null,
     popularity: string,
     script: string
   ) {
@@ -552,9 +706,44 @@ export class SettingsPageObject extends FtrService {
     if (script) {
       await this.setFieldScript(script);
     }
+
     if (doSaveField) {
       await this.clickSaveField();
     }
+  }
+
+  async addCompositeRuntimeField(
+    name: string,
+    script: string,
+    doSaveField = true,
+    subfieldCount = 0
+  ) {
+    await this.clickAddField();
+    await this.setFieldName(name);
+    await this.setFieldTypeComposite();
+    await this.setCompositeScript(script);
+    if (subfieldCount > 0) {
+      await this.testSubjects.find(`typeField_${subfieldCount - 1}`);
+    }
+    if (doSaveField) {
+      await this.clickSaveField();
+    }
+  }
+
+  async addFieldFilter(name: string) {
+    await this.testSubjects.click('tab-sourceFilters');
+    await this.find.setValue('.euiFieldText', name);
+    await this.find.clickByButtonText('Add');
+    const table = await this.find.byClassName('euiTable');
+    await this.retry.waitFor('field filter to be added', async () => {
+      const tableCells = await table.findAllByCssSelector('td');
+      const fieldNames = await Promise.all(
+        tableCells.map(async (cell) => {
+          return (await cell.getVisibleText()).trim();
+        })
+      );
+      return fieldNames.includes(name);
+    });
   }
 
   public async confirmSave() {
@@ -599,27 +788,32 @@ export class SettingsPageObject extends FtrService {
   async setFieldType(type: string) {
     this.log.debug('set type = ' + type);
     await this.testSubjects.setValue('typeField', type);
+    await this.browser.pressKeys(this.browser.keys.ENTER);
+  }
+
+  async setFieldTypeComposite() {
+    this.log.debug('set type = Composite');
+    await this.testSubjects.setValue('typeField', 'Composite');
+    await this.browser.pressKeys(this.browser.keys.RETURN);
   }
 
   async setFieldScript(script: string) {
     this.log.debug('set script = ' + script);
-    const valueRow = await this.toggleRow('valueRow');
-    const getMonacoTextArea = async () => (await valueRow.findAllByCssSelector('textarea'))[0];
-    this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
-    const monacoTextArea = await getMonacoTextArea();
-    await monacoTextArea.focus();
-    this.browser.pressKeys(script);
+    await this.toggleRow('valueRow');
+    await this.monacoEditor.waitCodeEditorReady('valueRow');
+    await this.monacoEditor.setCodeEditorValue(script);
   }
 
-  async changeFieldScript(script: string) {
-    this.log.debug('set script = ' + script);
-    const valueRow = await this.testSubjects.find('valueRow');
-    const getMonacoTextArea = async () => (await valueRow.findAllByCssSelector('textarea'))[0];
-    this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
-    const monacoTextArea = await getMonacoTextArea();
-    await monacoTextArea.focus();
-    this.browser.pressKeys(this.browser.keys.DELETE.repeat(30));
-    this.browser.pressKeys(script);
+  async setFieldScriptWithoutToggle(script: string) {
+    this.log.debug('set script without toggle = ' + script);
+    await this.monacoEditor.waitCodeEditorReady('valueRow');
+    await this.monacoEditor.setCodeEditorValue(script);
+  }
+
+  async setCompositeScript(script: string) {
+    this.log.debug('set composite script = ' + script);
+    await this.monacoEditor.waitCodeEditorReady('scriptFieldRow');
+    await this.monacoEditor.setCodeEditorValue(script);
   }
 
   async clickAddScriptedField() {
@@ -725,14 +919,7 @@ export class SettingsPageObject extends FtrService {
 
   async setScriptedFieldScript(script: string) {
     this.log.debug('set scripted field script = ' + script);
-    const aceEditorCssSelector = '[data-test-subj="editorFieldScript"] .ace_editor';
-    const editor = await this.find.byCssSelector(aceEditorCssSelector);
-    await editor.click();
-    const existingText = await editor.getVisibleText();
-    for (let i = 0; i < existingText.length; i++) {
-      await this.browser.pressKeys(this.browser.keys.BACK_SPACE);
-    }
-    await this.browser.pressKeys(...script.split(''));
+    await this.monacoEditor.setCodeEditorValue(script);
   }
 
   async openScriptedFieldHelp(activeTab: string) {
@@ -757,7 +944,7 @@ export class SettingsPageObject extends FtrService {
     await this.flyout.ensureClosed('scriptedFieldsHelpFlyout');
   }
 
-  async executeScriptedField(script: string, additionalField: string) {
+  async executeScriptedField(script: string, additionalField?: string) {
     this.log.debug('execute Scripted Fields help');
     await this.closeScriptedFieldHelp(); // ensure script help is closed so script input is not blocked
     await this.setScriptedFieldScript(script);
@@ -768,7 +955,7 @@ export class SettingsPageObject extends FtrService {
       await this.testSubjects.click('runScriptButton');
       await this.testSubjects.waitForDeleted('.euiLoadingSpinner');
     }
-    let scriptResults;
+    let scriptResults: string = '';
     await this.retry.try(async () => {
       scriptResults = await this.testSubjects.getVisibleText('scriptedFieldPreview');
     });

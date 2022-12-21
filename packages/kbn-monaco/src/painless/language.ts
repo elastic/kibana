@@ -5,22 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { Observable, of } from 'rxjs';
 import { monaco } from '../monaco_imports';
-
-import { WorkerProxyService, EditorStateService } from './lib';
 import { ID } from './constants';
-import { PainlessContext, PainlessAutocompleteField } from './types';
-import { PainlessWorker } from './worker';
-import { PainlessCompletionAdapter } from './completion_adapter';
-import { DiagnosticsAdapter, SyntaxErrors } from './diagnostics_adapter';
 
-const workerProxyService = new WorkerProxyService();
+import type { LangValidation, SyntaxErrors } from '../types';
+import type { PainlessContext, PainlessAutocompleteField } from './types';
+import type { PainlessWorker } from './worker';
+import { EditorStateService } from './lib';
+import { PainlessCompletionAdapter } from './completion_adapter';
+import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
+import { WorkerProxyService } from '../common/worker_proxy';
+
+const workerProxyService = new WorkerProxyService<PainlessWorker>();
 const editorStateService = new EditorStateService();
 
-export type WorkerAccessor = (...uris: monaco.Uri[]) => Promise<PainlessWorker>;
-
-const worker: WorkerAccessor = (...uris: monaco.Uri[]): Promise<PainlessWorker> => {
+const worker = (...uris: monaco.Uri[]): Promise<PainlessWorker> => {
   return workerProxyService.getWorker(uris);
 };
 
@@ -37,11 +37,15 @@ let diagnosticsAdapter: DiagnosticsAdapter;
 
 // Returns syntax errors for all models by model id
 export const getSyntaxErrors = (): SyntaxErrors => {
-  return diagnosticsAdapter.getSyntaxErrors();
+  return diagnosticsAdapter?.getSyntaxErrors() ?? {};
 };
 
-monaco.languages.onLanguage(ID, async () => {
-  workerProxyService.setup();
+export const validation$: () => Observable<LangValidation> = () =>
+  diagnosticsAdapter?.validation$ ||
+  of<LangValidation>({ isValid: true, isValidating: false, errors: [] });
 
-  diagnosticsAdapter = new DiagnosticsAdapter(worker);
+monaco.languages.onLanguage(ID, async () => {
+  workerProxyService.setup(ID);
+
+  diagnosticsAdapter = new DiagnosticsAdapter(ID, worker);
 });

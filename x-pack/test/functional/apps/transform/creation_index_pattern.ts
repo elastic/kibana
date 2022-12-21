@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -14,12 +14,13 @@ import {
   isPivotTransformTestData,
   LatestTransformTestData,
   PivotTransformTestData,
-} from './index';
+} from '.';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
+  const PageObjects = getPageObjects(['discover']);
 
   describe('creation_index_pattern', function () {
     before(async () => {
@@ -32,8 +33,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
+    const DEFAULT_NUM_FAILURE_RETRIES = '5';
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
       {
         type: 'pivot',
@@ -91,6 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         discoverAdjustSuperDatePicker: true,
+        numFailureRetries: '7',
         expected: {
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category": {'],
           pivotAdvancedEditorValue: {
@@ -181,7 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
               legend: 'top 20 of 46 categories',
               colorStats: [
                 { color: '#000000', percentage: 60 },
-                { color: '#54B399', percentage: 35 },
+                { color: '#54B399', percentage: 37 },
               ],
             },
             {
@@ -190,7 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
               legend: 'top 20 of 3321 categories',
               colorStats: [
                 { color: '#000000', percentage: 25 },
-                { color: '#54B399', percentage: 67 },
+                { color: '#54B399', percentage: 75 },
               ],
             },
             {
@@ -207,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'customer_id',
               legend: 'top 20 of 46 categories',
               colorStats: [
-                { color: '#54B399', percentage: 35 },
+                { color: '#54B399', percentage: 37 },
                 { color: '#000000', percentage: 60 },
               ],
             },
@@ -216,8 +220,8 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'customer_last_name',
               legend: 'top 20 of 183 categories',
               colorStats: [
-                { color: '#000000', percentage: 25 },
-                { color: '#54B399', percentage: 70 },
+                { color: '#000000', percentage: 23 },
+                { color: '#54B399', percentage: 77 },
               ],
             },
             {
@@ -249,6 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ],
           discoverQueryHits: '7,270',
+          numFailureRetries: '7',
         },
       } as PivotTransformTestData,
       {
@@ -287,6 +292,7 @@ export default function ({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         discoverAdjustSuperDatePicker: false,
+        numFailureRetries: '-1',
         expected: {
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
           pivotAdvancedEditorValue: {
@@ -334,6 +340,67 @@ export default function ({ getService }: FtrProviderContext) {
             rows: 5,
           },
           discoverQueryHits: '10',
+          numFailureRetries: '-1',
+        },
+      } as PivotTransformTestData,
+      {
+        type: 'pivot',
+        suiteTitle: 'batch transform with terms group and terms agg',
+        source: 'ft_ecommerce',
+        groupByEntries: [
+          {
+            identifier: 'terms(customer_gender)',
+            label: 'customer_gender',
+          } as GroupByEntry,
+        ],
+        aggregationEntries: [
+          {
+            identifier: 'terms(geoip.city_name)',
+            label: 'geoip.city_name.terms',
+          },
+        ],
+        transformId: `ec_3_${Date.now()}`,
+        transformDescription:
+          'ecommerce batch transform with group by terms(customer_gender) and aggregation terms(geoip.city_name)',
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        discoverAdjustSuperDatePicker: false,
+        numFailureRetries: '0',
+        expected: {
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "customer_gender": {'],
+          pivotAdvancedEditorValue: {
+            group_by: {
+              customer_gender: {
+                terms: {
+                  field: 'customer_gender',
+                },
+              },
+            },
+            aggregations: {
+              'geoip.city_name': {
+                terms: {
+                  field: 'geoip.city_name',
+                  size: 3,
+                },
+              },
+            },
+          },
+          transformPreview: {
+            column: 0,
+            values: ['FEMALE', 'MALE'],
+          },
+          row: {
+            status: TRANSFORM_STATE.STOPPED,
+            mode: 'batch',
+            progress: '100',
+          },
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          discoverQueryHits: '2',
+          numFailureRetries: '0',
         },
       } as PivotTransformTestData,
       {
@@ -350,14 +417,16 @@ export default function ({ getService }: FtrProviderContext) {
           identifier: 'order_date',
           label: 'order_date',
         },
-        transformId: `ec_3_${Date.now()}`,
+        transformId: `ec_4_${Date.now()}`,
 
         transformDescription:
           'ecommerce batch transform with the latest function config, sort by order_data, country code as unique key',
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        destinationDataViewTimeField: 'order_date',
         discoverAdjustSuperDatePicker: true,
+        numFailureRetries: '101',
         expected: {
           latestPreview: {
             column: 0,
@@ -383,6 +452,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           },
           discoverQueryHits: '10',
+          numFailureRetries: 'error',
         },
       } as LatestTransformTestData,
     ];
@@ -528,16 +598,53 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
-          await transform.testExecution.logTestStep('displays the create index pattern switch');
-          await transform.wizard.assertCreateIndexPatternSwitchExists();
-          await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
+          await transform.testExecution.logTestStep('displays the create data view switch');
+          await transform.wizard.assertCreateDataViewSwitchExists();
+          await transform.wizard.assertCreateDataViewSwitchCheckState(true);
+
+          if (testData.destinationDataViewTimeField) {
+            await transform.testExecution.logTestStep('sets the data view time field');
+            await transform.wizard.assertDataViewTimeFieldInputExists();
+            await transform.wizard.setDataViewTimeField(testData.destinationDataViewTimeField);
+          }
 
           await transform.testExecution.logTestStep('displays the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();
           await transform.wizard.assertContinuousModeSwitchCheckState(false);
 
+          await transform.testExecution.logTestStep(
+            'should display the advanced settings and show pre-filled configuration'
+          );
+          await transform.wizard.openTransformAdvancedSettingsAccordion();
+          if (
+            testData.numFailureRetries !== undefined &&
+            testData.expected.numFailureRetries !== undefined
+          ) {
+            await transform.wizard.assertNumFailureRetriesValue('');
+            await transform.wizard.setTransformNumFailureRetriesValue(
+              testData.numFailureRetries.toString(),
+              testData.expected.numFailureRetries
+            );
+            // If num failure input is expected to give an error, sets it back to a valid
+            // so that we can continue creating the transform
+            if (testData.expected.numFailureRetries === 'error') {
+              await transform.wizard.setTransformNumFailureRetriesValue(
+                DEFAULT_NUM_FAILURE_RETRIES,
+                DEFAULT_NUM_FAILURE_RETRIES
+              );
+            }
+          }
+
           await transform.testExecution.logTestStep('loads the create step');
           await transform.wizard.advanceToCreateStep();
+
+          await transform.testExecution.logTestStep('displays the summary details');
+          await transform.wizard.openTransformAdvancedSettingsSummaryAccordion();
+          await transform.wizard.assertTransformNumFailureRetriesSummaryValue(
+            testData.expected.numFailureRetries === 'error'
+              ? DEFAULT_NUM_FAILURE_RETRIES
+              : testData.expected.numFailureRetries
+          );
 
           await transform.testExecution.logTestStep('displays the create and start button');
           await transform.wizard.assertCreateAndStartButtonExists();
@@ -558,6 +665,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('starts the transform and finishes processing');
           await transform.wizard.startTransform();
+          await transform.wizard.assertErrorToastsNotExist();
           await transform.wizard.waitForProgressBarComplete();
 
           await transform.testExecution.logTestStep('returns to the management page');
@@ -591,6 +699,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('should navigate to discover');
           await transform.table.clickTransformRowAction(testData.transformId, 'Discover');
+          await PageObjects.discover.waitUntilSearchingHasFinished();
 
           if (testData.discoverAdjustSuperDatePicker) {
             await transform.discover.assertNoResults(testData.destinationIndex);

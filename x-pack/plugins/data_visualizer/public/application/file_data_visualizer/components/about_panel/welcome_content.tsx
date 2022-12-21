@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
-export const WelcomeContent: FC = () => {
+interface Props {
+  hasPermissionToImport: boolean;
+}
+
+export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
   const {
     services: {
       fileUpload: { getMaxBytesFormatted },
@@ -37,10 +41,17 @@ export const WelcomeContent: FC = () => {
         <EuiSpacer size="s" />
         <EuiText>
           <p>
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.welcomeContent.visualizeDataFromLogFileDescription"
-              defaultMessage="Upload your file, analyze its data, and optionally import the data into an Elasticsearch index."
-            />
+            {hasPermissionToImport ? (
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.welcomeContent.visualizeAndImportDataFromLogFileDescription"
+                defaultMessage="Upload your file, analyze its data, and optionally import the data into an Elasticsearch index."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.welcomeContent.visualizeDataFromLogFileDescription"
+                defaultMessage="Upload your file and analyze its data."
+              />
+            )}
           </p>
         </EuiText>
         <EuiSpacer size="s" />

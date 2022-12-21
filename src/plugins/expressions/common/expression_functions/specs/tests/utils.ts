@@ -7,22 +7,26 @@
  */
 
 import { mapValues } from 'lodash';
-import { AnyExpressionFunctionDefinition } from '../../types';
-import { ExecutionContext } from '../../../execution/types';
-import { Datatable } from '../../../expression_types';
+import type { AnyExpressionFunctionDefinition } from '../../types';
+import type { ExecutionContext } from '../../../execution/types';
+import type { Datatable } from '../../../expression_types';
 
 /**
  * Takes a function spec and passes in default args,
  * overriding with any provided args.
  */
-export const functionWrapper = <ContextType = object | null>(
-  spec: AnyExpressionFunctionDefinition
+export const functionWrapper = <
+  ExpressionFunctionDefinition extends AnyExpressionFunctionDefinition
+>(
+  spec: ExpressionFunctionDefinition
 ) => {
   const defaultArgs = mapValues(spec.args, (argSpec) => argSpec.default);
   return (
-    context: ContextType,
-    args: Record<string, any> = {},
-    handlers: ExecutionContext = {} as ExecutionContext
+    context?: Parameters<ExpressionFunctionDefinition['fn']>[0] | null,
+    args: Parameters<ExpressionFunctionDefinition['fn']>[1] = {},
+    handlers: ExecutionContext = {
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext
   ) => spec.fn(context, { ...defaultArgs, ...args }, handlers);
 };
 

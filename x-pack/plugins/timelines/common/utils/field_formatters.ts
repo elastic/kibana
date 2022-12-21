@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { get, isEmpty, isNumber, isObject, isString } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 
-import { EventHit, EventSource, TimelineEventsDetailsItem } from '../search_strategy';
+import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
+import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { EventHit, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
-
+import { ENRICHMENT_DESTINATION_PATH } from '../constants';
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
+const nonFlattenedFormatParamsFields = ['related_integrations', 'threat_mapping'];
 
 export const getFieldCategory = (field: string): string => {
   const fieldCategory = field.split('.')[0];
@@ -38,39 +43,12 @@ export const formatGeoLocation = (item: unknown[]) => {
 export const isGeoField = (field: string) =>
   field.includes('geo.location') || field.includes('geoip.location');
 
-export const getDataFromSourceHits = (
-  sources: EventSource,
-  category?: string,
-  path?: string
-): TimelineEventsDetailsItem[] =>
-  Object.keys(sources ?? {}).reduce<TimelineEventsDetailsItem[]>((accumulator, source) => {
-    const item: EventSource = get(source, sources);
-    if (Array.isArray(item) || isString(item) || isNumber(item)) {
-      const field = path ? `${path}.${source}` : source;
-      const fieldCategory = getFieldCategory(field);
+export const isRuleParametersFieldOrSubfield = (field: string, prependField?: string) =>
+  (prependField?.includes(ALERT_RULE_PARAMETERS) || field === ALERT_RULE_PARAMETERS) &&
+  !nonFlattenedFormatParamsFields.includes(field);
 
-      const objArrStr = toObjectArrayOfStrings(item);
-      const strArr = objArrStr.map(({ str }) => str);
-      const isObjectArray = objArrStr.some((o) => o.isObjectArray);
-
-      return [
-        ...accumulator,
-        {
-          category: fieldCategory,
-          field,
-          values: strArr,
-          originalValue: strArr,
-          isObjectArray,
-        } as TimelineEventsDetailsItem,
-      ];
-    } else if (isObject(item)) {
-      return [
-        ...accumulator,
-        ...getDataFromSourceHits(item, category || source, path ? `${path}.${source}` : source),
-      ];
-    }
-    return accumulator;
-  }, []);
+export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: string) =>
+  prependField?.includes(ENRICHMENT_DESTINATION_PATH) || field === ENRICHMENT_DESTINATION_PATH;
 
 export const getDataFromFieldsHits = (
   fields: EventHit['fields'],
@@ -79,7 +57,6 @@ export const getDataFromFieldsHits = (
 ): TimelineEventsDetailsItem[] =>
   Object.keys(fields).reduce<TimelineEventsDetailsItem[]>((accumulator, field) => {
     const item: unknown[] = fields[field];
-
     const fieldCategory =
       prependFieldCategory != null ? prependFieldCategory : getFieldCategory(field);
     if (isGeoField(field)) {
@@ -99,8 +76,14 @@ export const getDataFromFieldsHits = (
     const isObjectArray = objArrStr.some((o) => o.isObjectArray);
     const dotField = prependField ? `${prependField}.${field}` : field;
 
-    // return simple field value (non-object, non-array)
-    if (!isObjectArray) {
+    // return simple field value (non-ecs object, non-array)
+    if (
+      !isObjectArray ||
+      (Object.keys({ ...ecsFieldMap, ...technicalRuleFieldMap, ...experimentalRuleFieldMap }).find(
+        (ecsField) => ecsField === field
+      ) === undefined &&
+        !isRuleParametersFieldOrSubfield(field, prependField))
+    ) {
       return [
         ...accumulator,
         {
@@ -113,17 +96,39 @@ export const getDataFromFieldsHits = (
       ];
     }
 
+    const threatEnrichmentObject = isThreatEnrichmentFieldOrSubfield(field, prependField)
+      ? [
+          {
+            category: fieldCategory,
+            field: dotField,
+            values: strArr,
+            originalValue: strArr,
+            isObjectArray,
+          },
+        ]
+      : [];
+
     // format nested fields
-    const nestedFields = Array.isArray(item)
-      ? item
-          .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
-          .flat()
-      : getDataFromFieldsHits(item, prependField, fieldCategory);
+    let nestedFields;
+    if (isRuleParametersFieldOrSubfield(field, prependField)) {
+      nestedFields = Array.isArray(item)
+        ? item
+            .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
+            .flat()
+        : getDataFromFieldsHits(item, dotField, fieldCategory);
+    } else {
+      nestedFields = Array.isArray(item)
+        ? item
+            .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
+            .flat()
+        : getDataFromFieldsHits(item, prependField, fieldCategory);
+    }
 
     // combine duplicate fields
     const flat: Record<string, TimelineEventsDetailsItem> = [
       ...accumulator,
       ...nestedFields,
+      ...threatEnrichmentObject,
     ].reduce(
       (acc, f) => ({
         ...acc,

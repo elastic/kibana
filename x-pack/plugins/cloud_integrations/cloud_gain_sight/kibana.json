@@ -1,0 +1,15 @@
+{
+  "id": "cloudGainsight",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
+  "description": "When Kibana runs on Elastic Cloud, this plugin registers Gainsight as a shipper for telemetry.",
+  "server": true,
+  "ui": true,
+  "configPath": ["xpack", "cloud_integrations", "gain_sight"],
+  "requiredPlugins": ["cloud"],
+  "optionalPlugins": []
+}

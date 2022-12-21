@@ -9,8 +9,8 @@
 import React from 'react';
 import { SavedObjectFinderCreateNew } from '../saved_object_finder_create_new';
 import { shallow } from 'enzyme';
-import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
+import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 describe('SavedObjectFinderCreateNew', () => {
   test('renders correctly with no items', () => {
@@ -66,7 +66,7 @@ describe('SavedObjectFinderCreateNew', () => {
     const component = mountWithIntl(<SavedObjectFinderCreateNew menuItems={items} />);
     let popover = component.find(EuiPopover);
     expect(popover.prop('isOpen')).toBe(false);
-    const button = component.find(EuiButton);
+    const button = component.find('button');
     button.simulate('click');
     popover = component.find(EuiPopover);
     expect(popover.prop('isOpen')).toBe(true);

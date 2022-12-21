@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
-import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
+import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
+import type { KqlContext } from '../types';
 
 export function buildNodeParams(path: any, child: any) {
   const pathNode =
@@ -21,9 +22,9 @@ export function buildNodeParams(path: any, child: any) {
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
-  context: Record<string, any> = {}
+  context: KqlContext = {}
 ): estypes.QueryDslQueryContainer {
   const [path, child] = node.arguments;
   const stringPath = ast.toElasticsearchQuery(path) as unknown as string;
@@ -37,6 +38,9 @@ export function toElasticsearchQuery(
         nested: { path: fullPath },
       }) as estypes.QueryDslQueryContainer,
       score_mode: 'none',
+      ...(typeof config.nestedIgnoreUnmapped === 'boolean' && {
+        ignore_unmapped: config.nestedIgnoreUnmapped,
+      }),
     },
   };
 }

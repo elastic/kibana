@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { nodeBuilder } from '../../../../../src/plugins/data/common';
-import { OWNER_FIELD } from '../../common';
+import { nodeBuilder } from '@kbn/es-query';
+import { OWNER_FIELD } from '../../common/api';
 import {
   combineFilterWithAuthorizationFilter,
   ensureFieldIsSafeForQuery,
@@ -26,16 +26,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "a",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "hello",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -50,16 +48,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "a",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "hello",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -78,16 +74,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "a",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hello",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -96,16 +90,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "b",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hi",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -128,16 +120,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "b",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hi",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -146,16 +136,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "a",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hello",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -174,8 +162,8 @@ describe('utils', () => {
       expect(includeFieldsRequiredForAuthentication()).toBeUndefined();
     });
 
-    it('returns an array with a single entry containing the owner field', () => {
-      expect(includeFieldsRequiredForAuthentication([])).toStrictEqual([OWNER_FIELD]);
+    it('returns undefined when the fields parameter is an empty array', () => {
+      expect(includeFieldsRequiredForAuthentication([])).toBeUndefined();
     });
 
     it('returns an array without duplicates and including the owner field', () => {
@@ -229,16 +217,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "a.attributes.owner",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "hello",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -254,16 +240,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "a.attributes.owner",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hello",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -272,16 +256,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "a.attributes.owner",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hi",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",

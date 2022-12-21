@@ -7,7 +7,7 @@
 
 import React, { FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
 import { JobId } from '../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../application/services/ml_api_service';
@@ -111,8 +111,10 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     } catch (e) {
       // TODO add error handling
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adJobsApiService]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const onSelectionChange: EuiComboBoxProps<string>['onChange'] = useCallback(
     ((selectionUpdate) => {
       if (selectionUpdate.some((selectedOption) => selectedOption.value === ALL_JOBS_SELECTION)) {
@@ -142,6 +144,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   useEffect(() => {
     if (defaultOptions) return;
     fetchOptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

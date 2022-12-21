@@ -52,6 +52,15 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
 `has_reference`::
   (Optional, object) Filters to objects that have a relationship with the type and ID combination.
 
+`has_reference_operator`::
+  (Optional, string) The operator to use for the `has_reference` parameter. Either `OR` or `AND`. Defaults to `OR`.
+
+`has_no_reference`::
+  (Optional, object) Filters to objects that do not have a relationship with the type and ID combination.
+
+`has_no_reference_operator`::
+  (Optional, string) The operator to use for the `has_no_reference` parameter. Either `OR` or `AND`. Defaults to `OR`.
+
 `filter`::
   (Optional, string) The filter is a KQL string with the caveat that if you filter with an attribute from your saved object type,
   it should look like that: `savedObjectType.attributes.title: "myTitle"`. However, If you use a root attribute of a saved 
@@ -73,7 +82,7 @@ change. Use the find API for traditional paginated results, but avoid using it t
 
 ==== Examples
 
-Find index patterns with titles that start with `my`:
+Find {data-sources} with titles that start with `my`:
 
 [source,sh]
 --------------------------------------------------

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useState, useEffect, useContext } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 import { isAdvancedJobCreator } from '../../../../../common/job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -26,11 +26,13 @@ export const BucketSpanEstimator: FC<Props> = ({ setEstimating }) => {
 
   useEffect(() => {
     setEstimating(status === ESTIMATE_STATUS.RUNNING);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   useEffect(() => {
     setNoDetectors(jobCreator.detectors.length === 0);
     setIsUsingMlCategory(checkIsUsingMlCategory());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdate]);
 
   function checkIsUsingMlCategory() {

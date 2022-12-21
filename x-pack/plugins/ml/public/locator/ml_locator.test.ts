@@ -290,7 +290,7 @@ describe('ML locator', () => {
         });
       });
 
-      it('should generate valid URL for the Index Data Visualizer select index pattern or saved search page', async () => {
+      it('should generate valid URL for the Index Data Visualizer select data view or saved search page', async () => {
         const location = await definition.getLocation({
           page: ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
         });
@@ -319,6 +319,23 @@ describe('ML locator', () => {
         expect(location).toMatchObject({
           app: 'ml',
           path: '/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,to:now))',
+          state: {},
+        });
+      });
+    });
+
+    describe('Trained Models', () => {
+      it('should generate valid URL for the Trained Models page with model id', async () => {
+        const location = await definition.getLocation({
+          page: ML_PAGES.TRAINED_MODELS_MANAGE,
+          pageState: {
+            modelId: 'my_model_01',
+          },
+        });
+
+        expect(location).toMatchObject({
+          app: 'ml',
+          path: "/trained_models?_a=(trained_models:(queryText:'model_id:(my_model_01)'))",
           state: {},
         });
       });

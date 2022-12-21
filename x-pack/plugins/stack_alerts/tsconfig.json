@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "server/**/*",
@@ -12,13 +11,15 @@
     "public/**/*",
     "common/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../triggers_actions_ui/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/saved_objects/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" }
+    { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../transform/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
   ]
 }

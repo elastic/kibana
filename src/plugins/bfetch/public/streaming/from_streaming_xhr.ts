@@ -7,6 +7,7 @@
  */
 
 import { Observable, Subject } from 'rxjs';
+import { BfetchRequestError } from '../../common';
 
 /**
  * Creates observable from streaming XMLHttpRequest, where each event
@@ -23,8 +24,12 @@ export const fromStreamingXhr = (
   let index = 0;
   let aborted = false;
 
+  // 0 indicates a network failure. 400+ messages are considered server errors
+  const isErrorStatus = () => xhr.status === 0 || xhr.status >= 400;
+
   const processBatch = () => {
     if (aborted) return;
+    if (isErrorStatus()) return;
 
     const { responseText } = xhr;
     if (index >= responseText.length) return;
@@ -56,9 +61,8 @@ export const fromStreamingXhr = (
     if (xhr.readyState === 4) {
       if (signal) signal.removeEventListener('abort', onBatchAbort);
 
-      // 0 indicates a network failure. 400+ messages are considered server errors
-      if (xhr.status === 0 || xhr.status >= 400) {
-        subject.error(new Error(`Batch request failed with status ${xhr.status}`));
+      if (isErrorStatus()) {
+        subject.error(new BfetchRequestError(xhr.status));
       } else {
         subject.complete();
       }

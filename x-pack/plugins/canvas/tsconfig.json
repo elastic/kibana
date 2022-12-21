@@ -4,10 +4,14 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
 
     // the plugin contains some heavy json files
-    "resolveJsonModule": false
+    "resolveJsonModule": false,
+    // there is still a decent amount of JS in this plugin and we are taking
+    // advantage of the fact that TS doesn't know the types of that code and
+    // gives us `any`. Once that code is converted to .ts we can remove this
+    // and allow TS to infer types from any JS file imported.
+    "allowJs": false
   },
   "include": [
     "../../../typings/**/*",
@@ -22,7 +26,8 @@
     "tasks/mocks/*",
     "types/**/*"
   ],
-  "references": [
+  "kbn_references": [
+    { "path": "../../../src/setup_node_env/tsconfig.json" },
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/bfetch/tsconfig.json" },
     { "path": "../../../src/plugins/charts/tsconfig.json" },
@@ -39,9 +44,9 @@
     { "path": "../../../src/plugins/expression_shape/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/inspector/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/presentation_util/tsconfig.json" },
     { "path": "../../../src/plugins/saved_objects/tsconfig.json" },
     { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
@@ -49,6 +54,7 @@
     { "path": "../features/tsconfig.json" },
     { "path": "../lens/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
-    { "path": "../reporting/tsconfig.json" }
+    { "path": "../reporting/tsconfig.json" },
+    { "path": "../spaces/tsconfig.json" },
   ]
 }

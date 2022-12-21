@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -37,6 +37,7 @@ export const RareDetector: FC<Props> = ({ onChange }) => {
     } else {
       setRareDetectorType(RARE_DETECTOR_TYPE.RARE);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -48,6 +49,7 @@ export const RareDetector: FC<Props> = ({ onChange }) => {
       jobCreator.frequentlyRare = rareDetectorType === RARE_DETECTOR_TYPE.FREQ_RARE_POPULATION;
       jobCreatorUpdate();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rareDetectorType]);
 
   function onRareSelection() {

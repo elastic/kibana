@@ -5,43 +5,60 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { FC, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 interface Props {
-  destIndex: string;
+  color?: string;
+  destIndex?: string;
 }
 
-export const IndexPatternPrompt: FC<Props> = ({ destIndex }) => {
+export const IndexPatternPrompt: FC<Props> = ({ destIndex, color }) => {
   const {
     services: {
       http: { basePath },
+      application: { capabilities },
     },
   } = useMlKibana();
 
+  const canCreateDataView = useMemo(
+    () =>
+      capabilities.savedObjectsManagement.edit === true || capabilities.indexPatterns.save === true,
+    [capabilities]
+  );
+
   return (
     <>
-      <EuiText size="xs" color="warning">
+      <EuiText size="xs" color={color ?? 'warning'}>
         <FormattedMessage
-          id="xpack.ml.dataframe.analytics.indexPatternPromptMessage"
-          defaultMessage="No index pattern exists for index {destIndex}. {linkToIndexPatternManagement} for {destIndex}."
+          id="xpack.ml.dataframe.analytics.dataViewPromptMessage"
+          defaultMessage="No data view exists for index {destIndex}. "
           values={{
-            destIndex,
-            linkToIndexPatternManagement: (
-              <EuiLink
-                href={`${basePath.get()}/app/management/kibana/indexPatterns/create`}
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analytics.indexPatternPromptLinkText"
-                  defaultMessage="Create an index pattern"
-                />
-              </EuiLink>
-            ),
+            destIndex: destIndex ?? '',
           }}
         />
+        {canCreateDataView === true ? (
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.dataViewPromptLink"
+            defaultMessage="{linkToDataViewManagement}{destIndex}."
+            values={{
+              destIndex: destIndex ? ` for ${destIndex}` : '',
+              linkToDataViewManagement: (
+                <EuiLink
+                  href={`${basePath.get()}/app/management/kibana/dataViews/create`}
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.ml.dataframe.analytics.dataViewPromptLinkText"
+                    defaultMessage="Create a data view"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        ) : null}
       </EuiText>
     </>
   );

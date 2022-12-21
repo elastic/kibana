@@ -6,29 +6,30 @@
  */
 
 import expect from '@kbn/expect';
+import { SuperTest, Test } from 'supertest';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function createGetTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-
-  describe('get', () => {
-    const objectRemover = new ObjectRemover(supertest);
-
+const getTestUtils = (
+  describeType: 'internal' | 'public',
+  objectRemover: ObjectRemover,
+  supertest: SuperTest<Test>
+) => {
+  describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());
-
     it('should handle get alert request appropriately', async () => {
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`
+        `${getUrlPrefix(Spaces.space1.id)}/${
+          describeType === 'public' ? 'api' : 'internal'
+        }/alerting/rule/${createdAlert.id}`
       );
 
       expect(response.status).to.eql(200);
@@ -53,21 +54,37 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         created_at: response.body.created_at,
         updated_at: response.body.updated_at,
         execution_status: response.body.execution_status,
+        ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
+        ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
+        ...(describeType === 'internal'
+          ? {
+              monitoring: response.body.monitoring,
+              snooze_schedule: response.body.snooze_schedule,
+              is_snoozed_until: response.body.is_snoozed_until,
+            }
+          : {}),
       });
       expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
+      if (response.body.next_run) {
+        expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+      }
     });
 
     it(`shouldn't find alert from another space`, async () => {
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
       await supertest
-        .get(`${getUrlPrefix(Spaces.other.id)}/api/alerting/rule/${createdAlert.id}`)
+        .get(
+          `${getUrlPrefix(Spaces.other.id)}/${
+            describeType === 'public' ? 'api' : 'internal'
+          }/alerting/rule/${createdAlert.id}`
+        )
         .expect(404, {
           statusCode: 404,
           error: 'Not Found',
@@ -76,19 +93,38 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it(`should handle get alert request appropriately when alert doesn't exist`, async () => {
-      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/1`).expect(404, {
-        statusCode: 404,
-        error: 'Not Found',
-        message: 'Saved object [alert/1] not found',
-      });
+      await supertest
+        .get(
+          `${getUrlPrefix(Spaces.space1.id)}/${
+            describeType === 'public' ? 'api' : 'internal'
+          }/alerting/rule/1`
+        )
+        .expect(404, {
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Saved object [alert/1] not found',
+        });
     });
+  });
+};
+
+// eslint-disable-next-line import/no-default-export
+export default function createGetTests({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+
+  describe('get', () => {
+    const objectRemover = new ObjectRemover(supertest);
+    afterEach(() => objectRemover.removeAll());
+
+    getTestUtils('public', objectRemover, supertest);
+    getTestUtils('internal', objectRemover, supertest);
 
     describe('legacy', () => {
       it('should handle get alert request appropriately', async () => {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestAlertData())
+          .send(getTestRuleData())
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -118,9 +154,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           createdAt: response.body.createdAt,
           updatedAt: response.body.updatedAt,
           executionStatus: response.body.executionStatus,
+          ...(response.body.nextRun ? { nextRun: response.body.nextRun } : {}),
+          ...(response.body.lastRun ? { lastRun: response.body.lastRun } : {}),
         });
         expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
         expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+        if (response.body.nextRun) {
+          expect(Date.parse(response.body.nextRun)).to.be.greaterThan(0);
+        }
       });
     });
   });

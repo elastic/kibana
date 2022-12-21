@@ -16,14 +16,14 @@ describe('metricToFormat()', () => {
   it('should just work for byte metrics', () => {
     const metric: MetricsExplorerMetric = {
       aggregation: 'avg',
-      field: 'system.network.out.bytes',
+      field: 'host.network.egress.bytes',
     };
     expect(metricToFormat(metric)).toBe(InfraFormatterType.bytes);
   });
   it('should just work for rate bytes metrics', () => {
     const metric: MetricsExplorerMetric = {
       aggregation: 'rate',
-      field: 'system.network.out.bytes',
+      field: 'host.network.egress.bytes',
     };
     expect(metricToFormat(metric)).toBe(InfraFormatterType.bits);
   });

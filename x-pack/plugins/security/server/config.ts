@@ -7,13 +7,15 @@
 
 import crypto from 'crypto';
 import type { Duration } from 'moment';
+import path from 'path';
 
 import type { Type, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { AppenderConfigType, Logger } from '@kbn/core/server';
+import { config as coreConfig } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { Logger } from 'src/core/server';
+import { getLogsPath } from '@kbn/utils';
 
-import { config as coreConfig } from '../../../../src/core/server';
 import type { AuthenticationProvider } from '../common/model';
 
 export type ConfigType = ReturnType<typeof createConfig>;
@@ -81,6 +83,7 @@ function getUniqueProviderSchema<TProperties extends Record<string, Type<any>>>(
 }
 
 type ProvidersConfigType = TypeOf<typeof providersConfigSchema>;
+
 const providersConfigSchema = schema.object(
   {
     basic: getUniqueProviderSchema('basic', {
@@ -198,8 +201,8 @@ const providersConfigSchema = schema.object(
 );
 
 export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
+  showInsecureClusterWarning: schema.boolean({ defaultValue: true }),
   loginHelp: schema.maybe(schema.string()),
   cookieName: schema.string({ defaultValue: 'sid' }),
   encryptionKey: schema.conditional(
@@ -210,7 +213,7 @@ export const ConfigSchema = schema.object({
   ),
   session: schema.object({
     idleTimeout: schema.oneOf([schema.duration(), schema.literal(null)], {
-      defaultValue: schema.duration().validate('1h'),
+      defaultValue: schema.duration().validate('8h'),
     }),
     lifespan: schema.oneOf([schema.duration(), schema.literal(null)], {
       defaultValue: schema.duration().validate('30d'),
@@ -233,6 +236,7 @@ export const ConfigSchema = schema.object({
     hostname: schema.maybe(schema.string({ hostname: true })),
     port: schema.maybe(schema.number({ min: 0, max: 65535 })),
   }),
+  accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
   authc: schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {
@@ -268,33 +272,24 @@ export const ConfigSchema = schema.object({
     http: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       autoSchemesEnabled: schema.boolean({ defaultValue: true }),
-      schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
+      schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey', 'bearer'] }),
     }),
   }),
-  audit: schema.object(
-    {
-      enabled: schema.boolean({ defaultValue: false }),
-      appender: schema.maybe(coreConfig.logging.appenders),
-      ignore_filters: schema.maybe(
-        schema.arrayOf(
-          schema.object({
-            actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-            categories: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-            types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-            outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-            spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          })
-        )
-      ),
-    },
-    {
-      validate: (auditConfig) => {
-        if (auditConfig.ignore_filters && !auditConfig.appender) {
-          return 'xpack.security.audit.ignore_filters can only be used with the ECS audit logger. To enable the ECS audit logger, specify where you want to write the audit events using xpack.security.audit.appender.';
-        }
-      },
-    }
-  ),
+  audit: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    appender: schema.maybe(coreConfig.logging.appenders),
+    ignore_filters: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          categories: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+        })
+      )
+    ),
+  }),
 });
 
 export function createConfig(
@@ -313,6 +308,7 @@ export function createConfig(
   }
 
   let secureCookies = config.secureCookies;
+
   if (!isTLSEnabled) {
     if (secureCookies) {
       logger.warn(
@@ -329,6 +325,7 @@ export function createConfig(
   }
 
   const isUsingLegacyProvidersFormat = Array.isArray(config.authc.providers);
+
   const providers = (
     isUsingLegacyProvidersFormat
       ? [...new Set(config.authc.providers as Array<keyof ProvidersConfigType>)].reduce(
@@ -339,6 +336,7 @@ export function createConfig(
                   ? { enabled: true, showInSelector: true, order, ...config.authc[providerType] }
                   : { enabled: true, showInSelector: true, order },
             };
+
             return legacyProviders;
           },
           {} as Record<string, unknown>
@@ -353,16 +351,19 @@ export function createConfig(
     order: number;
     hasAccessAgreement: boolean;
   }> = [];
+
   for (const [type, providerGroup] of Object.entries(providers)) {
     for (const [name, { enabled, order, accessAgreement }] of Object.entries(providerGroup ?? {})) {
       if (!enabled) {
         delete providerGroup![name];
       } else {
+        const hasAccessAgreement: boolean = !!accessAgreement?.message;
+
         sortedProviders.push({
           type: type as any,
           name,
           order,
-          hasAccessAgreement: !!accessAgreement?.message,
+          hasAccessAgreement,
         });
       }
     }
@@ -381,8 +382,30 @@ export function createConfig(
         sortedProviders.filter(({ type, name }) => providers[type]?.[name].showInSelector).length >
           1;
 
+  const appender: AppenderConfigType | undefined =
+    config.audit.appender ??
+    ({
+      type: 'rolling-file',
+      fileName: path.join(getLogsPath(), 'audit.log'),
+      layout: {
+        type: 'json',
+      },
+      policy: {
+        type: 'time-interval',
+        interval: schema.duration().validate('24h'),
+      },
+      strategy: {
+        type: 'numeric',
+        max: 10,
+      },
+    } as AppenderConfigType);
+
   return {
     ...config,
+    audit: {
+      ...config.audit,
+      ...(config.audit.enabled && { appender }),
+    },
     authc: {
       selector: { ...config.authc.selector, enabled: isLoginSelectorEnabled },
       providers,

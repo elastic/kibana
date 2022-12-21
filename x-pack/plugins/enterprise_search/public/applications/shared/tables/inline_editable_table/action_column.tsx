@@ -24,6 +24,7 @@ import { InlineEditableTableLogic } from './inline_editable_table_logic';
 
 interface ActionColumnProps<Item extends ItemWithAnID> {
   displayedItems: Item[];
+  emptyPropertyAllowed?: boolean;
   isActivelyEditing: (i: Item) => boolean;
   isLoading?: boolean;
   item: Item;
@@ -33,6 +34,7 @@ interface ActionColumnProps<Item extends ItemWithAnID> {
 }
 
 export const ActionColumn = <Item extends ItemWithAnID>({
+  emptyPropertyAllowed = false,
   displayedItems,
   isActivelyEditing,
   isLoading = false,
@@ -41,7 +43,7 @@ export const ActionColumn = <Item extends ItemWithAnID>({
   lastItemWarning,
   uneditableItems,
 }: ActionColumnProps<Item>) => {
-  const { doesEditingItemValueContainEmptyProperty, formErrors, isEditingUnsavedItem } =
+  const { doesEditingItemValueContainEmptyProperty, fieldErrors, rowErrors, isEditingUnsavedItem } =
     useValues(InlineEditableTableLogic);
   const { editExistingItem, deleteItem, doneEditing, saveExistingItem, saveNewItem } =
     useActions(InlineEditableTableLogic);
@@ -49,6 +51,8 @@ export const ActionColumn = <Item extends ItemWithAnID>({
   if (uneditableItems?.includes(item)) {
     return null;
   }
+
+  const isInvalid = Object.keys(fieldErrors).length > 0 || rowErrors.length > 0;
 
   if (isActivelyEditing(item)) {
     return (
@@ -61,8 +65,8 @@ export const ActionColumn = <Item extends ItemWithAnID>({
             onClick={isEditingUnsavedItem ? saveNewItem : saveExistingItem}
             disabled={
               isLoading ||
-              Object.keys(formErrors).length > 0 ||
-              doesEditingItemValueContainEmptyProperty
+              isInvalid ||
+              (doesEditingItemValueContainEmptyProperty && !emptyPropertyAllowed)
             }
           >
             {SAVE_BUTTON_LABEL}

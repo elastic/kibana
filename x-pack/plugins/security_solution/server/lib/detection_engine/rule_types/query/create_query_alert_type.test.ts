@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-import { v4 } from 'uuid';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
-import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
+import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
+import { createMockConfig } from '../../routes/__mocks__';
+import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
+import { getQueryRuleParams } from '../../rule_schema/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+
+jest.mock('../../signals/utils', () => ({
+  ...jest.requireActual('../../signals/utils'),
+  getExceptions: () => [],
+}));
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -22,30 +31,41 @@ jest.mock('../utils/get_list_client', () => ({
   }),
 }));
 
-jest.mock('../../rule_execution_log/rule_execution_log_client');
-
 describe('Custom Query Alerts', () => {
+  const mocks = createRuleTypeMocks();
+  const licensing = licensingMock.createSetup();
+
+  const { dependencies, executor, services } = mocks;
+  const { alerting, lists, logger, ruleDataClient } = dependencies;
+  const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+    lists,
+    logger,
+    config: createMockConfig(),
+    ruleDataClient,
+    ruleExecutionLoggerFactory: () => Promise.resolve(ruleExecutionLogMock.forExecutors.create()),
+    version: '8.3',
+  });
+  const eventsTelemetry = createMockTelemetryEventsSender(true);
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('does not send an alert when no events found', async () => {
-    const { services, dependencies, executor } = createRuleTypeMocks();
-    const queryAlertType = createQueryAlertType({
-      experimentalFeatures: allowedExperimentalValues,
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
-      ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
-      version: '1.0.0',
-    });
+    const queryAlertType = securityRuleTypeWrapper(
+      createQueryAlertType({
+        eventsTelemetry,
+        licensing,
+        osqueryCreateAction: () => null,
+        experimentalFeatures: allowedExperimentalValues,
+        logger,
+        version: '1.0.0',
+        id: QUERY_RULE_TYPE_ID,
+        name: 'Custom Query Rule',
+      })
+    );
 
-    dependencies.alerting.registerType(queryAlertType);
-
-    const params = {
-      query: 'dne:42',
-      index: ['*'],
-      from: 'now-1m',
-      to: 'now',
-    };
+    alerting.registerType(queryAlertType);
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -69,39 +89,41 @@ describe('Custom Query Alerts', () => {
       })
     );
 
-    await executor({ params });
-    expect(dependencies.ruleDataClient.getWriter).not.toBeCalled();
-  });
+    const params = getQueryRuleParams();
 
-  it('sends a properly formatted alert when events are found', async () => {
-    const { services, dependencies, executor } = createRuleTypeMocks();
-    const queryAlertType = createQueryAlertType({
-      experimentalFeatures: allowedExperimentalValues,
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
-      ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
-      version: '1.0.0',
+    await executor({
+      params,
     });
 
-    dependencies.alerting.registerType(queryAlertType);
+    expect((await ruleDataClient.getWriter()).bulk).not.toHaveBeenCalled();
+    expect(eventsTelemetry.queueTelemetryEvents).not.toHaveBeenCalled();
+  });
 
-    const params = {
-      query: '*:*',
-      index: ['*'],
-      from: 'now-1m',
-      to: 'now',
-    };
+  it('sends an alert when events are found', async () => {
+    const queryAlertType = securityRuleTypeWrapper(
+      createQueryAlertType({
+        eventsTelemetry,
+        licensing,
+        osqueryCreateAction: () => null,
+        experimentalFeatures: allowedExperimentalValues,
+        logger,
+        version: '1.0.0',
+        id: QUERY_RULE_TYPE_ID,
+        name: 'Custom Query Rule',
+      })
+    );
+
+    alerting.registerType(queryAlertType);
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
-          hits: [sampleDocNoSortId(v4()), sampleDocNoSortId(v4()), sampleDocNoSortId(v4())],
+          hits: [sampleDocNoSortId()],
+          sequences: [],
+          events: [],
           total: {
             relation: 'eq',
-            value: 3,
+            value: 1,
           },
         },
         took: 0,
@@ -115,7 +137,11 @@ describe('Custom Query Alerts', () => {
       })
     );
 
+    const params = getQueryRuleParams();
+
     await executor({ params });
-    expect(dependencies.ruleDataClient.getWriter).toBeCalled();
+
+    expect((await ruleDataClient.getWriter()).bulk).toHaveBeenCalled();
+    expect(eventsTelemetry.queueTelemetryEvents).toHaveBeenCalled();
   });
 });

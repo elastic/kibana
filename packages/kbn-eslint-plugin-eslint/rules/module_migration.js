@@ -7,11 +7,13 @@
  */
 
 const path = require('path');
-const KIBANA_ROOT = path.resolve(__dirname, '../../..');
+const findKibanaRoot = require('../helpers/find_kibana_root');
+const KIBANA_ROOT = findKibanaRoot();
 
 function checkModuleNameNode(context, mappings, node, desc = 'Imported') {
   const mapping = mappings.find(
-    (mapping) => mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)
+    (mapping) =>
+      mapping.from === node.value || (!mapping.exact && node.value.startsWith(`${mapping.from}/`))
   );
 
   if (!mapping) {
@@ -83,6 +85,10 @@ module.exports = {
             },
             exclude: {
               type: 'array',
+            },
+            exact: {
+              type: 'boolean',
+              default: false,
             },
           },
           anyOf: [

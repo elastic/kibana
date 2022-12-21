@@ -8,34 +8,36 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const ml = getService('ml');
-  const supertest = getService('supertest');
 
   const fleetPackages = ['apache', 'nginx'];
+  const installedPackages: Array<{ pkgName: string; version: string }> = [];
 
   describe('modules', function () {
     before(async () => {
-      // use empty_kibana to make sure the fleet setup is removed correctly after the tests
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      // use await kibanaServer.savedObjects.cleanStandardList(); to make sure the fleet setup is removed correctly after the tests
+      await kibanaServer.savedObjects.cleanStandardList();
 
       // Fleet need to be setup to be able to setup packages
-      await supertest.post(`/api/fleet/setup`).set({ 'kbn-xsrf': 'some-xsrf-token' }).expect(200);
+      await ml.testResources.setupFleet();
 
       for (const fleetPackage of fleetPackages) {
-        await ml.testResources.installFleetPackage(fleetPackage);
+        const version = await ml.testResources.installFleetPackage(fleetPackage);
+        installedPackages.push({ pkgName: fleetPackage, version });
       }
     });
 
     after(async () => {
-      for (const fleetPackage of fleetPackages) {
-        await ml.testResources.removeFleetPackage(fleetPackage);
+      for (const fleetPackage of installedPackages) {
+        await ml.testResources.removeFleetPackage(fleetPackage.pkgName, fleetPackage.version);
       }
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     loadTestFile(require.resolve('./get_module'));
     loadTestFile(require.resolve('./recognize_module'));
     loadTestFile(require.resolve('./setup_module'));
+    loadTestFile(require.resolve('./jobs_exist'));
   });
 }

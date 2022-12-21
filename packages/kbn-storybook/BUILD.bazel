@@ -1,16 +1,28 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-storybook"
+PKG_DIRNAME = "kbn-storybook"
 PKG_REQUIRE_NAME = "@kbn/storybook"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.ejs",
   ],
-  exclude = ["**/*.test.*"],
+  exclude = [
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
 )
 
 SRCS = SOURCE_FILES
@@ -22,7 +34,6 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "preset/package.json",
-  "templates/index.ejs",
   "package.json",
   "README.md",
   "preset.js",
@@ -32,10 +43,14 @@ RUNTIME_DEPS = [
   "//packages/kbn-dev-utils",
   "//packages/kbn-ui-shared-deps-npm",
   "//packages/kbn-ui-shared-deps-src",
+  "//packages/kbn-utils",
+  "@npm//@elastic/eui",
+  "@npm//@emotion/cache",
   "@npm//@storybook/addons",
   "@npm//@storybook/api",
   "@npm//@storybook/components",
   "@npm//@storybook/core",
+  "@npm//@storybook/core-common",
   "@npm//@storybook/node-logger",
   "@npm//@storybook/react",
   "@npm//@storybook/theming",
@@ -46,13 +61,18 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-dev-utils",
-  "//packages/kbn-ui-shared-deps-npm",
-  "//packages/kbn-ui-shared-deps-src",
+  "//packages/kbn-dev-utils:npm_module_types",
+  "//packages/kbn-ui-shared-deps-npm:npm_module_types",
+  "//packages/kbn-ui-shared-deps-src:npm_module_types",
+  "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-ambient-storybook-types:npm_module_types",
+  "@npm//@elastic/eui",
+  "@npm//@emotion/cache",
   "@npm//@storybook/addons",
   "@npm//@storybook/api",
   "@npm//@storybook/components",
   "@npm//@storybook/core",
+  "@npm//@storybook/core-common",
   "@npm//@storybook/node-logger",
   "@npm//@storybook/react",
   "@npm//@storybook/theming",
@@ -67,6 +87,10 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(
@@ -84,16 +108,21 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
-  source_map = True,
   tsconfig = ":tsconfig",
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+js_library(
+  name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
@@ -102,9 +131,7 @@ js_library(
 
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
@@ -112,5 +139,11 @@ filegroup(
   srcs = [
     ":npm_module",
   ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm(
+  name = "build_types",
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

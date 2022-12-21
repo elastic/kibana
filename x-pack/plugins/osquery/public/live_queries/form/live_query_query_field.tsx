@@ -5,75 +5,166 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useRef } from 'react';
+import { isEmpty } from 'lodash';
+import type { EuiAccordionProps } from '@elastic/eui';
+import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-
-import { OsquerySchemaLink } from '../../components/osquery_schema_link';
-import { FieldHook } from '../../shared_imports';
+import { useController, useFormContext } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 import { OsqueryEditor } from '../../editor';
-import {
-  SavedQueriesDropdown,
-  SavedQueriesDropdownRef,
-} from '../../saved_queries/saved_queries_dropdown';
 import { useKibana } from '../../common/lib/kibana';
+import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
+import type { SavedQueriesDropdownProps } from '../../saved_queries/saved_queries_dropdown';
+import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 
-const StyledEuiCodeBlock = styled(EuiCodeBlock)`
-  min-height: 150px;
+const StyledEuiAccordion = styled(EuiAccordion)`
+  ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
+  .euiAccordion__button {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
 `;
 
-interface LiveQueryQueryFieldProps {
+const StyledEuiCodeBlock = styled(EuiCodeBlock)`
+  min-height: 100px;
+`;
+
+export interface LiveQueryQueryFieldProps {
+  handleSubmitForm?: () => void;
   disabled?: boolean;
-  field: FieldHook<string>;
 }
 
-const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disabled, field }) => {
+const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
+  disabled,
+  handleSubmitForm,
+}) => {
+  const { watch, resetField } = useFormContext();
+  const [advancedContentState, setAdvancedContentState] =
+    useState<EuiAccordionProps['forceState']>('closed');
   const permissions = useKibana().services.application.capabilities.osquery;
-  const { value, setValue, errors } = field;
-  const error = errors[0]?.message;
-  const savedQueriesDropdownRef = useRef<SavedQueriesDropdownRef>(null);
+  const [ecsMapping, queryType] = watch(['ecs_mapping', 'queryType']);
 
-  const handleSavedQueryChange = useCallback(
-    (savedQuery) => {
-      setValue(savedQuery?.query ?? '');
+  const {
+    field: { onChange, value },
+    fieldState: { error },
+  } = useController({
+    name: 'query',
+    rules: {
+      required: {
+        message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyQueryError', {
+          defaultMessage: 'Query is a required field',
+        }),
+        value: queryType !== 'pack',
+      },
     },
-    [setValue]
+    defaultValue: '',
+  });
+
+  useEffect(() => {
+    if (!isEmpty(ecsMapping) && advancedContentState === 'closed') {
+      setAdvancedContentState('open');
+    }
+  }, [advancedContentState, ecsMapping]);
+
+  const handleSavedQueryChange: SavedQueriesDropdownProps['onChange'] = useCallback(
+    (savedQuery) => {
+      if (savedQuery) {
+        resetField('query', { defaultValue: savedQuery.query });
+        resetField('savedQueryId', { defaultValue: savedQuery.savedQueryId });
+        resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
+
+        if (!isEmpty(savedQuery.ecs_mapping)) {
+          setAdvancedContentState('open');
+        }
+      } else {
+        resetField('savedQueryId');
+      }
+    },
+    [resetField]
   );
 
-  const handleEditorChange = useCallback(
-    (newValue) => {
-      savedQueriesDropdownRef.current?.clearSelection();
-      setValue(newValue);
-    },
-    [setValue]
+  const handleToggle = useCallback((isOpen) => {
+    const newState = isOpen ? 'open' : 'closed';
+    setAdvancedContentState(newState);
+  }, []);
+
+  const ecsFieldProps = useMemo(
+    () => ({
+      isDisabled: !permissions.writeLiveQueries,
+    }),
+    [permissions.writeLiveQueries]
+  );
+
+  const isAdvancedToggleHidden = useMemo(
+    () =>
+      !(
+        permissions.writeLiveQueries ||
+        (permissions.runSavedQueries && permissions.readSavedQueries)
+      ),
+    [permissions.readSavedQueries, permissions.runSavedQueries, permissions.writeLiveQueries]
+  );
+  const isSavedQueryDisabled = useMemo(
+    () => !permissions.runSavedQueries || !permissions.readSavedQueries,
+    [permissions.readSavedQueries, permissions.runSavedQueries]
+  );
+
+  const commands = useMemo(
+    () =>
+      handleSubmitForm
+        ? [
+            {
+              name: 'submitOnCmdEnter',
+              bindKey: { win: 'ctrl+enter', mac: 'cmd+enter' },
+              exec: handleSubmitForm,
+            },
+          ]
+        : [],
+    [handleSubmitForm]
   );
 
   return (
-    <EuiFormRow isInvalid={typeof error === 'string'} error={error} fullWidth>
-      <>
-        <SavedQueriesDropdown
-          ref={savedQueriesDropdownRef}
-          disabled={disabled || !permissions.runSavedQueries}
-          onChange={handleSavedQueryChange}
-        />
-        <EuiSpacer />
-        <EuiFormRow fullWidth labelAppend={<OsquerySchemaLink />}>
-          {!permissions.writeLiveQueries || disabled ? (
-            <StyledEuiCodeBlock
-              language="sql"
-              fontSize="m"
-              paddingSize="m"
-              transparentBackground={!value.length}
-            >
-              {value}
-            </StyledEuiCodeBlock>
-          ) : (
-            <OsqueryEditor defaultValue={value} onChange={handleEditorChange} />
-          )}
-        </EuiFormRow>
-      </>
-    </EuiFormRow>
+    <>
+      {!isSavedQueryDisabled && (
+        <SavedQueriesDropdown disabled={isSavedQueryDisabled} onChange={handleSavedQueryChange} />
+      )}
+      <EuiFormRow
+        isInvalid={!!error?.message}
+        error={error?.message}
+        fullWidth
+        isDisabled={!permissions.writeLiveQueries || disabled}
+      >
+        {!permissions.writeLiveQueries || disabled ? (
+          <StyledEuiCodeBlock
+            language="sql"
+            fontSize="m"
+            paddingSize="m"
+            transparentBackground={!value.length}
+          >
+            {value}
+          </StyledEuiCodeBlock>
+        ) : (
+          <OsqueryEditor defaultValue={value} onChange={onChange} commands={commands} />
+        )}
+      </EuiFormRow>
+
+      <EuiSpacer size="m" />
+
+      {!isAdvancedToggleHidden && (
+        <StyledEuiAccordion
+          id="advanced"
+          forceState={advancedContentState}
+          onToggle={handleToggle}
+          buttonContent="Advanced"
+        >
+          <EuiSpacer size="xs" />
+          <ECSMappingEditorField euiFieldProps={ecsFieldProps} />
+        </StyledEuiAccordion>
+      )}
+    </>
   );
 };
 
 export const LiveQueryQueryField = React.memo(LiveQueryQueryFieldComponent);
+
+// eslint-disable-next-line import/no-default-export
+export { LiveQueryQueryField as default };

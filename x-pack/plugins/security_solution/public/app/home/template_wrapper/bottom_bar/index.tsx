@@ -8,37 +8,29 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
-import { AppLeaveHandler } from '../../../../../../../../src/core/public';
-import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
-import { useSourcererScope, getScopeFromPath } from '../../../../common/containers/sourcerer';
+import type { EuiBottomBarProps } from '@elastic/eui';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
 import { Flyout } from '../../../../timelines/components/flyout';
+import { useResolveRedirect } from '../../../../common/hooks/use_resolve_redirect';
 
 export const BOTTOM_BAR_CLASSNAME = 'timeline-bottom-bar';
 
-export const SecuritySolutionBottomBar = React.memo(
-  ({ onAppLeave }: { onAppLeave: (handler: AppLeaveHandler) => void }) => {
-    const { pathname } = useLocation();
+export const SecuritySolutionBottomBar = React.memo(() => {
+  useResolveRedirect();
 
-    const [showTimeline] = useShowTimeline();
+  const { onAppLeave } = useKibana().services;
 
-    const { indicesExist } = useSourcererScope(getScopeFromPath(pathname));
+  return (
+    <>
+      <AutoSaveWarningMsg />
+      <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
+    </>
+  );
+});
 
-    return indicesExist && showTimeline ? (
-      <>
-        <AutoSaveWarningMsg />
-        <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />
-      </>
-    ) : null;
-  }
-);
-
-export const SecuritySolutionBottomBarProps: KibanaPageTemplateProps['bottomBarProps'] = {
+export const SecuritySolutionBottomBarProps: EuiBottomBarProps = {
   className: BOTTOM_BAR_CLASSNAME,
   'data-test-subj': 'timeline-bottom-bar-container',
-  position: 'fixed',
-  usePortal: false,
 };

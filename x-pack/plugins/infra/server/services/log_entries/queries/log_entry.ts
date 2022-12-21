@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as rt from 'io-ts';
 import { jsonArrayRT } from '../../../../common/typed_json';
 import {
@@ -21,18 +21,17 @@ export const createGetLogEntryQuery = (
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.AsyncSearchSubmitRequest => ({
   index: logEntryIndex,
-  terminate_after: 1,
-  track_scores: false,
-  track_total_hits: false,
   body: {
     size: 1,
+    terminate_after: 1,
+    track_scores: false,
+    track_total_hits: false,
     query: {
       ids: {
         values: [logEntryId],
       },
     },
     fields: ['*'],
-    // @ts-expect-error @elastic/elasticsearch doesn't declare "runtime_mappings" property
     runtime_mappings: runtimeMappings,
     sort: [{ [timestampField]: 'desc' }, { [tiebreakerField]: 'desc' }],
     _source: false,

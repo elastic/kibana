@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export { Session, SessionValue } from './session';
+export type { SessionValue } from './session';
+export { Session, getPrintableSessionId } from './session';
 export {
-  SessionManagementServiceStart,
-  SessionManagementService,
-} from './session_management_service';
+  SessionError,
+  SessionMissingError,
+  SessionExpiredError,
+  SessionUnexpectedError,
+} from './session_errors';
+export type { SessionManagementServiceStart } from './session_management_service';
+export { SessionManagementService } from './session_management_service';

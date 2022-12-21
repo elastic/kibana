@@ -17,9 +17,7 @@ beforeEach(() => {
 
 describe('createMonitoringStatsStream', () => {
   const configuration: TaskManagerConfig = {
-    enabled: true,
     max_workers: 10,
-    index: 'foo',
     max_attempts: 9,
     poll_interval: 6000000,
     version_conflict_threshold: 80,
@@ -29,6 +27,7 @@ describe('createMonitoringStatsStream', () => {
     monitored_aggregated_stats_refresh_rate: 5000,
     monitored_stats_health_verbose_log: {
       enabled: false,
+      level: 'debug' as const,
       warn_delayed_task_start_in_seconds: 60,
     },
     monitored_stats_running_average_window: 50,
@@ -45,6 +44,10 @@ describe('createMonitoringStatsStream', () => {
     },
     unsafe: {
       exclude_task_types: [],
+    },
+    event_loop_delay: {
+      monitor: true,
+      warn_threshold: 5000,
     },
   };
 

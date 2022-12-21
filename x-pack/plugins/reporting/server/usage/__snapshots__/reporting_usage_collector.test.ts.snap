@@ -26,18 +26,77 @@ Object {
       "deprecated": Object {
         "type": "long",
       },
-      "layout": Object {
-        "canvas": Object {
+      "error_codes": Object {
+        "authentication_expired_error": Object {
           "type": "long",
         },
-        "preserve_layout": Object {
+        "browser_could_not_launch_error": Object {
           "type": "long",
         },
-        "print": Object {
+        "browser_screenshot_error": Object {
+          "type": "long",
+        },
+        "browser_unexpectedly_closed_error": Object {
+          "type": "long",
+        },
+        "invalid_layout_parameters_error": Object {
+          "type": "long",
+        },
+        "kibana_shutting_down_error": Object {
+          "type": "long",
+        },
+        "queue_timeout_error": Object {
+          "type": "long",
+        },
+        "unknown_error": Object {
+          "type": "long",
+        },
+        "visual_reporting_soft_disabled_error": Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "execution_times": Object {
+        "avg": Object {
+          "type": "float",
+        },
+        "max": Object {
+          "type": "long",
+        },
+        "min": Object {
+          "type": "long",
+        },
+      },
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+      },
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },
@@ -85,18 +144,77 @@ Object {
       "deprecated": Object {
         "type": "long",
       },
-      "layout": Object {
-        "canvas": Object {
+      "error_codes": Object {
+        "authentication_expired_error": Object {
           "type": "long",
         },
-        "preserve_layout": Object {
+        "browser_could_not_launch_error": Object {
           "type": "long",
         },
-        "print": Object {
+        "browser_screenshot_error": Object {
+          "type": "long",
+        },
+        "browser_unexpectedly_closed_error": Object {
+          "type": "long",
+        },
+        "invalid_layout_parameters_error": Object {
+          "type": "long",
+        },
+        "kibana_shutting_down_error": Object {
+          "type": "long",
+        },
+        "queue_timeout_error": Object {
+          "type": "long",
+        },
+        "unknown_error": Object {
+          "type": "long",
+        },
+        "visual_reporting_soft_disabled_error": Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "execution_times": Object {
+        "avg": Object {
+          "type": "float",
+        },
+        "max": Object {
+          "type": "long",
+        },
+        "min": Object {
+          "type": "long",
+        },
+      },
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "png_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+      },
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },
@@ -129,68 +247,6 @@ Object {
     "available": Object {
       "type": "boolean",
     },
-    "browser_type": Object {
-      "type": "keyword",
-    },
-    "csv": Object {
-      "app": Object {
-        "canvas workpad": Object {
-          "type": "long",
-        },
-        "dashboard": Object {
-          "type": "long",
-        },
-        "search": Object {
-          "type": "long",
-        },
-        "visualization": Object {
-          "type": "long",
-        },
-      },
-      "available": Object {
-        "type": "boolean",
-      },
-      "deprecated": Object {
-        "type": "long",
-      },
-      "layout": Object {
-        "canvas": Object {
-          "type": "long",
-        },
-        "preserve_layout": Object {
-          "type": "long",
-        },
-        "print": Object {
-          "type": "long",
-        },
-      },
-      "sizes": Object {
-        "1.0": Object {
-          "type": "long",
-        },
-        "25.0": Object {
-          "type": "long",
-        },
-        "5.0": Object {
-          "type": "long",
-        },
-        "50.0": Object {
-          "type": "long",
-        },
-        "75.0": Object {
-          "type": "long",
-        },
-        "95.0": Object {
-          "type": "long",
-        },
-        "99.0": Object {
-          "type": "long",
-        },
-      },
-      "total": Object {
-        "type": "long",
-      },
-    },
     "csv_searchsource": Object {
       "app": Object {
         "canvas workpad": Object {
@@ -212,18 +268,48 @@ Object {
       "deprecated": Object {
         "type": "long",
       },
-      "layout": Object {
-        "canvas": Object {
+      "error_codes": Object {
+        "authentication_expired_error": Object {
           "type": "long",
         },
-        "preserve_layout": Object {
+        "kibana_shutting_down_error": Object {
           "type": "long",
         },
-        "print": Object {
+        "queue_timeout_error": Object {
+          "type": "long",
+        },
+        "unknown_error": Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "execution_times": Object {
+        "avg": Object {
+          "type": "float",
+        },
+        "max": Object {
+          "type": "long",
+        },
+        "min": Object {
+          "type": "long",
+        },
+      },
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+      },
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },
@@ -271,18 +357,48 @@ Object {
       "deprecated": Object {
         "type": "long",
       },
-      "layout": Object {
-        "canvas": Object {
+      "error_codes": Object {
+        "authentication_expired_error": Object {
           "type": "long",
         },
-        "preserve_layout": Object {
+        "kibana_shutting_down_error": Object {
           "type": "long",
         },
-        "print": Object {
+        "queue_timeout_error": Object {
+          "type": "long",
+        },
+        "unknown_error": Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "execution_times": Object {
+        "avg": Object {
+          "type": "float",
+        },
+        "max": Object {
+          "type": "long",
+        },
+        "min": Object {
+          "type": "long",
+        },
+      },
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+      },
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },
@@ -334,18 +450,77 @@ Object {
         "deprecated": Object {
           "type": "long",
         },
-        "layout": Object {
-          "canvas": Object {
+        "error_codes": Object {
+          "authentication_expired_error": Object {
             "type": "long",
           },
-          "preserve_layout": Object {
+          "browser_could_not_launch_error": Object {
             "type": "long",
           },
-          "print": Object {
+          "browser_screenshot_error": Object {
+            "type": "long",
+          },
+          "browser_unexpectedly_closed_error": Object {
+            "type": "long",
+          },
+          "invalid_layout_parameters_error": Object {
+            "type": "long",
+          },
+          "kibana_shutting_down_error": Object {
+            "type": "long",
+          },
+          "queue_timeout_error": Object {
+            "type": "long",
+          },
+          "unknown_error": Object {
+            "type": "long",
+          },
+          "visual_reporting_soft_disabled_error": Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "execution_times": Object {
+          "avg": Object {
+            "type": "float",
+          },
+          "max": Object {
+            "type": "long",
+          },
+          "min": Object {
+            "type": "long",
+          },
+        },
+        "metrics": Object {
+          "png_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+        },
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -393,18 +568,77 @@ Object {
         "deprecated": Object {
           "type": "long",
         },
-        "layout": Object {
-          "canvas": Object {
+        "error_codes": Object {
+          "authentication_expired_error": Object {
             "type": "long",
           },
-          "preserve_layout": Object {
+          "browser_could_not_launch_error": Object {
             "type": "long",
           },
-          "print": Object {
+          "browser_screenshot_error": Object {
+            "type": "long",
+          },
+          "browser_unexpectedly_closed_error": Object {
+            "type": "long",
+          },
+          "invalid_layout_parameters_error": Object {
+            "type": "long",
+          },
+          "kibana_shutting_down_error": Object {
+            "type": "long",
+          },
+          "queue_timeout_error": Object {
+            "type": "long",
+          },
+          "unknown_error": Object {
+            "type": "long",
+          },
+          "visual_reporting_soft_disabled_error": Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "execution_times": Object {
+          "avg": Object {
+            "type": "float",
+          },
+          "max": Object {
+            "type": "long",
+          },
+          "min": Object {
+            "type": "long",
+          },
+        },
+        "metrics": Object {
+          "png_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "png_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+        },
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -434,65 +668,6 @@ Object {
       "_all": Object {
         "type": "long",
       },
-      "csv": Object {
-        "app": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
-        "available": Object {
-          "type": "boolean",
-        },
-        "deprecated": Object {
-          "type": "long",
-        },
-        "layout": Object {
-          "canvas": Object {
-            "type": "long",
-          },
-          "preserve_layout": Object {
-            "type": "long",
-          },
-          "print": Object {
-            "type": "long",
-          },
-        },
-        "sizes": Object {
-          "1.0": Object {
-            "type": "long",
-          },
-          "25.0": Object {
-            "type": "long",
-          },
-          "5.0": Object {
-            "type": "long",
-          },
-          "50.0": Object {
-            "type": "long",
-          },
-          "75.0": Object {
-            "type": "long",
-          },
-          "95.0": Object {
-            "type": "long",
-          },
-          "99.0": Object {
-            "type": "long",
-          },
-        },
-        "total": Object {
-          "type": "long",
-        },
-      },
       "csv_searchsource": Object {
         "app": Object {
           "canvas workpad": Object {
@@ -514,18 +689,48 @@ Object {
         "deprecated": Object {
           "type": "long",
         },
-        "layout": Object {
-          "canvas": Object {
+        "error_codes": Object {
+          "authentication_expired_error": Object {
             "type": "long",
           },
-          "preserve_layout": Object {
+          "kibana_shutting_down_error": Object {
             "type": "long",
           },
-          "print": Object {
+          "queue_timeout_error": Object {
+            "type": "long",
+          },
+          "unknown_error": Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "execution_times": Object {
+          "avg": Object {
+            "type": "float",
+          },
+          "max": Object {
+            "type": "long",
+          },
+          "min": Object {
+            "type": "long",
+          },
+        },
+        "metrics": Object {
+          "csv_rows": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+        },
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -573,18 +778,48 @@ Object {
         "deprecated": Object {
           "type": "long",
         },
-        "layout": Object {
-          "canvas": Object {
+        "error_codes": Object {
+          "authentication_expired_error": Object {
             "type": "long",
           },
-          "preserve_layout": Object {
+          "kibana_shutting_down_error": Object {
             "type": "long",
           },
-          "print": Object {
+          "queue_timeout_error": Object {
+            "type": "long",
+          },
+          "unknown_error": Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "execution_times": Object {
+          "avg": Object {
+            "type": "float",
+          },
+          "max": Object {
+            "type": "long",
+          },
+          "min": Object {
+            "type": "long",
+          },
+        },
+        "metrics": Object {
+          "csv_rows": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+        },
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -655,6 +890,49 @@ Object {
         "deprecated": Object {
           "type": "long",
         },
+        "error_codes": Object {
+          "authentication_expired_error": Object {
+            "type": "long",
+          },
+          "browser_could_not_launch_error": Object {
+            "type": "long",
+          },
+          "browser_screenshot_error": Object {
+            "type": "long",
+          },
+          "browser_unexpectedly_closed_error": Object {
+            "type": "long",
+          },
+          "invalid_layout_parameters_error": Object {
+            "type": "long",
+          },
+          "kibana_shutting_down_error": Object {
+            "type": "long",
+          },
+          "pdf_worker_out_of_memory_error": Object {
+            "type": "long",
+          },
+          "queue_timeout_error": Object {
+            "type": "long",
+          },
+          "unknown_error": Object {
+            "type": "long",
+          },
+          "visual_reporting_soft_disabled_error": Object {
+            "type": "long",
+          },
+        },
+        "execution_times": Object {
+          "avg": Object {
+            "type": "float",
+          },
+          "max": Object {
+            "type": "long",
+          },
+          "min": Object {
+            "type": "long",
+          },
+        },
         "layout": Object {
           "canvas": Object {
             "type": "long",
@@ -666,7 +944,51 @@ Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "metrics": Object {
+          "pdf_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_pages": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+        },
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -714,6 +1036,49 @@ Object {
         "deprecated": Object {
           "type": "long",
         },
+        "error_codes": Object {
+          "authentication_expired_error": Object {
+            "type": "long",
+          },
+          "browser_could_not_launch_error": Object {
+            "type": "long",
+          },
+          "browser_screenshot_error": Object {
+            "type": "long",
+          },
+          "browser_unexpectedly_closed_error": Object {
+            "type": "long",
+          },
+          "invalid_layout_parameters_error": Object {
+            "type": "long",
+          },
+          "kibana_shutting_down_error": Object {
+            "type": "long",
+          },
+          "pdf_worker_out_of_memory_error": Object {
+            "type": "long",
+          },
+          "queue_timeout_error": Object {
+            "type": "long",
+          },
+          "unknown_error": Object {
+            "type": "long",
+          },
+          "visual_reporting_soft_disabled_error": Object {
+            "type": "long",
+          },
+        },
+        "execution_times": Object {
+          "avg": Object {
+            "type": "float",
+          },
+          "max": Object {
+            "type": "long",
+          },
+          "min": Object {
+            "type": "long",
+          },
+        },
         "layout": Object {
           "canvas": Object {
             "type": "long",
@@ -725,7 +1090,51 @@ Object {
             "type": "long",
           },
         },
-        "sizes": Object {
+        "metrics": Object {
+          "pdf_cpu": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_memory": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+          "pdf_pages": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+        },
+        "output_size": Object {
           "1.0": Object {
             "type": "long",
           },
@@ -749,6 +1158,17 @@ Object {
           },
         },
         "total": Object {
+          "type": "long",
+        },
+      },
+      "queue_times": Object {
+        "avg": Object {
+          "type": "float",
+        },
+        "max": Object {
+          "type": "long",
+        },
+        "min": Object {
           "type": "long",
         },
       },
@@ -799,20 +1219,6 @@ Object {
               "type": "long",
             },
           },
-          "csv": Object {
-            "canvas workpad": Object {
-              "type": "long",
-            },
-            "dashboard": Object {
-              "type": "long",
-            },
-            "search": Object {
-              "type": "long",
-            },
-            "visualization": Object {
-              "type": "long",
-            },
-          },
           "csv_searchsource": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -886,20 +1292,6 @@ Object {
             },
           },
           "PNGV2": Object {
-            "canvas workpad": Object {
-              "type": "long",
-            },
-            "dashboard": Object {
-              "type": "long",
-            },
-            "search": Object {
-              "type": "long",
-            },
-            "visualization": Object {
-              "type": "long",
-            },
-          },
-          "csv": Object {
             "canvas workpad": Object {
               "type": "long",
             },
@@ -999,20 +1391,6 @@ Object {
               "type": "long",
             },
           },
-          "csv": Object {
-            "canvas workpad": Object {
-              "type": "long",
-            },
-            "dashboard": Object {
-              "type": "long",
-            },
-            "search": Object {
-              "type": "long",
-            },
-            "visualization": Object {
-              "type": "long",
-            },
-          },
           "csv_searchsource": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -1099,20 +1477,6 @@ Object {
               "type": "long",
             },
           },
-          "csv": Object {
-            "canvas workpad": Object {
-              "type": "long",
-            },
-            "dashboard": Object {
-              "type": "long",
-            },
-            "search": Object {
-              "type": "long",
-            },
-            "visualization": Object {
-              "type": "long",
-            },
-          },
           "csv_searchsource": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -1186,20 +1550,6 @@ Object {
             },
           },
           "PNGV2": Object {
-            "canvas workpad": Object {
-              "type": "long",
-            },
-            "dashboard": Object {
-              "type": "long",
-            },
-            "search": Object {
-              "type": "long",
-            },
-            "visualization": Object {
-              "type": "long",
-            },
-          },
-          "csv": Object {
             "canvas workpad": Object {
               "type": "long",
             },
@@ -1316,6 +1666,49 @@ Object {
       "deprecated": Object {
         "type": "long",
       },
+      "error_codes": Object {
+        "authentication_expired_error": Object {
+          "type": "long",
+        },
+        "browser_could_not_launch_error": Object {
+          "type": "long",
+        },
+        "browser_screenshot_error": Object {
+          "type": "long",
+        },
+        "browser_unexpectedly_closed_error": Object {
+          "type": "long",
+        },
+        "invalid_layout_parameters_error": Object {
+          "type": "long",
+        },
+        "kibana_shutting_down_error": Object {
+          "type": "long",
+        },
+        "pdf_worker_out_of_memory_error": Object {
+          "type": "long",
+        },
+        "queue_timeout_error": Object {
+          "type": "long",
+        },
+        "unknown_error": Object {
+          "type": "long",
+        },
+        "visual_reporting_soft_disabled_error": Object {
+          "type": "long",
+        },
+      },
+      "execution_times": Object {
+        "avg": Object {
+          "type": "float",
+        },
+        "max": Object {
+          "type": "long",
+        },
+        "min": Object {
+          "type": "long",
+        },
+      },
       "layout": Object {
         "canvas": Object {
           "type": "long",
@@ -1327,7 +1720,51 @@ Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_pages": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+      },
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },
@@ -1375,6 +1812,49 @@ Object {
       "deprecated": Object {
         "type": "long",
       },
+      "error_codes": Object {
+        "authentication_expired_error": Object {
+          "type": "long",
+        },
+        "browser_could_not_launch_error": Object {
+          "type": "long",
+        },
+        "browser_screenshot_error": Object {
+          "type": "long",
+        },
+        "browser_unexpectedly_closed_error": Object {
+          "type": "long",
+        },
+        "invalid_layout_parameters_error": Object {
+          "type": "long",
+        },
+        "kibana_shutting_down_error": Object {
+          "type": "long",
+        },
+        "pdf_worker_out_of_memory_error": Object {
+          "type": "long",
+        },
+        "queue_timeout_error": Object {
+          "type": "long",
+        },
+        "unknown_error": Object {
+          "type": "long",
+        },
+        "visual_reporting_soft_disabled_error": Object {
+          "type": "long",
+        },
+      },
+      "execution_times": Object {
+        "avg": Object {
+          "type": "float",
+        },
+        "max": Object {
+          "type": "long",
+        },
+        "min": Object {
+          "type": "long",
+        },
+      },
       "layout": Object {
         "canvas": Object {
           "type": "long",
@@ -1386,7 +1866,51 @@ Object {
           "type": "long",
         },
       },
-      "sizes": Object {
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_memory": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "pdf_pages": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+      },
+      "output_size": Object {
         "1.0": Object {
           "type": "long",
         },
@@ -1410,6 +1934,17 @@ Object {
         },
       },
       "total": Object {
+        "type": "long",
+      },
+    },
+    "queue_times": Object {
+      "avg": Object {
+        "type": "float",
+      },
+      "max": Object {
+        "type": "long",
+      },
+      "min": Object {
         "type": "long",
       },
     },
@@ -1460,20 +1995,6 @@ Object {
             "type": "long",
           },
         },
-        "csv": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
         "csv_searchsource": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -1547,20 +2068,6 @@ Object {
           },
         },
         "PNGV2": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
-        "csv": Object {
           "canvas workpad": Object {
             "type": "long",
           },
@@ -1660,20 +2167,6 @@ Object {
             "type": "long",
           },
         },
-        "csv": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
         "csv_searchsource": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -1760,20 +2253,6 @@ Object {
             "type": "long",
           },
         },
-        "csv": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
         "csv_searchsource": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -1847,20 +2326,6 @@ Object {
           },
         },
         "PNGV2": Object {
-          "canvas workpad": Object {
-            "type": "long",
-          },
-          "dashboard": Object {
-            "type": "long",
-          },
-          "search": Object {
-            "type": "long",
-          },
-          "visualization": Object {
-            "type": "long",
-          },
-        },
-        "csv": Object {
           "canvas workpad": Object {
             "type": "long",
           },
@@ -1948,10 +2413,31 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "png_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "png_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
@@ -1964,33 +2450,36 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "png_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "png_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
   "_all": 9,
   "available": true,
-  "browser_type": undefined,
-  "csv": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 4,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
-    },
-    "output_size": undefined,
-    "total": 4,
-  },
   "csv_searchsource": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -1999,14 +2488,28 @@ Object {
       "visualization": 0,
     },
     "available": true,
-    "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "deprecated": 4,
+    "error_codes": Object {},
+    "execution_times": Object {},
+    "layout": undefined,
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
     },
-    "output_size": undefined,
-    "total": 5,
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
+    "total": 4,
   },
   "csv_searchsource_immediate": Object {
     "app": Object {
@@ -2017,10 +2520,25 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
@@ -2035,10 +2553,31 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "png_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
@@ -2051,31 +2590,35 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "png_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
     "_all": 9,
-    "csv": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 4,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
-      "output_size": undefined,
-      "total": 4,
-    },
     "csv_searchsource": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -2084,14 +2627,28 @@ Object {
         "visualization": 0,
       },
       "available": true,
-      "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "deprecated": 4,
+      "error_codes": Object {},
+      "execution_times": Object {},
+      "layout": undefined,
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
       },
-      "output_size": undefined,
-      "total": 5,
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "total": 4,
     },
     "csv_searchsource_immediate": Object {
       "app": Object {
@@ -2102,10 +2659,25 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
@@ -2119,10 +2691,41 @@ Object {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
+      },
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_pages": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
@@ -2135,24 +2738,53 @@ Object {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
       },
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_pages": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
       "total": 0,
     },
+    "queue_times": Object {},
     "status": Object {
       "completed": 9,
       "failed": 0,
     },
     "statuses": Object {
       "completed": Object {
-        "csv": Object {
-          "search": 4,
-        },
         "csv_searchsource": Object {
-          "search": 5,
+          "search": 4,
         },
       },
     },
@@ -2167,10 +2799,41 @@ Object {
     },
     "available": true,
     "deprecated": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
     "layout": Object {
       "canvas": 0,
       "preserve_layout": 0,
       "print": 0,
+    },
+    "metrics": Object {
+      "pdf_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_pages": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
@@ -2183,24 +2846,53 @@ Object {
     },
     "available": true,
     "deprecated": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
     "layout": Object {
       "canvas": 0,
       "preserve_layout": 0,
       "print": 0,
     },
+    "metrics": Object {
+      "pdf_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_pages": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
     "total": 0,
   },
+  "queue_times": Object {},
   "status": Object {
     "completed": 9,
     "failed": 0,
   },
   "statuses": Object {
     "completed": Object {
-      "csv": Object {
-        "search": 4,
-      },
       "csv_searchsource": Object {
-        "search": 5,
+        "search": 4,
       },
     },
   },
@@ -2218,10 +2910,31 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "png_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "png_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
@@ -2234,32 +2947,36 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "png_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "png_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
   "_all": 0,
   "available": true,
-  "browser_type": undefined,
-  "csv": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
-    },
-    "total": 0,
-  },
   "csv_searchsource": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2269,10 +2986,25 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
@@ -2285,10 +3017,25 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
@@ -2303,10 +3050,31 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "png_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
@@ -2319,30 +3087,35 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "png_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
     "_all": 0,
-    "csv": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
-      "total": 0,
-    },
     "csv_searchsource": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -2352,10 +3125,25 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
@@ -2368,10 +3156,25 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
@@ -2385,10 +3188,41 @@ Object {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
+      },
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_pages": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
@@ -2401,13 +3235,45 @@ Object {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
       },
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_pages": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
       "total": 0,
     },
+    "queue_times": Object {},
     "status": Object {
       "completed": 0,
       "failed": 0,
@@ -2424,10 +3290,41 @@ Object {
     },
     "available": true,
     "deprecated": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
     "layout": Object {
       "canvas": 0,
       "preserve_layout": 0,
       "print": 0,
+    },
+    "metrics": Object {
+      "pdf_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_pages": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
@@ -2440,16 +3337,567 @@ Object {
     },
     "available": true,
     "deprecated": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
     "layout": Object {
       "canvas": 0,
       "preserve_layout": 0,
       "print": 0,
     },
+    "metrics": Object {
+      "pdf_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_pages": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
     "total": 0,
   },
+  "queue_times": Object {},
   "status": Object {
     "completed": 0,
     "failed": 0,
+  },
+  "statuses": Object {},
+}
+`;
+
+exports[`data modeling with metrics and execution times in the data 1`] = `
+Object {
+  "PNG": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "png_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "png_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
+    "total": 0,
+  },
+  "PNGV2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "png_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "png_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
+    "total": 0,
+  },
+  "_all": 3,
+  "available": true,
+  "csv_searchsource": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
+    "total": 0,
+  },
+  "csv_searchsource_immediate": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
+    "total": 0,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "png_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "total": 0,
+    },
+    "PNGV2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "png_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "total": 0,
+    },
+    "_all": 0,
+    "csv_searchsource": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "total": 0,
+    },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "total": 0,
+    },
+    "output_size": undefined,
+    "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_pages": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "total": 0,
+    },
+    "printable_pdf_v2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_pages": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "total": 0,
+    },
+    "queue_times": undefined,
+    "status": Object {
+      "completed": 0,
+      "failed": 0,
+    },
+    "statuses": undefined,
+  },
+  "output_size": undefined,
+  "printable_pdf": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "metrics": Object {
+      "pdf_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_pages": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
+    "total": 0,
+  },
+  "printable_pdf_v2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "error_codes": Object {},
+    "execution_times": Object {
+      "avg": 13.01,
+      "max": 14,
+      "min": 12,
+    },
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "metrics": Object {
+      "csv_rows": Object {
+        "values": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "pdf_cpu": Object {
+        "values": Object {
+          "50.0": 0,
+          "75.0": 0,
+          "95.0": 0,
+          "99.0": 0,
+        },
+      },
+      "pdf_memory": Object {
+        "values": Object {
+          "50.0": 164.175,
+          "75.0": 165.3,
+          "95.0": 165.3,
+          "99.0": 165.3,
+        },
+      },
+      "pdf_pages": Object {
+        "values": Object {
+          "50.0": 1,
+          "75.0": 1,
+          "95.0": 1,
+          "99.0": 1,
+        },
+      },
+      "png_cpu": Object {
+        "values": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "png_memory": Object {
+        "values": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
+    "total": 3,
+  },
+  "queue_times": Object {},
+  "status": Object {
+    "completed": 2,
+    "failed": 1,
   },
   "statuses": Object {},
 }
@@ -2466,12 +3914,32 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": Object {},
+    "execution_times": Object {},
+    "layout": undefined,
+    "metrics": Object {
+      "png_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "png_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
     },
-    "output_size": undefined,
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
     "total": 1,
   },
   "PNGV2": Object {
@@ -2483,33 +3951,36 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "png_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "png_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
   "_all": 4,
   "available": true,
-  "browser_type": undefined,
-  "csv": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 1,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
-    },
-    "output_size": undefined,
-    "total": 1,
-  },
   "csv_searchsource": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2519,12 +3990,27 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": Object {},
+    "execution_times": Object {},
+    "layout": undefined,
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
     },
-    "total": 0,
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
+    "total": 1,
   },
   "csv_searchsource_immediate": Object {
     "app": Object {
@@ -2535,10 +4021,25 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
@@ -2553,12 +4054,32 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": Object {},
+      "execution_times": Object {},
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "png_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
       },
-      "output_size": undefined,
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
       "total": 1,
     },
     "PNGV2": Object {
@@ -2570,31 +4091,35 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "png_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
     "_all": 4,
-    "csv": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 1,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
-      "output_size": undefined,
-      "total": 1,
-    },
     "csv_searchsource": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -2604,12 +4129,27 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": Object {},
+      "execution_times": Object {},
+      "layout": undefined,
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
       },
-      "total": 0,
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "total": 1,
     },
     "csv_searchsource_immediate": Object {
       "app": Object {
@@ -2620,29 +4160,74 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
     "output_size": undefined,
     "printable_pdf": Object {
       "app": Object {
-        "canvas workpad": 1,
-        "dashboard": 1,
+        "canvas workpad": 0,
+        "dashboard": 0,
         "search": 0,
         "visualization": 0,
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": Object {},
+      "execution_times": Object {},
       "layout": Object {
         "canvas": 0,
-        "preserve_layout": 2,
+        "preserve_layout": 0,
         "print": 0,
       },
-      "output_size": undefined,
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_pages": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
       "total": 2,
     },
     "printable_pdf_v2": Object {
@@ -2654,13 +4239,45 @@ Object {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
       },
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_pages": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
       "total": 0,
     },
+    "queue_times": Object {},
     "status": Object {
       "completed": 4,
       "failed": 0,
@@ -2670,7 +4287,7 @@ Object {
         "PNG": Object {
           "dashboard": 1,
         },
-        "csv": Object {},
+        "csv_searchsource": Object {},
         "printable_pdf": Object {
           "canvas workpad": 1,
           "dashboard": 1,
@@ -2681,19 +4298,49 @@ Object {
   "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
-      "canvas workpad": 1,
-      "dashboard": 1,
+      "canvas workpad": 0,
+      "dashboard": 0,
       "search": 0,
       "visualization": 0,
     },
     "available": true,
     "deprecated": 0,
+    "error_codes": Object {},
+    "execution_times": Object {},
     "layout": Object {
       "canvas": 0,
-      "preserve_layout": 2,
+      "preserve_layout": 0,
       "print": 0,
     },
-    "output_size": undefined,
+    "metrics": Object {
+      "pdf_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_pages": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
     "total": 2,
   },
   "printable_pdf_v2": Object {
@@ -2705,13 +4352,45 @@ Object {
     },
     "available": true,
     "deprecated": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
     "layout": Object {
       "canvas": 0,
       "preserve_layout": 0,
       "print": 0,
     },
+    "metrics": Object {
+      "pdf_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_pages": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
     "total": 0,
   },
+  "queue_times": Object {},
   "status": Object {
     "completed": 4,
     "failed": 0,
@@ -2721,7 +4400,7 @@ Object {
       "PNG": Object {
         "dashboard": 1,
       },
-      "csv": Object {},
+      "csv_searchsource": Object {},
       "printable_pdf": Object {
         "canvas workpad": 1,
         "dashboard": 1,
@@ -2742,12 +4421,32 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": Object {},
+    "execution_times": Object {},
+    "layout": undefined,
+    "metrics": Object {
+      "png_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "png_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
     },
-    "output_size": undefined,
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
     "total": 1,
   },
   "PNGV2": Object {
@@ -2759,33 +4458,36 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "png_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "png_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
   "_all": 11,
   "available": true,
-  "browser_type": undefined,
-  "csv": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 1,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
-    },
-    "output_size": undefined,
-    "total": 1,
-  },
   "csv_searchsource": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2795,13 +4497,27 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": Object {},
+    "execution_times": Object {},
+    "layout": undefined,
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
     },
-    "output_size": undefined,
-    "total": 3,
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
+    "total": 1,
   },
   "csv_searchsource_immediate": Object {
     "app": Object {
@@ -2812,10 +4528,25 @@ Object {
     },
     "available": true,
     "deprecated": 0,
-    "layout": Object {
-      "canvas": 0,
-      "preserve_layout": 0,
-      "print": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
+    "layout": undefined,
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
     },
     "total": 0,
   },
@@ -2830,10 +4561,31 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "png_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
@@ -2846,30 +4598,35 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "png_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "png_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
     "_all": 0,
-    "csv": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
-      "total": 0,
-    },
     "csv_searchsource": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -2879,10 +4636,25 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
@@ -2895,10 +4667,25 @@ Object {
       },
       "available": true,
       "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
+      "layout": undefined,
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
@@ -2912,10 +4699,41 @@ Object {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
+      },
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_pages": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
       },
       "total": 0,
     },
@@ -2928,13 +4746,45 @@ Object {
       },
       "available": true,
       "deprecated": 0,
+      "error_codes": undefined,
+      "execution_times": undefined,
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
       },
+      "metrics": Object {
+        "pdf_cpu": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_memory": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+        "pdf_pages": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
+      "output_size": Object {
+        "1.0": null,
+        "25.0": null,
+        "5.0": null,
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
       "total": 0,
     },
+    "queue_times": Object {},
     "status": Object {
       "completed": 0,
       "failed": 0,
@@ -2945,18 +4795,48 @@ Object {
   "printable_pdf": Object {
     "app": Object {
       "canvas workpad": 0,
-      "dashboard": 6,
+      "dashboard": 0,
       "search": 0,
       "visualization": 0,
     },
     "available": true,
     "deprecated": 0,
+    "error_codes": Object {},
+    "execution_times": Object {},
     "layout": Object {
       "canvas": 0,
-      "preserve_layout": 5,
-      "print": 1,
+      "preserve_layout": 0,
+      "print": 0,
     },
-    "output_size": undefined,
+    "metrics": Object {
+      "pdf_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_pages": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
     "total": 6,
   },
   "printable_pdf_v2": Object {
@@ -2968,13 +4848,45 @@ Object {
     },
     "available": true,
     "deprecated": 0,
+    "error_codes": undefined,
+    "execution_times": undefined,
     "layout": Object {
       "canvas": 0,
       "preserve_layout": 0,
       "print": 0,
     },
+    "metrics": Object {
+      "pdf_cpu": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_memory": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+      "pdf_pages": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
+    "output_size": Object {
+      "1.0": null,
+      "25.0": null,
+      "5.0": null,
+      "50.0": null,
+      "75.0": null,
+      "95.0": null,
+      "99.0": null,
+    },
     "total": 0,
   },
+  "queue_times": Object {},
   "status": Object {
     "completed": 6,
     "completed_with_warnings": 2,
@@ -2983,11 +4895,8 @@ Object {
   },
   "statuses": Object {
     "completed": Object {
-      "csv": Object {
-        "search": 1,
-      },
       "csv_searchsource": Object {
-        "search": 3,
+        "search": 1,
       },
       "printable_pdf": Object {
         "dashboard": 2,

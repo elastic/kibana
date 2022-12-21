@@ -5,66 +5,44 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { ILicense } from '../../../../../licensing/common/types';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type {
+  GetAgentStatusResponse,
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesResponse,
+  UpdatePackagePolicyResponse,
+} from '@kbn/fleet-plugin/common';
+import type {
   AppLocation,
   Immutable,
   ProtectionFields,
   PolicyData,
   UIPolicyConfig,
-  PostTrustedAppCreateResponse,
-  GetTrustedListAppsResponse,
   MaybeImmutable,
 } from '../../../../common/endpoint/types';
-import { ServerApiError } from '../../../common/types';
-import {
-  GetAgentStatusResponse,
-  GetOnePackagePolicyResponse,
-  GetPackagePoliciesResponse,
-  GetPackagesResponse,
-  UpdatePackagePolicyResponse,
-} from '../../../../../fleet/common';
-import { AsyncResourceState } from '../../state';
-import { ImmutableMiddlewareAPI } from '../../../common/store';
-import { AppAction } from '../../../common/store/actions';
+import type { ServerApiError } from '../../../common/types';
+import type { ImmutableMiddlewareAPI } from '../../../common/store';
+import type { AppAction } from '../../../common/store/actions';
+
+export type PolicyDetailsStore = ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>;
 
 /**
  * Function that runs Policy Details middleware
  */
 export type MiddlewareRunner = (
-  coreStart: CoreStart,
-  store: ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>,
+  context: MiddlewareRunnerContext,
+  store: PolicyDetailsStore,
   action: MaybeImmutable<AppAction>
 ) => Promise<void>;
 
-/**
- * Policy list store state
- */
-export interface PolicyListState {
-  /** Array of policy items  */
-  policyItems: PolicyData[];
-  /** Information about the latest endpoint package */
-  endpointPackageInfo?: GetPackagesResponse['response'][0];
-  /** API error if loading data failed */
-  apiError?: ServerApiError;
-  /** total number of policies */
-  total: number;
-  /** Number of policies per page */
-  pageSize: number;
-  /** page number (zero based) */
-  pageIndex: number;
-  /** data is being retrieved from server */
-  isLoading: boolean;
-  /** current location information */
-  location?: Immutable<AppLocation>;
-  /** policy is being deleted */
-  isDeleting: boolean;
-  /** Deletion status */
-  deleteStatus?: boolean;
-  /** A summary of stats for the agents associated with a given Fleet Agent Policy */
-  agentStatusSummary?: GetAgentStatusResponse['results'];
+export interface MiddlewareRunnerContext {
+  coreStart: CoreStart;
 }
+
+export type PolicyDetailsSelector<T = unknown> = (
+  state: Immutable<PolicyDetailsState>
+) => Immutable<T>;
 
 /**
  * Policy details store state
@@ -96,25 +74,17 @@ export interface PolicyDetailsState {
 export interface PolicyArtifactsState {
   /** artifacts location params  */
   location: PolicyDetailsArtifactsPageLocation;
-  /** A list of artifacts can be linked to the policy  */
-  assignableList: AsyncResourceState<GetTrustedListAppsResponse>;
-  /** Represents if avaialble trusted apps entries exist, regardless of whether the list is showing results  */
-  assignableListEntriesExist: AsyncResourceState<boolean>;
-  /** A list of trusted apps going to be updated  */
-  trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
 }
 
-export enum OS {
-  windows = 'windows',
-  mac = 'mac',
-  linux = 'linux',
-}
-
-export interface PolicyDetailsArtifactsPageLocation {
-  page_index: number;
-  page_size: number;
-  show?: 'list';
+export interface PolicyDetailsArtifactsPageListLocationParams {
+  page: number;
+  pageSize: number;
   filter: string;
+}
+
+export interface PolicyDetailsArtifactsPageLocation
+  extends PolicyDetailsArtifactsPageListLocationParams {
+  show?: 'list';
 }
 
 /**
@@ -168,8 +138,8 @@ export type PolicyProtection =
       UIPolicyConfig['windows'],
       'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection'
     >
-  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection'>
-  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection'>;
+  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection' | 'memory_protection'>
+  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection' | 'memory_protection'>;
 
 export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
 

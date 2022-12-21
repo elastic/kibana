@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   Logger,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsExportTransformContext,
-} from 'kibana/server';
+} from '@kbn/core/server';
+import type { CaseUserActionAttributes, CommentAttributes } from '../../../common/api';
 import {
-  CaseUserActionAttributes,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-  CommentAttributes,
   MAX_DOCS_PER_PAGE,
   SAVED_OBJECT_TYPES,
-} from '../../../common';
-import { createCaseError, defaultSortField } from '../../common';
-import { ESCaseAttributes } from '../../services/cases/types';
+} from '../../../common/constants';
+import { defaultSortField } from '../../common/utils';
+import { createCaseError } from '../../common/error';
+import type { ESCaseAttributes } from '../../services/cases/types';
 
 export async function handleExport({
   context,
@@ -75,7 +75,7 @@ async function getAttachmentsAndUserActionsForCases(
     getAssociatedObjects<CaseUserActionAttributes>({
       savedObjectsClient,
       caseIds,
-      sortField: 'action_at',
+      sortField: defaultSortField,
       type: CASE_USER_ACTION_SAVED_OBJECT,
     }),
   ]);

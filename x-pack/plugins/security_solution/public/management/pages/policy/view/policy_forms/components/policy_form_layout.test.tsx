@@ -9,38 +9,46 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { PolicyFormLayout } from './policy_form_layout';
-import '../../../../../../common/mock/match_media.ts';
+import '../../../../../../common/mock/match_media';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import {
-  AppContextTestRender,
   createAppRootMockRenderer,
+  resetReactDomCreatePortalMock,
 } from '../../../../../../common/mock/endpoint';
-import { getPolicyDetailPath, getEndpointListPath } from '../../../../../common/routing';
+import { getPolicyDetailPath, getPoliciesPath } from '../../../../../common/routing';
 import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
 import { licenseService } from '../../../../../../common/hooks/use_license';
+import { PACKAGE_POLICY_API_ROOT, AGENT_API_ROUTES } from '@kbn/fleet-plugin/common';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/components/user_privileges/__mocks__';
 
 jest.mock('../../../../../../common/hooks/use_license');
+jest.mock('../../../../../../common/components/user_privileges');
+
+const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 describe('Policy Form Layout', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
 
   const policyDetailsPathUrl = getPolicyDetailPath('1');
-  const endpointListPath = getEndpointListPath({ name: 'endpointList' });
+  const policyListPath = getPoliciesPath();
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
-  let middlewareSpy: AppContextTestRender['middlewareSpy'];
   let http: typeof coreStart.http;
   let render: (ui: Parameters<typeof mount>[0]) => ReturnType<typeof mount>;
   let policyPackagePolicy: ReturnType<typeof generator.generatePolicyPackagePolicy>;
   let policyFormLayoutView: ReturnType<typeof render>;
 
+  beforeAll(() => resetReactDomCreatePortalMock());
+
   beforeEach(() => {
     const appContextMockRenderer = createAppRootMockRenderer();
     const AppWrapper = appContextMockRenderer.AppWrapper;
 
-    ({ history, coreStart, middlewareSpy } = appContextMockRenderer);
+    ({ history, coreStart } = appContextMockRenderer);
     render = (ui) => mount(ui, { wrappingComponent: AppWrapper });
     http = coreStart.http;
   });
@@ -52,33 +60,6 @@ describe('Policy Form Layout', () => {
     jest.clearAllMocks();
   });
 
-  describe('when displayed with invalid id', () => {
-    let releaseApiFailure: () => void;
-    beforeEach(() => {
-      http.get.mockImplementation(async () => {
-        await new Promise((_, reject) => {
-          releaseApiFailure = reject.bind(null, new Error('policy not found'));
-        });
-      });
-      history.push(policyDetailsPathUrl);
-      policyFormLayoutView = render(<PolicyFormLayout />);
-    });
-
-    it('should NOT display timeline', async () => {
-      expect(policyFormLayoutView.find('flyoutOverlay')).toHaveLength(0);
-    });
-
-    it('should show loader followed by error message', async () => {
-      expect(policyFormLayoutView.find('EuiLoadingSpinner').length).toBe(1);
-      releaseApiFailure();
-      await middlewareSpy.waitForAction('serverFailedToReturnPolicyDetailsData');
-      policyFormLayoutView.update();
-      const callout = policyFormLayoutView.find('EuiCallOut');
-      expect(callout).toHaveLength(1);
-      expect(callout.prop('color')).toEqual('danger');
-      expect(callout.text()).toEqual('policy not found');
-    });
-  });
   describe('when displayed with valid id', () => {
     let asyncActions: Promise<unknown> = Promise.resolve();
 
@@ -92,7 +73,7 @@ describe('Policy Form Layout', () => {
         const [path] = args;
         if (typeof path === 'string') {
           // GET datasouce
-          if (path === '/api/fleet/package_policies/1') {
+          if (path === `${PACKAGE_POLICY_API_ROOT}/1`) {
             asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
             return Promise.resolve({
               item: policyPackagePolicy,
@@ -101,7 +82,7 @@ describe('Policy Form Layout', () => {
           }
 
           // GET Agent status for agent policy
-          if (path === '/api/fleet/agent-status') {
+          if (path === `${AGENT_API_ROUTES.STATUS_PATTERN}`) {
             asyncActions = asyncActions.then(async () => sleep());
             return Promise.resolve({
               results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },
@@ -146,8 +127,8 @@ describe('Policy Form Layout', () => {
       cancelbutton.simulate('click', { button: 0 });
       const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
       expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
-        'securitySolution',
-        { path: endpointListPath },
+        'securitySolutionUI',
+        { path: policyListPath },
       ]);
     });
     it('should display save button', async () => {
@@ -159,6 +140,14 @@ describe('Policy Form Layout', () => {
       expect(saveButton).toHaveLength(1);
       expect(saveButton.text()).toEqual('Save');
     });
+    it('should display beta badge', async () => {
+      await asyncActions;
+      policyFormLayoutView.update();
+      const saveButton = policyFormLayoutView.find('EuiBetaBadge');
+      expect(saveButton).toHaveLength(1);
+      expect(saveButton.text()).toEqual('beta');
+    });
+
     describe('when the save button is clicked', () => {
       let saveButton: FindReactWrapperResponse;
       let confirmModal: FindReactWrapperResponse;
@@ -168,9 +157,7 @@ describe('Policy Form Layout', () => {
       beforeEach(async () => {
         await asyncActions;
         policyFormLayoutView.update();
-        saveButton = policyFormLayoutView.find(
-          'EuiButton[data-test-subj="policyDetailsSaveButton"]'
-        );
+        saveButton = policyFormLayoutView.find('button[data-test-subj="policyDetailsSaveButton"]');
         saveButton.simulate('click');
         policyFormLayoutView.update();
         confirmModal = policyFormLayoutView.find(
@@ -184,7 +171,7 @@ describe('Policy Form Layout', () => {
           asyncActions = asyncActions.then(async () => sleep());
           const [path] = args;
           if (typeof path === 'string') {
-            if (path === '/api/fleet/package_policies/1') {
+            if (path === `${PACKAGE_POLICY_API_ROOT}/1`) {
               return Promise.resolve({
                 item: policyPackagePolicy,
                 success: true,
@@ -198,9 +185,9 @@ describe('Policy Form Layout', () => {
 
       it('should show a modal confirmation', () => {
         expect(confirmModal).toHaveLength(1);
-        expect(confirmModal.find('div[data-test-subj="confirmModalTitleText"]').text()).toEqual(
-          'Save and deploy changes'
-        );
+        expect(
+          confirmModal.find('[data-test-subj="confirmModalTitleText"]').first().text()
+        ).toEqual('Save and deploy changes');
         expect(modalCancelButton.text()).toEqual('Cancel');
         expect(modalConfirmButton.text()).toEqual('Save and deploy changes');
       });
@@ -210,7 +197,7 @@ describe('Policy Form Layout', () => {
         );
         expect(warningCallout).toHaveLength(1);
         expect(warningCallout.text()).toEqual(
-          'This action will update 5 hostsSaving these changes will apply updates to all endpoints assigned to this agent policy.'
+          'This action will update 5 endpointsSaving these changes will apply updates to all endpoints assigned to this agent policy.'
         );
       });
       it('should close dialog if cancel button is clicked', () => {
@@ -229,7 +216,7 @@ describe('Policy Form Layout', () => {
 
         // API should be called
         await asyncActions;
-        expect(http.put.mock.calls[0][0]).toEqual(`/api/fleet/package_policies/1`);
+        expect(http.put.mock.calls[0][0]).toEqual(`${PACKAGE_POLICY_API_ROOT}/1`);
         policyFormLayoutView.update();
 
         // Toast notification should be shown
@@ -256,6 +243,7 @@ describe('Policy Form Layout', () => {
         });
       });
     });
+
     describe('when the subscription tier is platinum or higher', () => {
       beforeEach(() => {
         (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
@@ -307,6 +295,7 @@ describe('Policy Form Layout', () => {
         expect(ransomware).toHaveLength(1);
       });
     });
+
     describe('when the subscription tier is gold or lower', () => {
       beforeEach(() => {
         (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
@@ -344,9 +333,45 @@ describe('Policy Form Layout', () => {
         expect(ransomware).toHaveLength(0);
       });
 
-      it('shows the locked card in place of 1 paid feature', () => {
+      it('shows the locked card in place of paid features', () => {
         const lockedCard = policyFormLayoutView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
-        expect(lockedCard).toHaveLength(3);
+        expect(lockedCard).toHaveLength(4);
+      });
+    });
+
+    describe('and user has only READ privilege', () => {
+      beforeEach(() => {
+        const mockedPrivileges = getUserPrivilegesMockDefaultValue();
+        mockedPrivileges.endpointPrivileges.canWritePolicyManagement = false;
+        mockedPrivileges.endpointPrivileges.canAccessFleet = false;
+
+        useUserPrivilegesMock.mockReturnValue(mockedPrivileges);
+
+        policyFormLayoutView = render(<PolicyFormLayout />);
+      });
+
+      afterEach(() => {
+        useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
+      });
+
+      it('should not display the Save button', () => {
+        expect(
+          policyFormLayoutView.find('EuiButton[data-test-subj="policyDetailsSaveButton"]')
+        ).toHaveLength(0);
+      });
+
+      it('should display all form controls as disabled', () => {
+        policyFormLayoutView
+          .find('button[data-test-subj="advancedPolicyButton"]')
+          .simulate('click');
+
+        const inputElements = policyFormLayoutView.find('input');
+
+        expect(inputElements.length).toBeGreaterThan(0);
+
+        inputElements.forEach((element) => {
+          expect(element.prop('disabled')).toBe(true);
+        });
       });
     });
   });

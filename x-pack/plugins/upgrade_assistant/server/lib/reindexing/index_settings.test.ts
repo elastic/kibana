@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { mockKibanaSemverVersion, mockKibanaVersion } from '../../../common/constants';
 import { versionService } from '../version';
 import { getMockVersionInfo } from '../__fixtures__/version';
 
@@ -40,7 +39,6 @@ describe('transformFlatSettings', () => {
           'index.number_of_shards': '5',
 
           // Blacklisted settings
-          // @ts-expect-error @elastic/elasticsearch doesn't declare it
           'index.allocation.existing_shards_allocator': 'gateway_allocator',
           'index.blocks.write': 'true',
           'index.creation_date': '1547052614626',
@@ -64,6 +62,7 @@ describe('transformFlatSettings', () => {
           'index.verified_before_close': 'true',
           'index.version.created': '123123',
           'index.version.upgraded': '123123',
+          'index.mapper.dynamic': 'true',
 
           // Deprecated settings
           'index.force_memory_term_dictionary': '1024',
@@ -90,7 +89,6 @@ describe('transformFlatSettings', () => {
           'index.number_of_shards': '5',
 
           // Deprecated settings
-          // @ts-expect-error @elastic/elasticsearch doesn't declare it
           'index.soft_deletes.enabled': 'true',
           'index.translog.retention.size': '5b',
         },
@@ -114,7 +112,6 @@ describe('transformFlatSettings', () => {
           'index.number_of_shards': '5',
 
           // Deprecated settings
-          // @ts-expect-error @elastic/elasticsearch doesn't declare it
           'index.soft_deletes.enabled': 'true',
           'index.translog.retention.age': '5d',
         },
@@ -131,7 +128,7 @@ describe('transformFlatSettings', () => {
 
   describe('sourceNameForIndex', () => {
     beforeEach(() => {
-      versionService.setup(mockKibanaVersion);
+      versionService.setup('8.0.0');
     });
 
     it('parses internal indices', () => {
@@ -152,7 +149,7 @@ describe('transformFlatSettings', () => {
 
   describe('generateNewIndexName', () => {
     beforeEach(() => {
-      versionService.setup(mockKibanaVersion);
+      versionService.setup('8.0.0');
     });
 
     it('parses internal indices', () => {
@@ -186,7 +183,7 @@ describe('transformFlatSettings', () => {
       ).toEqual([]);
     });
 
-    if (mockKibanaSemverVersion.major === 7) {
+    if (currentMajor === 7) {
       describe('[7.x] customTypeName warning', () => {
         it('returns customTypeName warning for non-_doc mapping types', () => {
           expect(
@@ -219,7 +216,6 @@ describe('transformFlatSettings', () => {
             getReindexWarnings({
               settings: {
                 // Deprecated settings
-                // @ts-expect-error @elastic/elasticsearch doesn't declare it
                 'index.force_memory_term_dictionary': '1024',
                 'index.max_adjacency_matrix_filters': 'true',
                 'index.soft_deletes.enabled': 'true',

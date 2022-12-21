@@ -12,12 +12,12 @@ import {
   EuiResizeObserver,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { throttle } from 'lodash';
 import {
   Chart,
+  BrushEndListener,
   Settings,
   Heatmap,
   HeatmapElementEvent,
@@ -28,10 +28,14 @@ import {
   HeatmapBrushEvent,
   Position,
   ScaleType,
+  PartialTheme,
+  HeatmapStyle,
 } from '@elastic/charts';
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
+import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
+import { css } from '@emotion/react';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
@@ -44,12 +48,7 @@ import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { useUiSettings } from '../contexts/kibana';
-import {
-  Y_AXIS_LABEL_WIDTH,
-  Y_AXIS_LABEL_PADDING,
-  X_AXIS_RIGHT_OVERFLOW,
-} from './swimlane_annotation_container';
-import { AnnotationsTable } from '../../../common/types/annotations';
+import { Y_AXIS_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './swimlane_annotation_container';
 import { useCurrentEuiTheme } from '../components/color_range_legend';
 
 declare global {
@@ -68,14 +67,10 @@ function getFormattedSeverityScore(score: number): string {
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */
 const RESIZE_THROTTLE_TIME_MS = 500;
+const BORDER_WIDTH = 1;
 const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
-/**
- * Minimum container height to make sure "No data" message is displayed without overflow.
- */
-const MIN_CONTAINER_HEIGHT = 40;
-
-const Y_AXIS_HEIGHT = 24;
+const X_AXIS_HEIGHT = 24;
 
 export const SWIM_LANE_LABEL_WIDTH = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
 
@@ -140,13 +135,12 @@ const SwimLaneTooltip =
 
 export interface SwimlaneProps {
   filterActive?: boolean;
-  maskAll?: boolean;
   timeBuckets: InstanceType<typeof TimeBucketsClass>;
   showLegend?: boolean;
   swimlaneData: OverallSwimlaneData | ViewBySwimLaneData;
   swimlaneType: SwimlaneType;
-  selection?: AppStateSelectedCells;
-  onCellsSelection: (payload?: AppStateSelectedCells) => void;
+  selection?: AppStateSelectedCells | null;
+  onCellsSelection?: (payload?: AppStateSelectedCells) => void;
   'data-test-subj'?: string;
   onResize: (width: number) => void;
   fromPage?: number;
@@ -163,7 +157,9 @@ export interface SwimlaneProps {
    * Enables/disables timeline on the X-axis.
    */
   showTimeline?: boolean;
-  annotationsData?: AnnotationsTable['annotationsData'];
+  showYAxis?: boolean;
+  yAxisWidth?: HeatmapStyle['yAxisLabel']['width'];
+  chartsService: ChartsPluginStart;
 }
 
 /**
@@ -185,11 +181,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   selection,
   onCellsSelection,
   timeBuckets,
-  maskAll,
+  chartsService,
   showTimeline = true,
+  showYAxis = true,
   showLegend = true,
-  annotationsData,
   'data-test-subj': dataTestSubj,
+  yAxisWidth,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
@@ -199,6 +196,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       const resultNewWidth = e.width - SWIM_LANE_LABEL_WIDTH;
@@ -219,7 +217,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
     return swimlaneData.points
       .map((v) => {
-        const formatted = { ...v, time: v.time * 1000 };
+        const formatted = { ...v, time: v.time * 1000, value: v.value === 0 ? null : v.value };
         if (showFilterContext) {
           formatted.laneLabel = i18n.translate('xpack.ml.explorer.overallSwimlaneUnfilteredLabel', {
             defaultMessage: '{label} (unfiltered)',
@@ -234,8 +232,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         aIndex = aIndex > -1 ? aIndex : sortedLaneValues.length;
         bIndex = bIndex > -1 ? bIndex : sortedLaneValues.length;
         return aIndex - bIndex;
-      })
-      .filter((v) => v.value > 0);
+      });
   }, [swimlaneData?.points, filterActive, swimlaneType, swimlaneData?.laneLabels]);
 
   const showSwimlane = swimlaneData?.laneLabels?.length > 0 && swimLanePoints.length > 0;
@@ -254,11 +251,11 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     return isLoading
       ? containerHeightRef.current
       : // TODO update when elastic charts X label will be fixed
-        Math.max(
-          rowsCount * CELL_HEIGHT + (showLegend ? LEGEND_HEIGHT : 0) + (true ? Y_AXIS_HEIGHT : 0),
-          MIN_CONTAINER_HEIGHT
-        );
-  }, [isLoading, rowsCount, showTimeline]);
+        rowsCount * (CELL_HEIGHT + BORDER_WIDTH * 2) +
+          (showLegend ? LEGEND_HEIGHT : 0) +
+          (showTimeline ? X_AXIS_HEIGHT : 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, rowsCount]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -280,76 +277,63 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     }
 
     return { x: selection.times.map((v) => v * 1000), y: selection.lanes };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selection, swimlaneData, swimlaneType]);
 
-  const swimLaneConfig = useMemo<HeatmapSpec['config']>(() => {
+  const showBrush = !!onCellsSelection;
+
+  const themeOverrides = useMemo<PartialTheme>(() => {
     if (!showSwimlane) return {};
 
-    const config: HeatmapSpec['config'] = {
-      onBrushEnd: (e: HeatmapBrushEvent) => {
-        if (!e.cells.length) return;
-
-        onCellsSelection({
-          lanes: e.y as string[],
-          times: e.x.map((v) => (v as number) / 1000) as [number, number],
-          type: swimlaneType,
-          viewByFieldName: swimlaneData.fieldName,
-        });
-      },
-      grid: {
-        cellHeight: {
-          min: CELL_HEIGHT,
-          max: CELL_HEIGHT,
+    const theme: PartialTheme = {
+      heatmap: {
+        grid: {
+          cellHeight: {
+            min: CELL_HEIGHT,
+            max: CELL_HEIGHT,
+          },
+          stroke: {
+            width: BORDER_WIDTH,
+            color: euiTheme.euiBorderColor,
+          },
         },
-        stroke: {
-          width: 1,
-          color: euiTheme.euiBorderColor,
+        cell: {
+          maxWidth: 'fill',
+          maxHeight: 'fill',
+          label: {
+            visible: false,
+          },
+          border: {
+            stroke: euiTheme.euiBorderColor,
+            strokeWidth: 0,
+          },
         },
-      },
-      cell: {
-        maxWidth: 'fill',
-        maxHeight: 'fill',
-        label: {
-          visible: false,
+        yAxisLabel: {
+          visible: showYAxis,
+          width: yAxisWidth,
+          textColor: euiTheme.euiTextSubduedColor,
+          padding: Y_AXIS_LABEL_PADDING,
+          fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
         },
-        border: {
-          stroke: euiTheme.euiBorderColor,
-          strokeWidth: 0,
+        xAxisLabel: {
+          visible: showTimeline,
+          textColor: euiTheme.euiTextSubduedColor,
+          fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
         },
-      },
-      yAxisLabel: {
-        visible: true,
-        width: Y_AXIS_LABEL_WIDTH,
-        textColor: euiTheme.euiTextSubduedColor,
-        padding: Y_AXIS_LABEL_PADDING,
-        formatter: (laneLabel: string) => {
-          return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : laneLabel;
+        brushMask: {
+          visible: showBrush,
+          fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
         },
-        fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
-      },
-      xAxisLabel: {
-        visible: true,
-        textColor: euiTheme.euiTextSubduedColor,
-        formatter: (v: number) => {
-          timeBuckets.setInterval(`${swimlaneData.interval}s`);
-          const scaledDateFormat = timeBuckets.getScaledDateFormat();
-          return moment(v).format(scaledDateFormat);
+        brushArea: {
+          visible: showBrush,
+          stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
         },
-        fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
-        // Required to calculate where the swimlane ends
-        width: X_AXIS_RIGHT_OVERFLOW * 2,
+        ...(showLegend ? { maxLegendHeight: LEGEND_HEIGHT } : {}),
       },
-      brushMask: {
-        fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
-      },
-      brushArea: {
-        stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
-      },
-      ...(showLegend ? { maxLegendHeight: LEGEND_HEIGHT } : {}),
-      timeZone: 'UTC',
     };
 
-    return config;
+    return theme;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     showSwimlane,
     swimlaneType,
@@ -359,8 +343,16 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     onCellsSelection,
   ]);
 
+  const chartRef = useRef(null);
+
+  const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
+    isDateHistogram: true,
+  });
+
   const onElementClick = useCallback(
     (e: HeatmapElementEvent[]) => {
+      if (!onCellsSelection) return;
+
       const cell = e[0][0];
       const startTime = (cell.datum.x as number) / 1000;
       const payload = {
@@ -396,6 +388,21 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneData]
   );
 
+  const onBrushEnd = (e: HeatmapBrushEvent) => {
+    if (!e.cells.length || !showBrush) return;
+
+    if (typeof onCellsSelection === 'function') {
+      onCellsSelection({
+        lanes: e.y as string[],
+        times: e.x!.map((v) => (v as number) / 1000) as [number, number],
+        type: swimlaneType,
+        viewByFieldName: swimlaneData.fieldName,
+      });
+    }
+  };
+
+  const noSwimLaneData = !isLoading && !showSwimlane && !!noDataWarning;
+
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -403,34 +410,49 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         <EuiFlexGroup
           gutterSize={'none'}
           direction={'column'}
-          style={{ width: '100%', height: '100%', overflow: 'hidden' }}
           ref={resizeRef}
           data-test-subj={dataTestSubj}
+          css={{
+            width: '100%',
+            height: '100%',
+            overflow: 'hidden',
+          }}
         >
           <EuiFlexItem
-            style={{
+            css={{
               width: '100%',
-              overflowY: 'auto',
-              overflowX: 'hidden',
+              'overflow-y': 'auto',
+              'overflow-x': 'hidden',
             }}
             grow={false}
           >
             <>
               <div>
-                <div style={{ height: `${containerHeight}px`, position: 'relative' }}>
+                <div
+                  style={{ height: `${containerHeight}px` }}
+                  css={css`
+                    position: relative;
+                  `}
+                  hidden={noSwimLaneData}
+                >
                   {showSwimlane && !isLoading && (
-                    <Chart className={'mlSwimLaneContainer'}>
+                    <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
                       <Settings
+                        // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+                        theme={themeOverrides}
                         onElementClick={onElementClick}
+                        onPointerUpdate={handleCursorUpdate}
                         showLegend={showLegend}
                         legendPosition={Position.Top}
                         xDomain={xDomain}
                         tooltip={tooltipOptions}
                         debugState={window._echDebugStateFlag ?? false}
+                        onBrushEnd={onBrushEnd as BrushEndListener}
                       />
 
                       <Heatmap
                         id={id}
+                        timeZone="UTC"
                         colorScale={{
                           type: 'bands',
                           bands: [
@@ -467,9 +489,25 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         valueAccessor="value"
                         highlightedData={highlightedData}
                         valueFormatter={getFormattedSeverityScore}
-                        xScaleType={ScaleType.Time}
+                        xScale={{
+                          type: ScaleType.Time,
+                          interval: {
+                            type: 'fixed',
+                            unit: 'ms',
+                            // the xDomain.minInterval should always be available at rendering time
+                            // adding a fallback to 1m bucket
+                            value: xDomain?.minInterval ?? 1000 * 60,
+                          },
+                        }}
                         ySortPredicate="dataIndex"
-                        config={swimLaneConfig}
+                        yAxisLabelFormatter={(laneLabel) => {
+                          return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : String(laneLabel);
+                        }}
+                        xAxisLabelFormatter={(v) => {
+                          timeBuckets.setInterval(`${swimlaneData.interval}s`);
+                          const scaledDateFormat = timeBuckets.getScaledDateFormat();
+                          return moment(v).format(scaledDateFormat);
+                        }}
                       />
                     </Chart>
                   )}
@@ -491,14 +529,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                       />
                     </EuiText>
                   )}
-                  {!isLoading && !showSwimlane && (
-                    <EuiEmptyPrompt
-                      titleSize="xxs"
-                      style={{ padding: 0 }}
-                      title={<h2>{noDataWarning}</h2>}
-                    />
-                  )}
                 </div>
+                {noSwimLaneData ? <>{noDataWarning}</> : null}
               </div>
             </>
           </EuiFlexItem>

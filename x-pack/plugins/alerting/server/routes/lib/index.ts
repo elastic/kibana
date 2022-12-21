@@ -11,6 +11,14 @@ export {
   isSecurityPluginDisabledError,
 } from './error_handler';
 export { renameKeys } from './rename_keys';
-export { AsApiContract, RewriteRequestCase, RewriteResponseCase } from './rewrite_request_case';
+export type {
+  AsApiContract,
+  RewriteRequestCase,
+  RewriteResponseCase,
+} from './rewrite_request_case';
 export { verifyAccessAndContext } from './verify_access_and_context';
 export { countUsageOfPredefinedIds } from './count_usage_of_predefined_ids';
+export { rewriteActions } from './rewrite_actions';
+export { actionsSchema } from './actions_schema';
+export { rewriteRule, rewriteRuleLastRun } from './rewrite_rule';
+export { rewriteNamespaces } from './rewrite_namespaces';

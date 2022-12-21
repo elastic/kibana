@@ -1,50 +1,12 @@
-@import '@elastic/eui/src/components/flyout/variables';
-@import '@elastic/eui/src/components/flyout/mixins';
+.lnsLayerAddButton:hover {
+  text-decoration: none;
 
-.lnsDimensionContainer {
-  // Use the EuiFlyout style
-  @include euiFlyout;
-  // But with custom positioning to keep it within the sidebar contents
-  position: absolute;
-  left: 0;
-  animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
-
-  @include euiBreakpoint('l', 'xl') {
-    top: 0 !important;
-    height: 100% !important;
+  .lnsLayerAddButton__label {
+    text-decoration: underline;
   }
 
-  @include euiBreakpoint('xs', 's', 'm') {
-    @include euiFlyout;
+  .lnsLayerAddButton__techBadge,
+  .lnsLayerAddButton__techBadge * {
+    cursor: pointer;
   }
-
-  .lnsFrameLayout__sidebar-isFullscreen & {
-    border-left: $euiBorderThin; // Force border regardless of theme in fullscreen
-    box-shadow: none;
-  }
-}
-
-.lnsDimensionContainer__header {
-  padding: $euiSize;
-
-  .lnsFrameLayout__sidebar-isFullscreen & {
-    display: none;
-  }
-}
-
-.lnsDimensionContainer__content {
-  @include euiYScroll;
-  flex: 1;
-}
-
-.lnsDimensionContainer__footer {
-  padding: $euiSize;
-
-  .lnsFrameLayout__sidebar-isFullscreen & {
-    display: none;
-  }
-}
-
-.lnsBody--overflowHidden {
-  overflow: hidden;
 }

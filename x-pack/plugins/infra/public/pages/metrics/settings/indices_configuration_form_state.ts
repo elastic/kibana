@@ -6,9 +6,13 @@
  */
 
 import { ReactNode, useCallback, useMemo, useState } from 'react';
+
 import {
+  aggregateValidationErrors,
   createInputFieldProps,
   createInputRangeFieldProps,
+  validateInputFieldHasNotEmptyEntries,
+  validateInputFieldHasNotEmptySpaces,
   validateInputFieldNotEmpty,
 } from './input_fields';
 
@@ -16,11 +20,6 @@ interface FormState {
   name: string;
   description: string;
   metricAlias: string;
-  containerField: string;
-  hostField: string;
-  podField: string;
-  tiebreakerField: string;
-  timestampField: string;
   anomalyThreshold: number;
 }
 
@@ -46,7 +45,7 @@ export const useIndicesConfigurationFormState = ({
   const nameFieldProps = useMemo(
     () =>
       createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.name),
+        errors: aggregateValidationErrors<string>(validateInputFieldNotEmpty)(formState.name),
         name: 'name',
         onChange: (name) => setFormStateChanges((changes) => ({ ...changes, name })),
         value: formState.name,
@@ -56,70 +55,22 @@ export const useIndicesConfigurationFormState = ({
   const metricAliasFieldProps = useMemo(
     () =>
       createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.metricAlias),
+        errors: aggregateValidationErrors<string>(
+          validateInputFieldNotEmpty,
+          validateInputFieldHasNotEmptyEntries,
+          validateInputFieldHasNotEmptySpaces
+        )(formState.metricAlias),
         name: 'metricAlias',
         onChange: (metricAlias) => setFormStateChanges((changes) => ({ ...changes, metricAlias })),
         value: formState.metricAlias,
       }),
     [formState.metricAlias]
   );
-  const containerFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.containerField),
-        name: `containerField`,
-        onChange: (containerField) =>
-          setFormStateChanges((changes) => ({ ...changes, containerField })),
-        value: formState.containerField,
-      }),
-    [formState.containerField]
-  );
-  const hostFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.hostField),
-        name: `hostField`,
-        onChange: (hostField) => setFormStateChanges((changes) => ({ ...changes, hostField })),
-        value: formState.hostField,
-      }),
-    [formState.hostField]
-  );
-  const podFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.podField),
-        name: `podField`,
-        onChange: (podField) => setFormStateChanges((changes) => ({ ...changes, podField })),
-        value: formState.podField,
-      }),
-    [formState.podField]
-  );
-  const tiebreakerFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.tiebreakerField),
-        name: `tiebreakerField`,
-        onChange: (tiebreakerField) =>
-          setFormStateChanges((changes) => ({ ...changes, tiebreakerField })),
-        value: formState.tiebreakerField,
-      }),
-    [formState.tiebreakerField]
-  );
-  const timestampFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.timestampField),
-        name: `timestampField`,
-        onChange: (timestampField) =>
-          setFormStateChanges((changes) => ({ ...changes, timestampField })),
-        value: formState.timestampField,
-      }),
-    [formState.timestampField]
-  );
+
   const anomalyThresholdFieldProps = useMemo(
     () =>
       createInputRangeFieldProps({
-        errors: validateInputFieldNotEmpty(formState.anomalyThreshold),
+        errors: aggregateValidationErrors(validateInputFieldNotEmpty)(formState.anomalyThreshold),
         name: 'anomalyThreshold',
         onChange: (anomalyThreshold) =>
           setFormStateChanges((changes) => ({ ...changes, anomalyThreshold })),
@@ -132,23 +83,9 @@ export const useIndicesConfigurationFormState = ({
     () => ({
       name: nameFieldProps,
       metricAlias: metricAliasFieldProps,
-      containerField: containerFieldFieldProps,
-      hostField: hostFieldFieldProps,
-      podField: podFieldFieldProps,
-      tiebreakerField: tiebreakerFieldFieldProps,
-      timestampField: timestampFieldFieldProps,
       anomalyThreshold: anomalyThresholdFieldProps,
     }),
-    [
-      nameFieldProps,
-      metricAliasFieldProps,
-      containerFieldFieldProps,
-      hostFieldFieldProps,
-      podFieldFieldProps,
-      tiebreakerFieldFieldProps,
-      timestampFieldFieldProps,
-      anomalyThresholdFieldProps,
-    ]
+    [nameFieldProps, metricAliasFieldProps, anomalyThresholdFieldProps]
   );
 
   const errors = useMemo(
@@ -179,10 +116,5 @@ const defaultFormState: FormState = {
   name: '',
   description: '',
   metricAlias: '',
-  containerField: '',
-  hostField: '',
-  podField: '',
-  tiebreakerField: '',
-  timestampField: '',
   anomalyThreshold: 0,
 };

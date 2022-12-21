@@ -6,21 +6,38 @@
  */
 
 export { parseDuration, validateDurationSchema } from '../../common/parse_duration';
-export { ILicenseState, LicenseState } from './license_state';
-export { validateAlertTypeParams } from './validate_alert_type_params';
-export { getAlertNotifyWhenType } from './get_alert_notify_when_type';
+export type { ILicenseState } from './license_state';
+export { LicenseState } from './license_state';
+export { validateRuleTypeParams } from './validate_rule_type_params';
+export { validateMutatedRuleTypeParams } from './validate_mutated_rule_type_params';
+export { getRuleNotifyWhenType } from './get_rule_notify_when_type';
 export { verifyApiAccess } from './license_api_access';
 export { ErrorWithReason, getReasonFromError, isErrorWithReason } from './error_with_reason';
-export {
-  AlertTypeDisabledError,
-  AlertTypeDisabledReason,
+export type {
+  RuleTypeDisabledReason,
   ErrorThatHandlesItsOwnResponse,
-  isErrorThatHandlesItsOwnResponse,
   ElasticsearchError,
 } from './errors';
+export { RuleTypeDisabledError, RuleMutedError, isErrorThatHandlesItsOwnResponse } from './errors';
 export {
   executionStatusFromState,
   executionStatusFromError,
-  alertExecutionStatusToRaw,
-  alertExecutionStatusFromRaw,
-} from './alert_execution_status';
+  ruleExecutionStatusToRaw,
+  ruleExecutionStatusFromRaw,
+} from './rule_execution_status';
+export { lastRunFromState, lastRunFromError, lastRunToRaw } from './last_run_status';
+export {
+  updateMonitoring,
+  getDefaultMonitoring,
+  convertMonitoringFromRawAndVerify,
+} from './monitoring';
+export { getNextRun } from './next_run';
+export { processAlerts } from './process_alerts';
+export { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
+export { isRuleSnoozed, getRuleSnoozeEndTime } from './is_rule_snoozed';
+export { convertRuleIdsToKueryNode } from './convert_rule_ids_to_kuery_node';
+export { convertEsSortToEventLogSort } from './convert_es_sort_to_event_log_sort';
+export * from './snooze';
+export { setFlapping } from './set_flapping';
+export { determineAlertsToReturn } from './determine_alerts_to_return';
+export { updateFlappingHistory, isFlapping } from './flapping_utils';

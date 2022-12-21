@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { ImmutableMiddlewareFactory } from '../../../../../../common/store';
-import { PolicyDetailsState } from '../../../types';
-import { policyTrustedAppsMiddlewareRunner } from './policy_trusted_apps_middleware';
+import type { ImmutableMiddlewareFactory } from '../../../../../../common/store';
+import type { MiddlewareRunnerContext, PolicyDetailsState } from '../../../types';
 import { policySettingsMiddlewareRunner } from './policy_settings_middleware';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
   coreStart
 ) => {
+  const middlewareContext: MiddlewareRunnerContext = {
+    coreStart,
+  };
+
   return (store) => (next) => async (action) => {
     next(action);
 
-    policySettingsMiddlewareRunner(coreStart, store, action);
-    policyTrustedAppsMiddlewareRunner(coreStart, store, action);
+    policySettingsMiddlewareRunner(middlewareContext, store, action);
   };
 };

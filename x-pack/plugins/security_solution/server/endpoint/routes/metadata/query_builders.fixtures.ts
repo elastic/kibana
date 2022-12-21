@@ -11,32 +11,17 @@ export const expectedCompleteUnitedIndexQuery = {
         bool: {
           must_not: {
             terms: {
-              'agent.id': ['test-agent-id'],
+              'agent.id': [
+                '00000000-0000-0000-0000-000000000000',
+                '11111111-1111-1111-1111-111111111111',
+              ],
             },
           },
           filter: [
-            {
-              terms: {
-                'united.agent.policy_id': ['test-endpoint-policy-id'],
-              },
-            },
-            {
-              exists: {
-                field: 'united.endpoint.agent.id',
-              },
-            },
-            {
-              exists: {
-                field: 'united.agent.agent.id',
-              },
-            },
-            {
-              term: {
-                'united.agent.active': {
-                  value: true,
-                },
-              },
-            },
+            { terms: { 'united.agent.policy_id': ['test-endpoint-policy-id'] } },
+            { exists: { field: 'united.endpoint.agent.id' } },
+            { exists: { field: 'united.agent.agent.id' } },
+            { term: { 'united.agent.active': { value: true } } },
           ],
         },
       },
@@ -45,327 +30,8 @@ export const expectedCompleteUnitedIndexQuery = {
           filter: [
             {
               bool: {
-                must_not: {
-                  bool: {
-                    filter: [
-                      {
-                        bool: {
-                          should: [
-                            {
-                              range: {
-                                'united.agent.last_checkin': {
-                                  lt: 'now-120s',
-                                },
-                              },
-                            },
-                          ],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          must_not: {
-                            bool: {
-                              filter: [
-                                {
-                                  bool: {
-                                    should: [
-                                      {
-                                        bool: {
-                                          should: [
-                                            {
-                                              match: {
-                                                'united.agent.last_checkin_status': 'error',
-                                              },
-                                            },
-                                          ],
-                                          minimum_should_match: 1,
-                                        },
-                                      },
-                                      {
-                                        bool: {
-                                          should: [
-                                            {
-                                              match: {
-                                                'united.agent.last_checkin_status': 'degraded',
-                                              },
-                                            },
-                                          ],
-                                          minimum_should_match: 1,
-                                        },
-                                      },
-                                    ],
-                                    minimum_should_match: 1,
-                                  },
-                                },
-                                {
-                                  bool: {
-                                    must_not: {
-                                      bool: {
-                                        should: [
-                                          {
-                                            bool: {
-                                              filter: [
-                                                {
-                                                  bool: {
-                                                    should: [
-                                                      {
-                                                        exists: {
-                                                          field: 'united.agent.upgrade_started_at',
-                                                        },
-                                                      },
-                                                    ],
-                                                    minimum_should_match: 1,
-                                                  },
-                                                },
-                                                {
-                                                  bool: {
-                                                    must_not: {
-                                                      bool: {
-                                                        should: [
-                                                          {
-                                                            exists: {
-                                                              field: 'united.agent.upgraded_at',
-                                                            },
-                                                          },
-                                                        ],
-                                                        minimum_should_match: 1,
-                                                      },
-                                                    },
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                          {
-                                            bool: {
-                                              must_not: {
-                                                bool: {
-                                                  should: [
-                                                    {
-                                                      exists: {
-                                                        field: 'united.agent.last_checkin',
-                                                      },
-                                                    },
-                                                  ],
-                                                  minimum_should_match: 1,
-                                                },
-                                              },
-                                            },
-                                          },
-                                          {
-                                            bool: {
-                                              should: [
-                                                {
-                                                  exists: {
-                                                    field: 'united.agent.unenrollment_started_at',
-                                                  },
-                                                },
-                                              ],
-                                              minimum_should_match: 1,
-                                            },
-                                          },
-                                        ],
-                                        minimum_should_match: 1,
-                                      },
-                                    },
-                                  },
-                                },
-                              ],
-                            },
-                          },
-                        },
-                      },
-                      {
-                        bool: {
-                          must_not: {
-                            bool: {
-                              should: [
-                                {
-                                  bool: {
-                                    filter: [
-                                      {
-                                        bool: {
-                                          should: [
-                                            {
-                                              exists: {
-                                                field: 'united.agent.upgrade_started_at',
-                                              },
-                                            },
-                                          ],
-                                          minimum_should_match: 1,
-                                        },
-                                      },
-                                      {
-                                        bool: {
-                                          must_not: {
-                                            bool: {
-                                              should: [
-                                                {
-                                                  exists: {
-                                                    field: 'united.agent.upgraded_at',
-                                                  },
-                                                },
-                                              ],
-                                              minimum_should_match: 1,
-                                            },
-                                          },
-                                        },
-                                      },
-                                    ],
-                                  },
-                                },
-                                {
-                                  bool: {
-                                    must_not: {
-                                      bool: {
-                                        should: [
-                                          {
-                                            exists: {
-                                              field: 'united.agent.last_checkin',
-                                            },
-                                          },
-                                        ],
-                                        minimum_should_match: 1,
-                                      },
-                                    },
-                                  },
-                                },
-                                {
-                                  bool: {
-                                    should: [
-                                      {
-                                        exists: {
-                                          field: 'united.agent.unenrollment_started_at',
-                                        },
-                                      },
-                                    ],
-                                    minimum_should_match: 1,
-                                  },
-                                },
-                              ],
-                              minimum_should_match: 1,
-                            },
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-            {
-              bool: {
-                must_not: {
-                  bool: {
-                    filter: [
-                      {
-                        bool: {
-                          should: [
-                            {
-                              bool: {
-                                should: [
-                                  {
-                                    match: {
-                                      'united.agent.last_checkin_status': 'error',
-                                    },
-                                  },
-                                ],
-                                minimum_should_match: 1,
-                              },
-                            },
-                            {
-                              bool: {
-                                should: [
-                                  {
-                                    match: {
-                                      'united.agent.last_checkin_status': 'degraded',
-                                    },
-                                  },
-                                ],
-                                minimum_should_match: 1,
-                              },
-                            },
-                          ],
-                          minimum_should_match: 1,
-                        },
-                      },
-                      {
-                        bool: {
-                          must_not: {
-                            bool: {
-                              should: [
-                                {
-                                  bool: {
-                                    filter: [
-                                      {
-                                        bool: {
-                                          should: [
-                                            {
-                                              exists: {
-                                                field: 'united.agent.upgrade_started_at',
-                                              },
-                                            },
-                                          ],
-                                          minimum_should_match: 1,
-                                        },
-                                      },
-                                      {
-                                        bool: {
-                                          must_not: {
-                                            bool: {
-                                              should: [
-                                                {
-                                                  exists: {
-                                                    field: 'united.agent.upgraded_at',
-                                                  },
-                                                },
-                                              ],
-                                              minimum_should_match: 1,
-                                            },
-                                          },
-                                        },
-                                      },
-                                    ],
-                                  },
-                                },
-                                {
-                                  bool: {
-                                    must_not: {
-                                      bool: {
-                                        should: [
-                                          {
-                                            exists: {
-                                              field: 'united.agent.last_checkin',
-                                            },
-                                          },
-                                        ],
-                                        minimum_should_match: 1,
-                                      },
-                                    },
-                                  },
-                                },
-                                {
-                                  bool: {
-                                    should: [
-                                      {
-                                        exists: {
-                                          field: 'united.agent.unenrollment_started_at',
-                                        },
-                                      },
-                                    ],
-                                    minimum_should_match: 1,
-                                  },
-                                },
-                              ],
-                              minimum_should_match: 1,
-                            },
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
+                should: [{ exists: { field: 'united.agent.last_checkin' } }],
+                minimum_should_match: 1,
               },
             },
             {
@@ -375,13 +41,80 @@ export const expectedCompleteUnitedIndexQuery = {
                     should: [
                       {
                         bool: {
+                          should: [{ range: { 'united.agent.last_checkin': { lt: 'now-300s' } } }],
+                          minimum_should_match: 1,
+                        },
+                      },
+                      {
+                        bool: {
                           filter: [
                             {
                               bool: {
                                 should: [
                                   {
-                                    exists: {
-                                      field: 'united.agent.upgrade_started_at',
+                                    bool: {
+                                      filter: [
+                                        {
+                                          bool: {
+                                            should: [
+                                              {
+                                                exists: {
+                                                  field: 'united.agent.upgrade_started_at',
+                                                },
+                                              },
+                                            ],
+                                            minimum_should_match: 1,
+                                          },
+                                        },
+                                        {
+                                          bool: {
+                                            must_not: {
+                                              bool: {
+                                                should: [
+                                                  { exists: { field: 'united.agent.upgraded_at' } },
+                                                ],
+                                                minimum_should_match: 1,
+                                              },
+                                            },
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                  {
+                                    bool: {
+                                      must_not: {
+                                        bool: {
+                                          should: [
+                                            { exists: { field: 'united.agent.last_checkin' } },
+                                          ],
+                                          minimum_should_match: 1,
+                                        },
+                                      },
+                                    },
+                                  },
+                                  {
+                                    bool: {
+                                      should: [
+                                        {
+                                          exists: { field: 'united.agent.unenrollment_started_at' },
+                                        },
+                                      ],
+                                      minimum_should_match: 1,
+                                    },
+                                  },
+                                  {
+                                    bool: {
+                                      must_not: {
+                                        bool: {
+                                          should: [
+                                            {
+                                              exists: { field: 'united.agent.policy_revision_idx' },
+                                            },
+                                          ],
+                                          minimum_should_match: 1,
+                                        },
+                                      },
                                     },
                                   },
                                 ],
@@ -394,8 +127,118 @@ export const expectedCompleteUnitedIndexQuery = {
                                   bool: {
                                     should: [
                                       {
-                                        exists: {
-                                          field: 'united.agent.upgraded_at',
+                                        bool: {
+                                          should: [
+                                            {
+                                              range: {
+                                                'united.agent.last_checkin': { lt: 'now-300s' },
+                                              },
+                                            },
+                                          ],
+                                          minimum_should_match: 1,
+                                        },
+                                      },
+                                      {
+                                        bool: {
+                                          filter: [
+                                            {
+                                              bool: {
+                                                should: [
+                                                  {
+                                                    bool: {
+                                                      should: [
+                                                        {
+                                                          match: {
+                                                            'united.agent.last_checkin_status':
+                                                              'error',
+                                                          },
+                                                        },
+                                                      ],
+                                                      minimum_should_match: 1,
+                                                    },
+                                                  },
+                                                  {
+                                                    bool: {
+                                                      should: [
+                                                        {
+                                                          match: {
+                                                            'united.agent.last_checkin_status':
+                                                              'degraded',
+                                                          },
+                                                        },
+                                                      ],
+                                                      minimum_should_match: 1,
+                                                    },
+                                                  },
+                                                  {
+                                                    bool: {
+                                                      should: [
+                                                        {
+                                                          match: {
+                                                            'united.agent.last_checkin_status':
+                                                              'DEGRADED',
+                                                          },
+                                                        },
+                                                      ],
+                                                      minimum_should_match: 1,
+                                                    },
+                                                  },
+                                                  {
+                                                    bool: {
+                                                      should: [
+                                                        {
+                                                          match: {
+                                                            'united.agent.last_checkin_status':
+                                                              'ERROR',
+                                                          },
+                                                        },
+                                                      ],
+                                                      minimum_should_match: 1,
+                                                    },
+                                                  },
+                                                ],
+                                                minimum_should_match: 1,
+                                              },
+                                            },
+                                            {
+                                              bool: {
+                                                must_not: {
+                                                  bool: {
+                                                    should: [
+                                                      {
+                                                        bool: {
+                                                          should: [
+                                                            {
+                                                              range: {
+                                                                'united.agent.last_checkin': {
+                                                                  lt: 'now-300s',
+                                                                },
+                                                              },
+                                                            },
+                                                          ],
+                                                          minimum_should_match: 1,
+                                                        },
+                                                      },
+                                                      {
+                                                        bool: {
+                                                          should: [
+                                                            {
+                                                              exists: {
+                                                                field:
+                                                                  'united.agent.unenrollment_started_at',
+                                                              },
+                                                            },
+                                                          ],
+                                                          minimum_should_match: 1,
+                                                        },
+                                                      },
+                                                    ],
+                                                    minimum_should_match: 1,
+                                                  },
+                                                },
+                                              },
+                                            },
+                                          ],
                                         },
                                       },
                                     ],
@@ -409,30 +252,86 @@ export const expectedCompleteUnitedIndexQuery = {
                       },
                       {
                         bool: {
-                          must_not: {
-                            bool: {
-                              should: [
-                                {
-                                  exists: {
-                                    field: 'united.agent.last_checkin',
+                          filter: [
+                            {
+                              bool: {
+                                should: [
+                                  {
+                                    bool: {
+                                      should: [
+                                        { match: { 'united.agent.last_checkin_status': 'error' } },
+                                      ],
+                                      minimum_should_match: 1,
+                                    },
+                                  },
+                                  {
+                                    bool: {
+                                      should: [
+                                        {
+                                          match: { 'united.agent.last_checkin_status': 'degraded' },
+                                        },
+                                      ],
+                                      minimum_should_match: 1,
+                                    },
+                                  },
+                                  {
+                                    bool: {
+                                      should: [
+                                        {
+                                          match: { 'united.agent.last_checkin_status': 'DEGRADED' },
+                                        },
+                                      ],
+                                      minimum_should_match: 1,
+                                    },
+                                  },
+                                  {
+                                    bool: {
+                                      should: [
+                                        { match: { 'united.agent.last_checkin_status': 'ERROR' } },
+                                      ],
+                                      minimum_should_match: 1,
+                                    },
+                                  },
+                                ],
+                                minimum_should_match: 1,
+                              },
+                            },
+                            {
+                              bool: {
+                                must_not: {
+                                  bool: {
+                                    should: [
+                                      {
+                                        bool: {
+                                          should: [
+                                            {
+                                              range: {
+                                                'united.agent.last_checkin': { lt: 'now-300s' },
+                                              },
+                                            },
+                                          ],
+                                          minimum_should_match: 1,
+                                        },
+                                      },
+                                      {
+                                        bool: {
+                                          should: [
+                                            {
+                                              exists: {
+                                                field: 'united.agent.unenrollment_started_at',
+                                              },
+                                            },
+                                          ],
+                                          minimum_should_match: 1,
+                                        },
+                                      },
+                                    ],
+                                    minimum_should_match: 1,
                                   },
                                 },
-                              ],
-                              minimum_should_match: 1,
-                            },
-                          },
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [
-                            {
-                              exists: {
-                                field: 'united.agent.unenrollment_started_at',
                               },
                             },
                           ],
-                          minimum_should_match: 1,
                         },
                       },
                     ],
@@ -446,13 +345,7 @@ export const expectedCompleteUnitedIndexQuery = {
       },
       {
         bool: {
-          should: [
-            {
-              exists: {
-                field: 'united.endpoint.host.os.name',
-              },
-            },
-          ],
+          should: [{ exists: { field: 'united.endpoint.host.os.name' } }],
           minimum_should_match: 1,
         },
       },

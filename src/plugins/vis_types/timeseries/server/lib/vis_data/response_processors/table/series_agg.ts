@@ -9,8 +9,7 @@
 import { last } from 'lodash';
 
 import { calculateLabel } from '../../../../../common/calculate_label';
-
-// @ts-expect-error no typed yet
+import { SERIES_SEPARATOR } from '../../../../../common/constants';
 import { SeriesAgg } from './_series_agg';
 
 import type { TableResponseProcessorsFunction } from './types';
@@ -26,16 +25,16 @@ export const seriesAgg: TableResponseProcessorsFunction =
       // Filter out the seires with the matching metric and store them
       // in targetSeries
       results = results.filter((s) => {
-        if (s.id && s.id.split(/:/)[0] === series.id) {
+        if (s.id && s.id.split(SERIES_SEPARATOR)[0] === series.id) {
           targetSeries.push(s.data!);
           return false;
         }
         return true;
       });
-
+      // @ts-expect-error no typed yet
       const fn = SeriesAgg[series.aggregate_function];
       const data = fn(targetSeries);
-      const fieldsForSeries = meta.index ? await extractFields({ id: meta.index }) : [];
+      const fieldsForSeries = meta.dataViewId ? await extractFields({ id: meta.dataViewId }) : [];
 
       results.push({
         id: `${series.id}`,
@@ -44,5 +43,6 @@ export const seriesAgg: TableResponseProcessorsFunction =
         data: data[0],
       });
     }
+
     return next(results);
   };

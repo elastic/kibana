@@ -11,7 +11,6 @@ import { PhrasesFilter } from './phrases_filter';
 import { PhraseFilter } from './phrase_filter';
 import { RangeFilter } from './range_filter';
 import { MatchAllFilter } from './match_all_filter';
-import { MissingFilter } from './missing_filter';
 
 /**
  * A common type for filters supported by this package
@@ -22,8 +21,7 @@ export type FieldFilter =
   | PhraseFilter
   | PhrasesFilter
   | RangeFilter
-  | MatchAllFilter
-  | MissingFilter;
+  | MatchAllFilter;
 
 /**
  * An enum of all types of filters supported by this package
@@ -35,11 +33,11 @@ export enum FILTERS {
   PHRASE = 'phrase',
   EXISTS = 'exists',
   MATCH_ALL = 'match_all',
-  MISSING = 'missing',
   QUERY_STRING = 'query_string',
   RANGE = 'range',
   RANGE_FROM_VALUE = 'range_from_value',
   SPATIAL_FILTER = 'spatial_filter',
+  COMBINED = 'combined',
 }
 
 /**
@@ -52,13 +50,15 @@ export enum FilterStateStore {
   GLOBAL_STATE = 'globalState',
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FilterMeta = {
   alias?: string | null;
   disabled?: boolean;
   negate?: boolean;
   // controlledBy is there to identify who owns the filter
   controlledBy?: string;
+  // allows grouping of filters
+  group?: string;
   // index and type are optional only because when you create a new filter, there are no defaults
   index?: string;
   isMultiIndex?: boolean;
@@ -68,22 +68,22 @@ export type FilterMeta = {
   value?: string;
 };
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Filter = {
   $state?: {
     store: FilterStateStore;
   };
   meta: FilterMeta;
-
-  // TODO: research me! This is being extracted into the top level by translateToQuery. Maybe we can simplify.
   query?: Record<string, any>;
 };
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Query = {
   query: string | { [key: string]: any };
   language: string;
 };
+
+export type AggregateQuery = { sql: string } | { esql: string };
 
 /**
  * An interface for a latitude-longitude pair

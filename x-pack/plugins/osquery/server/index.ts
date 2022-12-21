@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { OsqueryPlugin } from './plugin';
-import { ConfigSchema, ConfigType } from './config';
+import type { ConfigType } from '../common/config';
+import { ConfigSchema } from '../common/config';
 
 export const config: PluginConfigDescriptor<ConfigType> = {
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
   schema: ConfigSchema,
   exposeToBrowser: {
-    enabled: true,
     actionEnabled: true,
-    savedQueries: true,
-    packs: true,
   },
 };
 export function plugin(initializerContext: PluginInitializerContext) {
   return new OsqueryPlugin(initializerContext);
 }
 
-export { OsqueryPluginSetup, OsqueryPluginStart } from './types';
+export type { OsqueryPluginSetup, OsqueryPluginStart } from './types';

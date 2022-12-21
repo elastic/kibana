@@ -56,6 +56,14 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
       );
     },
 
+    async assertInfluencersCellsContainFilter(filterString: string) {
+      const tableRows = await testSubjects.findAll('mlAnomaliesListColumnInfluencers');
+      for (const row of tableRows) {
+        const influencerColumnCellText = await row.getVisibleText();
+        expect(influencerColumnCellText).to.eql(filterString);
+      }
+    },
+
     async assertAnomalyActionsMenuButtonExists(rowIndex: number) {
       const rowSubj = await this.getRowSubjByRowIndex(rowIndex);
       await testSubjects.existOrFail(`${rowSubj} > mlAnomaliesListRowActionsButton`);
@@ -148,6 +156,35 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
       await this.ensurePagePopupOpen();
       await testSubjects.click(`tablePagination-${rowsNumber}-rows`);
       await this.assertRowsNumberPerPage(rowsNumber);
+    },
+
+    async ensureDetailsOpen(rowIndex: number) {
+      await retry.tryForTime(10 * 1000, async () => {
+        const rowSubj = await this.getRowSubjByRowIndex(rowIndex);
+        if (!(await testSubjects.exists('mlAnomaliesListRowDetails'))) {
+          await testSubjects.click(`${rowSubj} > mlAnomaliesListRowDetailsToggle`);
+          await testSubjects.existOrFail('mlAnomaliesListRowDetails', { timeout: 1000 });
+        }
+      });
+    },
+
+    async ensureDetailsClosed(rowIndex: number) {
+      await retry.tryForTime(10 * 1000, async () => {
+        const rowSubj = await this.getRowSubjByRowIndex(rowIndex);
+        if (await testSubjects.exists('mlAnomaliesListRowDetails')) {
+          await testSubjects.click(`${rowSubj} > mlAnomaliesListRowDetailsToggle`);
+          await testSubjects.missingOrFail('mlAnomaliesListRowDetails', { timeout: 1000 });
+        }
+      });
+    },
+
+    async scrollTableIntoView() {
+      await testSubjects.scrollIntoView('mlAnomaliesTable');
+    },
+
+    async scrollRowIntoView(rowIndex: number) {
+      const rowSubj = await this.getRowSubjByRowIndex(rowIndex);
+      await testSubjects.scrollIntoView(rowSubj);
     },
   };
 }

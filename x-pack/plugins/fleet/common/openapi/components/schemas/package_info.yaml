@@ -7,6 +7,22 @@ properties:
     type: string
   version:
     type: string
+  release:
+    type: string
+    deprecated: true
+    description: release label is deprecated, derive from the version instead (packages follow semver)
+    enum:
+      - experimental
+      - beta
+      - ga
+  source:
+    type: object
+    properties:
+      license:
+        type: string
+        enum:
+          - Apache-2.0
+          - Elastic-2.0
   readme:
     type: string
   description:
@@ -17,21 +33,24 @@ properties:
     type: array
     items:
       type: string
-  requirement:
-    oneOf:
-      - properties:
-          kibana:
-            type: object
-            properties:
-              versions:
-                type: string
-      - properties:
-          elasticsearch:
-            type: object
-            properties:
-              versions:
-                type: string
+  conditions:
     type: object
+    properties:
+      kibana:
+        type: object
+        properties:
+          versions:
+            type: string
+      elasticsearch:
+        type: object
+        properties:
+          subscription:
+            type: string
+            enum:
+              - basic
+              - gold
+              - platinum
+              - enterprise
   screenshots:
     type: array
     items:
@@ -102,8 +121,16 @@ properties:
     type: string
   path:
     type: string
-  removable:
-    type: boolean
+  elasticsearch:
+    type: object
+    properties:
+      privileges:
+        type: object
+        properties:
+          cluster:
+            type: array
+            items:
+              type: string
 required:
   - name
   - title
@@ -111,7 +138,7 @@ required:
   - description
   - type
   - categories
-  - requirement
+  - conditions
   - assets
   - format_version
   - download

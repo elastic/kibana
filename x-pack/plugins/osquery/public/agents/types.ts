@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { Agent } from '../../common/shared_imports';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { Agent } from '../../common/shared_imports';
 
 interface BaseDataPoint {
   key: string;
   doc_count: number;
 }
 
+interface AggDataPoint extends estypes.AggregationsTermsAggregateBase {
+  buckets: AggregationDataPoint[];
+}
+
 export type AggregationDataPoint = BaseDataPoint & {
-  [key: string]: estypes.AggregationsTermsAggregate<AggregationDataPoint>;
+  [key: string]: AggDataPoint;
 };
 
 export interface Group {
@@ -60,6 +64,5 @@ export enum AGENT_GROUP_KEY {
   All,
   Platform,
   Policy,
-  // eslint-disable-next-line @typescript-eslint/no-shadow
   Agent,
 }

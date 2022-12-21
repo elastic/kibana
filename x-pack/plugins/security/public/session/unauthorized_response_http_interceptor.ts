@@ -10,8 +10,10 @@ import type {
   HttpInterceptorResponseError,
   IAnonymousPaths,
   IHttpInterceptController,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
+import { SESSION_ERROR_REASON_HEADER } from '../../common/constants';
+import { LogoutReason } from '../../common/types';
 import type { SessionExpired } from './session_expired';
 
 export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
@@ -39,7 +41,12 @@ export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
     }
 
     if (response.status === 401) {
-      this.sessionExpired.logout();
+      const reason = response.headers.get(SESSION_ERROR_REASON_HEADER);
+      this.sessionExpired.logout(
+        reason === LogoutReason.SESSION_EXPIRED
+          ? LogoutReason.SESSION_EXPIRED
+          : LogoutReason.AUTHENTICATION_ERROR
+      );
       controller.halt();
     }
   }

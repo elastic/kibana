@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -19,6 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('overview page alert flyout controls', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
+      const ruleName = 'uptime-test';
       let alerts: any;
       let common: any;
 
@@ -87,7 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveAlertButton();
+        await alerts.clickSaveRuleButton(ruleName);
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });
@@ -99,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         let alert: any;
         await retry.tryForTime(60 * 1000, async () => {
           // add a delay before next call to not overload the server
-          await delay(1500);
+          await setTimeoutAsync(1500);
           const apiResponse = await supertest.get('/api/alerts/_find?search=uptime-test');
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === 'uptime-test'
@@ -176,14 +177,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveAlertButton();
+        await alerts.clickSaveRuleButton(alertId);
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });
 
       it('has created a valid alert with expected parameters', async () => {
         let alert: any;
-        await retry.tryForTime(15000, async () => {
+        await retry.tryForTime(60 * 1000, async () => {
           const apiResponse = await supertest.get(`/api/alerts/_find?search=${alertId}`);
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === alertId

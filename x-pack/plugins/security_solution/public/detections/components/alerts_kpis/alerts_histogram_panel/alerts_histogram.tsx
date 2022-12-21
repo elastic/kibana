@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import {
-  Axis,
-  Chart,
-  HistogramBarSeries,
-  Position,
-  Settings,
-  ChartSizeArray,
-} from '@elastic/charts';
+import type { ChartSizeArray } from '@elastic/charts';
+import { Axis, Chart, HistogramBarSeries, Position, Settings, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { useTheme, UpdateDateRange } from '../../../../common/components/charts/common';
+import type { UpdateDateRange, ChartData } from '../../../../common/components/charts/common';
+import { useTheme } from '../../../../common/components/charts/common';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
+import { hasValueToDisplay } from '../../../../common/utils/validators';
 import { DraggableLegend } from '../../../../common/components/charts/draggable_legend';
-import { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
+import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
+import { EMPTY_VALUE_LABEL } from '../../../../common/components/charts/translation';
 
 import type { HistogramData } from './types';
 
@@ -30,7 +27,9 @@ interface AlertsHistogramProps {
   from: string;
   legendItems: LegendItem[];
   legendPosition?: Position;
+  legendMinWidth?: number;
   loading: boolean;
+  showLegend?: boolean;
   to: string;
   data: HistogramData[];
   updateDateRange: UpdateDateRange;
@@ -41,8 +40,10 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
     data,
     from,
     legendItems,
-    legendPosition = 'right',
+    legendPosition = Position.Right,
+    legendMinWidth,
     loading,
+    showLegend,
     to,
     updateDateRange,
   }) => {
@@ -53,7 +54,10 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
     const yAxisId = 'alertsHistogramAxisY';
     const id = 'alertsHistogram';
     const yAccessors = useMemo(() => ['y'], []);
-    const splitSeriesAccessors = useMemo(() => ['g'], []);
+    const splitSeriesAccessors = useMemo(
+      () => [(datum: ChartData) => (hasValueToDisplay(datum.g) ? datum.g : EMPTY_VALUE_LABEL)],
+      []
+    );
     const tickFormat = useMemo(() => histogramDateTimeFormatter([from, to]), [from, to]);
 
     return (
@@ -73,19 +77,20 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
               <Settings
                 legendPosition={legendPosition}
                 onBrushEnd={updateDateRange}
-                showLegend={legendItems.length === 0}
-                showLegendExtra
+                // showLegend controls the default legend coming from Elastic chart, we show them when our customised legend items doesn't exist (but we still want to show legend).
+                showLegend={showLegend && legendItems.length === 0}
+                showLegendExtra={showLegend}
                 theme={theme}
               />
 
-              <Axis id={xAxisId} position="bottom" tickFormat={tickFormat} />
+              <Axis id={xAxisId} position={Position.Bottom} tickFormat={tickFormat} />
 
-              <Axis id={yAxisId} position="left" />
+              <Axis id={yAxisId} position={Position.Left} />
 
               <HistogramBarSeries
                 id={id}
-                xScaleType="time"
-                yScaleType="linear"
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
                 xAccessor="x"
                 yAccessors={yAccessors}
                 splitSeriesAccessors={splitSeriesAccessors}
@@ -95,7 +100,11 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {legendItems.length > 0 && (
-              <DraggableLegend legendItems={legendItems} height={chartHeight} />
+              <DraggableLegend
+                legendItems={legendItems}
+                height={chartHeight}
+                minWidth={legendMinWidth}
+              />
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

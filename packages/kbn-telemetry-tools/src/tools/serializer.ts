@@ -7,7 +7,7 @@
  */
 
 import * as ts from 'typescript';
-import { uniqBy, pick } from 'lodash';
+import { uniqBy, pick, omit } from 'lodash';
 import {
   getResolvedModuleSourceFile,
   getIdentifierDeclarationFromSource,
@@ -62,6 +62,8 @@ export function kindToDescriptorName(kind: number) {
     case ts.SyntaxKind.NumberKeyword:
     case ts.SyntaxKind.NumericLiteral:
       return 'number';
+    case ts.SyntaxKind.UnknownKeyword:
+      return 'unknown';
     default:
       throw new Error(`Unknown kind ${kind}`);
   }
@@ -219,6 +221,15 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
 
     // Support `Record<string, SOMETHING>`
     if (symbolName === 'Record') {
+      // Special use case `Record<string, unknown>`
+      if (
+        node.typeArguments![0].kind === ts.SyntaxKind.StringKeyword &&
+        node.typeArguments![1].kind === ts.SyntaxKind.UnknownKeyword
+      ) {
+        const kind = node.typeArguments![1].kind;
+        return { kind, type: ts.SyntaxKind[kind] as keyof typeof ts.SyntaxKind };
+      }
+
       const descriptor = getDescriptor(node.typeArguments![1], program);
       if (node.typeArguments![0].kind === ts.SyntaxKind.StringKeyword) {
         return { '@@INDEX@@': descriptor };
@@ -235,6 +246,12 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
       const parentDescriptor = getDescriptor(node.typeArguments![0], program);
       const pickPropNames = getConstraints(node.typeArguments![1], program);
       return pick(parentDescriptor, pickPropNames);
+    }
+    // Support `Omit<SOMETHING, 'prop1' | 'prop2'>`
+    if (symbolName === 'Omit') {
+      const parentDescriptor = getDescriptor(node.typeArguments![0], program);
+      const omitPropNames = getConstraints(node.typeArguments![1], program);
+      return omit(parentDescriptor, omitPropNames);
     }
 
     const declaration = (symbol?.getDeclarations() || [])[0];

@@ -7,21 +7,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { partition } from 'lodash';
-
-import type { SavedObjectReference } from 'kibana/public';
+import { isFilterPinned } from '@kbn/es-query';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { SavedObjectReference } from '@kbn/core/public';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
-import { Document, injectFilterReferences } from '../persistence';
+import { Document, checkForDuplicateTitle } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
-import { esFilters } from '../../../../../src/plugins/data/public';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
-import { trackUiEvent } from '../lens_ui_telemetry';
-import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
+import { VisualizeEditorContext } from '../types';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
@@ -37,6 +34,7 @@ export type SaveModalContainerProps = {
   isSaveable?: boolean;
   getAppNameFromId?: () => string | undefined;
   lensServices: LensAppServices;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 } & ExtraProps;
 
 export function SaveModalContainer({
@@ -53,6 +51,7 @@ export function SaveModalContainer({
   isSaveable = true,
   lastKnownDoc: initLastKnownDoc,
   lensServices,
+  initialContext,
 }: SaveModalContainerProps) {
   let title = '';
   let description;
@@ -62,6 +61,20 @@ export function SaveModalContainer({
     title = lastKnownDoc.title;
     description = lastKnownDoc.description;
     savedObjectId = lastKnownDoc.savedObjectId;
+  }
+
+  if (
+    !lastKnownDoc?.title &&
+    initialContext &&
+    'isEmbeddable' in initialContext &&
+    initialContext.isEmbeddable
+  ) {
+    title = i18n.translate('xpack.lens.app.convertedLabel', {
+      defaultMessage: '{title} (converted)',
+      values: {
+        title: initialContext.title || `${initialContext.visTypeTitle} visualization`,
+      },
+    });
   }
 
   const { attributeService, savedObjectsTagging, application, dashboardFeatureFlag } = lensServices;
@@ -173,7 +186,7 @@ const getDocToSave = (
   references: SavedObjectReference[]
 ) => {
   const docToSave = {
-    ...getLastKnownDocWithoutPinnedFilters(lastKnownDoc)!,
+    ...removePinnedFilters(lastKnownDoc)!,
     references,
   };
 
@@ -194,6 +207,8 @@ export const runSaveLensVisualization = async (
     getIsByValueMode: () => boolean;
     persistedDoc?: Document;
     originatingApp?: string;
+    textBasedLanguageSave?: boolean;
+    switchDatasource?: () => void;
   } & ExtraProps &
     LensAppServices,
   saveProps: SaveProps,
@@ -202,7 +217,6 @@ export const runSaveLensVisualization = async (
   const {
     chrome,
     initialInput,
-    originatingApp,
     lastKnownDoc,
     persistedDoc,
     savedObjectsClient,
@@ -210,21 +224,19 @@ export const runSaveLensVisualization = async (
     notifications,
     stateTransfer,
     attributeService,
-    usageCollection,
     savedObjectsTagging,
     getIsByValueMode,
     redirectToOrigin,
     onAppLeave,
     redirectTo,
     dashboardFeatureFlag,
+    textBasedLanguageSave,
+    switchDatasource,
+    application,
   } = props;
 
   if (!lastKnownDoc) {
     return;
-  }
-
-  if (usageCollection) {
-    usageCollection.reportUiCounter(originatingApp || 'visualize', METRIC_TYPE.CLICK, 'lens:save');
   }
 
   let references = lastKnownDoc.references;
@@ -261,15 +273,13 @@ export const runSaveLensVisualization = async (
         {
           id: originalSavedObjectId,
           title: docToSave.title,
-          copyOnSave: saveProps.newCopyOnSave,
+          displayName: i18n.translate('xpack.lens.app.saveModalType', {
+            defaultMessage: 'Lens visualization',
+          }),
           lastSavedTitle: lastKnownDoc.title,
-          getEsType: () => 'lens',
-          getDisplayName: () =>
-            i18n.translate('xpack.lens.app.saveModalType', {
-              defaultMessage: 'Lens visualization',
-            }),
+          copyOnSave: saveProps.newCopyOnSave,
+          isTitleDuplicateConfirmed: saveProps.isTitleDuplicateConfirmed,
         },
-        saveProps.isTitleDuplicateConfirmed,
         saveProps.onTitleDuplicate,
         {
           savedObjectsClient,
@@ -330,8 +340,12 @@ export const runSaveLensVisualization = async (
 
       // remove editor state so the connection is still broken after reload
       stateTransfer.clearEditorState?.(APP_ID);
-
-      redirectTo?.(newInput.savedObjectId);
+      if (textBasedLanguageSave) {
+        switchDatasource?.();
+        application.navigateToApp('lens', { path: '/' });
+      } else {
+        redirectTo?.(newInput.savedObjectId);
+      }
       return { isLinkedToOriginatingApp: false };
     }
 
@@ -347,26 +361,19 @@ export const runSaveLensVisualization = async (
   } catch (e) {
     // eslint-disable-next-line no-console
     console.dir(e);
-    trackUiEvent('save_failed');
     throw e;
   }
 };
 
-export function getLastKnownDocWithoutPinnedFilters(doc?: Document) {
+export function removePinnedFilters(doc?: Document) {
   if (!doc) return undefined;
-  const [pinnedFilters, appFilters] = partition(
-    injectFilterReferences(doc.state?.filters || [], doc.references),
-    esFilters.isFilterPinned
-  );
-  return pinnedFilters?.length
-    ? {
-        ...doc,
-        state: {
-          ...doc.state,
-          filters: appFilters,
-        },
-      }
-    : doc;
+  return {
+    ...doc,
+    state: {
+      ...doc.state,
+      filters: (doc.state?.filters || []).filter((filter) => !isFilterPinned(filter)),
+    },
+  };
 }
 
 // eslint-disable-next-line import/no-default-export

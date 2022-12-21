@@ -8,18 +8,19 @@
 
 import { fromKueryExpression, fromLiteralExpression, toElasticsearchQuery } from './ast';
 import { nodeTypes } from '../node_types';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../../..';
 import { KueryNode } from '../types';
 import { fields } from '../../filters/stubs';
 
 jest.mock('../grammar');
 
 describe('kuery AST API', () => {
-  let indexPattern: IndexPatternBase;
+  let indexPattern: DataViewBase;
 
   beforeEach(() => {
     indexPattern = {
       fields,
+      title: 'dataView',
     };
   });
 
@@ -145,7 +146,7 @@ describe('kuery AST API', () => {
     });
 
     test('should treat quoted values as phrases', () => {
-      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar baz', true);
+      const expected = nodeTypes.function.buildNode('is', 'foo', '"bar baz"');
       const actual = fromKueryExpression('foo:"bar baz"');
       expect(actual).toEqual(expected);
     });
@@ -173,12 +174,8 @@ describe('kuery AST API', () => {
 
     test('should support exclusive range operators', () => {
       const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.function.buildNode('range', 'bytes', {
-          gt: '1000',
-        }),
-        nodeTypes.function.buildNode('range', 'bytes', {
-          lt: '8000',
-        }),
+        nodeTypes.function.buildNode('range', 'bytes', 'gt', '1000'),
+        nodeTypes.function.buildNode('range', 'bytes', 'lt', '8000'),
       ]);
       const actual = fromKueryExpression('bytes > 1000 and bytes < 8000');
       expect(actual).toEqual(expected);
@@ -186,12 +183,8 @@ describe('kuery AST API', () => {
 
     test('should support inclusive range operators', () => {
       const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.function.buildNode('range', 'bytes', {
-          gte: '1000',
-        }),
-        nodeTypes.function.buildNode('range', 'bytes', {
-          lte: '8000',
-        }),
+        nodeTypes.function.buildNode('range', 'bytes', 'gte', '1000'),
+        nodeTypes.function.buildNode('range', 'bytes', 'lte', '8000'),
       ]);
       const actual = fromKueryExpression('bytes >= 1000 and bytes <= 8000');
       expect(actual).toEqual(expected);
@@ -335,19 +328,19 @@ describe('kuery AST API', () => {
     test('should support double quoted strings that do not need escapes except for quotes', () => {
       const expected = nodeTypes.literal.buildNode('\\():<>"*');
       const actual = fromLiteralExpression('"\\():<>\\"*"');
-      expect(actual).toEqual(expected);
+      expect(actual.value).toEqual(expected.value);
     });
 
     test('should support escaped backslashes inside quoted strings', () => {
       const expected = nodeTypes.literal.buildNode('\\');
       const actual = fromLiteralExpression('"\\\\"');
-      expect(actual).toEqual(expected);
+      expect(actual.value).toEqual(expected.value);
     });
 
     test('should support escaped unicode sequences inside quoted strings', () => {
       const expected = nodeTypes.literal.buildNode('\\u00A0');
       const actual = fromLiteralExpression('"\\\\u00A0"');
-      expect(actual).toEqual(expected);
+      expect(actual.value).toEqual(expected.value);
     });
 
     test('should detect wildcards and build wildcard AST nodes', () => {

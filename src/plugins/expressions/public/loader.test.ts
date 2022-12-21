@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { first, skip, toArray } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { loader, ExpressionLoader } from './loader';
@@ -16,12 +16,14 @@ import {
   IInterpreterRenderHandlers,
   RenderMode,
   AnyExpressionFunctionDefinition,
+  ExpressionsService,
+  ExecutionContract,
 } from '../common';
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-commonjs
 const { __getLastExecution, __getLastRenderMode } = require('./services');
 
-const element: HTMLElement = null as any;
+const element = null as unknown as HTMLElement;
 
 let testScheduler: TestScheduler;
 
@@ -36,8 +38,9 @@ jest.mock('./services', () => {
     },
   };
 
-  // eslint-disable-next-line
-  const service = new (require('../common/service/expressions_services').ExpressionsService as any)();
+  const service: ExpressionsService =
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    new (require('../common/service/expressions_services').ExpressionsService)();
 
   const testFn: AnyExpressionFunctionDefinition = {
     fn: () => ({ type: 'render', as: 'test' }),
@@ -54,9 +57,9 @@ jest.mock('./services', () => {
 
   service.start();
 
+  let execution: ExecutionContract;
   const moduleMock = {
-    __execution: undefined,
-    __getLastExecution: () => moduleMock.__execution,
+    __getLastExecution: () => execution,
     __getLastRenderMode: () => renderMode,
     getRenderersRegistry: () => ({
       get: (id: string) => renderers[id],
@@ -72,11 +75,10 @@ jest.mock('./services', () => {
   };
 
   const execute = service.execute;
-  service.execute = (...args: any) => {
-    const execution = execute(...args);
-    jest.spyOn(execution, 'getData');
-    jest.spyOn(execution, 'cancel');
-    moduleMock.__execution = execution;
+
+  // @ts-expect-error
+  service.execute = (...args: Parameters<ExpressionsService['execute']>) => {
+    execution = execute(...args);
     return execution;
   };
 
@@ -84,8 +86,8 @@ jest.mock('./services', () => {
 });
 
 describe('execute helper function', () => {
-  it('returns ExpressionLoader instance', () => {
-    const response = loader(element, '', {});
+  it('returns ExpressionLoader instance', async () => {
+    const response = await loader(element, '', {});
     expect(response).toBeInstanceOf(ExpressionLoader);
   });
 });
@@ -121,7 +123,7 @@ describe('ExpressionLoader', () => {
 
   it('emits on $data when data is available', async () => {
     const expressionLoader = new ExpressionLoader(element, 'var foo', { variables: { foo: 123 } });
-    const { result } = await expressionLoader.data$.pipe(first()).toPromise();
+    const { result } = await firstValueFrom(expressionLoader.data$);
     expect(result).toBe(123);
   });
 
@@ -129,7 +131,7 @@ describe('ExpressionLoader', () => {
     const expressionLoader = new ExpressionLoader(element, 'var foo', {
       variables: { foo: of(1, 2) },
     });
-    const { result, partial } = await expressionLoader.data$.pipe(first()).toPromise();
+    const { result, partial } = await firstValueFrom(expressionLoader.data$);
 
     expect(partial).toBe(false);
     expect(result).toBe(2);
@@ -141,7 +143,7 @@ describe('ExpressionLoader', () => {
       partial: true,
       throttle: 0,
     });
-    const { result, partial } = await expressionLoader.data$.pipe(first()).toPromise();
+    const { result, partial } = await firstValueFrom(expressionLoader.data$);
 
     expect(partial).toBe(true);
     expect(result).toBe(1);
@@ -150,7 +152,7 @@ describe('ExpressionLoader', () => {
   it('throttles partial results', async () => {
     testScheduler.run(({ cold, expectObservable }) => {
       const expressionLoader = new ExpressionLoader(element, 'var foo', {
-        variables: { foo: cold('a 5ms b 5ms c 10ms d', { a: 1, b: 2, c: 3, d: 4 }) },
+        variables: { foo: cold('a 5ms b 5ms c 10ms (d|)', { a: 1, b: 2, c: 3, d: 4 }) },
         partial: true,
         throttle: 20,
       });

@@ -4,19 +4,17 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
     "isolatedModules": true
   },
   "include": [
     "public/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../usage_collection/tsconfig.json" },
     { "path": "../telemetry/tsconfig.json" },
-    { "path": "../kibana_legacy/tsconfig.json"},
     { "path": "../ui_actions/tsconfig.json" },
     { "path": "../expressions/tsconfig.json" },
     { "path": "../home/tsconfig.json" },

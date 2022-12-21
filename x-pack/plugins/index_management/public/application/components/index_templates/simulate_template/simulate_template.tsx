@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
 import { serializers } from '../../../../shared_imports';
@@ -35,7 +35,9 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
       return;
     }
 
-    const indexTemplate = serializeTemplate(stripEmptyFields(template) as TemplateDeserialized);
+    const indexTemplate = serializeTemplate(
+      stripEmptyFields(template, { types: ['string'] }) as TemplateDeserialized
+    );
     const { data, error } = await simulateIndexTemplate(indexTemplate);
     let filteredTemplate = data;
 
@@ -90,7 +92,7 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
   }
 
   return isEmpty ? null : (
-    <EuiCodeBlock lang="json" data-test-subj="simulateTemplatePreview">
+    <EuiCodeBlock language="json" isCopyable={true} data-test-subj="simulateTemplatePreview">
       {templatePreview}
     </EuiCodeBlock>
   );

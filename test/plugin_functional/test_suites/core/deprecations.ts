@@ -7,8 +7,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { DomainDeprecationDetails, DeprecationsGetResponse } from 'src/core/server/types';
-import type { ResolveDeprecationResponse } from 'src/core/public';
+
+import type { ResolveDeprecationResponse } from '@kbn/core/public';
+import type { DeprecationsGetResponse, DomainDeprecationDetails } from '@kbn/core/server';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -19,8 +20,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   const CorePluginDeprecationsPluginDeprecations: DomainDeprecationDetails[] = [
     {
+      configPath: 'corePluginDeprecations.oldProperty',
       title: 'Setting "corePluginDeprecations.oldProperty" is deprecated',
-      level: 'critical',
+      level: 'warning',
       message:
         'Setting "corePluginDeprecations.oldProperty" has been replaced by "corePluginDeprecations.newProperty"',
       correctiveActions: {
@@ -33,8 +35,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
+      configPath: 'corePluginDeprecations.noLongerUsed',
       title: 'Setting "corePluginDeprecations.noLongerUsed" is deprecated',
-      level: 'critical',
+      level: 'warning',
       message: 'You no longer need to configure "corePluginDeprecations.noLongerUsed".',
       correctiveActions: {
         manualSteps: [
@@ -46,6 +49,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
+      configPath: 'corePluginDeprecations.secret',
       title: 'corePluginDeprecations has a deprecated setting',
       level: 'critical',
       message:

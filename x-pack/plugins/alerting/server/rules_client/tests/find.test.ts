@@ -6,18 +6,16 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { nodeTypes } from '@kbn/es-query';
-import { esKuery } from '../../../../../../src/plugins/data/server';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { nodeTypes, fromKueryExpression } from '@kbn/es-query';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '../../../../actions/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
@@ -28,7 +26,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -39,6 +37,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
@@ -55,7 +54,7 @@ beforeEach(() => {
 
 setGlobalDate();
 
-jest.mock('../lib/map_sort_field', () => ({
+jest.mock('../common/map_sort_field', () => ({
   mapSortField: jest.fn(),
 }));
 
@@ -77,7 +76,6 @@ describe('find()', () => {
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
-      logSuccessfulAuthorization() {},
     });
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
@@ -164,6 +162,7 @@ describe('find()', () => {
             "schedule": Object {
               "interval": "10s",
             },
+            "snoozeSchedule": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -177,7 +176,7 @@ describe('find()', () => {
       Array [
         Object {
           "fields": undefined,
-          "filter": undefined,
+          "filter": null,
           "sortField": undefined,
           "type": "alert",
         },
@@ -264,6 +263,7 @@ describe('find()', () => {
             "schedule": Object {
               "interval": "10s",
             },
+            "snoozeSchedule": Array [],
             "updatedAt": 2019-02-12T21:01:22.479Z,
           },
         ],
@@ -277,7 +277,7 @@ describe('find()', () => {
       Array [
         Object {
           "fields": undefined,
-          "filter": undefined,
+          "filter": null,
           "sortField": undefined,
           "type": "alert",
         },
@@ -288,14 +288,44 @@ describe('find()', () => {
   test('calls mapSortField', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.find({ options: { sortField: 'name' } });
-    expect(jest.requireMock('../lib/map_sort_field').mapSortField).toHaveBeenCalledWith('name');
+    expect(jest.requireMock('../common/map_sort_field').mapSortField).toHaveBeenCalledWith('name');
+  });
+
+  test('should translate filter/sort/search on params to mapped_params', async () => {
+    const filter = fromKueryExpression(
+      '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
+    );
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter,
+      ensureRuleTypeIsAuthorized() {},
+    });
+
+    const rulesClient = new RulesClient(rulesClientParams);
+    await rulesClient.find({
+      options: {
+        sortField: 'params.risk_score',
+        searchFields: ['params.risk_score', 'params.severity'],
+        filter: 'alert.attributes.params.risk_score > 50',
+      },
+      excludeFromPublicApi: true,
+    });
+
+    const findCallParams = unsecuredSavedObjectsClient.find.mock.calls[0][0];
+
+    expect(findCallParams.searchFields).toEqual([
+      'mapped_params.risk_score',
+      'mapped_params.severity',
+    ]);
+
+    expect(findCallParams.filter.arguments[0].arguments[0].value).toEqual(
+      'alert.attributes.mapped_params.risk_score'
+    );
   });
 
   test('should call useSavedObjectReferences.injectReferences if defined for rule type', async () => {
     jest.resetAllMocks();
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
-      logSuccessfulAuthorization() {},
     });
     const injectReferencesFn = jest.fn().mockReturnValue({
       bar: true,
@@ -432,58 +462,60 @@ describe('find()', () => {
     );
 
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "data": Array [
-        Object {
-          "actions": Array [
-            Object {
-              "group": "default",
-              "id": "1",
-              "params": Object {
-                "foo": true,
+      Object {
+        "data": Array [
+          Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "1",
+                "params": Object {
+                  "foo": true,
+                },
               },
+            ],
+            "alertTypeId": "myType",
+            "createdAt": 2019-02-12T21:01:22.479Z,
+            "id": "1",
+            "notifyWhen": "onActiveAlert",
+            "params": Object {
+              "bar": true,
             },
-          ],
-          "alertTypeId": "myType",
-          "createdAt": 2019-02-12T21:01:22.479Z,
-          "id": "1",
-          "notifyWhen": "onActiveAlert",
-          "params": Object {
-            "bar": true,
+            "schedule": Object {
+              "interval": "10s",
+            },
+            "snoozeSchedule": Array [],
+            "updatedAt": 2019-02-12T21:01:22.479Z,
           },
-          "schedule": Object {
-            "interval": "10s",
-          },
-          "updatedAt": 2019-02-12T21:01:22.479Z,
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "group": "default",
-              "id": "1",
-              "params": Object {
-                "foo": true,
+          Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "1",
+                "params": Object {
+                  "foo": true,
+                },
               },
+            ],
+            "alertTypeId": "123",
+            "createdAt": 2019-02-12T21:01:22.479Z,
+            "id": "2",
+            "notifyWhen": "onActiveAlert",
+            "params": Object {
+              "bar": true,
+              "parameterThatIsSavedObjectId": "9",
             },
-          ],
-          "alertTypeId": "123",
-          "createdAt": 2019-02-12T21:01:22.479Z,
-          "id": "2",
-          "notifyWhen": "onActiveAlert",
-          "params": Object {
-            "bar": true,
-            "parameterThatIsSavedObjectId": "9",
+            "schedule": Object {
+              "interval": "20s",
+            },
+            "snoozeSchedule": Array [],
+            "updatedAt": 2019-02-12T21:01:22.479Z,
           },
-          "schedule": Object {
-            "interval": "20s",
-          },
-          "updatedAt": 2019-02-12T21:01:22.479Z,
-        },
-      ],
-      "page": 1,
-      "perPage": 10,
-      "total": 2,
-    }
+        ],
+        "page": 1,
+        "perPage": 10,
+        "total": 2,
+      }
     `);
   });
 
@@ -491,7 +523,6 @@ describe('find()', () => {
     jest.resetAllMocks();
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
-      logSuccessfulAuthorization() {},
     });
     const injectReferencesFn = jest.fn().mockImplementation(() => {
       throw new Error('something went wrong!');
@@ -622,13 +653,12 @@ describe('find()', () => {
 
   describe('authorization', () => {
     test('ensures user is query filter types down to those the user is authorized to find', async () => {
-      const filter = esKuery.fromKueryExpression(
+      const filter = fromKueryExpression(
         '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
       );
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         filter,
         ensureRuleTypeIsAuthorized() {},
-        logSuccessfulAuthorization() {},
       });
 
       const rulesClient = new RulesClient(rulesClientParams);
@@ -636,7 +666,7 @@ describe('find()', () => {
 
       const [options] = unsecuredSavedObjectsClient.find.mock.calls[0];
       expect(options.filter).toEqual(
-        nodeTypes.function.buildNode('and', [esKuery.fromKueryExpression('someTerm'), filter])
+        nodeTypes.function.buildNode('and', [fromKueryExpression('someTerm'), filter])
       );
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledTimes(1);
     });
@@ -651,10 +681,8 @@ describe('find()', () => {
 
     test('ensures authorization even when the fields required to authorize are omitted from the find', async () => {
       const ensureRuleTypeIsAuthorized = jest.fn();
-      const logSuccessfulAuthorization = jest.fn();
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         ensureRuleTypeIsAuthorized,
-        logSuccessfulAuthorization,
       });
 
       unsecuredSavedObjectsClient.find.mockReset();
@@ -688,6 +716,7 @@ describe('find()', () => {
               "notifyWhen": undefined,
               "params": undefined,
               "schedule": undefined,
+              "snoozeSchedule": Array [],
               "tags": Array [
                 "myTag",
               ],
@@ -701,10 +730,11 @@ describe('find()', () => {
 
       expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
         fields: ['tags', 'alertTypeId', 'consumer'],
+        filter: null,
+        sortField: undefined,
         type: 'alert',
       });
       expect(ensureRuleTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'rule');
-      expect(logSuccessfulAuthorization).toHaveBeenCalled();
     });
   });
 
@@ -748,7 +778,6 @@ describe('find()', () => {
         ensureRuleTypeIsAuthorized: jest.fn(() => {
           throw new Error('Unauthorized');
         }),
-        logSuccessfulAuthorization: jest.fn(),
       });
 
       await expect(async () => await rulesClient.find()).rejects.toThrow();

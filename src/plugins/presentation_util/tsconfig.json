@@ -4,11 +4,7 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
-  "extraPublicDirs": [
-    "common"
-  ],
   "include": [
     "common/**/*",
     "public/**/*",
@@ -17,11 +13,11 @@
     "storybook/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../saved_objects/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
     { "path": "../embeddable/tsconfig.json" },
+    { "path": "../kibana_react/tsconfig.json" },
     { "path": "../data/tsconfig.json" }
   ]
 }

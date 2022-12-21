@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
 import { TestProviders } from '../../mock';
 
-import { DraggableLegendItem, LegendItem } from './draggable_legend_item';
+import type { LegendItem } from './draggable_legend_item';
+import { DraggableLegendItem } from './draggable_legend_item';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -55,9 +56,57 @@ describe('DraggableLegendItem', () => {
     ).toEqual(legendItem.value);
   });
 
+  it('renders a custom legend item via the `render` prop when provided', () => {
+    const render = (fieldValuePair?: { field: string; value: string | number }) => (
+      <div data-test-subj="custom">{`${fieldValuePair?.field} - ${fieldValuePair?.value}`}</div>
+    );
+
+    const customLegendItem = { ...legendItem, render };
+
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={customLegendItem} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="custom"]`).first().text()).toEqual(
+      `${legendItem.field} - ${legendItem.value}`
+    );
+  });
+
+  it('renders an item count via the `count` prop when provided', () => {
+    const customLegendItem = { ...legendItem, count: 1234 };
+
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={customLegendItem} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="legendItemCount"]`).first().exists()).toBe(true);
+  });
+
   it('always hides the Top N action for legend items', () => {
     expect(
       wrapper.find(`[data-test-subj="legend-item-${legendItem.dataProviderId}"]`).prop('hideTopN')
     ).toEqual(true);
+  });
+
+  it('renders the empty value label when the value is empty', () => {
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={{ ...legendItem, value: '' }} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="value-wrapper-empty"]').first().exists()).toBeTruthy();
+  });
+
+  it('does not render the empty value label when the value is a number', () => {
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={{ ...legendItem, value: 0 }} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="value-wrapper-empty"]').first().exists()).toBeFalsy();
   });
 });

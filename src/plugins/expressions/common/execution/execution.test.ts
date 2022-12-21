@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { scan } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { Execution } from './execution';
 import { parseExpression, ExpressionAstExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
-import { ExpressionFunctionDefinition } from '../../common';
+import { ExpressionFunctionDefinition } from '..';
 import { ExecutionContract } from './execution_contract';
+import { ExpressionValueBoxed } from '../expression_types';
 
 beforeAll(() => {
   if (typeof performance === 'undefined') {
-    (global as any).performance = { now: Date.now };
+    global.performance = { now: Date.now } as typeof performance;
   }
 });
 
@@ -41,11 +42,11 @@ const createExecution = (
 const run = async (
   expression: string = 'foo bar=123',
   context?: Record<string, unknown>,
-  input: any = null
+  input: unknown = null
 ) => {
   const execution = createExecution(expression, context);
   execution.start(input);
-  return await execution.result.toPromise();
+  return await lastValueFrom(execution.result);
 };
 
 let testScheduler: TestScheduler;
@@ -84,7 +85,7 @@ describe('Execution', () => {
     /* eslint-enable no-console */
 
     execution.start(123);
-    const { result } = await execution.result.toPromise();
+    const { result } = await lastValueFrom(execution.result);
 
     expect(result).toBe(123);
     expect(spy).toHaveBeenCalledTimes(1);
@@ -102,7 +103,7 @@ describe('Execution', () => {
       value: -1,
     });
 
-    const { result } = await execution.result.toPromise();
+    const { result } = await lastValueFrom(execution.result);
 
     expect(result).toEqual({
       type: 'num',
@@ -117,7 +118,7 @@ describe('Execution', () => {
       value: 0,
     });
 
-    const { result } = await execution.result.toPromise();
+    const { result } = await lastValueFrom(execution.result);
 
     expect(result).toEqual({
       type: 'num',
@@ -131,7 +132,7 @@ describe('Execution', () => {
 
       // Below 1 is cast to { type: 'num', value: 1 }.
       execution.start(1);
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -143,7 +144,7 @@ describe('Execution', () => {
       const execution = createExecution('add val=1');
 
       execution.start(Promise.resolve(1));
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -155,7 +156,7 @@ describe('Execution', () => {
       const execution = createExecution('add val=1');
 
       execution.start(of(1));
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -262,45 +263,45 @@ describe('Execution', () => {
 
   describe('execution context', () => {
     test('context.variables is an object', async () => {
-      const { result } = (await run('introspectContext key="variables"')) as any;
+      const { result } = await run('introspectContext key="variables"');
 
       expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.types is an object', async () => {
-      const { result } = (await run('introspectContext key="types"')) as any;
+      const { result } = await run('introspectContext key="types"');
 
       expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.abortSignal is an object', async () => {
-      const { result } = (await run('introspectContext key="abortSignal"')) as any;
+      const { result } = await run('introspectContext key="abortSignal"');
 
       expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.inspectorAdapters is an object', async () => {
-      const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
+      const { result } = await run('introspectContext key="inspectorAdapters"');
 
       expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.getKibanaRequest is a function if provided', async () => {
-      const { result } = (await run('introspectContext key="getKibanaRequest"', {
+      const { result } = await run('introspectContext key="getKibanaRequest"', {
         kibanaRequest: {},
-      })) as any;
+      });
 
       expect(result).toHaveProperty('result', expect.any(Function));
     });
 
     test('context.getKibanaRequest is undefined if not provided', async () => {
-      const { result } = (await run('introspectContext key="getKibanaRequest"')) as any;
+      const { result } = await run('introspectContext key="getKibanaRequest"');
 
       expect(result).toHaveProperty('result', undefined);
     });
 
     test('unknown context key is undefined', async () => {
-      const { result } = (await run('introspectContext key="foo"')) as any;
+      const { result } = await run('introspectContext key="foo"');
 
       expect(result).toHaveProperty('result', undefined);
     });
@@ -310,11 +311,18 @@ describe('Execution', () => {
       const { result } = await run('var name="foo"', { variables });
       expect(result).toBe('bar');
     });
+
+    test('can access variables set from the parent expression', async () => {
+      const { result } = await run(
+        'var_set name="a" value="bar" | var_set name="b" value={var name="a"} | var name="b"'
+      );
+      expect(result).toBe('bar');
+    });
   });
 
   describe('inspector adapters', () => {
     test('by default, "tables" and "requests" inspector adapters are available', async () => {
-      const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
+      const { result } = await run('introspectContext key="inspectorAdapters"');
       expect(result).toHaveProperty(
         'result',
         expect.objectContaining({
@@ -326,9 +334,9 @@ describe('Execution', () => {
 
     test('can set custom inspector adapters', async () => {
       const inspectorAdapters = {};
-      const { result } = (await run('introspectContext key="inspectorAdapters"', {
+      const { result } = await run('introspectContext key="inspectorAdapters"', {
         inspectorAdapters,
-      })) as any;
+      });
       expect(result).toHaveProperty('result', inspectorAdapters);
     });
 
@@ -351,7 +359,7 @@ describe('Execution', () => {
 
   describe('expression abortion', () => {
     test('context has abortSignal object', async () => {
-      const { result } = (await run('introspectContext key="abortSignal"')) as any;
+      const { result } = await run('introspectContext key="abortSignal"');
 
       expect(result).toHaveProperty('result.aborted', false);
     });
@@ -365,7 +373,7 @@ describe('Execution', () => {
         value: 0,
       });
 
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -379,7 +387,7 @@ describe('Execution', () => {
     });
 
     test('result is undefined until execution completes', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
       const execution = createExecution('sleep 10');
       expect(execution.state.get().result).toBe(undefined);
       execution.start(null).subscribe(jest.fn());
@@ -396,11 +404,11 @@ describe('Execution', () => {
       jest.useRealTimers();
     });
 
-    test('handles functions returning observables', () => {
+    test('handles partial results when functions return observables', () => {
       testScheduler.run(({ cold, expectObservable }) => {
         const arg = cold('     -a-b-c|', { a: 1, b: 2, c: 3 });
         const expected = '     -a-b-c|';
-        const observable: ExpressionFunctionDefinition<'observable', any, {}, any> = {
+        const observable: ExpressionFunctionDefinition<'observable', unknown, {}, unknown> = {
           name: 'observable',
           args: {},
           help: '',
@@ -409,12 +417,74 @@ describe('Execution', () => {
         const executor = createUnitTestExecutor();
         executor.registerFunction(observable);
 
-        const result = executor.run('observable', null, {});
+        const result = executor.run('observable', null, { partial: true });
 
         expectObservable(result).toBe(expected, {
           a: { result: 1, partial: true },
           b: { result: 2, partial: true },
           c: { result: 3, partial: false },
+        });
+      });
+    });
+
+    test('ignores partial results by default', () => {
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const arg = cold('     -a-b-c|', { a, b, c });
+        const expected = '     ------(c|)';
+        const spyFn = jest.fn((value) => value);
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => arg,
+        });
+        executor.registerFunction({
+          name: 'spy',
+          args: {},
+          help: '',
+          fn: (input) => spyFn(input),
+        });
+
+        const result = executor.run('observable | spy', null);
+
+        expectObservable(result).toBe(expected, {
+          c: { result: c, partial: false },
+        });
+
+        flush();
+
+        expect(spyFn).toHaveBeenCalledTimes(1);
+        expect(spyFn).toHaveBeenCalledWith(c);
+      });
+    });
+
+    it('throttles partial results', async () => {
+      testScheduler.run(({ cold, expectObservable }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const d = 4;
+        const observable = cold('a 5ms b 5ms c 10ms (d|)', { a, b, c, d });
+        const expected = '       a 19ms c 2ms (d|)';
+
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => observable,
+        });
+
+        const result = executor.run('observable', null, { partial: true, throttle: 20 });
+
+        expectObservable(result).toBe(expected, {
+          a: expect.objectContaining({ result: a }),
+          c: expect.objectContaining({ result: c }),
+          d: expect.objectContaining({ result: d }),
         });
       });
     });
@@ -453,7 +523,7 @@ describe('Execution', () => {
       const execution = await createExecution('error "foo"');
       execution.start(null);
 
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toMatchObject({
         type: 'error',
@@ -468,7 +538,7 @@ describe('Execution', () => {
     });
 
     test('does not execute remaining functions in pipeline', async () => {
-      const spy: ExpressionFunctionDefinition<'spy', any, {}, any> = {
+      const spy: ExpressionFunctionDefinition<'spy', unknown, {}, unknown> = {
         name: 'spy',
         args: {},
         help: '',
@@ -480,6 +550,63 @@ describe('Execution', () => {
       await executor.run('error "..." | spy', null).toPromise();
 
       expect(spy.fn).toHaveBeenCalledTimes(0);
+    });
+
+    test('continues execution when error state is gone', async () => {
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const observable$ = cold('abc|', { a, b, c });
+        const flakyFn = jest
+          .fn()
+          .mockImplementationOnce((value) => value)
+          .mockImplementationOnce(() => {
+            throw new Error('Some error.');
+          })
+          .mockImplementationOnce((value) => value);
+        const spyFn = jest.fn((value) => value);
+
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => observable$,
+        });
+        executor.registerFunction({
+          name: 'flaky',
+          args: {},
+          help: '',
+          fn: (value) => flakyFn(value),
+        });
+        executor.registerFunction({
+          name: 'spy',
+          args: {},
+          help: '',
+          fn: (value) => spyFn(value),
+        });
+
+        const result = executor.run('observable | flaky | spy', null, { partial: true });
+
+        expectObservable(result).toBe('abc|', {
+          a: { partial: true, result: a },
+          b: {
+            partial: true,
+            result: {
+              type: 'error',
+              error: expect.objectContaining({ message: '[flaky] > Some error.' }),
+            },
+          },
+          c: { partial: false, result: c },
+        });
+
+        flush();
+
+        expect(spyFn).toHaveBeenCalledTimes(2);
+        expect(spyFn).toHaveBeenNthCalledWith(1, a);
+        expect(spyFn).toHaveBeenNthCalledWith(2, c);
+      });
     });
   });
 
@@ -496,7 +623,7 @@ describe('Execution', () => {
     });
 
     test('execution state is "pending" while execution is in progress', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
       const execution = createExecution('sleep 20');
       execution.start(null);
       jest.advanceTimersByTime(5);
@@ -594,7 +721,7 @@ describe('Execution', () => {
         const executor = createUnitTestExecutor();
         executor.registerFunction(observable);
 
-        const result = executor.run('add val={observable}', 1, {});
+        const result = executor.run('add val={observable}', 1, { partial: true });
 
         expectObservable(result).toBe(expected, {
           a: { partial: true, result: { type: 'num', value: 2 } },
@@ -621,7 +748,12 @@ describe('Execution', () => {
           help: '',
           fn: () => arg2,
         };
-        const max: ExpressionFunctionDefinition<'max', any, { val1: number; val2: number }, any> = {
+        const max: ExpressionFunctionDefinition<
+          'max',
+          unknown,
+          { val1: number; val2: number },
+          unknown
+        > = {
           name: 'max',
           args: {
             val1: { help: '', types: ['number'] },
@@ -635,7 +767,11 @@ describe('Execution', () => {
         executor.registerFunction(observable2);
         executor.registerFunction(max);
 
-        const result = executor.run('max val1={observable1} val2={observable2}', {});
+        const result = executor.run(
+          'max val1={observable1} val2={observable2}',
+          {},
+          { partial: true }
+        );
 
         expectObservable(result).toBe(expected, {
           a: { partial: true, result: { type: 'num', value: 1 } },
@@ -660,7 +796,7 @@ describe('Execution', () => {
         const executor = createUnitTestExecutor();
         executor.registerFunction(observable);
 
-        const result = executor.run('add val={observable}', 1, {});
+        const result = executor.run('add val={observable}', 1, { partial: true });
 
         expectObservable(result).toBe(expected, {
           a: expect.objectContaining({ result: { type: 'num', value: 2 } }),
@@ -675,11 +811,130 @@ describe('Execution', () => {
         });
       });
     });
+
+    test('continues execution when error state is gone', async () => {
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const d = 4;
+        const observable$ = cold('abcd|', { a, b, c, d });
+        const flakyFn = jest
+          .fn()
+          .mockImplementationOnce((value) => value)
+          .mockImplementationOnce(() => {
+            throw new Error('Some error.');
+          })
+          .mockReturnValueOnce({ type: 'something' })
+          .mockImplementationOnce((value) => value);
+        const spyFn = jest.fn((input, { arg }) => arg);
+
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => observable$,
+        });
+        executor.registerFunction({
+          name: 'flaky',
+          args: {},
+          help: '',
+          fn: (value) => flakyFn(value),
+        });
+        executor.registerFunction({
+          name: 'spy',
+          args: {
+            arg: {
+              help: '',
+              types: ['number'],
+            },
+          },
+          help: '',
+          fn: (input, args) => spyFn(input, args),
+        });
+
+        const result = executor.run('spy arg={observable | flaky}', null, { partial: true });
+
+        expectObservable(result).toBe('abcd|', {
+          a: { partial: true, result: a },
+          b: {
+            partial: true,
+            result: {
+              type: 'error',
+              error: expect.objectContaining({ message: '[spy] > [flaky] > Some error.' }),
+            },
+          },
+          c: {
+            partial: true,
+            result: {
+              type: 'error',
+              error: expect.objectContaining({
+                message: `[spy] > Can not cast 'something' to any of 'number'`,
+              }),
+            },
+          },
+          d: { partial: false, result: d },
+        });
+
+        flush();
+
+        expect(spyFn).toHaveBeenCalledTimes(2);
+        expect(spyFn).toHaveBeenNthCalledWith(1, null, { arg: a });
+        expect(spyFn).toHaveBeenNthCalledWith(2, null, { arg: d });
+      });
+    });
+
+    test('supports opting out of partial results in sub-expression', async () => {
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const observable$ = cold('abc|', { a, b, c });
+        const expected = '        ---(c|)';
+        const spyFn = jest.fn((input, { arg }) => arg);
+
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => observable$,
+        });
+        executor.registerFunction({
+          name: 'spy',
+          args: {
+            arg: {
+              help: '',
+              types: ['number'],
+            },
+          },
+          help: '',
+          fn: (input, args) => spyFn(input, args),
+        });
+
+        const result = executor.run('spy arg={observable}', null);
+
+        expectObservable(result).toBe(expected, {
+          c: { partial: false, result: c },
+        });
+
+        flush();
+
+        expect(spyFn).toHaveBeenCalledTimes(1);
+        expect(spyFn).toHaveBeenCalledWith(null, { arg: c });
+      });
+    });
   });
 
   describe('when arguments are missing', () => {
     it('when required argument is missing and has not alias, returns error', async () => {
-      const requiredArg: ExpressionFunctionDefinition<'requiredArg', any, { arg: any }, any> = {
+      const requiredArg: ExpressionFunctionDefinition<
+        'requiredArg',
+        unknown,
+        { arg: unknown },
+        unknown
+      > = {
         name: 'requiredArg',
         args: {
           arg: {
@@ -692,12 +947,12 @@ describe('Execution', () => {
       };
       const executor = createUnitTestExecutor();
       executor.registerFunction(requiredArg);
-      const { result } = await executor.run('requiredArg', null, {}).toPromise();
+      const { result } = await lastValueFrom(executor.run('requiredArg', null, {}));
 
       expect(result).toMatchObject({
         type: 'error',
         error: {
-          message: '[requiredArg] > requiredArg requires an argument',
+          message: '[requiredArg] > requiredArg requires the "arg" argument',
         },
       });
     });
@@ -708,7 +963,98 @@ describe('Execution', () => {
       expect(result).toMatchObject({
         type: 'error',
         error: {
-          message: '[var_set] > var_set requires an "name" argument',
+          message: '[var_set] > var_set requires the "name" argument',
+        },
+      });
+    });
+  });
+
+  describe('when arguments are not valid', () => {
+    let executor: ReturnType<typeof createUnitTestExecutor>;
+
+    beforeEach(() => {
+      const validateArg: ExpressionFunctionDefinition<
+        'validateArg',
+        unknown,
+        { arg: unknown },
+        unknown
+      > = {
+        name: 'validateArg',
+        args: {
+          arg: {
+            help: '',
+            multi: true,
+            options: ['valid'],
+            strict: true,
+          },
+        },
+        help: '',
+        fn: () => 'something',
+      };
+      executor = createUnitTestExecutor();
+      executor.registerFunction(validateArg);
+    });
+
+    it('errors when argument is invalid', async () => {
+      const { result } = await lastValueFrom(executor.run('validateArg arg="invalid"', null));
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message:
+            "[validateArg] > Value 'invalid' is not among the allowed options for argument 'arg': 'valid'",
+        },
+      });
+    });
+
+    it('errors when at least one value is invalid', async () => {
+      const { result } = await lastValueFrom(
+        executor.run('validateArg arg="valid" arg="invalid"', null)
+      );
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message:
+            "[validateArg] > Value 'invalid' is not among the allowed options for argument 'arg': 'valid'",
+        },
+      });
+    });
+
+    it('does not error when argument is valid', async () => {
+      const { result } = await lastValueFrom(executor.run('validateArg arg="valid"', null));
+
+      expect(result).toBe('something');
+    });
+  });
+
+  describe('when arguments are incorrect', () => {
+    it('when required argument is missing and has not alias, returns error', async () => {
+      const incorrectArg: ExpressionFunctionDefinition<
+        'incorrectArg',
+        unknown,
+        { arg: ExpressionValueBoxed<'something'> },
+        unknown
+      > = {
+        name: 'incorrectArg',
+        args: {
+          arg: {
+            help: '',
+            required: true,
+            types: ['something'],
+          },
+        },
+        help: '',
+        fn: jest.fn(),
+      };
+      const executor = createUnitTestExecutor();
+      executor.registerFunction(incorrectArg);
+      const { result } = await lastValueFrom(executor.run('incorrectArg arg="string"', null, {}));
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message: `[incorrectArg] > Can not cast 'string' to any of 'something'`,
         },
       });
     });
@@ -718,7 +1064,7 @@ describe('Execution', () => {
     test('can execute expression in debug mode', async () => {
       const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
       execution.start(-1);
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -733,7 +1079,7 @@ describe('Execution', () => {
         true
       );
       execution.start(0);
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',

@@ -5,38 +5,48 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 
-import { SearchAfterAndBulkCreateParams, WrapSequences } from '../../signals/types';
+import type { WrapSequences } from '../../signals/types';
 import { buildAlertGroupFromSequence } from './utils/build_alert_group_from_sequence';
-import { ConfigType } from '../../../../config';
-import { WrappedRACAlert } from '../types';
+import type { ConfigType } from '../../../../config';
+import type { CompleteRule, RuleParams } from '../../rule_schema';
+import type {
+  BaseFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/detection_engine/schemas/alerts';
 
 export const wrapSequencesFactory =
   ({
     logger,
-    ruleSO,
+    completeRule,
     ignoreFields,
     mergeStrategy,
     spaceId,
+    indicesToQuery,
+    alertTimestampOverride,
   }: {
     logger: Logger;
-    ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
+    completeRule: CompleteRule<RuleParams>;
     ignoreFields: ConfigType['alertIgnoreFields'];
     mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;
+    indicesToQuery: string[];
+    alertTimestampOverride: Date | undefined;
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
     sequences.reduce(
-      (acc: WrappedRACAlert[], sequence) => [
+      (acc: Array<WrappedFieldsLatest<BaseFieldsLatest>>, sequence) => [
         ...acc,
         ...buildAlertGroupFromSequence(
           logger,
           sequence,
-          ruleSO,
+          completeRule,
           mergeStrategy,
           spaceId,
-          buildReasonMessage
+          buildReasonMessage,
+          indicesToQuery,
+          alertTimestampOverride
         ),
       ],
       []

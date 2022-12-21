@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { ConfigType } from './config';
+import type { ConfigType } from '../common/config';
 
-export const createConfig = (context: PluginInitializerContext): Readonly<ConfigType> => {
-  return context.config.get<ConfigType>();
-};
+export const createConfig = (context: PluginInitializerContext): Readonly<ConfigType> =>
+  context.config.get<ConfigType>();

@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
 import * as i18n from '../translations';
-import { FavoriteTimelineResult, OpenTimelineResult } from '../types';
-import { TimelineTypeLiteralWithNull, TimelineType } from '../../../../../common/types/timeline';
+import type { FavoriteTimelineResult, OpenTimelineResult } from '../types';
+import type { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 /**
  * Returns the columns that have icon headers

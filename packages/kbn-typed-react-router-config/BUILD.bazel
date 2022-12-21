@@ -1,17 +1,27 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-typed-react-router-config"
+PKG_DIRNAME = "kbn-typed-react-router-config"
 PKG_REQUIRE_NAME = "@kbn/typed-react-router-config"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ]
 )
 
@@ -28,20 +38,29 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "//packages/kbn-io-ts-utils",
-  "@npm//tslib",
-  "@npm//utility-types",
+  "@npm//fp-ts",
+  "@npm//history",
   "@npm//io-ts",
+  "@npm//lodash",
   "@npm//query-string",
+  "@npm//react",
   "@npm//react-router-config",
   "@npm//react-router-dom",
+  "@npm//tslib",
+  "@npm//utility-types",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-io-ts-utils",
+  "//packages/kbn-io-ts-utils:npm_module_types",
+  "@npm//fp-ts",
+  "@npm//io-ts",
   "@npm//query-string",
   "@npm//utility-types",
+  "@npm//@types/history",
   "@npm//@types/jest",
+  "@npm//@types/lodash",
   "@npm//@types/node",
+  "@npm//@types/react",
   "@npm//@types/react-router-config",
   "@npm//@types/react-router-dom",
 ]
@@ -74,16 +93,21 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+js_library(
+  name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
@@ -92,9 +116,7 @@ js_library(
 
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
@@ -102,5 +124,11 @@ filegroup(
   srcs = [
     ":npm_module",
   ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm(
+  name = "build_types",
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

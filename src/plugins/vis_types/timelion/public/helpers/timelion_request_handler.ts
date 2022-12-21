@@ -7,12 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { KibanaExecutionContext } from 'kibana/public';
-import { KibanaContext, TimeRange, Filter, esQuery, Query } from '../../../../data/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { DataView } from '@kbn/data-plugin/common';
+import { Filter, buildEsQuery, TimeRange, Query } from '@kbn/es-query';
+import { KibanaContext, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelionVisParams } from '../timelion_vis_fn';
-import { getDataSearch } from '../helpers/plugin_services';
+import { getDataSearch, getIndexPatterns } from './plugin_services';
 import { VisSeries } from '../../common/vis_data';
 
 interface Stats {
@@ -52,7 +54,10 @@ export function getTimelionRequestHandler({
   uiSettings,
   http,
   timefilter,
-}: TimelionVisDependencies) {
+  expressionAbortSignal,
+}: TimelionVisDependencies & {
+  expressionAbortSignal: AbortSignal;
+}) {
   const timezone = getTimezone(uiSettings);
 
   return async function ({
@@ -72,6 +77,12 @@ export function getTimelionRequestHandler({
   }): Promise<TimelionSuccessResponse> {
     const dataSearch = getDataSearch();
     const expression = visParams.expression;
+    const abortController = new AbortController();
+    const expressionAbortHandler = function () {
+      abortController.abort();
+    };
+
+    expressionAbortSignal.addEventListener('abort', expressionAbortHandler);
 
     if (!expression) {
       throw new Error(
@@ -81,26 +92,25 @@ export function getTimelionRequestHandler({
       );
     }
 
-    const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
+    let dataView: DataView | undefined;
+    const firstFilterIndex = filters[0]?.meta.index;
+    if (firstFilterIndex) {
+      dataView = await getIndexPatterns()
+        .get(firstFilterIndex)
+        .catch(() => undefined);
+    }
 
-    // parse the time range client side to make sure it behaves like other charts
-    const timeRangeBounds = timefilter.calculateBounds(timeRange);
-    const untrackSearch =
-      dataSearch.session.isCurrentSession(searchSessionId) &&
-      dataSearch.session.trackSearch({
-        abort: () => {
-          // TODO: support search cancellations
-        },
-      });
+    const esQueryConfigs = getEsQueryConfig(uiSettings);
 
-    try {
-      const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
+    const doSearch = async (
+      searchOptions: ReturnType<typeof dataSearch.session.getSearchOptions>
+    ): Promise<TimelionSuccessResponse> => {
       return await http.post('/api/timelion/run', {
         body: JSON.stringify({
           sheet: [expression],
           extended: {
             es: {
-              filter: esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs),
+              filter: buildEsQuery(dataView, query, filters, esQueryConfigs),
             },
           },
           time: {
@@ -109,13 +119,40 @@ export function getTimelionRequestHandler({
             interval: visParams.interval,
             timezone,
           },
-          ...(searchSessionOptions && {
-            searchSession: searchSessionOptions,
-          }),
+          ...(searchOptions
+            ? {
+                searchSession: searchOptions,
+              }
+            : {}),
         }),
         context: executionContext,
+        signal: abortController.signal,
       });
+    };
+
+    // parse the time range client side to make sure it behaves like other charts
+    const timeRangeBounds = timefilter.calculateBounds(timeRange);
+    const searchTracker = dataSearch.session.isCurrentSession(searchSessionId)
+      ? dataSearch.session.trackSearch({
+          abort: () => abortController.abort(),
+          poll: async () => {
+            // don't use, keep this empty, onSavingSession is used instead
+          },
+          onSavingSession: async (searchSessionOptions) => {
+            await doSearch(searchSessionOptions);
+          },
+        })
+      : undefined;
+
+    try {
+      const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
+      const visData = await doSearch(searchSessionOptions);
+
+      searchTracker?.complete();
+      return visData;
     } catch (e) {
+      searchTracker?.error();
+
       if (e && e.body) {
         const err = new Error(
           `${i18n.translate('timelion.requestHandlerErrorTitle', {
@@ -128,10 +165,7 @@ export function getTimelionRequestHandler({
         throw e;
       }
     } finally {
-      if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
-        // call `untrack` if this search still belongs to current session
-        untrackSearch();
-      }
+      expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);
     }
   };
 }

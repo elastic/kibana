@@ -8,8 +8,10 @@
 
 export { UrlFormat } from './url';
 export { BytesFormat } from './bytes';
+export { CurrencyFormat } from './currency';
 export { RelativeDateFormat } from './relative_date';
 export { DurationFormat } from './duration';
+export { GeoPointFormat } from './geo_point';
 export { IpFormat } from './ip';
 export { NumberFormat } from './number';
 export { PercentFormat } from './percent';

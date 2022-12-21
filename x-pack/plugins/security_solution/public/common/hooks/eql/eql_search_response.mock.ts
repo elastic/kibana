@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
-import { Source } from './types';
-import { EqlSearchResponse } from '../../../../common/detection_engine/types';
-import { Connection } from '@elastic/elasticsearch';
+import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import type { Source } from './types';
+import type { EqlSearchResponse } from '../../../../common/detection_engine/types';
+import type { Connection } from '@elastic/elasticsearch';
 
 export const getMockEqlResponse = (): EqlSearchStrategyResponse<EqlSearchResponse<Source>> => ({
   id: 'some-id',

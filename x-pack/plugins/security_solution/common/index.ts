@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110904
-/* eslint-disable @kbn/eslint/no_export_all */
+// TODO(jbudz): should be removed when upgrading to TS@4.8
+// this is a skip for the errors created when typechecking with isolatedModules
+export {};
 
-export * from './types';
-export * from './search_strategy';
-export * from './utility_types';
+// Careful of exporting anything from this file as any file(s) you export here will cause your page bundle size to increase.
+// If you're using functions/types/etc... internally it's best to import directly from their paths than expose the functions/types/etc... here.
+// You should _only_ expose functions/types/etc... that need to be shared with other plugins here.

@@ -14,8 +14,9 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiComboBoxProps,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Tag } from '../../../common';
 import { testSubjFriendly } from '../../utils';
 import { CreateModalOpener } from '../edition_modal';
@@ -42,14 +43,14 @@ function isCreateOption(
   return value.type === '__create_option__';
 }
 
-export interface TagSelectorProps {
+export type TagSelectorProps = EuiComboBoxProps<Tag | CreateOption> & {
   tags: Tag[];
   selected: string[];
   onTagsSelected: (ids: string[]) => void;
   'data-test-subj'?: string;
   allowCreate: boolean;
   openCreateModal: CreateModalOpener;
-}
+};
 
 const renderCreateOption = () => {
   return (
@@ -166,7 +167,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
   );
 
   return (
-    <EuiComboBox
+    <EuiComboBox<Tag | CreateOption>
       placeholder={''}
       options={options}
       selectedOptions={selectedOptions}

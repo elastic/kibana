@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, MouseEventHandler } from 'react';
-import { EuiLink, EuiLinkProps, EuiButton, EuiButtonProps } from '@elastic/eui';
+import type { MouseEventHandler } from 'react';
+import React, { memo } from 'react';
+import type { EuiLinkProps, EuiButtonProps } from '@elastic/eui';
+import { EuiLink, EuiButton } from '@elastic/eui';
 import { useNavigateToAppEventHandler } from '../../hooks/endpoint/use_navigate_to_app_event_handler';
-import { APP_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 
 export type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
   /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */
@@ -30,7 +32,7 @@ export type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
  */
 export const LinkToApp = memo<LinkToAppProps>(
   ({
-    appId = APP_ID,
+    appId = APP_UI_ID,
     deepLinkId,
     appPath: path,
     appState: state,

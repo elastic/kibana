@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useState, useCallback, useContext } from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { useState, useCallback } from 'react';
+import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerMetric,
@@ -14,7 +14,7 @@ import {
 } from '../../../../../common/http_api/metrics_explorer';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 import {
-  MetricsExplorerOptionsContainer,
+  useMetricsExplorerOptionsContainerContext,
   MetricsExplorerChartOptions,
   MetricsExplorerTimeOptions,
   MetricsExplorerOptions,
@@ -29,7 +29,7 @@ export interface MetricExplorerViewState {
 
 export const useMetricsExplorerState = (
   source: MetricsSourceConfigurationProperties,
-  derivedIndexPattern: IIndexPattern,
+  derivedIndexPattern: DataViewBase,
   shouldLoadImmediately = true
 ) => {
   const [refreshSignal, setRefreshSignal] = useState(0);
@@ -42,7 +42,7 @@ export const useMetricsExplorerState = (
     setChartOptions,
     setTimeRange,
     setOptions,
-  } = useContext(MetricsExplorerOptionsContainer.Context);
+  } = useMetricsExplorerOptionsContainerContext();
 
   const { loading, error, data, loadData } = useMetricsExplorerData(
     options,

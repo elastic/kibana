@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InstallablePackage } from '../../../types';
+import type { PackageInfo } from '../../../types';
 import { getArchiveFilelist, getAsset } from '../archive';
 import type { ArchiveEntry } from '../archive';
 
@@ -17,7 +17,7 @@ import type { ArchiveEntry } from '../archive';
 // and different package and version structure
 
 export function getAssets(
-  packageInfo: InstallablePackage,
+  packageInfo: Pick<PackageInfo, 'version' | 'name' | 'type'>,
   filter = (path: string): boolean => true,
   datasetName?: string
 ): string[] {
@@ -35,7 +35,10 @@ export function getAssets(
 
     // if dataset, filter for them
     if (datasetName) {
-      const comparePath = `${packageInfo.name}-${packageInfo.version}/data_stream/${datasetName}/`;
+      const comparePath =
+        packageInfo?.type === 'input'
+          ? `${packageInfo.name}-${packageInfo.version}/agent/input/`
+          : `${packageInfo.name}-${packageInfo.version}/data_stream/${datasetName}/`;
       if (!path.includes(comparePath)) {
         continue;
       }
@@ -49,13 +52,11 @@ export function getAssets(
   return assets;
 }
 
-// ASK: Does getAssetsData need an installSource now?
-// if so, should it be an Installation vs InstallablePackage or add another argument?
-export async function getAssetsData(
-  packageInfo: InstallablePackage,
+export function getAssetsData(
+  packageInfo: Pick<PackageInfo, 'version' | 'name' | 'type'>,
   filter = (path: string): boolean => true,
   datasetName?: string
-): Promise<ArchiveEntry[]> {
+): ArchiveEntry[] {
   // Gather all asset data
   const assets = getAssets(packageInfo, filter, datasetName);
   const entries: ArchiveEntry[] = assets.map((path) => {

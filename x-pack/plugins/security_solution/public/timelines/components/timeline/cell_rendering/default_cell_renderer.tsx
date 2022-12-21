@@ -5,43 +5,77 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import styled from 'styled-components';
 
-import { getMappedNonEcsValue } from '../body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../body/data_driven_columns';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
+import type { CellValueElementProps } from '.';
+import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
+import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions/constants';
+import { ExpandedCellValueActions } from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
 
-import { CellValueElementProps } from '.';
+const hasCellActions = (columnId?: string) => {
+  return columnId && !FIELDS_WITHOUT_CELL_ACTIONS.includes(columnId);
+};
+
+const StyledContent = styled.div<{ $isDetails: boolean }>`
+  padding: ${({ $isDetails }) => ($isDetails ? '0 8px' : undefined)};
+`;
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
-  columnId,
   data,
-  eventId,
-  header,
-  isDraggable,
-  linkValues,
-  setCellProps,
-  timelineId,
-  rowRenderers,
-  browserFields,
   ecsData,
-}) => (
-  <>
-    {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-      columnName: header.id,
-      eventId,
-      field: header,
-      isDraggable,
-      linkValues,
-      timelineId,
-      truncate: true,
-      values: getMappedNonEcsValue({
-        data,
-        fieldName: header.id,
-      }),
-      rowRenderers,
-      browserFields,
-      ecsData,
-    })}
-  </>
-);
+  eventId,
+  globalFilters,
+  header,
+  isDetails,
+  isDraggable,
+  isTimeline,
+  linkValues,
+  rowRenderers,
+  scopeId,
+  truncate,
+  enableActions = true,
+}) => {
+  const asPlainText = useMemo(() => {
+    return getLinkColumnDefinition(header.id, header.type, undefined) !== undefined && !isTimeline;
+  }, [header.id, header.type, isTimeline]);
+
+  const values = useGetMappedNonEcsValue({
+    data,
+    fieldName: header.id,
+  });
+  const styledContentClassName = isDetails
+    ? 'eui-textBreakWord'
+    : 'eui-displayInlineBlock eui-textTruncate';
+  return (
+    <>
+      <StyledContent className={styledContentClassName} $isDetails={isDetails}>
+        {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
+          asPlainText, // we want to render value with links as plain text but keep other formatters like badge.
+          columnName: header.id,
+          ecsData,
+          eventId,
+          field: header,
+          isDetails,
+          isDraggable,
+          linkValues,
+          rowRenderers,
+          scopeId,
+          truncate,
+          values,
+        })}
+      </StyledContent>
+      {enableActions && isDetails && hasCellActions(header.id) && (
+        <ExpandedCellValueActions
+          field={header}
+          globalFilters={globalFilters}
+          scopeId={scopeId}
+          value={values}
+        />
+      )}
+    </>
+  );
+};

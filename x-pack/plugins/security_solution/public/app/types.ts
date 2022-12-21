@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import {
+import type {
   Reducer,
   AnyAction,
   Middleware,
   Action,
   Store,
   Dispatch,
-  PreloadedState,
   StateFromReducersMapObject,
   CombinedState,
 } from 'redux';
-import { RouteProps } from 'react-router-dom';
-import { AppMountParameters } from '../../../../../src/core/public';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
-import { StartedSubPlugins, StartServices } from '../types';
+import type { RouteProps } from 'react-router-dom';
+import type { AppMountParameters } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ExploreReducer, ExploreState } from '../explore';
+import type { StartServices } from '../types';
 
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
@@ -27,20 +27,20 @@ import { StartedSubPlugins, StartServices } from '../types';
 export interface RenderAppProps extends AppMountParameters {
   services: StartServices;
   store: Store<State, Action>;
-  subPlugins: StartedSubPlugins;
+  subPluginRoutes: RouteProps[];
   usageCollection?: UsageCollectionSetup;
 }
 
-import { State, SubPluginsInitReducer } from '../common/store';
-import { Immutable } from '../../common/endpoint/types';
-import { AppAction } from '../common/store/actions';
-import { TimelineState } from '../timelines/store/timeline/types';
+import type { State, SubPluginsInitReducer } from '../common/store';
+import type { Immutable } from '../../common/endpoint/types';
+import type { AppAction } from '../common/store/actions';
+import type { TableState } from '../common/store/data_table/types';
 
 export { SecurityPageName } from '../../common/constants';
 
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
-  initialState: Record<K, T | undefined>;
-  reducer: Record<K, Reducer<T, AnyAction>>;
+  initialState: K extends 'explore' ? ExploreState : Record<K, T>;
+  reducer: K extends 'explore' ? ExploreReducer : Record<K, Reducer<T, AnyAction>>;
   middleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 }
 
@@ -48,13 +48,16 @@ export type SecuritySubPluginRoutes = RouteProps[];
 
 export interface SecuritySubPlugin {
   routes: SecuritySubPluginRoutes;
-  storageTimelines?: Pick<TimelineState, 'timelineById'>;
+  storageDataTables?: Pick<TableState, 'tableById'>;
+  exploreDataTables?: {
+    network: Pick<TableState, 'tableById'>;
+    hosts: Pick<TableState, 'tableById'>;
+    users: Pick<TableState, 'tableById'>;
+  };
 }
 
 export type SecuritySubPluginKeyStore =
-  | 'hosts'
-  | 'network'
-  | 'ueba'
+  | 'explore'
   | 'timeline'
   | 'hostList'
   | 'alertList'
@@ -70,14 +73,12 @@ export interface SecuritySubPluginWithStore<K extends SecuritySubPluginKeyStore,
 
 export interface SecuritySubPlugins extends SecuritySubPlugin {
   store: {
-    initialState: PreloadedState<
-      CombinedState<
-        StateFromReducersMapObject<
-          /** SubPluginsInitReducer, being an interface, will not work in `StateFromReducersMapObject`.
-           * Picking its keys does the trick.
-           **/
-          Pick<SubPluginsInitReducer, keyof SubPluginsInitReducer>
-        >
+    initialState: CombinedState<
+      StateFromReducersMapObject<
+        /** SubPluginsInitReducer, being an interface, will not work in `StateFromReducersMapObject`.
+         * Picking its keys does the trick.
+         **/
+        Pick<SubPluginsInitReducer, keyof SubPluginsInitReducer>
       >
     >;
     reducer: SubPluginsInitReducer;

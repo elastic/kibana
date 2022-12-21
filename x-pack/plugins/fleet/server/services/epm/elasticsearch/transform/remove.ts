@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference } from '../../../../types';
@@ -21,24 +21,19 @@ export const stopTransforms = async (transformIds: string[], esClient: Elasticse
   }
 };
 
-export const deleteTransforms = async (esClient: ElasticsearchClient, transformIds: string[]) => {
+export const deleteTransforms = async (
+  esClient: ElasticsearchClient,
+  transformIds: string[],
+  deleteDestinationIndices = false
+) => {
   const logger = appContextService.getLogger();
   if (transformIds.length) {
     logger.info(`Deleting currently installed transform ids ${transformIds}`);
   }
   await Promise.all(
     transformIds.map(async (transformId) => {
-      interface TransformResponse {
-        count: number;
-        transforms?: Array<{
-          dest: {
-            index: string;
-          };
-        }>;
-      }
-
       // get the index the transform
-      const { body: transformResponse } = await esClient.transform.getTransform<TransformResponse>(
+      const transformResponse = await esClient.transform.getTransform(
         { transform_id: transformId },
         { ignore: [404] }
       );
@@ -49,13 +44,12 @@ export const deleteTransforms = async (esClient: ElasticsearchClient, transformI
         { ignore: [404] }
       );
       logger.info(`Deleted: ${transformId}`);
-      if (transformResponse?.transforms) {
+      if (deleteDestinationIndices && transformResponse?.transforms) {
         // expect this to be 1
         for (const transform of transformResponse.transforms) {
           await esClient.transport.request(
             {
               method: 'DELETE',
-              // @ts-expect-error @elastic/elasticsearch Transform is empty interface
               path: `/${transform?.dest?.index}`,
             },
             {

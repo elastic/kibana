@@ -7,7 +7,6 @@
  */
 
 import React, { Component, ReactElement } from 'react';
-
 import {
   EuiButton,
   EuiCopy,
@@ -21,30 +20,33 @@ import {
   EuiRadioGroup,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
 
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { HttpStart } from 'kibana/public';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { Capabilities } from 'src/core/public';
+import type { Capabilities } from '@kbn/core/public';
 
-import { shortenUrl } from '../lib/url_shortener';
 import { UrlParamExtension } from '../types';
-import type { SecurityOssPluginStart } from '../../../security_oss/public';
+import {
+  AnonymousAccessServiceContract,
+  AnonymousAccessState,
+} from '../../common/anonymous_access';
+import type { BrowserUrlService } from '../types';
 
-interface Props {
+export interface UrlPanelContentProps {
   allowShortUrl: boolean;
   isEmbedded?: boolean;
   objectId?: string;
   objectType: string;
   shareableUrl?: string;
-  basePath: string;
-  post: HttpStart['post'];
   urlParamExtensions?: UrlParamExtension[];
-  anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
+  anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
+  urlService: BrowserUrlService;
+  snapshotShareWarning?: string;
 }
 
 export enum ExportUrlAsType {
@@ -66,19 +68,18 @@ interface State {
   url?: string;
   shortUrlErrorMsg?: string;
   urlParams?: UrlParams;
-  anonymousAccessParameters: Record<string, string> | null;
+  anonymousAccessParameters: AnonymousAccessState['accessURLParameters'];
   showPublicUrlSwitch: boolean;
 }
 
-export class UrlPanelContent extends Component<Props, State> {
+export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   private mounted?: boolean;
   private shortUrlCache?: string;
 
-  constructor(props: Props) {
+  constructor(props: UrlPanelContentProps) {
     super(props);
 
     this.shortUrlCache = undefined;
-
     this.state = {
       exportUrlAs: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
       useShortUrl: false,
@@ -104,8 +105,8 @@ export class UrlPanelContent extends Component<Props, State> {
 
     if (this.props.anonymousAccess) {
       (async () => {
-        const anonymousAccessParameters =
-          await this.props.anonymousAccess!.getAccessURLParameters();
+        const { accessURLParameters: anonymousAccessParameters } =
+          await this.props.anonymousAccess!.getState();
 
         if (!this.mounted) {
           return;
@@ -140,47 +141,72 @@ export class UrlPanelContent extends Component<Props, State> {
   }
 
   public render() {
+    const shortUrlSwitch = this.renderShortUrlSwitch();
+    const publicUrlSwitch = this.renderPublicUrlSwitch();
+
+    const urlRow = (!!shortUrlSwitch || !!publicUrlSwitch) && (
+      <EuiFormRow
+        label={<FormattedMessage id="share.urlPanel.urlGroupTitle" defaultMessage="URL" />}
+      >
+        <>
+          <EuiSpacer size={'s'} />
+          {shortUrlSwitch}
+          {publicUrlSwitch}
+        </>
+      </EuiFormRow>
+    );
+
+    const showWarningButton =
+      this.props.snapshotShareWarning &&
+      this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT;
+
+    const copyButton = (copy: () => void) => (
+      <EuiButton
+        fill
+        fullWidth
+        onClick={copy}
+        disabled={this.state.isCreatingShortUrl || this.state.url === ''}
+        data-share-url={this.state.url}
+        data-test-subj="copyShareUrlButton"
+        size="s"
+        iconType={showWarningButton ? 'alert' : undefined}
+        color={showWarningButton ? 'warning' : 'primary'}
+      >
+        {this.props.isEmbedded ? (
+          <FormattedMessage
+            id="share.urlPanel.copyIframeCodeButtonLabel"
+            defaultMessage="Copy iFrame code"
+          />
+        ) : (
+          <FormattedMessage id="share.urlPanel.copyLinkButtonLabel" defaultMessage="Copy link" />
+        )}
+      </EuiButton>
+    );
+
     return (
       <I18nProvider>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
           {this.renderExportAsRadioGroup()}
           {this.renderUrlParamExtensions()}
-
-          <EuiFormRow
-            label={<FormattedMessage id="share.urlPanel.urlGroupTitle" defaultMessage="URL" />}
-          >
-            <>
-              <EuiSpacer size={'s'} />
-              {this.renderShortUrlSwitch()}
-              {this.renderPublicUrlSwitch()}
-            </>
-          </EuiFormRow>
+          {urlRow}
 
           <EuiSpacer size="m" />
 
           <EuiCopy textToCopy={this.state.url || ''} anchorClassName="eui-displayBlock">
             {(copy: () => void) => (
-              <EuiButton
-                fill
-                fullWidth
-                onClick={copy}
-                disabled={this.state.isCreatingShortUrl || this.state.url === ''}
-                data-share-url={this.state.url}
-                data-test-subj="copyShareUrlButton"
-                size="s"
-              >
-                {this.props.isEmbedded ? (
-                  <FormattedMessage
-                    id="share.urlPanel.copyIframeCodeButtonLabel"
-                    defaultMessage="Copy iFrame code"
-                  />
+              <>
+                {showWarningButton ? (
+                  <EuiToolTip
+                    position="bottom"
+                    content={this.props.snapshotShareWarning}
+                    display="block"
+                  >
+                    {copyButton(copy)}
+                  </EuiToolTip>
                 ) : (
-                  <FormattedMessage
-                    id="share.urlPanel.copyLinkButtonLabel"
-                    defaultMessage="Copy link"
-                  />
+                  copyButton(copy)
                 )}
-              </EuiButton>
+              </>
             )}
           </EuiCopy>
         </EuiForm>
@@ -240,13 +266,11 @@ export class UrlPanelContent extends Component<Props, State> {
         },
       }),
     });
-
     return this.updateUrlParams(formattedUrl);
   };
 
   private getSnapshotUrl = () => {
     const url = this.props.shareableUrl || window.location.href;
-
     return this.updateUrlParams(url);
   };
 
@@ -358,16 +382,16 @@ export class UrlPanelContent extends Component<Props, State> {
     });
 
     try {
-      const shortUrl = await shortenUrl(this.getSnapshotUrl(), {
-        basePath: this.props.basePath,
-        post: this.props.post,
-      });
+      const snapshotUrl = this.getSnapshotUrl();
+      const shortUrl = await this.props.urlService.shortUrls
+        .get(null)
+        .createFromLongUrl(snapshotUrl);
 
       if (!this.mounted) {
         return;
       }
 
-      this.shortUrlCache = shortUrl;
+      this.shortUrlCache = shortUrl.url;
       this.setState(
         {
           isCreatingShortUrl: false,
@@ -398,17 +422,24 @@ export class UrlPanelContent extends Component<Props, State> {
   };
 
   private renderExportUrlAsOptions = () => {
+    const snapshotLabel = (
+      <FormattedMessage id="share.urlPanel.snapshotLabel" defaultMessage="Snapshot" />
+    );
     return [
       {
         id: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
-        label: this.renderWithIconTip(
-          <FormattedMessage id="share.urlPanel.snapshotLabel" defaultMessage="Snapshot" />,
-          <FormattedMessage
-            id="share.urlPanel.snapshotDescription"
-            defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
+        label: (
+          <>
+            {this.renderWithIconTip(
+              snapshotLabel,
+              <FormattedMessage
+                id="share.urlPanel.snapshotDescription"
+                defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
             Edits to the saved {objectType} won't be visible via this URL."
-            values={{ objectType: this.props.objectType }}
-          />
+                values={{ objectType: this.props.objectType }}
+              />
+            )}
+          </>
         ),
         ['data-test-subj']: 'exportAsSnapshot',
       },
@@ -448,19 +479,19 @@ export class UrlPanelContent extends Component<Props, State> {
       />
     ) : undefined;
     return (
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="share.urlPanel.generateLinkAsLabel"
-            defaultMessage="Generate the link as"
-          />
-        }
-        helpText={generateLinkAsHelp}
-      >
+      <EuiFormRow helpText={generateLinkAsHelp}>
         <EuiRadioGroup
           options={this.renderExportUrlAsOptions()}
           idSelected={this.state.exportUrlAs}
           onChange={this.handleExportUrlAs}
+          legend={{
+            children: (
+              <FormattedMessage
+                id="share.urlPanel.generateLinkAsLabel"
+                defaultMessage="Generate the link as"
+              />
+            ),
+          }}
         />
       </EuiFormRow>
     );
@@ -471,7 +502,7 @@ export class UrlPanelContent extends Component<Props, State> {
       this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT ||
       !this.props.allowShortUrl
     ) {
-      return;
+      return null;
     }
     const shortUrlLabel = (
       <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />

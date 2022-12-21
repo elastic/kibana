@@ -10,15 +10,15 @@ import { cloneDeep } from 'lodash/fp';
 import React, { useEffect } from 'react';
 
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import {
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type {
   ColumnHeaderOptions,
   CellValueElementProps,
-  TimelineTabs,
 } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 
 import { StatefulCell } from './stateful_cell';
-import { getMappedNonEcsValue } from '.';
+import { useGetMappedNonEcsValue } from '.';
 
 /**
  * This (test) component implement's `EuiDataGrid`'s `renderCellValue` interface,
@@ -30,14 +30,13 @@ import { getMappedNonEcsValue } from '.';
  * https://codesandbox.io/s/zhxmo
  */
 const RenderCellValue: React.FC<CellValueElementProps> = ({ columnId, data, setCellProps }) => {
+  const value = useGetMappedNonEcsValue({
+    data,
+    fieldName: columnId,
+  });
   useEffect(() => {
     // branching logic that conditionally renders a specific cell green:
     if (columnId === defaultHeaders[0].id) {
-      const value = getMappedNonEcsValue({
-        data,
-        fieldName: columnId,
-      });
-
       if (value?.length) {
         setCellProps({
           style: {
@@ -46,24 +45,17 @@ const RenderCellValue: React.FC<CellValueElementProps> = ({ columnId, data, setC
         });
       }
     }
-  }, [columnId, data, setCellProps]);
+  }, [columnId, data, setCellProps, value]);
 
-  return (
-    <div data-test-subj="renderCellValue">
-      {getMappedNonEcsValue({
-        data,
-        fieldName: columnId,
-      })}
-    </div>
-  );
+  return <div data-test-subj="renderCellValue">{value}</div>;
 };
 
 describe('StatefulCell', () => {
-  const ariaRowindex = 123;
+  const rowIndex = 123;
+  const colIndex = 0;
   const eventId = '_id-123';
   const linkValues = ['foo', 'bar', '@baz'];
-  const tabType = TimelineTabs.query;
-  const timelineId = 'test';
+  const timelineId = TimelineId.test;
 
   let header: ColumnHeaderOptions;
   let data: TimelineNonEcsData[];
@@ -77,7 +69,8 @@ describe('StatefulCell', () => {
 
     mount(
       <StatefulCell
-        ariaRowindex={ariaRowindex}
+        rowIndex={rowIndex}
+        colIndex={colIndex}
         data={data}
         header={header}
         eventId={eventId}
@@ -98,8 +91,9 @@ describe('StatefulCell', () => {
         isExpanded: false,
         isDetails: false,
         linkValues,
-        rowIndex: ariaRowindex - 1,
-        timelineId: `${timelineId}-${tabType}`,
+        rowIndex,
+        colIndex,
+        scopeId: timelineId,
       })
     );
   });
@@ -109,7 +103,8 @@ describe('StatefulCell', () => {
 
     mount(
       <StatefulCell
-        ariaRowindex={ariaRowindex}
+        rowIndex={rowIndex}
+        colIndex={colIndex}
         data={data}
         header={header}
         eventId={eventId}
@@ -129,8 +124,9 @@ describe('StatefulCell', () => {
         isExpanded: false,
         isDetails: false,
         linkValues,
-        rowIndex: ariaRowindex - 1,
-        timelineId,
+        rowIndex,
+        colIndex,
+        scopeId: timelineId,
       })
     );
   });
@@ -140,7 +136,8 @@ describe('StatefulCell', () => {
 
     const wrapper = mount(
       <StatefulCell
-        ariaRowindex={ariaRowindex}
+        rowIndex={rowIndex}
+        colIndex={colIndex}
         data={data}
         header={header}
         eventId={eventId}
@@ -156,7 +153,8 @@ describe('StatefulCell', () => {
   test("it renders a div with the styles set by `renderCellValue`'s `setCellProps` argument", () => {
     const wrapper = mount(
       <StatefulCell
-        ariaRowindex={ariaRowindex}
+        rowIndex={rowIndex}
+        colIndex={colIndex}
         data={data}
         header={header}
         eventId={eventId}

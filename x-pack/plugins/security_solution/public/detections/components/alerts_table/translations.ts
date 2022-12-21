@@ -18,12 +18,6 @@ export const ALERTS_DOCUMENT_TYPE = i18n.translate(
   }
 );
 
-export const ALERTS_UNIT = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.alerts.alertsUnit', {
-    values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
-  });
-
 export const OPEN_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.openAlertsTitle',
   {
@@ -80,20 +74,6 @@ export const ALERTS_HEADERS_RULE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ALERTS_HEADERS_VERSION = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.versionTitle',
-  {
-    defaultMessage: 'Version',
-  }
-);
-
-export const ALERTS_HEADERS_METHOD = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.methodTitle',
-  {
-    defaultMessage: 'Method',
-  }
-);
-
 export const ALERTS_HEADERS_SEVERITY = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.severityTitle',
   {
@@ -118,7 +98,7 @@ export const ALERTS_HEADERS_RISK_SCORE = i18n.translate(
 export const ALERTS_HEADERS_THRESHOLD_COUNT = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdCount',
   {
-    defaultMessage: 'Threshold Count',
+    defaultMessage: 'Event Count',
   }
 );
 
@@ -132,35 +112,21 @@ export const ALERTS_HEADERS_THRESHOLD_TERMS = i18n.translate(
 export const ALERTS_HEADERS_THRESHOLD_CARDINALITY = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdCardinality',
   {
-    defaultMessage: 'Threshold Cardinality',
+    defaultMessage: 'Event Cardinality',
   }
 );
 
-export const ALERTS_HEADERS_TARGET_IMPORT_HASH = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.overviewTable.targetImportHash',
+export const ALERTS_HEADERS_NEW_TERMS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.newTerms',
   {
-    defaultMessage: 'Import Hash',
+    defaultMessage: 'New Terms',
   }
 );
 
-export const ACTION_OPEN_ALERT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.openAlertTitle',
+export const ALERTS_HEADERS_NEW_TERMS_FIELDS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.newTermsFields',
   {
-    defaultMessage: 'Open alert',
-  }
-);
-
-export const ACTION_CLOSE_ALERT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.closeAlertTitle',
-  {
-    defaultMessage: 'Close alert',
-  }
-);
-
-export const ACTION_ACKNOWLEDGED_ALERT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.acknowledgedAlertTitle',
-  {
-    defaultMessage: 'Mark as acknowledged',
+    defaultMessage: 'New Terms fields',
   }
 );
 
@@ -189,6 +155,14 @@ export const ACTION_ADD_EVENT_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter',
   {
     defaultMessage: 'Add Endpoint event filter',
+  }
+);
+
+export const ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter.disabled.tooltip',
+  {
+    defaultMessage:
+      'Endpoint event filters can be created from the Events section of the Hosts page.',
   }
 );
 
@@ -265,6 +239,20 @@ export const STATUS = i18n.translate(
   }
 );
 
+export const CHANGE_ALERT_STATUS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overview.changeAlertStatus',
+  {
+    defaultMessage: 'Change alert status',
+  }
+);
+
+export const CLICK_TO_CHANGE_ALERT_STATUS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overview.clickToChangeAlertStatus',
+  {
+    defaultMessage: 'Click to change alert status',
+  }
+);
+
 export const SIGNAL_STATUS = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.overviewTable.signalStatusTitle',
   {
@@ -279,9 +267,30 @@ export const TRIGGERED = i18n.translate(
   }
 );
 
-export const TIMESTAMP = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.overviewTable.timestampTitle',
+export const ADD_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToCase',
   {
-    defaultMessage: 'Timestamp',
+    defaultMessage: 'Add to existing case',
+  }
+);
+
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToNewCase',
+  {
+    defaultMessage: 'Add to new case',
+  }
+);
+
+export const ADD_TO_CASE_DISABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToCaseDisabled',
+  {
+    defaultMessage: 'Add to case is not supported for this selection',
+  }
+);
+
+export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addBulkToTimeline',
+  {
+    defaultMessage: 'Investigate in timeline',
   }
 );

@@ -7,7 +7,4 @@
  */
 
 export { getAutocompleteSuggestions } from './autocomplete';
-
-export { PainlessError } from './error_listener';
-
 export { parseAndGetSyntaxErrors } from './parser';

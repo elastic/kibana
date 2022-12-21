@@ -7,62 +7,60 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-// @ts-expect-error
-import { spritesheet } from '@elastic/maki';
-import sprites1 from '@elastic/maki/dist/sprite@1.png';
-import sprites2 from '@elastic/maki/dist/sprite@2.png';
-import { Adapters } from 'src/plugins/inspector/public';
-import { Filter } from 'src/plugins/data/public';
-import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
-
-import { mapboxgl } from '@kbn/mapbox-gl';
-import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
+import { Adapters } from '@kbn/inspector-plugin/public';
+import { Filter } from '@kbn/es-query';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { maplibregl } from '@kbn/mapbox-gl';
+import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
+import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
-import { getPreserveDrawingBuffer } from '../../kibana_services';
-import { ILayer } from '../../classes/layers/layer';
-import { MapSettings } from '../../reducers/map';
 import {
+  getPreserveDrawingBuffer,
+  getUsageCollection,
+  isScreenshotMode,
+} from '../../kibana_services';
+import { ILayer } from '../../classes/layers/layer';
+import {
+  CustomIcon,
   Goto,
   MapCenterAndZoom,
-  TileMetaFeature,
+  MapSettings,
   Timeslice,
 } from '../../../common/descriptor_types';
 import {
+  APP_ID,
+  CUSTOM_ICON_SIZE,
   DECIMAL_DEGREES_PRECISION,
-  KBN_TOO_MANY_FEATURES_IMAGE_ID,
-  LAYER_TYPE,
+  MAKI_ICON_SIZE,
   RawValue,
   ZOOM_PRECISION,
 } from '../../../common/constants';
-import { getGlyphUrl, isRetina } from '../../util';
+import { getGlyphUrl } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 
-import {
-  addSpriteSheetToMapFromImageData,
-  loadSpriteSheetImageData,
-  removeOrphanedSourcesAndLayers,
-  // @ts-expect-error
-} from './utils';
-import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
+import { removeOrphanedSourcesAndLayers } from './utils';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
-import { TiledVectorLayer } from '../../classes/layers/tiled_vector_layer/tiled_vector_layer';
 import type { MapExtentState } from '../../reducers/map/types';
+import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vector/symbol_utils';
+import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
+import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
 
 export interface Props {
   isMapReady: boolean;
   settings: MapSettings;
+  customIcons: CustomIcon[];
   layerList: ILayer[];
   spatialFiltersLayer: ILayer;
   goto?: Goto | null;
   inspectorAdapters: Adapters;
   isFullScreen: boolean;
-  scrollZoom: boolean;
   extentChanged: (mapExtentState: MapExtentState) => void;
   onMapReady: (mapExtentState: MapExtentState) => void;
   onMapDestroyed: () => void;
@@ -75,11 +73,10 @@ export interface Props {
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   renderTooltipContent?: RenderToolTipContent;
-  setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
   timeslice?: Timeslice;
-  updateMetaFromTiles: (layerId: string, features: TileMetaFeature[]) => void;
   featureModeActive: boolean;
   filterModeActive: boolean;
+  onMapMove?: (lat: number, lon: number, zoom: number) => void;
 }
 
 interface State {
@@ -90,11 +87,11 @@ export class MbMap extends Component<Props, State> {
   private _checker?: ResizeChecker;
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
+  private _prevCustomIcons?: CustomIcon[];
   private _prevDisableInteractive?: boolean;
   private _prevLayerList?: ILayer[];
   private _prevTimeslice?: Timeslice;
-  private _navigationControl = new mapboxgl.NavigationControl({ showCompass: false });
-  private _tileStatusTracker?: TileStatusTracker;
+  private _navigationControl = new maplibregl.NavigationControl({ showCompass: false });
 
   state: State = {
     mbMap: undefined,
@@ -115,25 +112,12 @@ export class MbMap extends Component<Props, State> {
     if (this._checker) {
       this._checker.destroy();
     }
-    if (this._tileStatusTracker) {
-      this._tileStatusTracker.destroy();
-    }
     if (this.state.mbMap) {
       this.state.mbMap.remove();
       this.state.mbMap = undefined;
     }
     this.props.onMapDestroyed();
   }
-
-  // This keeps track of the latest update calls, per layerId
-  _queryForMeta = (layer: ILayer) => {
-    if (this.state.mbMap && layer.isVisible() && layer.getType() === LAYER_TYPE.TILED_VECTOR) {
-      const mbFeatures = (layer as TiledVectorLayer).queryTileMetaFeatures(this.state.mbMap);
-      if (mbFeatures !== null) {
-        this.props.updateMetaFromTiles(layer.getId(), mbFeatures);
-      }
-    }
-  };
 
   _debouncedSync = _.debounce(() => {
     if (this._isMounted && this.props.isMapReady && this.state.mbMap) {
@@ -170,19 +154,19 @@ export class MbMap extends Component<Props, State> {
   }
 
   async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
+    this._reportUsage();
     return new Promise((resolve) => {
       const mbStyle = {
-        version: 8,
+        version: 8 as 8,
         sources: {},
         layers: [],
         glyphs: getGlyphUrl(),
       };
 
-      const options: MapboxOptions = {
+      const options: MapOptions = {
         attributionControl: false,
         container: this._containerRef!,
         style: mbStyle,
-        scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: getPreserveDrawingBuffer(),
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
@@ -196,26 +180,9 @@ export class MbMap extends Component<Props, State> {
       } else {
         options.bounds = [-170, -60, 170, 75];
       }
-      const mbMap = new mapboxgl.Map(options);
+      const mbMap = new maplibregl.Map(options);
       mbMap.dragRotate.disable();
       mbMap.touchZoomRotate.disableRotation();
-
-      this._tileStatusTracker = new TileStatusTracker({
-        mbMap,
-        getCurrentLayerList: () => this.props.layerList,
-        updateTileStatus: (layer: ILayer, areTilesLoaded: boolean) => {
-          this.props.setAreTilesLoaded(layer.getId(), areTilesLoaded);
-          this._queryForMeta(layer);
-        },
-      });
-
-      const tooManyFeaturesImageSrc =
-        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAA7DgAAOw4BzLahgwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAARLSURBVHic7ZnPbxRVAMe/7735sWO3293ZlUItJsivCxEE0oTYRgu1FqTQoFSwKTYx8SAH/wHjj4vRozGGi56sMcW2UfqTEuOhppE0KJc2GIuKQFDY7qzdtrudX88D3YTUdFuQN8+k87ltZt7uZz958/bNLAGwBWsYKltANmEA2QKyCQPIFpBNGEC2gGzCALIFZBMGkC0gmzCAbAHZhAFkC8gmDCBbQDZhANkCslnzARQZH6oDpNs0D5UDSUIInePcOpPLfdfnODNBuwQWIAWwNOABwHZN0x8npE6hNLJ4DPWRyFSf40wE5VOEQPBjcR0g3YlE4ybGmtK+/1NzJtOZA/xSYwZMs3nG962T2ez3It2AANaA/kSidYuivOQBs5WM1fUnk6f0u+GXJUqIuUtVXx00zRbRfkIDfBqL7a1WlIYbjvNtTTr99jXXHVpH6dMjK0R4cXq6c9rzxjcx9sKX8XitSEdhAToMI7VP10/97fsTh7PZrgWAN1lW72KE2vOm2b5chDTgtWQyn93x/bEEIetEOQIC14CxVOr1CkKefH929t0v8vn0vcdGEoljGxXl4C3PGz2YyXy+AHARDqtByAxoUdWKBKV70r4/vvTLA0CjZfX+5nkDGxirKzUTgkBIgNaysh3gnF627R+XO+dQJvP1ddcdrmSsbtA020pF+CAW21qrqmUiXIUEqGRsIwD0FQq/lzqv0bJ6rrvucBVjzwyb5ivLRTiiaW+8VV7eIEBVTAANiIIQd9RxZlc6t9Gyem647vn1jD07ZJonl4sQASoevqmgABzwwHnJzc69PGdZ3X+47sgGxuqHTPPE0ggeVtg5/QeEBMhxPg1Aa1DV2GrHPG9ZXy1G2D+wNALn9jyQEeHKAJgP+033Kgrdqij7AFwZtu3bqx3XWShMHtV1o1pRGo4YxiNd+fyEB2DKdX/4aG5u0hbwcylkBryTy/3scT6zW9Nq7ndso2Wdvea6Q1WUHuiPx1/WAXLBcWZXun94UMRcAoD/p+ddTFK6u8MwUvc7vsmyem+67oVqVT0wkEgcF+FYRNhW+L25uX6f84XThtHxIBudE5bVY/t++jFVrU/dvVSFICzAqG3PX/S8rihj2/61qK1AOUB7ksl2jdLUL7Z9rvgcQQRCFsEi5wqFmw26XnhCUQ63GcZmCly95Lrzpca0G0byk3j8tEnpU1c975tmyxoU5QcE8EAEAM5WVOzfoarHAeC2749dcpzxMwsLv07Ztg0AOzVNf03Ttu/S9T2PMlbjc25fdpyutmx2TLRbIAEA4M1otKo1EjmaoHQn4ZwBgA/kAVAK6MXXdzxv/ONcrq/HcbJBeAUWoEizqsaORaPbKglZrxMSZZyrM76f/ovzWx/m85PFWREUgQf4v7Hm/xcIA8gWkE0YQLaAbMIAsgVkEwaQLSCbMIBsAdmEAWQLyCYMIFtANmEA2QKyCQPIFpDNmg/wD3OFdEybUvJjAAAAAElFTkSuQmCC';
-      const tooManyFeaturesImage = new Image();
-      tooManyFeaturesImage.onload = () => {
-        mbMap.addImage(KBN_TOO_MANY_FEATURES_IMAGE_ID, tooManyFeaturesImage);
-      };
-      tooManyFeaturesImage.src = tooManyFeaturesImageSrc;
 
       let emptyImage: HTMLImageElement;
       mbMap.on('styleimagemissing', (e: unknown) => {
@@ -269,9 +236,20 @@ export class MbMap extends Component<Props, State> {
     mbMap.on(
       'moveend',
       _.debounce(() => {
-        this.props.extentChanged(this._getMapExtentState());
+        if (this._isMounted) {
+          this.props.extentChanged(this._getMapExtentState());
+        }
       }, 100)
     );
+
+    // do not update redux state on 'move' event for performance reasons
+    // instead, callback provided for cases where consumers need to react to "move" event
+    mbMap.on('move', () => {
+      if (this.props.onMapMove) {
+        const { zoom, center } = this._getMapExtentState();
+        this.props.onMapMove(center.lat, center.lon, zoom);
+      }
+    });
 
     // Attach event only if view control is visible, which shows lat/lon
     if (!this.props.settings.hideViewControl) {
@@ -298,12 +276,40 @@ export class MbMap extends Component<Props, State> {
     });
   }
 
+  _reportUsage() {
+    const usageCollector = getUsageCollection();
+    if (!usageCollector) return;
+
+    const webglSupport = maplibregl.supported();
+
+    usageCollector.reportUiCounter(
+      APP_ID,
+      METRIC_TYPE.LOADED,
+      webglSupport ? 'gl_webglSupported' : 'gl_webglNotSupported'
+    );
+
+    // Report low system performance or no hardware GPU
+    if (webglSupport && !maplibregl.supported({ failIfMajorPerformanceCaveat: true })) {
+      usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, 'gl_majorPerformanceCaveat');
+    }
+  }
+
   async _loadMakiSprites(mbMap: MapboxMap) {
-    const spritesUrl = isRetina() ? sprites2 : sprites1;
-    const json = isRetina() ? spritesheet[2] : spritesheet[1];
-    const spritesData = await loadSpriteSheetImageData(spritesUrl);
     if (this._isMounted) {
-      addSpriteSheetToMapFromImageData(json, spritesData, mbMap);
+      // Math.floor rounds values < 1 to 0. This occurs when browser is zoomed out
+      // Math.max wrapper ensures value is always at least 1 in these cases
+      const pixelRatio = Math.max(Math.floor(window.devicePixelRatio), 1);
+      for (const [symbolId, { svg }] of Object.entries(MAKI_ICONS)) {
+        if (!mbMap.hasImage(symbolId)) {
+          const imageData = await createSdfIcon({ renderSize: MAKI_ICON_SIZE, svg });
+          if (imageData) {
+            mbMap.addImage(symbolId, imageData, {
+              pixelRatio,
+              sdf: true,
+            });
+          }
+        }
+      }
     }
   }
 
@@ -318,12 +324,12 @@ export class MbMap extends Component<Props, State> {
 
     if (goto.bounds) {
       // clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
-      const lnLatBounds = new mapboxgl.LngLatBounds(
-        new mapboxgl.LngLat(
+      const lnLatBounds = new maplibregl.LngLatBounds(
+        new maplibregl.LngLat(
           clampToLonBounds(goto.bounds.minLon),
           clampToLatBounds(goto.bounds.minLat)
         ),
-        new mapboxgl.LngLat(
+        new maplibregl.LngLat(
           clampToLonBounds(goto.bounds.maxLon),
           clampToLatBounds(goto.bounds.maxLat)
         )
@@ -377,8 +383,9 @@ export class MbMap extends Component<Props, State> {
     }
 
     if (
-      this._prevDisableInteractive === undefined ||
-      this._prevDisableInteractive !== this.props.settings.disableInteractive
+      !isScreenshotMode() &&
+      (this._prevDisableInteractive === undefined ||
+        this._prevDisableInteractive !== this.props.settings.disableInteractive)
     ) {
       this._prevDisableInteractive = this.props.settings.disableInteractive;
       if (this.props.settings.disableInteractive) {
@@ -398,6 +405,29 @@ export class MbMap extends Component<Props, State> {
       }
     }
 
+    if (
+      this._prevCustomIcons === undefined ||
+      !_.isEqual(this._prevCustomIcons, this.props.customIcons)
+    ) {
+      this._prevCustomIcons = this.props.customIcons;
+      const mbMap = this.state.mbMap;
+      for (const { symbolId, svg, cutoff, radius } of this.props.customIcons) {
+        createSdfIcon({ svg, renderSize: CUSTOM_ICON_SIZE, cutoff, radius }).then(
+          (imageData: ImageData | null) => {
+            if (!imageData) {
+              return;
+            }
+            if (mbMap.hasImage(symbolId)) mbMap.updateImage(symbolId, imageData);
+            else
+              mbMap.addImage(symbolId, imageData, {
+                sdf: true,
+                pixelRatio: CUSTOM_ICON_PIXEL_RATIO,
+              });
+          }
+        );
+      }
+    }
+
     let zoomRangeChanged = false;
     if (this.props.settings.minZoom !== this.state.mbMap.getMinZoom()) {
       this.state.mbMap.setMinZoom(this.props.settings.minZoom);
@@ -413,7 +443,9 @@ export class MbMap extends Component<Props, State> {
     // hack to update extent after zoom update finishes moving map.
     if (zoomRangeChanged) {
       setTimeout(() => {
-        this.props.extentChanged(this._getMapExtentState());
+        if (this._isMounted) {
+          this.props.extentChanged(this._getMapExtentState());
+        }
       }, 300);
     }
   }
@@ -427,6 +459,8 @@ export class MbMap extends Component<Props, State> {
     let drawFeatureControl;
     let tooltipControl;
     let scaleControl;
+    let keydownScrollZoomControl;
+    let tileStatusTrackerControl;
     if (this.state.mbMap) {
       drawFilterControl =
         this.props.addFilters && this.props.filterModeActive ? (
@@ -448,6 +482,10 @@ export class MbMap extends Component<Props, State> {
       scaleControl = this.props.settings.showScaleControl ? (
         <ScaleControl mbMap={this.state.mbMap} isFullScreen={this.props.isFullScreen} />
       ) : null;
+      keydownScrollZoomControl = this.props.settings.keydownScrollZoom ? (
+        <KeydownScrollZoom mbMap={this.state.mbMap} />
+      ) : null;
+      tileStatusTrackerControl = <TileStatusTracker mbMap={this.state.mbMap} />;
     }
     return (
       <div
@@ -458,8 +496,10 @@ export class MbMap extends Component<Props, State> {
       >
         {drawFilterControl}
         {drawFeatureControl}
+        {keydownScrollZoomControl}
         {scaleControl}
         {tooltipControl}
+        {tileStatusTrackerControl}
       </div>
     );
   }

@@ -2,7 +2,7 @@
 id: formLibCoreUseFormData
 slug: /form-lib/core/use-form-data
 title: useFormData()
-summary: Get fields value updates from anywhere
+description: Get fields value updates from anywhere
 tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
@@ -54,6 +54,31 @@ const [{ type }] = useFormData({ watch: 'type' });
 
 // Only get update whenever either the "type" or the "subType" field changes
 const [{ type, subType }] = useFormData({ watch: ['type', 'subType'] });
+```
+
+### onChange
+
+**Type:** `(data: T) => void`
+
+This handler lets you listen to form fields value change _before_ any validation is executed.
+
+```js
+// With "onChange": listen to changes before any validation is triggered
+const onFieldChange = useCallback(({ myField, otherField }) => {
+  // React to changes before any validation is executed
+}, []);
+
+useFormData({
+  watch: ['myField', 'otherField'],
+  onChange: onFieldChange
+});
+
+// Without "onChange": the way to go most of the time
+const [{ myField, otherField }] = useFormData({ watch['myField', 'otherField'] });
+
+useEffect(() => {
+  // React to changes after validation have been triggered
+}, [myField, otherField]);
 ```
 
 ## Return

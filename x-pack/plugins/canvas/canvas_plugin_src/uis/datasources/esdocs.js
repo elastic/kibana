@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFormRow,
@@ -20,20 +20,24 @@ import {
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { ESFieldsSelect } from '../../../public/components/es_fields_select';
 import { ESFieldSelect } from '../../../public/components/es_field_select';
-import { ESIndexSelect } from '../../../public/components/es_index_select';
+import { ESDataViewSelect } from '../../../public/components/es_data_view_select';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { DataSourceStrings, LUCENE_QUERY_URL } from '../../../i18n';
 
 const { ESDocs: strings } = DataSourceStrings;
 
 const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
-  const setArg = (name, value) => {
-    updateArgs &&
-      updateArgs({
-        ...args,
-        ...setSimpleArg(name, value),
-      });
-  };
+  const setArg = useCallback(
+    (name, value) => {
+      console.log({ name, value });
+      updateArgs &&
+        updateArgs({
+          ...args,
+          ...setSimpleArg(name, value),
+        });
+    },
+    [args, updateArgs]
+  );
 
   // TODO: This is a terrible way of doing defaults. We need to find a way to read the defaults for the function
   // and set them for the data source UI.
@@ -73,6 +77,12 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
 
   const index = getIndex();
 
+  useEffect(() => {
+    if (getSimpleArg('index', args)[0] !== index) {
+      setArg('index', index);
+    }
+  }, [args, index, setArg]);
+
   const sortOptions = [
     { value: 'asc', text: strings.getAscendingOption() },
     { value: 'desc', text: strings.getDescendingOption() },
@@ -85,7 +95,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
         helpText={strings.getIndexLabel()}
         display="rowCompressed"
       >
-        <ESIndexSelect value={index} onChange={(index) => setArg('index', index)} />
+        <ESDataViewSelect value={index} onChange={(index) => setArg('index', index)} />
       </EuiFormRow>
 
       <EuiFormRow

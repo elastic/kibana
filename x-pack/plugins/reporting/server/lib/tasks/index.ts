@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TaskRunCreatorFunction } from '../../../../task_manager/server';
+import { TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
 import { ReportSource, TaskRunResult } from '../../../common/types';
 import { BasePayload } from '../../types';
 
@@ -14,7 +14,7 @@ export const REPORTING_MONITOR_TYPE = 'reports:monitor';
 
 export { ExecuteReportTask } from './execute_report';
 export { MonitorReportsTask } from './monitor_reports';
-export { TaskRunResult };
+export type { TaskRunResult };
 
 export interface ReportTaskParams<JobPayloadType = BasePayload> {
   id: string;

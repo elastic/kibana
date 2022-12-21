@@ -6,15 +6,17 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   ENRICHMENT_TYPES,
   EVENT_ENRICHMENT_INDICATOR_FIELD_MAP,
 } from '../../../../../../common/cti/constants';
-import {
+import type {
   CtiEnrichment,
   EventField,
+} from '../../../../../../common/search_strategy/security_solution/cti';
+import {
   isValidEventField,
   validEventFields,
 } from '../../../../../../common/search_strategy/security_solution/cti';
@@ -74,7 +76,9 @@ const buildIndicatorMatchedFields = (
   };
 };
 
-export const getTotalCount = (total: number | estypes.SearchTotalHits | null): number => {
+export const getTotalCount = (
+  total: number | estypes.SearchTotalHits | null | undefined
+): number => {
   if (total == null) {
     return 0;
   }

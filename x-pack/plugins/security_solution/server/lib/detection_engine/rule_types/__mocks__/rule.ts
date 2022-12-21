@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../rule_schema';
 
 export const createRuleMock = (params: Partial<RuleParams>) => ({
   actions: [],
@@ -15,7 +15,9 @@ export const createRuleMock = (params: Partial<RuleParams>) => ({
   createdBy: 'elastic',
   description: '24/7',
   enabled: true,
+  timestampField: undefined,
   eventCategoryOverride: undefined,
+  tiebreakerField: undefined,
   exceptionsList: [],
   falsePositives: [],
   filters: [],

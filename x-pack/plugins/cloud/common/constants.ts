@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const ELASTIC_SUPPORT_LINK = 'https://support.elastic.co/';
+export const ELASTIC_SUPPORT_LINK = 'https://cloud.elastic.co/support';
 
 /**
  * This is the page for managing your snapshots on Cloud.

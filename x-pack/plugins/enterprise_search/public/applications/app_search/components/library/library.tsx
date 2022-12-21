@@ -13,12 +13,12 @@ import {
   EuiSpacer,
   EuiPageHeader,
   EuiTitle,
-  EuiPageContentBody,
-  EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiDragDropContext,
   EuiDroppable,
   EuiDraggable,
-  EuiButtonIconColor,
+  EuiButtonIconProps,
   EuiEmptyPrompt,
 } from '@elastic/eui';
 
@@ -98,7 +98,7 @@ export const Library: React.FC = () => {
       title: 'Fill this action button',
       onClick: () => setIsActionButtonFilled(!isActionButtonFilled),
       iconType: isActionButtonFilled ? 'starFilled' : 'starEmpty',
-      iconColor: 'primary' as EuiButtonIconColor,
+      iconColor: 'primary' as EuiButtonIconProps['color'],
     },
   ];
 
@@ -364,7 +364,7 @@ export const Library: React.FC = () => {
             items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
             columns={[
               { name: 'ID', render: (item) => <div>{item.id}</div> },
-              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+              { name: 'Whatever', render: () => <div>Whatever</div> },
             ]}
           />
           <EuiSpacer />
@@ -379,7 +379,7 @@ export const Library: React.FC = () => {
             items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
             columns={[
               { name: 'ID', render: (item) => <div>{item.id}</div> },
-              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+              { name: 'Whatever', render: () => <div>Whatever</div> },
             ]}
           />
           <EuiSpacer />
@@ -394,7 +394,7 @@ export const Library: React.FC = () => {
             items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
             columns={[
               { name: 'ID', render: (item) => <div>{item.id}</div> },
-              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+              { name: 'Whatever', render: () => <div>Whatever</div> },
             ]}
           />
           <EuiSpacer />
@@ -409,7 +409,7 @@ export const Library: React.FC = () => {
             unreorderableItems={[{ id: 4 }, { id: 5 }]}
             columns={[
               { name: 'ID', render: (item) => <div>{item.id}</div> },
-              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+              { name: 'Whatever', render: () => <div>Whatever</div> },
             ]}
           />
           <EuiSpacer />
@@ -428,7 +428,7 @@ export const Library: React.FC = () => {
             items={[{ id: 1 }, { id: 2 }, { id: 3 }]}
             columns={[
               { name: 'ID', render: (item) => <div>{item.id}</div> },
-              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+              { name: 'Whatever', render: () => <div>Whatever</div> },
             ]}
           />
 
@@ -442,7 +442,7 @@ export const Library: React.FC = () => {
             items={[]}
             columns={[
               { name: 'ID', render: (item: { id: number }) => <div>{item.id}</div> },
-              { name: 'Whatever', render: (item) => <div>Whatever</div> },
+              { name: 'Whatever', render: () => <div>Whatever</div> },
             ]}
           />
           <EuiSpacer />

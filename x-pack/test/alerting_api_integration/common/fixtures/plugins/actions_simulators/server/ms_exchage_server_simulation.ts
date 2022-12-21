@@ -11,7 +11,7 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 export function initPlugin(router: IRouter, path: string) {
   router.post(
@@ -43,8 +43,8 @@ export function initPlugin(router: IRouter, path: string) {
           cc: null,
           bcc: null,
           subject: 'email-subject',
-          html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Kibana. <a href=\"https://localhost:5601\">Go to Kibana</a>.</p>\n`,
-          text: 'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
+          html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`,
+          text: 'email-message\n\n--\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).',
           headers: {},
         },
       });

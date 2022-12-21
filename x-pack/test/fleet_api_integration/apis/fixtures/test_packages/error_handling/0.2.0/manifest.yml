@@ -7,7 +7,9 @@ categories: []
 release: beta
 type: integration
 license: basic
-
+owner:
+  github: elastic/fleet
+  
 requirement:
   elasticsearch:
     versions: '>7.7.0'
@@ -17,3 +19,4 @@ requirement:
 icons:
   - src: '/img/logo_overrides_64_color.svg'
     size: '16x16'
+    type: 'image/svg+xml'

@@ -7,8 +7,10 @@
 
 import * as React from 'react';
 import { shallow } from 'enzyme';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { OfExpression } from './of';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 describe('of expression', () => {
   it('renders of builtin aggregation types', () => {
@@ -151,5 +153,33 @@ describe('of expression', () => {
     expect(wrapper.find('[data-test-subj="availablefieldsOptionsFormRow"]').prop('helpText')).toBe(
       'Helptext test message'
     );
+  });
+
+  it('clears selected agg field if fields does not contain current selection', async () => {
+    const onChangeSelectedAggField = jest.fn();
+    const wrapper = mountWithIntl(
+      <OfExpression
+        aggType="count"
+        errors={{ aggField: [] }}
+        fields={[
+          {
+            normalizedType: 'number',
+            name: 'test',
+            type: 'long',
+            searchable: true,
+            aggregatable: true,
+          },
+        ]}
+        aggField="notavailable"
+        onChangeSelectedAggField={onChangeSelectedAggField}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(onChangeSelectedAggField).toHaveBeenCalledWith(undefined);
   });
 });

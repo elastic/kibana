@@ -5,29 +5,28 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { ReportingCore } from '../..';
-import { APP_WRAPPER_CLASS } from '../../../../../../src/core/server';
+import { lastValueFrom } from 'rxjs';
+import type { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { omitBlockedHeaders, generatePngObservableFactory } from '../../export_types/common';
+import { generatePngObservable } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
-import { LevelLogger as Logger } from '../../lib';
-import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { DiagnosticResponse } from './';
+import { authorizedUserPreRouting, getCounters } from '../lib';
+
+const path = `${API_DIAGNOSE_URL}/screenshot`;
 
 export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
   router.post(
-    {
-      path: `${API_DIAGNOSE_URL}/screenshot`,
-      validate: {},
-    },
+    { path, validate: {} },
     authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
-      const generatePngObservable = await generatePngObservableFactory(reporting);
+      const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
+
       const config = reporting.getConfig();
-      const decryptedHeaders = req.headers as Record<string, string>;
       const [basePath, protocol, hostname, port] = [
         config.kbnConfig.get('server', 'basePath'),
         config.get('kibanaServer', 'protocol'),
@@ -40,7 +39,6 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
 
       // Hack the layout to make the base/login page work
       const layout = {
-        id: 'png',
         dimensions: {
           width: 1440,
           height: 2024,
@@ -53,20 +51,20 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
-      const headers = {
-        headers: omitBlockedHeaders(decryptedHeaders),
-        conditions: {
-          hostname,
-          port: +port,
-          basePath,
-          protocol,
-        },
-      };
-
-      return generatePngObservable(logger, hashUrl, 'America/Los_Angeles', headers, layout)
-        .pipe()
-        .toPromise()
+      return lastValueFrom(
+        generatePngObservable(reporting, logger, {
+          layout,
+          request: req,
+          browserTimezone: 'America/Los_Angeles',
+          urls: [hashUrl],
+        })
+          // Pipe is required to ensure that we can subscribe to it
+          .pipe()
+      )
         .then((screenshot) => {
+          counters.usageCounter();
+
+          // NOTE: the screenshot could be returned as a string using `data:image/png;base64,` + results.buffer.toString('base64')
           if (screenshot.warnings.length) {
             return res.ok({
               body: {
@@ -81,11 +79,12 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
               success: true,
               help: [],
               logs: '',
-            } as DiagnosticResponse,
+            },
           });
         })
-        .catch((error) =>
-          res.ok({
+        .catch((error) => {
+          counters.errorCounter();
+          return res.ok({
             body: {
               success: false,
               help: [
@@ -94,9 +93,9 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
                 }),
               ],
               logs: error.message,
-            } as DiagnosticResponse,
-          })
-        );
+            },
+          });
+        });
     })
   );
 };

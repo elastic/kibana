@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorServiceNowITSMTypeFields } from '../../../common';
-import { ServiceNowITSMFormat } from './types';
+import type { ConnectorServiceNowITSMTypeFields } from '../../../common/api';
+import type { ServiceNowITSMFormat } from './types';
 
 export const format: ServiceNowITSMFormat = (theCase, alerts) => {
   const {
@@ -16,5 +16,13 @@ export const format: ServiceNowITSMFormat = (theCase, alerts) => {
     category = null,
     subcategory = null,
   } = (theCase.connector.fields as ConnectorServiceNowITSMTypeFields['fields']) ?? {};
-  return { severity, urgency, impact, category, subcategory };
+  return {
+    severity,
+    urgency,
+    impact,
+    category,
+    subcategory,
+    correlation_id: theCase.id ?? null,
+    correlation_display: 'Elastic Case',
+  };
 };

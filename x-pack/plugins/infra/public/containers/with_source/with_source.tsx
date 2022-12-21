@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 
-import { IIndexPattern } from 'src/plugins/data/public';
 import {
   MetricsSourceConfigurationProperties,
   PartialMetricsSourceConfigurationProperties,
 } from '../../../common/metrics_sources';
 import { RendererFunction } from '../../utils/typed_react';
-import { Source } from '../metrics_source';
+import { useSourceContext } from '../metrics_source';
+import { CreateDerivedIndexPattern } from '../metrics_source';
 
 interface WithSourceProps {
   children: RendererFunction<{
@@ -21,7 +21,7 @@ interface WithSourceProps {
     create: (
       sourceProperties: PartialMetricsSourceConfigurationProperties
     ) => Promise<any> | undefined;
-    createDerivedIndexPattern: (type: 'metrics') => IIndexPattern;
+    createDerivedIndexPattern: CreateDerivedIndexPattern;
     exists?: boolean;
     hasFailed: boolean;
     isLoading: boolean;
@@ -52,7 +52,7 @@ export const WithSource: React.FunctionComponent<WithSourceProps> = ({ children 
     loadSourceFailureMessage,
     updateSourceConfiguration,
     version,
-  } = useContext(Source.Context);
+  } = useSourceContext();
 
   return children({
     create: createSourceConfiguration,

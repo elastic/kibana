@@ -9,7 +9,7 @@
 /**
  * Provides vislib configuration, throws error if invalid property is accessed without providing defaults
  */
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import { vislibTypesConfig as visTypes } from './types';
 import { Data } from './data';
@@ -18,7 +18,6 @@ const DEFAULT_VIS_CONFIG = {
   style: {
     margin: { top: 10, right: 3, bottom: 5, left: 3 },
   },
-  alerts: [],
   categoryAxes: [],
   valueAxes: [],
   grid: {},

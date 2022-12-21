@@ -5,16 +5,29 @@
  * 2.0.
  */
 
-import { securityMock } from '../../../../plugins/security/server/mocks';
-import { httpServerMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { featuresPluginMock } from '../../../../plugins/features/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { Authorization, Operations } from '.';
-import { Space } from '../../../spaces/server';
+import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { AuthorizationAuditLogger } from './audit_logger';
-import { KibanaRequest } from 'kibana/server';
-import { KibanaFeature } from '../../../../plugins/features/common';
-import { AuditLogger, SecurityPluginStart } from '../../../security/server';
-import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
+import type { AuditLogger, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+
+const createSpacesDisabledFeaturesMock = (disabledFeatures: string[] = []) => {
+  const spacesStart: jest.Mocked<SpacesPluginStart> = spacesMock.createStart();
+  (spacesStart.spacesService.getActiveSpace as jest.Mock).mockImplementation(async () => {
+    return {
+      disabledFeatures: [],
+    };
+  });
+
+  return spacesStart;
+};
 
 describe('authorization', () => {
   let request: KibanaRequest;
@@ -22,17 +35,18 @@ describe('authorization', () => {
 
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
-    mockLogger = {
-      log: jest.fn(),
-    };
+    mockLogger = auditLoggerMock.create();
   });
 
   describe('create', () => {
     let securityStart: jest.Mocked<SecurityPluginStart>;
     let featuresStart: jest.Mocked<FeaturesPluginStart>;
+    let spacesStart: jest.Mocked<SpacesPluginStart>;
 
     beforeEach(() => {
       securityStart = securityMock.createStart();
+      spacesStart = createSpacesDisabledFeaturesMock();
+
       featuresStart = featuresPluginMock.createStart();
       featuresStart.getKibanaFeatures.mockReturnValue([
         { id: '1', cases: ['a'] },
@@ -42,13 +56,12 @@ describe('authorization', () => {
     it('creates an Authorization object', async () => {
       expect.assertions(2);
 
-      const getSpace = jest.fn();
       const authPromise = Authorization.create({
         request,
         securityAuth: securityStart.authz,
-        getSpace,
+        spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -59,16 +72,16 @@ describe('authorization', () => {
     it('throws and error when a failure occurs', async () => {
       expect.assertions(1);
 
-      const getSpace = jest.fn(async () => {
+      (spacesStart.spacesService.getActiveSpace as jest.Mock).mockImplementation(() => {
         throw new Error('space error');
       });
 
       const authPromise = Authorization.create({
         request,
         securityAuth: securityStart.authz,
-        getSpace,
+        spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -81,6 +94,7 @@ describe('authorization', () => {
 
     let securityStart: ReturnType<typeof securityMock.createStart>;
     let featuresStart: jest.Mocked<FeaturesPluginStart>;
+    let spacesStart: jest.Mocked<SpacesPluginStart>;
     let auth: Authorization;
 
     beforeEach(async () => {
@@ -93,10 +107,12 @@ describe('authorization', () => {
       featuresStart = featuresPluginMock.createStart();
       featuresStart.getKibanaFeatures.mockReturnValue([feature] as unknown as KibanaFeature[]);
 
+      spacesStart = createSpacesDisabledFeaturesMock();
+
       auth = await Authorization.create({
         request,
         securityAuth: securityStart.authz,
-        getSpace: jest.fn(),
+        spaces: spacesStart,
         features: featuresStart,
         auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
@@ -122,9 +138,9 @@ describe('authorization', () => {
 
       auth = await Authorization.create({
         request,
-        getSpace: jest.fn(),
+        spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -241,12 +257,16 @@ describe('authorization', () => {
     it('throws an error when owner does not exist because it was from a disabled plugin', async () => {
       expect.assertions(1);
 
+      (spacesStart.spacesService.getActiveSpace as jest.Mock).mockImplementation(() => {
+        return { disabledFeatures: [feature.id] } as Space;
+      });
+
       auth = await Authorization.create({
         request,
         securityAuth: securityStart.authz,
-        getSpace: jest.fn(async () => ({ disabledFeatures: [feature.id] } as Space)),
+        spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -273,9 +293,9 @@ describe('authorization', () => {
       auth = await Authorization.create({
         request,
         securityAuth: securityStart.authz,
-        getSpace: jest.fn(),
+        spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -300,9 +320,9 @@ describe('authorization', () => {
       auth = await Authorization.create({
         request,
         securityAuth: securityStart.authz,
-        getSpace: jest.fn(),
+        spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -327,7 +347,7 @@ describe('authorization', () => {
       auth = await Authorization.create({
         request,
         securityAuth: securityStart.authz,
-        getSpace: jest.fn(),
+        spaces: spacesStart,
         features: featuresStart,
         auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
@@ -397,6 +417,7 @@ describe('authorization', () => {
 
     let securityStart: ReturnType<typeof securityMock.createStart>;
     let featuresStart: jest.Mocked<FeaturesPluginStart>;
+    let spacesStart: jest.Mocked<SpacesPluginStart>;
     let auth: Authorization;
 
     beforeEach(async () => {
@@ -413,10 +434,12 @@ describe('authorization', () => {
       featuresStart = featuresPluginMock.createStart();
       featuresStart.getKibanaFeatures.mockReturnValue([feature] as unknown as KibanaFeature[]);
 
+      spacesStart = createSpacesDisabledFeaturesMock();
+
       auth = await Authorization.create({
         request,
         securityAuth: securityStart.authz,
-        getSpace: jest.fn(),
+        spaces: spacesStart,
         features: featuresStart,
         auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
@@ -431,7 +454,7 @@ describe('authorization', () => {
       auth = await Authorization.create({
         request,
         securityAuth: securityStart.authz,
-        getSpace: jest.fn(),
+        spaces: spacesStart,
         features: featuresStart,
         auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
@@ -473,7 +496,7 @@ describe('authorization', () => {
 
       auth = await Authorization.create({
         request,
-        getSpace: jest.fn(),
+        spaces: spacesStart,
         features: featuresStart,
         auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
@@ -510,16 +533,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "a",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -528,16 +549,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "b",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -619,16 +638,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "a",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -637,16 +654,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "b",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -751,7 +766,7 @@ describe('authorization', () => {
         auth = await Authorization.create({
           request,
           securityAuth: securityStart.authz,
-          getSpace: jest.fn(),
+          spaces: spacesStart,
           features: featuresStart,
           auditLogger: new AuthorizationAuditLogger(mockLogger),
           logger: loggingSystemMock.createLogger(),
@@ -775,16 +790,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "a",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -793,16 +806,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "b",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -884,16 +895,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "a",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",
@@ -902,16 +911,14 @@ describe('authorization', () => {
               Object {
                 "arguments": Array [
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "cases.attributes.owner",
                   },
                   Object {
+                    "isQuoted": false,
                     "type": "literal",
                     "value": "b",
-                  },
-                  Object {
-                    "type": "literal",
-                    "value": false,
                   },
                 ],
                 "function": "is",

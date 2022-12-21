@@ -8,34 +8,23 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
-import { useForm, Form, FormHook } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { connectorsMock } from '../../containers/mock';
 import { Connector } from './connector';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { incidentTypes, severity, choices } from '../connectors/mock';
-import { schema, FormProps } from './schema';
-import { TestProviders } from '../../common/mock';
+import type { FormProps } from './schema';
+import { schema } from './schema';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
-import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
-import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { useKibana } from '../../common/lib/kibana';
-
-const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
-
-jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: {},
-      http: {},
-      triggersActionsUi: mockTriggersActionsUiService,
-    },
-  }),
-}));
 
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
@@ -46,7 +35,6 @@ const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const useGetIncidentTypesResponse = {
   isLoading: false,
@@ -70,6 +58,7 @@ const defaultProps = {
 };
 
 describe('Connector', () => {
+  let appMockRender: AppMockRenderer;
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
@@ -86,18 +75,9 @@ describe('Connector', () => {
     return <Form form={form}>{children}</Form>;
   };
 
-  const { createMockActionTypeModel } = actionTypeRegistryMock;
-
-  beforeAll(() => {
-    connectorsMock.forEach((connector) =>
-      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.register(
-        createMockActionTypeModel({ id: connector.actionTypeId, iconClass: 'logoSecurity' })
-      )
-    );
-  });
-
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
@@ -194,5 +174,20 @@ describe('Connector', () => {
         fields: { incidentTypes: ['19'], severityCode: '4' },
       });
     });
+  });
+
+  it('shows the actions permission message if the user does not have read access to actions', async () => {
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      actions: { save: false, show: false },
+    };
+
+    const result = appMockRender.render(
+      <MockHookWrapperComponent>
+        <Connector {...defaultProps} />
+      </MockHookWrapperComponent>
+    );
+    expect(result.getByTestId('create-case-connector-permissions-error-msg')).toBeInTheDocument();
+    expect(result.queryByTestId('caseConnectors')).toBe(null);
   });
 });

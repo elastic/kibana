@@ -5,139 +5,132 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import {
-  ConcreteTaskInstance,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '../../../../../task_manager/server';
-import {
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
   TELEMETRY_CHANNEL_LISTS,
+  TASK_METRICS_CHANNEL,
 } from '../constants';
-import { batchTelemetryRecords, templateExceptionList } from '../helpers';
-import { TelemetryEventsSender } from '../sender';
-import { TelemetryReceiver } from '../receiver';
+import type { ESClusterInfo, ESLicense } from '../types';
+import { batchTelemetryRecords, templateExceptionList, tlog, createTaskMetric } from '../helpers';
+import type { ITelemetryEventsSender } from '../sender';
+import type { ITelemetryReceiver } from '../receiver';
+import type { TaskExecutionPeriod } from '../task';
 
-export const TelemetrySecuityListsTaskConstants = {
-  TIMEOUT: '3m',
-  TYPE: 'security:telemetry-lists',
-  INTERVAL: '24h',
-  VERSION: '1.0.0',
-};
+export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number) {
+  return {
+    type: 'security:telemetry-lists',
+    title: 'Security Solution Lists Telemetry',
+    interval: '24h',
+    timeout: '3m',
+    version: '1.0.0',
+    runTask: async (
+      taskId: string,
+      logger: Logger,
+      receiver: ITelemetryReceiver,
+      sender: ITelemetryEventsSender,
+      taskExecutionPeriod: TaskExecutionPeriod
+    ) => {
+      const startTime = Date.now();
+      const taskName = 'Security Solution Lists Telemetry';
+      try {
+        let count = 0;
 
-const MAX_TELEMETRY_BATCH = 1_000;
+        const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
+          receiver.fetchClusterInfo(),
+          receiver.fetchLicenseInfo(),
+        ]);
 
-export class TelemetryExceptionListsTask {
-  private readonly logger: Logger;
-  private readonly sender: TelemetryEventsSender;
-  private readonly receiver: TelemetryReceiver;
+        const clusterInfo =
+          clusterInfoPromise.status === 'fulfilled'
+            ? clusterInfoPromise.value
+            : ({} as ESClusterInfo);
+        const licenseInfo =
+          licenseInfoPromise.status === 'fulfilled'
+            ? licenseInfoPromise.value
+            : ({} as ESLicense | undefined);
+        const FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS = 24;
 
-  constructor(
-    logger: Logger,
-    taskManager: TaskManagerSetupContract,
-    sender: TelemetryEventsSender,
-    receiver: TelemetryReceiver
-  ) {
-    this.logger = logger;
-    this.sender = sender;
-    this.receiver = receiver;
+        // Lists Telemetry: Trusted Applications
+        const trustedApps = await receiver.fetchTrustedApplications();
+        if (trustedApps?.data) {
+          const trustedAppsJson = templateExceptionList(
+            trustedApps.data,
+            clusterInfo,
+            licenseInfo,
+            LIST_TRUSTED_APPLICATION
+          );
+          tlog(logger, `Trusted Apps: ${trustedAppsJson}`);
+          count += trustedAppsJson.length;
 
-    taskManager.registerTaskDefinitions({
-      [TelemetrySecuityListsTaskConstants.TYPE]: {
-        title: 'Security Solution Lists Telemetry',
-        timeout: TelemetrySecuityListsTaskConstants.TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-          const { state } = taskInstance;
+          const batches = batchTelemetryRecords(trustedAppsJson, maxTelemetryBatch);
+          for (const batch of batches) {
+            await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
+          }
+        }
 
-          return {
-            run: async () => {
-              const taskExecutionTime = moment().utc().toISOString();
-              const hits = await this.runTask(taskInstance.id);
+        // Lists Telemetry: Endpoint Exceptions
 
-              return {
-                state: {
-                  lastExecutionTimestamp: taskExecutionTime,
-                  runs: (state.runs || 0) + 1,
-                  hits,
-                },
-              };
-            },
-            cancel: async () => {},
-          };
-        },
-      },
-    });
-  }
+        const epExceptions = await receiver.fetchEndpointList(ENDPOINT_LIST_ID);
+        if (epExceptions?.data) {
+          const epExceptionsJson = templateExceptionList(
+            epExceptions.data,
+            clusterInfo,
+            licenseInfo,
+            LIST_ENDPOINT_EXCEPTION
+          );
+          tlog(logger, `EP Exceptions: ${epExceptionsJson}`);
+          count += epExceptionsJson.length;
 
-  public start = async (taskManager: TaskManagerStartContract) => {
-    try {
-      await taskManager.ensureScheduled({
-        id: this.getTaskId(),
-        taskType: TelemetrySecuityListsTaskConstants.TYPE,
-        scope: ['securitySolution'],
-        schedule: {
-          interval: TelemetrySecuityListsTaskConstants.INTERVAL,
-        },
-        state: { runs: 0 },
-        params: { version: TelemetrySecuityListsTaskConstants.VERSION },
-      });
-    } catch (e) {
-      this.logger.error(`Error scheduling task, received ${e.message}`);
-    }
-  };
+          const batches = batchTelemetryRecords(epExceptionsJson, maxTelemetryBatch);
+          for (const batch of batches) {
+            await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
+          }
+        }
 
-  private getTaskId = (): string => {
-    return `${TelemetrySecuityListsTaskConstants.TYPE}:${TelemetrySecuityListsTaskConstants.VERSION}`;
-  };
+        // Lists Telemetry: Endpoint Event Filters
 
-  public runTask = async (taskId: string) => {
-    if (taskId !== this.getTaskId()) {
-      return 0;
-    }
+        const epFilters = await receiver.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
+        if (epFilters?.data) {
+          const epFiltersJson = templateExceptionList(
+            epFilters.data,
+            clusterInfo,
+            licenseInfo,
+            LIST_ENDPOINT_EVENT_FILTER
+          );
+          tlog(logger, `EP Event Filters: ${epFiltersJson}`);
+          count += epFiltersJson.length;
 
-    const isOptedIn = await this.sender.isTelemetryOptedIn();
-    if (!isOptedIn) {
-      return 0;
-    }
+          const batches = batchTelemetryRecords(epFiltersJson, maxTelemetryBatch);
+          for (const batch of batches) {
+            await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
+          }
+        }
 
-    // Lists Telemetry: Trusted Applications
-
-    const trustedApps = await this.receiver.fetchTrustedApplications();
-    const trustedAppsJson = templateExceptionList(trustedApps.data, LIST_TRUSTED_APPLICATION);
-    this.logger.debug(`Trusted Apps: ${trustedAppsJson}`);
-
-    batchTelemetryRecords(trustedAppsJson, MAX_TELEMETRY_BATCH).forEach((batch) =>
-      this.sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
-    );
-
-    // Lists Telemetry: Endpoint Exceptions
-
-    const epExceptions = await this.receiver.fetchEndpointList(ENDPOINT_LIST_ID);
-    const epExceptionsJson = templateExceptionList(epExceptions.data, LIST_ENDPOINT_EXCEPTION);
-    this.logger.debug(`EP Exceptions: ${epExceptionsJson}`);
-
-    batchTelemetryRecords(epExceptionsJson, MAX_TELEMETRY_BATCH).forEach((batch) =>
-      this.sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
-    );
-
-    // Lists Telemetry: Endpoint Event Filters
-
-    const epFilters = await this.receiver.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
-    const epFiltersJson = templateExceptionList(epFilters.data, LIST_ENDPOINT_EVENT_FILTER);
-    this.logger.debug(`EP Event Filters: ${epFiltersJson}`);
-
-    batchTelemetryRecords(epFiltersJson, MAX_TELEMETRY_BATCH).forEach((batch) =>
-      this.sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch)
-    );
-
-    return trustedAppsJson.length + epExceptionsJson.length + epFiltersJson.length;
+        // Value list meta data
+        const valueListMetaData = await receiver.fetchValueListMetaData(
+          FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS
+        );
+        tlog(logger, `Value List Meta Data: ${JSON.stringify(valueListMetaData)}`);
+        if (valueListMetaData?.total_list_count) {
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
+        }
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, true, startTime),
+        ]);
+        return count;
+      } catch (err) {
+        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
+          createTaskMetric(taskName, false, startTime, err.message),
+        ]);
+        return 0;
+      }
+    },
   };
 }

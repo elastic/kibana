@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -51,6 +51,7 @@ export const DatafeedPreview: FC<{
     } catch (error) {
       // fail silently
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combinedJob]);
 
   const loadDataPreview = useCallback(async () => {
@@ -89,6 +90,7 @@ export const DatafeedPreview: FC<{
       );
       setPreviewJsonString(errorText);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combinedJob]);
 
   return (

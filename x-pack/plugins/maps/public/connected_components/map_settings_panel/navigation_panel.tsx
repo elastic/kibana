@@ -20,11 +20,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { MapSettings } from '../../reducers/map';
-import { ValidatedDualRange, Value } from '../../../../../../src/plugins/kibana_react/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ValidatedDualRange, Value } from '@kbn/kibana-react-plugin/public';
 import { INITIAL_LOCATION, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
-import { MapCenter } from '../../../common/descriptor_types';
+import { MapCenter, MapSettings } from '../../../common/descriptor_types';
 // @ts-ignore
 import { ValidatedRange } from '../../components/validated_range';
 

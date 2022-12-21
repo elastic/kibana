@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }) {
         {
           from: 'Aug 29, 2017 @ 17:24:14.254',
           to: 'Aug 29, 2017 @ 17:25:44.142',
+          useCreate: true,
         }
       );
 
@@ -46,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
         osFreeMemory: 'OS Free Memory\n1.5 GB',
         version: 'Version\n7.0.0-alpha1',
         uptime: 'Uptime\n3 minutes',
-        health: 'Health: green',
+        health: 'Last Reported Status\n Green\nStale',
       });
     });
   });

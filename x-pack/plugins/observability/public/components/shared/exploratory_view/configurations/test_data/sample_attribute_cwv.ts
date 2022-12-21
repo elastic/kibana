@@ -4,28 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { mockDataView } from '../../rtl_helpers';
+import { RECORDS_FIELD } from '../constants';
+
 export const sampleAttributeCoreWebVital = {
   description: '',
-  references: [
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    },
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-layer-layer0',
-      type: 'index-pattern',
-    },
-  ],
+  references: [],
   state: {
+    internalReferences: [
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-layer-layer0',
+        type: 'index-pattern',
+      },
+    ],
+    adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           layer0: {
             columnOrder: [
               'x-axis-column-layer0',
-              'y-axis-column-layer0',
+              'y-axis-column-layer0-0',
               'y-axis-column-1',
               'y-axis-column-2',
             ],
@@ -33,12 +38,12 @@ export const sampleAttributeCoreWebVital = {
               'x-axis-column-layer0': {
                 dataType: 'string',
                 isBucketed: true,
-                label: 'Top values of Operating system',
+                label: 'Operating system',
                 operationType: 'terms',
                 params: {
                   missingBucket: false,
                   orderBy: {
-                    columnId: 'y-axis-column-layer0',
+                    columnId: 'y-axis-column-layer0-0',
                     type: 'column',
                   },
                   orderDirection: 'desc',
@@ -59,7 +64,7 @@ export const sampleAttributeCoreWebVital = {
                 label: 'Average',
                 operationType: 'count',
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
               'y-axis-column-2': {
                 dataType: 'number',
@@ -71,19 +76,20 @@ export const sampleAttributeCoreWebVital = {
                 label: 'Poor',
                 operationType: 'count',
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
-              'y-axis-column-layer0': {
+              'y-axis-column-layer0-0': {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query: 'transaction.type: page-load and processor.event: transaction',
+                  query:
+                    'transaction.type: page-load and processor.event: transaction and transaction.marks.agent.largestContentfulPaint < 2500',
                 },
                 isBucketed: false,
                 label: 'Good',
                 operationType: 'count',
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
             },
             incompleteColumns: {},
@@ -94,26 +100,28 @@ export const sampleAttributeCoreWebVital = {
     filters: [],
     query: {
       language: 'kuery',
-      query: '',
+      query:
+        'transaction.type: page-load and processor.event: transaction and transaction.type: "page-load"',
     },
     visualization: {
       axisTitlesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: true,
         yRight: true,
       },
       curveType: 'CURVE_MONOTONE_X',
       fittingFunction: 'Linear',
       gridlinesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: true,
         yRight: true,
       },
       layers: [
         {
-          accessors: ['y-axis-column-layer0', 'y-axis-column-1', 'y-axis-column-2'],
+          accessors: ['y-axis-column-layer0-0', 'y-axis-column-1', 'y-axis-column-2'],
           layerId: 'layer0',
           layerType: 'data',
+          palette: undefined,
           seriesType: 'bar_horizontal_percentage_stacked',
           xAccessor: 'x-axis-column-layer0',
           yConfig: [
@@ -134,7 +142,10 @@ export const sampleAttributeCoreWebVital = {
       ],
       legend: {
         isVisible: true,
+        showSingleSeries: true,
         position: 'right',
+        shouldTruncate: false,
+        legendSize: 'auto',
       },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: {

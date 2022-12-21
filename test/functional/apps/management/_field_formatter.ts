@@ -7,8 +7,8 @@
  */
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import expect from '@kbn/expect';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { FIELD_FORMAT_IDS } from '../../../../src/plugins/field_formats/common';
 import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -166,6 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               FIELD_FORMAT_IDS.BOOLEAN,
               FIELD_FORMAT_IDS.BYTES,
               FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.CURRENCY,
               FIELD_FORMAT_IDS.DURATION,
               FIELD_FORMAT_IDS.NUMBER,
               FIELD_FORMAT_IDS.PERCENT,
@@ -189,6 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               FIELD_FORMAT_IDS.BOOLEAN,
               FIELD_FORMAT_IDS.BYTES,
               FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.CURRENCY,
               FIELD_FORMAT_IDS.DURATION,
               FIELD_FORMAT_IDS.NUMBER,
               FIELD_FORMAT_IDS.PERCENT,
@@ -369,6 +371,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               FIELD_FORMAT_IDS.BOOLEAN,
               FIELD_FORMAT_IDS.BYTES,
               FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.CURRENCY,
               FIELD_FORMAT_IDS.DURATION,
               FIELD_FORMAT_IDS.NUMBER,
               FIELD_FORMAT_IDS.PERCENT,
@@ -423,7 +426,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let testDocumentId: string;
 
     before(async () => {
-      if ((await es.indices.exists({ index: indexTitle })).body) {
+      if (await es.indices.exists({ index: indexTitle })) {
         await es.indices.delete({ index: indexTitle });
       }
 
@@ -431,6 +434,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         index: indexTitle,
         body: {
           mappings: {
+            // @ts-expect-error Type 'Record<string, { type: ES_FIELD_TYPES; }>' is not assignable to type 'Record<string, MappingProperty>'.
             properties: specs.reduce((properties, spec, index) => {
               properties[`${index}`] = { type: spec.fieldType };
               return properties;
@@ -447,7 +451,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }, {} as Record<string, FieldFormatEditorSpecDescriptor['fieldValue']>),
         refresh: 'wait_for',
       });
-      testDocumentId = docResult.body._id;
+      testDocumentId = docResult._id;
 
       const indexPatternResult = await indexPatterns.create(
         { title: indexTitle },
@@ -476,36 +480,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       specs.forEach((spec, index) => {
         const fieldName = `${index}`;
-        it(
-          `edit field format of "${fieldName}" field to "${spec.applyFormatterType}"` +
-            spec.expectFormatterTypes
-            ? `, and check available formats types`
-            : '',
-          async () => {
-            await PageObjects.settings.filterField(fieldName);
-            await PageObjects.settings.openControlsByName(fieldName);
-            await PageObjects.settings.toggleRow('formatRow');
+        it(`edit field format of "${fieldName}" field to "${spec.applyFormatterType}"${
+          spec.expectFormatterTypes ? ', and check available formats types' : ''
+        }`, async () => {
+          await PageObjects.settings.filterField(fieldName);
+          await PageObjects.settings.openControlsByName(fieldName);
+          await PageObjects.settings.toggleRow('formatRow');
 
-            if (spec.expectFormatterTypes) {
-              expect(
-                (
-                  await Promise.all(
-                    (
-                      await (
-                        await testSubjects.find('editorSelectedFormatId')
-                      ).findAllByTagName('option')
-                    ).map((option) => option.getAttribute('value'))
-                  )
-                ).filter(Boolean)
-              ).to.eql(spec.expectFormatterTypes);
-            }
-
-            await PageObjects.settings.setFieldFormat(spec.applyFormatterType);
-            if (spec.beforeSave) {
-              await spec.beforeSave(await testSubjects.find('formatRow'));
-            }
+          if (spec.expectFormatterTypes) {
+            expect(
+              (
+                await Promise.all(
+                  (
+                    await (
+                      await testSubjects.find('editorSelectedFormatId')
+                    ).findAllByTagName('option')
+                  ).map((option) => option.getAttribute('value'))
+                )
+              ).filter(Boolean)
+            ).to.eql(spec.expectFormatterTypes);
           }
-        );
+
+          await PageObjects.settings.setFieldFormat(spec.applyFormatterType);
+          if (spec.beforeSave) {
+            await spec.beforeSave(await testSubjects.find('formatRow'));
+          }
+        });
       });
     });
 

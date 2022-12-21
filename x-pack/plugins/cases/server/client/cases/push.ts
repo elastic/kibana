@@ -6,42 +6,77 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsFindResponse, SavedObject } from 'kibana/server';
+import { nodeBuilder } from '@kbn/es-query';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
-import {
+import type { UserProfile } from '@kbn/security-plugin/common';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   ActionConnector,
-  CaseResponseRt,
   CaseResponse,
-  CaseStatuses,
   ExternalServiceResponse,
-  CaseType,
-  ENABLE_CASE_CONNECTOR,
   CasesConfigureAttributes,
-  CaseAttributes,
-} from '../../../common';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
+  CommentRequestAlertType,
+  CommentAttributes,
+} from '../../../common/api';
+import {
+  CaseResponseRt,
+  CaseStatuses,
+  ActionTypes,
+  OWNER_FIELD,
+  CommentType,
+} from '../../../common/api';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
-import { createIncident, getCommentContextFromAttributes } from './utils';
-import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } from '../../common';
-import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
+import { createIncident, getDurationInSeconds } from './utils';
+import { createCaseError } from '../../common/error';
+import {
+  createAlertUpdateRequest,
+  flattenCaseSavedObject,
+  getAlertInfoFromComments,
+} from '../../common/utils';
+import type { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
+import { getAlerts } from '../alerts/get';
+import { buildFilter } from '../utils';
+import type { ICaseResponse } from '../typedoc_interfaces';
 
 /**
- * Returns true if the case should be closed based on the configuration settings and whether the case
- * is a collection. Collections are not closable because we aren't allowing their status to be changed.
- * In the future we could allow push to close all the sub cases of a collection but that's not currently supported.
+ * Returns true if the case should be closed based on the configuration settings.
  */
 function shouldCloseByPush(
-  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>,
-  caseInfo: SavedObject<CaseAttributes>
+  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>
 ): boolean {
   return (
     configureSettings.total > 0 &&
-    configureSettings.saved_objects[0].attributes.closure_type === 'close-by-pushing' &&
-    caseInfo.attributes.type !== CaseType.collection
+    configureSettings.saved_objects[0].attributes.closure_type === 'close-by-pushing'
   );
 }
+
+const changeAlertsStatusToClose = async (
+  caseId: string,
+  caseService: CasesClientArgs['services']['caseService'],
+  alertsService: CasesClientArgs['services']['alertsService']
+) => {
+  const alertAttachments = (await caseService.getAllCaseComments({
+    id: [caseId],
+    options: {
+      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+    },
+  })) as SavedObjectsFindResponse<CommentRequestAlertType>;
+
+  const alerts = alertAttachments.saved_objects
+    .map((attachment) =>
+      createAlertUpdateRequest({
+        comment: attachment.attributes,
+        status: CaseStatuses.closed,
+      })
+    )
+    .flat();
+
+  await alertsService.updateAlertsStatus(alerts);
+};
 
 /**
  * Parameters for pushing a case to an external system
@@ -70,14 +105,20 @@ export const push = async (
 ): Promise<CaseResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    attachmentService,
-    caseService,
-    caseConfigureService,
-    userActionService,
+    services: {
+      attachmentService,
+      caseService,
+      caseConfigureService,
+      userActionService,
+      alertsService,
+    },
     actionsClient,
     user,
     logger,
     authorization,
+    securityStartPlugin,
+    spaceId,
+    publicBaseUrl,
   } = clientArgs;
 
   try {
@@ -86,7 +127,6 @@ export const push = async (
       casesClient.cases.get({
         id: caseId,
         includeComments: true,
-        includeSubCaseComments: ENABLE_CASE_CONNECTOR,
       }),
       actionsClient.get({ id: connectorId }),
       casesClient.userActions.getAll({ caseId }),
@@ -97,7 +137,6 @@ export const push = async (
       operation: Operations.pushCase,
     });
 
-    // We need to change the logic when we support subcases
     if (theCase?.status === CaseStatuses.closed) {
       throw Boom.conflict(
         `The ${theCase.title} case is closed. Pushing a closed case is not allowed.`
@@ -105,31 +144,18 @@ export const push = async (
     }
 
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
-
-    const alerts = await casesClientInternal.alerts.get({
-      alertsInfo,
-    });
-
-    const getMappingsResponse = await casesClientInternal.configuration.getMappings({
-      connector: theCase.connector,
-    });
-
-    const mappings =
-      getMappingsResponse.length === 0
-        ? await casesClientInternal.configuration.createMappings({
-            connector: theCase.connector,
-            owner: theCase.owner,
-          })
-        : getMappingsResponse[0].attributes.mappings;
+    const alerts = await getAlerts(alertsInfo, clientArgs);
+    const profiles = await getProfiles(theCase, securityStartPlugin);
 
     const externalServiceIncident = await createIncident({
-      actionsClient,
       theCase,
       userActions,
       connector: connector as ActionConnector,
-      mappings,
       alerts,
       casesConnectors,
+      userProfiles: profiles,
+      spaceId,
+      publicBaseUrl,
     });
 
     const pushRes = await actionsClient.execute({
@@ -148,33 +174,37 @@ export const push = async (
 
     /* End of push to external service */
 
+    const ownerFilter = buildFilter({
+      filters: theCase.owner,
+      field: OWNER_FIELD,
+      operator: 'or',
+      type: Operations.findConfigurations.savedObjectType,
+    });
+
     /* Start of update case with push information */
     const [myCase, myCaseConfigure, comments] = await Promise.all([
       caseService.getCase({
-        unsecuredSavedObjectsClient,
         id: caseId,
       }),
-      caseConfigureService.find({ unsecuredSavedObjectsClient }),
+      caseConfigureService.find({ unsecuredSavedObjectsClient, options: { filter: ownerFilter } }),
       caseService.getAllCaseComments({
-        unsecuredSavedObjectsClient,
         id: caseId,
         options: {
           fields: [],
           page: 1,
           perPage: theCase?.totalComment ?? 0,
         },
-        includeSubCaseComments: ENABLE_CASE_CONNECTOR,
       }),
     ]);
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { username, full_name, email } = user;
+    const { username, full_name, email, profile_uid } = user;
     const pushedDate = new Date().toISOString();
     const externalServiceResponse = pushRes.data as ExternalServiceResponse;
 
     const externalService = {
       pushed_at: pushedDate,
-      pushed_by: { username, full_name, email },
+      pushed_by: { username, full_name, email, profile_uid },
       connector_id: connector.id,
       connector_name: connector.name,
       external_id: externalServiceResponse.id,
@@ -182,26 +212,32 @@ export const push = async (
       external_url: externalServiceResponse.url,
     };
 
-    const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure, myCase);
+    const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure);
 
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
         originalCase: myCase,
-        unsecuredSavedObjectsClient,
         caseId,
         updatedAttributes: {
           ...(shouldMarkAsClosed
             ? {
                 status: CaseStatuses.closed,
                 closed_at: pushedDate,
-                closed_by: { email, full_name, username },
+                closed_by: { email, full_name, username, profile_uid },
               }
+            : {}),
+          ...(shouldMarkAsClosed
+            ? getDurationInSeconds({
+                closedAt: pushedDate,
+                createdAt: theCase.created_at,
+              })
             : {}),
           external_service: externalService,
           updated_at: pushedDate,
-          updated_by: { username, full_name, email },
+          updated_by: { username, full_name, email, profile_uid },
         },
         version: myCase.version,
+        refresh: false,
       }),
 
       attachmentService.bulkUpdate({
@@ -212,41 +248,36 @@ export const push = async (
             attachmentId: comment.id,
             updatedAttributes: {
               pushed_at: pushedDate,
-              pushed_by: { username, full_name, email },
+              pushed_by: { username, full_name, email, profile_uid },
             },
             version: comment.version,
           })),
-      }),
-
-      userActionService.bulkCreate({
-        unsecuredSavedObjectsClient,
-        actions: [
-          ...(shouldMarkAsClosed
-            ? [
-                buildCaseUserActionItem({
-                  action: 'update',
-                  actionAt: pushedDate,
-                  actionBy: { username, full_name, email },
-                  caseId,
-                  fields: ['status'],
-                  newValue: CaseStatuses.closed,
-                  oldValue: myCase.attributes.status,
-                  owner: myCase.attributes.owner,
-                }),
-              ]
-            : []),
-          buildCaseUserActionItem({
-            action: 'push-to-service',
-            actionAt: pushedDate,
-            actionBy: { username, full_name, email },
-            caseId,
-            fields: ['pushed'],
-            newValue: externalService,
-            owner: myCase.attributes.owner,
-          }),
-        ],
+        refresh: false,
       }),
     ]);
+
+    if (shouldMarkAsClosed) {
+      await userActionService.createUserAction({
+        type: ActionTypes.status,
+        payload: { status: CaseStatuses.closed },
+        user,
+        caseId,
+        owner: myCase.attributes.owner,
+        refresh: false,
+      });
+
+      if (myCase.attributes.settings.syncAlerts) {
+        await changeAlertsStatusToClose(myCase.id, caseService, alertsService);
+      }
+    }
+
+    await userActionService.createUserAction({
+      type: ActionTypes.pushed,
+      payload: { externalService },
+      user,
+      caseId,
+      owner: myCase.attributes.owner,
+    });
 
     /* End of update case with push information */
 
@@ -266,8 +297,7 @@ export const push = async (
             attributes: {
               ...origComment.attributes,
               ...updatedComment?.attributes,
-              ...getCommentContextFromAttributes(origComment.attributes),
-            },
+            } as CommentAttributes,
             version: updatedComment?.version ?? origComment.version,
             references: origComment?.references ?? [],
           };
@@ -277,4 +307,28 @@ export const push = async (
   } catch (error) {
     throw createCaseError({ message: `Failed to push case: ${error}`, error, logger });
   }
+};
+
+const getProfiles = async (
+  caseInfo: ICaseResponse,
+  securityStartPlugin: SecurityPluginStart
+): Promise<Map<string, UserProfile> | undefined> => {
+  const uids = new Set([
+    ...(caseInfo.updated_by?.profile_uid != null ? [caseInfo.updated_by.profile_uid] : []),
+    ...(caseInfo.created_by?.profile_uid != null ? [caseInfo.created_by.profile_uid] : []),
+  ]);
+
+  if (uids.size <= 0) {
+    return;
+  }
+
+  const userProfiles =
+    (await securityStartPlugin.userProfiles.bulkGet({
+      uids,
+    })) ?? [];
+
+  return userProfiles.reduce<Map<string, UserProfile>>((acc, profile) => {
+    acc.set(profile.uid, profile);
+    return acc;
+  }, new Map());
 };

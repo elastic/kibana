@@ -3,20 +3,36 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/common/setup_bazel.sh
 
 echo "--- yarn install and bootstrap"
-retry 2 15 yarn kbn bootstrap
 
-###
-### upload ts-refs-cache artifacts as quickly as possible so they are available for download
-###
-if [[ "${BUILD_TS_REFS_CACHE_CAPTURE:-}" == "true" ]]; then
-  echo "--- Upload ts-refs-cache"
-  cd "$KIBANA_DIR/target/ts_refs_cache"
-  gsutil cp "*.zip" 'gs://kibana-ci-ts-refs-cache/'
-  cd "$KIBANA_DIR"
+BOOTSTRAP_PARAMS=()
+if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
+  BOOTSTRAP_PARAMS+=(--force-install)
+fi
+
+# Use the node_modules that is baked into the agent image, if it exists, as a cache
+# But only for agents not mounting the workspace on a local ssd or in memory
+# It actually ends up being slower to move all of the tiny files between the disks vs extracting archives from the yarn cache
+if [[ -d ~/.kibana/node_modules && "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
+  echo "Using ~/.kibana/node_modules as a starting point"
+  mv ~/.kibana/node_modules ./
+fi
+
+if ! yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"; then
+  echo "bootstrap failed, trying again in 15 seconds"
+  sleep 15
+
+  # Most bootstrap failures will result in a problem inside node_modules that does not get fixed on the next bootstrap
+  # So, we should just delete node_modules in between attempts
+  rm -rf node_modules
+
+  echo "--- yarn install and bootstrap, attempt 2"
+  yarn kbn bootstrap --force-install
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
-  verify_no_git_changes 'yarn kbn bootstrap'
+  check_for_changed_files 'yarn kbn bootstrap'
 fi
+

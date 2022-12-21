@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { expectAssignable } from 'tsd';
-import { Writable } from '../..';
+import { Writable } from '../../..';
 
 type WritableArray = Writable<readonly string[]>;
 expectAssignable<WritableArray>(['1']);

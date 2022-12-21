@@ -7,11 +7,13 @@
  */
 
 import { getFields } from './get_fields';
-import { IndexPatternBase, IndexPatternFieldBase, KueryNode } from '../../..';
+import { DataViewBase, DataViewFieldBase, KueryNode } from '../../../..';
+import { getDataViewFieldSubtypeNested } from '../../../utils';
+import { isNode as isWildcardNode } from '../../node_types/wildcard';
 
 export function getFullFieldNameNode(
   rootNameNode: any,
-  indexPattern?: IndexPatternBase,
+  indexPattern?: DataViewBase,
   nestedPath?: string
 ): KueryNode {
   const fullFieldNameNode = {
@@ -22,14 +24,14 @@ export function getFullFieldNameNode(
   // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
   // users handle this themselves so we automatically add nested queries in this scenario and skip the
   // error checking below.
-  if (!indexPattern || (fullFieldNameNode.type === 'wildcard' && !nestedPath)) {
+  if (!indexPattern || (isWildcardNode(fullFieldNameNode) && !nestedPath)) {
     return fullFieldNameNode;
   }
   const fields = getFields(fullFieldNameNode, indexPattern);
 
-  const errors = fields!.reduce((acc: any, field: IndexPatternFieldBase) => {
-    const nestedPathFromField =
-      field.subType && field.subType.nested ? field.subType.nested.path : undefined;
+  const errors = fields!.reduce((acc: any, field: DataViewFieldBase) => {
+    const subTypeNested = getDataViewFieldSubtypeNested(field);
+    const nestedPathFromField = subTypeNested?.nested.path;
 
     if (nestedPath && !nestedPathFromField) {
       return [
@@ -48,11 +50,7 @@ export function getFullFieldNameNode(
     if (nestedPathFromField !== nestedPath) {
       return [
         ...acc,
-        `Nested field ${
-          field.name
-        } is being queried with the incorrect nested path. The correct path is ${
-          field.subType!.nested!.path
-        }.`,
+        `Nested field ${field.name} is being queried with the incorrect nested path. The correct path is ${subTypeNested?.nested.path}.`,
       ];
     }
 

@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "common/**/*",
@@ -14,11 +13,10 @@
     "public/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" }
   ]
 }

@@ -22,13 +22,13 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
 import { AppContextConsumer, AppDependencies } from '../../../app_context';
 import { TelemetryPluginStart, shouldShowTelemetryOptIn } from '../../../lib/telemetry';
 
-interface Props {
+export interface Props {
   loadTrialStatus: () => void;
   startLicenseTrial: () => void;
   telemetry?: TelemetryPluginStart;

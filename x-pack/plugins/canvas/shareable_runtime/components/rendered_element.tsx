@@ -6,9 +6,8 @@
  */
 
 import React, { FC, PureComponent } from 'react';
-// @ts-expect-error untyped library
-import Style from 'style-it';
-import { AnyExpressionFunctionDefinition } from '../../../../../src/plugins/expressions';
+import { css as emotionCss } from '@emotion/css';
+import { AnyExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Positionable } from '../../public/components/positionable/positionable';
 import { elementToShape } from '../../public/components/workpad_page/positioning_utils';
 import { CanvasRenderedElement } from '../types';
@@ -81,16 +80,13 @@ export class RenderedElementComponent extends PureComponent<Props> {
     return (
       <Positionable height={height} width={width} transformMatrix={shape.transformMatrix}>
         <div className={css.root}>
-          {Style.it(
-            elementCSS,
-            <div className={css.container} style={{ ...containerStyle }}>
-              <div className={css.content}>
-                <div className={css.renderContainer}>
-                  <div key={id} ref={this.ref} data-renderer={as} className={css.render} />
-                </div>
+          <div css={emotionCss(elementCSS)} className={css.container} style={{ ...containerStyle }}>
+            <div className={css.content}>
+              <div className={css.renderContainer}>
+                <div key={id} ref={this.ref} data-renderer={as} className={css.render} />
               </div>
             </div>
-          )}
+          </div>
         </div>
       </Positionable>
     );

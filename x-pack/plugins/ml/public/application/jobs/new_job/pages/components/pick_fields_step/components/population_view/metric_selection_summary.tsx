@@ -7,7 +7,7 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { PopulationJobCreator } from '../../../../../common/job_creator';
@@ -50,6 +50,7 @@ export const PopulationDetectorsSummary: FC = () => {
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // watch for changes in by field values
@@ -60,6 +61,7 @@ export const PopulationDetectorsSummary: FC = () => {
     if (allDataReady()) {
       loadCharts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(fieldValuesPerDetector), jobCreator.populationField]);
 
   // watch for changes in split field or by fields.
@@ -67,6 +69,7 @@ export const PopulationDetectorsSummary: FC = () => {
   // changes to fieldValues here will trigger the card effect via setFieldValuesPerDetector
   useEffect(() => {
     loadFieldExamples();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreator.populationField]);
 
   async function loadCharts() {

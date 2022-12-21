@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { indexPatternRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { omit } from 'lodash';
 import {
   SourceConfigurationRT,
   SourceStatusRuntimeType,
@@ -22,7 +22,6 @@ export const metricsSourceConfigurationPropertiesRT = rt.strict({
   metricAlias: SourceConfigurationRT.props.metricAlias,
   inventoryDefaultView: SourceConfigurationRT.props.inventoryDefaultView,
   metricsExplorerDefaultView: SourceConfigurationRT.props.metricsExplorerDefaultView,
-  fields: rt.strict(omit(SourceConfigurationRT.props.fields.props, 'message')),
   anomalyThreshold: rt.number,
 });
 
@@ -30,11 +29,13 @@ export type MetricsSourceConfigurationProperties = rt.TypeOf<
   typeof metricsSourceConfigurationPropertiesRT
 >;
 
+export const partialMetricsSourceConfigurationReqPayloadRT = rt.partial({
+  ...metricsSourceConfigurationPropertiesRT.type.props,
+  metricAlias: indexPatternRt,
+});
+
 export const partialMetricsSourceConfigurationPropertiesRT = rt.partial({
   ...metricsSourceConfigurationPropertiesRT.type.props,
-  fields: rt.partial({
-    ...metricsSourceConfigurationPropertiesRT.type.props.fields.type.props,
-  }),
 });
 
 export type PartialMetricsSourceConfigurationProperties = rt.TypeOf<

@@ -7,7 +7,14 @@
 
 import * as rt from 'io-ts';
 
-import { ActionResult, ActionType } from '../../../../actions/common';
+import type { ActionType } from '@kbn/actions-plugin/common';
+/**
+ * ActionResult type from the common folder is outdated.
+ * The type from server is not exported properly so we
+ * disable the linting for the moment
+ */
+
+import type { ActionResult } from '@kbn/actions-plugin/server/types';
 import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
 import { ServiceNowITSMFieldsRT } from './servicenow_itsm';
@@ -33,6 +40,7 @@ export const ConnectorFieldsRt = rt.union([
 ]);
 
 export enum ConnectorTypes {
+  casesWebhook = '.cases-webhook',
   jira = '.jira',
   none = '.none',
   resilient = '.resilient',
@@ -41,14 +49,17 @@ export enum ConnectorTypes {
   swimlane = '.swimlane',
 }
 
-export const connectorTypes = Object.values(ConnectorTypes);
+const ConnectorCasesWebhookTypeFieldsRt = rt.type({
+  type: rt.literal(ConnectorTypes.casesWebhook),
+  fields: rt.null,
+});
 
 const ConnectorJiraTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.jira),
   fields: rt.union([JiraFieldsRT, rt.null]),
 });
 
-const ConnectorResillientTypeFieldsRt = rt.type({
+const ConnectorResilientTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.resilient),
   fields: rt.union([ResilientFieldsRT, rt.null]),
 });
@@ -73,12 +84,13 @@ const ConnectorNoneTypeFieldsRt = rt.type({
   fields: rt.null,
 });
 
-export const noneConnectorId: string = 'none';
+export const NONE_CONNECTOR_ID: string = 'none';
 
 export const ConnectorTypeFieldsRt = rt.union([
+  ConnectorCasesWebhookTypeFieldsRt,
   ConnectorJiraTypeFieldsRt,
   ConnectorNoneTypeFieldsRt,
-  ConnectorResillientTypeFieldsRt,
+  ConnectorResilientTypeFieldsRt,
   ConnectorServiceNowITSMTypeFieldsRt,
   ConnectorServiceNowSIRTypeFieldsRt,
   ConnectorSwimlaneTypeFieldsRt,
@@ -87,9 +99,14 @@ export const ConnectorTypeFieldsRt = rt.union([
 /**
  * This type represents the connector's format when it is encoded within a user action.
  */
-export const CaseUserActionConnectorRt = rt.intersection([
-  rt.type({ name: rt.string }),
-  ConnectorTypeFieldsRt,
+export const CaseUserActionConnectorRt = rt.union([
+  rt.intersection([ConnectorCasesWebhookTypeFieldsRt, rt.type({ name: rt.string })]),
+  rt.intersection([ConnectorJiraTypeFieldsRt, rt.type({ name: rt.string })]),
+  rt.intersection([ConnectorNoneTypeFieldsRt, rt.type({ name: rt.string })]),
+  rt.intersection([ConnectorResilientTypeFieldsRt, rt.type({ name: rt.string })]),
+  rt.intersection([ConnectorServiceNowITSMTypeFieldsRt, rt.type({ name: rt.string })]),
+  rt.intersection([ConnectorServiceNowSIRTypeFieldsRt, rt.type({ name: rt.string })]),
+  rt.intersection([ConnectorSwimlaneTypeFieldsRt, rt.type({ name: rt.string })]),
 ]);
 
 export const CaseConnectorRt = rt.intersection([
@@ -102,8 +119,9 @@ export const CaseConnectorRt = rt.intersection([
 export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;
 export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;
+export type ConnectorCasesWebhookTypeFields = rt.TypeOf<typeof ConnectorCasesWebhookTypeFieldsRt>;
 export type ConnectorJiraTypeFields = rt.TypeOf<typeof ConnectorJiraTypeFieldsRt>;
-export type ConnectorResillientTypeFields = rt.TypeOf<typeof ConnectorResillientTypeFieldsRt>;
+export type ConnectorResilientTypeFields = rt.TypeOf<typeof ConnectorResilientTypeFieldsRt>;
 export type ConnectorSwimlaneTypeFields = rt.TypeOf<typeof ConnectorSwimlaneTypeFieldsRt>;
 export type ConnectorServiceNowITSMTypeFields = rt.TypeOf<
   typeof ConnectorServiceNowITSMTypeFieldsRt

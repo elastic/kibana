@@ -10,23 +10,27 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isEmpty } from 'lodash';
 
-import { throwErrors } from '../../../../cases/common';
-import {
+import { throwErrors } from '@kbn/cases-plugin/common';
+import type {
   TimelineResponse,
-  TimelineResponseType,
-  TimelineStatus,
-  TimelineErrorResponseType,
   TimelineErrorResponse,
   ImportTimelineResultSchema,
-  importTimelineResultSchema,
   ResponseFavoriteTimeline,
   AllTimelinesResponse,
   SingleTimelineResponse,
+  SingleTimelineResolveResponse,
+  GetTimelinesArgs,
+} from '../../../common/types/timeline';
+import {
+  TimelineResponseType,
+  TimelineStatus,
+  TimelineErrorResponseType,
+  importTimelineResultSchema,
   allTimelinesResponse,
   responseFavoriteTimeline,
-  GetTimelinesArgs,
   SingleTimelineResponseType,
   TimelineType,
+  ResolvedSingleTimelineResponseType,
 } from '../../../common/types/timeline';
 import {
   TIMELINE_URL,
@@ -34,18 +38,19 @@ import {
   TIMELINE_IMPORT_URL,
   TIMELINE_EXPORT_URL,
   TIMELINE_PREPACKAGED_URL,
+  TIMELINE_RESOLVE_URL,
   TIMELINES_URL,
   TIMELINE_FAVORITE_URL,
 } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
 import { ToasterError } from '../../common/components/toasters';
-import {
+import type {
   ExportDocumentsProps,
   ImportDataProps,
   ImportDataResponse,
-} from '../../detections/containers/detection_engine/rules';
-import { TimelineInput } from '../../../common/search_strategy';
+} from '../../detection_engine/rule_management/logic';
+import type { TimelineInput } from '../../../common/search_strategy';
 
 interface RequestPostTimeline {
   timeline: TimelineInput;
@@ -68,6 +73,12 @@ const decodeTimelineResponse = (respTimeline?: TimelineResponse | TimelineErrorR
 const decodeSingleTimelineResponse = (respTimeline?: SingleTimelineResponse) =>
   pipe(
     SingleTimelineResponseType.decode(respTimeline),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+const decodeResolvedSingleTimelineResponse = (respTimeline?: SingleTimelineResolveResponse) =>
+  pipe(
+    ResolvedSingleTimelineResponseType.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
   );
 
@@ -147,6 +158,7 @@ export const persistTimeline = async ({
   try {
     if (isEmpty(timelineId) && timeline.status === TimelineStatus.draft && timeline) {
       const temp: TimelineResponse | TimelineErrorResponse = await cleanDraftTimeline({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineType: timeline.timelineType!,
         templateTimelineId: timeline.templateTimelineId ?? undefined,
         templateTimelineVersion: timeline.templateTimelineVersion ?? undefined,
@@ -154,7 +166,7 @@ export const persistTimeline = async ({
 
       const draftTimeline = decodeTimelineResponse(temp);
       const templateTimelineInfo =
-        timeline.timelineType! === TimelineType.template
+        timeline.timelineType === TimelineType.template
           ? {
               templateTimelineId:
                 draftTimeline.data.persistTimeline.timeline.templateTimelineId ??
@@ -303,6 +315,19 @@ export const getTimeline = async (id: string) => {
   });
 
   return decodeSingleTimelineResponse(response);
+};
+
+export const resolveTimeline = async (id: string) => {
+  const response = await KibanaServices.get().http.get<SingleTimelineResolveResponse>(
+    TIMELINE_RESOLVE_URL,
+    {
+      query: {
+        id,
+      },
+    }
+  );
+
+  return decodeResolvedSingleTimelineResponse(response);
 };
 
 export const getTimelineTemplate = async (templateTimelineId: string) => {

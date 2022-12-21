@@ -5,27 +5,32 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { I18nProvider } from '@kbn/i18n/react';
+import { euiDarkVars } from '@kbn/ui-theme';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
-import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
+import type { DropResult, ResponderProvided } from 'react-beautiful-dnd';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import { Store } from 'redux';
+import type { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
-import { Capabilities } from 'src/core/public';
+import type { Capabilities } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { createStore, State } from '../store';
+import { ConsoleManager } from '../../management/components/console';
+import type { State } from '../store';
+import { createStore } from '../store';
 import { mockGlobalState } from './global_state';
 import {
   createKibanaContextProviderMock,
   createStartServicesMock,
 } from '../lib/kibana/kibana_react.mock';
-import { FieldHook } from '../../shared_imports';
+import type { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
-import { UserPrivilegesProvider } from '../components/user_privileges';
+import { CASES_FEATURE_ID } from '../../../common/constants';
+import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
 
 const state: State = mockGlobalState;
 
@@ -49,17 +54,24 @@ export const TestProvidersComponent: React.FC<Props> = ({
   children,
   store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
-}) => (
-  <I18nProvider>
-    <MockKibanaContextProvider>
-      <ReduxStoreProvider store={store}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-        </ThemeProvider>
-      </ReduxStoreProvider>
-    </MockKibanaContextProvider>
-  </I18nProvider>
-);
+}) => {
+  const queryClient = new QueryClient();
+  return (
+    <I18nProvider>
+      <MockKibanaContextProvider>
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <QueryClientProvider client={queryClient}>
+              <ConsoleManager>
+                <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+              </ConsoleManager>
+            </QueryClientProvider>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      </MockKibanaContextProvider>
+    </I18nProvider>
+  );
+};
 
 /**
  * A utility for wrapping children in the providers required to run most tests
@@ -76,7 +88,10 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <UserPrivilegesProvider
             kibanaCapabilities={
-              { siem: { crud_alerts: true, read_alerts: true } } as unknown as Capabilities
+              {
+                siem: { show: true, crud: true },
+                [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+              } as unknown as Capabilities
             }
           >
             <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>

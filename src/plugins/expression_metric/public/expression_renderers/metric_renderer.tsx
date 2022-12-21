@@ -5,11 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { CSSProperties, lazy } from 'react';
+import React, { CSSProperties } from 'react';
+import { Observable } from 'rxjs';
+import { CoreTheme } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { EuiErrorBoundary } from '@elastic/eui';
+import {
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { withSuspense } from '../../../presentation_util/public';
+import { CoreSetup } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { MetricRendererConfig } from '../../common/types';
 
 const strings = {
@@ -23,33 +31,39 @@ const strings = {
     }),
 };
 
-const LazyMetricComponent = lazy(() => import('../components/metric_component'));
-const MetricComponent = withSuspense(LazyMetricComponent);
+export const getMetricRenderer =
+  (theme$: Observable<CoreTheme> = defaultTheme$) =>
+  (): ExpressionRenderDefinition<MetricRendererConfig> => ({
+    name: 'metric',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    render: async (
+      domNode: HTMLElement,
+      config: MetricRendererConfig,
+      handlers: IInterpreterRenderHandlers
+    ) => {
+      const { MetricComponent } = await import('../components/metric_component');
+      handlers.onDestroy(() => {
+        unmountComponentAtNode(domNode);
+      });
 
-export const metricRenderer = (): ExpressionRenderDefinition<MetricRendererConfig> => ({
-  name: 'metric',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  render: async (
-    domNode: HTMLElement,
-    config: MetricRendererConfig,
-    handlers: IInterpreterRenderHandlers
-  ) => {
-    handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
-    });
+      render(
+        <EuiErrorBoundary>
+          <KibanaThemeProvider theme$={theme$}>
+            <MetricComponent
+              label={config.label}
+              labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
+              metric={config.metric}
+              metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
+              metricFormat={config.metricFormat}
+            />
+          </KibanaThemeProvider>
+        </EuiErrorBoundary>,
+        domNode,
+        () => handlers.done()
+      );
+    },
+  });
 
-    render(
-      <MetricComponent
-        label={config.label}
-        labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
-        metric={config.metric}
-        metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
-        metricFormat={config.metricFormat}
-      />,
-      domNode,
-      () => handlers.done()
-    );
-  },
-});
+export const metricRendererFactory = (core: CoreSetup) => getMetricRenderer(core.theme.theme$);

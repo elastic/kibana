@@ -6,8 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
-import { Plugin } from 'unified';
+import type { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
+import type { Plugin } from 'unified';
 /**
  * @description - manage the plugins, hooks, and ui components needed to enable timeline functionality within the cases plugin
  * @TODO - To better encapsulate the timeline logic needed by cases, we are managing it in this top level context.
@@ -42,7 +42,6 @@ export interface CasesTimelineIntegration {
     ) => UseInsertTimelineReturn;
   };
   ui?: {
-    renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
     renderTimelineDetailsPanel?: () => JSX.Element;
   };
 }
@@ -54,12 +53,15 @@ export const CasesTimelineIntegrationContext = React.createContext<CasesTimeline
 
 export const CasesTimelineIntegrationProvider: React.FC<{
   timelineIntegration?: CasesTimelineIntegration;
-}> = ({ children, timelineIntegration }) => {
-  const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
+}> =
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
+  ({ children, timelineIntegration }) => {
+    const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
 
-  return (
-    <CasesTimelineIntegrationContext.Provider value={activeTimelineIntegration}>
-      {children}
-    </CasesTimelineIntegrationContext.Provider>
-  );
-};
+    return (
+      <CasesTimelineIntegrationContext.Provider value={activeTimelineIntegration}>
+        {children}
+      </CasesTimelineIntegrationContext.Provider>
+    );
+  };

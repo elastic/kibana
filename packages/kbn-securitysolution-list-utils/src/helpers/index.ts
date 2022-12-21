@@ -14,7 +14,6 @@ import {
   EntriesArray,
   Entry,
   EntryNested,
-  ExceptionListItemSchema,
   ExceptionListType,
   ListSchema,
   NamespaceType,
@@ -27,17 +26,28 @@ import {
   entry,
   exceptionListItemSchema,
   nestedEntryItem,
+  CreateRuleExceptionListItemSchema,
+  createRuleExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import {
+  DataViewBase,
+  DataViewFieldBase,
+  getDataViewFieldSubtypeNested,
+  isDataViewFieldSubtypeNested,
+} from '@kbn/es-query';
 
 import {
-  EXCEPTION_OPERATORS,
+  ALL_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
   doesNotExistOperator,
   existsOperator,
   isNotOperator,
   isOneOfOperator,
   isOperator,
+  DETECTION_ENGINE_EXCEPTION_OPERATORS,
+  isNotOneOfOperator,
+  isInListOperator,
+  isNotInListOperator,
 } from '../autocomplete_operators';
 
 import {
@@ -46,6 +56,7 @@ import {
   EmptyEntry,
   EmptyNestedEntry,
   ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
 } from '../types';
@@ -56,59 +67,60 @@ export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
 
 export const filterExceptionItems = (
   exceptions: ExceptionsBuilderExceptionItem[]
-): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
-    (acc, exception) => {
-      const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
-        const strippedSingleEntry = removeIdFromItem(singleEntry);
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptions.reduce<ExceptionsBuilderReturnExceptionItem[]>((acc, exception) => {
+    const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
+      const strippedSingleEntry = removeIdFromItem(singleEntry);
+      if (entriesNested.is(strippedSingleEntry)) {
+        const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
+          const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
+          const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
+          return validatedNestedEntry != null;
+        });
+        const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
+          removeIdFromItem(singleNestedEntry)
+        );
 
-        if (entriesNested.is(strippedSingleEntry)) {
-          const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
-            const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
-            const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
-            return validatedNestedEntry != null;
-          });
-          const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
-            removeIdFromItem(singleNestedEntry)
-          );
+        const [validatedNestedEntry] = validate(
+          { ...strippedSingleEntry, entries: noIdNestedEntries },
+          entriesNested
+        );
 
-          const [validatedNestedEntry] = validate(
-            { ...strippedSingleEntry, entries: noIdNestedEntries },
-            entriesNested
-          );
-
-          if (validatedNestedEntry != null) {
-            return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
-          }
-          return nestedAcc;
-        } else {
-          const [validatedEntry] = validate(strippedSingleEntry, entry);
-
-          if (validatedEntry != null) {
-            return [...nestedAcc, singleEntry];
-          }
-          return nestedAcc;
+        if (validatedNestedEntry != null) {
+          return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
         }
-      }, []);
-
-      if (entries.length === 0) {
-        return acc;
-      }
-
-      const item = { ...exception, entries };
-
-      if (exceptionListItemSchema.is(item)) {
-        return [...acc, item];
-      } else if (createExceptionListItemSchema.is(item)) {
-        const { meta, ...rest } = item;
-        const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
-        return [...acc, itemSansMetaId];
+        return nestedAcc;
       } else {
-        return acc;
+        const [validatedEntry] = validate(strippedSingleEntry, entry);
+        if (validatedEntry != null) {
+          return [...nestedAcc, singleEntry];
+        }
+        return nestedAcc;
       }
-    },
-    []
-  );
+    }, []);
+
+    if (entries.length === 0) {
+      return acc;
+    }
+
+    const item = { ...exception, entries };
+
+    if (exceptionListItemSchema.is(item)) {
+      return [...acc, item];
+    } else if (
+      createExceptionListItemSchema.is(item) ||
+      createRuleExceptionListItemSchema.is(item)
+    ) {
+      const { meta, ...rest } = item;
+      const itemSansMetaId: CreateExceptionListItemSchema | CreateRuleExceptionListItemSchema = {
+        ...rest,
+        meta: undefined,
+      };
+      return [...acc, itemSansMetaId];
+    } else {
+      return acc;
+    }
+  }, []);
 };
 
 export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
@@ -127,15 +139,15 @@ export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
 export const getNewExceptionItem = ({
   listId,
   namespaceType,
-  ruleName,
+  name,
 }: {
-  listId: string;
-  namespaceType: NamespaceType;
-  ruleName: string;
+  listId: string | undefined;
+  namespaceType: NamespaceType | undefined;
+  name: string;
 }): CreateExceptionListItemBuilderSchema => {
   return {
     comments: [],
-    description: `${ruleName} - exception list item`,
+    description: `Exception list item`,
     entries: addIdToEntries([
       {
         field: '',
@@ -149,7 +161,7 @@ export const getNewExceptionItem = ({
     meta: {
       temporaryUuid: uuid.v4(),
     },
-    name: `${ruleName} - exception list item`,
+    name,
     namespace_type: namespaceType,
     tags: [],
     type: 'simple',
@@ -167,6 +179,8 @@ export const getOperatorType = (item: BuilderEntry): OperatorTypeEnum => {
       return OperatorTypeEnum.MATCH;
     case 'match_any':
       return OperatorTypeEnum.MATCH_ANY;
+    case 'wildcard':
+      return OperatorTypeEnum.WILDCARD;
     case 'list':
       return OperatorTypeEnum.LIST;
     default:
@@ -185,7 +199,7 @@ export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption =
     return isOperator;
   } else {
     const operatorType = getOperatorType(item);
-    const foundOperator = EXCEPTION_OPERATORS.find((operatorOption) => {
+    const foundOperator = ALL_OPERATORS.find((operatorOption) => {
       return item.operator === operatorOption.operator && operatorType === operatorOption.type;
     });
 
@@ -202,6 +216,7 @@ export const getEntryValue = (item: BuilderEntry): string | string[] | undefined
   switch (item.type) {
     case OperatorTypeEnum.MATCH:
     case OperatorTypeEnum.MATCH_ANY:
+    case OperatorTypeEnum.WILDCARD:
       return item.value;
     case OperatorTypeEnum.EXISTS:
       return undefined;
@@ -278,17 +293,17 @@ export const getUpdatedEntriesOnDelete = (
  * add nested entry, should only show nested fields, if item is the parent
  * field of a nested entry, we only display the parent field
  *
- * @param patterns IndexPatternBase containing available fields on rule index
+ * @param patterns DataViewBase containing available fields on rule index
  * @param item exception item entry
  * set to add a nested field
  */
 export const getFilteredIndexPatterns = (
-  patterns: IndexPatternBase,
+  patterns: DataViewBase,
   item: FormattedBuilderEntry,
   type: ExceptionListType,
-  preFilter?: (i: IndexPatternBase, t: ExceptionListType, o?: OsTypeArray) => IndexPatternBase,
+  preFilter?: (i: DataViewBase, t: ExceptionListType, o?: OsTypeArray) => DataViewBase,
   osTypes?: OsTypeArray
-): IndexPatternBase => {
+): DataViewBase => {
   const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;
 
   if (item.nested === 'child' && item.parent != null) {
@@ -297,11 +312,11 @@ export const getFilteredIndexPatterns = (
       ...indexPatterns,
       fields: indexPatterns.fields
         .filter((indexField) => {
+          const subTypeNested = getDataViewFieldSubtypeNested(indexField);
           const fieldHasCommonParentPath =
-            indexField.subType != null &&
-            indexField.subType.nested != null &&
+            subTypeNested &&
             item.parent != null &&
-            indexField.subType.nested.path === item.parent.parent.field;
+            subTypeNested.nested.path === item.parent.parent.field;
 
           return fieldHasCommonParentPath;
         })
@@ -317,9 +332,7 @@ export const getFilteredIndexPatterns = (
     // when user selects to add a nested entry, only nested fields are shown as options
     return {
       ...indexPatterns,
-      fields: indexPatterns.fields.filter(
-        (field) => field.subType != null && field.subType.nested != null
-      ),
+      fields: indexPatterns.fields.filter((field) => isDataViewFieldSubtypeNested(field)),
     };
   } else {
     return indexPatterns;
@@ -335,7 +348,7 @@ export const getFilteredIndexPatterns = (
  */
 export const getEntryOnFieldChange = (
   item: FormattedBuilderEntry,
-  newField: IndexPatternFieldBase
+  newField: DataViewFieldBase
 ): { index: number; updatedEntry: BuilderEntry } => {
   const { parent, entryIndex, nested } = item;
   const newChildFieldValue = newField != null ? newField.name.split('.').slice(-1)[0] : '';
@@ -346,10 +359,8 @@ export const getEntryOnFieldChange = (
     // a user selects "exists", as soon as they make a selection
     // we can now identify the 'parent' and 'child' this is where
     // we first convert the entry into type "nested"
-    const newParentFieldValue =
-      newField.subType != null && newField.subType.nested != null
-        ? newField.subType.nested.path
-        : '';
+    const subTypeNested = getDataViewFieldSubtypeNested(newField);
+    const newParentFieldValue = subTypeNested?.nested.path || '';
 
     return {
       index: entryIndex,
@@ -523,6 +534,54 @@ export const getEntryOnMatchChange = (
 };
 
 /**
+ * Determines proper entry update when user updates value
+ * when operator is of type "wildcard"
+ *
+ * @param item - current exception item entry values
+ * @param newField - newly entered value
+ *
+ */
+export const getEntryOnWildcardChange = (
+  item: FormattedBuilderEntry,
+  newField: string
+): { index: number; updatedEntry: BuilderEntry } => {
+  const { nested, parent, entryIndex, field, operator } = item;
+
+  if (nested != null && parent != null) {
+    const fieldName = field != null ? field.name.split('.').slice(-1)[0] : '';
+
+    return {
+      index: parent.parentIndex,
+      updatedEntry: {
+        ...parent.parent,
+        entries: [
+          ...parent.parent.entries.slice(0, entryIndex),
+          {
+            field: fieldName,
+            id: item.id,
+            operator: operator.operator,
+            type: OperatorTypeEnum.WILDCARD,
+            value: newField,
+          },
+          ...parent.parent.entries.slice(entryIndex + 1),
+        ],
+      },
+    };
+  } else {
+    return {
+      index: entryIndex,
+      updatedEntry: {
+        field: field != null ? field.name : '',
+        id: item.id,
+        operator: operator.operator,
+        type: OperatorTypeEnum.WILDCARD,
+        value: newField,
+      },
+    };
+  }
+};
+
+/**
  * On operator change, determines whether value needs to be cleared or not
  *
  * @param field
@@ -561,6 +620,15 @@ export const getEntryFromOperator = (
         list: { id: '', type: 'ip' },
         operator: selectedOperator.operator,
         type: OperatorTypeEnum.LIST,
+      };
+    case 'wildcard':
+      return {
+        field: fieldValue,
+        id: currentEntry.id,
+        operator: selectedOperator.operator,
+        type: OperatorTypeEnum.WILDCARD,
+        value:
+          isSameOperatorType && typeof currentEntry.value === 'string' ? currentEntry.value : '',
       };
     default:
       return {
@@ -606,6 +674,10 @@ export const getEntryOnOperatorChange = (
   }
 };
 
+const fieldSupportsMatches = (field: DataViewFieldBase) => {
+  return field.type === 'string';
+};
+
 /**
  * Determines which operators to make available
  *
@@ -626,12 +698,34 @@ export const getOperatorOptions = (
     return isBoolean ? [isOperator] : [isOperator, isOneOfOperator];
   } else if (item.nested != null && listType === 'detection') {
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
+  } else if (isBoolean) {
+    return [isOperator, isNotOperator, existsOperator, doesNotExistOperator];
+  } else if (!includeValueListOperators) {
+    return fieldSupportsMatches(item.field)
+      ? EXCEPTION_OPERATORS_SANS_LISTS
+      : [
+          isOperator,
+          isNotOperator,
+          isOneOfOperator,
+          isNotOneOfOperator,
+          existsOperator,
+          doesNotExistOperator,
+        ];
   } else {
-    return isBoolean
-      ? [isOperator, isNotOperator, existsOperator, doesNotExistOperator]
-      : includeValueListOperators
-      ? EXCEPTION_OPERATORS
-      : EXCEPTION_OPERATORS_SANS_LISTS;
+    return listType === 'detection'
+      ? fieldSupportsMatches(item.field)
+        ? DETECTION_ENGINE_EXCEPTION_OPERATORS
+        : [
+            isOperator,
+            isNotOperator,
+            isOneOfOperator,
+            isNotOneOfOperator,
+            existsOperator,
+            doesNotExistOperator,
+            isInListOperator,
+            isNotInListOperator,
+          ]
+      : ALL_OPERATORS;
   }
 };
 
@@ -640,7 +734,7 @@ export const getOperatorOptions = (
  * to find it's corresponding keyword type (if available) which does
  * generate autocomplete values
  *
- * @param fields IFieldType fields
+ * @param fields DataViewFieldBase fields
  * @param selectedField the field name that was selected
  * @param isTextType we only want a corresponding keyword field if
  * the selected field is of type 'text'
@@ -650,9 +744,9 @@ export const getCorrespondingKeywordField = ({
   fields,
   selectedField,
 }: {
-  fields: IndexPatternFieldBase[];
+  fields: DataViewFieldBase[];
   selectedField: string | undefined;
-}): IndexPatternFieldBase | undefined => {
+}): DataViewFieldBase | undefined => {
   const selectedFieldBits =
     selectedField != null && selectedField !== '' ? selectedField.split('.') : [];
   const selectedFieldIsTextType = selectedFieldBits.slice(-1)[0] === 'text';
@@ -672,19 +766,21 @@ export const getCorrespondingKeywordField = ({
  * Formats the entry into one that is easily usable for the UI, most of the
  * complexity was introduced with nested fields
  *
- * @param patterns IndexPatternBase containing available fields on rule index
+ * @param patterns DataViewBase containing available fields on rule index
  * @param item exception item entry
  * @param itemIndex entry index
  * @param parent nested entries hold copy of their parent for use in various logic
  * @param parentIndex corresponds to the entry index, this might seem obvious, but
  * was added to ensure that nested items could be identified with their parent entry
+ * @param allowCustomFieldOptions determines if field must be found to match in indexPattern or not
  */
 export const getFormattedBuilderEntry = (
-  indexPattern: IndexPatternBase,
+  indexPattern: DataViewBase,
   item: BuilderEntry,
   itemIndex: number,
   parent: EntryNested | undefined,
-  parentIndex: number | undefined
+  parentIndex: number | undefined,
+  allowCustomFieldOptions: boolean
 ): FormattedBuilderEntry => {
   const { fields } = indexPattern;
   const field = parent != null ? `${parent.field}.${item.field}` : item.field;
@@ -709,10 +805,14 @@ export const getFormattedBuilderEntry = (
       value: getEntryValue(item),
     };
   } else {
+    const fieldToUse = allowCustomFieldOptions
+      ? foundField ?? { name: item.field, type: 'keyword' }
+      : foundField;
+
     return {
       correspondingKeywordField,
       entryIndex: itemIndex,
-      field: foundField,
+      field: fieldToUse,
       id: item.id != null ? item.id : `${itemIndex}`,
       nested: undefined,
       operator: getExceptionOperatorSelect(item),
@@ -726,17 +826,17 @@ export const getFormattedBuilderEntry = (
  * Formats the entries to be easily usable for the UI, most of the
  * complexity was introduced with nested fields
  *
- * @param patterns IndexPatternBase containing available fields on rule index
+ * @param patterns DataViewBase containing available fields on rule index
  * @param entries exception item entries
- * @param addNested boolean noting whether or not UI is currently
- * set to add a nested field
+ * @param allowCustomFieldOptions determines if field must be found to match in indexPattern or not
  * @param parent nested entries hold copy of their parent for use in various logic
  * @param parentIndex corresponds to the entry index, this might seem obvious, but
  * was added to ensure that nested items could be identified with their parent entry
  */
 export const getFormattedBuilderEntries = (
-  indexPattern: IndexPatternBase,
+  indexPattern: DataViewBase,
   entries: BuilderEntry[],
+  allowCustomFieldOptions: boolean,
   parent?: EntryNested,
   parentIndex?: number
 ): FormattedBuilderEntry[] => {
@@ -748,7 +848,8 @@ export const getFormattedBuilderEntries = (
         item,
         index,
         parent,
-        parentIndex
+        parentIndex,
+        allowCustomFieldOptions
       );
       return [...acc, newItemEntry];
     } else {
@@ -757,14 +858,14 @@ export const getFormattedBuilderEntries = (
         entryIndex: index,
         field: isNewNestedEntry
           ? undefined
-          : // This type below is really a FieldSpec type from "src/plugins/data/common/index_patterns/fields/types.ts", we cast it here to keep using the IndexPatternFieldBase interface
+          : // This type below is really a FieldSpec type from "src/plugins/data/common/index_patterns/fields/types.ts", we cast it here to keep using the DataViewFieldBase interface
             ({
               aggregatable: false,
               esTypes: ['nested'],
               name: item.field != null ? item.field : '',
               searchable: false,
               type: 'string',
-            } as IndexPatternFieldBase),
+            } as DataViewFieldBase),
         id: item.id != null ? item.id : `${index}`,
         nested: 'parent',
         operator: isOperator,
@@ -778,7 +879,13 @@ export const getFormattedBuilderEntries = (
       }
 
       if (isEntryNested(item)) {
-        const nestedItems = getFormattedBuilderEntries(indexPattern, item.entries, item, index);
+        const nestedItems = getFormattedBuilderEntries(
+          indexPattern,
+          item.entries,
+          allowCustomFieldOptions,
+          item,
+          index
+        );
 
         return [...acc, parentEntry, ...nestedItems];
       }

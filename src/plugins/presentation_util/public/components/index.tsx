@@ -38,4 +38,13 @@ export const LazySavedObjectSaveModalDashboard = React.lazy(
   () => import('./saved_object_save_modal_dashboard')
 );
 
+export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/data_view_picker'));
+
+export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_picker'));
+
+/**
+ * A lazily-loaded ExpressionInput component.
+ */
+export const LazyExpressionInput = React.lazy(() => import('./expression_input'));
+
 export * from './types';

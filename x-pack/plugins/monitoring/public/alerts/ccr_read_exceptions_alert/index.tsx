@@ -6,40 +6,22 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { Expression, Props } from '../components/param_details_form/expression';
-import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { validateDuration, ValidateDurationOptions } from '../../../common/validate_duration';
 import {
   RULE_CCR_READ_EXCEPTIONS,
   RULE_DETAILS,
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
-import { AlertTypeParams } from '../../../../alerting/common';
-import { MonitoringConfig } from '../../types';
-
-interface ValidateOptions extends AlertTypeParams {
-  duration: string;
-}
-
-const validate = (inputValues: ValidateOptions): ValidationResult => {
-  const validationResult = { errors: {} };
-  const errors: { [key: string]: string[] } = {
-    duration: [],
-  };
-  if (!inputValues.duration) {
-    errors.duration.push(
-      i18n.translate('xpack.monitoring.alerts.validation.duration', {
-        defaultMessage: 'A valid duration is required.',
-      })
-    );
-  }
-  validationResult.errors = errors;
-  return validationResult;
-};
+import type { MonitoringConfig } from '../../types';
+import {
+  LazyExpression,
+  LazyExpressionProps,
+} from '../components/param_details_form/lazy_expression';
 
 export function createCCRReadExceptionsAlertType(
   config: MonitoringConfig
-): AlertTypeModel<ValidateOptions> {
+): RuleTypeModel<ValidateDurationOptions> {
   return {
     id: RULE_CCR_READ_EXCEPTIONS,
     description: RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].description,
@@ -47,14 +29,14 @@ export function createCCRReadExceptionsAlertType(
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaCCRReadExceptions}`;
     },
-    alertParamsExpression: (props: Props) => (
-      <Expression
+    ruleParamsExpression: (props: LazyExpressionProps) => (
+      <LazyExpression
         {...props}
         config={config}
         paramDetails={RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].paramDetails}
       />
     ),
-    validate,
+    validate: validateDuration,
     defaultActionMessage: '{{context.internalFullMessage}}',
     requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
   };

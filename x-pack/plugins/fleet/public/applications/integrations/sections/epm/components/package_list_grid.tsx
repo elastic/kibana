@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { Fragment, useCallback, useState } from 'react';
+import type { ReactNode, FunctionComponent } from 'react';
+import { useMemo } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
+import { css } from '@emotion/react';
+
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -14,68 +17,91 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTitle,
-  // @ts-ignore
-  EuiSearchBar,
+  EuiFieldSearch,
   EuiText,
+  useEuiTheme,
+  EuiIcon,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useStartServices } from '../../../../../hooks';
+import { i18n } from '@kbn/i18n';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { Loading } from '../../../components';
 import { useLocalSearch, searchIdField } from '../../../hooks';
 
 import type { IntegrationCardItem } from '../../../../../../common/types/models';
 
+import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
+
+import { promoteFeaturedIntegrations } from './utils';
+
 import { PackageCard } from './package_card';
 
-export interface ListProps {
+export interface Props {
   isLoading?: boolean;
-  controls?: ReactNode;
-  title: string;
+  controls?: ReactNode | ReactNode[];
+  title?: string;
   list: IntegrationCardItem[];
   initialSearch?: string;
+  selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
+  categories: CategoryFacet[];
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
+  callout?: JSX.Element | null;
+  showCardLabels?: boolean;
 }
 
-export function PackageListGrid({
+export const PackageListGrid: FunctionComponent<Props> = ({
   isLoading,
   controls,
   title,
   list,
   initialSearch,
   onSearchChange,
+  selectedCategory,
   setSelectedCategory,
+  categories,
   showMissingIntegrationMessage = false,
-}: ListProps) {
+  callout,
+  showCardLabels = true,
+}) => {
   const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const localSearchRef = useLocalSearch(list);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [isSticky, setIsSticky] = useState(false);
+  const [windowScrollY] = useState(window.scrollY);
+  const { euiTheme } = useEuiTheme();
 
-  const onQueryChange = ({
-    queryText: userInput,
-    error,
-  }: {
-    queryText: string;
-    error: { message: string } | null;
-  }) => {
-    if (!error) {
-      onSearchChange(userInput);
-      setSearchTerm(userInput);
-    }
+  useEffect(() => {
+    const menuRefCurrent = menuRef.current;
+    const onScroll = () => {
+      if (menuRefCurrent) {
+        setIsSticky(menuRefCurrent?.getBoundingClientRect().top < 110);
+      }
+    };
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [windowScrollY, isSticky]);
+
+  const onQueryChange = (e: any) => {
+    const queryText = e.target.value;
+    setSearchTerm(queryText);
+    onSearchChange(queryText);
   };
 
   const resetQuery = () => {
     setSearchTerm('');
   };
 
-  const controlsContent = <ControlsColumn title={title} controls={controls} />;
-  let gridContent: JSX.Element;
+  const selectedCategoryTitle = selectedCategory
+    ? categories.find((category) => category.id === selectedCategory)?.title
+    : undefined;
 
-  if (isLoading || !localSearchRef.current) {
-    gridContent = <Loading />;
-  } else {
+  const filteredPromotedList = useMemo(() => {
+    if (isLoading) return [];
     const filteredList = searchTerm
       ? list.filter((item) =>
           (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
@@ -83,77 +109,167 @@ export function PackageListGrid({
             .includes(item[searchIdField])
         )
       : list;
+
+    return promoteFeaturedIntegrations(filteredList, selectedCategory);
+  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
+
+  const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
+  let gridContent: JSX.Element;
+
+  if (isLoading || !localSearchRef.current) {
+    gridContent = <Loading />;
+  } else {
     gridContent = (
       <GridColumn
-        list={filteredList}
+        list={filteredPromotedList}
         showMissingIntegrationMessage={showMissingIntegrationMessage}
+        showCardLabels={showCardLabels}
       />
     );
   }
 
   return (
-    <EuiFlexGroup alignItems="flexStart">
-      <EuiFlexItem grow={1}>{controlsContent}</EuiFlexItem>
-      <EuiFlexItem grow={3}>
-        <EuiSearchBar
-          query={searchTerm || undefined}
-          box={{
-            placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
-              defaultMessage: 'Search for integrations',
-            }),
-            incremental: true,
-          }}
-          onChange={onQueryChange}
-        />
-        <EuiSpacer />
-        {gridContent}
-        {showMissingIntegrationMessage && (
-          <>
-            <EuiSpacer size="xxl" />
-            <MissingIntegrationContent
-              resetQuery={resetQuery}
-              setSelectedCategory={setSelectedCategory}
+    <>
+      <div ref={menuRef}>
+        <EuiFlexGroup
+          alignItems="flexStart"
+          gutterSize="xl"
+          data-test-subj="epmList.integrationCards"
+        >
+          <EuiFlexItem grow={1} className={isSticky ? 'kbnStickyMenu' : ''}>
+            {controlsContent}
+          </EuiFlexItem>
+          <EuiFlexItem grow={5}>
+            <EuiFieldSearch
+              data-test-subj="epmList.searchBar"
+              placeholder={i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
+                defaultMessage: 'Search for integrations',
+              })}
+              value={searchTerm}
+              onChange={(e) => onQueryChange(e)}
+              isClearable={true}
+              incremental={true}
+              fullWidth={true}
+              prepend={
+                selectedCategoryTitle ? (
+                  <EuiText
+                    data-test-subj="epmList.categoryBadge"
+                    size="xs"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      fontWeight: euiTheme.font.weight.bold,
+                      backgroundColor: euiTheme.colors.lightestShade,
+                    }}
+                  >
+                    <EuiScreenReaderOnly>
+                      <span>Searching category: </span>
+                    </EuiScreenReaderOnly>
+                    {selectedCategoryTitle}
+                    <button
+                      data-test-subj="epmList.categoryBadge.closeBtn"
+                      onClick={() => {
+                        setSelectedCategory('');
+                      }}
+                      aria-label="Remove filter"
+                      style={{
+                        padding: euiTheme.size.xs,
+                        paddingTop: '2px',
+                      }}
+                    >
+                      <EuiIcon
+                        type="cross"
+                        color="text"
+                        size="s"
+                        style={{
+                          width: 'auto',
+                          padding: 0,
+                          backgroundColor: euiTheme.colors.lightestShade,
+                        }}
+                      />
+                    </button>
+                  </EuiText>
+                ) : undefined
+              }
             />
-          </>
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            {callout ? (
+              <>
+                <EuiSpacer />
+                {callout}
+              </>
+            ) : null}
+            <EuiSpacer />
+            {gridContent}
+            {showMissingIntegrationMessage && (
+              <>
+                <EuiSpacer />
+                <MissingIntegrationContent
+                  resetQuery={resetQuery}
+                  setSelectedCategory={setSelectedCategory}
+                />
+              </>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    </>
   );
-}
+};
 
 interface ControlsColumnProps {
   controls: ReactNode;
-  title: string;
+  title: string | undefined;
+  sticky: boolean;
 }
 
-function ControlsColumn({ controls, title }: ControlsColumnProps) {
+function ControlsColumn({ controls, title, sticky }: ControlsColumnProps) {
+  let titleContent;
+  if (title) {
+    titleContent = (
+      <>
+        <EuiTitle size="s">
+          <h2>{title}</h2>
+        </EuiTitle>
+        <EuiSpacer size="l" />
+      </>
+    );
+  }
   return (
-    <Fragment>
-      <EuiTitle size="s">
-        <h2>{title}</h2>
-      </EuiTitle>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={4}>{controls}</EuiFlexItem>
-        <EuiFlexItem grow={1} />
-      </EuiFlexGroup>
-    </Fragment>
+    <EuiFlexGroup direction="column" className={sticky ? 'kbnStickyMenu' : ''} gutterSize="none">
+      {titleContent}
+      {controls}
+    </EuiFlexGroup>
   );
 }
 
 interface GridColumnProps {
   list: IntegrationCardItem[];
   showMissingIntegrationMessage?: boolean;
+  showCardLabels?: boolean;
 }
 
-function GridColumn({ list, showMissingIntegrationMessage = false }: GridColumnProps) {
+function GridColumn({
+  list,
+  showMissingIntegrationMessage = false,
+  showCardLabels = false,
+}: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
         list.map((item) => {
           return (
-            <EuiFlexItem key={item.id}>
-              <PackageCard {...item} />
+            <EuiFlexItem
+              key={item.id}
+              // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
+              css={css`
+                & > .euiPopover,
+                & > .euiPopover > .euiPopover__anchor,
+                & > .euiPopover > .euiPopover__anchor > .euiCard {
+                  height: 100%;
+                }
+              `}
+            >
+              <PackageCard {...item} showLabels={showCardLabels} />
             </EuiFlexItem>
           );
         })
@@ -169,7 +285,7 @@ function GridColumn({ list, showMissingIntegrationMessage = false }: GridColumnP
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
-                  defaultMessage="No packages found"
+                  defaultMessage="No integrations found"
                 />
               )}
             </p>
@@ -189,20 +305,17 @@ function MissingIntegrationContent({
   resetQuery,
   setSelectedCategory,
 }: MissingIntegrationContentProps) {
-  const {
-    application: { getUrlForApp },
-  } = useStartServices();
   const handleCustomInputsLinkClick = useCallback(() => {
     resetQuery();
     setSelectedCategory('custom');
   }, [resetQuery, setSelectedCategory]);
 
   return (
-    <EuiText>
+    <EuiText size="s" color="subdued">
       <p>
         <FormattedMessage
           id="xpack.fleet.integrations.missing"
-          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}, or add data using {beatsTutorialLink}. Request new integrations using our {discussForumLink}."
+          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations in our {forumLink}."
           values={{
             customInputsLink: (
               <EuiLink onClick={handleCustomInputsLinkClick}>
@@ -212,19 +325,11 @@ function MissingIntegrationContent({
                 />
               </EuiLink>
             ),
-            discussForumLink: (
-              <EuiLink href="https://discuss.elastic.co/tag/fleet" external target="_blank">
+            forumLink: (
+              <EuiLink href="https://discuss.elastic.co/tag/integrations" external target="_blank">
                 <FormattedMessage
                   id="xpack.fleet.integrations.discussForumLink"
-                  defaultMessage="discuss forum"
-                />
-              </EuiLink>
-            ),
-            beatsTutorialLink: (
-              <EuiLink href={getUrlForApp('home', { path: '#/tutorial_directory' })}>
-                <FormattedMessage
-                  id="xpack.fleet.integrations.beatsModulesLink"
-                  defaultMessage="Beats modules"
+                  defaultMessage="forum"
                 />
               </EuiLink>
             ),

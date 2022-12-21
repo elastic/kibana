@@ -116,6 +116,13 @@ export const ONLY_FAVORITES = i18n.translate(
   }
 );
 
+export const CREATE_RULE_FROM_TIMELINE = i18n.translate(
+  'xpack.securitySolution.open.timeline.createRuleFromTimelineTooltip',
+  {
+    defaultMessage: 'Create rule from timeline',
+  }
+);
+
 export const CREATE_TEMPLATE_FROM_TIMELINE = i18n.translate(
   'xpack.securitySolution.open.timeline.createTemplateFromTimelineTooltip',
   {
@@ -164,10 +171,6 @@ export const PINNED_EVENTS = i18n.translate(
     defaultMessage: 'Pinned events',
   }
 );
-
-export const POSTED = i18n.translate('xpack.securitySolution.open.timeline.postedLabel', {
-  defaultMessage: 'Posted:',
-});
 
 export const REFRESH = i18n.translate('xpack.securitySolution.open.timeline.refreshTitle', {
   defaultMessage: 'Refresh',
@@ -227,34 +230,6 @@ export const ZERO_TIMELINE_TEMPLATES_MATCH = i18n.translate(
   'xpack.securitySolution.open.timeline.zeroTimelineTemplatesMatchLabel',
   {
     defaultMessage: '0 timeline templates match the search criteria',
-  }
-);
-
-export const SINGLE_TIMELINE = i18n.translate(
-  'xpack.securitySolution.open.timeline.singleTimelineLabel',
-  {
-    defaultMessage: 'timeline',
-  }
-);
-
-export const PLURAL_TIMELINES = i18n.translate(
-  'xpack.securitySolution.open.timeline.pluralTimelinesLabel',
-  {
-    defaultMessage: 'timelines',
-  }
-);
-
-export const SINGLE_TEMPLATE = i18n.translate(
-  'xpack.securitySolution.open.timeline.singleTemplateLabel',
-  {
-    defaultMessage: 'template',
-  }
-);
-
-export const PLURAL_TEMPLATES = i18n.translate(
-  'xpack.securitySolution.open.timeline.pluralTemplatesLabel',
-  {
-    defaultMessage: 'templates',
   }
 );
 
@@ -373,12 +348,15 @@ export const SUCCESSFULLY_IMPORTED_TIMELINES = (totalCount: number) =>
     }
   );
 
-export const IMPORT_FAILED = i18n.translate(
-  'xpack.securitySolution.timelines.components.importTimelineModal.importFailedTitle',
-  {
-    defaultMessage: 'Failed to import',
-  }
-);
+export const IMPORT_FAILED = (totalTimelines: number) =>
+  i18n.translate(
+    'xpack.securitySolution.timelines.components.importTimelineModal.importFailedTitle',
+    {
+      values: { totalTimelines },
+      defaultMessage:
+        'Failed to import {totalTimelines} {totalTimelines, plural, =1 {timeline} other {timelines}}',
+    }
+  );
 
 export const IMPORT_TIMELINE = i18n.translate(
   'xpack.securitySolution.timelines.components.importTimelineModal.importTitle',
@@ -387,11 +365,11 @@ export const IMPORT_TIMELINE = i18n.translate(
   }
 );
 
-export const IMPORT_FAILED_DETAILED = (id: string, statusCode: number, message: string) =>
+export const IMPORT_FAILED_DETAILED = (message: string) =>
   i18n.translate(
     'xpack.securitySolution.timelines.components.importTimelineModal.importFailedDetailedTitle',
     {
-      values: { id, statusCode, message },
-      defaultMessage: 'Timeline ID: {id}\n Status Code: {statusCode}\n Message: {message}',
+      values: { message },
+      defaultMessage: '{message}',
     }
   );

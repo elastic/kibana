@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { InstructionSet } from './instruction_set';
 import * as StatusCheckStates from './status_check_states';
@@ -34,12 +34,6 @@ const instructionVariants = [
   },
 ];
 
-jest.mock('../../../../../kibana_react/public', () => {
-  return {
-    Markdown: () => <div className="markdown" />,
-  };
-});
-
 test('render', () => {
   const component = shallowWithIntl(
     <InstructionSet.WrappedComponent
@@ -52,7 +46,7 @@ test('render', () => {
       isCloudEnabled={false}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 describe('statusCheckState', () => {
@@ -78,7 +72,7 @@ describe('statusCheckState', () => {
         isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('checking status', () => {
@@ -95,7 +89,7 @@ describe('statusCheckState', () => {
         isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('failed status check - error', () => {
@@ -112,7 +106,7 @@ describe('statusCheckState', () => {
         isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('failed status check - no data', () => {
@@ -129,7 +123,7 @@ describe('statusCheckState', () => {
         isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('successful status check', () => {
@@ -146,6 +140,6 @@ describe('statusCheckState', () => {
         isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 });

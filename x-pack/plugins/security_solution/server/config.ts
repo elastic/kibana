@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from '../../../../src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import {
   getExperimentalAllowedValues,
   isValidExperimentalValue,
+  parseExperimentalConfigValue,
 } from '../common/experimental_features';
 
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
   maxRuleImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
   maxTimelineImportExportSize: schema.number({ defaultValue: 10000 }),
@@ -88,7 +90,7 @@ export const configSchema = schema.object({
    * @example
    * xpack.securitySolution.enableExperimental:
    *   - someCrazyFeature
-   *   - trustedAppsByPolicyEnabled
+   *   - someEvenCrazierFeature
    */
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
@@ -104,24 +106,23 @@ export const configSchema = schema.object({
   }),
 
   /**
-   * Host Endpoint Configuration
-   */
-  endpointResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
-  endpointResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
-
-  /**
    * Artifacts Configuration
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
-
-  /**
-   * Detection prebuilt rules
-   */
-  prebuiltRulesFromFileSystem: schema.boolean({ defaultValue: true }),
-  prebuiltRulesFromSavedObjects: schema.boolean({ defaultValue: true }),
 });
 
-export const createConfig = (context: PluginInitializerContext) =>
-  context.config.get<TypeOf<typeof configSchema>>();
+export type ConfigSchema = TypeOf<typeof configSchema>;
 
-export type ConfigType = TypeOf<typeof configSchema>;
+export type ConfigType = ConfigSchema & {
+  experimentalFeatures: ExperimentalFeatures;
+};
+
+export const createConfig = (context: PluginInitializerContext): ConfigType => {
+  const pluginConfig = context.config.get<TypeOf<typeof configSchema>>();
+  const experimentalFeatures = parseExperimentalConfigValue(pluginConfig.enableExperimental);
+
+  return {
+    ...pluginConfig,
+    experimentalFeatures,
+  };
+};

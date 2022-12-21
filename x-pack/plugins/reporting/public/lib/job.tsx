@@ -7,13 +7,14 @@
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
-import { JOB_STATUSES } from '../../common/constants';
-import {
+import { JobTypes, JOB_STATUSES } from '../../common/constants';
+import type {
+  BaseParamsV2,
   JobId,
   ReportApiJSON,
+  ReportFields,
   ReportOutput,
   ReportSource,
   TaskRunResult,
@@ -28,34 +29,42 @@ type ReportPayload = ReportSource['payload'];
  * It can be instantiated with ReportApiJSON: the response data format for the report job APIs
  */
 export class Job {
-  public id: JobId;
-  public index: string;
+  public readonly id: JobId;
+  public readonly index: string;
 
-  public objectType: ReportPayload['objectType'];
-  public title: ReportPayload['title'];
-  public isDeprecated: ReportPayload['isDeprecated'];
-  public browserTimezone?: ReportPayload['browserTimezone'];
-  public layout: ReportPayload['layout'];
+  public readonly objectType: ReportPayload['objectType'];
+  public readonly title: ReportPayload['title'];
+  public readonly isDeprecated: ReportPayload['isDeprecated'];
+  public readonly spaceId: ReportPayload['spaceId'];
+  public readonly browserTimezone?: ReportPayload['browserTimezone'];
+  public readonly layout: ReportPayload['layout'];
+  public readonly version: ReportPayload['version'];
 
-  public jobtype: ReportSource['jobtype'];
-  public created_by: ReportSource['created_by'];
-  public created_at: ReportSource['created_at'];
-  public started_at: ReportSource['started_at'];
-  public completed_at: ReportSource['completed_at'];
-  public status: JOB_STATUSES; // FIXME: can not use ReportSource['status'] due to type mismatch
-  public attempts: ReportSource['attempts'];
-  public max_attempts: ReportSource['max_attempts'];
+  public readonly jobtype: ReportSource['jobtype'];
+  public readonly created_by: ReportSource['created_by'];
+  public readonly created_at: ReportSource['created_at'];
+  public readonly started_at: ReportSource['started_at'];
+  public readonly completed_at: ReportSource['completed_at'];
+  public readonly status: JOB_STATUSES; // FIXME: can not use ReportSource['status'] due to type mismatch
+  public readonly attempts: ReportSource['attempts'];
+  public readonly max_attempts: ReportSource['max_attempts'];
 
-  public timeout: ReportSource['timeout'];
-  public kibana_name: ReportSource['kibana_name'];
-  public kibana_id: ReportSource['kibana_id'];
-  public browser_type: ReportSource['browser_type'];
+  public readonly timeout: ReportSource['timeout'];
+  public readonly kibana_name: ReportSource['kibana_name'];
+  public readonly kibana_id: ReportSource['kibana_id'];
 
-  public size?: ReportOutput['size'];
-  public content_type?: TaskRunResult['content_type'];
-  public csv_contains_formulas?: TaskRunResult['csv_contains_formulas'];
-  public max_size_reached?: TaskRunResult['max_size_reached'];
-  public warnings?: TaskRunResult['warnings'];
+  public readonly size?: ReportOutput['size'];
+  public readonly content_type?: TaskRunResult['content_type'];
+  public readonly csv_contains_formulas?: TaskRunResult['csv_contains_formulas'];
+  public readonly max_size_reached?: TaskRunResult['max_size_reached'];
+  public readonly metrics?: ReportSource['metrics'];
+  public readonly warnings?: TaskRunResult['warnings'];
+  public readonly error_code?: ReportOutput['error_code'];
+
+  public readonly locatorParams?: BaseParamsV2['locatorParams'];
+
+  public readonly queue_time_ms?: Required<ReportFields>['queue_time_ms'][number];
+  public readonly execution_time_ms?: Required<ReportFields>['execution_time_ms'][number];
 
   constructor(report: ReportApiJSON) {
     this.id = report.id;
@@ -65,6 +74,7 @@ export class Job {
     this.objectType = report.payload.objectType;
     this.title = report.payload.title;
     this.layout = report.payload.layout;
+    this.version = report.payload.version;
     this.created_by = report.created_by;
     this.created_at = report.created_at;
     this.started_at = report.started_at;
@@ -76,15 +86,20 @@ export class Job {
     this.timeout = report.timeout;
     this.kibana_name = report.kibana_name;
     this.kibana_id = report.kibana_id;
-    this.browser_type = report.browser_type;
     this.browserTimezone = report.payload.browserTimezone;
     this.size = report.output?.size;
     this.content_type = report.output?.content_type;
 
     this.isDeprecated = report.payload.isDeprecated || false;
+    this.spaceId = report.payload.spaceId;
     this.csv_contains_formulas = report.output?.csv_contains_formulas;
     this.max_size_reached = report.output?.max_size_reached;
     this.warnings = report.output?.warnings;
+    this.error_code = report.output?.error_code;
+    this.locatorParams = (report.payload as BaseParamsV2).locatorParams;
+    this.metrics = report.metrics;
+    this.queue_time_ms = report.queue_time_ms;
+    this.execution_time_ms = report.execution_time_ms;
   }
 
   getStatusMessage() {
@@ -137,33 +152,71 @@ export class Job {
     return null;
   }
 
-  getStatus() {
-    const statusLabel = jobStatusLabelsMap.get(this.status) as string;
-    const statusTimestamp = this.getStatusTimestamp();
-
-    if (statusTimestamp) {
-      return (
-        <FormattedMessage
-          id="xpack.reporting.jobStatusDetail.statusTimestampText"
-          defaultMessage="{statusLabel} at {statusTimestamp}"
-          values={{
-            statusLabel,
-            statusTimestamp: (
-              <span className="eui-textNoWrap">{this.formatDate(statusTimestamp)}</span>
-            ),
-          }}
-        />
-      );
-    }
-
-    return statusLabel;
+  public get prettyStatus(): string {
+    return (
+      jobStatusLabelsMap.get(this.status) ??
+      i18n.translate('xpack.reporting.jobStatusDetail.unknownText', { defaultMessage: 'Unknown' })
+    );
   }
 
-  getStatusLabel() {
+  public get canLinkToKibanaApp(): boolean {
+    return Boolean(this.locatorParams);
+  }
+
+  public get isDownloadReady(): boolean {
+    return this.status === JOB_STATUSES.COMPLETED || this.status === JOB_STATUSES.WARNINGS;
+  }
+
+  public get prettyJobTypeName(): undefined | string {
+    switch (this.jobtype as JobTypes) {
+      case 'printable_pdf':
+      case 'printable_pdf_v2':
+        return i18n.translate('xpack.reporting.jobType.pdfOutputName', {
+          defaultMessage: 'PDF',
+        });
+      case 'PNG':
+      case 'PNGV2':
+        return i18n.translate('xpack.reporting.jobType.pngOutputName', {
+          defaultMessage: 'PNG',
+        });
+      case 'csv_searchsource':
+        return i18n.translate('xpack.reporting.jobType.csvOutputName', {
+          defaultMessage: 'CSV',
+        });
+      default:
+        return undefined;
+    }
+  }
+
+  public get prettyTimeout(): string {
+    if (this.timeout == null) {
+      return i18n.translate('xpack.reporting.jobStatusDetail.timeoutSecondsUnknown', {
+        defaultMessage: 'Unknown',
+      });
+    }
+    const seconds = this.timeout / 1000;
+    return i18n.translate('xpack.reporting.jobStatusDetail.timeoutSeconds', {
+      defaultMessage: '{timeout} seconds',
+      values: { timeout: seconds },
+    });
+  }
+
+  /**
+   * Returns a user friendly version of the report job creation date
+   */
+  getCreatedAtDate(): string {
+    return this.formatDate(this.created_at);
+  }
+
+  /**
+   * Returns a user friendly version of the user that created the report job
+   */
+  getCreatedBy(): string {
     return (
-      <>
-        {this.getStatus()} {this.getStatusMessage()}
-      </>
+      this.created_by ||
+      i18n.translate('xpack.reporting.jobCreatedBy.unknownUserPlaceholderText', {
+        defaultMessage: 'Unknown',
+      })
     );
   }
 
@@ -191,15 +244,20 @@ export class Job {
     }
   }
 
+  getDeprecatedMessage(): undefined | string {
+    if (this.isDeprecated) {
+      return i18n.translate('xpack.reporting.jobWarning.exportTypeDeprecated', {
+        defaultMessage:
+          'This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.',
+      });
+    }
+  }
+
   getWarnings() {
     const warnings: string[] = [];
-    if (this.isDeprecated) {
-      warnings.push(
-        i18n.translate('xpack.reporting.jobWarning.exportTypeDeprecated', {
-          defaultMessage:
-            'This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.',
-        })
-      );
+    const deprecatedMessage = this.getDeprecatedMessage();
+    if (deprecatedMessage) {
+      warnings.push(deprecatedMessage);
     }
 
     if (this.csv_contains_formulas) {
@@ -232,6 +290,10 @@ export class Job {
         </ul>
       );
     }
+  }
+
+  getPrettyStatusTimestamp() {
+    return this.formatDate(this.getStatusTimestamp());
   }
 
   private formatDate(timestamp: string) {

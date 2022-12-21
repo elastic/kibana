@@ -12,12 +12,13 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
-import {
+import type {
   IScopedClusterClient,
+  KibanaRequest,
   SavedObjectsClientContract,
-} from '../../../../../../../../../src/core/server';
-import { EndpointAppContext } from '../../../../../endpoint/types';
-import { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+} from '@kbn/core/server';
+import type { EndpointAppContext } from '../../../../../endpoint/types';
+import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
 
 const mockDeps = {
@@ -35,6 +36,7 @@ const mockDeps = {
     },
     service: {} as EndpointAppContextService,
   } as EndpointAppContext,
+  request: {} as KibanaRequest,
 };
 
 describe('hostDetails search strategy', () => {

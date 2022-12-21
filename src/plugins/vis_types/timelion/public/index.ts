@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { TimelionVisPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }
 
-export { VisTypeTimelionPluginStart } from './plugin';
+export type { VisTypeTimelionPluginStart } from './plugin';

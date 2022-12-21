@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function calculateThroughput({
+export function calculateThroughputWithRange({
   start,
   end,
   value,
@@ -15,6 +15,17 @@ export function calculateThroughput({
   value: number;
 }) {
   const durationAsMinutes = (end - start) / 1000 / 60;
+  return value / durationAsMinutes;
+}
+
+export function calculateThroughputWithInterval({
+  bucketSize,
+  value,
+}: {
+  bucketSize: number;
+  value: number;
+}) {
+  const durationAsMinutes = bucketSize / 60;
   return value / durationAsMinutes;
 }
 

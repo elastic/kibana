@@ -45,8 +45,8 @@ export const PropertyActions = React.memo<PropertyActionsProps>(({ propertyActio
   const [showActions, setShowActions] = useState(false);
 
   const onButtonClick = useCallback(() => {
-    setShowActions(!showActions);
-  }, [showActions]);
+    setShowActions((prevShowActions) => !prevShowActions);
+  }, []);
 
   const onClosePopover = useCallback((cb?: () => void) => {
     setShowActions(false);

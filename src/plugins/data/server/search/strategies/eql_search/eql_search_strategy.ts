@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { tap } from 'rxjs/operators';
-import type { IScopedClusterClient, Logger } from 'kibana/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { SearchConfigSchema } from '../../../../config';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
@@ -18,10 +19,12 @@ import {
 import { toEqlKibanaSearchResponse } from './response_utils';
 import { EqlSearchResponse } from './types';
 import { ISearchStrategy } from '../../types';
-import { getDefaultSearchParams, shimAbortSignal } from '../es_search';
-import { getDefaultAsyncGetParams, getIgnoreThrottled } from '../ese_search/request_utils';
+import { getDefaultSearchParams } from '../es_search';
+import { getIgnoreThrottled } from '../ese_search/request_utils';
+import { getCommonDefaultAsyncGetParams } from '../common/async_utils';
 
 export const eqlSearchStrategyProvider = (
+  searchConfig: SearchConfigSchema,
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
@@ -45,19 +48,36 @@ export const eqlSearchStrategyProvider = (
           uiSettingsClient
         );
         const params = id
-          ? getDefaultAsyncGetParams(null, options)
+          ? getCommonDefaultAsyncGetParams(searchConfig, options, {
+              /* disable until full eql support */ disableSearchSessions: true,
+            })
           : {
               ...(await getIgnoreThrottled(uiSettingsClient)),
               ...defaultParams,
-              ...getDefaultAsyncGetParams(null, options),
+              ...getCommonDefaultAsyncGetParams(searchConfig, options, {
+                /* disable until full eql support */ disableSearchSessions: true,
+              }),
               ...request.params,
             };
-        const promise = id
-          ? client.get({ ...params, id }, request.options)
-          : // @ts-expect-error EqlRequestParams | undefined is not assignable to EqlRequestParams
-            client.search(params as EqlSearchStrategyRequest['params'], request.options);
-        const response = await shimAbortSignal(promise, options.abortSignal);
-        return toEqlKibanaSearchResponse(response as ApiResponse<EqlSearchResponse>);
+        const response = id
+          ? await client.get(
+              { ...params, id },
+              {
+                ...request.options,
+                ...options.transport,
+                signal: options.abortSignal,
+                meta: true,
+              }
+            )
+          : // @ts-expect-error optional key cannot be used since search doesn't expect undefined
+            await client.search(params as EqlSearchStrategyRequest['params'], {
+              ...request.options,
+              ...options.transport,
+              signal: options.abortSignal,
+              meta: true,
+            });
+
+        return toEqlKibanaSearchResponse(response as TransportResult<EqlSearchResponse>);
       };
 
       const cancel = async () => {
@@ -66,7 +86,10 @@ export const eqlSearchStrategyProvider = (
         }
       };
 
-      return pollSearch(search, cancel, options).pipe(tap((response) => (id = response.id)));
+      return pollSearch(search, cancel, {
+        pollInterval: searchConfig.asyncSearch.pollInterval,
+        ...options,
+      }).pipe(tap((response) => (id = response.id)));
     },
 
     extend: async (id, keepAlive, options, { esClient }) => {

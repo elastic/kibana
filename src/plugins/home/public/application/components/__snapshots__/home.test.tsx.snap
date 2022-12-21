@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`home change home route should render a link to change the default route in advanced settings if advanced settings is enabled 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -13,7 +13,7 @@ exports[`home change home route should render a link to change the default route
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -21,10 +21,31 @@ exports[`home change home route should render a link to change the default route
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -33,11 +54,11 @@ exports[`home change home route should render a link to change the default route
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;
 
 exports[`home directories should not render directory entry when showOnHomePage is false 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -49,7 +70,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -57,10 +78,31 @@ exports[`home directories should not render directory entry when showOnHomePage 
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -69,11 +111,11 @@ exports[`home directories should not render directory entry when showOnHomePage 
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;
 
 exports[`home directories should render ADMIN directory entry in "Manage your data" panel 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -85,7 +127,7 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -93,10 +135,31 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
     features={
       Array [
         Object {
@@ -117,11 +180,11 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;
 
 exports[`home directories should render solutions in the "solution section" 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -133,7 +196,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -176,10 +239,31 @@ exports[`home directories should render solutions in the "solution section" 1`] 
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -188,11 +272,11 @@ exports[`home directories should render solutions in the "solution section" 1`] 
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;
 
 exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -204,7 +288,7 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -212,10 +296,55 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction] {
+          "calls": Array [
+            Array [
+              "./home#/getting_started",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+      }
+    }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction] {
+          "calls": Array [
+            Array [
+              "./home#/getting_started",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -224,11 +353,11 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when there are index patterns 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -240,7 +369,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -248,10 +377,55 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction] {
+          "calls": Array [
+            Array [
+              "./home#/getting_started",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+      }
+    }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction] {
+          "calls": Array [
+            Array [
+              "./home#/getting_started",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -260,207 +434,18 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
 <Welcome
   onSkip={[Function]}
-  telemetry={
-    Object {
-      "telemetryConstants": Object {
-        "getPrivacyStatementUrl": [MockFunction],
-      },
-      "telemetryNotifications": TelemetryNotifications {
-        "http": Object {
-          "addLoadingCountSource": [MockFunction],
-          "anonymousPaths": Object {
-            "isAnonymous": [MockFunction],
-            "register": [MockFunction],
-          },
-          "basePath": BasePath {
-            "basePath": "",
-            "get": [Function],
-            "prepend": [Function],
-            "publicBaseUrl": undefined,
-            "remove": [Function],
-            "serverBasePath": "",
-          },
-          "delete": [MockFunction],
-          "externalUrl": Object {
-            "validateUrl": [MockFunction],
-          },
-          "fetch": [MockFunction],
-          "get": [MockFunction],
-          "getLoadingCount$": [MockFunction],
-          "head": [MockFunction],
-          "intercept": [MockFunction],
-          "options": [MockFunction],
-          "patch": [MockFunction],
-          "post": [MockFunction],
-          "put": [MockFunction],
-        },
-        "onSetOptInClick": [Function],
-        "optInBannerId": undefined,
-        "optedInNoticeBannerId": undefined,
-        "overlays": Object {
-          "banners": Object {
-            "add": [MockFunction],
-            "get$": [MockFunction],
-            "getComponent": [MockFunction],
-            "remove": [MockFunction],
-            "replace": [MockFunction],
-          },
-          "openConfirm": [MockFunction],
-          "openFlyout": [MockFunction],
-          "openModal": [MockFunction],
-        },
-        "renderOptInBanner": [Function],
-        "renderOptedInNoticeBanner": [Function],
-        "setOptedInNoticeSeen": [Function],
-        "shouldShowOptInBanner": [Function],
-        "shouldShowOptedInNoticeBanner": [Function],
-        "telemetryService": TelemetryService {
-          "canSendTelemetry": [Function],
-          "currentKibanaVersion": "mockKibanaVersion",
-          "defaultConfig": Object {
-            "allowChangingOptInStatus": true,
-            "banner": true,
-            "enabled": true,
-            "optIn": true,
-            "sendUsageFrom": "browser",
-            "sendUsageTo": "staging",
-            "telemetryNotifyUserAboutOptInDefault": true,
-            "userCanChangeSettings": true,
-          },
-          "fetchExample": [Function],
-          "fetchTelemetry": [Function],
-          "getCanChangeOptInStatus": [Function],
-          "getIsOptedIn": [Function],
-          "getOptInStatusUrl": [Function],
-          "getTelemetryUrl": [Function],
-          "http": Object {
-            "addLoadingCountSource": [MockFunction],
-            "anonymousPaths": Object {
-              "isAnonymous": [MockFunction],
-              "register": [MockFunction],
-            },
-            "basePath": BasePath {
-              "basePath": "",
-              "get": [Function],
-              "prepend": [Function],
-              "publicBaseUrl": undefined,
-              "remove": [Function],
-              "serverBasePath": "",
-            },
-            "delete": [MockFunction],
-            "externalUrl": Object {
-              "validateUrl": [MockFunction],
-            },
-            "fetch": [MockFunction],
-            "get": [MockFunction],
-            "getLoadingCount$": [MockFunction],
-            "head": [MockFunction],
-            "intercept": [MockFunction],
-            "options": [MockFunction],
-            "patch": [MockFunction],
-            "post": [MockFunction],
-            "put": [MockFunction],
-          },
-          "isScreenshotMode": false,
-          "notifications": Object {
-            "toasts": Object {
-              "add": [MockFunction],
-              "addDanger": [MockFunction],
-              "addError": [MockFunction],
-              "addInfo": [MockFunction],
-              "addSuccess": [MockFunction],
-              "addWarning": [MockFunction],
-              "get$": [MockFunction],
-              "remove": [MockFunction],
-            },
-          },
-          "reportOptInStatus": [MockFunction],
-          "reportOptInStatusChange": true,
-          "setOptIn": [Function],
-          "setUserHasSeenNotice": [Function],
-          "updatedConfig": undefined,
-        },
-      },
-      "telemetryService": TelemetryService {
-        "canSendTelemetry": [Function],
-        "currentKibanaVersion": "mockKibanaVersion",
-        "defaultConfig": Object {
-          "allowChangingOptInStatus": true,
-          "banner": true,
-          "enabled": true,
-          "optIn": true,
-          "sendUsageFrom": "browser",
-          "sendUsageTo": "staging",
-          "telemetryNotifyUserAboutOptInDefault": true,
-          "userCanChangeSettings": true,
-        },
-        "fetchExample": [Function],
-        "fetchTelemetry": [Function],
-        "getCanChangeOptInStatus": [Function],
-        "getIsOptedIn": [Function],
-        "getOptInStatusUrl": [Function],
-        "getTelemetryUrl": [Function],
-        "http": Object {
-          "addLoadingCountSource": [MockFunction],
-          "anonymousPaths": Object {
-            "isAnonymous": [MockFunction],
-            "register": [MockFunction],
-          },
-          "basePath": BasePath {
-            "basePath": "",
-            "get": [Function],
-            "prepend": [Function],
-            "publicBaseUrl": undefined,
-            "remove": [Function],
-            "serverBasePath": "",
-          },
-          "delete": [MockFunction],
-          "externalUrl": Object {
-            "validateUrl": [MockFunction],
-          },
-          "fetch": [MockFunction],
-          "get": [MockFunction],
-          "getLoadingCount$": [MockFunction],
-          "head": [MockFunction],
-          "intercept": [MockFunction],
-          "options": [MockFunction],
-          "patch": [MockFunction],
-          "post": [MockFunction],
-          "put": [MockFunction],
-        },
-        "isScreenshotMode": false,
-        "notifications": Object {
-          "toasts": Object {
-            "add": [MockFunction],
-            "addDanger": [MockFunction],
-            "addError": [MockFunction],
-            "addInfo": [MockFunction],
-            "addSuccess": [MockFunction],
-            "addWarning": [MockFunction],
-            "get$": [MockFunction],
-            "remove": [MockFunction],
-          },
-        },
-        "reportOptInStatus": [MockFunction],
-        "reportOptInStatusChange": true,
-        "setOptIn": [Function],
-        "setUserHasSeenNotice": [Function],
-        "updatedConfig": undefined,
-      },
-    }
-  }
   urlBasePath="goober"
 />
 `;
 
 exports[`home should render home component 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -472,7 +457,7 @@ exports[`home should render home component 1`] = `
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -480,10 +465,31 @@ exports[`home should render home component 1`] = `
   />
   <AddData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
+    application={
+      Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+        "navigateToUrl": [MockFunction],
+      }
+    }
     features={Array []}
   />
   <mockConstructor
@@ -492,309 +498,5 @@ exports[`home should render home component 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
-`;
-
-exports[`home welcome should show the normal home page if loading fails 1`] = `
-<mockConstructor
-  data-test-subj="homeApp"
-  pageHeader={
-    Object {
-      "bottomBorder": false,
-      "pageTitle": <FormattedMessage
-        defaultMessage="Welcome home"
-        id="home.header.title"
-        values={Object {}}
-      />,
-    }
-  }
-  template="empty"
->
-  <SolutionsSection
-    addBasePath={[Function]}
-    solutions={Array []}
-  />
-  <AddData
-    addBasePath={[Function]}
-    isDarkMode={false}
-  />
-  <ManageData
-    addBasePath={[Function]}
-    features={Array []}
-  />
-  <mockConstructor
-    addBasePath={[Function]}
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/home"
-  />
-</mockConstructor>
-`;
-
-exports[`home welcome should show the normal home page if welcome screen is disabled locally 1`] = `
-<mockConstructor
-  data-test-subj="homeApp"
-  pageHeader={
-    Object {
-      "bottomBorder": false,
-      "pageTitle": <FormattedMessage
-        defaultMessage="Welcome home"
-        id="home.header.title"
-        values={Object {}}
-      />,
-    }
-  }
-  template="empty"
->
-  <SolutionsSection
-    addBasePath={[Function]}
-    solutions={Array []}
-  />
-  <AddData
-    addBasePath={[Function]}
-    isDarkMode={false}
-  />
-  <ManageData
-    addBasePath={[Function]}
-    features={Array []}
-  />
-  <mockConstructor
-    addBasePath={[Function]}
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/home"
-  />
-</mockConstructor>
-`;
-
-exports[`home welcome should show the welcome screen if enabled, and there are no index patterns defined 1`] = `
-<Welcome
-  onSkip={[Function]}
-  telemetry={
-    Object {
-      "telemetryConstants": Object {
-        "getPrivacyStatementUrl": [MockFunction],
-      },
-      "telemetryNotifications": TelemetryNotifications {
-        "http": Object {
-          "addLoadingCountSource": [MockFunction],
-          "anonymousPaths": Object {
-            "isAnonymous": [MockFunction],
-            "register": [MockFunction],
-          },
-          "basePath": BasePath {
-            "basePath": "",
-            "get": [Function],
-            "prepend": [Function],
-            "publicBaseUrl": undefined,
-            "remove": [Function],
-            "serverBasePath": "",
-          },
-          "delete": [MockFunction],
-          "externalUrl": Object {
-            "validateUrl": [MockFunction],
-          },
-          "fetch": [MockFunction],
-          "get": [MockFunction],
-          "getLoadingCount$": [MockFunction],
-          "head": [MockFunction],
-          "intercept": [MockFunction],
-          "options": [MockFunction],
-          "patch": [MockFunction],
-          "post": [MockFunction],
-          "put": [MockFunction],
-        },
-        "onSetOptInClick": [Function],
-        "optInBannerId": undefined,
-        "optedInNoticeBannerId": undefined,
-        "overlays": Object {
-          "banners": Object {
-            "add": [MockFunction],
-            "get$": [MockFunction],
-            "getComponent": [MockFunction],
-            "remove": [MockFunction],
-            "replace": [MockFunction],
-          },
-          "openConfirm": [MockFunction],
-          "openFlyout": [MockFunction],
-          "openModal": [MockFunction],
-        },
-        "renderOptInBanner": [Function],
-        "renderOptedInNoticeBanner": [Function],
-        "setOptedInNoticeSeen": [Function],
-        "shouldShowOptInBanner": [Function],
-        "shouldShowOptedInNoticeBanner": [Function],
-        "telemetryService": TelemetryService {
-          "canSendTelemetry": [Function],
-          "currentKibanaVersion": "mockKibanaVersion",
-          "defaultConfig": Object {
-            "allowChangingOptInStatus": true,
-            "banner": true,
-            "enabled": true,
-            "optIn": true,
-            "sendUsageFrom": "browser",
-            "sendUsageTo": "staging",
-            "telemetryNotifyUserAboutOptInDefault": true,
-            "userCanChangeSettings": true,
-          },
-          "fetchExample": [Function],
-          "fetchTelemetry": [Function],
-          "getCanChangeOptInStatus": [Function],
-          "getIsOptedIn": [Function],
-          "getOptInStatusUrl": [Function],
-          "getTelemetryUrl": [Function],
-          "http": Object {
-            "addLoadingCountSource": [MockFunction],
-            "anonymousPaths": Object {
-              "isAnonymous": [MockFunction],
-              "register": [MockFunction],
-            },
-            "basePath": BasePath {
-              "basePath": "",
-              "get": [Function],
-              "prepend": [Function],
-              "publicBaseUrl": undefined,
-              "remove": [Function],
-              "serverBasePath": "",
-            },
-            "delete": [MockFunction],
-            "externalUrl": Object {
-              "validateUrl": [MockFunction],
-            },
-            "fetch": [MockFunction],
-            "get": [MockFunction],
-            "getLoadingCount$": [MockFunction],
-            "head": [MockFunction],
-            "intercept": [MockFunction],
-            "options": [MockFunction],
-            "patch": [MockFunction],
-            "post": [MockFunction],
-            "put": [MockFunction],
-          },
-          "isScreenshotMode": false,
-          "notifications": Object {
-            "toasts": Object {
-              "add": [MockFunction],
-              "addDanger": [MockFunction],
-              "addError": [MockFunction],
-              "addInfo": [MockFunction],
-              "addSuccess": [MockFunction],
-              "addWarning": [MockFunction],
-              "get$": [MockFunction],
-              "remove": [MockFunction],
-            },
-          },
-          "reportOptInStatus": [MockFunction],
-          "reportOptInStatusChange": true,
-          "setOptIn": [Function],
-          "setUserHasSeenNotice": [Function],
-          "updatedConfig": undefined,
-        },
-      },
-      "telemetryService": TelemetryService {
-        "canSendTelemetry": [Function],
-        "currentKibanaVersion": "mockKibanaVersion",
-        "defaultConfig": Object {
-          "allowChangingOptInStatus": true,
-          "banner": true,
-          "enabled": true,
-          "optIn": true,
-          "sendUsageFrom": "browser",
-          "sendUsageTo": "staging",
-          "telemetryNotifyUserAboutOptInDefault": true,
-          "userCanChangeSettings": true,
-        },
-        "fetchExample": [Function],
-        "fetchTelemetry": [Function],
-        "getCanChangeOptInStatus": [Function],
-        "getIsOptedIn": [Function],
-        "getOptInStatusUrl": [Function],
-        "getTelemetryUrl": [Function],
-        "http": Object {
-          "addLoadingCountSource": [MockFunction],
-          "anonymousPaths": Object {
-            "isAnonymous": [MockFunction],
-            "register": [MockFunction],
-          },
-          "basePath": BasePath {
-            "basePath": "",
-            "get": [Function],
-            "prepend": [Function],
-            "publicBaseUrl": undefined,
-            "remove": [Function],
-            "serverBasePath": "",
-          },
-          "delete": [MockFunction],
-          "externalUrl": Object {
-            "validateUrl": [MockFunction],
-          },
-          "fetch": [MockFunction],
-          "get": [MockFunction],
-          "getLoadingCount$": [MockFunction],
-          "head": [MockFunction],
-          "intercept": [MockFunction],
-          "options": [MockFunction],
-          "patch": [MockFunction],
-          "post": [MockFunction],
-          "put": [MockFunction],
-        },
-        "isScreenshotMode": false,
-        "notifications": Object {
-          "toasts": Object {
-            "add": [MockFunction],
-            "addDanger": [MockFunction],
-            "addError": [MockFunction],
-            "addInfo": [MockFunction],
-            "addSuccess": [MockFunction],
-            "addWarning": [MockFunction],
-            "get$": [MockFunction],
-            "remove": [MockFunction],
-          },
-        },
-        "reportOptInStatus": [MockFunction],
-        "reportOptInStatusChange": true,
-        "setOptIn": [Function],
-        "setUserHasSeenNotice": [Function],
-        "updatedConfig": undefined,
-      },
-    }
-  }
-  urlBasePath="goober"
-/>
-`;
-
-exports[`home welcome stores skip welcome setting if skipped 1`] = `
-<mockConstructor
-  data-test-subj="homeApp"
-  pageHeader={
-    Object {
-      "bottomBorder": false,
-      "pageTitle": <FormattedMessage
-        defaultMessage="Welcome home"
-        id="home.header.title"
-        values={Object {}}
-      />,
-    }
-  }
-  template="empty"
->
-  <SolutionsSection
-    addBasePath={[Function]}
-    solutions={Array []}
-  />
-  <AddData
-    addBasePath={[Function]}
-    isDarkMode={false}
-  />
-  <ManageData
-    addBasePath={[Function]}
-    features={Array []}
-  />
-  <mockConstructor
-    addBasePath={[Function]}
-    onChangeDefaultRoute={[Function]}
-    onSetDefaultRoute={[Function]}
-    path="/app/home"
-  />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;

@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-agg-utils",
+  "owner": "@elastic/ml-ui",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

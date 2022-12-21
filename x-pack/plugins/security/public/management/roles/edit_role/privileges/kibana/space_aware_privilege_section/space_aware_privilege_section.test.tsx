@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
@@ -85,6 +85,13 @@ describe('<SpaceAwarePrivilegeSection>', () => {
 
     const table = wrapper.find(PrivilegeSpaceTable);
     expect(table).toHaveLength(0);
+  });
+
+  it('hides "Add space privilege" button if not editable', () => {
+    const props = buildProps();
+
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection {...props} editable={false} />);
+    expect(wrapper.find('button[data-test-subj="addSpacePrivilegeButton"]')).toHaveLength(0);
   });
 
   it('Renders flyout after clicking "Add space privilege" button', () => {

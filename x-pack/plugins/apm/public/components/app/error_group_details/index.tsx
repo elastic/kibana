@@ -13,21 +13,24 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { DetailView } from './detail_view';
-import { ErrorDistribution } from './Distribution';
+import { ErrorDistribution } from './distribution';
+import { TopErroneousTransactions } from './top_erroneous_transactions';
 
 const Titles = euiStyled.div`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
@@ -48,7 +51,17 @@ const Message = euiStyled.div`
 
 const Culprit = euiStyled.div`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
+
+type ErrorDistributionAPIResponse =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
+
+const emptyState: ErrorDistributionAPIResponse = {
+  currentPeriod: [],
+  previousPeriod: [],
+  bucketSize: 0,
+};
 
 function getShortGroupId(errorGroupId?: string) {
   if (!errorGroupId) {
@@ -94,7 +107,7 @@ function ErrorGroupHeader({
 }
 
 export function ErrorGroupDetails() {
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
 
   const { serviceName } = useApmServiceContext();
 
@@ -102,51 +115,75 @@ export function ErrorGroupDetails() {
 
   const {
     path: { groupId },
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      serviceGroup,
+      comparisonEnabled,
+    },
   } = useApmParams('/services/{serviceName}/errors/{groupId}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  useBreadcrumb({
-    title: groupId,
-    href: apmRouter.link('/services/{serviceName}/errors/{groupId}', {
-      path: {
-        serviceName,
-        groupId,
-      },
-      query: {
-        rangeFrom,
-        rangeTo,
-        environment,
-        kuery,
-      },
+  useBreadcrumb(
+    () => ({
+      title: groupId,
+      href: apmRouter.link('/services/{serviceName}/errors/{groupId}', {
+        path: {
+          serviceName,
+          groupId,
+        },
+        query: {
+          rangeFrom,
+          rangeTo,
+          environment,
+          kuery,
+          serviceGroup,
+          comparisonEnabled,
+        },
+      }),
     }),
-  });
+    [
+      apmRouter,
+      comparisonEnabled,
+      environment,
+      groupId,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      serviceGroup,
+      serviceName,
+    ]
+  );
 
   const { data: errorGroupData } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
-          params: {
-            path: {
-              serviceName,
-              groupId,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/errors/{groupId}',
+          {
+            params: {
+              path: {
+                serviceName,
+                groupId,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-            },
-          },
-        });
+          }
+        );
       }
     },
     [environment, kuery, serviceName, start, end, groupId]
   );
 
-  const { errorDistributionData } = useErrorGroupDistributionFetcher({
+  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId,
     environment,
@@ -173,51 +210,69 @@ export function ErrorGroupDetails() {
 
       <EuiSpacer size={'m'} />
 
-      <EuiPanel hasBorder={true}>
-        {showDetails && (
-          <Titles>
-            <EuiText>
-              {logMessage && (
-                <>
-                  <Label>
-                    {i18n.translate(
-                      'xpack.apm.errorGroupDetails.logMessageLabel',
-                      {
-                        defaultMessage: 'Log message',
-                      }
-                    )}
-                  </Label>
-                  <Message>{logMessage}</Message>
-                </>
+      {showDetails && (
+        <Titles>
+          <EuiText>
+            {logMessage && (
+              <>
+                <Label>
+                  {i18n.translate(
+                    'xpack.apm.errorGroupDetails.logMessageLabel',
+                    {
+                      defaultMessage: 'Log message',
+                    }
+                  )}
+                </Label>
+                <Message>{logMessage}</Message>
+              </>
+            )}
+            <Label>
+              {i18n.translate(
+                'xpack.apm.errorGroupDetails.exceptionMessageLabel',
+                {
+                  defaultMessage: 'Exception message',
+                }
               )}
-              <Label>
-                {i18n.translate(
-                  'xpack.apm.errorGroupDetails.exceptionMessageLabel',
-                  {
-                    defaultMessage: 'Exception message',
-                  }
-                )}
-              </Label>
-              <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
-              <Label>
-                {i18n.translate('xpack.apm.errorGroupDetails.culpritLabel', {
-                  defaultMessage: 'Culprit',
-                })}
-              </Label>
-              <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
-            </EuiText>
-          </Titles>
-        )}
-        <ErrorDistribution
-          distribution={errorDistributionData}
-          title={i18n.translate(
-            'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-            {
-              defaultMessage: 'Occurrences',
-            }
-          )}
-        />
-      </EuiPanel>
+            </Label>
+            <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
+            <Label>
+              {i18n.translate('xpack.apm.errorGroupDetails.culpritLabel', {
+                defaultMessage: 'Culprit',
+              })}
+            </Label>
+            <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
+
+            <Label>
+              {i18n.translate('xpack.apm.errorGroupDetails.occurrencesLabel', {
+                defaultMessage: 'Occurrences',
+              })}
+            </Label>
+            {errorGroupData.occurrencesCount}
+          </EuiText>
+          <EuiHorizontalRule />
+        </Titles>
+      )}
+      <EuiFlexGroup>
+        <EuiFlexItem grow={3}>
+          <EuiPanel hasBorder={true}>
+            <ErrorDistribution
+              fetchStatus={status}
+              distribution={showDetails ? errorDistributionData : emptyState}
+              title={i18n.translate(
+                'xpack.apm.errorGroupDetails.occurrencesChartLabel',
+                {
+                  defaultMessage: 'Occurrences',
+                }
+              )}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <EuiPanel hasBorder={true}>
+            <TopErroneousTransactions serviceName={serviceName} />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       {showDetails && (
         <DetailView

@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -24,7 +24,7 @@ import {
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { flattenPanelTree } from '../../../services';
 
-class JobActionMenuUi extends Component {
+export class JobActionMenuUi extends Component {
   static propTypes = {
     startJobs: PropTypes.func.isRequired,
     stopJobs: PropTypes.func.isRequired,

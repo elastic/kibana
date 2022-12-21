@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface MustCondition {
   bool: Pick<estypes.QueryDslBoolQuery, 'must'>;
@@ -64,18 +64,6 @@ export function filterDownBy(...filter: estypes.QueryDslQueryContainer[]) {
   return {
     bool: {
       filter,
-    },
-  };
-}
-
-export function asPinnedQuery(
-  ids: estypes.QueryDslPinnedQuery['ids'],
-  organic: estypes.QueryDslPinnedQuery['organic']
-): Pick<estypes.QueryDslQueryContainer, 'pinned'> {
-  return {
-    pinned: {
-      ids,
-      organic,
     },
   };
 }

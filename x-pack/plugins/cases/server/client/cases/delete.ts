@@ -5,63 +5,17 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import { Boom } from '@hapi/boom';
-import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResponse } from 'kibana/server';
+import type { SavedObjectsBulkDeleteObject } from '@kbn/core/server';
 import {
-  CommentAttributes,
-  ENABLE_CASE_CONNECTOR,
-  MAX_CONCURRENT_SEARCHES,
-  OWNER_FIELD,
-  SubCaseAttributes,
-} from '../../../common';
-import { CasesClientArgs } from '..';
-import { createCaseError } from '../../common';
-import { AttachmentService, CasesService } from '../../services';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { Operations, OwnerEntity } from '../../authorization';
-
-async function deleteSubCases({
-  attachmentService,
-  caseService,
-  unsecuredSavedObjectsClient,
-  caseIds,
-}: {
-  attachmentService: AttachmentService;
-  caseService: CasesService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  caseIds: string[];
-}) {
-  const subCasesForCaseIds = await caseService.findSubCasesByCaseId({
-    unsecuredSavedObjectsClient,
-    ids: caseIds,
-  });
-
-  const subCaseIDs = subCasesForCaseIds.saved_objects.map((subCase) => subCase.id);
-  const commentsForSubCases = await caseService.getAllSubCaseComments({
-    unsecuredSavedObjectsClient,
-    id: subCaseIDs,
-  });
-
-  const commentMapper = (commentSO: SavedObject<CommentAttributes>) =>
-    attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: commentSO.id });
-
-  const subCasesMapper = (subCaseSO: SavedObject<SubCaseAttributes>) =>
-    caseService.deleteSubCase(unsecuredSavedObjectsClient, subCaseSO.id);
-
-  /**
-   * This shouldn't actually delete anything because
-   * all the comments should be deleted when comments are deleted
-   * per case ID. We also ensure that we don't too many concurrent deletions running.
-   */
-  await pMap(commentsForSubCases.saved_objects, commentMapper, {
-    concurrency: MAX_CONCURRENT_SEARCHES,
-  });
-
-  await pMap(subCasesForCaseIds.saved_objects, subCasesMapper, {
-    concurrency: MAX_CONCURRENT_SEARCHES,
-  });
-}
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+} from '../../../common/constants';
+import type { CasesClientArgs } from '..';
+import { createCaseError } from '../../common/error';
+import type { OwnerEntity } from '../../authorization';
+import { Operations } from '../../authorization';
 
 /**
  * Deletes the specified cases and their attachments.
@@ -71,15 +25,12 @@ async function deleteSubCases({
 export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   const {
     unsecuredSavedObjectsClient,
-    caseService,
-    attachmentService,
-    user,
-    userActionService,
+    services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
   try {
-    const cases = await caseService.getCases({ unsecuredSavedObjectsClient, caseIds: ids });
+    const cases = await caseService.getCases({ caseIds: ids });
     const entities = new Map<string, OwnerEntity>();
 
     for (const theCase of cases.saved_objects) {
@@ -99,81 +50,27 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       entities: Array.from(entities.values()),
     });
 
-    const deleteCasesMapper = async (id: string) =>
-      caseService.deleteCase({
-        unsecuredSavedObjectsClient,
-        id,
-      });
-
-    // Ensuring we don't too many concurrent deletions running.
-    await pMap(ids, deleteCasesMapper, {
-      concurrency: MAX_CONCURRENT_SEARCHES,
-    });
-
-    const getCommentsMapper = async (id: string) =>
-      caseService.getAllCaseComments({
-        unsecuredSavedObjectsClient,
-        id,
-      });
-
-    // Ensuring we don't too many concurrent get running.
-    const comments = await pMap(ids, getCommentsMapper, {
-      concurrency: MAX_CONCURRENT_SEARCHES,
-    });
-
-    /**
-     * This is a nested pMap.Mapper.
-     * Each element of the comments array contains all comments of a particular case.
-     * For that reason we need first to create a map that iterate over all cases
-     * and return a pMap that deletes the comments for that case
-     */
-    const deleteCommentsMapper = async (commentRes: SavedObjectsFindResponse<CommentAttributes>) =>
-      pMap(commentRes.saved_objects, (comment) =>
-        attachmentService.delete({
-          unsecuredSavedObjectsClient,
-          attachmentId: comment.id,
-        })
-      );
-
-    // Ensuring we don't too many concurrent deletions running.
-    await pMap(comments, deleteCommentsMapper, {
-      concurrency: MAX_CONCURRENT_SEARCHES,
-    });
-
-    if (ENABLE_CASE_CONNECTOR) {
-      await deleteSubCases({
-        attachmentService,
-        caseService,
-        unsecuredSavedObjectsClient,
-        caseIds: ids,
-      });
-    }
-
-    const deleteDate = new Date().toISOString();
-
-    await userActionService.bulkCreate({
+    const attachmentIds = await attachmentService.getAttachmentIdsForCases({
+      caseIds: ids,
       unsecuredSavedObjectsClient,
-      actions: cases.saved_objects.map((caseInfo) =>
-        buildCaseUserActionItem({
-          action: 'delete',
-          actionAt: deleteDate,
-          actionBy: user,
-          caseId: caseInfo.id,
-          fields: [
-            'description',
-            'status',
-            'tags',
-            'title',
-            'connector',
-            'settings',
-            OWNER_FIELD,
-            'comment',
-            ...(ENABLE_CASE_CONNECTOR ? ['sub_case' as const] : []),
-          ],
-          owner: caseInfo.attributes.owner,
-        })
-      ),
     });
+
+    const userActionIds = await userActionService.getUserActionIdsForCases(ids);
+
+    const bulkDeleteEntities: SavedObjectsBulkDeleteObject[] = [
+      ...ids.map((id) => ({ id, type: CASE_SAVED_OBJECT })),
+      ...attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT })),
+      ...userActionIds.map((id) => ({ id, type: CASE_USER_ACTION_SAVED_OBJECT })),
+    ];
+
+    await caseService.bulkDeleteCaseEntities({
+      entities: bulkDeleteEntities,
+      options: { refresh: 'wait_for' },
+    });
+
+    await userActionService.bulkAuditLogCaseDeletion(
+      cases.saved_objects.map((caseInfo) => caseInfo.id)
+    );
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete cases ids: ${JSON.stringify(ids)}: ${error}`,

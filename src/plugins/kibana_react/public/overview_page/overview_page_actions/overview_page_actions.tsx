@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '../../app_links';
 
 interface Props {
@@ -43,8 +43,8 @@ export const overviewPageActions = ({
         href={addDataHref}
         iconType="plusInCircle"
       >
-        {i18n.translate('kibana-react.kbnOverviewPageHeader.addDataButtonLabel', {
-          defaultMessage: 'Add data',
+        {i18n.translate('kibana-react.kbnOverviewPageHeader.addIntegrationsButtonLabel', {
+          defaultMessage: 'Add integrations',
         })}
       </EuiButtonEmpty>
     </RedirectAppLinks>

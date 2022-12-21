@@ -8,7 +8,7 @@
 import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { InfraSource } from '../../../lib/sources';
-import { SnapshotRequest } from '../../../../common/http_api';
+import { MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
 
 jest.mock('./create_timerange_with_interval', () => {
   return {
@@ -47,12 +47,7 @@ const source: InfraSource = {
       indexPatternId: 'kibana_index_pattern',
     },
     fields: {
-      container: 'container.id',
-      host: 'host.name',
       message: ['message', '@message'],
-      pod: 'kubernetes.pod.uid',
-      tiebreaker: '_doc',
-      timestamp: '@timestamp',
     },
     inventoryDefaultView: '0',
     metricsExplorerDefaultView: '0',
@@ -78,9 +73,9 @@ const snapshotRequest: SnapshotRequest = {
   includeTimeseries: true,
 };
 
-const metricsApiRequest = {
+const metricsApiRequest: MetricsAPIRequest = {
   indexPattern: 'metrics-*,metricbeat-*',
-  timerange: { field: '@timestamp', from: 1605705900000, to: 1605706200000, interval: '60s' },
+  timerange: { from: 1605705900000, to: 1605706200000, interval: '60s' },
   metrics: [
     {
       id: 'cpu',
@@ -116,4 +111,5 @@ const metricsApiRequest = {
   alignDataToEnd: true,
   dropPartialBuckets: true,
   groupBy: ['kubernetes.pod.uid'],
+  includeTimeseries: true,
 };

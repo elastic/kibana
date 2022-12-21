@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { searchProvider } from './search';
 
 type OrigMlClient = ElasticsearchClient['ml'];
 
 export interface MlClient extends OrigMlClient {
   anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
+  updateTrainedModelDeployment: (payload: {
+    model_id: string;
+    number_of_allocations: number;
+  }) => Promise<{ acknowledge: boolean }>;
 }
 
 export type MlClientParams =
@@ -48,6 +52,8 @@ export type MlClientParams =
   | Parameters<MlClient['getRecords']>
   | Parameters<MlClient['getTrainedModels']>
   | Parameters<MlClient['getTrainedModelsStats']>
+  | Parameters<MlClient['startTrainedModelDeployment']>
+  | Parameters<MlClient['stopTrainedModelDeployment']>
   | Parameters<MlClient['info']>
   | Parameters<MlClient['openJob']>
   | Parameters<MlClient['postCalendarEvents']>
@@ -84,3 +90,11 @@ export type MlGetDFAParams =
   | Parameters<MlClient['getDataFrameAnalytics']>
   | Parameters<MlClient['getDataFrameAnalyticsStats']>
   | Parameters<MlClient['putDataFrameAnalytics']>;
+
+export type MlGetTrainedModelParams =
+  | Parameters<MlClient['putTrainedModel']>
+  | Parameters<MlClient['deleteTrainedModel']>
+  | Parameters<MlClient['getTrainedModels']>
+  | Parameters<MlClient['getTrainedModelsStats']>
+  | Parameters<MlClient['startTrainedModelDeployment']>
+  | Parameters<MlClient['stopTrainedModelDeployment']>;

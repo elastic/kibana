@@ -7,15 +7,16 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ML_JOB_FIELD_TYPES } from '../../../../plugins/ml/common/constants/field_types';
 import { MlCommonUI } from './common_ui';
 export type MlDataVisualizerTable = ProvidedType<typeof MachineLearningDataVisualizerTableProvider>;
 
 export function MachineLearningDataVisualizerTableProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI
 ) {
+  const headerPage = getPageObject('header');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -290,25 +291,6 @@ export function MachineLearningDataVisualizerTableProvider(
       await testSubjects.existOrFail('dataVisualizerFieldTypeSelect');
     }
 
-    public async assertSampleSizeInputExists() {
-      await testSubjects.existOrFail('dataVisualizerShardSizeSelect');
-    }
-
-    public async setSampleSizeInputValue(
-      sampleSize: number,
-      fieldName: string,
-      docCountFormatted: string
-    ) {
-      await this.assertSampleSizeInputExists();
-      await testSubjects.clickWhenNotDisabled('dataVisualizerShardSizeSelect');
-      await testSubjects.existOrFail(`dataVisualizerShardSizeOption ${sampleSize}`);
-      await testSubjects.click(`dataVisualizerShardSizeOption ${sampleSize}`);
-
-      await retry.tryForTime(5000, async () => {
-        await this.assertFieldDocCount(fieldName, docCountFormatted);
-      });
-    }
-
     public async setFieldTypeFilter(fieldTypes: string[], expectedRowCount = 1) {
       await this.assertFieldTypeInputExists();
       await mlCommonUI.setMultiSelectFilter('dataVisualizerFieldTypeSelect', fieldTypes);
@@ -361,7 +343,27 @@ export function MachineLearningDataVisualizerTableProvider(
       });
     }
 
-    public async assertTopValuesContents(fieldName: string, expectedTopValuesCount: number) {
+    public async assertTopValuesContent(fieldName: string, expectedTopValues: string[]) {
+      const selector = this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValuesContent');
+      const topValuesElement = await testSubjects.find(selector);
+      const topValuesBars = await topValuesElement.findAllByTestSubject(
+        'dataVisualizerFieldDataTopValueBar'
+      );
+
+      const topValuesBarsValues = await Promise.all(
+        topValuesBars.map(async (bar) => {
+          const visibleText = await bar.getVisibleText();
+          return visibleText ? visibleText.split('\n')[0] : undefined;
+        })
+      );
+
+      expect(topValuesBarsValues).to.eql(
+        expectedTopValues,
+        `Expected top values for field '${fieldName}' to equal '${expectedTopValues}' (got '${topValuesBarsValues}')`
+      );
+    }
+
+    public async assertTopValuesCount(fieldName: string, expectedTopValuesCount: number) {
       const selector = this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValuesContent');
       const topValuesElement = await testSubjects.find(selector);
       const topValuesBars = await topValuesElement.findAllByTestSubject(
@@ -390,6 +392,7 @@ export function MachineLearningDataVisualizerTableProvider(
       hasActionMenu = false,
       checkDistributionPreviewExist = true
     ) {
+      await headerPage.waitUntilLoadingHasFinished();
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
@@ -401,7 +404,7 @@ export function MachineLearningDataVisualizerTableProvider(
       await testSubjects.existOrFail(
         this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValues')
       );
-      await this.assertTopValuesContents(fieldName, topValuesCount);
+      await this.assertTopValuesCount(fieldName, topValuesCount);
 
       if (checkDistributionPreviewExist) {
         await this.assertDistributionPreviewExist(fieldName);
@@ -420,6 +423,7 @@ export function MachineLearningDataVisualizerTableProvider(
     }
 
     public async assertDateFieldContents(fieldName: string, docCountFormatted: string) {
+      await headerPage.waitUntilLoadingHasFinished();
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
@@ -433,8 +437,10 @@ export function MachineLearningDataVisualizerTableProvider(
     public async assertKeywordFieldContents(
       fieldName: string,
       docCountFormatted: string,
-      topValuesCount: number
+      topValuesCount: number,
+      exampleContent?: string[]
     ) {
+      await headerPage.waitUntilLoadingHasFinished();
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
@@ -442,7 +448,11 @@ export function MachineLearningDataVisualizerTableProvider(
       await testSubjects.existOrFail(
         this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValuesContent')
       );
-      await this.assertTopValuesContents(fieldName, topValuesCount);
+      await this.assertTopValuesCount(fieldName, topValuesCount);
+
+      if (exampleContent) {
+        await this.assertTopValuesContent(fieldName, exampleContent);
+      }
       await this.ensureDetailsClosed(fieldName);
     }
 
@@ -461,6 +471,7 @@ export function MachineLearningDataVisualizerTableProvider(
       docCountFormatted: string,
       expectedExamplesCount: number
     ) {
+      await headerPage.waitUntilLoadingHasFinished();
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 
@@ -475,6 +486,7 @@ export function MachineLearningDataVisualizerTableProvider(
       docCountFormatted: string,
       expectedExamplesCount: number
     ) {
+      await headerPage.waitUntilLoadingHasFinished();
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 
@@ -490,6 +502,7 @@ export function MachineLearningDataVisualizerTableProvider(
     }
 
     public async assertUnknownFieldContents(fieldName: string, docCountFormatted: string) {
+      await headerPage.waitUntilLoadingHasFinished();
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 
@@ -508,13 +521,19 @@ export function MachineLearningDataVisualizerTableProvider(
       docCountFormatted: string,
       exampleCount: number,
       viewableInLens: boolean,
-      hasActionMenu?: boolean
+      hasActionMenu?: boolean,
+      exampleContent?: string[]
     ) {
       // Currently the data used in the data visualizer tests only contains these field types.
       if (fieldType === ML_JOB_FIELD_TYPES.DATE) {
         await this.assertDateFieldContents(fieldName, docCountFormatted);
       } else if (fieldType === ML_JOB_FIELD_TYPES.KEYWORD) {
-        await this.assertKeywordFieldContents(fieldName, docCountFormatted, exampleCount);
+        await this.assertKeywordFieldContents(
+          fieldName,
+          docCountFormatted,
+          exampleCount,
+          exampleContent
+        );
       } else if (fieldType === ML_JOB_FIELD_TYPES.TEXT) {
         await this.assertTextFieldContents(fieldName, docCountFormatted, exampleCount);
       } else if (fieldType === ML_JOB_FIELD_TYPES.GEO_POINT) {
@@ -532,6 +551,17 @@ export function MachineLearningDataVisualizerTableProvider(
       } else {
         await this.assertViewInLensActionNotExists(fieldName);
       }
+    }
+
+    public async assertLensActionShowChart(fieldName: string, visualizationContainer?: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
+          this.rowSelector(fieldName, 'dataVisualizerActionViewInLensButton')
+        );
+        await testSubjects.existOrFail(visualizationContainer ?? 'lnsVisualizationContainer', {
+          timeout: 15 * 1000,
+        });
+      });
     }
 
     public async ensureNumRowsPerPage(n: 10 | 25 | 50) {

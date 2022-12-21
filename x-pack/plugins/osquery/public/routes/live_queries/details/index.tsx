@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import styled from 'styled-components';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
-import { useActionDetails } from '../../../actions/use_action_details';
-import { ResultTabs } from '../../saved_queries/edit/tabs';
+import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
+import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
+
+const StyledTableWrapper = styled(EuiFlexItem)`
+  padding-left: 10px;
+`;
 
 const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
   useBreadcrumbs('live_query_details', { liveQueryId: actionId });
   const liveQueryListProps = useRouterNavigate('live_queries');
-
-  const { data } = useActionDetails({ actionId });
+  const [isLive, setIsLive] = useState(false);
+  const { data } = useLiveQueryDetails({ actionId, isLive });
 
   const LeftColumn = useMemo(
     () => (
@@ -37,33 +40,36 @@ const LiveQueryDetailsPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.liveQueryDetails.pageTitle"
                 defaultMessage="Live query details"
               />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
     [liveQueryListProps]
   );
 
+  useLayoutEffect(() => {
+    setIsLive(() => !(data?.status === 'completed'));
+  }, [data?.status]);
+
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-      <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-        {data?.actionDetails._source?.data?.query}
-      </EuiCodeBlock>
-      <EuiSpacer />
-      <ResultTabs
-        actionId={actionId}
-        agentIds={data?.actionDetails?.fields?.agents}
-        startDate={get(data, ['actionDetails', 'fields', '@timestamp', '0'])}
-        endDate={get(data, 'actionDetails.fields.expiration[0]')}
-      />
+      <StyledTableWrapper>
+        <PackQueriesStatusTable
+          actionId={actionId}
+          data={data?.queries}
+          startDate={data?.['@timestamp']}
+          expirationDate={data?.expiration}
+          agentIds={data?.agents}
+          showResultsHeader
+        />
+      </StyledTableWrapper>
     </WithHeaderLayout>
   );
 };

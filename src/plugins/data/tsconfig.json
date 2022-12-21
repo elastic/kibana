@@ -4,17 +4,18 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*",
     "config.ts",
+    "config.mock.ts",
     "common/**/*.json",
-    "public/**/*.json"
+    "public/**/*.json",
+    "../../../typings/index.d.ts"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../bfetch/tsconfig.json" },
     { "path": "../ui_actions/tsconfig.json" },
@@ -23,6 +24,10 @@
     { "path": "../usage_collection/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../field_formats/tsconfig.json" }
+    { "path": "../field_formats/tsconfig.json" },
+    { "path": "../data_views/tsconfig.json" },
+    { "path": "../screenshot_mode/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/task_manager/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/security/tsconfig.json" }
   ]
 }

@@ -22,7 +22,7 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const Static = (props) => {
   const handleChange = createChangeHandler(props.onChange, props.model);
@@ -76,6 +76,7 @@ export const Static = (props) => {
             }
           >
             <EuiFieldNumber
+              data-test-subj="staticValue"
               onChange={handleTextChange('value')}
               value={model.value === '' ? '' : Number(model.value)}
               step={0.1}

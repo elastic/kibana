@@ -5,15 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  PolicyArtifactsAssignableList,
-  PolicyArtifactsAssignableListProps,
-} from './policy_artifacts_assignable_list';
+import type { PolicyArtifactsAssignableListProps } from './policy_artifacts_assignable_list';
+import { PolicyArtifactsAssignableList } from './policy_artifacts_assignable_list';
 import * as reactTestingLibrary from '@testing-library/react';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { fireEvent } from '@testing-library/dom';
 import { getMockListResponse } from '../../../test_utils';
 
@@ -41,7 +37,7 @@ describe('Policy artifacts list', () => {
       selectedArtifactsUpdated: selectedArtifactsUpdatedMock,
     });
 
-    expect(component.getByTestId('loading-spinner')).not.toBeNull();
+    expect(component.getByTestId('artifactsAssignableListLoader')).not.toBeNull();
   });
 
   it('should artifacts list without data', async () => {

@@ -11,38 +11,34 @@ describe('buildTimelineDetailsQuery', () => {
   it('returns the expected query', () => {
     const indexName = '.siem-signals-default';
     const eventId = 'f0a936d50b5b3a5a193d415459c14587fe633f7e519df7b5dc151d56142680e3';
-    const docValueFields = [
-      { field: '@timestamp' },
-      { field: 'agent.ephemeral_id' },
-      { field: 'agent.id' },
-      { field: 'agent.name' },
-    ];
 
-    const query = buildTimelineDetailsQuery(indexName, eventId, docValueFields);
+    const query = buildTimelineDetailsQuery({
+      indexName,
+      id: eventId,
+      runtimeMappings: {},
+    });
 
     expect(query).toMatchInlineSnapshot(`
       Object {
-        "allowNoIndices": true,
+        "allow_no_indices": true,
         "body": Object {
-          "_source": true,
-          "docvalue_fields": Array [
-            Object {
-              "field": "@timestamp",
-            },
-            Object {
-              "field": "agent.ephemeral_id",
-            },
-            Object {
-              "field": "agent.id",
-            },
-            Object {
-              "field": "agent.name",
-            },
-          ],
+          "_source": false,
           "fields": Array [
             Object {
               "field": "*",
               "include_unmapped": true,
+            },
+            Object {
+              "field": "@timestamp",
+              "format": "strict_date_optional_time",
+            },
+            Object {
+              "field": "code_signature.timestamp",
+              "format": "strict_date_optional_time",
+            },
+            Object {
+              "field": "dll.code_signature.timestamp",
+              "format": "strict_date_optional_time",
             },
           ],
           "query": Object {
@@ -52,8 +48,12 @@ describe('buildTimelineDetailsQuery', () => {
               ],
             },
           },
+          "runtime_mappings": Object {},
+          "stored_fields": Array [
+            "*",
+          ],
         },
-        "ignoreUnavailable": true,
+        "ignore_unavailable": true,
         "index": ".siem-signals-default",
         "size": 1,
       }

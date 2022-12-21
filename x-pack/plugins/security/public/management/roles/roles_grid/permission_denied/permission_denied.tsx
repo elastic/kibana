@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const PermissionDenied = () => (
   <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">

@@ -7,10 +7,15 @@
 
 import React, { forwardRef, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiMarkdownEditorProps, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../common/shared_imports';
-import { MarkdownEditor, MarkdownEditorRef } from './editor';
+import type { EuiMarkdownEditorProps } from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import * as i18n from '../../common/translations';
+import type { MarkdownEditorRef } from './editor';
+import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
+import { useMarkdownSessionStorage } from './use_markdown_session_storage';
 
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
@@ -21,18 +26,44 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   bottomRightContent?: React.ReactNode;
   caseTitle?: string;
   caseTags?: string[];
+  draftStorageKey: string;
+  disabledUiPlugins?: string[];
+  initialValue?: string;
 };
 
 const BottomContentWrapper = styled(EuiFlexGroup)`
   ${({ theme }) => `
-    padding: ${theme.eui.ruleMargins.marginSmall} 0;
+    padding: ${theme.eui.euiSizeM} 0;
   `}
 `;
 
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
-    ({ id, field, dataTestSubj, idAria, bottomRightContent, caseTitle, caseTags }, ref) => {
+    (
+      {
+        id,
+        field,
+        dataTestSubj,
+        idAria,
+        bottomRightContent,
+        caseTitle,
+        caseTags,
+        draftStorageKey,
+        disabledUiPlugins,
+        initialValue,
+      },
+      ref
+    ) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+      const { hasConflicts } = useMarkdownSessionStorage({
+        field,
+        sessionKey: draftStorageKey,
+        initialValue,
+      });
+
+      const conflictWarningText = i18n.VERSION_CONFLICT_WARNING(
+        id === 'description' ? id : 'comment'
+      );
 
       const commentEditorContextValue = useMemo(
         () => ({
@@ -51,7 +82,7 @@ export const MarkdownEditorForm = React.memo(
             describedByIds={idAria ? [idAria] : undefined}
             fullWidth
             error={errorMessage}
-            helpText={field.helpText}
+            helpText={hasConflicts ? conflictWarningText : field.helpText}
             isInvalid={isInvalid}
             label={field.label}
             labelAppend={field.labelAppend}
@@ -62,6 +93,7 @@ export const MarkdownEditorForm = React.memo(
               editorId={id}
               onChange={field.setValue}
               value={field.value}
+              disabledUiPlugins={disabledUiPlugins}
               data-test-subj={`${dataTestSubj}-markdown-editor`}
             />
           </EuiFormRow>
@@ -75,3 +107,5 @@ export const MarkdownEditorForm = React.memo(
     }
   )
 );
+
+MarkdownEditorForm.displayName = 'MarkdownEditorForm';

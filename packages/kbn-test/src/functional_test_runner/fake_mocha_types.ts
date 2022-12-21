@@ -15,6 +15,7 @@
 import { EventEmitter } from 'events';
 
 export interface Suite {
+  currentTest?: Test;
   suites: Suite[];
   tests: Test[];
   title: string;
@@ -31,11 +32,13 @@ export interface Test {
   file?: string;
   parent?: Suite;
   isPassed: () => boolean;
+  pending?: boolean;
 }
 
 export interface Runner extends EventEmitter {
   abort(): void;
   failures: any[];
+  uncaught: (error: Error) => void;
 }
 
 export interface Mocha {

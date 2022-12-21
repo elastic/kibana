@@ -6,16 +6,25 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { ArtifactEntryCard, ArtifactEntryCardProps } from './artifact_entry_card';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { ArtifactEntryCardProps } from './artifact_entry_card';
+import { ArtifactEntryCard } from './artifact_entry_card';
 import { act, fireEvent, getByTestId } from '@testing-library/react';
-import { AnyArtifact } from './types';
-import { isTrustedApp } from './hooks/use_normalized_artifact';
-import { getTrustedAppProvider, getExceptionProvider } from './test_utils';
+import type { AnyArtifact } from './types';
+import { isTrustedApp } from './utils';
+import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
+import { OS_LINUX, OS_MAC, OS_WINDOWS } from './components/translations';
+import type { TrustedApp } from '../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+
+jest.mock('../../../common/components/user_privileges');
+const mockUserPrivileges = useUserPrivileges as jest.Mock;
 
 describe.each([
-  ['trusted apps', getTrustedAppProvider],
-  ['exceptions/event filters', getExceptionProvider],
+  ['trusted apps', getTrustedAppProviderMock],
+  ['exceptions/event filters', getExceptionProviderMock],
 ])('when using the ArtifactEntryCard component with %s', (_, generateItem) => {
   let item: AnyArtifact;
   let appTestContext: AppContextTestRender;
@@ -25,7 +34,7 @@ describe.each([
   ) => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
-    item = generateItem();
+    item = generateItem() as AnyArtifact;
     appTestContext = createAppRootMockRenderer();
     render = (props = {}) => {
       renderResult = appTestContext.render(
@@ -39,6 +48,12 @@ describe.each([
       );
       return renderResult;
     };
+
+    mockUserPrivileges.mockReturnValue({ endpointPrivileges: getEndpointAuthzInitialStateMock() });
+  });
+
+  afterEach(() => {
+    mockUserPrivileges.mockReset();
   });
 
   it('should display title and who has created and updated it last', async () => {
@@ -48,10 +63,10 @@ describe.each([
       'some internal app'
     );
     expect(renderResult.getByTestId('testCard-subHeader-touchedBy-createdBy').textContent).toEqual(
-      'Created byJJusta'
+      'Created byMMarty'
     );
     expect(renderResult.getByTestId('testCard-subHeader-touchedBy-updatedBy').textContent).toEqual(
-      'Updated byMMara'
+      'Updated byEEllamae'
     );
   });
 
@@ -67,7 +82,7 @@ describe.each([
     render();
 
     expect(renderResult.getByTestId('testCard-header-updated').textContent).toEqual(
-      expect.stringMatching(/Last updated(\s seconds? ago|now)/)
+      expect.stringMatching(/Last updated(?:(\s*\d+ seconds? ago)|now)/)
     );
   });
 
@@ -77,18 +92,52 @@ describe.each([
     expect(renderResult.getByTestId('testCard-description').textContent).toEqual(item.description);
   });
 
+  it("shouldn't display description", async () => {
+    render({ hideDescription: true });
+    expect(renderResult.queryByTestId('testCard-description')).toBeNull();
+  });
+
   it('should display default empty value if description does not exist', async () => {
     item.description = undefined;
     render();
-
     expect(renderResult.getByTestId('testCard-description').textContent).toEqual('—');
+  });
+
+  it('should display comments if one exists', async () => {
+    render();
+    if (isTrustedApp(item)) {
+      expect(renderResult.queryByTestId('testCard-comments')).toBeNull();
+    } else {
+      expect(renderResult.queryByTestId('testCard-comments')).not.toBeNull();
+    }
+  });
+
+  it("shouldn't display comments", async () => {
+    render({ hideComments: true });
+    expect(renderResult.queryByTestId('testCard-comments')).toBeNull();
   });
 
   it('should display OS and criteria conditions', () => {
     render();
 
     expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
-      ' OSIS WindowsAND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS /one/two/three'
+      ' OSIS WindowsAND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS c:\\fol\\bin.exe'
+    );
+  });
+
+  it('should display multiple OSs in the criteria conditions', () => {
+    if (isTrustedApp(item)) {
+      // Trusted apps does not support multiple OS, so this is just so the test will pass
+      // for the trusted app run (the top level `describe()` uses a `.each()`)
+      item.os = [OS_LINUX, OS_MAC, OS_WINDOWS].join(', ') as TrustedApp['os'];
+    } else {
+      item.os_types = ['linux', 'macos', 'windows'];
+    }
+
+    render();
+
+    expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
+      ` OSIS ${OS_LINUX}, ${OS_MAC}, ${OS_WINDOWS}AND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS c:\\fol\\bin.exe`
     );
   });
 
@@ -167,19 +216,42 @@ describe.each([
       ).not.toBeNull();
     });
 
-    it('should show popup menu with list of associated policies when clicked', async () => {
-      render({ policies });
-      await act(async () => {
-        await fireEvent.click(
-          renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
+    describe('when clicked', () => {
+      it('should show popup menu with list of associated policies, with `View details` button when has Policy privilege', async () => {
+        render({ policies });
+        await act(async () => {
+          await fireEvent.click(
+            renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
+          );
+        });
+
+        expect(
+          renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
+        ).not.toBeNull();
+
+        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
+          'Policy oneView details'
         );
       });
 
-      expect(
-        renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
-      ).not.toBeNull();
+      it('should show popup menu with list of associated policies, without `View details` button when does NOT have Policy privilege', async () => {
+        mockUserPrivileges.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({ canReadPolicyManagement: false }),
+        });
 
-      expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one');
+        render({ policies });
+        await act(async () => {
+          await fireEvent.click(
+            renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
+          );
+        });
+
+        expect(
+          renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
+        ).not.toBeNull();
+
+        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one');
+      });
     });
 
     it('should display policy ID if no policy menu item found in `policies` prop', async () => {

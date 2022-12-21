@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export {
-  // utility function
-  entries,
-  // Object types
+export type {
   Agent,
   AgentMetadata,
   AgentPolicy,
@@ -26,11 +23,14 @@ export {
   PackagePolicyConfigRecordEntry,
   PackagePolicyPackage,
   Output,
+  DownloadSource,
+  FleetServerHost,
+  FleetProxy,
   DataStream,
   Settings,
-  // API schema - misc setup, status
+  ActionStatus,
+  CurrentUpgrade,
   GetFleetStatusResponse,
-  // API schemas - Agent policy
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
@@ -44,7 +44,6 @@ export {
   CopyAgentPolicyResponse,
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
-  // API schemas - Package policy
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   UpdatePackagePolicyRequest,
@@ -53,9 +52,7 @@ export {
   DryRunPackagePolicy,
   UpgradePackagePolicyResponse,
   UpgradePackagePolicyDryRunResponse,
-  // API schemas - Data streams
   GetDataStreamsResponse,
-  // API schemas - Agents
   GetAgentsResponse,
   GetAgentsRequest,
   GetOneAgentResponse,
@@ -69,30 +66,31 @@ export {
   PostBulkAgentUpgradeResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
+  GetAgentIncomingDataRequest,
+  IncomingDataList,
+  GetAgentIncomingDataResponse,
   PutAgentReassignRequest,
   PutAgentReassignResponse,
   PostBulkAgentReassignRequest,
   PostBulkAgentReassignResponse,
   PostNewAgentActionResponse,
   PostNewAgentActionRequest,
-  // API schemas - Enrollment API Keys
   GetEnrollmentAPIKeysResponse,
   GetEnrollmentAPIKeysRequest,
   GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
-  // API schemas - Outputs
+  PostLogstashApiKeyResponse,
   GetOutputsResponse,
+  GetCurrentUpgradesResponse,
   PutOutputRequest,
   PutOutputResponse,
-  // API schemas - Settings
+  PostOutputRequest,
   GetSettingsResponse,
   PutSettingsRequest,
   PutSettingsResponse,
-  // API schemas - app
   CheckPermissionsResponse,
   GenerateServiceTokenResponse,
-  // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,
   AssetType,
@@ -100,12 +98,11 @@ export {
   CategoryId,
   CategorySummaryItem,
   CategorySummaryList,
-  ElasticsearchAssetType,
-  KibanaAssetType,
   PackageInfo,
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
+  RegistryStreamWithDataStream,
   RegistryPolicyTemplate,
   PackageList,
   PackageListItem,
@@ -123,12 +120,25 @@ export {
   InstallPackageResponse,
   DeletePackageResponse,
   DetailViewPanelName,
-  InstallStatus,
   InstallationStatus,
   Installable,
   RegistryRelease,
   PackageSpecCategory,
-} from '../../common';
+  UpdatePackageRequest,
+  UpdatePackageResponse,
+  GetDownloadSourceResponse,
+  PostDownloadSourceRequest,
+  PutDownloadSourceRequest,
+  GetAvailableVersionsResponse,
+  PostHealthCheckRequest,
+  PostHealthCheckResponse,
+} from '../../common/types';
+export {
+  entries,
+  ElasticsearchAssetType,
+  KibanaAssetType,
+  InstallStatus,
+} from '../../common/types';
 
 export * from './intra_app_route_state';
 export * from './ui_extensions';

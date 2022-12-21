@@ -9,19 +9,33 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
-import { StepScheduleRule } from './index';
+import { StepScheduleRule } from '.';
+import { getStepScheduleDefaultValue } from '../../../pages/detection_engine/rules/utils';
 
 describe('StepScheduleRule', () => {
   it('renders correctly', () => {
-    const wrapper = mount(<StepScheduleRule isReadOnlyView={false} isLoading={false} />, {
-      wrappingComponent: TestProviders,
-    });
+    const wrapper = mount(
+      <StepScheduleRule
+        isReadOnlyView={false}
+        isLoading={false}
+        defaultValues={getStepScheduleDefaultValue('query')}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
+    );
 
     expect(wrapper.find('Form[data-test-subj="stepScheduleRule"]')).toHaveLength(1);
   });
 
   it('renders correctly if isReadOnlyView', () => {
-    const wrapper = shallow(<StepScheduleRule isReadOnlyView={true} isLoading={false} />);
+    const wrapper = shallow(
+      <StepScheduleRule
+        isReadOnlyView={true}
+        isLoading={false}
+        defaultValues={getStepScheduleDefaultValue('query')}
+      />
+    );
 
     expect(wrapper.find('StepContentWrapper')).toHaveLength(1);
   });

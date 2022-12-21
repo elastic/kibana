@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
@@ -13,16 +13,17 @@ import { Router } from 'react-router-dom';
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
 
-import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { InitialAppData } from '../../common/types';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { InitialAppData, ProductAccess } from '../../common/types';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
+import { getCloudEnterpriseSearchHost } from './shared/get_cloud_enterprise_search_host/get_cloud_enterprise_search_host';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
 import { mountLicensingLogic } from './shared/licensing';
@@ -38,16 +39,30 @@ export const renderApp = (
   { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
-  const { publicUrl, errorConnecting, ...initialData } = data;
-  externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
+  const { publicUrl, errorConnectingMessage, ...initialData } = data;
+  const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
+  externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
+
+  const noProductAccess: ProductAccess = {
+    hasAppSearchAccess: false,
+    hasWorkplaceSearchAccess: false,
+  };
+  const productAccess = data.access || noProductAccess;
+
+  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });
   const store = getContext().store;
 
   const unmountKibanaLogic = mountKibanaLogic({
+    capabilities: core.application.capabilities,
     config,
+    productAccess,
     charts: plugins.charts,
     cloud: plugins.cloud,
+    uiSettings: core.uiSettings,
+    guidedOnboarding: plugins.guidedOnboarding,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
     security: plugins.security,
@@ -63,23 +78,25 @@ export const renderApp = (
   });
   const unmountHttpLogic = mountHttpLogic({
     http: core.http,
-    errorConnecting,
+    errorConnectingMessage,
     readOnlyMode: initialData.readOnlyMode,
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic();
 
   ReactDOM.render(
     <I18nProvider>
-      <EuiThemeProvider>
+      <KibanaThemeProvider theme$={params.theme$}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
-          <Provider store={store}>
-            <Router history={params.history}>
-              <App {...initialData} />
-              <Toasts />
-            </Router>
-          </Provider>
+          <CloudContext>
+            <Provider store={store}>
+              <Router history={params.history}>
+                <App {...initialData} />
+                <Toasts />
+              </Router>
+            </Provider>
+          </CloudContext>
         </KibanaContextProvider>
-      </EuiThemeProvider>
+      </KibanaThemeProvider>
     </I18nProvider>,
     params.element
   );
@@ -96,7 +113,7 @@ export const renderApp = (
  * Render function for Kibana's header action menu chrome -
  * reusable by any Enterprise Search plugin simply by passing in
  * a custom HeaderActions component (e.g., WorkplaceSearchHeaderActions)
- * @see https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
+ * @see https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
  */
 
 export const renderHeaderActions = (

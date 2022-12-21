@@ -5,11 +5,20 @@
  * 2.0.
  */
 
+import type { MatrixHistogramRequestOptions } from '../../../../../../../common/search_strategy';
 import {
   MatrixHistogramQuery,
-  MatrixHistogramRequestOptions,
   MatrixHistogramType,
 } from '../../../../../../../common/search_strategy';
+
+const runtimeMappings: MatrixHistogramRequestOptions['runtimeMappings'] = {
+  '@a.runtime.field': {
+    script: {
+      source: 'emit("Radically mocked dude: " + doc[\'host.name\'].value)',
+    },
+    type: 'keyword',
+  },
+};
 
 export const mockOptions: MatrixHistogramRequestOptions = {
   defaultIndex: [
@@ -27,6 +36,7 @@ export const mockOptions: MatrixHistogramRequestOptions = {
   histogramType: MatrixHistogramType.events,
   timerange: { interval: '12h', from: '2020-09-08T16:11:26.215Z', to: '2020-09-09T16:11:26.215Z' },
   stackByField: 'event.action',
+  runtimeMappings,
 };
 
 export const expectedDsl = {
@@ -40,8 +50,8 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -80,6 +90,7 @@ export const expectedDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
@@ -95,8 +106,8 @@ export const expectedThresholdDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -137,6 +148,7 @@ export const expectedThresholdDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
@@ -152,8 +164,8 @@ export const expectedThresholdMissingFieldDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -192,12 +204,13 @@ export const expectedThresholdMissingFieldDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
 
 export const expectedThresholdWithCardinalityDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   body: {
     aggregations: {
       eventActionGroup: {
@@ -242,9 +255,10 @@ export const expectedThresholdWithCardinalityDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -256,67 +270,10 @@ export const expectedThresholdWithCardinalityDsl = {
     'winlogbeat-*',
   ],
   track_total_hits: true,
-};
-
-export const expectedThresholdWithGroupFieldsAndCardinalityDsl = {
-  index: [
-    'apm-*-transaction*',
-    'traces-apm*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'logs-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
-  track_total_hits: true,
-  body: {
-    aggregations: {
-      eventActionGroup: {
-        terms: {
-          script: {
-            lang: 'painless',
-            source: "doc['host.name'].value + ':' + doc['agent.name'].value",
-          },
-          order: { _count: 'desc' },
-          size: 10,
-        },
-        aggs: {
-          events: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: '2700000ms',
-              min_doc_count: 200,
-              extended_bounds: { min: 1599581486215, max: 1599667886215 },
-            },
-          },
-        },
-      },
-    },
-    query: {
-      bool: {
-        filter: [
-          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-          {
-            range: {
-              '@timestamp': {
-                gte: '2020-09-08T16:11:26.215Z',
-                lte: '2020-09-09T16:11:26.215Z',
-                format: 'strict_date_optional_time',
-              },
-            },
-          },
-        ],
-      },
-    },
-    size: 0,
-  },
 };
 
 export const expectedThresholdGroupWithCardinalityDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   body: {
     aggregations: {
       eventActionGroup: {
@@ -363,9 +320,10 @@ export const expectedThresholdGroupWithCardinalityDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -390,8 +348,8 @@ export const expectedIpIncludingMissingDataDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -438,6 +396,7 @@ export const expectedIpIncludingMissingDataDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };
@@ -453,8 +412,8 @@ export const expectedIpNotIncludingMissingDataDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  allowNoIndices: true,
-  ignoreUnavailable: true,
+  allow_no_indices: true,
+  ignore_unavailable: true,
   track_total_hits: true,
   body: {
     aggregations: {
@@ -496,6 +455,7 @@ export const expectedIpNotIncludingMissingDataDsl = {
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
     size: 0,
   },
 };

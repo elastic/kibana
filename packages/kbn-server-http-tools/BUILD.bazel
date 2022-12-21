@@ -1,16 +1,27 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-server-http-tools"
+PKG_DIRNAME = "kbn-server-http-tools"
 PKG_REQUIRE_NAME = "@kbn/server-http-tools"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.mocks.*",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -37,15 +48,14 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-config-schema",
-  "//packages/kbn-crypto",
+  "//packages/kbn-config-schema:npm_module_types",
+  "//packages/kbn-crypto:npm_module_types",
   "@npm//@hapi/hapi",
   "@npm//@hapi/hoek",
   "@npm//joi",
   "@npm//moment",
   "@npm//@types/hapi__hapi",
   "@npm//@types/jest",
-  "@npm//@types/joi",
   "@npm//@types/node",
   "@npm//@types/uuid",
 ]
@@ -71,16 +81,21 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+js_library(
+  name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
@@ -89,9 +104,7 @@ js_library(
 
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
@@ -99,5 +112,11 @@ filegroup(
   srcs = [
     ":npm_module",
   ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm(
+  name = "build_types",
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

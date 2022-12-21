@@ -47,11 +47,32 @@ export function asPercent(
   return numeral(decimal).format('0.0%');
 }
 
+export function asPercentWithTwoDecimals(
+  numerator: Maybe<number>,
+  denominator: number | undefined,
+  fallbackResult = NOT_AVAILABLE_LABEL
+) {
+  if (!denominator || !isFiniteNumber(numerator)) {
+    return fallbackResult;
+  }
+
+  const decimal = numerator / denominator;
+
+  // 33.2 => 33.20%
+  // 3.32 => 3.32%
+  // 0 => 0%
+  if (String(Math.abs(decimal)).split('.').at(1)?.length === 2 || decimal === 0 || decimal === 1) {
+    return numeral(decimal).format('0%');
+  }
+
+  return numeral(decimal).format('0.00%');
+}
+
 export type AsPercent = typeof asPercent;
 
 export function asDecimalOrInteger(value: number) {
   // exact 0 or above 10 should not have decimal
-  if (value === 0 || value >= 10) {
+  if (value === 0 || Math.abs(value) >= 10) {
     return asInteger(value);
   }
   return asDecimal(value);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
-import { executeAction } from './index';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { executeAction } from '.';
 
 const http = httpServiceMock.createStartContract();
 
@@ -19,13 +19,14 @@ describe('executeAction', () => {
       stringParams: 'someString',
       numericParams: 123,
     };
+    const signal = new AbortController().signal;
 
     http.post.mockResolvedValueOnce({
       connector_id: id,
       status: 'ok',
     });
 
-    const result = await executeAction({ id, http, params });
+    const result = await executeAction({ id, http, params, signal });
     expect(result).toEqual({
       actionId: id,
       status: 'ok',
@@ -35,6 +36,7 @@ describe('executeAction', () => {
         "/api/actions/connector/12%2F3/_execute",
         Object {
           "body": "{\\"params\\":{\\"stringParams\\":\\"someString\\",\\"numericParams\\":123}}",
+          "signal": AbortSignal {},
         },
       ]
     `);

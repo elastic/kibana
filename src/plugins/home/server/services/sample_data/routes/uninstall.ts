@@ -7,16 +7,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import _ from 'lodash';
-import { IRouter } from 'src/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
-import { createIndexName } from '../lib/create_index_name';
 import { SampleDataUsageTracker } from '../usage/usage';
+import { getSampleDataInstaller, SAMPLE_DATA_UNINSTALLED_EVENT } from './utils';
+import { SampleDataInstallError } from '../errors';
 
 export function createUninstallRoute(
   router: IRouter,
   sampleDatasets: SampleDatasetSchema[],
-  usageTracker: SampleDataUsageTracker
+  logger: Logger,
+  usageTracker: SampleDataUsageTracker,
+  analytics: AnalyticsServiceSetup
 ): void {
   router.delete(
     {
@@ -25,68 +29,42 @@ export function createUninstallRoute(
         params: schema.object({ id: schema.string() }),
       },
     },
-    async (
-      {
-        core: {
-          elasticsearch: { client: esClient },
-          savedObjects: { getClient: getSavedObjectsClient, typeRegistry },
-        },
-      },
-      request,
-      response
-    ) => {
+    async (context, request, response) => {
+      const routeStartTime = performance.now();
       const sampleDataset = sampleDatasets.find(({ id }) => id === request.params.id);
-
       if (!sampleDataset) {
         return response.notFound();
       }
 
-      for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
-        const dataIndexConfig = sampleDataset.dataIndices[i];
-        const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
-
-        try {
-          await esClient.asCurrentUser.indices.delete({
-            index,
-          });
-        } catch (err) {
-          return response.customError({
-            statusCode: err.status,
-            body: {
-              message: `Unable to delete sample data index "${index}", error: ${err.message}`,
-            },
-          });
-        }
-      }
-
-      const includedHiddenTypes = sampleDataset.savedObjects
-        .map((object) => object.type)
-        .filter((supportedType) => typeRegistry.isHidden(supportedType));
-
-      const savedObjectsClient = getSavedObjectsClient({ includedHiddenTypes });
-
-      const deletePromises = sampleDataset.savedObjects.map(({ type, id }) =>
-        savedObjectsClient.delete(type, id)
-      );
+      const sampleDataInstaller = await getSampleDataInstaller({
+        datasetId: sampleDataset.id,
+        sampleDatasets,
+        logger,
+        context,
+      });
 
       try {
-        await Promise.all(deletePromises);
-      } catch (err) {
-        // ignore 404s since users could have deleted some of the saved objects via the UI
-        if (_.get(err, 'output.statusCode') !== 404) {
+        await sampleDataInstaller.uninstall(request.params.id);
+        // track the usage operation in a non-blocking way
+        usageTracker.addUninstall(request.params.id);
+
+        reportPerformanceMetricEvent(analytics, {
+          eventName: SAMPLE_DATA_UNINSTALLED_EVENT,
+          duration: performance.now() - routeStartTime,
+          key1: sampleDataset.id,
+        });
+        return response.noContent();
+      } catch (e) {
+        if (e instanceof SampleDataInstallError) {
           return response.customError({
-            statusCode: err.status,
             body: {
-              message: `Unable to delete sample dataset saved objects, error: ${err.message}`,
+              message: e.message,
             },
+            statusCode: e.httpCode,
           });
         }
+        throw e;
       }
-
-      // track the usage operation in a non-blocking way
-      usageTracker.addUninstall(request.params.id);
-
-      return response.noContent();
     }
   );
 }

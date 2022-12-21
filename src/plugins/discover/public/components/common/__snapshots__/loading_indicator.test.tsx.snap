@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Loading indicator default renders correctly 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-spaceAround-center-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <span
+      aria-label="Loading"
+      class="euiLoadingSpinner emotion-euiLoadingSpinner-l"
+      role="progressbar"
+    />
+  </div>
+</div>
+`;
+
+exports[`Loading indicator elastic renders correctly 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-spaceAround-center-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <span
+      aria-label="Loading"
+      class="euiLoadingElastic emotion-euiLoadingElastic"
+      role="progressbar"
+    >
+      <span
+        data-euiicon-type="logoElastic"
+      />
+    </span>
+  </div>
+</div>
+`;

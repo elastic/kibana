@@ -10,11 +10,21 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { NavLinksBuilder } from '../../common/nav_links_builder';
 import { FeaturesService } from '../../common/services';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import { UnreachableError } from '../../common/lib';
 import { SpaceScenarios } from '../scenarios';
 
 export default function navLinksTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
   const featuresService: FeaturesService = getService('features');
+
+  const uiCapabilitiesExceptions = [
+    // enterprise_search plugin is loaded but disabled because security isn't enabled in ES. That means the following capabilities are disabled
+    'enterpriseSearch',
+    'enterpriseSearchContent',
+    'enterpriseSearchAnalytics',
+    'appSearch',
+    'workplaceSearch',
+  ];
 
   describe('navLinks', () => {
     let navLinksBuilder: NavLinksBuilder;
@@ -30,7 +40,9 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except(...uiCapabilitiesExceptions)
+            );
             break;
           case 'nothing_space':
             expect(uiCapabilities.success).to.be(true);
@@ -40,7 +52,9 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'foo_disabled_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('foo'));
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except('foo', ...uiCapabilitiesExceptions)
+            );
             break;
           default:
             throw new UnreachableError(scenario);

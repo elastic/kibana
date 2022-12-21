@@ -8,10 +8,12 @@
 import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { enableInspectEsQueries } from '../../../../../observability/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  enableInspectEsQueries,
+  useInspectorContext,
+} from '@kbn/observability-plugin/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useInspectorContext } from '../../../context/inspector/use_inspector_context';
 
 export function InspectorHeaderLink() {
   const { inspector } = useApmPluginContext();
@@ -30,7 +32,11 @@ export function InspectorHeaderLink() {
   }
 
   return (
-    <EuiHeaderLink color="primary" onClick={inspect}>
+    <EuiHeaderLink
+      color="primary"
+      onClick={inspect}
+      data-test-subj="apmInspectHeaderLink"
+    >
       {i18n.translate('xpack.apm.inspectButtonText', {
         defaultMessage: 'Inspect',
       })}

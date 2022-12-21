@@ -6,10 +6,8 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'kibana/server';
-import { createEscapeValue } from '../../../../../../../src/plugins/data/common';
-import { ReportingConfig } from '../../../';
+import type { IUiSettingsClient, Logger } from '@kbn/core/server';
+import { createEscapeValue } from '@kbn/data-plugin/common';
 import {
   CSV_BOM_CHARS,
   UI_SETTINGS_CSV_QUOTE_VALUES,
@@ -17,7 +15,7 @@ import {
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from '../../../../common/constants';
-import { LevelLogger } from '../../../lib';
+import { ReportingConfigType } from '../../../config';
 
 export interface CsvExportSettings {
   timezone: string;
@@ -36,9 +34,9 @@ export interface CsvExportSettings {
 
 export const getExportSettings = async (
   client: IUiSettingsClient,
-  config: ReportingConfig,
+  config: ReportingConfigType['csv'],
   timezone: string | undefined,
-  logger: LevelLogger
+  logger: Logger
 ): Promise<CsvExportSettings> => {
   let setTimezone: string;
   if (timezone) {
@@ -49,11 +47,7 @@ export const getExportSettings = async (
     if (setTimezone === 'Browser') {
       // if `Browser`, hardcode it to 'UTC' so the export has data that makes sense
       logger.warn(
-        i18n.translate('xpack.reporting.exportTypes.csv.executeJob.dateFormateSetting', {
-          defaultMessage:
-            'Kibana Advanced Setting "{dateFormatTimezone}" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.',
-          values: { dateFormatTimezone: 'dateFormat:tz' },
-        })
+        `Kibana Advanced Setting "dateFormat:tz" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.`
       );
       setTimezone = 'UTC';
     }
@@ -66,21 +60,21 @@ export const getExportSettings = async (
     client.get(UI_SETTINGS_CSV_QUOTE_VALUES),
   ]);
 
-  const escapeFormulaValues = config.get('csv', 'escapeFormulaValues');
+  const escapeFormulaValues = config.escapeFormulaValues;
   const escapeValue = createEscapeValue(quoteValues, escapeFormulaValues);
-  const bom = config.get('csv', 'useByteOrderMarkEncoding') ? CSV_BOM_CHARS : '';
+  const bom = config.useByteOrderMarkEncoding ? CSV_BOM_CHARS : '';
 
   return {
     timezone: setTimezone,
     scroll: {
-      size: config.get('csv', 'scroll', 'size'),
-      duration: config.get('csv', 'scroll', 'duration'),
+      size: config.scroll.size,
+      duration: config.scroll.duration,
     },
     bom,
     includeFrozen,
     separator,
-    maxSizeBytes: config.get('csv', 'maxSizeBytes'),
-    checkForFormulas: config.get('csv', 'checkForFormulas'),
+    maxSizeBytes: config.maxSizeBytes,
+    checkForFormulas: config.checkForFormulas,
     escapeFormulaValues,
     escapeValue,
   };

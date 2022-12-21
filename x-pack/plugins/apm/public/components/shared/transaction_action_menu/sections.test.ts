@@ -6,7 +6,7 @@
  */
 
 import { Location } from 'history';
-import { IBasePath } from 'kibana/public';
+import { IBasePath } from '@kbn/core/public';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getSections } from './sections';
 
@@ -55,7 +55,7 @@ describe('Transaction action menu', () => {
             {
               key: 'traceLogs',
               label: 'Trace logs',
-              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
+              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20(not%20trace.id:*%20AND%20%22123%22)',
               condition: true,
             },
           ],
@@ -67,7 +67,7 @@ describe('Transaction action menu', () => {
           actions: [
             {
               key: 'sampleDocument',
-              label: 'View sample document',
+              label: 'View transaction in Discover',
               href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
@@ -122,7 +122,7 @@ describe('Transaction action menu', () => {
             {
               key: 'traceLogs',
               label: 'Trace logs',
-              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
+              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20(not%20trace.id:*%20AND%20%22123%22)',
               condition: true,
             },
           ],
@@ -134,7 +134,7 @@ describe('Transaction action menu', () => {
           actions: [
             {
               key: 'sampleDocument',
-              label: 'View sample document',
+              label: 'View transaction in Discover',
               href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
@@ -188,7 +188,7 @@ describe('Transaction action menu', () => {
             {
               key: 'traceLogs',
               label: 'Trace logs',
-              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
+              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20(not%20trace.id:*%20AND%20%22123%22)',
               condition: true,
             },
           ],
@@ -200,7 +200,7 @@ describe('Transaction action menu', () => {
           actions: [
             {
               key: 'sampleDocument',
-              label: 'View sample document',
+              label: 'View transaction in Discover',
               href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },

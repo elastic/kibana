@@ -12,15 +12,11 @@
  */
 
 import apm from 'elastic-apm-node';
+import uuid from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { performance } from 'perf_hooks';
-import { identity, defaults, flow } from 'lodash';
-import {
-  Logger,
-  SavedObjectsErrorHelpers,
-  ExecutionContextStart,
-} from '../../../../../src/core/server';
-
+import { identity, defaults, flow, omit } from 'lodash';
+import { Logger, SavedObjectsErrorHelpers, ExecutionContextStart } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Middleware } from '../lib/middleware';
 import {
   asOk,
@@ -38,7 +34,7 @@ import {
   TaskMarkRunning,
   asTaskRunEvent,
   asTaskMarkRunningEvent,
-  startTaskTimer,
+  startTaskTimerWithEventLoopMonitoring,
   TaskTiming,
   TaskPersistence,
 } from '../task_events';
@@ -56,9 +52,12 @@ import {
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError } from './errors';
-
-const defaultBackoffPerFailure = 5 * 60 * 1000;
+import type { EventLoopDelayConfig } from '../config';
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
+
+export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
+export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
+export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -69,9 +68,11 @@ export interface TaskRunner {
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
   id: string;
+  taskExecutionId: string;
   stage: string;
   isEphemeral?: boolean;
   toString: () => string;
+  isSameTask: (executionId: string) => boolean;
 }
 
 export enum TaskRunningStage {
@@ -98,6 +99,8 @@ type Opts = {
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
   defaultMaxAttempts: number;
   executionContext: ExecutionContextStart;
+  usageCounter?: UsageCounter;
+  eventLoopDelayConfig: EventLoopDelayConfig;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -142,7 +145,10 @@ export class TaskManagerRunner implements TaskRunner {
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
+  private uuid: string;
   private readonly executionContext: ExecutionContextStart;
+  private usageCounter?: UsageCounter;
+  private eventLoopDelayConfig: EventLoopDelayConfig;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -164,6 +170,8 @@ export class TaskManagerRunner implements TaskRunner {
     defaultMaxAttempts,
     onTaskEvent = identity,
     executionContext,
+    usageCounter,
+    eventLoopDelayConfig,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -174,6 +182,9 @@ export class TaskManagerRunner implements TaskRunner {
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
+    this.usageCounter = usageCounter;
+    this.uuid = uuid.v4();
+    this.eventLoopDelayConfig = eventLoopDelayConfig;
   }
 
   /**
@@ -181,6 +192,21 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public get id() {
     return this.instance.task.id;
+  }
+
+  /**
+   * Gets the execution id of this task instance.
+   */
+  public get taskExecutionId() {
+    return `${this.id}::${this.uuid}`;
+  }
+
+  /**
+   * Test whether given execution ID identifies a different execution of this same task
+   * @param id
+   */
+  public isSameTask(executionId: string) {
+    return executionId.startsWith(this.id);
   }
 
   /**
@@ -255,9 +281,9 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
-    this.logger.debug(`Running task ${this}`);
+    this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
-    const apmTrans = apm.startTransaction(this.taskType, 'taskManager run', {
+    const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
 
@@ -265,7 +291,7 @@ export class TaskManagerRunner implements TaskRunner {
       taskInstance: this.instance.task,
     });
 
-    const stopTaskTimer = startTaskTimer();
+    const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
 
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
@@ -285,7 +311,10 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
-      this.logger.error(`Task ${this} failed: ${err}`);
+      this.logger.error(`Task ${this} failed: ${err}`, {
+        tags: [this.taskType, this.instance.task.id, 'task-run-failed'],
+        error: { stack_trace: err.stack },
+      });
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
@@ -296,6 +325,8 @@ export class TaskManagerRunner implements TaskRunner {
       );
       if (apmTrans) apmTrans.end('failure');
       return processedResult;
+    } finally {
+      this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
     }
   }
 
@@ -313,9 +344,12 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
-    performance.mark('markTaskAsRunning_start');
 
-    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+      TASK_MANAGER_TRANSACTION_TYPE
+    );
+    apmTrans?.addLabels({ entityId: this.taskType });
 
     const now = new Date();
     try {
@@ -339,7 +373,7 @@ export class TaskManagerRunner implements TaskRunner {
 
       this.instance = asReadyToRun(
         (await this.bufferedTaskStore.update({
-          ...taskInstance,
+          ...taskWithoutEnabled(taskInstance),
           status: TaskStatus.Running,
           startedAt: now,
           attempts,
@@ -372,12 +406,10 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       if (apmTrans) apmTrans.end('success');
-      performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(this.instance.task)));
       return true;
     } catch (error) {
       if (apmTrans) apmTrans.end('failure');
-      performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
@@ -403,6 +435,7 @@ export class TaskManagerRunner implements TaskRunner {
   public async cancel() {
     const { task } = this;
     if (task?.cancel) {
+      // it will cause the task state of "running" to be cleared
       this.task = undefined;
       return task.cancel();
     }
@@ -421,7 +454,7 @@ export class TaskManagerRunner implements TaskRunner {
   private async releaseClaimAndIncrementAttempts(): Promise<Result<ConcreteTaskInstance, Error>> {
     return promiseResult(
       this.bufferedTaskStore.update({
-        ...this.instance.task,
+        ...taskWithoutEnabled(this.instance.task),
         status: TaskStatus.Idle,
         attempts: this.instance.task.attempts + 1,
         startedAt: null,
@@ -434,6 +467,11 @@ export class TaskManagerRunner implements TaskRunner {
   private shouldTryToScheduleRetry(): boolean {
     if (this.instance.task.schedule) {
       return true;
+    }
+
+    if (this.isExpired) {
+      this.logger.warn(`Skipping reschedule for task ${this} due to the task expiring`);
+      return false;
     }
 
     const maxAttempts = this.definition.maxAttempts || this.defaultMaxAttempts;
@@ -498,20 +536,28 @@ export class TaskManagerRunner implements TaskRunner {
       unwrap
     )(result);
 
-    this.instance = asRan(
-      await this.bufferedTaskStore.update(
-        defaults(
-          {
-            ...fieldUpdates,
-            // reset fields that track the lifecycle of the concluded `task run`
-            startedAt: null,
-            retryAt: null,
-            ownerId: null,
-          },
-          this.instance.task
+    if (!this.isExpired) {
+      this.instance = asRan(
+        await this.bufferedTaskStore.update(
+          defaults(
+            {
+              ...fieldUpdates,
+              // reset fields that track the lifecycle of the concluded `task run`
+              startedAt: null,
+              retryAt: null,
+              ownerId: null,
+            },
+            taskWithoutEnabled(this.instance.task)
+          )
         )
-      )
-    );
+      );
+    } else {
+      this.usageCounter?.incrementCounter({
+        counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
+        counterType: 'taskManagerTaskRunner',
+        incrementBy: 1,
+      });
+    }
 
     return fieldUpdates.status === TaskStatus.Failed
       ? TaskRunResult.Failed
@@ -575,6 +621,18 @@ export class TaskManagerRunner implements TaskRunner {
         );
       }
     );
+
+    const { eventLoopBlockMs = 0 } = taskTiming;
+    const taskLabel = `${this.taskType} ${this.instance.task.id}`;
+    if (eventLoopBlockMs > this.eventLoopDelayConfig.warn_threshold) {
+      this.logger.warn(
+        `event loop blocked for at least ${eventLoopBlockMs} ms while running task ${taskLabel}`,
+        {
+          tags: [this.taskType, taskLabel, 'event-loop-blocked'],
+        }
+      );
+    }
+
     return result;
   }
 
@@ -594,7 +652,7 @@ export class TaskManagerRunner implements TaskRunner {
     if (retry instanceof Date) {
       result = retry;
     } else if (retry === true) {
-      result = new Date(Date.now() + attempts * defaultBackoffPerFailure);
+      result = new Date(Date.now() + calculateDelay(attempts));
     }
 
     // Add a duration to the result
@@ -617,13 +675,10 @@ function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null)
   return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
 }
 
-function performanceStopMarkingTaskAsRunning() {
-  performance.mark('markTaskAsRunning_stop');
-  performance.measure(
-    'taskRunner.markTaskAsRunning',
-    'markTaskAsRunning_start',
-    'markTaskAsRunning_stop'
-  );
+// Omits "enabled" field from task updates so we don't overwrite any user
+// initiated changes to "enabled" while the task was running
+function taskWithoutEnabled(task: ConcreteTaskInstance): ConcreteTaskInstance {
+  return omit(task, 'enabled');
 }
 
 // A type that extracts the Instance type out of TaskRunningStage
@@ -659,4 +714,14 @@ export function asRan(task: InstanceOf<TaskRunningStage.RAN, RanTask>): RanTask 
     stage: TaskRunningStage.RAN,
     task,
   };
+}
+
+export function calculateDelay(attempts: number) {
+  if (attempts === 1) {
+    return 30 * 1000; // 30s
+  } else {
+    // get multiples of 5 min
+    const defaultBackoffPerFailure = 5 * 60 * 1000;
+    return defaultBackoffPerFailure * Math.pow(2, attempts - 2);
+  }
 }

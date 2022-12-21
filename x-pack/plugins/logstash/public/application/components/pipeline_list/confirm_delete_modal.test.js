@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 describe('ConfirmDeleteModal component', () => {
@@ -43,7 +43,7 @@ describe('ConfirmDeleteModal component', () => {
 
   it('calls deleteSelectedPipelines', () => {
     const wrapper = mountWithIntl(<ConfirmDeleteModal {...props} />);
-    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
     expect(props.deleteSelectedPipelines).toHaveBeenCalled();
   });
 

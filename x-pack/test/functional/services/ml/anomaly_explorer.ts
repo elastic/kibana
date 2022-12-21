@@ -7,11 +7,19 @@
 
 import expect from '@kbn/expect';
 
+import type { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import type { CreateCaseParams } from '../cases/create';
+import { MlAnomalyCharts } from './anomaly_charts';
 
-export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProviderContext) {
+export function MachineLearningAnomalyExplorerProvider(
+  { getPageObject, getService }: FtrProviderContext,
+  anomalyCharts: MlAnomalyCharts
+) {
+  const dashboardPage = getPageObject('dashboard');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const cases = getService('cases');
 
   return {
     async assertAnomalyExplorerEmptyListMessageExists() {
@@ -34,6 +42,20 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
         influencerFieldLabelElements.map(async (elmnt) => await elmnt.getVisibleText())
       );
       return influencerFieldLabels;
+    },
+
+    async getQueryBarText() {
+      const queryBarElement = await testSubjects.find('explorerQueryInput');
+      const queryBarText = await queryBarElement.getVisibleText();
+      return queryBarText;
+    },
+
+    async assertQueryBarContent(contentString: string) {
+      const queryBarText = await this.getQueryBarText();
+      expect(queryBarText).to.eql(
+        contentString,
+        `Expected influencer filter to be '${contentString}' (got '${queryBarText}')`
+      );
     },
 
     async assertInfluencerListContainsLabel(influencerField: string, label: string) {
@@ -76,22 +98,53 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       });
     },
 
+    async addFilterForInfluencer(influencerField: string, influencerValue: string) {
+      await testSubjects.existOrFail(
+        `mlAnomaliesTableEntityCellAddFilterButton-${influencerValue}`
+      );
+      await testSubjects.click(`mlAnomaliesTableEntityCellAddFilterButton-${influencerValue}`);
+    },
+
+    async removeFilterForInfluencer(influencerField: string, influencerValue: string) {
+      await testSubjects.existOrFail(
+        `mlAnomaliesTableEntityCellRemoveFilterButton-${influencerValue}`
+      );
+      await testSubjects.click(`mlAnomaliesTableEntityCellRemoveFilterButton-${influencerValue}`);
+    },
+
     async openAddToDashboardControl() {
       await testSubjects.click('mlAnomalyTimelinePanelMenu');
       await testSubjects.click('mlAnomalyTimelinePanelAddToDashboardButton');
       await testSubjects.existOrFail('mlAddToDashboardModal');
     },
 
+    async attachSwimLaneToCase(swimLaneType: SwimlaneType = 'overall', params: CreateCaseParams) {
+      const attachTestSubject =
+        swimLaneType === 'overall'
+          ? 'mlAnomalyTimelinePanelAttachOverallButton'
+          : 'mlAnomalyTimelinePanelAttachViewByButton';
+      await testSubjects.click('mlAnomalyTimelinePanelMenu');
+      await testSubjects.click('mlAnomalyTimelinePanelAttachToCaseButton');
+      await testSubjects.click(attachTestSubject);
+
+      await cases.create.createCaseFromModal(params);
+    },
+
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
-      await this.filterDashboardSearchWithSearchString(dashboardTitle);
-      await this.selectAllDashboards();
-      await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.filterDashboardSearchWithSearchString(dashboardTitle);
+        await testSubjects.clickWhenNotDisabledWithoutRetry('~mlEmbeddableAddAndEditDashboard');
+
+        // make sure the dashboard page actually loaded
+        const dashboardItemCount = await dashboardPage.getSharedItemsCount();
+        expect(dashboardItemCount).to.not.eql(undefined);
+      });
       // changing to the dashboard app might take sime time
       const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper', 30 * 1000);
       const swimlane = await embeddable.findByClassName('mlSwimLaneContainer');
       expect(await swimlane.isDisplayed()).to.eql(
         true,
-        'Anomaly swimlane should be displayed in dashboard'
+        'Anomaly swim lane should be displayed in dashboard'
       );
     },
 
@@ -100,15 +153,24 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
     },
 
     async waitForDashboardsToLoad() {
-      await testSubjects.existOrFail('~mlDashboardSelectionTable', { timeout: 60 * 1000 });
+      await testSubjects.existOrFail('mlDashboardSelectionTable loaded', { timeout: 60 * 1000 });
     },
 
-    async filterDashboardSearchWithSearchString(filter: string) {
-      await this.waitForDashboardsToLoad();
-      const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
-      await searchBarInput.clearValueWithKeyboard();
-      await searchBarInput.type(filter);
-      await this.assertDashboardSearchInputValue(filter);
+    async filterDashboardSearchWithSearchString(filter: string, expectedRowCount: number = 1) {
+      await retry.tryForTime(20 * 1000, async () => {
+        await this.waitForDashboardsToLoad();
+        const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
+        await searchBarInput.clearValueWithKeyboard();
+        await searchBarInput.type(filter);
+        await this.assertDashboardSearchInputValue(filter);
+        await this.waitForDashboardsToLoad();
+
+        const dashboardRows = await testSubjects.findAll('~mlDashboardSelectionTableRow', 2000);
+        expect(dashboardRows.length).to.eql(
+          expectedRowCount,
+          `Dashboard table should have ${expectedRowCount} rows, got ${dashboardRows.length}`
+        );
+      });
     },
 
     async assertDashboardSearchInputValue(expectedSearchValue: string) {
@@ -120,20 +182,17 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       );
     },
 
-    async selectAllDashboards() {
-      await retry.tryForTime(3000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlDashboardSelectionTable > checkboxSelectAll');
-        expect(
-          await testSubjects.isChecked('mlDashboardSelectionTable > checkboxSelectAll')
-        ).to.eql(true, 'Checkbox to select all dashboards should be selected');
-      });
-    },
-
     async assertClearSelectionButtonVisible(expectVisible: boolean) {
       if (expectVisible) {
-        await testSubjects.existOrFail('mlAnomalyTimelineClearSelection');
+        expect(await testSubjects.isDisplayed('mlAnomalyTimelineClearSelection')).to.eql(
+          true,
+          `Expected 'Clear selection' button to be displayed`
+        );
       } else {
-        await testSubjects.missingOrFail('mlAnomalyTimelineClearSelection');
+        expect(await testSubjects.isDisplayed('mlAnomalyTimelineClearSelection')).to.eql(
+          false,
+          `Expected 'Clear selection' button to be hidden`
+        );
       }
     },
 
@@ -144,14 +203,37 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
     },
 
     async assertAnomalyExplorerChartsCount(expectedChartsCount: number) {
-      const chartsContainer = await testSubjects.find('mlExplorerChartsContainer');
-      const actualChartsCount = (
-        await chartsContainer.findAllByClassName('ml-explorer-chart-container', 3000)
-      ).length;
-      expect(actualChartsCount).to.eql(
-        expectedChartsCount,
-        `Expect ${expectedChartsCount} charts to appear, got ${actualChartsCount}`
+      await anomalyCharts.assertAnomalyExplorerChartsCount(
+        'mlExplorerChartsContainer',
+        expectedChartsCount
       );
+    },
+
+    async scrollChartsContainerIntoView() {
+      await testSubjects.scrollIntoView('mlExplorerChartsContainer');
+    },
+
+    async scrollMapContainerIntoView() {
+      await testSubjects.scrollIntoView('mlAnomaliesMapContainer');
+    },
+
+    async assertSingleMetricViewerButtonEnabled(expectedEnabled = true) {
+      const isEnabled = await testSubjects.isEnabled(
+        'mlAnomalyResultsViewSelectorSingleMetricViewer'
+      );
+      expect(isEnabled).to.eql(
+        expectedEnabled,
+        `Expected the Single Metric Viewer button to be '${
+          expectedEnabled ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    },
+
+    async attachAnomalyChartsToCase(params: CreateCaseParams) {
+      await testSubjects.click('mlExplorerAnomalyPanelMenu');
+      await testSubjects.click('mlAnomalyAttachChartsToCasesButton');
+
+      await cases.create.createCaseFromModal(params);
     },
   };
 }

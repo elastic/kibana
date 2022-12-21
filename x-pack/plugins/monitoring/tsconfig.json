@@ -3,19 +3,13 @@
   "compilerOptions": {
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "declaration": true
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
-  "references": [
+  "include": ["common/**/*", "public/**/*", "server/**/*", "server/**/*.json"],
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "../../../src/plugins/navigation/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
@@ -30,6 +24,6 @@
     { "path": "../license_management/tsconfig.json" },
     { "path": "../observability/tsconfig.json" },
     { "path": "../telemetry_collection_xpack/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" },
+    { "path": "../triggers_actions_ui/tsconfig.json" }
   ]
 }

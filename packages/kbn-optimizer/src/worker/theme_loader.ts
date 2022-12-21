@@ -10,7 +10,7 @@ import { stringifyRequest, getOptions } from 'loader-utils';
 import webpack from 'webpack';
 import { parseThemeTags, ALL_THEMES, ThemeTag } from '../common';
 
-const getVersion = (tag: ThemeTag) => (tag.includes('v7') ? 7 : 8);
+const getVersion = (tag: ThemeTag) => 8;
 const getIsDark = (tag: ThemeTag) => tag.includes('dark');
 const compare = (a: ThemeTag, b: ThemeTag) =>
   (getVersion(a) === getVersion(b) ? 1 : 0) + (getIsDark(a) === getIsDark(b) ? 1 : 0);
@@ -20,7 +20,7 @@ export default function (this: webpack.loader.LoaderContext) {
   this.cacheable(true);
 
   const options = getOptions(this);
-  const bundleId: string = options.bundleId!;
+  const bundleId = options.bundleId as string;
   const themeTags = parseThemeTags(options.themeTags);
 
   const cases = ALL_THEMES.map((tag) => {

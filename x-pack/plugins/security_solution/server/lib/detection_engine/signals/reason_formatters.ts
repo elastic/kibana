@@ -7,16 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { getOr } from 'lodash/fp';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { SignalSourceHit } from './types';
+import type { SignalSourceHit } from './types';
 
 export interface BuildReasonMessageArgs {
-  rule: RulesSchema;
+  name: string;
+  severity: string;
   mergedDoc?: SignalSourceHit;
 }
 
 export interface BuildReasonMessageUtilArgs extends BuildReasonMessageArgs {
-  type?: 'eql' | 'ml' | 'query' | 'threatMatch' | 'threshold';
+  type?: 'eql' | 'ml' | 'query' | 'threatMatch' | 'threshold' | 'new_terms';
 }
 
 export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
@@ -35,16 +35,16 @@ interface ReasonFields {
 }
 const getFieldsFromDoc = (mergedDoc: SignalSourceHit) => {
   const reasonFields: ReasonFields = {};
-  const docToUse = mergedDoc?.fields || mergedDoc;
+  const docToUse = mergedDoc?.fields || mergedDoc?._source || mergedDoc;
 
-  reasonFields.destinationAddress = getOr(null, 'destination.address', docToUse);
+  reasonFields.destinationAddress = getOr(null, 'destination.ip', docToUse);
   reasonFields.destinationPort = getOr(null, 'destination.port', docToUse);
   reasonFields.eventCategory = getOr(null, 'event.category', docToUse);
   reasonFields.fileName = getOr(null, 'file.name', docToUse);
   reasonFields.hostName = getOr(null, 'host.name', docToUse);
   reasonFields.processName = getOr(null, 'process.name', docToUse);
   reasonFields.processParentName = getOr(null, 'process.parent.name', docToUse);
-  reasonFields.sourceAddress = getOr(null, 'source.address', docToUse);
+  reasonFields.sourceAddress = getOr(null, 'source.ip', docToUse);
   reasonFields.sourcePort = getOr(null, 'source.port', docToUse);
   reasonFields.userName = getOr(null, 'user.name', docToUse);
 
@@ -56,8 +56,12 @@ const getFieldsFromDoc = (mergedDoc: SignalSourceHit) => {
  * to more easily allow for this in the future.
  * @export buildCommonReasonMessage - is only exported for testing purposes, and only used internally here.
  */
-export const buildReasonMessageUtil = ({ rule, mergedDoc }: BuildReasonMessageUtilArgs) => {
-  if (!rule || !mergedDoc) {
+export const buildReasonMessageUtil = ({
+  name,
+  severity,
+  mergedDoc,
+}: BuildReasonMessageUtilArgs) => {
+  if (!mergedDoc) {
     // This should never happen, but in case, better to not show a malformed string
     return '';
   }
@@ -98,8 +102,8 @@ export const buildReasonMessageUtil = ({ rule, mergedDoc }: BuildReasonMessageUt
 {hostName, select, null {} other {{whitespace}on {hostName}} } \
 created {alertSeverity} alert {alertName}.`,
     values: {
-      alertName: rule.name,
-      alertSeverity: rule.severity,
+      alertName: name,
+      alertSeverity: severity,
       destinationAddress: getFieldTemplateValue(destinationAddress, true),
       destinationPort: getFieldTemplateValue(destinationPort, true),
       eventCategory: getFieldTemplateValue(eventCategory),
@@ -130,3 +134,6 @@ export const buildReasonMessageForThreatMatchAlert = (args: BuildReasonMessageAr
 
 export const buildReasonMessageForThresholdAlert = (args: BuildReasonMessageArgs) =>
   buildReasonMessageUtil({ ...args, type: 'threshold' });
+
+export const buildReasonMessageForNewTermsAlert = (args: BuildReasonMessageArgs) =>
+  buildReasonMessageUtil({ ...args, type: 'new_terms' });

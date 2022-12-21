@@ -9,14 +9,14 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { ExpressionRenderDefinition } from '../../../expressions/public';
-import { VisualizationContainer } from '../../../visualizations/public';
-import { ChartsPluginSetup } from '../../../charts/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VislibRenderValue, vislibVisName } from './vis_type_vislib_vis_fn';
 import { VislibChartType } from './types';
-import { PieRenderValue } from './pie_fn';
 
 const VislibWrapper = lazy(() => import('./vis_wrapper'));
 
@@ -34,7 +34,7 @@ function shouldShowNoResultsMessage(visData: any, visType: VislibChartType): boo
 export const getVislibVisRenderer: (
   core: VisTypeVislibCoreSetup,
   charts: ChartsPluginSetup
-) => ExpressionRenderDefinition<VislibRenderValue | PieRenderValue> = (core, charts) => ({
+) => ExpressionRenderDefinition<VislibRenderValue> = (core, charts) => ({
   name: vislibVisName,
   displayName: 'Vislib visualization',
   reuseDomNode: true,
@@ -44,9 +44,11 @@ export const getVislibVisRenderer: (
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
 
     render(
-      <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
-        <VislibWrapper {...config} core={core} charts={charts} handlers={handlers} />
-      </VisualizationContainer>,
+      <KibanaThemeProvider theme$={core.theme.theme$}>
+        <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+          <VislibWrapper {...config} core={core} charts={charts} handlers={handlers} />
+        </VisualizationContainer>
+      </KibanaThemeProvider>,
       domNode
     );
   },

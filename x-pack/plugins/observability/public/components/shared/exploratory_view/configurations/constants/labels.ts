@@ -45,10 +45,24 @@ export const SERVICE_NAME_LABEL = i18n.translate(
   }
 );
 
+export const SERVICE_TYPE_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.serviceType',
+  {
+    defaultMessage: 'Service type',
+  }
+);
+
 export const ENVIRONMENT_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.environment',
   {
     defaultMessage: 'Environment',
+  }
+);
+
+export const EVENT_DATASET_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.eventDataset',
+  {
+    defaultMessage: 'Dataset',
   }
 );
 
@@ -71,6 +85,13 @@ export const FID_LABEL = i18n.translate('xpack.observability.expView.fieldLabels
 export const CLS_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.cls', {
   defaultMessage: 'Cumulative layout shift',
 });
+
+export const NETWORK_TIMINGS_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.networkTimings',
+  {
+    defaultMessage: 'Network timings',
+  }
+);
 
 export const DCL_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.dcl', {
   defaultMessage: 'DOM content loaded',
@@ -136,6 +157,17 @@ export const AGENT_HOST_LABEL = i18n.translate(
   }
 );
 
+export const AGENT_TYPE_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.agentType',
+  {
+    defaultMessage: 'Agent type',
+  }
+);
+
+export const MESSAGE_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.message', {
+  defaultMessage: 'Message',
+});
+
 export const HOST_NAME_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.hostName', {
   defaultMessage: 'Host name',
 });
@@ -169,6 +201,15 @@ export const TAGS_LABEL = i18n.translate('xpack.observability.expView.fieldLabel
 export const METRIC_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.metric', {
   defaultMessage: 'Metric',
 });
+export const LABELS_FIELD = i18n.translate('xpack.observability.expView.fieldLabels.labels', {
+  defaultMessage: 'Labels',
+});
+export const LABELS_BREAKDOWN = i18n.translate(
+  'xpack.observability.expView.fieldLabels.chooseField',
+  {
+    defaultMessage: 'Labels field',
+  }
+);
 export const KPI_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.kpi', {
   defaultMessage: 'KPI',
 });
@@ -193,6 +234,17 @@ export const DEVICE_DISTRIBUTION_LABEL = i18n.translate(
     defaultMessage: 'Device distribution',
   }
 );
+
+export const SINGLE_METRIC_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.singleMetric',
+  {
+    defaultMessage: 'Single metric',
+  }
+);
+
+export const HEATMAP_LABEL = i18n.translate('xpack.observability.expView.fieldLabels.heatMap', {
+  defaultMessage: 'Heatmap',
+});
 
 export const MOBILE_RESPONSE_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.mobileResponse',
@@ -219,6 +271,20 @@ export const MONITORS_DURATION_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.monitorDurationLabel',
   {
     defaultMessage: 'Monitor duration',
+  }
+);
+
+export const STEP_DURATION_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.stepDurationLabel',
+  {
+    defaultMessage: 'Step duration',
+  }
+);
+
+export const STEP_NAME_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.stepNameLabel',
+  {
+    defaultMessage: 'Step name',
   }
 );
 
@@ -291,16 +357,37 @@ export const MOBILE_APP = i18n.translate('xpack.observability.expView.fieldLabel
   defaultMessage: 'Mobile App',
 });
 
-export const MEMORY_USAGE = i18n.translate(
+export const SYSTEM_MEMORY_USAGE = i18n.translate(
   'xpack.observability.expView.fieldLabels.mobile.memoryUsage',
   {
-    defaultMessage: 'Memory Usage',
+    defaultMessage: 'System memory usage',
   }
 );
 
 export const CPU_USAGE = i18n.translate('xpack.observability.expView.fieldLabels.cpuUsage', {
-  defaultMessage: 'CPU Usage',
+  defaultMessage: 'CPU usage',
 });
+
+export const SYSTEM_CPU_USAGE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.cpuUsage.system',
+  {
+    defaultMessage: 'System CPU usage',
+  }
+);
+
+export const DOCKER_CPU_USAGE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.cpuUsage.docker',
+  {
+    defaultMessage: 'Docker CPU usage',
+  }
+);
+
+export const K8S_POD_CPU_USAGE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.cpuUsage.k8sDocker',
+  {
+    defaultMessage: 'K8s pod CPU usage',
+  }
+);
 
 export const TRANSACTIONS_PER_MINUTE = i18n.translate(
   'xpack.observability.expView.fieldLabels.transactionPerMinute',
@@ -315,3 +402,7 @@ export const NUMBER_OF_DEVICES = i18n.translate(
     defaultMessage: 'Number of Devices',
   }
 );
+
+export const LOG_RATE = i18n.translate('xpack.observability.expView.fieldLabels.logRate', {
+  defaultMessage: 'Log rate',
+});

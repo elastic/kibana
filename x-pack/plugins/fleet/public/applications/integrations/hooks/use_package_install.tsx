@@ -8,13 +8,20 @@
 import createContainer from 'constate';
 import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { NotificationsStart } from 'src/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { NotificationsStart } from '@kbn/core/public';
+import type { Observable } from 'rxjs';
+import type { CoreTheme } from '@kbn/core/public';
 
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+
 import type { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
+
 import { InstallStatus } from '../../../types';
+import { isVerificationError } from '../services';
+
+import { useConfirmForceInstall } from '.';
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;
@@ -26,15 +33,23 @@ interface PackageInstallItem {
 }
 
 type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
+  isReinstall?: boolean;
   fromUpdate?: boolean;
+  force?: boolean;
 };
 type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
-function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
+function usePackageInstall({
+  notifications,
+  theme$,
+}: {
+  notifications: NotificationsStart;
+  theme$: Observable<CoreTheme>;
+}) {
   const history = useHistory();
   const { getPath } = useLink();
   const [packages, setPackage] = useState<PackagesInstall>({});
-
+  const confirmForceInstall = useConfirmForceInstall();
   const setPackageInstallStatus = useCallback(
     ({ name, status, version }: SetPackageInstallStatusProps) => {
       const packageProps: PackageInstallItem = {
@@ -56,35 +71,64 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
     [packages]
   );
 
-  const installPackage = useCallback(
-    async ({ name, version, title, fromUpdate = false }: InstallPackageProps) => {
-      const currStatus = getPackageInstallStatus(name);
-      const newStatus = { ...currStatus, name, status: InstallStatus.installing };
-      setPackageInstallStatus(newStatus);
-      const pkgkey = `${name}-${version}`;
+  const optionallyForceInstall = async (
+    installProps: InstallPackageProps,
+    prevStatus: PackageInstallItem
+  ) => {
+    const forceInstall = await confirmForceInstall(installProps);
+    if (forceInstall) {
+      installPackage({ ...installProps, force: true });
+    } else {
+      setPackageInstallStatus({ ...prevStatus, name: installProps.name });
+    }
+  };
 
-      const res = await sendInstallPackage(pkgkey);
+  const installPackage = useCallback(
+    async (props: InstallPackageProps) => {
+      const {
+        name,
+        version,
+        title,
+        fromUpdate = false,
+        isReinstall = false,
+        force = false,
+      } = props;
+      const prevStatus = getPackageInstallStatus(name);
+      const newStatus = {
+        ...prevStatus,
+        name,
+        status: isReinstall ? InstallStatus.reinstalling : InstallStatus.installing,
+      };
+      setPackageInstallStatus(newStatus);
+
+      const res = await sendInstallPackage(name, version, isReinstall || force);
       if (res.error) {
+        if (isVerificationError(res.error)) {
+          return optionallyForceInstall(props, prevStatus);
+        }
         if (fromUpdate) {
           // if there is an error during update, set it back to the previous version
           // as handling of bad update is not implemented yet
-          setPackageInstallStatus({ ...currStatus, name });
+          setPackageInstallStatus({ ...prevStatus, name });
         } else {
           setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
         }
+
         notifications.toasts.addWarning({
           title: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.packageInstallErrorTitle"
               defaultMessage="Failed to install {title} package"
               values={{ title }}
-            />
+            />,
+            { theme$ }
           ),
           text: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.packageInstallErrorDescription"
               defaultMessage="Something went wrong while trying to install this package. Please try again later."
-            />
+            />,
+            { theme$ }
           ),
           iconType: 'alert',
         });
@@ -97,25 +141,56 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
           history.push(settingsPath);
         }
 
-        notifications.toasts.addSuccess({
-          title: toMountPoint(
-            <FormattedMessage
-              id="xpack.fleet.integrations.packageInstallSuccessTitle"
-              defaultMessage="Installed {title}"
-              values={{ title }}
-            />
-          ),
-          text: toMountPoint(
-            <FormattedMessage
-              id="xpack.fleet.integrations.packageInstallSuccessDescription"
-              defaultMessage="Successfully installed {title}"
-              values={{ title }}
-            />
-          ),
-        });
+        if (isReinstall) {
+          notifications.toasts.addSuccess({
+            title: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageReinstallSuccessTitle"
+                defaultMessage="Reinstalled {title}"
+                values={{ title }}
+              />,
+              { theme$ }
+            ),
+            text: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageReinstallSuccessDescription"
+                defaultMessage="Successfully reinstalled {title}"
+                values={{ title }}
+              />,
+              { theme$ }
+            ),
+          });
+        } else {
+          notifications.toasts.addSuccess({
+            title: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageInstallSuccessTitle"
+                defaultMessage="Installed {title}"
+                values={{ title }}
+              />,
+              { theme$ }
+            ),
+            text: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageInstallSuccessDescription"
+                defaultMessage="Successfully installed {title}"
+                values={{ title }}
+              />,
+              { theme$ }
+            ),
+          });
+        }
       }
     },
-    [getPackageInstallStatus, notifications.toasts, setPackageInstallStatus, getPath, history]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      getPackageInstallStatus,
+      setPackageInstallStatus,
+      notifications.toasts,
+      theme$,
+      getPath,
+      history,
+    ]
   );
 
   const uninstallPackage = useCallback(
@@ -126,9 +201,8 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
       redirectToVersion,
     }: Pick<PackageInfo, 'name' | 'version' | 'title'> & { redirectToVersion: string }) => {
       setPackageInstallStatus({ name, status: InstallStatus.uninstalling, version });
-      const pkgkey = `${name}-${version}`;
 
-      const res = await sendRemovePackage(pkgkey);
+      const res = await sendRemovePackage(name, version);
       if (res.error) {
         setPackageInstallStatus({ name, status: InstallStatus.installed, version });
         notifications.toasts.addWarning({
@@ -137,13 +211,15 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
               id="xpack.fleet.integrations.packageUninstallErrorTitle"
               defaultMessage="Failed to uninstall {title} package"
               values={{ title }}
-            />
+            />,
+            { theme$ }
           ),
           text: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.packageUninstallErrorDescription"
               defaultMessage="Something went wrong while trying to uninstall this package. Please try again later."
-            />
+            />,
+            { theme$ }
           ),
           iconType: 'alert',
         });
@@ -156,14 +232,16 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
               id="xpack.fleet.integrations.packageUninstallSuccessTitle"
               defaultMessage="Uninstalled {title}"
               values={{ title }}
-            />
+            />,
+            { theme$ }
           ),
           text: toMountPoint(
             <FormattedMessage
               id="xpack.fleet.integrations.packageUninstallSuccessDescription"
               defaultMessage="Successfully uninstalled {title}"
               values={{ title }}
-            />
+            />,
+            { theme$ }
           ),
         });
         if (redirectToVersion !== version) {
@@ -174,7 +252,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         }
       }
     },
-    [notifications.toasts, setPackageInstallStatus, getPath, history]
+    [notifications.toasts, setPackageInstallStatus, getPath, history, theme$]
   );
 
   return {

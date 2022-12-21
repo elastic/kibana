@@ -1,6 +1,7 @@
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "pkg_npm")
 
-PKG_BASE_NAME = "kbn-eslint-plugin-eslint"
+PKG_DIRNAME = "kbn-eslint-plugin-eslint"
 PKG_REQUIRE_NAME = "@kbn/eslint-plugin-eslint"
 
 SOURCE_FILES = glob(
@@ -11,8 +12,17 @@ SOURCE_FILES = glob(
     "lib.js",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
-    "**/__fixtures__"
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -25,32 +35,29 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md",
 ]
 
-DEPS = [
-  "@npm//babel-eslint",
+RUNTIME_DEPS = [
+  "//packages/kbn-utils",
+  "@npm//@babel/eslint-parser",
   "@npm//dedent",
   "@npm//eslint",
   "@npm//eslint-module-utils",
-  "@npm//micromatch",
 ]
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES + [
     ":srcs",
   ],
-  deps = DEPS,
+  deps = RUNTIME_DEPS,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(

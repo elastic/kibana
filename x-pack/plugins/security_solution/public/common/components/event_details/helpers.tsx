@@ -5,27 +5,21 @@
  * 2.0.
  */
 
-import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
+import { get, getOr, isEmpty } from 'lodash/fp';
 
-import styled from 'styled-components';
-import React from 'react';
-import { EuiBasicTableColumn, EuiTitle } from '@elastic/eui';
 import {
   elementOrChildrenHasFocus,
   getFocusedDataColindexCell,
   getTableSkipFocus,
   handleSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../../../../../timelines/public';
-import { BrowserField, BrowserFields } from '../../containers/source';
-import {
-  DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  DEFAULT_COLUMN_MIN_WIDTH,
-} from '../../../timelines/components/timeline/body/constants';
-import { FieldsData } from './types';
+} from '@kbn/timelines-plugin/public';
+import type { BrowserFields } from '../../containers/source';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import type { EnrichedFieldInfo, EventSummaryField } from './types';
 
 import * as i18n from './translations';
-import { ColumnHeaderOptions } from '../../../../common';
+import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -37,11 +31,6 @@ export const search = {
     schema: true,
   },
 };
-
-export interface ItemValues {
-  value: JSX.Element;
-  valueAsString: string;
-}
 
 /**
  * An item rendered in the table
@@ -56,78 +45,17 @@ export interface Item {
 
 export interface AlertSummaryRow {
   title: string;
-  description: {
-    data: FieldsData;
-    eventId: string;
+  description: EnrichedFieldInfo & {
     isDraggable?: boolean;
-    fieldFromBrowserField?: BrowserField;
-    linkValue: string | undefined;
-    timelineId: string;
-    values: string[] | null | undefined;
+    isReadOnly?: boolean;
   };
 }
-
-export interface ThreatDetailsRow {
-  title: string;
-  description: {
-    fieldName: string;
-    value: string;
-  };
-}
-
-export type SummaryRow = AlertSummaryRow | ThreatDetailsRow;
-
-export const getColumnHeaderFromBrowserField = ({
-  browserField,
-  width = DEFAULT_COLUMN_MIN_WIDTH,
-}: {
-  browserField: Partial<BrowserField>;
-  width?: number;
-}): ColumnHeaderOptions => ({
-  category: browserField.category,
-  columnHeaderType: 'not-filtered',
-  description: browserField.description != null ? browserField.description : undefined,
-  example: browserField.example != null ? `${browserField.example}` : undefined,
-  id: browserField.name || '',
-  type: browserField.type,
-  aggregatable: browserField.aggregatable,
-  initialWidth: width,
-});
-
-/**
- * Returns a collection of columns, where the first column in the collection
- * is a timestamp, and the remaining columns are all the columns in the
- * specified category
- */
-export const getColumnsWithTimestamp = ({
-  browserFields,
-  category,
-}: {
-  browserFields: BrowserFields;
-  category: string;
-}): ColumnHeaderOptions[] => {
-  const emptyFields: Record<string, Partial<BrowserField>> = {};
-  const timestamp = get('base.fields.@timestamp', browserFields);
-  const categoryFields: Array<Partial<BrowserField>> = [
-    ...Object.values(getOr(emptyFields, `${category}.fields`, browserFields)),
-  ];
-
-  return timestamp != null && categoryFields.length
-    ? uniqBy('id', [
-        getColumnHeaderFromBrowserField({
-          browserField: timestamp,
-          width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
-        }),
-        ...categoryFields.map((f) => getColumnHeaderFromBrowserField({ browserField: f })),
-      ])
-    : [];
-};
 
 /** Returns example text, or an empty string if the field does not have an example */
 export const getExampleText = (example: string | number | null | undefined): string =>
   !isEmpty(example) ? `Example: ${example}` : '';
 
-export const getIconFromType = (type: string | null) => {
+export const getIconFromType = (type: string | null | undefined) => {
   switch (type) {
     case 'string': // fall through
     case 'keyword':
@@ -199,36 +127,61 @@ export const onEventDetailsTabKeyPressed = ({
   }
 };
 
-const StyledH5 = styled.h5`
-  line-height: 1.7rem;
-`;
+export function getEnrichedFieldInfo({
+  browserFields,
+  contextId,
+  eventId,
+  field,
+  item,
+  linkValueField,
+  scopeId,
+}: {
+  browserFields: BrowserFields;
+  contextId: string;
+  item: TimelineEventsDetailsItem;
+  eventId: string;
+  field?: EventSummaryField;
+  scopeId: string;
+  linkValueField?: TimelineEventsDetailsItem;
+}): EnrichedFieldInfo {
+  const fieldInfo = {
+    contextId,
+    eventId,
+    fieldType: 'string',
+    linkValue: undefined,
+    scopeId,
+  };
+  const linkValue = getOr(null, 'originalValue.0', linkValueField);
+  const category = item.category ?? '';
+  const fieldName = item.field ?? '';
 
-const getTitle = (title: string) => (
-  <EuiTitle size="xxxs">
-    <StyledH5>{title}</StyledH5>
-  </EuiTitle>
-);
-getTitle.displayName = 'getTitle';
+  const browserField = get([category, 'fields', fieldName], browserFields);
+  const overrideField = field?.overrideField;
+  return {
+    ...fieldInfo,
+    data: {
+      field: overrideField ?? fieldName,
+      format: browserField?.format ?? '',
+      type: browserField?.type ?? '',
+      isObjectArray: item.isObjectArray,
+    },
+    values: item.values,
+    linkValue: linkValue ?? undefined,
+    fieldFromBrowserField: browserField,
+  };
+}
 
-export const getSummaryColumns = (
-  DescriptionComponent:
-    | React.FC<AlertSummaryRow['description']>
-    | React.FC<ThreatDetailsRow['description']>
-): Array<EuiBasicTableColumn<SummaryRow>> => {
-  return [
-    {
-      field: 'title',
-      truncateText: false,
-      render: getTitle,
-      width: '220px',
-      name: '',
-    },
-    {
-      className: 'flyoutOverviewDescription',
-      field: 'description',
-      truncateText: false,
-      render: DescriptionComponent,
-      name: '',
-    },
-  ];
+/**
+ * A lookup table for fields that should not have actions
+ */
+export const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = {
+  [AGENT_STATUS_FIELD_NAME]: true,
 };
+
+/**
+ * Checks whether the given field should have hover or row actions.
+ * The lookup is fast, so it is not necessary to memoize the result.
+ */
+export function hasHoverOrRowActions(field: string): boolean {
+  return !FIELDS_WITHOUT_ACTIONS[field];
+}

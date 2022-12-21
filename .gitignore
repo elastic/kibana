@@ -10,6 +10,7 @@
 node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
+!/packages/kbn-import-resolver/src/__fixtures__/node_modules
 trash
 /optimize
 /built_assets
@@ -19,9 +20,12 @@ target
 .idea
 *.iml
 *.log
+types.eslint.config.js
+__tmp__
 
 # Ignore example plugin builds
 /examples/*/build
+/x-pack/examples/*/build
 
 # Ignore certain functional test runner artifacts
 /test/*/failure_debug
@@ -36,6 +40,7 @@ target
 /x-pack/test/*/screenshots/failure
 /x-pack/test/*/screenshots/session
 /x-pack/test/*/screenshots/visual_regression_gallery.html
+/x-pack/test/functional/apps/*/*/reporting/reports/failure
 
 /html_docs
 .eslintcache
@@ -54,6 +59,7 @@ selenium
 *.swo
 *.out
 package-lock.json
+!/.buildkite/package-lock.json
 .yo-rc.json
 .vscode
 *.sublime-*
@@ -65,9 +71,19 @@ npm-debug.log*
 .ci/bash_standard_lib.sh
 .gradle
 .vagrant
+.envrc
+
+## Snyk
+.dccache
 
 ## @cypress/snapshot from apm plugin
 /snapshots.js
+
+# transpiled cypress config
+x-pack/plugins/fleet/cypress.config.d.ts
+x-pack/plugins/fleet/cypress.config.js
+x-pack/plugins/osquery/cypress.config.d.ts
+x-pack/plugins/osquery/cypress.config.js
 
 # release notes script output
 report.csv
@@ -78,11 +94,22 @@ report.asciidoc
 
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
+tsconfig.base.type_check.json
+tsconfig.type_check.json
 
 # Yarn local mirror content
 .yarn-local-mirror
 
 # Bazel
+.ijwb
 /bazel
 /bazel-*
 .bazelrc.user
+.bazelrc.cache
+
+elastic-agent-*
+fleet-server-*
+elastic-agent.yml
+fleet-server.yml
+/packages/kbn-synthetic-package-map/synthetic-packages.json
+

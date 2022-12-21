@@ -5,37 +5,26 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110904
-/* eslint-disable @kbn/eslint/no_export_all */
+// Careful of exporting anything from this file as any file(s) you export here will cause your page bundle size to increase.
+// If you're using functions/types/etc... internally or within integration tests it's best to import directly from their paths
+// than expose the functions/types/etc... here. You should _only_ expose functions/types/etc... that need to be shared with other plugins here.
 
-import { createContext } from 'react';
-
-import { PluginInitializerContext } from '../../../../src/core/public';
+// When you do have to add things here you might want to consider creating a package to share with
+// other plugins instead as packages are easier to break down and you do not have to carry the cost of extra plugin weight on
+// first download since the other plugins/areas of your code can directly pull from the package in their async imports.
+// See: https://docs.elastic.dev/kibana-dev-docs/key-concepts/platform-intro#public-plugin-api
 
 import { TimelinesPlugin } from './plugin';
-import type { StatefulEventContextType } from './types';
-export * as tGridActions from './store/t_grid/actions';
-export * as tGridSelectors from './store/t_grid/selectors';
-export type {
-  Inspect,
-  SortField,
-  TimerangeInput,
-  PaginationInputPaginated,
-  DocValueFields,
-  CursorType,
-  TotalValue,
-} from '../common/search_strategy/common';
-export { Direction } from '../common/search_strategy/common';
-export { tGridReducer } from './store/t_grid/reducer';
-export type { TGridModelForTimeline, TimelineState, TimelinesUIStart } from './types';
-export { TGridType, SortDirection } from './types';
+
+export type { TimelinesUIStart } from './types';
+export type { OnColumnFocused } from '../common/utils/accessibility';
+
 export {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   FIRST_ARIA_INDEX,
-  OnColumnFocused,
   arrayIndexToAriaIndex,
   elementOrChildrenHasFocus,
   isArrowDownOrArrowUp,
@@ -49,23 +38,14 @@ export {
   getRowRendererClassName,
   getTableSkipFocus,
   handleSkipFocus,
-  onFocusReFocusDraggable,
   onKeyDownFocusHandler,
-  skipFocusInContainerTo,
   stopPropagationAndPreventDefault,
 } from '../common/utils/accessibility';
-export { getPageRowIndex } from '../common/utils/pagination';
-export {
-  addFieldToTimelineColumns,
-  getTimelineIdFromColumnDroppableId,
-} from './components/drag_and_drop/helpers';
-export { StatefulFieldsBrowser } from './components/t_grid/toolbar/fields_browser';
-export { useStatusBulkActionItems } from './hooks/use_status_bulk_action_items';
+
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new TimelinesPlugin(initializerContext);
+export function plugin() {
+  return new TimelinesPlugin();
 }
 
-export const StatefulEventContext = createContext<StatefulEventContextType | null>(null);
-export { TimelineContext } from './components/t_grid/shared';
+export type { AddToTimelineButtonProps } from './components/hover_actions/actions/add_to_timeline';

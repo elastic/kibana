@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { some } from 'lodash';
 import useDebounce from 'react-use/lib/useDebounce';
-import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
+import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiMarkdownAstNode, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import type { EuiMarkdownAstNode, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { VISUALIZATION } from './translations';
 import { PREFIX } from './constants';
 
@@ -107,11 +109,13 @@ export const useLensButtonToggle = ({
           for (let i = 0; i < node.children.length; i++) {
             const child = node.children[i];
             if (
+              child.position &&
               child.position.start.offset < selectionStart &&
               selectionStart < child.position.end.offset
             ) {
               if (child.type === 'text') break outer; // don't dive into `text` nodes
               node = child;
+              // eslint-disable-next-line no-continue
               continue outer;
             }
           }

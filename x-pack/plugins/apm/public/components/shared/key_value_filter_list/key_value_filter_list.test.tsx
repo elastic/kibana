@@ -5,11 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { KeyValueFilterList } from './';
+import { KeyValueFilterList } from '.';
 import {
   expectTextsInDocument,
   renderWithTheme,
-} from '../../../utils/testHelpers';
+} from '../../../utils/test_helpers';
 import { fireEvent } from '@testing-library/react';
 
 describe('KeyValueFilterList', () => {
@@ -28,8 +28,8 @@ describe('KeyValueFilterList', () => {
       <KeyValueFilterList
         title="title"
         keyValueList={[
-          { key: 'foo', value: 'foo value' },
-          { key: 'bar', value: 'bar value' },
+          { key: 'foo', value: 'foo value', isFilterable: true },
+          { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={jest.fn}
       />
@@ -48,8 +48,8 @@ describe('KeyValueFilterList', () => {
         title="title"
         icon="alert"
         keyValueList={[
-          { key: 'foo', value: 'foo value' },
-          { key: 'bar', value: 'bar value' },
+          { key: 'foo', value: 'foo value', isFilterable: true },
+          { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={jest.fn}
       />
@@ -62,8 +62,8 @@ describe('KeyValueFilterList', () => {
       <KeyValueFilterList
         title="title"
         keyValueList={[
-          { key: 'foo', value: 'foo value' },
-          { key: 'bar', value: 'bar value' },
+          { key: 'foo', value: 'foo value', isFilterable: true },
+          { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={jest.fn}
       />
@@ -71,20 +71,38 @@ describe('KeyValueFilterList', () => {
     expect(component.queryAllByTestId('accordion_title_icon')).toEqual([]);
     expectTextsInDocument(component, ['title']);
   });
+
+  it('hides filter by value option', () => {
+    const component = renderWithTheme(
+      <KeyValueFilterList
+        title="title"
+        keyValueList={[
+          { key: 'foo', value: 'foo value', isFilterable: false },
+          { key: 'bar', value: 'bar value', isFilterable: true },
+        ]}
+        onClickFilter={jest.fn}
+      />
+    );
+    expect(component.queryAllByTestId('filter_by_foo')).toEqual([]);
+    expect(component.queryAllByTestId('filter_by_bar')).toHaveLength(1);
+  });
   it('returns selected key value when the filter button is clicked', () => {
     const mockFilter = jest.fn();
     const component = renderWithTheme(
       <KeyValueFilterList
         title="title"
         keyValueList={[
-          { key: 'foo', value: 'foo value' },
-          { key: 'bar', value: 'bar value' },
+          { key: 'foo', value: 'foo value', isFilterable: true },
+          { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={mockFilter}
       />
     );
 
     fireEvent.click(component.getByTestId('filter_by_foo'));
-    expect(mockFilter).toHaveBeenCalledWith({ key: 'foo', value: 'foo value' });
+    expect(mockFilter).toHaveBeenCalledWith({
+      key: 'foo',
+      value: 'foo value',
+    });
   });
 });

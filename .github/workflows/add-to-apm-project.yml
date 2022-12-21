@@ -1,0 +1,52 @@
+name: Add to APM Project
+on:
+  issues:
+    types:
+      - labeled
+jobs:
+  add_to_project:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.label.name == 'Team:apm'
+    steps:
+      - uses: octokit/graphql-action@v2.x
+        id: add_to_project
+        with:
+          query: |
+            mutation add_to_project($projectid:ID!,$contentid:ID!) {
+              addProjectV2ItemById(input:{projectId:$projectid contentId:$contentid}) {
+                item {
+                  ... on ProjectV2Item {
+                    id
+                  }
+                }
+              }
+            }
+          projectid: ${{ env.PROJECT_ID }}
+          contentid: ${{ github.event.issue.node_id }}
+        env:
+          PROJECT_ID: "PVT_kwDOAGc3Zs0VSg"
+          GITHUB_TOKEN: ${{ secrets.APM_TECH_KIBANA_USER_TOKEN }}
+      - uses: octokit/graphql-action@v2.x
+        id: label_team
+        with:
+          query: |
+            mutation label_team($projectid:ID!,$itemid:ID!,$fieldid:ID!,$value:String!) {
+              updateProjectV2ItemFieldValue(input: { projectId:$projectid itemId:$itemid fieldId:$fieldid value:{singleSelectOptionId: $value} }) {
+                projectV2Item {
+                  id
+                  content {
+                    ... on Issue {
+                      number
+                    }
+                  }
+                }
+              }
+            }
+          projectid: ${{ env.PROJECT_ID }}
+          itemid: ${{ fromJSON(steps.add_to_project.outputs.data).addProjectV2ItemById.item.id }}
+          fieldid: "PVTSSF_lADOAGc3Zs0VSs2scg"
+          value: "c33f5c54"
+        env:
+          PROJECT_ID: "PVT_kwDOAGc3Zs0VSg"
+          GITHUB_TOKEN: ${{ secrets.APM_TECH_KIBANA_USER_TOKEN }}

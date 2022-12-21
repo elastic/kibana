@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiHorizontalRule, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -110,6 +110,7 @@ export const ExpandableSectionAnalytics: FC<ExpandableSectionAnalyticsProps> = (
 
   useEffect(() => {
     fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   const analyticsSectionHeaderItems = getAnalyticsSectionHeaderItems(expandedRowItem);

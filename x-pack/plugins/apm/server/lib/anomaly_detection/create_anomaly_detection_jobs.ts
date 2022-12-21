@@ -6,41 +6,46 @@
  */
 
 import Boom from '@hapi/boom';
-import { Logger } from 'kibana/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { snakeCase } from 'lodash';
 import moment from 'moment';
 import uuid from 'uuid/v4';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { waitForIndexStatus } from '@kbn/core-saved-objects-migration-server-internal';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import {
-  METRICSET_NAME,
-  PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { METRICSET_NAME, PROCESSOR_EVENT } from '../../../common/es_fields/apm';
+import { Environment } from '../../../common/environment_rt';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { Setup } from '../helpers/setup_request';
+import { MlClient } from '../helpers/get_ml_client';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
+import { ApmIndicesConfig } from '../../routes/settings/apm_indices/get_apm_indices';
 
-export async function createAnomalyDetectionJobs(
-  setup: Setup,
-  environments: string[],
-  logger: Logger
-) {
-  const { ml, indices } = setup;
+const DEFAULT_TIMEOUT = '60s';
 
-  if (!ml) {
+export async function createAnomalyDetectionJobs({
+  mlClient,
+  esClient,
+  indices,
+  environments,
+  logger,
+}: {
+  mlClient?: MlClient;
+  esClient: ElasticsearchClient;
+  indices: ApmIndicesConfig;
+  environments: Environment[];
+  logger: Logger;
+}) {
+  if (!mlClient) {
     throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
-  const mlCapabilities = await withApmSpan('get_ml_capabilities', () =>
-    ml.mlSystem.mlCapabilities()
+  const uniqueMlJobEnvs = await getUniqueMlJobEnvs(
+    mlClient,
+    environments,
+    logger
   );
-  if (!mlCapabilities.mlFeatureEnabledInSpace) {
-    throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
-  }
-
-  const uniqueMlJobEnvs = await getUniqueMlJobEnvs(setup, environments, logger);
   if (uniqueMlJobEnvs.length === 0) {
     return [];
   }
@@ -50,19 +55,36 @@ export async function createAnomalyDetectionJobs(
       `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`
     );
 
-    const indexPatternName = indices['apm_oss.metricsIndices'];
-    const responses = await Promise.all(
-      uniqueMlJobEnvs.map((environment) =>
-        createAnomalyDetectionJob({ ml, environment, indexPatternName })
-      )
-    );
+    const apmMetricIndex = indices.metric;
+    const responses = [];
+    const failedJobs = [];
+    // Avoid the creation of multiple ml jobs in parallel
+    // https://github.com/elastic/elasticsearch/issues/36271
+    for (const environment of uniqueMlJobEnvs) {
+      try {
+        responses.push(
+          await createAnomalyDetectionJob({
+            mlClient,
+            esClient,
+            environment,
+            apmMetricIndex,
+          })
+        );
+      } catch (e) {
+        if (!e.id || !e.error) {
+          throw e;
+        }
+        failedJobs.push({ id: e.id, error: e.error });
+      }
+    }
+
     const jobResponses = responses.flatMap((response) => response.jobs);
-    const failedJobs = jobResponses.filter(({ success }) => !success);
 
     if (failedJobs.length > 0) {
-      const errors = failedJobs.map(({ id, error }) => ({ id, error }));
       throw new Error(
-        `An error occurred while creating ML jobs: ${JSON.stringify(errors)}`
+        `An error occurred while creating ML jobs: ${JSON.stringify(
+          failedJobs
+        )}`
       );
     }
 
@@ -71,22 +93,24 @@ export async function createAnomalyDetectionJobs(
 }
 
 async function createAnomalyDetectionJob({
-  ml,
+  mlClient,
+  esClient,
   environment,
-  indexPatternName,
+  apmMetricIndex,
 }: {
-  ml: Required<Setup>['ml'];
+  mlClient: Required<MlClient>;
+  esClient: ElasticsearchClient;
   environment: string;
-  indexPatternName: string;
+  apmMetricIndex: string;
 }) {
   return withApmSpan('create_anomaly_detection_job', async () => {
     const randomToken = uuid().substr(-4);
 
-    return ml.modules.setup({
+    const anomalyDetectionJob = mlClient.modules.setup({
       moduleId: ML_MODULE_ID_APM_TRANSACTION,
       prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
       groups: [APM_ML_JOB_GROUP],
-      indexPatternName,
+      indexPatternName: apmMetricIndex,
       applyToAllSpaces: true,
       start: moment().subtract(4, 'weeks').valueOf(),
       query: {
@@ -111,17 +135,29 @@ async function createAnomalyDetectionJob({
         },
       ],
     });
+
+    waitForIndexStatus({
+      client: esClient,
+      index: '.ml-*',
+      timeout: DEFAULT_TIMEOUT,
+      status: 'yellow',
+    });
+
+    return anomalyDetectionJob;
   });
 }
 
 async function getUniqueMlJobEnvs(
-  setup: Setup,
-  environments: string[],
+  mlClient: MlClient,
+  environments: Environment[],
   logger: Logger
 ) {
   // skip creation of duplicate ML jobs
-  const jobs = await getAnomalyDetectionJobs(setup, logger);
-  const existingMlJobEnvs = jobs.map(({ environment }) => environment);
+  const jobs = await getAnomalyDetectionJobs(mlClient);
+  const existingMlJobEnvs = jobs
+    .filter((job) => job.version === 3)
+    .map(({ environment }) => environment);
+
   const requestedExistingMlJobEnvs = environments.filter((env) =>
     existingMlJobEnvs.includes(env)
   );

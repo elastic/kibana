@@ -4,22 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  Field,
-  Aggregation,
-  AggId,
-  FieldId,
-  EVENT_RATE_FIELD_ID,
-} from '../../../../common/types/fields';
-import { ES_FIELD_TYPES, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Field, Aggregation, AggId, FieldId } from '../../../../common/types/fields';
+import { EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import { getGeoFields, filterCategoryFields } from '../../../../common/util/fields_utils';
 import { ml } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
-
-const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP];
 
 class NewJobCapsService extends NewJobCapabilitiesServiceBase {
   private _catFields: Field[] = [];
   private _dateFields: Field[] = [];
+  private _geoFields: Field[] = [];
   private _includeEventRateField: boolean = true;
   private _removeTextFields: boolean = true;
 
@@ -31,12 +27,16 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
     return this._dateFields;
   }
 
+  public get geoFields(): Field[] {
+    return this._geoFields;
+  }
+
   public get categoryFields(): Field[] {
     return filterCategoryFields(this._fields);
   }
 
-  public async initializeFromIndexPattern(
-    indexPattern: IIndexPattern,
+  public async initializeFromDataVIew(
+    dataView: DataView,
     includeEventRateField = true,
     removeTextFields = true
   ) {
@@ -44,8 +44,8 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
       this._includeEventRateField = includeEventRateField;
       this._removeTextFields = removeTextFields;
 
-      const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
-      const { fields: allFields, aggs } = createObjects(resp, indexPattern.title);
+      const resp = await ml.jobs.newJobCaps(dataView.getIndexPattern(), dataView.type === 'rollup');
+      const { fields: allFields, aggs } = createObjects(resp, dataView.getIndexPattern());
 
       if (this._includeEventRateField === true) {
         addEventRateField(aggs, allFields);
@@ -57,6 +57,7 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
         (f) => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.TEXT
       );
       const dateFields = fieldsPreferringText.filter((f) => f.type === ES_FIELD_TYPES.DATE);
+      const geoFields = getGeoFields(allFields);
       const fields = this._removeTextFields ? fieldsPreferringKeyword : allFields;
 
       // set the main fields list to contain fields which have been filtered to prefer
@@ -66,6 +67,7 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
       // set the category fields to contain fields which have been filtered to prefer text fields.
       this._catFields = catFields;
       this._dateFields = dateFields;
+      this._geoFields = geoFields;
       this._aggs = aggs;
     } catch (error) {
       console.error('Unable to load new job capabilities', error); // eslint-disable-line no-console
@@ -164,10 +166,6 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
     }
   });
   fields.splice(0, 0, eventRateField);
-}
-
-export function filterCategoryFields(fields: Field[]) {
-  return fields.filter((f) => categoryFieldTypes.includes(f.type));
 }
 
 export const newJobCapsService = new NewJobCapsService();

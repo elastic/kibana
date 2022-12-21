@@ -11,5 +11,9 @@
 
 /** @public types */
 export * from './types';
-export * from './prepare_log_table';
+export * from './utils';
 export * from './expression_functions';
+export * from './convert_to_lens';
+export { convertToSchemaConfig } from './vis_schemas';
+
+export { LegendSize, LegendSizeToPixels, DEFAULT_LEGEND_SIZE } from './constants';

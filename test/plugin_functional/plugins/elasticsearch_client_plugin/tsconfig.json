@@ -8,7 +8,7 @@
     "../../../../typings/**/*"
   ],
   "exclude": [],
-  "references": [
+  "kbn_references": [
     { "path": "../../../../src/core/tsconfig.json" }
   ]
 }

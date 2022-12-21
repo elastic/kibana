@@ -7,27 +7,28 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSplitPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSplitPanel, EuiText } from '@elastic/eui';
+import * as i18n from './translations';
 
 const ButtonContainer = styled(EuiFlexGroup)`
-  padding: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const Icon = styled(EuiIcon)`
   padding: 0;
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
   margin-left: 12px;
   transform: scale(${({ color }) => (color === 'primary' ? 1.4 : 1)});
 `;
 
 const PanelContainer = styled(EuiSplitPanel.Inner)`
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 const Title = styled(EuiText)<{ textcolor: 'primary' | 'warning' }>`
   color: ${({ theme, textcolor }) =>
     textcolor === 'primary' ? theme.eui.euiColorPrimary : theme.eui.euiColorWarningText};
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 export const InnerLinkPanel = ({
@@ -35,12 +36,14 @@ export const InnerLinkPanel = ({
   button,
   color,
   dataTestSubj,
+  learnMoreLink,
   title,
 }: {
   body: string;
   button?: JSX.Element;
   color: 'primary' | 'warning';
   dataTestSubj: string;
+  learnMoreLink?: string;
   title: string;
 }) => (
   <PanelContainer grow={false} color={color}>
@@ -54,7 +57,19 @@ export const InnerLinkPanel = ({
             </Title>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {body}
+        <p>
+          {body}{' '}
+          {learnMoreLink && (
+            <EuiLink
+              href={learnMoreLink}
+              target="_blank"
+              data-test-subj={`${dataTestSubj}-learn-more`}
+              external
+            >
+              {i18n.LEARN_MORE}
+            </EuiLink>
+          )}
+        </p>
       </EuiFlexItem>
       {button && (
         <ButtonContainer>

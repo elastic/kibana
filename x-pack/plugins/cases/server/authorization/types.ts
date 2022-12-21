@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EcsEventType, KibanaRequest } from 'kibana/server';
-import { KueryNode } from 'src/plugins/data/common';
-import { Space } from '../../../spaces/server';
+import type { EcsEventType } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
+import type { CasesSupportedOperations } from '@kbn/security-plugin/server';
 
 /**
  * The tenses for describing the action performed by a API route
@@ -17,8 +17,6 @@ export interface Verbs {
   progressive: string;
   past: string;
 }
-
-export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
 /**
  * Read operations for the cases APIs.
@@ -40,6 +38,10 @@ export enum ReadOperations {
   FindConfigurations = 'findConfigurations',
   GetUserActions = 'getUserActions',
   GetAlertsAttachedToCase = 'getAlertsAttachedToCase',
+  GetAttachmentMetrics = 'getAttachmentMetrics',
+  GetCaseMetrics = 'getCaseMetrics',
+  GetCasesMetrics = 'getCasesMetrics',
+  GetUserActionMetrics = 'getUserActionMetrics',
 }
 
 /**
@@ -73,9 +75,9 @@ export interface OperationDetails {
    * The name of the operation to authorize against for the privilege check.
    * These values need to match one of the operation strings defined here: x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
    */
-  name: string;
+  name: CasesSupportedOperations;
   /**
-   * The ECS `event.action` field, should be in the form of <entity>_<operation> e.g comment_get, case_fined
+   * The ECS `event.action` field, should be in the form of <entity>_<operation> e.g comment_get, case_find
    */
   action: string;
   /**

@@ -6,42 +6,56 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { get, isPlainObject } from 'lodash';
+import { get, isPlainObject, differenceWith, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
-import { esKuery } from '../../../../../src/plugins/data/server';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import {
+  isCommentRequestTypeExternalReference,
+  isCommentRequestTypePersistableState,
+} from '../../common/utils/attachments';
+import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+
+import { SEVERITY_EXTERNAL_TO_ESMODEL } from '../common/constants';
+import type {
+  CaseStatuses,
+  CommentRequest,
+  CaseSeverity,
+  CommentRequestExternalReferenceType,
+} from '../../common/api';
+import {
+  OWNER_FIELD,
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
-  CASE_SAVED_OBJECT,
-  CaseStatuses,
-  CaseType,
-  CommentRequest,
   ContextTypeUserRt,
   excess,
-  OWNER_FIELD,
-  SUB_CASE_SAVED_OBJECT,
   throwErrors,
-} from '../../common';
+  ExternalReferenceStorageType,
+  ExternalReferenceSORt,
+  ExternalReferenceNoSORt,
+  PersistableStateAttachmentRt,
+} from '../../common/api';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
   getIDsAndIndicesAsArrays,
-  isCommentRequestTypeAlertOrGenAlert,
+  isCommentRequestTypeAlert,
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
-  SavedObjectFindOptionsKueryNode,
-} from '../common';
+  assertUnreachable,
+} from '../common/utils';
+import type { SavedObjectFindOptionsKueryNode } from '../common/types';
+import type { CasesFindQueryParams } from './types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
   } else if (isCommentRequestTypeActions(comment)) {
     pipe(excess(ActionsCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
-  } else if (isCommentRequestTypeAlertOrGenAlert(comment)) {
+  } else if (isCommentRequestTypeAlert(comment)) {
     pipe(excess(AlertCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
     const { ids, indices } = getIDsAndIndicesAsArrays(comment);
 
@@ -85,6 +99,31 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
         )} indices: ${JSON.stringify(indices)}`
       );
     }
+  } else if (isCommentRequestTypeExternalReference(comment)) {
+    decodeExternalReferenceAttachment(comment);
+  } else if (isCommentRequestTypePersistableState(comment)) {
+    pipe(
+      excess(PersistableStateAttachmentRt).decode(comment),
+      fold(throwErrors(badRequest), identity)
+    );
+  } else {
+    /**
+     * This assertion ensures that TS will show an error
+     * when we add a new attachment type. This way, we rely on TS
+     * to remind us that we have to do a check for the new attachment.
+     */
+    assertUnreachable(comment);
+  }
+};
+
+const decodeExternalReferenceAttachment = (attachment: CommentRequestExternalReferenceType) => {
+  if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
+    pipe(excess(ExternalReferenceSORt).decode(attachment), fold(throwErrors(badRequest), identity));
+  } else {
+    pipe(
+      excess(ExternalReferenceNoSORt).decode(attachment),
+      fold(throwErrors(badRequest), identity)
+    );
   }
 };
 
@@ -92,7 +131,7 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
  * Return the alert IDs from the comment if it is an alert style comment. Otherwise return an empty array.
  */
 export const getAlertIds = (comment: CommentRequest): string[] => {
-  if (isCommentRequestTypeAlertOrGenAlert(comment)) {
+  if (isCommentRequestTypeAlert(comment)) {
     return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
   }
   return [];
@@ -117,11 +156,37 @@ export const addStatusFilter = ({
   return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 };
 
+export const addSeverityFilter = ({
+  severity,
+  appendFilter,
+  type = CASE_SAVED_OBJECT,
+}: {
+  severity: CaseSeverity;
+  appendFilter?: KueryNode;
+  type?: string;
+}): KueryNode => {
+  const filters: KueryNode[] = [];
+
+  filters.push(
+    nodeBuilder.is(`${type}.attributes.severity`, `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`)
+  );
+
+  if (appendFilter) {
+    filters.push(appendFilter);
+  }
+
+  return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
+};
+
 interface FilterField {
   filters?: string | string[];
   field: string;
   operator: 'and' | 'or';
   type?: string;
+}
+
+interface NestedFilterField extends FilterField {
+  nestedField: string;
 }
 
 export const buildFilter = ({
@@ -141,7 +206,48 @@ export const buildFilter = ({
   }
 
   return nodeBuilder[operator](
-    filtersAsArray.map((filter) => nodeBuilder.is(`${type}.attributes.${field}`, filter))
+    filtersAsArray.map((filter) =>
+      nodeBuilder.is(`${escapeKuery(type)}.attributes.${escapeKuery(field)}`, escapeKuery(filter))
+    )
+  );
+};
+
+/**
+ * Creates a KueryNode filter for the Saved Object find API's filter field. This handles constructing a filter for
+ * a nested field.
+ *
+ * @param filters is a string or array of strings that defines the values to search for
+ * @param field is the location to search for
+ * @param nestedField is the field in the saved object that has a type of 'nested'
+ * @param operator whether to 'or'/'and' the created filters together
+ * @type the type of saved object being searched
+ * @returns a constructed KueryNode representing the filter or undefined if one could not be built
+ */
+export const buildNestedFilter = ({
+  filters,
+  field,
+  nestedField,
+  operator,
+  type = CASE_SAVED_OBJECT,
+}: NestedFilterField): KueryNode | undefined => {
+  if (filters === undefined) {
+    return;
+  }
+
+  const filtersAsArray = Array.isArray(filters) ? filters : [filters];
+
+  if (filtersAsArray.length === 0) {
+    return;
+  }
+
+  return nodeBuilder[operator](
+    filtersAsArray.map((filter) =>
+      fromKueryExpression(
+        `${escapeKuery(type)}.attributes.${escapeKuery(nestedField)}:{ ${escapeKuery(
+          field
+        )}: ${escapeKuery(filter)} }`
+      )
+    )
   );
 };
 
@@ -183,210 +289,166 @@ export function stringToKueryNode(expression?: string): KueryNode | undefined {
     return;
   }
 
-  return esKuery.fromKueryExpression(expression);
+  return fromKueryExpression(expression);
 }
 
-/**
- * Constructs the filters used for finding cases and sub cases.
- * There are a few scenarios that this function tries to handle when constructing the filters used for finding cases
- * and sub cases.
- *
- * Scenario 1:
- *  Type == Individual
- *  If the API request specifies that it wants only individual cases (aka not collections) then we need to add that
- *  specific filter when call the saved objects find api. This will filter out any collection cases.
- *
- * Scenario 2:
- *  Type == collection
- *  If the API request specifies that it only wants collection cases (cases that have sub cases) then we need to add
- *  the filter for collections AND we need to ignore any status filter for the case find call. This is because a
- *  collection's status is no longer relevant when it has sub cases. The user cannot change the status for a collection
- *  only for its sub cases. The status filter will be applied to the find request when looking for sub cases.
- *
- * Scenario 3:
- *  No Type is specified
- *  If the API request does not want to filter on type but instead get both collections and regular individual cases then
- *  we need to find all cases that match the other filter criteria and sub cases. To do this we construct the following query:
- *
- *    ((status == some_status and type === individual) or type == collection) and (tags == blah) and (reporter == yo)
- *  This forces us to honor the status request for individual cases but gets us ALL collection cases that match the other
- *  filter criteria. When we search for sub cases we will use that status filter in that find call as well.
- */
+export const buildRangeFilter = ({
+  from,
+  to,
+  field = 'created_at',
+  savedObjectType = CASE_SAVED_OBJECT,
+}: {
+  from?: string;
+  to?: string;
+  field?: string;
+  savedObjectType?: string;
+}): KueryNode | undefined => {
+  if (from == null && to == null) {
+    return;
+  }
+
+  try {
+    const fromKQL =
+      from != null
+        ? `${escapeKuery(savedObjectType)}.attributes.${escapeKuery(field)} >= ${escapeKuery(from)}`
+        : undefined;
+    const toKQL =
+      to != null
+        ? `${escapeKuery(savedObjectType)}.attributes.${escapeKuery(field)} <= ${escapeKuery(to)}`
+        : undefined;
+
+    const rangeKQLQuery = `${fromKQL != null ? fromKQL : ''} ${
+      fromKQL != null && toKQL != null ? 'and' : ''
+    } ${toKQL != null ? toKQL : ''}`;
+
+    return stringToKueryNode(rangeKQLQuery);
+  } catch (error) {
+    throw badRequest('Invalid "from" and/or "to" query parameters');
+  }
+};
+
+export const buildAssigneesFilter = ({
+  assignees,
+}: {
+  assignees: CasesFindQueryParams['assignees'];
+}): KueryNode | undefined => {
+  if (assignees === undefined) {
+    return;
+  }
+
+  const assigneesAsArray = Array.isArray(assignees) ? assignees : [assignees];
+
+  if (assigneesAsArray.length === 0) {
+    return;
+  }
+
+  const assigneesWithoutNone = assigneesAsArray.filter(
+    (assignee) => assignee !== NO_ASSIGNEES_FILTERING_KEYWORD
+  );
+  const hasNoneAssignee = assigneesAsArray.some(
+    (assignee) => assignee === NO_ASSIGNEES_FILTERING_KEYWORD
+  );
+
+  const assigneesFilter = assigneesWithoutNone.map((filter) =>
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
+  );
+
+  if (!hasNoneAssignee) {
+    return nodeBuilder.or(assigneesFilter);
+  }
+
+  const filterCasesWithoutAssigneesKueryNode = fromKueryExpression(
+    `not ${CASE_SAVED_OBJECT}.attributes.assignees.uid: *`
+  );
+
+  return nodeBuilder.or([...assigneesFilter, filterCasesWithoutAssigneesKueryNode]);
+};
+
 export const constructQueryOptions = ({
   tags,
   reporters,
   status,
+  severity,
   sortByField,
-  caseType,
   owner,
   authorizationFilter,
-}: {
-  tags?: string | string[];
-  reporters?: string | string[];
-  status?: CaseStatuses;
-  sortByField?: string;
-  caseType?: CaseType;
-  owner?: string | string[];
-  authorizationFilter?: KueryNode;
-}): { case: SavedObjectFindOptionsKueryNode; subCase?: SavedObjectFindOptionsKueryNode } => {
-  const kueryNodeExists = (filter: KueryNode | null | undefined): filter is KueryNode =>
-    filter != null;
+  from,
+  to,
+  assignees,
+}: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
+  const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
+  const reportersFilter = createReportersFilter(reporters);
+  const sortField = convertSortField(sortByField);
+  const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
 
-  const tagsFilter = buildFilter({ filters: tags ?? [], field: 'tags', operator: 'or' });
+  const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
+  const severityFilter = severity != null ? addSeverityFilter({ severity }) : undefined;
+  const rangeFilter = buildRangeFilter({ from, to });
+  const assigneesFilter = buildAssigneesFilter({ assignees });
+
+  const filters = combineFilters([
+    statusFilter,
+    severityFilter,
+    tagsFilter,
+    reportersFilter,
+    rangeFilter,
+    ownerFilter,
+    assigneesFilter,
+  ]);
+
+  return {
+    filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
+    sortField,
+  };
+};
+
+const createReportersFilter = (reporters?: string | string[]): KueryNode | undefined => {
   const reportersFilter = buildFilter({
-    filters: reporters ?? [],
+    filters: reporters,
     field: 'created_by.username',
     operator: 'or',
   });
-  const sortField = sortToSnake(sortByField);
-  const ownerFilter = buildFilter({ filters: owner ?? [], field: OWNER_FIELD, operator: 'or' });
 
-  switch (caseType) {
-    case CaseType.individual: {
-      // The cases filter will result in this structure "status === oh and (type === individual) and (tags === blah) and (reporter === yo)"
-      // The subCase filter will be undefined because we don't need to find sub cases if type === individual
+  const reportersProfileUidFilter = buildFilter({
+    filters: reporters,
+    field: 'created_by.profile_uid',
+    operator: 'or',
+  });
 
-      // We do not want to support multiple type's being used, so force it to be a single filter value
-      const typeFilter = nodeBuilder.is(
-        `${CASE_SAVED_OBJECT}.attributes.type`,
-        CaseType.individual
-      );
+  const filters = [reportersFilter, reportersProfileUidFilter].filter(
+    (filter): filter is KueryNode => filter != null
+  );
 
-      const filters: KueryNode[] = [typeFilter, tagsFilter, reportersFilter, ownerFilter].filter(
-        kueryNodeExists
-      );
-
-      const caseFilters =
-        status != null
-          ? addStatusFilter({
-              status,
-              appendFilter: filters.length > 1 ? nodeBuilder.and(filters) : filters[0],
-            })
-          : undefined;
-
-      return {
-        case: {
-          filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
-          sortField,
-        },
-      };
-    }
-    case CaseType.collection: {
-      // The cases filter will result in this structure "(type == parent) and (tags == blah) and (reporter == yo)"
-      // The sub case filter will use the query.status if it exists
-      const typeFilter = nodeBuilder.is(
-        `${CASE_SAVED_OBJECT}.attributes.type`,
-        CaseType.collection
-      );
-
-      const filters: KueryNode[] = [typeFilter, tagsFilter, reportersFilter, ownerFilter].filter(
-        kueryNodeExists
-      );
-      const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
-      const subCaseFilters =
-        status != null ? addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT }) : undefined;
-
-      return {
-        case: {
-          filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
-          sortField,
-        },
-        subCase: {
-          filter: combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter),
-          sortField,
-        },
-      };
-    }
-    default: {
-      /**
-       * In this scenario no type filter was sent, so we want to honor the status filter if one exists.
-       * To construct the filter and honor the status portion we need to find all individual cases that
-       * have that particular status. We also need to find cases that have sub cases but we want to ignore the
-       * case collection's status because it is not relevant. We only care about the status of the sub cases if the
-       * case is a collection.
-       *
-       * The cases filter will result in this structure "((status == open and type === individual) or type == parent) and (tags == blah) and (reporter == yo)"
-       * The sub case filter will use the query.status if it exists
-       */
-      const typeIndividual = nodeBuilder.is(
-        `${CASE_SAVED_OBJECT}.attributes.type`,
-        CaseType.individual
-      );
-      const typeParent = nodeBuilder.is(
-        `${CASE_SAVED_OBJECT}.attributes.type`,
-        CaseType.collection
-      );
-
-      const statusFilter =
-        status != null
-          ? nodeBuilder.and([addStatusFilter({ status }), typeIndividual])
-          : typeIndividual;
-      const statusAndType = nodeBuilder.or([statusFilter, typeParent]);
-
-      const filters: KueryNode[] = [statusAndType, tagsFilter, reportersFilter, ownerFilter].filter(
-        kueryNodeExists
-      );
-
-      const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
-      const subCaseFilters =
-        status != null ? addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT }) : undefined;
-
-      return {
-        case: {
-          filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
-          sortField,
-        },
-        subCase: {
-          filter: combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter),
-          sortField,
-        },
-      };
-    }
+  if (filters.length <= 0) {
+    return;
   }
+
+  return nodeBuilder.or(filters);
 };
 
-interface CompareArrays {
-  addedItems: string[];
-  deletedItems: string[];
+interface CompareArrays<T> {
+  addedItems: T[];
+  deletedItems: T[];
 }
-export const compareArrays = ({
-  originalValue,
-  updatedValue,
-}: {
-  originalValue: string[];
-  updatedValue: string[];
-}): CompareArrays => {
-  const result: CompareArrays = {
-    addedItems: [],
-    deletedItems: [],
-  };
-  originalValue.forEach((origVal) => {
-    if (!updatedValue.includes(origVal)) {
-      result.deletedItems = [...result.deletedItems, origVal];
-    }
-  });
-  updatedValue.forEach((updatedVal) => {
-    if (!originalValue.includes(updatedVal)) {
-      result.addedItems = [...result.addedItems, updatedVal];
-    }
-  });
 
-  return result;
-};
-
-export const isTwoArraysDifference = (
-  originalValue: unknown,
-  updatedValue: unknown
-): CompareArrays | null => {
+export const arraysDifference = <T>(
+  originalValue: T[] | undefined | null,
+  updatedValue: T[] | undefined | null
+): CompareArrays<T> | null => {
   if (
     originalValue != null &&
     updatedValue != null &&
     Array.isArray(updatedValue) &&
     Array.isArray(originalValue)
   ) {
-    const compObj = compareArrays({ originalValue, updatedValue });
-    if (compObj.addedItems.length > 0 || compObj.deletedItems.length > 0) {
-      return compObj;
+    const addedItems = differenceWith(updatedValue, originalValue, isEqual);
+    const deletedItems = differenceWith(originalValue, updatedValue, isEqual);
+
+    if (addedItems.length > 0 || deletedItems.length > 0) {
+      return {
+        addedItems,
+        deletedItems,
+      };
     }
   }
   return null;
@@ -406,7 +468,7 @@ export const getCaseToUpdate = (
     (acc, [key, value]) => {
       const currentValue = get(currentCase, key);
       if (Array.isArray(currentValue) && Array.isArray(value)) {
-        if (isTwoArraysDifference(value, currentValue)) {
+        if (arraysDifference(value, currentValue)) {
           return {
             ...acc,
             [key]: value,
@@ -437,9 +499,11 @@ enum SortFieldCase {
   closedAt = 'closed_at',
   createdAt = 'created_at',
   status = 'status',
+  title = 'title.keyword',
+  severity = 'severity',
 }
 
-export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
+export const convertSortField = (sortField: string | undefined): SortFieldCase => {
   switch (sortField) {
     case 'status':
       return SortFieldCase.status;
@@ -449,6 +513,10 @@ export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
     case 'closedAt':
     case 'closed_at':
       return SortFieldCase.closedAt;
+    case 'title':
+      return SortFieldCase.title;
+    case 'severity':
+      return SortFieldCase.severity;
     default:
       return SortFieldCase.createdAt;
   }

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from 'kibana/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
-import { SecurityPluginStart } from '../../../security/server';
-import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { AuthFilterHelpers, GetSpaceFn, OwnerEntity } from './types';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AuthFilterHelpers, OwnerEntity } from './types';
 import { getOwnersFilter } from './utils';
-import { AuthorizationAuditLogger, OperationDetails } from '.';
-import { createCaseError } from '../common';
+import type { OperationDetails } from '.';
+import { AuthorizationAuditLogger } from '.';
+import { createCaseError } from '../common/error';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -47,22 +49,26 @@ export class Authorization {
   static async create({
     request,
     securityAuth,
-    getSpace,
+    spaces,
     features,
     auditLogger,
     logger,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
-    getSpace: GetSpaceFn;
+    spaces: SpacesPluginStart;
     features: FeaturesPluginStart;
     auditLogger: AuthorizationAuditLogger;
     logger: Logger;
   }): Promise<Authorization> {
+    const getSpace = async (): Promise<Space> => {
+      return spaces.spacesService.getActiveSpace(request);
+    };
+
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseOwners: Set<string>;
     try {
-      const disabledFeatures = new Set((await getSpace(request))?.disabledFeatures ?? []);
+      const disabledFeatures = new Set((await getSpace()).disabledFeatures ?? []);
 
       caseOwners = new Set(
         features
@@ -87,7 +93,7 @@ export class Authorization {
   }
 
   /**
-   * Checks that the user making the request for the passed in owners and operation has the correct authorization. This
+   * Checks that the user making the request for the passed in owner, saved object, and operation has the correct authorization. This
    * function will throw if the user is not authorized for the requested operation and owners.
    *
    * @param entities an array of entities describing the case owners in conjunction with the saved object ID attempting
@@ -231,8 +237,10 @@ export class Authorization {
           ? Array.from(featureCaseOwners)
           : privileges.kibana.reduce<string[]>((authorizedOwners, { authorized, privilege }) => {
               if (authorized && requiredPrivileges.has(privilege)) {
-                const owner = requiredPrivileges.get(privilege)!;
-                authorizedOwners.push(owner);
+                const owner = requiredPrivileges.get(privilege);
+                if (owner) {
+                  authorizedOwners.push(owner);
+                }
               }
 
               return authorizedOwners;

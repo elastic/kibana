@@ -13,10 +13,7 @@ import { useValues } from 'kea';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';
@@ -26,17 +23,18 @@ import { Loading } from '../loading';
 import './page_template.scss';
 
 /*
- * EnterpriseSearchPageTemplate is a light wrapper for KibanaPageTemplate (which
+ * EnterpriseSearchPageTemplateWrapper is a light wrapper for KibanaPageTemplate (which
  * is a light wrapper for EuiPageTemplate). It should contain only concerns shared
  * between both AS & WS, which should have their own AppSearchPageTemplate &
  * WorkplaceSearchPageTemplate sitting on top of this template (:nesting_dolls:),
  * which in turn manages individual product-specific concerns (e.g. side navs, telemetry, etc.)
  *
- * @see https://github.com/elastic/kibana/tree/master/src/plugins/kibana_react/public/page_template
+ * @see https://github.com/elastic/kibana/tree/main/src/plugins/kibana_react/public/page_template
  * @see https://elastic.github.io/eui/#/layout/page
  */
 
 export type PageTemplateProps = KibanaPageTemplateProps & {
+  customPageSections?: boolean; // If false, automatically wraps children in an EuiPageSection
   hideFlashMessages?: boolean;
   isLoading?: boolean;
   emptyState?: React.ReactNode;
@@ -46,9 +44,10 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   pageViewTelemetry?: string;
 };
 
-export const EnterpriseSearchPageTemplate: React.FC<PageTemplateProps> = ({
+export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
   children,
   className,
+  customPageSections,
   hideFlashMessages,
   isLoading,
   isEmptyState,
@@ -66,11 +65,11 @@ export const EnterpriseSearchPageTemplate: React.FC<PageTemplateProps> = ({
       restrictWidth={false}
       {...pageTemplateProps}
       className={classNames('enterpriseSearchPageTemplate', className)}
-      pageContentProps={{
-        ...pageTemplateProps.pageContentProps,
+      mainProps={{
+        ...pageTemplateProps.mainProps,
         className: classNames(
           'enterpriseSearchPageTemplate__content',
-          pageTemplateProps.pageContentProps?.className
+          pageTemplateProps.mainProps?.className
         ),
       }}
       isEmptyState={isEmptyState && !isLoading}
@@ -91,7 +90,15 @@ export const EnterpriseSearchPageTemplate: React.FC<PageTemplateProps> = ({
         </>
       )}
       {!hideFlashMessages && <FlashMessages />}
-      {isLoading ? <Loading /> : showCustomEmptyState ? emptyState : children}
+      {isLoading ? (
+        <Loading />
+      ) : showCustomEmptyState ? (
+        emptyState
+      ) : customPageSections ? (
+        children
+      ) : (
+        <KibanaPageTemplate.Section>{children}</KibanaPageTemplate.Section>
+      )}
     </KibanaPageTemplate>
   );
 };

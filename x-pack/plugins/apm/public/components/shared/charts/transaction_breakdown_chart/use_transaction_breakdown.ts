@@ -6,9 +6,9 @@
  */
 
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
 export function useTransactionBreakdown({
@@ -20,11 +20,14 @@ export function useTransactionBreakdown({
 }) {
   const {
     urlParams: { transactionName },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -37,21 +40,22 @@ export function useTransactionBreakdown({
   } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
-        return callApmApi({
-          endpoint:
-            'GET /api/apm/services/{serviceName}/transaction/charts/breakdown',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionName,
-              transactionType,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                transactionName,
+                transactionType,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [

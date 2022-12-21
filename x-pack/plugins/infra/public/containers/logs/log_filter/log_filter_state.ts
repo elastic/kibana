@@ -5,103 +5,145 @@
  * 2.0.
  */
 
+import { useMemo, useEffect, useCallback, useState } from 'react';
+import { merge, of } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import { buildEsQuery, DataViewBase, Query, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import createContainer from 'constate';
-import { useCallback, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
-import { esQuery, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
-
-type ParsedQuery = ReturnType<typeof esQuery.buildEsQuery>;
+import { useKibanaQuerySettings } from '../../../utils/use_kibana_query_settings';
+import { BuiltEsQuery } from '../log_stream';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useSubscription } from '../../../utils/use_observable';
+import { UnsupportedLanguageError, QueryParsingError } from './errors';
 
 interface ILogFilterState {
   filterQuery: {
-    parsedQuery: ParsedQuery;
+    parsedQuery: BuiltEsQuery;
     serializedQuery: string;
     originalQuery: Query;
   } | null;
-  filterQueryDraft: Query;
-  validationErrors: string[];
+  queryStringQuery: Query | AggregateQuery | null;
+  validationError: Error | null;
 }
 
-const initialLogFilterState: ILogFilterState = {
-  filterQuery: null,
-  filterQueryDraft: {
-    language: 'kuery',
-    query: '',
-  },
-  validationErrors: [],
+export const DEFAULT_QUERY = {
+  language: 'kuery',
+  query: '',
 };
 
-const validationDebounceTimeout = 1000; // milliseconds
+const INITIAL_LOG_FILTER_STATE = {
+  filterQuery: null,
+  queryStringQuery: null,
+  validationError: null,
+};
 
-export const useLogFilterState = ({ indexPattern }: { indexPattern: IIndexPattern }) => {
-  const [logFilterState, setLogFilterState] = useState<ILogFilterState>(initialLogFilterState);
+// Error toasts
+export const errorToastTitle = i18n.translate(
+  'xpack.infra.logsPage.toolbar.logFilterErrorToastTitle',
+  {
+    defaultMessage: 'Log filter error',
+  }
+);
+
+const unsupportedLanguageError = i18n.translate(
+  'xpack.infra.logsPage.toolbar.logFilterUnsupportedLanguageError',
+  {
+    defaultMessage: 'SQL is not supported',
+  }
+);
+
+export const useLogFilterState = ({ dataView }: { dataView?: DataViewBase }) => {
+  const {
+    notifications: { toasts },
+    data: {
+      query: { queryString },
+    },
+  } = useKibanaContextForPlugin().services;
+
+  const kibanaQuerySettings = useKibanaQuerySettings();
+
+  const [logFilterState, setLogFilterState] = useState<ILogFilterState>(INITIAL_LOG_FILTER_STATE);
+
+  useEffect(() => {
+    const handleValidationError = (error: Error) => {
+      if (error instanceof UnsupportedLanguageError) {
+        toasts.addError(error, { title: errorToastTitle });
+        queryString.setQuery(DEFAULT_QUERY);
+      } else if (error instanceof QueryParsingError) {
+        toasts.addError(error, { title: errorToastTitle });
+      }
+    };
+
+    if (logFilterState.validationError) {
+      handleValidationError(logFilterState.validationError);
+    }
+  }, [logFilterState.validationError, queryString, toasts]);
 
   const parseQuery = useCallback(
-    (filterQuery: Query) => esQuery.buildEsQuery(indexPattern, filterQuery, []),
-    [indexPattern]
+    (filterQuery: Query) => {
+      return buildEsQuery(dataView, filterQuery, [], kibanaQuerySettings);
+    },
+    [dataView, kibanaQuerySettings]
   );
 
-  const setLogFilterQueryDraft = useCallback((filterQueryDraft: Query) => {
-    setLogFilterState((previousLogFilterState) => ({
-      ...previousLogFilterState,
-      filterQueryDraft,
-      validationErrors: [],
-    }));
-  }, []);
-
-  const [, cancelPendingValidation] = useDebounce(
-    () => {
-      setLogFilterState((previousLogFilterState) => {
+  const getNewLogFilterState = useCallback(
+    (newQuery: Query | AggregateQuery) =>
+      (previousLogFilterState: ILogFilterState): ILogFilterState => {
         try {
-          parseQuery(logFilterState.filterQueryDraft);
-          return {
-            ...previousLogFilterState,
-            validationErrors: [],
-          };
+          if (!isOfQueryType(newQuery)) {
+            throw new UnsupportedLanguageError(unsupportedLanguageError);
+          }
+          try {
+            const parsedQuery = parseQuery(newQuery);
+            return {
+              filterQuery: {
+                parsedQuery,
+                serializedQuery: JSON.stringify(parsedQuery),
+                originalQuery: newQuery,
+              },
+              queryStringQuery: newQuery,
+              validationError: null,
+            };
+          } catch (error) {
+            throw new QueryParsingError(error);
+          }
         } catch (error) {
           return {
             ...previousLogFilterState,
-            validationErrors: [`${error}`],
+            queryStringQuery: newQuery,
+            validationError: error,
           };
         }
-      });
-    },
-    validationDebounceTimeout,
-    [logFilterState.filterQueryDraft, parseQuery]
+      },
+    [parseQuery]
   );
 
-  const applyLogFilterQuery = useCallback(
-    (filterQuery: Query) => {
-      cancelPendingValidation();
-      try {
-        const parsedQuery = parseQuery(filterQuery);
-        setLogFilterState((previousLogFilterState) => ({
-          ...previousLogFilterState,
-          filterQuery: {
-            parsedQuery,
-            serializedQuery: JSON.stringify(parsedQuery),
-            originalQuery: filterQuery,
-          },
-          filterQueryDraft: filterQuery,
-          validationErrors: [],
-        }));
-      } catch (error) {
-        setLogFilterState((previousLogFilterState) => ({
-          ...previousLogFilterState,
-          validationErrors: [`${error}`],
-        }));
-      }
-    },
-    [cancelPendingValidation, parseQuery]
+  useSubscription(
+    useMemo(() => {
+      return merge(of(undefined), queryString.getUpdates$()); // NOTE: getUpdates$ uses skip(1) so we do this to ensure an initial emit of a value.
+    }, [queryString]),
+    useMemo(() => {
+      return {
+        next: () => {
+          setLogFilterState(getNewLogFilterState(queryString.getQuery()));
+        },
+      };
+    }, [getNewLogFilterState, queryString])
   );
+
+  // NOTE: If the dataView changes the query will need to be reparsed and the filter regenerated.
+  useEffect(() => {
+    if (dataView) {
+      setLogFilterState(getNewLogFilterState(queryString.getQuery()));
+    }
+  }, [dataView, getNewLogFilterState, queryString]);
 
   return {
-    filterQuery: logFilterState.filterQuery,
-    filterQueryDraft: logFilterState.filterQueryDraft,
-    isFilterQueryDraftValid: logFilterState.validationErrors.length === 0,
-    setLogFilterQueryDraft,
-    applyLogFilterQuery,
+    queryStringQuery: logFilterState.queryStringQuery, // NOTE: Query String Manager query.
+    filterQuery: logFilterState.filterQuery, // NOTE: Valid and syntactically correct query applied to requests etc.
+    validationError: logFilterState.validationError,
   };
 };
 
-export const LogFilterState = createContainer(useLogFilterState);
+export const [LogFilterStateProvider, useLogFilterStateContext] =
+  createContainer(useLogFilterState);

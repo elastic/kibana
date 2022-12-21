@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BulkError } from '../../../../detection_engine/routes/utils';
+import type { BulkError } from '../../../../detection_engine/routes/utils';
 
-import { SavedTimeline } from '../../../../../../common/types/timeline';
-import { HapiReadableStream } from '../../../../detection_engine/rules/types';
-import { TimelineStatusActions } from '../../../utils/common';
-import { NoteResult } from '../../../../../../common/types/timeline/note';
+import type { SavedTimeline } from '../../../../../../common/types/timeline';
+import type { TimelineStatusActions } from '../../../utils/common';
+import type { NoteResult } from '../../../../../../common/types/timeline/note';
 
 export type ImportedTimeline = SavedTimeline & {
   savedObjectId: string | null;
@@ -29,6 +28,3 @@ export interface ImportRegular {
 }
 
 export type ImportTimelineResponse = ImportRegular | BulkError;
-export interface ImportTimelinesRequestParams {
-  body: { file: HapiReadableStream };
-}

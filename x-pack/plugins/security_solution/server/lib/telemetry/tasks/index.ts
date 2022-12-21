@@ -5,6 +5,28 @@
  * 2.0.
  */
 
-export { TelemetryDiagTask as DiagnosticTask } from './diagnostic';
-export { TelemetryEndpointTask as EndpointTask } from './endpoint';
-export { TelemetryExceptionListsTask as ExceptionListsTask } from './security_lists';
+import type { SecurityTelemetryTaskConfig } from '../task';
+import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
+import { createTelemetryEndpointTaskConfig } from './endpoint';
+import { createTelemetrySecurityListTaskConfig } from './security_lists';
+import { createTelemetryDetectionRuleListsTaskConfig } from './detection_rule';
+import { createTelemetryPrebuiltRuleAlertsTaskConfig } from './prebuilt_rule_alerts';
+import { createTelemetryTimelineTaskConfig } from './timelines';
+import { createTelemetryConfigurationTaskConfig } from './configuration';
+import { telemetryConfiguration } from '../configuration';
+import { createTelemetryFilterListArtifactTaskConfig } from './filterlists';
+
+export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
+  return [
+    createTelemetryDiagnosticsTaskConfig(),
+    createTelemetryEndpointTaskConfig(telemetryConfiguration.max_security_list_telemetry_batch),
+    createTelemetrySecurityListTaskConfig(telemetryConfiguration.max_endpoint_telemetry_batch),
+    createTelemetryDetectionRuleListsTaskConfig(
+      telemetryConfiguration.max_detection_rule_telemetry_batch
+    ),
+    createTelemetryPrebuiltRuleAlertsTaskConfig(telemetryConfiguration.max_detection_alerts_batch),
+    createTelemetryTimelineTaskConfig(),
+    createTelemetryConfigurationTaskConfig(),
+    createTelemetryFilterListArtifactTaskConfig(),
+  ];
+}

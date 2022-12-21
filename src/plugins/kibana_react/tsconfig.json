@@ -4,8 +4,7 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "../../../typings/**/*"],
-  "references": [{ "path": "../kibana_utils/tsconfig.json" }]
+  "include": [".storybook/**/*", "common/**/*", "public/**/*", "../../../typings/**/*"],
+  "kbn_references": [{ "path": "../kibana_utils/tsconfig.json" }]
 }

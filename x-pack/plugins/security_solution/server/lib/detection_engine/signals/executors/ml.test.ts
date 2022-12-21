@@ -5,49 +5,51 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
+import dateMath from '@kbn/datemath';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { mlExecutor } from './ml';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getMlRuleParams } from '../../schemas/rule_schemas.mock';
-import { buildRuleMessageFactory } from '../rule_messages';
-import { getListClientMock } from '../../../../../../lists/server/services/lists/list_client.mock';
+import { getCompleteRuleMock, getMlRuleParams } from '../../rule_schema/mocks';
+import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { findMlSignals } from '../find_ml_signals';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
-import { mlPluginServerMock } from '../../../../../../ml/server/mocks';
-import { sampleRuleSO } from '../__mocks__/es_results';
+import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
+import type { MachineLearningRuleParams } from '../../rule_schema';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
 jest.mock('../find_ml_signals');
 jest.mock('../bulk_create_ml_signals');
 
 describe('ml_executor', () => {
   let jobsSummaryMock: jest.Mock;
+  let forceStartDatafeedsMock: jest.Mock;
+  let stopDatafeedsMock: jest.Mock;
   let mlMock: ReturnType<typeof mlPluginServerMock.createSetupContract>;
-  const exceptionItems = [getExceptionListItemSchemaMock()];
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let alertServices: AlertServicesMock;
+  let alertServices: RuleExecutorServicesMock;
+  let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
   const params = getMlRuleParams();
-  const mlSO = sampleRuleSO(params);
+  const mlCompleteRule = getCompleteRuleMock<MachineLearningRuleParams>(params);
   const tuple = {
     from: dateMath.parse(params.from)!,
     to: dateMath.parse(params.to)!,
     maxSignals: params.maxSignals,
   };
-  const buildRuleMessage = buildRuleMessageFactory({
-    id: mlSO.id,
-    ruleId: mlSO.attributes.params.ruleId,
-    name: mlSO.attributes.name,
-    index: mlSO.attributes.params.outputIndex,
-  });
+  const listClient = getListClientMock();
 
   beforeEach(() => {
     jobsSummaryMock = jest.fn();
-    alertServices = alertsMock.createAlertServices();
-    logger = loggingSystemMock.createLogger();
     mlMock = mlPluginServerMock.createSetupContract();
     mlMock.jobServiceProvider.mockReturnValue({
       jobsSummary: jobsSummaryMock,
+      forceStartDatafeeds: forceStartDatafeedsMock,
+      stopDatafeeds: stopDatafeedsMock,
+    });
+    alertServices = alertsMock.createRuleExecutorServices();
+    ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
+      ruleId: mlCompleteRule.alertId,
+      ruleUuid: mlCompleteRule.ruleParams.ruleId,
+      ruleName: mlCompleteRule.ruleConfig.name,
+      ruleType: mlCompleteRule.ruleConfig.ruleTypeId,
     });
     (findMlSignals as jest.Mock).mockResolvedValue({
       _shards: {},
@@ -60,22 +62,23 @@ describe('ml_executor', () => {
       bulkCreateDuration: 0,
       createdItemsCount: 0,
       errors: [],
+      createdItems: [],
     });
   });
 
   it('should throw an error if ML plugin was not available', async () => {
     await expect(
       mlExecutor({
-        rule: mlSO,
+        completeRule: mlCompleteRule,
         tuple,
         ml: undefined,
-        exceptionItems,
         services: alertServices,
-        logger,
-        buildRuleMessage,
-        listClient: getListClientMock(),
+        ruleExecutionLogger,
+        listClient,
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
+        exceptionFilter: undefined,
+        unprocessedExceptions: [],
       })
     ).rejects.toThrow('ML plugin unavailable during rule execution');
   });
@@ -83,19 +86,21 @@ describe('ml_executor', () => {
   it('should record a partial failure if Machine learning job summary was null', async () => {
     jobsSummaryMock.mockResolvedValue([]);
     const response = await mlExecutor({
-      rule: mlSO,
+      completeRule: mlCompleteRule,
       tuple,
       ml: mlMock,
-      exceptionItems,
       services: alertServices,
-      logger,
-      buildRuleMessage,
-      listClient: getListClientMock(),
+      ruleExecutionLogger,
+      listClient,
       bulkCreate: jest.fn(),
       wrapHits: jest.fn(),
+      exceptionFilter: undefined,
+      unprocessedExceptions: [],
     });
-    expect(logger.warn).toHaveBeenCalled();
-    expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job(s) are not started');
+    expect(ruleExecutionLogger.warn).toHaveBeenCalled();
+    expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
+      'Machine learning job(s) are not started'
+    );
     expect(response.warningMessages.length).toEqual(1);
   });
 
@@ -109,19 +114,21 @@ describe('ml_executor', () => {
     ]);
 
     const response = await mlExecutor({
-      rule: mlSO,
+      completeRule: mlCompleteRule,
       tuple,
       ml: mlMock,
-      exceptionItems,
       services: alertServices,
-      logger,
-      buildRuleMessage,
-      listClient: getListClientMock(),
+      ruleExecutionLogger,
+      listClient,
       bulkCreate: jest.fn(),
       wrapHits: jest.fn(),
+      exceptionFilter: undefined,
+      unprocessedExceptions: [],
     });
-    expect(logger.warn).toHaveBeenCalled();
-    expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job(s) are not started');
+    expect(ruleExecutionLogger.warn).toHaveBeenCalled();
+    expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
+      'Machine learning job(s) are not started'
+    );
     expect(response.warningMessages.length).toEqual(1);
   });
 });

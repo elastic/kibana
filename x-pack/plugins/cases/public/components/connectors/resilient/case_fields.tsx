@@ -6,25 +6,22 @@
  */
 
 import React, { useMemo, useCallback, useEffect, useRef } from 'react';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-  EuiSelect,
-  EuiSelectOption,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiSelectOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 
 import { useKibana } from '../../../common/lib/kibana';
-import { ConnectorFieldsProps } from '../types';
+import type { ConnectorFieldsProps } from '../types';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
-import { ConnectorTypes, ResilientFieldsType } from '../../../../common';
+import type { ResilientFieldsType } from '../../../../common/api';
+import { ConnectorTypes } from '../../../../common/api';
 import { ConnectorCard } from '../card';
 
 const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<ResilientFieldsType>> =
+  // TODO: Fix this manually. Issue #123375
+  // eslint-disable-next-line react/display-name
   ({ isEdit = true, fields, connector, onChange }) => {
     const init = useRef(true);
     const { incidentTypes = null, severityCode = null } = fields ?? {};

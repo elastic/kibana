@@ -6,86 +6,88 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { BrowserRouter as Router } from 'react-router-dom';
-
-import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
+import { Cases } from '.';
+import { Router } from 'react-router-dom';
+import { render } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
-import { Case } from '.';
+import { useTourContext } from '../../common/components/guided_onboarding_tour';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../common/components/guided_onboarding_tour/tour_config';
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-jest.mock('../../common/lib/kibana');
+jest.mock('../../common/components/guided_onboarding_tour');
 
-const mockedSetBadge = jest.fn();
+type Action = 'PUSH' | 'POP' | 'REPLACE';
+const pop: Action = 'POP';
+const location = {
+  pathname: '/network',
+  search: '',
+  state: '',
+  hash: '',
+};
+const mockHistory = {
+  length: 2,
+  location,
+  action: pop,
+  push: jest.fn(),
+  replace: jest.fn(),
+  go: jest.fn(),
+  goBack: jest.fn(),
+  goForward: jest.fn(),
+  block: jest.fn(),
+  createHref: jest.fn(),
+  listen: jest.fn(),
+};
 
-describe('CaseContainerComponent', () => {
+describe('cases page in security', () => {
+  const endTourStep = jest.fn();
   beforeEach(() => {
+    (useTourContext as jest.Mock).mockReturnValue({
+      activeStep: AlertsCasesTourSteps.viewCase,
+      incrementStep: () => null,
+      endTourStep,
+      isTourShown: () => true,
+    });
     jest.clearAllMocks();
-    useKibanaMock().services.chrome.setBadge = mockedSetBadge;
   });
-
-  it('does not display the readonly glasses badge when the user has write permissions', () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: true,
-      read: false,
+  it('calls endTour on cases details page when SecurityStepId.alertsCases tour is active and step is AlertsCasesTourSteps.viewCase', () => {
+    render(
+      <Router history={mockHistory}>
+        <Cases />
+      </Router>,
+      { wrapper: TestProviders }
+    );
+    expect(endTourStep).toHaveBeenCalledWith(SecurityStepId.alertsCases);
+  });
+  it('does not call endTour on cases details page when SecurityStepId.alertsCases tour is not active', () => {
+    (useTourContext as jest.Mock).mockReturnValue({
+      activeStep: AlertsCasesTourSteps.viewCase,
+      incrementStep: () => null,
+      endTourStep,
+      isTourShown: () => false,
     });
-
-    mount(
-      <Router>
-        <TestProviders>
-          <Case />
-        </TestProviders>
-      </Router>
+    render(
+      <Router history={mockHistory}>
+        <Cases />
+      </Router>,
+      { wrapper: TestProviders }
     );
-
-    expect(mockedSetBadge).not.toBeCalled();
+    expect(endTourStep).not.toHaveBeenCalled();
   });
-
-  it('does not display the readonly glasses badge when the user has neither write nor read permissions', () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: false,
-      read: false,
+  it('does not call endTour on cases details page when SecurityStepId.alertsCases tour is active and step is not AlertsCasesTourSteps.viewCase', () => {
+    (useTourContext as jest.Mock).mockReturnValue({
+      activeStep: AlertsCasesTourSteps.expandEvent,
+      incrementStep: () => null,
+      endTourStep,
+      isTourShown: () => true,
     });
-
-    mount(
-      <Router>
-        <TestProviders>
-          <Case />
-        </TestProviders>
-      </Router>
+    render(
+      <Router history={mockHistory}>
+        <Cases />
+      </Router>,
+      { wrapper: TestProviders }
     );
-
-    expect(mockedSetBadge).not.toBeCalled();
-  });
-
-  it('does not display the readonly glasses badge when the user has null permissions', () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(null);
-
-    mount(
-      <Router>
-        <TestProviders>
-          <Case />
-        </TestProviders>
-      </Router>
-    );
-
-    expect(mockedSetBadge).not.toBeCalled();
-  });
-
-  it('displays the readonly glasses badge read permissions but not write', () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: false,
-      read: true,
-    });
-
-    mount(
-      <Router>
-        <TestProviders>
-          <Case />
-        </TestProviders>
-      </Router>
-    );
-
-    expect(mockedSetBadge).toBeCalledTimes(1);
+    expect(endTourStep).not.toHaveBeenCalled();
   });
 });

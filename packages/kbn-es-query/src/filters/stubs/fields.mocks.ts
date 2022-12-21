@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldBase } from '../..';
+import { DataViewFieldBase } from '../../..';
 
 /**
  * Base index pattern fields for testing
  */
-export const fields: IndexPatternFieldBase[] = [
+export const fields: DataViewFieldBase[] = [
   {
     name: 'bytes',
     type: 'number',
@@ -40,6 +40,12 @@ export const fields: IndexPatternFieldBase[] = [
   {
     name: 'machine.os.raw',
     type: 'string',
+    scripted: false,
+  },
+  {
+    name: 'machine.os.keyword',
+    type: 'string',
+    esTypes: ['keyword'],
     scripted: false,
   },
   {

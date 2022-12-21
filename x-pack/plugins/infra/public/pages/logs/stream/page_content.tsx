@@ -5,61 +5,104 @@
  * 2.0.
  */
 
-import React from 'react';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
+import { useSelector } from '@xstate/react';
+import React from 'react';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { useLogStreamPageStateContext } from '../../../observability_logs/log_stream_page/state/src/provider';
+import { fullHeightContentStyles } from '../../../page_template.styles';
+import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
+import { LogsPageTemplate } from '../shared/page_template';
 import { LogsPageLogsContent } from './page_logs_content';
-import { LogsPageNoIndicesContent } from './page_no_indices_content';
-import { LogsPageTemplate } from '../page_template';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
+import { LogStreamPageContentProviders } from './page_providers';
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',
 });
 
-export const StreamPageContent: React.FunctionComponent = () => {
-  const {
-    hasFailedLoading,
-    isLoading,
-    isUninitialized,
-    loadSource,
-    latestLoadSourceFailures,
-    sourceStatus,
-  } = useLogSourceContext();
+interface InjectedProps {
+  isLoading: boolean;
+  hasFailedLoading: boolean;
+  hasIndices: boolean;
+  missingIndices: boolean;
+}
 
-  if (isLoading || isUninitialized) {
+export const ConnectedStreamPageContent: React.FC = () => {
+  const logStreamPageStateService = useLogStreamPageStateContext();
+
+  const isLoading = useSelector(logStreamPageStateService, (state) => {
+    return state.matches('uninitialized') || state.matches('loadingLogView');
+  });
+
+  const hasFailedLoading = useSelector(logStreamPageStateService, (state) =>
+    state.matches('loadingLogViewFailed')
+  );
+
+  const hasIndices = useSelector(logStreamPageStateService, (state) =>
+    state.matches('hasLogViewIndices')
+  );
+
+  const missingIndices = useSelector(logStreamPageStateService, (state) =>
+    state.matches('missingLogViewIndices')
+  );
+
+  return (
+    <StreamPageContent
+      isLoading={isLoading}
+      hasFailedLoading={hasFailedLoading}
+      hasIndices={hasIndices}
+      missingIndices={missingIndices}
+    />
+  );
+};
+
+export const StreamPageContent: React.FC<InjectedProps> = (props: InjectedProps) => {
+  const { isLoading, hasFailedLoading, hasIndices, missingIndices } = props;
+
+  if (isLoading) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={latestLoadSourceFailures} onRetry={loadSource} />;
-  } else if (sourceStatus?.logIndexStatus !== 'missing') {
+    return <ConnectedLogViewErrorPage />;
+  } else if (missingIndices) {
     return (
-      <LogStreamPageWrapper className={APP_WRAPPER_CLASS}>
+      <div className={APP_WRAPPER_CLASS}>
         <LogsPageTemplate
+          hasData={false}
+          isDataLoading={false}
           pageHeader={{
             pageTitle: streamTitle,
           }}
+          pageSectionProps={{
+            contentProps: {
+              css: fullHeightContentStyles,
+            },
+          }}
+        />
+      </div>
+    );
+  } else if (hasIndices) {
+    return (
+      <div className={APP_WRAPPER_CLASS}>
+        <LogsPageTemplate
+          hasData={true}
+          isDataLoading={false}
+          pageHeader={{
+            pageTitle: streamTitle,
+          }}
+          pageSectionProps={{
+            contentProps: {
+              css: fullHeightContentStyles,
+            },
+          }}
         >
-          <LogsPageLogsContent />
+          <LogStreamPageContentProviders>
+            <LogsPageLogsContent />
+          </LogStreamPageContentProviders>
         </LogsPageTemplate>
-      </LogStreamPageWrapper>
+      </div>
     );
   } else {
-    return <LogsPageNoIndicesContent />;
+    return null;
   }
 };
-
-// This is added to facilitate a full height layout whereby the
-// inner container will set it's own height and be scrollable.
-// The "fullHeight" prop won't help us as it only applies to certain breakpoints.
-export const LogStreamPageWrapper = euiStyled.div`
-  .euiPage .euiPageContentBody {
-    display: flex;
-    flex-direction: column;
-    flex: 1 0 auto;
-    width: 100%;
-    height: 100%;
-  }
-`;

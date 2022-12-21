@@ -27,7 +27,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
@@ -46,11 +46,12 @@ import {
   ANNOTATION_EVENT_USER,
   ANNOTATION_EVENT_DELAYED_DATA,
 } from '../../../../../common/constants/annotations';
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
 import { timeFormatter } from '../../../../../common/util/date_utils';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import { DatafeedChartFlyout } from '../../../jobs/jobs_list/components/datafeed_chart_flyout';
+import { RevertModelSnapshotFlyout } from '../../model_snapshots/revert_model_snapshot_flyout';
 
 const editAnnotationsText = (
   <FormattedMessage
@@ -61,7 +62,7 @@ const editAnnotationsText = (
 const viewDataFeedText = (
   <FormattedMessage
     id="xpack.ml.annotationsTable.datafeedChartTooltip"
-    defaultMessage="Datafeed chart"
+    defaultMessage="View datafeed counts"
   />
 );
 
@@ -72,16 +73,20 @@ const CURRENT_SERIES = 'current_series';
 class AnnotationsTableUI extends Component {
   static propTypes = {
     annotations: PropTypes.array,
+    annotationUpdatesService: PropTypes.object.isRequired,
     jobs: PropTypes.array,
+    detectors: PropTypes.array,
     isSingleMetricViewerLinkVisible: PropTypes.bool,
     isNumberBadgeVisible: PropTypes.bool,
+    refreshJobList: PropTypes.func,
+    chartDetails: PropTypes.object,
+    kibana: PropTypes.object,
   };
 
   constructor(props) {
     super(props);
     this.state = {
       annotations: [],
-      aggregations: null,
       isLoading: false,
       queryText: `event:(${ANNOTATION_EVENT_USER} or ${ANNOTATION_EVENT_DELAYED_DATA})`,
       searchError: undefined,
@@ -92,6 +97,8 @@ class AnnotationsTableUI extends Component {
           ? this.props.jobs[0].job_id
           : undefined,
       datafeedFlyoutVisible: false,
+      modelSnapshot: null,
+      revertSnapshotFlyoutVisible: false,
       datafeedEnd: null,
     };
     this.sorting = {
@@ -115,18 +122,11 @@ class AnnotationsTableUI extends Component {
           earliestMs: null,
           latestMs: null,
           maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-          fields: [
-            {
-              field: 'event',
-              missing: ANNOTATION_EVENT_USER,
-            },
-          ],
         })
         .toPromise()
         .then((resp) => {
           this.setState((prevState, props) => ({
             annotations: resp.annotations[props.jobs[0].job_id] || [],
-            aggregations: resp.aggregations,
             errorMessage: undefined,
             isLoading: false,
             jobId: props.jobs[0].job_id,
@@ -570,41 +570,35 @@ class AnnotationsTableUI extends Component {
         onMouseLeave: () => this.onMouseLeaveRow(),
       };
     };
-    let filterOptions = [];
-    const aggregations = this.props.aggregations ?? this.state.aggregations;
-    if (aggregations) {
-      const buckets = aggregations.event.buckets;
-      let foundUser = false;
-      let foundDelayedData = false;
 
-      buckets.forEach((bucket) => {
-        if (bucket.key === ANNOTATION_EVENT_USER) {
-          foundUser = true;
-        }
-        if (bucket.key === ANNOTATION_EVENT_DELAYED_DATA) {
-          foundDelayedData = true;
-        }
-      });
-      const adjustedBuckets = [];
-      if (!foundUser) {
-        adjustedBuckets.push({ key: ANNOTATION_EVENT_USER, doc_count: 0 });
-      }
-      if (!foundDelayedData) {
-        adjustedBuckets.push({ key: ANNOTATION_EVENT_DELAYED_DATA, doc_count: 0 });
-      }
+    // Build the options to show in the Event type filter.
+    // Do not try and run a search using a terms agg on the event field
+    // because in 7.9 this field was incorrectly mapped as a text rather than keyword.
 
-      filterOptions = [...adjustedBuckets, ...buckets];
-    }
+    // Always display options for user and delayed data types.
+    const countsByEvent = {
+      [ANNOTATION_EVENT_USER]: 0,
+      [ANNOTATION_EVENT_DELAYED_DATA]: 0,
+    };
+    annotations.forEach((annotation) => {
+      // Default to user type for annotations created in early releases which didn't have an event field
+      const event = annotation.event ?? ANNOTATION_EVENT_USER;
+      if (countsByEvent[event] === undefined) {
+        countsByEvent[event] = 0;
+      }
+      countsByEvent[event]++;
+    });
+
     const filters = [
       {
         type: 'field_value_selection',
         field: 'event',
         name: 'Event',
         multiSelect: 'or',
-        options: filterOptions.map((field) => ({
-          value: field.key,
-          name: field.key,
-          view: `${field.key} (${field.doc_count})`,
+        options: Object.entries(countsByEvent).map(([key, docCount]) => ({
+          value: key,
+          name: key,
+          view: `${key} (${docCount})`,
         })),
         'data-test-subj': 'mlAnnotationTableEventFilter',
       },
@@ -723,7 +717,7 @@ class AnnotationsTableUI extends Component {
         <EuiInMemoryTable
           data-test-subj={'mlAnnotationsTable'}
           error={searchError}
-          className="eui-textOverflowWrap"
+          className="eui-textBreakWord"
           compressed={true}
           items={items}
           columns={columns}
@@ -741,8 +735,28 @@ class AnnotationsTableUI extends Component {
                 datafeedFlyoutVisible: false,
               });
             }}
+            onModelSnapshotAnnotationClick={(modelSnapshot) => {
+              this.setState({
+                modelSnapshot,
+                revertSnapshotFlyoutVisible: true,
+                datafeedFlyoutVisible: false,
+              });
+            }}
             end={this.state.datafeedEnd}
             jobId={this.state.jobId}
+          />
+        ) : null}
+        {this.state.revertSnapshotFlyoutVisible === true && this.state.modelSnapshot !== null ? (
+          <RevertModelSnapshotFlyout
+            snapshot={this.state.modelSnapshot}
+            snapshots={[this.state.modelSnapshot]}
+            job={this.getJob(this.state.jobId)}
+            closeFlyout={() => {
+              this.setState({
+                revertSnapshotFlyoutVisible: false,
+              });
+            }}
+            refresh={this.props.refreshJobList ?? (() => {})}
           />
         ) : null}
       </Fragment>

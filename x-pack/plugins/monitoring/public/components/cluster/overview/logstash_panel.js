@@ -29,9 +29,8 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
-  EuiIconTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
@@ -98,6 +97,7 @@ export function LogstashPanel(props) {
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
                   href={goToLogstash()}
+                  data-test-subj="lsOverview"
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel',
                     {
@@ -215,7 +215,7 @@ export function LogstashPanel(props) {
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel',
                         {
-                          defaultMessage: 'Logstash Pipelines (beta feature): {pipelineCount}',
+                          defaultMessage: 'Logstash Pipelines: {pipelineCount}',
                           values: { pipelineCount: props.pipeline_count },
                         }
                       )}
@@ -234,19 +234,6 @@ export function LogstashPanel(props) {
                     </DisabledIfNoDataAndInSetupModeLink>
                   </h3>
                 </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip',
-                    {
-                      defaultMessage: 'Beta feature',
-                    }
-                  )}
-                  position="bottom"
-                  type="beaker"
-                  aria-label="Beta feature"
-                />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />

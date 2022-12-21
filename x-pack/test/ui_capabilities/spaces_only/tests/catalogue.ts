@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import { UnreachableError } from '../../common/lib';
 import { SpaceScenarios } from '../scenarios';
 
 export default function catalogueTests({ getService }: FtrProviderContext) {
@@ -24,6 +25,17 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
     'watcher',
   ];
 
+  const uiCapabilitiesExceptions = [
+    // enterprise_search plugin is loaded but disabled because security isn't enabled in ES. That means the following capabilities are disabled
+    'enterpriseSearch',
+    'enterpriseSearchContent',
+    'enterpriseSearchAnalytics',
+    'elasticsearch',
+    'appSearch',
+    'workplaceSearch',
+    'searchExperiences',
+  ];
+
   describe('catalogue', () => {
     SpaceScenarios.forEach((scenario) => {
       it(`${scenario.name}`, async () => {
@@ -33,7 +45,10 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
             // everything is enabled
-            const expected = mapValues(uiCapabilities.value!.catalogue, () => true);
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) => !uiCapabilitiesExceptions.includes(catalogueId)
+            );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }
@@ -55,7 +70,8 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             // only foo is disabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
-              (value, catalogueId) => catalogueId !== 'foo'
+              (enabled, catalogueId) =>
+                !uiCapabilitiesExceptions.includes(catalogueId) && catalogueId !== 'foo'
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;

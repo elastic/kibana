@@ -6,39 +6,39 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { QUERY_RULE_TYPE_ID } from '../../../../../common/constants';
-import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
-import { queryExecutor } from '../../signals/executors/query';
-import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { CreateRuleOptions } from '../types';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 
-export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
+import type { BucketHistory } from '../../signals/alert_suppression/group_and_bulk_create';
+import type { UnifiedQueryRuleParams } from '../../rule_schema';
+import { unifiedQueryRuleParams } from '../../rule_schema';
+import { queryExecutor } from '../../signals/executors/query';
+import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
+import { validateIndexPatterns } from '../utils';
+
+export interface QueryRuleState {
+  suppressionGroupHistory?: BucketHistory[];
+  [key: string]: unknown;
+}
+
+export const createQueryAlertType = (
+  createOptions: CreateQueryRuleOptions
+): SecurityAlertType<UnifiedQueryRuleParams, QueryRuleState, {}, 'default'> => {
   const {
+    eventsTelemetry,
     experimentalFeatures,
-    lists,
-    logger,
-    mergeStrategy,
-    ignoreFields,
-    ruleDataClient,
     version,
-    ruleDataService,
+    osqueryCreateAction,
+    licensing,
+    id,
+    name,
   } = createOptions;
-  const createSecurityRuleType = createSecurityRuleTypeFactory({
-    lists,
-    logger,
-    mergeStrategy,
-    ignoreFields,
-    ruleDataClient,
-    ruleDataService,
-  });
-  return createSecurityRuleType<QueryRuleParams, {}, PersistenceServices, {}>({
-    id: QUERY_RULE_TYPE_ID,
-    name: 'Custom Query Rule',
+  return {
+    id,
+    name,
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validateNonExact(object, queryRuleParams);
+          const [validated, errors] = validateNonExact(object, unifiedQueryRuleParams);
           if (errors != null) {
             throw new Error(errors);
           }
@@ -46,6 +46,17 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
         },
       },
     },
@@ -61,39 +72,20 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
-      const {
-        runOpts: {
-          buildRuleMessage,
-          bulkCreate,
-          exceptionItems,
-          listClient,
-          rule,
-          searchAfterSize,
-          tuple,
-          wrapHits,
-        },
-        services,
-        state,
-      } = execOptions;
-
-      const result = await queryExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
+      const { runOpts, services, spaceId, state } = execOptions;
+      return queryExecutor({
+        runOpts,
         experimentalFeatures,
-        eventsTelemetry: undefined,
-        listClient,
-        logger,
-        rule,
-        searchAfterSize,
+        eventsTelemetry,
         services,
-        tuple,
         version,
-        wrapHits,
+        spaceId,
+        bucketHistory: state.suppressionGroupHistory,
+        osqueryCreateAction,
+        licensing,
       });
-      return { ...result, state };
     },
-  });
+  };
 };

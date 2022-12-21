@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { UiActionsSetup } from '../../ui_actions/public';
+import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import {
   contextMenuTrigger,
   panelBadgeTrigger,
   panelNotificationTrigger,
   selectRangeTrigger,
   valueClickTrigger,
+  cellValueTrigger,
 } from './lib';
 
 /**
@@ -25,4 +26,5 @@ export const bootstrap = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(panelNotificationTrigger);
   uiActions.registerTrigger(selectRangeTrigger);
   uiActions.registerTrigger(valueClickTrigger);
+  uiActions.registerTrigger(cellValueTrigger);
 };
