@@ -69,7 +69,7 @@ describe('CaseActionBar', () => {
     expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="sync-alerts-switch"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="case-refresh"]`).exists()).toBeTruthy();
-
+    expect(wrapper.find(`[data-test-subj="case-view-actions"]`).exists()).toBeTruthy();
     // no loading bar
     expect(wrapper.find(`[data-test-subj="case-view-action-bar-spinner"]`).exists()).toBeFalsy();
   });
