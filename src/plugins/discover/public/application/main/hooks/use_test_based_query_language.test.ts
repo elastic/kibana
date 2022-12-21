@@ -29,6 +29,7 @@ function getHookProps(
 ) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.replaceUrlAppState = replaceUrlAppState;
+  stateContainer.setAppState({ columns: [] });
   stateContainer.internalState.transitions.setSavedDataViews([dataViewMock as DataViewListItem]);
 
   const msgLoading = {
@@ -69,7 +70,7 @@ describe('useTextBasedQueryLanguage', () => {
     renderHook(() => useTextBasedQueryLanguage(props));
 
     await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
-    expect(replaceUrlAppState).toHaveBeenCalledWith({ columns: [], index: 'the-data-view-id' });
+    expect(replaceUrlAppState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
 
     replaceUrlAppState.mockReset();
 
@@ -156,7 +157,6 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => {
       expect(replaceUrlAppState).toHaveBeenCalledWith({
-        columns: [],
         index: 'the-data-view-id',
       });
     });
