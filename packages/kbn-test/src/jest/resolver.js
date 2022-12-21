@@ -86,8 +86,16 @@ module.exports = (request, options) => {
     });
   }
 
-  return resolve.sync(request, {
-    basedir: options.basedir,
-    extensions: options.extensions,
-  });
+  try {
+    return resolve.sync(request, {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      return options.defaultResolver(request, options);
+    }
+
+    throw error;
+  }
 };
