@@ -4,7 +4,7 @@
 This guide describes the "Sharing saved objects" effort, and the breaking changes that plugin developers need to be aware of for the planned
 8.0 release of {kib}. It also describes how developers can take advantage of this feature.
 
-`From *8.7.0*, as a step towards Zero-Down-Time upgrades, plugins are no longer allowed to switch to shareable saved objects.`
+Whilst new saved object types can still be defined as 'multiple', existing plugins are no longer allowed to switch to shareable saved objects.
 [[sharing-saved-objects-overview]]
 === Overview
 
