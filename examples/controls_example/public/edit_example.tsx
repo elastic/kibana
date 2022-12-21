@@ -70,6 +70,7 @@ export const EditExample = () => {
       <EuiText>
         <p>Customize controls and persist state to local storage.</p>
       </EuiText>
+      <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
