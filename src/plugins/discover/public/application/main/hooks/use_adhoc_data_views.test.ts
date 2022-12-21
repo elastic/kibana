@@ -149,7 +149,7 @@ describe('useAdHocDataViews', () => {
         dataViews: mockDiscoverServices.dataViews,
         filterManager: mockDiscoverServices.filterManager,
         toastNotifications: mockDiscoverServices.toastNotifications,
-        query: { sql: 'Select * from mock-title ' },
+        isTextBasedMode: true,
       })
     );
 
