@@ -104,13 +104,19 @@ function QueryBarMenuComponent({
     }
   }, [openQueryBarMenu]);
 
+  const plainClosePopover = useCallback(
+    () => toggleFilterBarMenuPopover(false),
+    [toggleFilterBarMenuPopover]
+  );
+
   const closePopover = useCallback(() => {
-    onCloseFilterPopover(originalFilter, updatedFilter, [() => toggleFilterBarMenuPopover(false)]);
-  }, [originalFilter, updatedFilter, onCloseFilterPopover, toggleFilterBarMenuPopover]);
+    onCloseFilterPopover(originalFilter, updatedFilter, [plainClosePopover]);
+  }, [originalFilter, updatedFilter, onCloseFilterPopover, plainClosePopover]);
 
   const normalContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'normalContextMenuPopover',
   });
+
   const onButtonClick = () => {
     toggleFilterBarMenuPopover(!openQueryBarMenu);
   };
@@ -146,7 +152,7 @@ function QueryBarMenuComponent({
     manageFilterSetComponent,
     hiddenPanelOptions,
     nonKqlMode,
-    closePopover,
+    closePopover: plainClosePopover,
     onQueryBarSubmit,
     onFiltersUpdated,
     onClearSavedQuery,
@@ -182,9 +188,7 @@ function QueryBarMenuComponent({
                 onFiltersUpdated={onFiltersUpdated}
                 onLocalFilterUpdate={setUpdatedFilter}
                 onLocalFilterCreate={setOriginalFilter}
-                closePopoverOnAdd={() => {
-                  toggleFilterBarMenuPopover(false);
-                }}
+                closePopoverOnAdd={plainClosePopover}
                 closePopoverOnCancel={() => {
                   closePopover();
                 }}
@@ -201,7 +205,7 @@ function QueryBarMenuComponent({
         id={normalContextMenuPopoverId}
         button={button}
         isOpen={openQueryBarMenu}
-        closePopover={closePopover}
+        closePopover={renderedComponent === 'addFilter' ? closePopover : plainClosePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
         repositionOnScroll

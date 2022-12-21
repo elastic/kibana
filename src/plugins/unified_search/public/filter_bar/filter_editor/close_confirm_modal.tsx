@@ -18,23 +18,19 @@ interface CloseFilterEditorConfirmModalProps {
 const strings = {
   getTitle: () =>
     i18n.translate('unifiedSearch.filter.closeEditorConfirmModal.title', {
-      defaultMessage: 'Add filter',
+      defaultMessage: 'Unsaved changes',
     }),
   getCancelButton: () =>
     i18n.translate('unifiedSearch.filter.closeEditorConfirmModal.cancelButton', {
-      defaultMessage: 'Cancel',
+      defaultMessage: 'Close',
     }),
   getConfirmButton: () =>
     i18n.translate('unifiedSearch.filter.closeEditorConfirmModal.confirmButton', {
-      defaultMessage: 'Close',
+      defaultMessage: 'Dismiss changes',
     }),
   getWarningLabel: () =>
     i18n.translate('unifiedSearch.filter.closeEditorConfirmModal.warningLabel', {
-      defaultMessage: 'If you close this now you will lose any unsaved changes.',
-    }),
-  getConfirmationQuestionLabel: () =>
-    i18n.translate('unifiedSearch.filter.closeEditorConfirmModal.confirmationQuestionLabel', {
-      defaultMessage: 'Are you sure you want to do this?',
+      defaultMessage: 'If you leave now, your unsaved work will be lost.',
     }),
 };
 
@@ -46,12 +42,11 @@ export const CloseFilterEditorConfirmModal = memo(function CloseFilterEditorConf
       title={strings.getTitle()}
       cancelButtonText={strings.getCancelButton()}
       confirmButtonText={strings.getConfirmButton()}
-      buttonColor="primary"
+      buttonColor="danger"
       defaultFocusedButton="confirm"
       {...props}
     >
       <p>{strings.getWarningLabel()}</p>
-      <p>{strings.getConfirmationQuestionLabel()}</p>
     </EuiConfirmModal>
   );
 });
