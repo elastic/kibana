@@ -31,7 +31,7 @@ export default function MonitorStatusAlert({ core, plugins, params }: Props) {
       <KibanaContextProvider services={{ ...core, ...plugins }}>
         <EuiText>
           <FormattedMessage
-            id="xpack.uptime.synthetics.alertRule.monitorStatus.description"
+            id="xpack.synthetics.alertRule.monitorStatus.description"
             defaultMessage="Manage synthetics monitor status rule actions."
           />
         </EuiText>

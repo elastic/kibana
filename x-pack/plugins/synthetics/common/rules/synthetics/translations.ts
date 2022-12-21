@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const SyntheticsMonitorStatusTranslations = {
   defaultActionMessage: i18n.translate(
-    'xpack.synthetics.alerts.monitorStatus.defaultActionMessage',
+    'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultActionMessage',
     {
       defaultMessage:
         'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}, checked at {checkedAt}',
@@ -24,7 +24,7 @@ export const SyntheticsMonitorStatusTranslations = {
     }
   ),
   defaultSubjectMessage: i18n.translate(
-    'xpack.synthetics.alerts.monitorStatus.defaultSubjectMessage',
+    'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultSubjectMessage',
     {
       defaultMessage: 'Monitor {monitorName} with url {monitorUrl} is down',
       values: {
@@ -34,7 +34,7 @@ export const SyntheticsMonitorStatusTranslations = {
     }
   ),
   defaultRecoveryMessage: i18n.translate(
-    'xpack.synthetics.alerts.monitorStatus.defaultRecoveryMessage',
+    'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoveryMessage',
     {
       defaultMessage:
         'Alert for monitor {monitorName} with url {monitorUrl} from {observerLocation} has recovered {recoveryReason}',
@@ -46,10 +46,10 @@ export const SyntheticsMonitorStatusTranslations = {
       },
     }
   ),
-  name: i18n.translate('xpack.synthetics.alerts.monitorStatus.clientName', {
-    defaultMessage: 'Uptime monitor status',
+  name: i18n.translate('xpack.synthetics.alerts.syntheticsMonitorStatus.clientName', {
+    defaultMessage: 'Synthetics monitor status',
   }),
-  description: i18n.translate('xpack.synthetics.alerts.monitorStatus.description', {
+  description: i18n.translate('xpack.synthetics.alerts.syntheticsMonitorStatus.description', {
     defaultMessage: 'Alert when a monitor is down or an availability threshold is breached.',
   }),
 };
