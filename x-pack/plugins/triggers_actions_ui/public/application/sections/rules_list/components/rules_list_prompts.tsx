@@ -22,6 +22,13 @@ interface RulesListPromptsProps {
 export const RulesListPrompts = (props: RulesListPromptsProps) => {
   const { showPrompt, authorizedToCreateRules, showSpinner, showCreateRule, onCreateRulesClick } =
     props;
+  if (showSpinner) {
+    return (
+      <EuiPageTemplate.Section grow={false} paddingSize="none">
+        <CenterJustifiedSpinner />
+      </EuiPageTemplate.Section>
+    );
+  }
 
   if (showPrompt) {
     if (authorizedToCreateRules) {
@@ -31,14 +38,6 @@ export const RulesListPrompts = (props: RulesListPromptsProps) => {
     } else {
       return <NoPermissionPrompt />;
     }
-  }
-
-  if (showSpinner) {
-    return (
-      <EuiPageTemplate.Section grow={false} paddingSize="none">
-        <CenterJustifiedSpinner />
-      </EuiPageTemplate.Section>
-    );
   }
 
   return null;

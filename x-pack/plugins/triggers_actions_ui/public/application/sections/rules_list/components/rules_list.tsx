@@ -222,7 +222,6 @@ export const RulesList = ({
 
   // Fetch config
   const { config } = useLoadConfigQuery();
-
   // Fetch rule types
   const {
     ruleTypesState,
@@ -599,16 +598,17 @@ export const RulesList = ({
   const showPrompt = noData && !rulesState.isLoading && !ruleTypesState.isLoading;
 
   useEffect(() => {
-    if (showPrompt && !authorizedToCreateAnyRules) {
+    if (!initialLoad && showPrompt && !authorizedToCreateAnyRules) {
       setHeaderActions?.([<RulesListDocLink />]);
       return;
     }
-    if (!showPrompt && authorizedToCreateAnyRules) {
+    if (!initialLoad && !showPrompt && authorizedToCreateAnyRules) {
       setHeaderActions?.([<CreateRuleButton openFlyout={openFlyout} />, <RulesListDocLink />]);
       return;
     }
+
     setHeaderActions?.();
-  }, [showPrompt, authorizedToCreateAnyRules]);
+  }, [showPrompt, authorizedToCreateAnyRules, initialLoad]);
 
   useEffect(() => {
     return () => setHeaderActions?.();

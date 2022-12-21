@@ -33,9 +33,9 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
     refetch,
     isLoading,
     data: rulesResponse,
-    isInitialLoading,
     dataUpdatedAt,
-    fetchStatus,
+    isInitialLoading,
+    isFetching,
   } = useQuery({
     queryKey: [
       'loadRules',
@@ -94,17 +94,16 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
     isEmpty(filters.tags)
   );
 
-  const noData = !rulesResponse || (rulesResponse?.data.length === 0 && !isFilterApplied);
-
+  const noData = rulesResponse?.data.length === 0 && !isFilterApplied;
   return {
     rulesState: {
-      isLoading: isLoading && fetchStatus === 'fetching',
+      isLoading: isLoading || isFetching,
       data: rulesResponse?.data ?? [],
       totalItemCount: rulesResponse?.total ?? 0,
     },
     lastUpdate: moment(dataUpdatedAt).format(),
     noData,
-    initialLoad: isInitialLoading || !rulesResponse,
+    initialLoad: isLoading || isInitialLoading,
     loadRules: refetch,
   };
 };

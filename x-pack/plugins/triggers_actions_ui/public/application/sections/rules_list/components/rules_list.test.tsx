@@ -337,59 +337,55 @@ describe('rules_list ', () => {
       cleanup();
     });
 
-    describe('Status filter', () => {
-      it('can filter by rule states', async () => {
-        (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-        const onStatusFilterChangeMock = jest.fn();
-        renderWithProviders(
-          <RulesList statusFilter={['disabled']} onStatusFilterChange={onStatusFilterChangeMock} />
-        );
-        await waitFor(() => screen.getByText('Rule state'));
-        expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-          expect.objectContaining({
-            ruleStatusesFilter: ['disabled'],
-          })
-        );
-        fireEvent.click(screen.getAllByTestId('ruleStatusFilterButton')[0]);
-        fireEvent.click(screen.getAllByTestId('ruleStatusFilterOption-enabled')[0]);
-        expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-          expect.objectContaining({
-            ruleStatusesFilter: ['disabled', 'enabled'],
-          })
-        );
-        expect(onStatusFilterChangeMock).toHaveBeenCalled();
-        expect(onStatusFilterChangeMock).toHaveBeenLastCalledWith(['disabled', 'enabled']);
-      });
+    it('can filter by rule states', async () => {
+      (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+      const onStatusFilterChangeMock = jest.fn();
+      renderWithProviders(
+        <RulesList statusFilter={['disabled']} onStatusFilterChange={onStatusFilterChangeMock} />
+      );
+      await waitFor(() => screen.getByText('Rule state'));
+      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          ruleStatusesFilter: ['disabled'],
+        })
+      );
+
+      fireEvent.click(screen.getAllByTestId('ruleStatusFilterButton')[0]);
+      fireEvent.click(screen.getAllByTestId('ruleStatusFilterOption-enabled')[0]);
+      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          ruleStatusesFilter: ['disabled', 'enabled'],
+        })
+      );
+      expect(onStatusFilterChangeMock).toHaveBeenCalled();
+      expect(onStatusFilterChangeMock).toHaveBeenLastCalledWith(['disabled', 'enabled']);
     });
 
-    describe('Last response filter', () => {
-      it('can filter by last response', async () => {
-        const onLastRunOutcomeFilterChangeMock = jest.fn();
-        renderWithProviders(
-          <RulesList
-            lastRunOutcomeFilter={['failed']}
-            onLastRunOutcomeFilterChange={onLastRunOutcomeFilterChangeMock}
-          />
-        );
-        await waitFor(() => screen.getByTestId('ruleLastRunOutcomeFilterButton'));
-        fireEvent.click(screen.getAllByTestId('ruleLastRunOutcomeFilterButton')[0]);
-        fireEvent.click(screen.getAllByTestId('ruleLastRunOutcomesucceededFilterOption')[0]);
-        expect(onLastRunOutcomeFilterChangeMock).toHaveBeenLastCalledWith(['failed', 'succeeded']);
-        expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-          expect.objectContaining({
-            ruleLastRunOutcomesFilter: ['failed', 'succeeded'],
-          })
-        );
-        await waitFor(() => screen.getByTestId('ruleLastRunOutcomeFilterButton'));
-        fireEvent.click(screen.getAllByTestId('ruleLastRunOutcomeFilterButton')[0]);
-        fireEvent.click(screen.getAllByTestId('ruleLastRunOutcomefailedFilterOption')[0]);
-        expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-          expect.objectContaining({
-            ruleLastRunOutcomesFilter: ['succeeded'],
-          })
-        );
-        expect(onLastRunOutcomeFilterChangeMock).toHaveBeenLastCalledWith(['succeeded']);
-      });
+    it('can filter by last response', async () => {
+      const onLastRunOutcomeFilterChangeMock = jest.fn();
+      renderWithProviders(
+        <RulesList
+          lastRunOutcomeFilter={['failed']}
+          onLastRunOutcomeFilterChange={onLastRunOutcomeFilterChangeMock}
+        />
+      );
+      fireEvent.click((await screen.findAllByTestId('ruleLastRunOutcomeFilterButton'))[0]);
+      fireEvent.click((await screen.findAllByTestId('ruleLastRunOutcomesucceededFilterOption'))[0]);
+      expect(onLastRunOutcomeFilterChangeMock).toHaveBeenLastCalledWith(['failed', 'succeeded']);
+      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          ruleLastRunOutcomesFilter: ['failed', 'succeeded'],
+        })
+      );
+      await waitFor(() => screen.getByTestId('ruleLastRunOutcomeFilterButton'));
+      fireEvent.click(screen.getAllByTestId('ruleLastRunOutcomeFilterButton')[0]);
+      fireEvent.click(screen.getAllByTestId('ruleLastRunOutcomefailedFilterOption')[0]);
+      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          ruleLastRunOutcomesFilter: ['succeeded'],
+        })
+      );
+      expect(onLastRunOutcomeFilterChangeMock).toHaveBeenLastCalledWith(['succeeded']);
     });
 
     describe('showActionFilter prop', () => {
