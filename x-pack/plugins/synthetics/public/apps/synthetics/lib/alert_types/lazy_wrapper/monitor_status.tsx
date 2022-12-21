@@ -11,6 +11,7 @@ import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { store } from '../../../state';
@@ -28,7 +29,13 @@ export default function MonitorStatusAlert({ core, plugins, params }: Props) {
   return (
     <ReduxProvider store={store}>
       <KibanaContextProvider services={{ ...core, ...plugins }}>
-        <EuiText>Manage synthetics monitor status alert actions</EuiText>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.uptime.synthetics.alertRule.monitorStatus.description"
+            defaultMessage="Manage synthetics monitor status rule actions."
+          />
+        </EuiText>
+
         <EuiSpacer size="m" />
       </KibanaContextProvider>
     </ReduxProvider>

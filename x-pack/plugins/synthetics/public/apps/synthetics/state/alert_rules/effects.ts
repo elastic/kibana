@@ -25,9 +25,9 @@ export function* enableDefaultAlertingEffect() {
 }
 
 const successMessage = i18n.translate('xpack.synthetics.settings.enableAlerting', {
-  defaultMessage: 'Successfully updated default alert.',
+  defaultMessage: 'Successfully updated monitor status alert.',
 });
 
 const failureMessage = i18n.translate('xpack.synthetics.settings.enabledAlert.fail', {
-  defaultMessage: 'Failed to updated default alert.',
+  defaultMessage: 'Failed to update monitor status alert.',
 });
