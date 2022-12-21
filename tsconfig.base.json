@@ -184,8 +184,6 @@
       "@kbn/core-i18n-server-internal/*": ["packages/core/i18n/core-i18n-server-internal/*"],
       "@kbn/core-i18n-server-mocks": ["packages/core/i18n/core-i18n-server-mocks"],
       "@kbn/core-i18n-server-mocks/*": ["packages/core/i18n/core-i18n-server-mocks/*"],
-      "@kbn/core-injected-metadata-browser": ["packages/core/injected-metadata/core-injected-metadata-browser"],
-      "@kbn/core-injected-metadata-browser/*": ["packages/core/injected-metadata/core-injected-metadata-browser/*"],
       "@kbn/core-injected-metadata-browser-internal": ["packages/core/injected-metadata/core-injected-metadata-browser-internal"],
       "@kbn/core-injected-metadata-browser-internal/*": ["packages/core/injected-metadata/core-injected-metadata-browser-internal/*"],
       "@kbn/core-injected-metadata-browser-mocks": ["packages/core/injected-metadata/core-injected-metadata-browser-mocks"],
