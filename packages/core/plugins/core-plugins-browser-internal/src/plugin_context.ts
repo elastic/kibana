@@ -81,9 +81,6 @@ export function createPluginSetupContext<
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
     settings: deps.settings,
-    injectedMetadata: {
-      getInjectedVar: deps.injectedMetadata.getInjectedVar,
-    },
     theme: deps.theme,
     getStartServices: () => plugin.startDependencies,
   };
@@ -130,9 +127,6 @@ export function createPluginStartContext<
     uiSettings: deps.uiSettings,
     settings: deps.settings,
     savedObjects: deps.savedObjects,
-    injectedMetadata: {
-      getInjectedVar: deps.injectedMetadata.getInjectedVar,
-    },
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
     theme: deps.theme,
