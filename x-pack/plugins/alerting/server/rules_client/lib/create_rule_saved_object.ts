@@ -86,11 +86,12 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     }
 
     await withSpan({ name: 'unsecuredSavedObjectsClient.update', type: 'rules' }, () =>
-        context.unsecuredSavedObjectsClient.update<RawRule>('alert', createdAlert.id, {
-          scheduledTaskId,
-        })
-      );
-      createdAlert.attributes.scheduledTaskId = scheduledTaskId;
+      context.unsecuredSavedObjectsClient.update<RawRule>('alert', createdAlert.id, {
+        scheduledTaskId,
+      })
+    );
+    createdAlert.attributes.scheduledTaskId = scheduledTaskId;
+  }
 
   // Log warning if schedule interval is less than the minimum but we're not enforcing it
   if (
