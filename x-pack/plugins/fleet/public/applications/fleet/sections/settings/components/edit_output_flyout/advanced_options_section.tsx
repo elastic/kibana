@@ -193,7 +193,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
           label={
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.diskQueuePathLabel"
-              defaultMessage="Path"
+              defaultMessage="Disk Queue Path"
             />
           }
           {...diskQueuePathInput.formRowProps}
@@ -217,7 +217,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
           label={
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.diskQueueMaxSize"
-              defaultMessage="Maximum Disk Size"
+              defaultMessage="Maximum Disk Queue Size"
             />
           }
         >
