@@ -200,13 +200,13 @@ describe('status check alert', () => {
       const alert = statusCheckAlertFactory(server, libs, plugins);
       // @ts-ignore the executor can return `void`, but ours never does
       const options = mockOptions();
-      const state: Record<string, any> | void = await alert.executor(options);
+      const executorResult: Record<string, any> | void = await alert.executor(options);
       const {
         services: { alertWithLifecycle },
       } = options;
 
-      expect(state).not.toBeUndefined();
-      expect(state instanceof Object ? state.isTriggered : true).toBe(false);
+      expect(executorResult?.state).not.toBeUndefined();
+      expect(executorResult?.state instanceof Object ? executorResult.state.isTriggered : true).toBe(false);
       expect(alertWithLifecycle).not.toHaveBeenCalled();
       expect(mockGetter).toHaveBeenCalledTimes(1);
       expect(mockGetter.mock.calls[0][0]).toEqual(
@@ -406,7 +406,7 @@ describe('status check alert', () => {
       const {
         services: { alertWithLifecycle },
       } = options;
-      const state = await alert.executor(options);
+      const executorResult = await alert.executor(options);
 
       const [{ value: alertInstanceMock }] = alertWithLifecycle.mock.results;
       mockMonitors.forEach((monitor) => {
@@ -437,7 +437,7 @@ describe('status check alert', () => {
           },
         ]
       `);
-      expect(state).toMatchInlineSnapshot(`
+      expect(executorResult?.state).toMatchInlineSnapshot(`
         Object {
           "currentTriggerStarted": "7.7 date",
           "firstCheckedAt": "7.7 date",
@@ -473,7 +473,7 @@ describe('status check alert', () => {
           tags: ['unsecured', 'containers', 'org:google'],
         },
       });
-      const state = await alert.executor(options);
+      const executorResult = await alert.executor(options);
       const {
         services: { alertWithLifecycle },
       } = options;
@@ -653,7 +653,7 @@ describe('status check alert', () => {
           },
         ]
       `);
-      expect(state).toMatchInlineSnapshot(`
+      expect(executorResult?.state).toMatchInlineSnapshot(`
         Object {
           "currentTriggerStarted": "foo date string",
           "firstCheckedAt": "foo date string",
@@ -818,7 +818,7 @@ describe('status check alert', () => {
       const {
         services: { alertWithLifecycle },
       } = options;
-      const state = await alert.executor(options);
+      const executorResult = await alert.executor(options);
       const [{ value: alertInstanceMock }] = alertWithLifecycle.mock.results;
       mockAvailabilityMonitors.forEach((monitor) => {
         expect(alertWithLifecycle).toBeCalledWith(mockAvailabilityAlertDocument(monitor));
@@ -927,7 +927,7 @@ describe('status check alert', () => {
           threshold: '99.34',
         })
       );
-      expect(state).toMatchInlineSnapshot(`
+      expect(executorResult?.state).toMatchInlineSnapshot(`
         Object {
           "currentTriggerStarted": undefined,
           "firstCheckedAt": "availability test",

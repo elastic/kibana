@@ -47,7 +47,7 @@ describe('createLifecycleExecutor', () => {
       return { state: nextRuleState };
     });
 
-    const newRuleState = await executor(
+    const newExecutorResult = await executor(
       createDefaultAlertExecutorOptions({
         params: {},
         state: { wrapped: initialRuleState, trackedAlerts: {}, trackedAlertsRecovered: {} },
@@ -55,7 +55,7 @@ describe('createLifecycleExecutor', () => {
       })
     );
 
-    expect(newRuleState).toEqual({
+    expect(newExecutorResult.state).toEqual({
       wrapped: {
         aRuleStateKey: 'NEXT_RULE_STATE_VALUE',
       },

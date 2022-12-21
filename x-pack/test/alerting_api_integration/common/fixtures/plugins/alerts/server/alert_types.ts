@@ -128,8 +128,10 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
     },
   });
   return {
-    globalStateValue: true,
-    groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+    state: {
+      globalStateValue: true,
+      groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+    },
   };
 }
 
@@ -165,7 +167,9 @@ function getCumulativeFiringAlertType() {
       });
 
       return {
-        runCount,
+        state: {
+          runCount,
+        },
       };
     },
   };
@@ -209,7 +213,9 @@ function getNeverFiringAlertType() {
         },
       });
       return {
-        globalStateValue: true,
+        state: {
+          globalStateValue: true,
+        },
       };
     },
   };
@@ -491,7 +497,9 @@ function getPatternFiringAlertType() {
       }
 
       return {
-        patternIndex: patternIndex + 1,
+        state: {
+          patternIndex: patternIndex + 1,
+        },
       };
     },
   };
@@ -530,7 +538,9 @@ function getPatternSuccessOrFailureAlertType() {
       }
 
       return {
-        patternIndex: patternIndex + 1,
+        state: {
+          patternIndex: patternIndex + 1,
+        },
       };
     },
   };
@@ -577,7 +587,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
       if (pattern[globalPatternIndex++] === true) {
         await new Promise((resolve) => setTimeout(resolve, 10000));
       }
-      return {};
+      return { state: {} };
     },
   };
   return result;

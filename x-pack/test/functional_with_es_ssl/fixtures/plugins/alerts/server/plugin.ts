@@ -58,8 +58,10 @@ export const alwaysFiringAlertType: RuleType<
     });
 
     return {
-      globalStateValue: true,
-      groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+      state: {
+        globalStateValue: true,
+        groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+      },
     };
   },
 };

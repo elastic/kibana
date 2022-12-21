@@ -150,7 +150,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           });
         }
 
-        return Promise.resolve({ shouldTriggerAlert: triggerAlert });
+        return Promise.resolve({ state: { shouldTriggerAlert: triggerAlert } });
       });
 
       const getSummarizedAlerts = createGetSummarizedAlerts();
