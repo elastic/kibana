@@ -53,6 +53,7 @@ import { registerConfigDataRoute } from './routes/enterprise_search/config_data'
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
 import { registerCreateAPIKeyRoute } from './routes/enterprise_search/create_api_key';
+import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -63,7 +64,6 @@ import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/t
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
 import { ConfigType } from '.';
-import { registerStatsRoutes } from './routes/enterprise_search/stats';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
