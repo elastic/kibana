@@ -10,7 +10,7 @@ import { find, get } from 'lodash';
 import { catchError, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
