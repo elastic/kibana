@@ -12,7 +12,6 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/core-injected-metadata-browser-mocks",
     "@kbn/core-doc-links-browser-mocks",
     "@kbn/core-theme-browser-mocks",
     "@kbn/core-analytics-browser-mocks",
