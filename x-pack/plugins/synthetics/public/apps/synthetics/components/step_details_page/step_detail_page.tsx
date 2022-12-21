@@ -35,7 +35,7 @@ export const StepDetailPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'stepDetail' });
   useTrackPageview({ app: 'synthetics', path: 'stepDetail', delay: 15000 });
 
-  const { data, loading, isFailed, currentStep, stepLabels } = useJourneySteps(checkGroupId);
+  const { data, loading, isFailed, currentStep } = useJourneySteps(checkGroupId);
 
   const activeStep = data?.steps?.find(
     (step) => step.synthetics?.step?.index === Number(stepIndex)
@@ -63,12 +63,7 @@ export const StepDetailPage = () => {
         <EuiFlexItem grow={1}>
           <EuiPanel hasShadow={false} hasBorder>
             {data?.details?.journey && currentStep && (
-              <StepImage
-                ping={data?.details?.journey}
-                step={currentStep}
-                isFailed={isFailed}
-                stepLabels={stepLabels}
-              />
+              <StepImage ping={data?.details?.journey} step={currentStep} isFailed={isFailed} />
             )}
           </EuiPanel>
         </EuiFlexItem>
@@ -91,7 +86,7 @@ export const StepDetailPage = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
             <StepMetrics />
           </EuiPanel>
         </EuiFlexItem>

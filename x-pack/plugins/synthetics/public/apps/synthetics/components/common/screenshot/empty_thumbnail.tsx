@@ -16,17 +16,15 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-export const IMAGE_WIDTH = 360;
-export const IMAGE_HEIGHT = 203;
+import {
+  getConfinedScreenshotSize,
+  ScreenshotImageSize,
+  THUMBNAIL_SCREENSHOT_SIZE,
+} from './screenshot_size';
 
-export const IMAGE_WIDTH_M = 200;
-export const IMAGE_HEIGHT_M = 114;
-
-export const imageStyle = css`
+export const thumbnailStyle = css`
   padding: 0;
   margin: auto;
-  width: ${IMAGE_WIDTH}px;
-  height: ${IMAGE_HEIGHT}px;
   object-fit: contain;
   overflow: hidden;
   display: flex;
@@ -34,35 +32,49 @@ export const imageStyle = css`
   justify-content: center;
 `;
 
-export const EmptyImage = ({ size, isLoading = false }: { isLoading: boolean; size?: 'm' }) => {
+export const EmptyThumbnail = ({
+  isLoading = false,
+  animateLoading,
+  size = THUMBNAIL_SCREENSHOT_SIZE,
+  unavailableMessage,
+  borderRadius,
+}: {
+  isLoading: boolean;
+  animateLoading: boolean;
+  size: ScreenshotImageSize | [number, number];
+  unavailableMessage?: string;
+  borderRadius?: string | number;
+}) => {
   const { euiTheme } = useEuiTheme();
-
-  const imgWidth = size === 'm' ? IMAGE_WIDTH_M : IMAGE_WIDTH;
-  const imgHeight = size === 'm' ? IMAGE_HEIGHT_M : IMAGE_HEIGHT;
+  const { width, height } = getConfinedScreenshotSize(size);
+  const noDataMessage = unavailableMessage ?? SCREENSHOT_NOT_AVAILABLE;
 
   return (
     <div
       data-test-subj="stepScreenshotPlaceholder"
       role="img"
-      aria-label={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : SCREENSHOT_NOT_AVAILABLE}
-      title={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : SCREENSHOT_NOT_AVAILABLE}
+      aria-label={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : noDataMessage}
+      title={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : noDataMessage}
       css={css`
-        ${imageStyle};
-        width: ${imgWidth}px;
-        height: ${imgHeight}px;
+        ${thumbnailStyle};
+        width: ${width};
+        height: ${height};
         background: ${useEuiBackgroundColor('subdued')};
         border: ${euiTheme.border.thin};
+        ${borderRadius ? `border-radius: ${borderRadius}` : ``};
       `}
     >
       {isLoading ? (
         <EuiLoadingContent
-          lines={1}
           data-test-subj="stepScreenshotPlaceholderLoading"
           css={css`
             width: 100%;
-            height: 8%;
-            transform: scale(1, 13); // To create a skeleton loading effect
+            transform: scale(
+              1,
+              ${animateLoading ? '100' : '0'}
+            ); // To create a skeleton loading effect when animateLoading is true
           `}
+          lines={1}
         />
       ) : (
         <div
@@ -78,7 +90,10 @@ export const EmptyImage = ({ size, isLoading = false }: { isLoading: boolean; si
             type="eyeClosed"
             color={euiTheme.colors.disabledText}
           />
-          <EuiText color={euiTheme.colors.disabledText}>{IMAGE_UN_AVAILABLE}</EuiText>
+
+          {unavailableMessage ? (
+            <EuiText color={euiTheme.colors.disabledText}>{unavailableMessage}</EuiText>
+          ) : null}
         </div>
       )}
     </div>
@@ -96,12 +111,5 @@ export const SCREENSHOT_NOT_AVAILABLE = i18n.translate(
   'xpack.synthetics.monitor.step.screenshot.notAvailable',
   {
     defaultMessage: 'Step screenshot is not available.',
-  }
-);
-
-export const IMAGE_UN_AVAILABLE = i18n.translate(
-  'xpack.synthetics.monitor.step.screenshot.unAvailable',
-  {
-    defaultMessage: 'Image unavailable',
   }
 );

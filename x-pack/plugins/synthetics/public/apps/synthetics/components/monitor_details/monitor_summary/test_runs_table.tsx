@@ -34,7 +34,7 @@ import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
-import { JourneyScreenshot } from '../../common/screenshot/journey_screenshot';
+import { JourneyLastScreenshot } from '../../common/screenshot/journey_last_screenshot';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
@@ -99,7 +99,7 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
             field: 'timestamp',
             name: SCREENSHOT_LABEL,
             render: (_timestamp: string, item) => (
-              <JourneyScreenshot checkGroupId={item.monitor.check_group} />
+              <JourneyLastScreenshot checkGroupId={item.monitor.check_group} size={[100, 64]} />
             ),
           },
         ]
