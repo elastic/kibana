@@ -12,6 +12,7 @@ import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { LensAppLocatorParams } from '../../common/locator/locator';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
@@ -37,7 +38,6 @@ import {
   createIndexPatternService,
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
-import type { LensAppLocatorParams } from '../../common/locator/locator';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -441,25 +441,9 @@ export function App({
         // This is a stripped down version of what the share URL plugin is doing
         const relativeUrl = await shortUrls.create({ locator, params });
         const absoluteShortUrl = application.getUrlForApp('', {
-          path: `/s/r/${relativeUrl.data.slug}`,
+          path: `/r/s/${relativeUrl.data.slug}`,
           absolute: true,
         });
-        // Another version (does not work) #1
-        // const res = await shortUrls.createWithLocator({ locator, params });
-        // const absoluteShortUrl = res.locator.getRedirectUrl(res.params);
-
-        // Another version (does not work) #2
-        // const absoluteShortUrl = await locator.getUrl(
-        //   { url: `/s/r/${relativeUrl}` },
-        //   { absolute: true }
-        // );
-
-        // Yet another version (does not work) #3
-        // const result = await shortUrls.createWithLocator({
-        //   locator: legacyLocator,
-        //   params: { url: `/s/r/${relativeUrl}` },
-        // });
-        // const absoluteShortUrl = await result.locator.getUrl(result.params, { absolute: true });
         return absoluteShortUrl;
       }
       return '';

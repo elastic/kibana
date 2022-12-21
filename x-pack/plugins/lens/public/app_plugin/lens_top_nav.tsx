@@ -16,7 +16,8 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import { ENABLE_SQL } from '../../common';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
@@ -33,6 +34,7 @@ import {
   getIndexPatternsIds,
   getResolvedDateRange,
   refreshIndexPatternsList,
+  extractReferencesFromState,
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
@@ -585,25 +587,43 @@ export const LensTopNavMenu = ({
               title: title || unsavedTitle,
             };
 
-            const visualizationStateSerialized = visualization as LensAppState['visualization'] &
+            const references = extractReferencesFromState({
+              activeDatasources: Object.keys(datasourceStates).reduce(
+                (acc, datasourceId) => ({
+                  ...acc,
+                  [datasourceId]: datasourceMap[datasourceId],
+                }),
+                {}
+              ),
+              datasourceStates,
+              visualizationState: visualization.state,
+              activeVisualization: visualization.activeId
+                ? visualizationMap[visualization.activeId]
+                : undefined,
+            }) as Array<SavedObjectReference & SerializableRecord>;
+
+            const serializableVisualization = visualization as LensAppState['visualization'] &
               SerializableRecord;
-            const dataSourceStatesSerialized =
+
+            const serializableDatasourceStates =
               datasourceStates as LensAppState['datasourceStates'] & SerializableRecord;
 
-            const shareableUrl =
-              (await shortUrlService?.({
-                filters,
-                query,
-                resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
-                visualization: visualizationStateSerialized,
-                datasourceStates: dataSourceStatesSerialized,
-              })) || '';
-            // const shareableUrl = shortUrl;
+            const shareableUrl = await shortUrlService?.({
+              filters,
+              query,
+              resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+              visualization: serializableVisualization,
+              datasourceStates: serializableDatasourceStates,
+              activeDatasourceId,
+              searchSessionId: data.search.session.getSessionId(),
+              references,
+            });
+
             share.toggleShareContextMenu({
               anchorElement,
               allowEmbed: false,
               allowShortUrl: false, // we'll manage this implicitly via the new service
-              shareableUrl,
+              shareableUrl: shareableUrl || '',
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens_visualization',
               panelTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
@@ -731,8 +751,9 @@ export const LensTopNavMenu = ({
     isLinkedToOriginatingApp,
     dashboardFeatureFlag.allowByValueEmbeddables,
     initialContextIsEmbedded,
-    isSaveable,
     activeData,
+    isSaveable,
+    shortUrlService,
     application.capabilities.visualize.createShortUrl,
     getIsByValueMode,
     savingToLibraryPermitted,
@@ -744,13 +765,16 @@ export const LensTopNavMenu = ({
     title,
     share,
     unsavedTitle,
-    visualization,
     datasourceStates,
-    shortUrlService,
+    visualization,
+    visualizationMap,
     filters,
     query,
     data.query.timefilter.timefilter,
+    data.search.session,
+    activeDatasourceId,
     currentDoc?.savedObjectId,
+    datasourceMap,
     onAppLeave,
     runSave,
     attributeService,

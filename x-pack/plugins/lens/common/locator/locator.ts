@@ -9,14 +9,15 @@ import rison from '@kbn/rison';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/common';
+import { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { DateRange } from '../types';
 
 export const LENS_APP_LOCATOR = 'LENS_APP_LOCATOR';
+export const LENS_SHARE_STATE_ACTION = 'LENS_SHARE_STATE_ACTION';
 
-interface LensPartialState {
+interface LensShareableState {
   /**
    * Optionally apply filters.
    */
@@ -38,14 +39,29 @@ interface LensPartialState {
   savedQuery?: SavedQuery & SerializableRecord;
 
   /**
-   * Optionally set the visualization configuration
+   * Set the visualization configuration
    */
-  visualization?: { activeId: string | null; state: unknown } & SerializableRecord;
+  visualization: { activeId: string | null; state: unknown } & SerializableRecord;
 
   /**
-   * Optionally set the datasources configurations
+   * Set the active datasource used
    */
-  datasourceStates?: Record<string, { isLoading: boolean; state: unknown }> & SerializableRecord;
+  activeDatasourceId?: string;
+
+  /**
+   * Set the datasources configurations
+   */
+  datasourceStates: Record<string, unknown> & SerializableRecord;
+
+  /**
+   * Background search session id
+   */
+  searchSessionId?: string;
+
+  /**
+   * Set the references used in the Lens state
+   */
+  references: Array<SavedObjectReference & SerializableRecord>;
 }
 
 export interface LensAppLocatorParams extends SerializableRecord {
@@ -53,12 +69,6 @@ export interface LensAppLocatorParams extends SerializableRecord {
    * Optionally set saved object ID.
    */
   savedObjectId?: string;
-
-  /**
-   * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
-   * whether to hash the data in the url to avoid url length issues.
-   */
-  useHash?: boolean;
 
   /**
    * Background search session id
@@ -86,14 +96,28 @@ export interface LensAppLocatorParams extends SerializableRecord {
   savedQuery?: SavedQuery & SerializableRecord;
 
   /**
-   * Optionally set the visualization configuration
+   * In case of no savedObjectId passed, the properties above have to be passed
+   */
+
+  /**
+   * Set the active datasource used
+   */
+  activeDatasourceId?: string | null;
+
+  /**
+   * Set the visualization configuration
    */
   visualization?: { activeId: string | null; state: unknown } & SerializableRecord;
 
   /**
-   * Optionally set the datasources configurations
+   * Set the datasources configurations
    */
-  datasourceStates?: Record<string, { isLoading: boolean; state: unknown }> & SerializableRecord;
+  datasourceStates?: Record<string, { state: unknown }> & SerializableRecord;
+
+  /**
+   * Sset the references used in the Lens state
+   */
+  references?: Array<SavedObjectReference & SerializableRecord>;
 }
 
 export type LensAppLocator = LocatorPublic<LensAppLocatorParams>;
@@ -106,7 +130,27 @@ export interface LensAppLocatorDependencies {
  * Location state of scoped history (history instance of Kibana Platform application service)
  */
 export interface MainHistoryLocationState {
-  dataViewSpec?: DataViewSpec;
+  type: typeof LENS_SHARE_STATE_ACTION;
+  payload:
+    | LensShareableState
+    | Omit<
+        LensShareableState,
+        'activeDatasourceId' | 'visualization' | 'datasourceStates' | 'references'
+      >;
+}
+
+function getStateFromParams(params: LensAppLocatorParams): MainHistoryLocationState['payload'] {
+  if (params.savedObjectId) {
+    return {};
+  }
+  return {
+    activeDatasourceId: params.activeDatasourceId!,
+    visualization: params.visualization!,
+    datasourceStates: Object.fromEntries(
+      Object.entries(params.datasourceStates!).map(([id, { state }]) => [id, state])
+    ) as Record<string, { state: unknown }> & SerializableRecord,
+    references: params.references!,
+  };
 }
 
 export class LensAppLocatorDefinition implements LocatorDefinition<LensAppLocatorParams> {
@@ -115,50 +159,37 @@ export class LensAppLocatorDefinition implements LocatorDefinition<LensAppLocato
   constructor(protected readonly deps: LensAppLocatorDependencies) {}
 
   public readonly getLocation = async (params: LensAppLocatorParams) => {
-    const {
-      filters,
-      query,
-      savedObjectId,
-      resolvedDateRange,
-      searchSessionId,
-      visualization,
-      datasourceStates,
-    } = params;
-    const appState: LensPartialState = {};
+    const { filters, query, savedObjectId, resolvedDateRange, searchSessionId } = params;
+    const appState = getStateFromParams(params);
     const queryState: GlobalQueryStateFromUrl = {};
     const { isFilterPinned } = await import('@kbn/es-query');
 
-    if (query) appState.query = query;
+    if (query) {
+      appState.query = query;
+    }
     if (resolvedDateRange) {
+      appState.resolvedDateRange = resolvedDateRange;
       queryState.time = { from: resolvedDateRange.fromDate, to: resolvedDateRange.toDate };
     }
-    if (filters && filters.length) {
+    if (filters?.length) {
       appState.filters = filters?.filter((f) => !isFilterPinned(f));
       queryState.filters = appState.filters;
     }
-    if (visualization) {
-      appState.visualization = visualization;
-    }
-    if (datasourceStates) {
-      appState.datasourceStates = datasourceStates;
-    }
-
-    const state: MainHistoryLocationState = {};
 
     const savedObjectPath = savedObjectId ? `edit/${encodeURIComponent(savedObjectId)}` : '';
-    const url = new URL(window.location.href);
+    const basepath = `${window.location.origin}${window.location.pathname}`;
+    const url = new URL(basepath);
     url.hash = savedObjectPath;
     url.searchParams.append('_g', rison.encodeUnknown(queryState) || '');
-    url.searchParams.append('_a', rison.encodeUnknown(appState) || '');
 
     if (searchSessionId) {
-      url.searchParams.append('searchSessionId', searchSessionId);
+      appState.searchSessionId = searchSessionId;
     }
 
     return {
       app: 'lens',
-      path: url.href,
-      state,
+      path: url.href.replace(basepath, '#/'),
+      state: { type: LENS_SHARE_STATE_ACTION, payload: appState },
     };
   };
 }
