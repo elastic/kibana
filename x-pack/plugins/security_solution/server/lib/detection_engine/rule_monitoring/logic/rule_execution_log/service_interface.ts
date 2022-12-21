@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 
 import type {
-  PublicRuleLastRunService,
+  PublicRuleResultService,
   PublicRuleMonitoringService,
 } from '@kbn/alerting-plugin/server/types';
 import type { IRuleExecutionLogForRoutes } from './client_for_routes/client_interface';
@@ -36,6 +36,6 @@ export interface ClientForRoutesParams {
 export interface ClientForExecutorsParams {
   savedObjectsClient: SavedObjectsClientContract;
   ruleMonitoringService?: PublicRuleMonitoringService;
-  ruleLastRunService?: PublicRuleLastRunService;
+  ruleResultService?: PublicRuleResultService;
   context: RuleExecutionContext;
 }

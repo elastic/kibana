@@ -10,7 +10,7 @@ import type { Duration } from 'moment';
 import type { Logger } from '@kbn/core/server';
 
 import type {
-  PublicRuleLastRunService,
+  PublicRuleResultService,
   PublicRuleMonitoringService,
 } from '@kbn/alerting-plugin/server/types';
 import type {
@@ -44,7 +44,7 @@ export const createClientForExecutors = (
   logger: Logger,
   context: RuleExecutionContext,
   ruleMonitoringService?: PublicRuleMonitoringService,
-  ruleLastRunService?: PublicRuleLastRunService
+  ruleResultService?: PublicRuleResultService
 ): IRuleExecutionLogForExecutors => {
   const baseCorrelationIds = getCorrelationIds(context);
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
@@ -171,15 +171,15 @@ export const createClientForExecutors = (
     } = metrics ?? {};
 
     if (newStatus === RuleExecutionStatus.failed) {
-      ruleLastRunService?.addLastRunError(message);
+      ruleResultService?.addLastRunError(message);
     }
 
     if (newStatus === RuleExecutionStatus['partial failure']) {
-      ruleLastRunService?.addLastRunWarning(message);
+      ruleResultService?.addLastRunWarning(message);
     }
 
     if (newStatus === RuleExecutionStatus.succeeded) {
-      ruleLastRunService?.setLastRunOutcomeMessage(message);
+      ruleResultService?.setLastRunOutcomeMessage(message);
     }
 
     if (totalSearchDurationMs) {

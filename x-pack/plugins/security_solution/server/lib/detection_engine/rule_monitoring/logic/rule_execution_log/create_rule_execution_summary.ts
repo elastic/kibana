@@ -28,7 +28,7 @@ export const createRuleExecutionSummary = (
       date: rule.monitoring?.run.last_run?.timestamp ?? '',
       status: ruleExecutionStatus,
       status_order: ruleExecutionStatusToNumber(ruleExecutionStatus),
-      message: rule.lastRun?.outcomeMsg ?? '',
+      message: rule.lastRun?.outcomeMsg?.join(' ') ?? '',
       metrics: {
         total_indexing_duration_ms:
           rule.monitoring?.run.last_run.metrics.total_indexing_duration_ms ?? undefined,
