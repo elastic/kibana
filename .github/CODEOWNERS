@@ -73,6 +73,7 @@
 /src/plugins/ui_actions/ @elastic/kibana-global-experience
 /src/plugins/ui_actions_enhanced/ @elastic/kibana-global-experience
 /src/plugins/navigation/ @elastic/kibana-global-experience
+/src/plugins/image_embeddable/ @elastic/kibana-global-experience
 /x-pack/plugins/notifications/ @elastic/kibana-global-experience
 
 ## Examples
@@ -782,7 +783,6 @@ packages/core/i18n/core-i18n-browser-mocks @elastic/kibana-core
 packages/core/i18n/core-i18n-server @elastic/kibana-core
 packages/core/i18n/core-i18n-server-internal @elastic/kibana-core
 packages/core/i18n/core-i18n-server-mocks @elastic/kibana-core
-packages/core/injected-metadata/core-injected-metadata-browser @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-browser-internal @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-browser-mocks @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-common-internal @elastic/kibana-core
@@ -880,6 +880,7 @@ packages/home/sample_data_types @elastic/kibana-global-experience
 packages/kbn-ace @elastic/platform-deployment-management
 packages/kbn-alerts @elastic/security-solution
 packages/kbn-ambient-common-types @elastic/kibana-operations
+packages/kbn-ambient-ftr-types @elastic/kibana-operations
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core

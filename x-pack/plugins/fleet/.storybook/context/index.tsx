@@ -84,9 +84,6 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
           return <I18nProvider>{children}</I18nProvider>;
         },
       },
-      injectedMetadata: {
-        getInjectedVar: () => null,
-      },
       notifications: getNotifications(),
       share: getShare(),
       uiSettings: getUiSettings(),
