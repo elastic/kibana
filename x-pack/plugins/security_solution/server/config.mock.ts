@@ -14,6 +14,8 @@ export const createMockConfig = (): ConfigType => {
   const enableExperimental: Array<keyof ExperimentalFeatures> = [
     // Remove property below once `get-file` FF is enabled or removed
     'responseActionGetFileEnabled',
+    // Remove property below once kubernetes commands FF is enabled or removed
+    'responseActionKubernetesCommandsEnabled',
   ];
 
   return {

@@ -178,18 +178,21 @@ export function registerResponseActionRoutes(
     );
   }
 
-  router.post(
-    {
-      path: GET_KUBE_LIST_ROUTE,
-      validate: ResponseActionKubeRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canExecuteKubernetesCommands'] },
-      logger,
-      responseActionRequestHandler(endpointContext, 'kube-list')
-    )
-  );
+  // `kubernetes commands` currently behind FF
+  if (endpointContext.experimentalFeatures.responseActionKubernetesCommandsEnabled) {
+    router.post(
+      {
+        path: GET_KUBE_LIST_ROUTE,
+        validate: ResponseActionKubeRequestSchema,
+        options: { authRequired: true, tags: ['access:securitySolution'] },
+      },
+      withEndpointAuthz(
+        { all: ['canExecuteKubernetesCommands'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'kube-list')
+      )
+    );
+  }
 }
 
 const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([

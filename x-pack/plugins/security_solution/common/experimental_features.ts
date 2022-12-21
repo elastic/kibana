@@ -82,6 +82,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionGetFileEnabled: false,
 
   /**
+   * Enables kubernetes commands in the response action
+   */
+  responseActionKubernetesCommandsEnabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: false,

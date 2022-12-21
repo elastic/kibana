@@ -242,6 +242,14 @@ export const useActionsLogFilter = ({
             return false;
           }
 
+          // Kubernetes commands are currently behind FF
+          if (
+            commandName === 'kube-list' &&
+            !ExperimentalFeaturesService.get().responseActionKubernetesCommandsEnabled
+          ) {
+            return false;
+          }
+
           return true;
         }).map((commandName) => ({
           key: commandName,

@@ -16,6 +16,7 @@ const ExperimentalFeaturesServiceMock = {
       ...allowedExperimentalValues,
 
       responseActionGetFileEnabled: true,
+      responseActionKubernetesCommandsEnabled: true,
     };
 
     return ff;

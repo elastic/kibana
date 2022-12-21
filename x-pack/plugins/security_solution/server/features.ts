@@ -562,6 +562,12 @@ function getSubFeatures(experimentalFeatures: ConfigType['experimentalFeatures']
     });
   }
 
+  if (!experimentalFeatures.responseActionKubernetesCommandsEnabled) {
+    filteredSubFeatures = filteredSubFeatures.filter((subFeat) => {
+      return subFeat.name !== 'Kubernetes Commands';
+    });
+  }
+
   return filteredSubFeatures;
 }
 

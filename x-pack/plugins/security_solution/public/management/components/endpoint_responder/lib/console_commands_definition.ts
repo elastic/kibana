@@ -171,6 +171,8 @@ export const getEndpointConsoleCommands = ({
   endpointPrivileges: EndpointPrivileges;
 }): CommandDefinition[] => {
   const isGetFileEnabled = ExperimentalFeaturesService.get().responseActionGetFileEnabled;
+  const isKubernetesCommandsEnabled =
+    ExperimentalFeaturesService.get().responseActionKubernetesCommandsEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     const responderCapability = commandToCapabilitiesMap.get(commandName);
@@ -456,50 +458,52 @@ export const getEndpointConsoleCommands = ({
     });
   }
 
-  // TODO: check kubernetes feature flag
-  consoleCommands.push({
-    name: 'kube-list',
-    about: getCommandAboutInfo({
-      aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.kubeList.about', {
-        defaultMessage: 'List Kubernetes Resources (pod or deployment)',
+  // Kubernetes commands are currently behind feature flag
+  if (isKubernetesCommandsEnabled) {
+    consoleCommands.push({
+      name: 'kube-list',
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.kubeList.about', {
+          defaultMessage: 'List Kubernetes Resources (pod or deployment)',
+        }),
+        isSupported: doesEndpointSupportCommand('kube-list'),
       }),
-      isSupported: doesEndpointSupportCommand('kube-list'),
-    }),
-    RenderComponent: KubeListActionResult,
-    meta: {
-      endpointId: endpointAgentId,
-      capabilities: endpointCapabilities,
-      privileges: endpointPrivileges,
-    },
-    exampleUsage: 'kube-list --resource pod --comment "listing kubernetes pods"',
-    exampleInstruction: ENTER_RESOURCE_NAME,
-    validate: capabilitiesAndPrivilegesValidator,
-    mustHaveArgs: true,
-    args: {
-      comment: {
-        required: false,
-        allowMultiples: false,
-        about: COMMENT_ARG_ABOUT,
+      RenderComponent: KubeListActionResult,
+      meta: {
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
       },
-      resource: {
-        required: true,
-        allowMultiples: false,
-        exclusiveOr: false,
-        about: i18n.translate(
-          'xpack.securitySolution.endpointConsoleCommands.kubeList.resource.arg.about',
-          {
-            defaultMessage: 'A kubernetes resource to list (pod or deployment)',
-          }
-        ),
-        validate: kubernetesResourceValidator,
+      exampleUsage: 'kube-list --resource pod --comment "listing kubernetes pods"',
+      exampleInstruction: ENTER_RESOURCE_NAME,
+      validate: capabilitiesAndPrivilegesValidator,
+      mustHaveArgs: true,
+      args: {
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+        resource: {
+          required: true,
+          allowMultiples: false,
+          exclusiveOr: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.kubeList.resource.arg.about',
+            {
+              defaultMessage: 'A kubernetes resource to list (pod or deployment)',
+            }
+          ),
+          validate: kubernetesResourceValidator,
+        },
       },
-    },
-    helpGroupLabel: HELP_KUBE_COMMANDS.kubernetesActions.label,
-    helpGroupPosition: HELP_KUBE_COMMANDS.kubernetesActions.position,
-    helpCommandPosition: 7,
-    helpDisabled: doesEndpointSupportCommand('kube-list') === false,
-    helpHidden: !getRbacControl({ commandName: 'kube-list', privileges: endpointPrivileges }),
-  });
+      helpGroupLabel: HELP_KUBE_COMMANDS.kubernetesActions.label,
+      helpGroupPosition: HELP_KUBE_COMMANDS.kubernetesActions.position,
+      helpCommandPosition: 7,
+      helpDisabled: doesEndpointSupportCommand('kube-list') === false,
+      helpHidden: !getRbacControl({ commandName: 'kube-list', privileges: endpointPrivileges }),
+    });
+  }
 
   return consoleCommands;
 };
