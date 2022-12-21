@@ -76,7 +76,7 @@ export function DataViewsList({
   );
 
   const [sortByOptions, setSortByOptions] = useState<EuiSelectableOption[]>(() => {
-    return sortingService.getColums().map((key) => {
+    return sortingService.getColumns().map((key) => {
       return toSelectableOption(
         key,
         key === sortingService.column,

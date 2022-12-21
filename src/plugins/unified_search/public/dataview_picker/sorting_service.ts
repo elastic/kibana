@@ -59,7 +59,7 @@ export class SortingService<T = unknown> {
     return [SortDirection.ASC, SortDirection.DESC];
   }
 
-  getColums(): Array<Sorting['column']> {
+  getColumns(): Array<Sorting['column']> {
     return [ALPHABETICALLY];
   }
 
