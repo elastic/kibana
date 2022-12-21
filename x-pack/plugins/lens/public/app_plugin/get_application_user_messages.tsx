@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { css } from '@emotion/react';
 import type { DataViewsState, VisualizationState } from '../state_management';
 import type { Datasource, UserMessage, VisualizationMap } from '../types';
 import { getMissingIndexPattern } from '../editor_frame_service/editor_frame/state_helpers';
@@ -77,9 +76,10 @@ function getMissingIndexPatternsError(
   const { management: isManagementEnabled } = core.application.capabilities.navLinks;
   const isIndexPatternManagementEnabled =
     core.application.capabilities.management.kibana.indexPatterns;
+  const canFix = isManagementEnabled && isIndexPatternManagementEnabled;
   return {
     severity: 'error',
-    fixableInEditor: true,
+    fixableInEditor: canFix,
     displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
     shortMessage: '',
     longMessage: (
@@ -92,9 +92,9 @@ function getMissingIndexPatternsError(
         </p>
         <p
           className="eui-textBreakWord"
-          css={css`
-            user-select: text;
-          `}
+          style={{
+            userSelect: 'text',
+          }}
         >
           <FormattedMessage
             id="xpack.lens.indexPattern.missingDataView"
@@ -104,7 +104,7 @@ function getMissingIndexPatternsError(
               indexpatterns: missingIndexPatterns.join(', '),
             }}
           />
-          {isManagementEnabled && isIndexPatternManagementEnabled && (
+          {canFix && (
             <RedirectAppLinks coreStart={core}>
               <a
                 href={core.application.getUrlForApp('management', {

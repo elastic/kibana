@@ -671,43 +671,6 @@ describe('workspace_panel', () => {
     expect(expressionRendererMock).toHaveBeenCalledTimes(3);
   });
 
-  it('should show an error message if there are missing indexpatterns in the visualization', async () => {
-    mockDatasource.getLayers.mockReturnValue(['first']);
-    mockDatasource.checkIntegrity.mockReturnValue(['a']);
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-    };
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-        }}
-      />,
-
-      {
-        preloadedState: {
-          datasourceStates: {
-            testDatasource: {
-              // define a layer with an indexpattern not available
-              state: { layers: { indexPatternId: 'a' }, indexPatterns: {} },
-              isLoading: false,
-            },
-          },
-        },
-      }
-    );
-    instance = mounted.instance;
-
-    expect(instance.find('[data-test-subj="missing-refs-failure"]').exists()).toBeTruthy();
-    expect(instance.find(expressionRendererMock)).toHaveLength(0);
-  });
-
   it('should not show the management action in case of missing indexpattern and no navigation permissions', async () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
     const framePublicAPI = createMockFramePublicAPI();

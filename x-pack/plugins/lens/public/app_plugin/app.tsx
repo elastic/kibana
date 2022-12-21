@@ -37,7 +37,7 @@ import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
 import { IndexPatternServiceAPI, createIndexPatternService } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
-import { getApplicationUserMessages } from './get_user_messages';
+import { getApplicationUserMessages } from './get_application_user_messages';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;

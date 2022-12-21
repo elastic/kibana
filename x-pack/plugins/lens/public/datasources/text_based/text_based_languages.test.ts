@@ -555,7 +555,7 @@ describe('Textbased Data Source', () => {
                 "id": "suggestionPanel",
               },
               Object {
-                "id": "topNav",
+                "id": "textBasedLanguagesQueryInput",
               },
             ],
             "fixableInEditor": true,
@@ -572,7 +572,7 @@ describe('Textbased Data Source', () => {
                 "id": "suggestionPanel",
               },
               Object {
-                "id": "topNav",
+                "id": "textBasedLanguagesQueryInput",
               },
             ],
             "fixableInEditor": true,
