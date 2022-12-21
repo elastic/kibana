@@ -207,6 +207,8 @@ describe('Task Runner', () => {
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
     (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
     logger.get.mockImplementation(() => logger);
+
+    ruleType.executor.mockResolvedValue({ state: {} });
   });
 
   test('successfully executes the task', async () => {
