@@ -24,7 +24,7 @@ export interface SloListSearchFilterSortBarProps {
   loading: boolean;
   onChangeQuery: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onChangeSort: (sortMethod: SortType) => void;
-  onChangeStatusFilter: (statusFilters: SortItem[]) => void;
+  onChangeIndicatorTypesFilter: (statusFilters: SortItem[]) => void;
 }
 
 export type SortType = 'name' | 'indicator_type';
@@ -71,7 +71,7 @@ export function SloListSearchFilterSortBar({
   loading,
   onChangeQuery,
   onChangeSort,
-  onChangeStatusFilter,
+  onChangeIndicatorTypesFilter: onChangeStatusFilter,
 }: SloListSearchFilterSortBarProps) {
   const [isFilterPopoverOpen, setFilterPopoverOpen] = useState(false);
   const [isSortPopoverOpen, setSortPopoverOpen] = useState(false);

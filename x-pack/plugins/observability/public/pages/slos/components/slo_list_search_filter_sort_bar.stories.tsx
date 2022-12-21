@@ -24,11 +24,11 @@ const Template: ComponentStory<typeof Component> = (props: SloListSearchFilterSo
   <Component {...props} />
 );
 
-const defaultProps = {
+const defaultProps: SloListSearchFilterSortBarProps = {
   loading: false,
   onChangeQuery: () => {},
   onChangeSort: () => {},
-  onChangeStatusFilter: () => {},
+  onChangeIndicatorTypesFilter: () => {},
 };
 
 export const SloListSearchFilterSortBar = Template.bind({});

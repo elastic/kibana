@@ -6,34 +6,25 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { SloListItem } from './slo_list_item';
 import { SloListEmpty } from './slo_list_empty';
-import { filterSlos } from '../helpers/filter_slos';
-import { SLO } from '../../../typings';
-import { SortItem } from './slo_list_search_filter_sort_bar';
 import { SloListError } from './slo_list_error';
+import { SLO } from '../../../typings';
 
 export interface SloListItemsProps {
   slos: SLO[];
   loading: boolean;
   error: boolean;
-  filters: SortItem[];
   onDeleted: () => void;
   onDeleting: () => void;
 }
 
-export function SloListItems({
-  slos,
-  loading,
-  error,
-  filters,
-  onDeleted,
-  onDeleting,
-}: SloListItemsProps) {
+export function SloListItems({ slos, loading, error, onDeleted, onDeleting }: SloListItemsProps) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {slos.length
-        ? slos.filter(filterSlos(filters)).map((slo) => (
+        ? slos.map((slo) => (
             <EuiFlexItem key={slo.id}>
               <SloListItem slo={slo} onDeleted={onDeleted} onDeleting={onDeleting} />
             </EuiFlexItem>

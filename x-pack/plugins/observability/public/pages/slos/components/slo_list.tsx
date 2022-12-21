@@ -72,13 +72,12 @@ export function SloList() {
           loading={loading || deleting}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
-          onChangeStatusFilter={handleChangeFilter}
+          onChangeIndicatorTypesFilter={handleChangeFilter}
         />
       </EuiFlexItem>
 
       <EuiFlexItem>
         <SloListItems
-          filters={filters}
           slos={slos}
           loading={loading}
           error={error}
