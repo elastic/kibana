@@ -95,7 +95,6 @@ export interface WorkspacePanelProps {
 }
 
 interface WorkspaceState {
-  expressionBuildErrors: UserMessage[];
   expandError: boolean;
   expressionToRender: string | null | undefined;
 }
@@ -119,7 +118,8 @@ const executionContext: KibanaExecutionContext = {
   },
 };
 
-// Exported for testing purposes only.
+const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';
+
 export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
   const { getSuggestionForField, ...restProps } = props;
 
@@ -162,12 +162,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
-    expressionBuildErrors: [],
     expandError: false,
     expressionToRender: undefined,
   });
 
-  // const expressionToRender = useRef<null | undefined | string>();
   const initialRenderComplete = useRef<boolean>();
 
   const renderDeps = useRef<{
@@ -225,6 +223,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   }, []);
 
   const removeSearchWarningMessagesRef = useRef<() => void>();
+  const removeExpressionBuildErrorsRef = useRef<() => void>();
 
   const onData$ = useCallback(
     (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
@@ -282,7 +281,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
-    if (!workspaceErrors?.length) {
+    if (
+      workspaceErrors.filter((error) => error.uniqueId !== EXPRESSION_BUILD_ERROR_ID).length === 0
+    ) {
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
@@ -304,26 +305,33 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           return null;
         }
       } catch (e) {
-        // TODO consider pushing this user message to a global store/subscription somewhere instead of using it directly here
-        // this will allow us to show these errors outside just the workspace
-        const defaultMessage: UserMessage = {
-          severity: 'error',
-          fixableInEditor: true,
-          displayLocations: [{ id: 'workspace' }],
-          shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
-            defaultMessage: 'An unexpected error occurred while preparing the chart',
-          }),
-          longMessage: e.toString(),
-        };
-        // Most likely an error in the expression provided by a datasource or visualization
-        setLocalState((s) => ({
-          ...s,
-          expressionBuildErrors: [defaultMessage],
-        }));
+        removeExpressionBuildErrorsRef.current = addUserMessages([
+          {
+            uniqueId: EXPRESSION_BUILD_ERROR_ID,
+            severity: 'error',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
+            shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
+              defaultMessage: 'An unexpected error occurred while preparing the chart',
+            }),
+            longMessage: (
+              <>
+                <p data-test-subj="expression-failure">
+                  <FormattedMessage
+                    id="xpack.lens.editorFrame.expressionFailure"
+                    defaultMessage="An error occurred in the expression"
+                  />
+                </p>
+
+                <p>{e.toString()}</p>
+              </>
+            ),
+          },
+        ]);
       }
     }
   }, [
-    workspaceErrors?.length,
+    workspaceErrors,
     activeVisualization,
     visualization.state,
     datasourceMap,
@@ -332,6 +340,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     dataViews.indexPatterns,
     framePublicAPI.dateRange,
     searchSessionId,
+    addUserMessages,
   ]);
 
   useEffect(() => {
@@ -354,6 +363,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   }, [unappliedExpression, shouldApplyExpression]);
 
   const expressionExists = Boolean(localState.expressionToRender);
+
+  useEffect(() => {
+    // reset expression error if component attempts to run it again
+    if (expressionExists && removeExpressionBuildErrorsRef.current) {
+      removeExpressionBuildErrorsRef.current();
+      removeExpressionBuildErrorsRef.current = undefined;
+    }
+  }, [expressionExists]);
+
   useEffect(() => {
     // null signals an empty workspace which should count as an initial render
     if (
@@ -418,16 +436,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     },
     [plugins.uiActions]
   );
-
-  useEffect(() => {
-    // reset expression error if component attempts to run it again
-    if (expressionExists && localState.expressionBuildErrors.length) {
-      setLocalState((s) => ({
-        ...s,
-        expressionBuildErrors: [],
-      }));
-    }
-  }, [expressionExists, localState.expressionBuildErrors]);
 
   const onDrop = useCallback(() => {
     if (suggestionForDraggedField) {
@@ -697,30 +705,6 @@ export const VisualizationWrapper = ({
                     ))}
                   </>
                 )}
-              </>
-            }
-            iconColor="danger"
-            iconType="alert"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  } else if (localState.expressionBuildErrors.length) {
-    const firstError = localState.expressionBuildErrors[0];
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiEmptyPrompt
-            body={
-              <>
-                <p data-test-subj="expression-failure">
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.expressionFailure"
-                    defaultMessage="An error occurred in the expression"
-                  />
-                </p>
-
-                <p>{firstError.longMessage}</p>
               </>
             }
             iconColor="danger"

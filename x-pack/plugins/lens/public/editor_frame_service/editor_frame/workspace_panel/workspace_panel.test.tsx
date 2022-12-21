@@ -775,6 +775,7 @@ describe('workspace_panel', () => {
     expect(showingErrors()).toBeTruthy();
   });
 
+  // TODO - test refresh after expression failure error
   it('should show an error message if the expression fails to parse', async () => {
     mockDatasource.toExpression.mockReturnValue('|||');
     mockDatasource.getLayers.mockReturnValue(['first']);
@@ -782,6 +783,10 @@ describe('workspace_panel', () => {
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
     };
+
+    const mockRemoveUserMessages = jest.fn();
+    const mockAddUserMessages = jest.fn(() => mockRemoveUserMessages);
+    const mockGetUserMessages = jest.fn<UserMessage[], unknown[]>(() => []);
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
@@ -793,11 +798,13 @@ describe('workspace_panel', () => {
         visualizationMap={{
           testVis: { ...mockVisualization, toExpression: () => 'testVis' },
         }}
+        addUserMessages={mockAddUserMessages}
+        getUserMessages={mockGetUserMessages}
       />
     );
     instance = mounted.instance;
 
-    expect(instance.find('[data-test-subj="expression-failure"]').exists()).toBeTruthy();
+    expect(mockAddUserMessages.mock.lastCall).toMatchSnapshot();
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
   });
 

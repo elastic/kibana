@@ -517,8 +517,8 @@ export function App({
     const addedMessageIds: string[] = [];
     messages.forEach((message) => {
       if (!newMessageMap[message.uniqueId]) {
-        newMessageMap[message.uniqueId] = message;
         addedMessageIds.push(message.uniqueId);
+        newMessageMap[message.uniqueId] = message;
       }
     });
 
@@ -531,7 +531,7 @@ export function App({
         ...additionalUserMessages,
       };
 
-      addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
+      messages.map(({ uniqueId }) => uniqueId).forEach((id) => delete withMessagesRemoved[id]);
 
       setAdditionalUserMessages(withMessagesRemoved);
     };
