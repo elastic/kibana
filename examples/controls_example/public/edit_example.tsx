@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiPanel } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
@@ -19,6 +19,16 @@ export const EditExample = () => {
 
   return (
     <EuiPanel hasBorder={true}>
+      <EuiButton
+        color="primary"
+        isDisabled={controlGroup === undefined}
+        fill
+        onClick={() => {
+          controlGroup.openAddDataControlFlyout();
+        }}
+      >
+        Add control
+      </EuiButton>
       <ControlGroupRenderer
         getInitialInput={async (initialInput, builder) => {
           return {
