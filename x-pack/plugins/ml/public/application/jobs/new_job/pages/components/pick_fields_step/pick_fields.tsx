@@ -7,7 +7,7 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 
-import { useFieldStatsFlyoutContext } from './components/field_stats_flyout';
+import { useFieldStatsFlyoutContext } from '../../../../../components/field_stats_flyout';
 import { JobCreatorContext } from '../job_creator_context';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiSpacer, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FieldStatsFlyoutProvider } from '../components/pick_fields_step/components/field_stats_flyout';
+import { FieldStatsFlyoutProvider } from '../../../../components/field_stats_flyout';
 import { WIZARD_STEPS } from '../components/step_types';
 
 import { TimeRangeStep } from '../components/time_range_step';

@@ -7,7 +7,7 @@
 
 import React, { ReactNode, useCallback } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { useFieldStatsFlyoutContext } from '../pages/components/pick_fields_step/components/field_stats_flyout';
+import { useFieldStatsFlyoutContext } from '../../../components/field_stats_flyout';
 import { FieldStatsInfoButton } from '../common/components/field_stats_info_button';
 import { Field } from '../../../../../common/types/fields';
 

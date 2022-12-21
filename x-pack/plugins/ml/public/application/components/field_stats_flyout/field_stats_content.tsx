@@ -8,11 +8,11 @@
 import React, { FC, useContext, useEffect, useMemo, useState } from 'react';
 import { FieldStats, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import moment from 'moment';
-import { getDefaultDatafeedQuery } from '../../../../../utils/new_job_utils';
-import { useMlKibana } from '../../../../../../../contexts/kibana';
-import { JobCreatorContext } from '../../../job_creator_context';
+import { getDefaultDatafeedQuery } from '../../jobs/new_job/utils/new_job_utils';
+import { useMlKibana } from '../../contexts/kibana';
+import { JobCreatorContext } from '../../jobs/new_job/pages/components/job_creator_context';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
-import { isDefined } from '../../../../../../../../../common/types/guards';
+import { isDefined } from '../../../../common/types/guards';
 
 const defaultDatafeedQuery = getDefaultDatafeedQuery();
 
