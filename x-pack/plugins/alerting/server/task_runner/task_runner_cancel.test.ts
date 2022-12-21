@@ -243,6 +243,7 @@ describe('Task Runner Cancel', () => {
           },
         },
         nextRun: '1970-01-01T00:00:10.000Z',
+        running: false,
       },
       { refresh: false, namespace: undefined }
     );
