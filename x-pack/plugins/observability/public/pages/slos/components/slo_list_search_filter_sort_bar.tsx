@@ -23,20 +23,23 @@ import React, { useEffect, useState } from 'react';
 export interface SloListSearchFilterSortBarProps {
   loading: boolean;
   onChangeQuery: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onChangeSort: (sortMethod: SortType) => void;
-  onChangeIndicatorTypesFilter: (statusFilters: SortItem[]) => void;
+  onChangeSort: (sort: SortType) => void;
+  onChangeIndicatorTypeFilter: (filter: FilterType[]) => void;
 }
 
 export type SortType = 'name' | 'indicator_type';
-export type StatusType = 'violated' | 'forecastedViolation' | 'healthy';
+export type FilterType =
+  | 'sli.apm.transaction_duration'
+  | 'sli.apm.transaction_error_rate'
+  | 'sli.kql.custom';
 
-export type SortItem = EuiSelectableOption & {
+export type Item<T> = EuiSelectableOption & {
   label: string;
-  type: SortType | StatusType;
+  type: T;
   checked?: EuiSelectableOptionCheckedType;
 };
 
-const SORT_OPTIONS: SortItem[] = [
+const SORT_OPTIONS: Array<Item<SortType>> = [
   {
     label: i18n.translate('xpack.observability.slos.list.sortBy.name', {
       defaultMessage: 'Name',
@@ -52,18 +55,24 @@ const SORT_OPTIONS: SortItem[] = [
   },
 ];
 
-const STATUS_OPTIONS: SortItem[] = [
+const INDICATOR_TYPE_OPTIONS: Array<Item<FilterType>> = [
   {
-    label: i18n.translate('xpack.observability.slos.list.statusFilter.violated', {
-      defaultMessage: 'Violated',
+    label: i18n.translate('xpack.observability.slos.list.indicatorTypeFilter.apmLatency', {
+      defaultMessage: 'APM latency',
     }),
-    type: 'violated',
+    type: 'sli.apm.transaction_duration',
   },
   {
-    label: i18n.translate('xpack.observability.slos.list.statusFilter.healthy', {
-      defaultMessage: 'Healthy',
+    label: i18n.translate('xpack.observability.slos.list.indicatorTypeFilter.apmAvailability', {
+      defaultMessage: 'APM availability',
     }),
-    type: 'healthy',
+    type: 'sli.apm.transaction_error_rate',
+  },
+  {
+    label: i18n.translate('xpack.observability.slos.list.indicatorTypeFilter.customKql', {
+      defaultMessage: 'Custom KQL',
+    }),
+    type: 'sli.kql.custom',
   },
 ];
 
@@ -71,30 +80,32 @@ export function SloListSearchFilterSortBar({
   loading,
   onChangeQuery,
   onChangeSort,
-  onChangeIndicatorTypesFilter: onChangeStatusFilter,
+  onChangeIndicatorTypeFilter,
 }: SloListSearchFilterSortBarProps) {
   const [isFilterPopoverOpen, setFilterPopoverOpen] = useState(false);
   const [isSortPopoverOpen, setSortPopoverOpen] = useState(false);
 
   const [sortOptions, setSortOptions] = useState(SORT_OPTIONS);
-  const [statusOptions, setStatusOptions] = useState(STATUS_OPTIONS);
+  const [indicatorTypeOptions, setIndicatorTypeOptions] = useState(INDICATOR_TYPE_OPTIONS);
 
   const selectedSort = sortOptions.find((option) => option.checked === 'on');
-  const selectedStatusFilters = statusOptions.filter((option) => option.checked === 'on');
+  const selectedIndicatorTypeFilter = indicatorTypeOptions.filter(
+    (option) => option.checked === 'on'
+  );
 
   const handleToggleFilterButton = () => setFilterPopoverOpen(!isFilterPopoverOpen);
   const handleToggleSortButton = () => setSortPopoverOpen(!isSortPopoverOpen);
 
-  const handleChangeSort = (newOptions: SortItem[]) => {
+  const handleChangeSort = (newOptions: Array<Item<SortType>>) => {
     setSortOptions(newOptions);
     setSortPopoverOpen(false);
   };
 
-  const handleChangeStatusOptions = (newOptions: SortItem[]) => {
-    setStatusOptions(newOptions);
-    setFilterPopoverOpen(false);
-
-    onChangeStatusFilter(newOptions.filter((option) => option.checked === 'on'));
+  const handleChangeIndicatorTypeOptions = (newOptions: Array<Item<FilterType>>) => {
+    setIndicatorTypeOptions(newOptions);
+    onChangeIndicatorTypeFilter(
+      newOptions.filter((option) => option.checked === 'on').map((option) => option.type)
+    );
   };
 
   useEffect(() => {
@@ -116,7 +127,7 @@ export function SloListSearchFilterSortBar({
         />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} style={{ width: 115 }}>
+      <EuiFlexItem grow={false} style={{ width: 200 }}>
         <EuiFilterGroup>
           <EuiPopover
             button={
@@ -124,10 +135,10 @@ export function SloListSearchFilterSortBar({
                 iconType="arrowDown"
                 onClick={handleToggleFilterButton}
                 isSelected={isFilterPopoverOpen}
-                numFilters={selectedStatusFilters.length}
+                numFilters={selectedIndicatorTypeFilter.length}
               >
-                {i18n.translate('xpack.observability.slos.list.statusFilter', {
-                  defaultMessage: 'Status',
+                {i18n.translate('xpack.observability.slos.list.indicatorTypeFilter', {
+                  defaultMessage: 'Indicator type',
                 })}
               </EuiFilterButton>
             }
@@ -138,11 +149,14 @@ export function SloListSearchFilterSortBar({
           >
             <div style={{ width: 300 }}>
               <EuiPopoverTitle paddingSize="s">
-                {i18n.translate('xpack.observability.slos.list.statusFilter', {
-                  defaultMessage: 'Status',
+                {i18n.translate('xpack.observability.slos.list.indicatorTypeFilter', {
+                  defaultMessage: 'Indicator type',
                 })}
               </EuiPopoverTitle>
-              <EuiSelectable<SortItem> options={statusOptions} onChange={handleChangeStatusOptions}>
+              <EuiSelectable<Item<FilterType>>
+                options={indicatorTypeOptions}
+                onChange={handleChangeIndicatorTypeOptions}
+              >
                 {(list) => list}
               </EuiSelectable>
             </div>
@@ -150,7 +164,7 @@ export function SloListSearchFilterSortBar({
         </EuiFilterGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} style={{ width: 215 }}>
+      <EuiFlexItem grow={false} style={{ width: 200 }}>
         <EuiFilterGroup>
           <EuiPopover
             button={
@@ -176,7 +190,7 @@ export function SloListSearchFilterSortBar({
                   defaultMessage: 'Sort by',
                 })}
               </EuiPopoverTitle>
-              <EuiSelectable<SortItem>
+              <EuiSelectable<Item<SortType>>
                 singleSelection
                 options={sortOptions}
                 onChange={handleChangeSort}

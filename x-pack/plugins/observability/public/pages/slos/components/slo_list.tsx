@@ -10,7 +10,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { debounce } from 'lodash';
 
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
-import { SloListSearchFilterSortBar, SortItem, SortType } from './slo_list_search_filter_sort_bar';
+import {
+  FilterType,
+  SloListSearchFilterSortBar,
+  SortType,
+} from './slo_list_search_filter_sort_bar';
 import { SloListItems } from './slo_list_items';
 
 export function SloList() {
@@ -18,7 +22,7 @@ export function SloList() {
 
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortType>('name');
-  const [filters, setFilters] = useState<SortItem[]>([]);
+  const [indicatorTypeFilter, setIndicatorTypeFilter] = useState<FilterType[]>([]);
 
   const [deleting, setIsDeleting] = useState(false);
   const [shouldReload, setShouldReload] = useState(false);
@@ -27,7 +31,13 @@ export function SloList() {
     loading,
     error,
     sloList: { results: slos = [], total, perPage },
-  } = useFetchSloList({ page: activePage + 1, name: query, sortBy: sort, refetch: shouldReload });
+  } = useFetchSloList({
+    page: activePage + 1,
+    name: query,
+    sortBy: sort,
+    indicatorTypes: indicatorTypeFilter,
+    refetch: shouldReload,
+  });
 
   useEffect(() => {
     if (shouldReload) {
@@ -61,8 +71,8 @@ export function SloList() {
     setSort(newSort);
   };
 
-  const handleChangeFilter = (newFilters: SortItem[]) => {
-    setFilters(newFilters);
+  const handleChangeIndicatorTypeFilter = (newFilter: FilterType[]) => {
+    setIndicatorTypeFilter(newFilter);
   };
 
   return (
@@ -72,7 +82,7 @@ export function SloList() {
           loading={loading || deleting}
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
-          onChangeIndicatorTypesFilter={handleChangeFilter}
+          onChangeIndicatorTypeFilter={handleChangeIndicatorTypeFilter}
         />
       </EuiFlexItem>
 

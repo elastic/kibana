@@ -23,6 +23,7 @@ interface SLOListParams {
   name?: string;
   page?: number;
   sortBy?: string;
+  indicatorTypes?: string[];
 }
 
 export interface UseFetchSloListResponse {
@@ -36,20 +37,26 @@ export function useFetchSloList({
   page,
   refetch,
   sortBy,
+  indicatorTypes,
 }: {
   refetch: boolean;
   name?: string;
   page?: number;
   sortBy?: string;
+  indicatorTypes?: string[];
 }): UseFetchSloListResponse {
   const [sloList, setSloList] = useState(EMPTY_LIST);
 
-  const params: SLOListParams = useMemo(() => ({ name, page, sortBy }), [name, page, sortBy]);
+  const params: SLOListParams = useMemo(
+    () => ({ name, page, sortBy, indicatorTypes }),
+    [name, page, sortBy, indicatorTypes]
+  );
   const shouldExecuteApiCall = useCallback(
     (apiCallParams: SLOListParams) =>
       apiCallParams.name === params.name ||
       apiCallParams.page === params.page ||
       apiCallParams.sortBy === params.sortBy ||
+      apiCallParams.indicatorTypes === params.indicatorTypes ||
       refetch,
     [params, refetch]
   );
@@ -79,6 +86,8 @@ const fetchSloList = async (
         ...(params.page && { page: params.page }),
         ...(params.name && { name: params.name }),
         ...(params.sortBy && { sort_by: params.sortBy }),
+        ...(params.indicatorTypes &&
+          params.indicatorTypes.length > 0 && { indicator_types: params.indicatorTypes.join(',') }),
       },
       signal: abortController.signal,
     });
