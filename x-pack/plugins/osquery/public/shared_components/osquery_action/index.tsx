@@ -21,7 +21,7 @@ export interface OsqueryActionProps {
   defaultValues?: {};
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
