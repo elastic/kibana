@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiAvatar,
   EuiButton,
@@ -16,73 +16,96 @@ import {
   EuiTimeline,
   EuiTimelineItem,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
+import { Controller, useForm } from 'react-hook-form';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
+import { useCheckFormPartialValidities } from '../helpers/use_check_form_partial_validities';
 import { SloEditFormDefinitionCustomKql } from './slo_edit_form_definition_custom_kql';
 import { SloEditFormDescription } from './slo_edit_form_description';
-import { SloEditFormObjectives } from './slo_edit_form_objectives';
+import {
+  SloEditFormObjectives,
+  BUDGETING_METHOD_OPTIONS,
+  TIMEWINDOW_OPTIONS,
+} from './slo_edit_form_objectives';
+import { paths } from '../../../config';
 import { SLO } from '../../../typings';
+import type { CreateSLOParams } from '../../../../server/types/rest_specs';
 
 export interface SloEditFormProps {
   slo: SLO | undefined;
 }
 
-export type SliType =
-  | 'sli.apm.transaction_error_rate'
-  | 'sli.apm.transaction_duration'
-  | 'sli.kql.custom';
-
-const SLI_OPTIONS: Array<{ value: SliType; text: string }> = [
-  { value: 'sli.kql.custom', text: 'KQL custom indicator' },
-];
+const SLI_OPTIONS = [{ value: 'sli.kql.custom' as const, text: 'KQL custom indicator' }];
 
 const maxWidth = 775;
 
 export function SloEditForm({ slo }: SloEditFormProps) {
   const {
+    application: { navigateToUrl },
+    http: { basePath },
     notifications: { toasts },
   } = useKibana().services;
 
-  const [stateSlo, setStateSlo] = useState<SLO | undefined>(slo);
-  const [validity, setValidity] = useState({
-    definition: false,
-    objectives: false,
-    description: false,
+  const defaultValues: CreateSLOParams = {
+    name: '',
+    description: '',
+    indicator: {
+      type: SLI_OPTIONS[0].value,
+      params: {
+        index: '',
+        filter: '',
+        good: '',
+        total: '',
+      },
+    },
+    time_window: {
+      duration: TIMEWINDOW_OPTIONS[0].value,
+      is_rolling: true,
+    },
+    budgeting_method: BUDGETING_METHOD_OPTIONS[0].value,
+    objective: {
+      target: 0,
+    },
+  };
+
+  const { control, watch, getFieldState, getValues, formState, trigger } = useForm({
+    defaultValues,
+    mode: 'all',
   });
 
-  const { loading, error: errorCreatingSlo, createSlo } = useCreateSlo();
+  const { isDefinitionValid, isDescriptionValid, isObjectiveValid } = useCheckFormPartialValidities(
+    { getFieldState, formState }
+  );
 
-  const [sliType, setSliType] = useState<SliType>(SLI_OPTIONS[0].value);
-  const sliSelectId = useGeneratedHtmlId({ prefix: 'sliSelect' });
-
-  const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setSliType(e.target.value as SliType);
-  };
+  const {
+    loading: loadingCreatingSlo,
+    success: successCreatingSlo,
+    error: errorCreatingSlo,
+    createSlo,
+  } = useCreateSlo();
 
   const handleCreateSlo = () => {
-    if (stateSlo) {
-      createSlo(stateSlo);
-    }
+    const values = getValues();
+
+    createSlo({ ...values, objective: { target: values.objective.target / 100 } });
   };
 
-  const handleCheckValidity = (valid: boolean) => {
-    if (!validity.definition && valid) {
-      setValidity({ ...validity, definition: true });
-    }
-
-    if (validity.definition && !valid) {
-      setValidity({ ...validity, definition: false });
-    }
-  };
+  if (successCreatingSlo) {
+    toasts.addSuccess(`Successfully created ${getValues().name}`);
+    navigateToUrl(basePath.prepend(paths.observability.slos));
+  }
 
   if (errorCreatingSlo) {
     toasts.addError(new Error(errorCreatingSlo), { title: 'Something went wrong' });
   }
+
+  useEffect(() => {
+    trigger();
+  }, [trigger]);
 
   return (
     <EuiTimeline>
@@ -90,11 +113,9 @@ export function SloEditForm({ slo }: SloEditFormProps) {
         verticalAlign="top"
         icon={
           <EuiAvatar
-            name={validity.definition ? 'Check' : '1'}
-            iconType={validity.definition ? 'check' : ''}
-            color={
-              validity.definition ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary
-            }
+            name={isDefinitionValid ? 'Check' : '1'}
+            iconType={isDefinitionValid ? 'check' : ''}
+            color={isDefinitionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary}
           />
         }
       >
@@ -114,17 +135,18 @@ export function SloEditForm({ slo }: SloEditFormProps) {
               defaultMessage: 'SLI type',
             })}
           </EuiFormLabel>
-          <EuiSelect
-            id={sliSelectId}
-            options={SLI_OPTIONS}
-            value={sliType}
-            onChange={handleChange}
+
+          <Controller
+            name="indicator.type"
+            control={control}
+            rules={{ required: true }}
+            render={({ field }) => <EuiSelect {...field} options={SLI_OPTIONS} />}
           />
 
           <EuiSpacer size="xxl" />
 
-          {sliType === 'sli.kql.custom' ? (
-            <SloEditFormDefinitionCustomKql onCheckValidity={handleCheckValidity} />
+          {watch('indicator.type') === 'sli.kql.custom' ? (
+            <SloEditFormDefinitionCustomKql control={control} />
           ) : null}
 
           <EuiSpacer size="m" />
@@ -135,11 +157,9 @@ export function SloEditForm({ slo }: SloEditFormProps) {
         verticalAlign="top"
         icon={
           <EuiAvatar
-            name={validity.objectives ? 'Check' : '2'}
-            iconType={validity.objectives ? 'check' : ''}
-            color={
-              validity.objectives ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary
-            }
+            name={isObjectiveValid ? 'Check' : '2'}
+            iconType={isObjectiveValid ? 'check' : ''}
+            color={isObjectiveValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary}
           />
         }
       >
@@ -154,7 +174,7 @@ export function SloEditForm({ slo }: SloEditFormProps) {
 
           <EuiSpacer size="xl" />
 
-          <SloEditFormObjectives />
+          <SloEditFormObjectives control={control} />
 
           <EuiSpacer size="xl" />
         </EuiPanel>
@@ -164,11 +184,9 @@ export function SloEditForm({ slo }: SloEditFormProps) {
         verticalAlign="top"
         icon={
           <EuiAvatar
-            name={validity.description ? 'Check' : '3'}
-            iconType={validity.description ? 'check' : ''}
-            color={
-              validity.description ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary
-            }
+            name={isDescriptionValid ? 'Check' : '3'}
+            iconType={isDescriptionValid ? 'check' : ''}
+            color={isDescriptionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary}
           />
         }
       >
@@ -183,7 +201,7 @@ export function SloEditForm({ slo }: SloEditFormProps) {
 
           <EuiSpacer size="xl" />
 
-          <SloEditFormDescription />
+          <SloEditFormDescription control={control} />
 
           <EuiSpacer size="xl" />
 
@@ -191,12 +209,15 @@ export function SloEditForm({ slo }: SloEditFormProps) {
             fill
             color="primary"
             onClick={handleCreateSlo}
-            isLoading={loading && !errorCreatingSlo}
+            disabled={!formState.isValid}
+            isLoading={loadingCreatingSlo && !errorCreatingSlo}
           >
             {i18n.translate('xpack.observability.slos.sloEdit.createSloButton', {
               defaultMessage: 'Create SLO',
             })}
           </EuiButton>
+
+          <EuiSpacer size="xl" />
         </EuiPanel>
       </EuiTimelineItem>
     </EuiTimeline>

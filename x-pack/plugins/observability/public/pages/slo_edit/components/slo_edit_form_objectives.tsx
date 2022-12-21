@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiFieldNumber,
   EuiFlexGroup,
@@ -14,11 +15,16 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, useState } from 'react';
+import { Control, Controller } from 'react-hook-form';
 
-const BUDGETING_METHOD_OPTIONS = [{ value: 'occurences', text: 'Occurences' }];
+import type { CreateSLOParams } from '../../../../server/types/rest_specs';
 
-const TIMEWINDOW_OPTIONS = [
+export const BUDGETING_METHOD_OPTIONS = [
+  { value: 'occurrences', text: 'Occurences' },
+  { value: 'timeslices', text: 'Timeslices' },
+];
+
+export const TIMEWINDOW_OPTIONS = [
   {
     value: '30d',
     text: i18n.translate('xpack.observability.slos.sloEdit.objectives.days', {
@@ -35,25 +41,13 @@ const TIMEWINDOW_OPTIONS = [
   },
 ];
 
-export function SloEditFormObjectives() {
+interface SloEditFormObjectivesProps {
+  control: Control<CreateSLOParams>;
+}
+
+export function SloEditFormObjectives({ control }: SloEditFormObjectivesProps) {
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
-
-  const [budgetingMethod, setBudgetingMethod] = useState(BUDGETING_METHOD_OPTIONS[0].value);
-  const [timeWindow, setTimeWindow] = useState(TIMEWINDOW_OPTIONS[0].value);
-  const [sloTarget, setSloTarget] = useState('');
-
-  const handleChangeBudgetMethod = (e: ChangeEvent<HTMLSelectElement>) => {
-    setBudgetingMethod(e.target.value);
-  };
-
-  const handleChangeTimewindow = (e: ChangeEvent<HTMLSelectElement>) => {
-    setTimeWindow(e.target.value);
-  };
-
-  const handleChangeSloTarget = (e: ChangeEvent<HTMLInputElement>) => {
-    setSloTarget(e.target.value);
-  };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -65,11 +59,15 @@ export function SloEditFormObjectives() {
                 defaultMessage: 'Budgeting method',
               })}
             </EuiFormLabel>
-            <EuiSelect
-              id={budgetingSelect}
-              options={BUDGETING_METHOD_OPTIONS}
-              value={budgetingMethod}
-              onChange={handleChangeBudgetMethod}
+
+            <Controller
+              name="budgeting_method"
+              shouldUnregister
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <EuiSelect id={budgetingSelect} options={BUDGETING_METHOD_OPTIONS} {...field} />
+              )}
             />
           </EuiFlexItem>
 
@@ -79,11 +77,15 @@ export function SloEditFormObjectives() {
                 defaultMessage: 'Time window',
               })}
             </EuiFormLabel>
-            <EuiSelect
-              id={timeWindowSelect}
-              options={TIMEWINDOW_OPTIONS}
-              value={timeWindow}
-              onChange={handleChangeTimewindow}
+
+            <Controller
+              name="time_window.duration"
+              shouldUnregister
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <EuiSelect id={timeWindowSelect} options={TIMEWINDOW_OPTIONS} {...field} />
+              )}
             />
           </EuiFlexItem>
 
@@ -93,7 +95,22 @@ export function SloEditFormObjectives() {
                 defaultMessage: 'Target / SLO (%)',
               })}
             </EuiFormLabel>
-            <EuiFieldNumber value={sloTarget} onChange={handleChangeSloTarget} />
+
+            <Controller
+              name="objective.target"
+              shouldUnregister
+              control={control}
+              rules={{ required: true, min: 0.0001, max: 100, validate: (value) => value > 0 }}
+              render={({ field }) => (
+                <EuiFieldNumber
+                  {...field}
+                  min={0}
+                  max={100}
+                  step={0.0001}
+                  onChange={(event) => field.onChange(Number(event.target.value))}
+                />
+              )}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

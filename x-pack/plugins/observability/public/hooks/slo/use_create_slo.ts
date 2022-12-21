@@ -7,13 +7,13 @@
 
 import { useCallback, useState } from 'react';
 import { useKibana } from '../../utils/kibana_react';
-import { SLO } from '../../typings';
+import type { CreateSLOParams } from '../../../server/types/rest_specs';
 
 interface UseCreateSlo {
   loading: boolean;
   success: boolean;
   error: string | undefined;
-  createSlo: (slo: SLO) => void;
+  createSlo: (slo: CreateSLOParams) => void;
 }
 
 export function useCreateSlo(): UseCreateSlo {
@@ -23,7 +23,7 @@ export function useCreateSlo(): UseCreateSlo {
   const [error, setError] = useState<string | undefined>(undefined);
 
   const createSlo = useCallback(
-    async (slo: SLO) => {
+    async (slo: CreateSLOParams) => {
       setLoading(true);
       setError('');
       setSuccess(false);

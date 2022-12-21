@@ -5,38 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiSuggest,
-  EuiSuggestionProps,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSuggest } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Control, Controller } from 'react-hook-form';
 
 import { useFetchIndices } from '../../../hooks/use_fetch_indices';
-import { SliType } from './slo_edit_form';
-
-export interface SloDefinitionFormProps {
-  sliType: SliType;
-}
-
-const sampleItems = [
-  {
-    type: { iconType: 'save', color: 'tint3' },
-    label: 'Saved search',
-  },
-];
+import type { CreateSLOParams } from '../../../../server/types/rest_specs';
 
 interface SloEditFormDefinitionCustomKqlProps {
-  onCheckValidity: (validity: boolean) => void;
+  control: Control<CreateSLOParams>;
 }
 
-export function SloEditFormDefinitionCustomKql({
-  onCheckValidity,
-}: SloEditFormDefinitionCustomKqlProps) {
+export function SloEditFormDefinitionCustomKql({ control }: SloEditFormDefinitionCustomKqlProps) {
   const { loading, indices = [] } = useFetchIndices();
 
   const indicesNames = indices.map(({ name }) => ({
@@ -44,42 +25,6 @@ export function SloEditFormDefinitionCustomKql({
     label: name,
     description: '',
   }));
-
-  const [selectedIndex, setSelectedIndex] = useState<string | undefined>();
-
-  const isInvalid = useCallback(
-    () =>
-      selectedIndex ? !Boolean(indicesNames.find((index) => index.label === selectedIndex)) : false,
-    [indicesNames, selectedIndex]
-  );
-
-  const handleFieldBlur = () => {};
-  const handleFieldFocus = () => {};
-  const handleItemClick = () => {};
-  const handleInputChange = () => {};
-
-  const handleChangeIndex = (index: EuiSuggestionProps) => {
-    setSelectedIndex(index.label);
-  };
-
-  const handleChangeIndexInput = (index: string) => {
-    setSelectedIndex(index);
-  };
-
-  useEffect(() => {
-    if (selectedIndex) {
-      if (isInvalid()) {
-        onCheckValidity(false);
-      } else {
-        onCheckValidity(true);
-      }
-    } else {
-      onCheckValidity(false);
-    }
-    return () => {
-      onCheckValidity(false);
-    };
-  }, [isInvalid, onCheckValidity, selectedIndex]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -89,22 +34,35 @@ export function SloEditFormDefinitionCustomKql({
             defaultMessage: 'Index',
           })}
         </EuiFormLabel>
-        <EuiSuggest
-          fullWidth
-          isClearable
-          aria-label="Indices"
-          status={loading ? 'loading' : selectedIndex ? 'unchanged' : 'unchanged'}
-          onChange={handleChangeIndexInput}
-          onItemClick={handleChangeIndex}
-          isInvalid={isInvalid()}
-          placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.sloDefinition.customKql.index',
-            {
-              defaultMessage: 'Select an index',
-            }
+
+        <Controller
+          name="indicator.params.index"
+          shouldUnregister
+          control={control}
+          rules={{
+            required: true,
+            validate: (value) => Boolean(indices.find((index) => index.name === value)),
+          }}
+          render={({ field }) => (
+            <EuiSuggest
+              fullWidth
+              isClearable
+              aria-label="Indices"
+              status={loading ? 'loading' : field.value ? 'unchanged' : 'unchanged'}
+              onItemClick={({ label }) => {
+                field.onChange(label);
+              }}
+              isInvalid={!Boolean(indicesNames.find((index) => index.label === field.value))}
+              placeholder={i18n.translate(
+                'xpack.observability.slos.sloEdit.sloDefinition.customKql.index',
+                {
+                  defaultMessage: 'Select an index',
+                }
+              )}
+              suggestions={indicesNames}
+              {...field}
+            />
           )}
-          value={selectedIndex}
-          suggestions={indicesNames}
         />
       </EuiFlexItem>
 
@@ -114,21 +72,26 @@ export function SloEditFormDefinitionCustomKql({
             defaultMessage: 'Query filter',
           })}
         </EuiFormLabel>
-        <EuiSuggest
-          append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
-          status="unchanged"
-          aria-label="Filter"
-          placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.sloDefinition.customKql.customFilter',
-            {
-              defaultMessage: 'Custom filter to apply on the index',
-            }
+        <Controller
+          name="indicator.params.filter"
+          shouldUnregister
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <EuiSuggest
+              append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
+              status="unchanged"
+              aria-label="Filter"
+              placeholder={i18n.translate(
+                'xpack.observability.slos.sloEdit.sloDefinition.customKql.customFilter',
+                {
+                  defaultMessage: 'Custom filter to apply on the index',
+                }
+              )}
+              suggestions={[]}
+              {...field}
+            />
           )}
-          suggestions={sampleItems}
-          onBlur={handleFieldBlur}
-          onFocus={handleFieldFocus}
-          onItemClick={handleItemClick}
-          onChange={handleInputChange}
         />
       </EuiFlexItem>
 
@@ -138,21 +101,26 @@ export function SloEditFormDefinitionCustomKql({
             defaultMessage: 'Good query',
           })}
         </EuiFormLabel>
-        <EuiSuggest
-          append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
-          status={'unchanged'}
-          aria-label="Filter"
-          placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQueryPlaceholder',
-            {
-              defaultMessage: 'Define the good events',
-            }
+        <Controller
+          name="indicator.params.good"
+          shouldUnregister
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <EuiSuggest
+              append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
+              status="unchanged"
+              aria-label="Filter"
+              placeholder={i18n.translate(
+                'xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQueryPlaceholder',
+                {
+                  defaultMessage: 'Define the good events',
+                }
+              )}
+              suggestions={[]}
+              {...field}
+            />
           )}
-          suggestions={sampleItems}
-          onBlur={handleFieldBlur}
-          onFocus={handleFieldFocus}
-          onItemClick={handleItemClick}
-          onChange={handleInputChange}
         />
       </EuiFlexItem>
 
@@ -162,21 +130,26 @@ export function SloEditFormDefinitionCustomKql({
             defaultMessage: 'Total query',
           })}
         </EuiFormLabel>
-        <EuiSuggest
-          append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
-          status={'unchanged'}
-          aria-label="Filter"
-          placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQueryPlaceholder',
-            {
-              defaultMessage: 'Define the total events',
-            }
+        <Controller
+          name="indicator.params.total"
+          shouldUnregister
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <EuiSuggest
+              append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
+              status="unchanged"
+              aria-label="Filter"
+              placeholder={i18n.translate(
+                'xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQueryPlaceholder',
+                {
+                  defaultMessage: 'Define the total events',
+                }
+              )}
+              suggestions={[]}
+              {...field}
+            />
           )}
-          suggestions={sampleItems}
-          onBlur={handleFieldBlur}
-          onFocus={handleFieldFocus}
-          onItemClick={handleItemClick}
-          onChange={handleInputChange}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
