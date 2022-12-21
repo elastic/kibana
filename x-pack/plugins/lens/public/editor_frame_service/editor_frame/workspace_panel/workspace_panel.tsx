@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type {
   ExpressionRendererEvent,
   ExpressionRenderError,
@@ -55,7 +54,6 @@ import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
 import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
 import { getOriginalRequestErrorMessages } from '../../error_helper';
-import { getMissingIndexPattern } from '../state_helpers';
 import {
   onActiveDataChange,
   useLensDispatch,
@@ -267,33 +265,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const missingIndexPatterns = getMissingIndexPattern(
-    activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-    activeDatasourceId ? datasourceStates[activeDatasourceId] : null,
-    dataViews.indexPatterns
-  );
-
-  const missingRefsErrors = missingIndexPatterns.length
-    ? [
-        {
-          shortMessage: '',
-          longMessage: i18n.translate('xpack.lens.indexPattern.missingDataView', {
-            defaultMessage:
-              'The {count, plural, one {data view} other {data views}} ({count, plural, one {id} other {ids}}: {indexpatterns}) cannot be found',
-            values: {
-              count: missingIndexPatterns.length,
-              indexpatterns: missingIndexPatterns.join(', '),
-            },
-          }),
-        },
-      ]
-    : [];
-
   const configurationValidationErrors = getUserMessages('workspace', 'error');
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
-    if (!configurationValidationErrors?.length && !missingRefsErrors.length) {
+    if (!configurationValidationErrors?.length) {
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
@@ -337,7 +313,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [
     configurationValidationErrors?.length,
-    missingRefsErrors.length,
     activeVisualization,
     visualization.state,
     datasourceMap,
@@ -558,7 +533,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         setLocalState={setLocalState}
-        localState={{ ...localState, configurationValidationErrors, missingRefsErrors }}
+        localState={{ ...localState, configurationValidationErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
         core={core}
         activeDatasourceId={activeDatasourceId}
@@ -649,7 +624,6 @@ export const VisualizationWrapper = ({
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
     configurationValidationErrors?: UserMessage[];
-    missingRefsErrors?: Array<{ shortMessage: string; longMessage: React.ReactNode }>;
   };
   ExpressionRendererComponent: ReactExpressionRendererType;
   core: CoreStart;
@@ -712,53 +686,6 @@ export const VisualizationWrapper = ({
                     ))}
                   </>
                 )}
-              </>
-            }
-            iconColor="danger"
-            iconType="alert"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  if (localState.missingRefsErrors?.length) {
-    // Check for access to both Management app && specific indexPattern section
-    const { management: isManagementEnabled } = core.application.capabilities.navLinks;
-    const isIndexPatternManagementEnabled =
-      core.application.capabilities.management.kibana.indexPatterns;
-    return (
-      <EuiFlexGroup data-test-subj="configuration-failure">
-        <EuiFlexItem>
-          <EuiEmptyPrompt
-            actions={
-              isManagementEnabled && isIndexPatternManagementEnabled ? (
-                <RedirectAppLinks coreStart={core}>
-                  <a
-                    href={core.application.getUrlForApp('management', {
-                      path: '/kibana/indexPatterns/create',
-                    })}
-                    style={{ width: '100%' }}
-                    data-test-subj="configuration-failure-reconfigure-indexpatterns"
-                  >
-                    {i18n.translate('xpack.lens.editorFrame.dataViewReconfigure', {
-                      defaultMessage: `Recreate it in the data view management page`,
-                    })}
-                  </a>
-                </RedirectAppLinks>
-              ) : null
-            }
-            body={
-              <>
-                <p className="eui-textBreakWord" data-test-subj="missing-refs-failure">
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.dataViewNotFound"
-                    defaultMessage="Data view not found"
-                  />
-                </p>
-                <p className="eui-textBreakWord lnsSelectableErrorMessage">
-                  {localState.missingRefsErrors[0].longMessage}
-                </p>
               </>
             }
             iconColor="danger"

@@ -333,6 +333,7 @@ export async function mountApp(
             contextOriginatingApp={historyLocationState?.originatingApp}
             topNavMenuEntryGenerators={topNavMenuEntryGenerators}
             theme$={core.theme.theme$}
+            coreStart={coreStart}
           />
         </Provider>
       );

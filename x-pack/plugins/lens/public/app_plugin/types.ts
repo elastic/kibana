@@ -13,6 +13,7 @@ import type {
   ApplicationStart,
   AppMountParameters,
   ChromeStart,
+  CoreStart,
   CoreTheme,
   ExecutionContextStart,
   HttpStart,
@@ -82,6 +83,7 @@ export interface LensAppProps {
   contextOriginatingApp?: string;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   theme$: Observable<CoreTheme>;
+  coreStart: CoreStart;
 }
 
 export type RunSave = (

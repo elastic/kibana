@@ -62,6 +62,7 @@ export function App({
   topNavMenuEntryGenerators,
   initialContext,
   theme$,
+  coreStart,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -478,6 +479,10 @@ export function App({
       ...getApplicationUserMessages({
         visualizationMap,
         visualization,
+        activeDatasource: activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+        activeDatasourceState: activeDatasourceId ? datasourceStates[activeDatasourceId] : null,
+        core: coreStart,
+        dataViews: frameDatasourceAPI.dataViews,
       }),
     ].filter(
       (message) =>

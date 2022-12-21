@@ -438,7 +438,7 @@ export function getMissingIndexPattern(
   currentDatasourceState: { state: unknown } | null,
   indexPatterns: IndexPatternMap
 ) {
-  if (currentDatasourceState == null || currentDatasource == null) {
+  if (currentDatasourceState?.state == null || currentDatasource == null) {
     return [];
   }
   const missingIds = currentDatasource.checkIntegrity(currentDatasourceState.state, indexPatterns);
