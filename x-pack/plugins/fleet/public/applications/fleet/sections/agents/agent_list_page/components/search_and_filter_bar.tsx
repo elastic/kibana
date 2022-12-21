@@ -89,14 +89,14 @@ const InactiveAgentsCallout: React.FC<{
       size="m"
       title={
         <FormattedMessage
-          id="xpack.fleet.agentList.inactiveAgentsCalloutText"
+          id="xpack.fleet.agentList.inactiveAgentsCalloutTitle"
           defaultMessage="Some agents are inactive or unenrolled"
         />
       }
       iconType="iInCircle"
     >
       <FormattedMessage
-        id="xpack.fleet.agentList.inactiveAgentsCalloutText"
+        id="xpack.fleet.agentList.inactiveAgentsCalloutBody"
         defaultMessage="These are not displayed by default. Use status filters to show inactive or unenrolled agents. {clickToShow}"
         values={{
           clickToShow: (
