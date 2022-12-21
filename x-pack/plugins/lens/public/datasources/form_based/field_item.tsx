@@ -24,17 +24,17 @@ import {
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverVisualize,
+  FieldIcon,
+  getFieldIconProps,
+  wrapFieldNameOnDot,
 } from '@kbn/unified-field-list-plugin/public';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DragDrop } from '../../drag_drop';
-import { DatasourceDataPanelProps, DataType } from '../../types';
+import { DatasourceDataPanelProps } from '../../types';
 import { DOCUMENT_FIELD_NAME } from '../../../common';
 import type { IndexPattern, IndexPatternField } from '../../types';
-import { LensFieldIcon } from '../../shared_components/field_picker/lens_field_icon';
 import type { LensAppServices } from '../../app_plugin/types';
-import { debouncedComponent } from '../../debounced_component';
 import { APP_ID } from '../../../common/constants';
-import { getFieldType } from './pure_utils';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
 
 export interface FieldItemProps {
@@ -56,13 +56,6 @@ export interface FieldItemProps {
   removeField?: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
   uiActions: UiActionsStart;
-}
-
-function wrapOnDot(str?: string) {
-  // u200B is a non-width white-space character, which allows
-  // the browser to efficiently word-wrap right after the dot
-  // without us having to draw a lot of extra DOM elements, etc
-  return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
 export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
@@ -157,7 +150,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
 
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
-  const lensFieldIcon = <LensFieldIcon type={getFieldType(field) as DataType} />;
+  const lensFieldIcon = <FieldIcon {...getFieldIconProps(field)} />;
   const lensInfoIcon = (
     <EuiIconTip
       anchorClassName="lnsFieldItem__infoIcon"
@@ -222,8 +215,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               }}
               fieldIcon={lensFieldIcon}
               fieldName={
-                <EuiHighlight search={wrapOnDot(highlight)}>
-                  {wrapOnDot(field.displayName)}
+                <EuiHighlight search={wrapFieldNameOnDot(highlight)}>
+                  {wrapFieldNameOnDot(field.displayName)}
                 </EuiHighlight>
               }
               fieldInfoIcon={lensInfoIcon}
@@ -275,7 +268,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   );
 };
 
-export const FieldItem = debouncedComponent(InnerFieldItem);
+export const FieldItem = React.memo(InnerFieldItem);
 
 function FieldItemPopoverContents(
   props: FieldItemProps & {
