@@ -239,7 +239,9 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
       const source = response.hits.hits[0]._source as any;
 
       // The state in Elasticsearch should match the state returned from the executor
-      expect(source.testObject).to.eql(nextExecutorResult.state.wrapped && nextExecutorResult.state.wrapped.testObject);
+      expect(source.testObject).to.eql(
+        nextExecutorResult.state.wrapped && nextExecutorResult.state.wrapped.testObject
+      );
     });
   });
 }
