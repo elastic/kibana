@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export { ecsFieldMap } from './field_maps/ecs_field_map';
 export { alertFieldMap } from './field_maps/alert_field_map';
-export { EcsSchema } from './schemas/ecs_schema';
-export type { Ecs } from './schemas/ecs_schema';
 export { AlertSchema } from './schemas/alert_schema';
 export type { Alert } from './schemas/alert_schema';
 export { getComponentTemplateFromFieldMap } from './field_maps/component_template_from_field_map';

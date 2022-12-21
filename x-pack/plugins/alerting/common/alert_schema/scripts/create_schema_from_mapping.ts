@@ -10,7 +10,6 @@ import path from 'path';
 import { get, set } from 'lodash';
 import { createLineWriter, LineWriter } from './lib/line_writer';
 import { alertFieldMap } from '../field_maps/alert_field_map';
-import { ecsFieldMap } from '../field_maps/ecs_field_map';
 import { FieldMap } from '../field_maps/types';
 
 const PLUGIN_DIR = path.resolve(path.join(__dirname, '..'));
@@ -306,10 +305,6 @@ try {
   // eslint-disable-next-line no-console
   console.log(`Creating runtime schema for AlertFieldMap`);
   createSchema(ALERT_SCHEMA_FILE, alertFieldMap, 'Alert');
-
-  // eslint-disable-next-line no-console
-  console.log(`Creating runtime schema for EcsFieldMap`);
-  createSchema(ECS_SCHEMA_FILE, ecsFieldMap, 'Ecs');
 
   // eslint-disable-next-line no-console
   console.log(`Finished creating schemas!`);

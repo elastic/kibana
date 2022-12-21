@@ -13,17 +13,12 @@ import {
 import { get, isEmpty } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
-import {
-  alertFieldMap,
-  ecsFieldMap,
-  getComponentTemplateFromFieldMap,
-} from '../../common/alert_schema';
+import { alertFieldMap, getComponentTemplateFromFieldMap } from '../../common/alert_schema';
 import { ILM_POLICY_NAME, DEFAULT_ILM_POLICY } from './default_lifecycle_policy';
 import {
   ALERTS_COMPONENT_TEMPLATE_NAME,
   DEFAULT_ALERTS_INDEX,
   DEFAULT_ALERTS_INDEX_PATTERN,
-  ECS_COMPONENT_TEMPLATE_NAME,
   INDEX_TEMPLATE_NAME,
   INITIAL_ALERTS_INDEX_NAME,
 } from './types';
@@ -34,11 +29,6 @@ const componentTemplatesToInstall = [
     name: ALERTS_COMPONENT_TEMPLATE_NAME,
     fieldMap: alertFieldMap,
     fieldLimit: 100,
-  },
-  {
-    name: ECS_COMPONENT_TEMPLATE_NAME,
-    fieldMap: ecsFieldMap,
-    fieldLimit: 2000,
   },
 ];
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -79,7 +69,6 @@ export class AlertsService implements IAlertsService {
   public async initialize(timeoutMs?: number) {
     // Only initialize once
     if (this.initialized) return;
-    this.initialized = true;
 
     this.options.logger.debug(`Initializing resources for AlertsService`);
 
@@ -93,6 +82,8 @@ export class AlertsService implements IAlertsService {
     );
     await this.installWithTimeout(esClient, this.createOrUpdateIndexTemplate.bind(this), timeoutMs);
     await this.installWithTimeout(esClient, this.createConcreteWriteIndex.bind(this), timeoutMs);
+
+    this.initialized = true;
   }
 
   /**
@@ -167,7 +158,7 @@ export class AlertsService implements IAlertsService {
       name: INDEX_TEMPLATE_NAME,
       body: {
         index_patterns: [DEFAULT_ALERTS_INDEX_PATTERN],
-        composed_of: [ALERTS_COMPONENT_TEMPLATE_NAME, ECS_COMPONENT_TEMPLATE_NAME],
+        composed_of: [ALERTS_COMPONENT_TEMPLATE_NAME],
         template: {
           settings: {
             auto_expand_replicas: '0-1',
