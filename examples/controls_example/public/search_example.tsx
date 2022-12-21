@@ -14,7 +14,14 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { EuiCallOut, EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { PLUGIN_ID } from './constants';
