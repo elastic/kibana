@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -30,15 +30,6 @@ export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
-
-  useEffect(() => {
-    if (!controlGroup) {
-      return;
-    }
-    return () => {
-      controlGroup.destroy();
-    };
-  }, [controlGroup]);
 
   async function onSave() {
     setIsSaving(true);

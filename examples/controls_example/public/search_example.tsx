@@ -55,7 +55,6 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
     });
     return () => {
       subscription.unsubscribe();
-      controlGroup.destroy();
     };
   }, [controlGroup]);
 

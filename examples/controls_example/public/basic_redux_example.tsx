@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
   LazyControlGroupRenderer,
@@ -22,15 +22,6 @@ const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
-
-  useEffect(() => {
-    if (!controlGroup) {
-      return;
-    }
-    return () => {
-      controlGroup.destroy();
-    };
-  }, [controlGroup]);
 
   const ControlGroupReduxWrapper = useMemo(() => {
     if (controlGroup) return controlGroup.getReduxEmbeddableTools().Wrapper;
