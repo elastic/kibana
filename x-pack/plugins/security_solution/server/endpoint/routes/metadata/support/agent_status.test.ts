@@ -93,7 +93,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       const status = ['healthy'];
       const kuery = buildStatusesKuery(status);
       expect(kuery).toMatchInlineSnapshot(
-        `"(united.agent.last_checkin:*  AND not ((united.agent.last_checkin < now-300s) or ((((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))  AND not ((united.agent.last_checkin < now-300s) or ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*))))) or ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*)))))"`
+        `"(united.agent.last_checkin:*  AND not ((united.agent.last_checkin < now-300s) or ((((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))  AND not ((united.agent.last_checkin < now-300s) or ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded or united.agent.last_checkin_status:DEGRADED or united.agent.last_checkin_status:ERROR)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*))))) or ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded or united.agent.last_checkin_status:DEGRADED or united.agent.last_checkin_status:ERROR)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*)))))"`
       );
     });
 
@@ -107,7 +107,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       const status = ['unhealthy'];
       const kuery = buildStatusesKuery(status);
       expect(kuery).toMatchInlineSnapshot(
-        `"((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*)))"`
+        `"((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded or united.agent.last_checkin_status:DEGRADED or united.agent.last_checkin_status:ERROR)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*)))"`
       );
     });
 
@@ -115,7 +115,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       const status = ['updating'];
       const kuery = buildStatusesKuery(status);
       expect(kuery).toMatchInlineSnapshot(
-        `"((((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))  AND not ((united.agent.last_checkin < now-300s) or ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*)))))"`
+        `"((((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) or (not united.agent.policy_revision_idx:*))  AND not ((united.agent.last_checkin < now-300s) or ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded or united.agent.last_checkin_status:DEGRADED or united.agent.last_checkin_status:ERROR)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*)))))"`
       );
     });
 
@@ -130,7 +130,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       const statuses = ['offline', 'unhealthy'];
       const kuery = buildStatusesKuery(statuses);
       expect(kuery).toMatchInlineSnapshot(
-        `"(united.agent.last_checkin < now-300s OR (united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*)))"`
+        `"(united.agent.last_checkin < now-300s OR (united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded or united.agent.last_checkin_status:DEGRADED or united.agent.last_checkin_status:ERROR)  AND not ((united.agent.last_checkin < now-300s) or (united.agent.unenrollment_started_at:*)))"`
       );
     });
   });

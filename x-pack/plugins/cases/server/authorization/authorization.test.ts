@@ -61,7 +61,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -81,7 +81,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -140,7 +140,7 @@ describe('authorization', () => {
         request,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -266,7 +266,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -295,7 +295,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 
@@ -322,7 +322,7 @@ describe('authorization', () => {
         securityAuth: securityStart.authz,
         spaces: spacesStart,
         features: featuresStart,
-        auditLogger: new AuthorizationAuditLogger(),
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
         logger: loggingSystemMock.createLogger(),
       });
 

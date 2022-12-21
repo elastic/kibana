@@ -168,16 +168,16 @@ export const getPieVisualization = ({
     const getPrimaryGroupConfig = (): VisualizationDimensionGroupConfig => {
       const originalOrder = getSortedGroups(datasource, layer);
       // When we add a column it could be empty, and therefore have no order
-      const accessors: AccessorConfig[] = originalOrder.map((accessor) => ({
+      const accessors = originalOrder.map<AccessorConfig>((accessor) => ({
         columnId: accessor,
-        triggerIcon: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
+        triggerIconType: isCollapsed(accessor, layer) ? 'aggregate' : undefined,
       }));
 
       const firstNonCollapsedColumnId = layer.primaryGroups.find((id) => !isCollapsed(id, layer));
 
       accessors.forEach((accessorConfig) => {
         if (firstNonCollapsedColumnId === accessorConfig.columnId) {
-          accessorConfig.triggerIcon = 'colorBy';
+          accessorConfig.triggerIconType = 'colorBy';
           accessorConfig.palette = paletteService
             .get(state.palette?.name || 'default')
             .getCategoricalColors(10, state.palette?.params);
@@ -273,9 +273,9 @@ export const getPieVisualization = ({
 
     const getSecondaryGroupConfig = (): VisualizationDimensionGroupConfig | undefined => {
       const originalSecondaryOrder = getSortedGroups(datasource, layer, 'secondaryGroups');
-      const accessors = originalSecondaryOrder.map((accessor) => ({
+      const accessors = originalSecondaryOrder.map<AccessorConfig>((accessor) => ({
         columnId: accessor,
-        triggerIcon: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
+        triggerIconType: isCollapsed(accessor, layer) ? 'aggregate' : undefined,
       }));
 
       const secondaryGroupConfigBaseProps = {
@@ -321,10 +321,10 @@ export const getPieVisualization = ({
         ...(layer.allowMultipleMetrics
           ? hasSliceBy
             ? {
-                triggerIcon: 'disabled',
+                triggerIconType: 'disabled',
               }
             : {
-                triggerIcon: 'color',
+                triggerIconType: 'color',
                 color:
                   layer.colorsByDimension?.[columnId] ??
                   getDefaultColorForMultiMetricDimension({
@@ -636,6 +636,7 @@ export const getPieVisualization = ({
       dimensions.push({
         id: metric,
         name: metricLabel,
+        dimensionType: 'metric',
       });
     });
 
@@ -645,6 +646,7 @@ export const getPieVisualization = ({
           name: i18n.translate('xpack.lens.pie.horizontalAxisLabel', {
             defaultMessage: 'Horizontal axis',
           }),
+          dimensionType: 'horizontal_axis',
           id: accessor,
         });
       });
@@ -654,19 +656,23 @@ export const getPieVisualization = ({
       let name = i18n.translate('xpack.lens.pie.treemapGroupLabel', {
         defaultMessage: 'Group by',
       });
+      let dimensionType = 'group_by';
       if (state.shape === 'mosaic') {
         name = i18n.translate('xpack.lens.pie.verticalAxisLabel', {
           defaultMessage: 'Vertical axis',
         });
+        dimensionType = 'vertical_axis';
       }
       if (state.shape === 'donut' || state.shape === 'pie') {
         name = i18n.translate('xpack.lens.pie.sliceGroupLabel', {
           defaultMessage: 'Slice by',
         });
+        dimensionType = 'slice_by';
       }
       layer.primaryGroups.forEach((accessor) => {
         dimensions.push({
           name,
+          dimensionType,
           id: accessor,
         });
       });

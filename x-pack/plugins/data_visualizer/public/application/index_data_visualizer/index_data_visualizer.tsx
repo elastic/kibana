@@ -9,7 +9,7 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';

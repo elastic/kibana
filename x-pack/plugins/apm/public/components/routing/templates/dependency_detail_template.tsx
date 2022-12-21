@@ -91,7 +91,7 @@ export function DependencyDetailTemplate({ children }: Props) {
           isSelected:
             path === '/dependencies/operations' ||
             path === '/dependencies/operation',
-          append: <BetaBadge />,
+          append: <BetaBadge icon="beta" />,
         },
       ]
     : [];

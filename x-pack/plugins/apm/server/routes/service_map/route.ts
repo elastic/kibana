@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { compact } from 'lodash';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map';
@@ -129,8 +128,6 @@ const serviceMapRoute = createApmServerRoute({
         uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
       ]);
 
-    const serviceNames = compact([serviceName]);
-
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
       config,
@@ -142,14 +139,14 @@ const serviceMapRoute = createApmServerRoute({
       mlClient,
       config,
       apmEventClient,
-      serviceNames,
+      serviceName,
       environment,
       searchAggregatedTransactions,
       logger,
       start,
       end,
       maxNumberOfServices,
-      serviceGroup,
+      serviceGroupKuery: serviceGroup?.kuery,
     });
   },
 });

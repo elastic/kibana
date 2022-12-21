@@ -5,8 +5,8 @@
     "emitDeclarationOnly": true,
     "outDir": "target_types",
     "types": [
-      "mocha",
-      "node"
+      "node",
+      "@kbn/ambient-ftr-types",
     ]
   },
   "include": [

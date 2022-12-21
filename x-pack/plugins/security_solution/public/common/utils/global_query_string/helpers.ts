@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { decode, encode } from 'rison-node';
+import { decode, encode } from '@kbn/rison';
 import type { ParsedQuery } from 'query-string';
 import { parse, stringify } from 'query-string';
 import { url } from '@kbn/kibana-utils-plugin/public';
