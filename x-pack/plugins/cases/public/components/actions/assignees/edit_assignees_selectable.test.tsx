@@ -26,9 +26,7 @@ describe('EditAssigneesSelectable', () => {
   const props = {
     selectedCases: [basicCase],
     isLoading: false,
-    userProfiles: userProfilesMap,
     onChangeAssignees: jest.fn(),
-    unknownUsers: [],
   };
 
   /**
@@ -42,8 +40,6 @@ describe('EditAssigneesSelectable', () => {
       { ...basicCase, assignees: [...basicCase.assignees, { uid: userProfiles[1].uid }] },
     ],
     isLoading: false,
-    userProfiles: userProfilesMap,
-    unknownUsers: [],
     onChangeAssignees: jest.fn(),
   };
 
@@ -67,7 +63,10 @@ describe('EditAssigneesSelectable', () => {
   it('renders correctly', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
 
-    expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
+
     expect(result.getByPlaceholderText('Find a user')).toBeInTheDocument();
     expect(result.getByText('Selected: 1')).toBeInTheDocument();
 
@@ -80,6 +79,10 @@ describe('EditAssigneesSelectable', () => {
   it('renders the selected assignees label correctly', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...propsMultipleCases} />);
 
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
+
     expect(result.getByText('Selected: 2')).toBeInTheDocument();
 
     for (const userProfile of userProfilesMap.values()) {
@@ -90,6 +93,10 @@ describe('EditAssigneesSelectable', () => {
 
   it('renders the assignees icons correctly', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...propsMultipleCases} />);
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
 
     for (const [uid, icon] of [
       [userProfiles[0].uid, 'check'],
@@ -103,6 +110,10 @@ describe('EditAssigneesSelectable', () => {
 
   it('selects and unselects correctly assignees with one case', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
@@ -122,6 +133,10 @@ describe('EditAssigneesSelectable', () => {
   it('selects and unselects correctly assignees with multiple cases', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...propsMultipleCases} />);
 
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
+
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
       userEvent.click(result.getByText(userProfile.user.full_name));
@@ -139,6 +154,10 @@ describe('EditAssigneesSelectable', () => {
 
   it('renders the icons correctly after selecting and deselecting assignees', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...propsMultipleCases} />);
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
@@ -169,9 +188,7 @@ describe('EditAssigneesSelectable', () => {
       [...userProfiles].reverse().map((profile) => [profile.uid, profile])
     );
 
-    const result = appMock.render(
-      <EditAssigneesSelectable {...props} userProfiles={reversedUserProfiles} />
-    );
+    const result = appMock.render(<EditAssigneesSelectable {...props} />);
 
     const allUsersInView = result.getAllByRole('option');
     expect(allUsersInView.length).toBe(3);
@@ -187,6 +204,10 @@ describe('EditAssigneesSelectable', () => {
       'cases-actions-assignees-edit-selectable-assignee-u_IbBVXpDtrjOByJ-syBdr425fLGqwpzY_xdQqCFAFXLI_0';
 
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
 
     userEvent.type(result.getByPlaceholderText('Find a user'), 's');
 
@@ -211,6 +232,10 @@ describe('EditAssigneesSelectable', () => {
       'cases-actions-assignees-edit-selectable-assignee-u_IbBVXpDtrjOByJ-syBdr425fLGqwpzY_xdQqCFAFXLI_0';
 
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
 
     userEvent.type(result.getByPlaceholderText('Find a user'), 's');
 
@@ -239,6 +264,10 @@ describe('EditAssigneesSelectable', () => {
   it('does not show the same user in search results if it is already in the initial user profile mapping', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
 
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
+
     userEvent.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
@@ -259,6 +288,10 @@ describe('EditAssigneesSelectable', () => {
       'cases-actions-assignees-edit-selectable-assignee-u_IbBVXpDtrjOByJ-syBdr425fLGqwpzY_xdQqCFAFXLI_0';
 
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
 
     userEvent.type(result.getByPlaceholderText('Find a user'), 's');
 
@@ -282,6 +315,10 @@ describe('EditAssigneesSelectable', () => {
 
   it('shows deselected users from the initial user profile mapping', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
 
     // @ts-ignore: full name exists
     userEvent.click(result.getByText(userProfiles[0].user.full_name));
@@ -308,6 +345,10 @@ describe('EditAssigneesSelectable', () => {
 
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
 
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
+
     act(() => {
       jest.advanceTimersByTime(1000);
     });
@@ -321,6 +362,10 @@ describe('EditAssigneesSelectable', () => {
 
   it('shows the no matching component', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...props} />);
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
 
     userEvent.type(result.getByPlaceholderText('Find a user'), 'not-exists');
 
@@ -336,9 +381,11 @@ describe('EditAssigneesSelectable', () => {
   });
 
   it('shows unknown users', async () => {
-    const result = appMock.render(
-      <EditAssigneesSelectable {...props} unknownUsers={['123', '456']} />
-    );
+    const result = appMock.render(<EditAssigneesSelectable {...props} />);
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
 
     await waitFor(() => {
       const unknownUsers = result.getAllByText('Unknown');
@@ -347,7 +394,11 @@ describe('EditAssigneesSelectable', () => {
   });
 
   it('selects unknown users', async () => {
-    const result = appMock.render(<EditAssigneesSelectable {...props} unknownUsers={['123']} />);
+    const result = appMock.render(<EditAssigneesSelectable {...props} />);
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
 
     await waitFor(() => {
       expect(result.getByText('Unknown')).toBeInTheDocument();
@@ -364,7 +415,7 @@ describe('EditAssigneesSelectable', () => {
   it('deselects unknown users', async () => {
     const selectedCases = [{ ...basicCase, assignees: [{ uid: '123' }] }];
     const result = appMock.render(
-      <EditAssigneesSelectable {...props} selectedCases={selectedCases} unknownUsers={['123']} />
+      <EditAssigneesSelectable {...props} selectedCases={selectedCases} />
     );
 
     await waitFor(() => {
@@ -381,6 +432,10 @@ describe('EditAssigneesSelectable', () => {
 
   it('remove all assignees', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...propsMultipleCases} />);
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+    });
 
     expect(result.getByRole('button', { name: 'Remove all assignees' })).toBeInTheDocument();
     userEvent.click(result.getByRole('button', { name: 'Remove all assignees' }));

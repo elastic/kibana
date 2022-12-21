@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -17,13 +17,10 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   euiFullHeight,
-  EuiLoadingSpinner,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import type { Case } from '../../../../common';
 import { EditAssigneesSelectable } from './edit_assignees_selectable';
 import * as i18n from './translations';
@@ -43,41 +40,11 @@ const fullHeight = css`
   }
 `;
 
-const getUnknownUsers = (
-  assignees: Set<string>,
-  userProfiles?: Map<string, UserProfileWithAvatar>
-) => {
-  const unknownUsers: string[] = [];
-
-  if (!userProfiles) {
-    return unknownUsers;
-  }
-
-  for (const assignee of assignees) {
-    if (!userProfiles.has(assignee)) {
-      unknownUsers.push(assignee);
-    }
-  }
-
-  return unknownUsers;
-};
-
 const EditAssigneesFlyoutComponent: React.FC<Props> = ({
   selectedCases,
   onClose,
   onSaveAssignees,
 }) => {
-  const assignees = useMemo(
-    () => new Set(selectedCases.map((theCase) => theCase.assignees.map(({ uid }) => uid)).flat()),
-    [selectedCases]
-  );
-
-  const { data: userProfiles, isFetching: isLoadingUserProfiles } = useBulkGetUserProfiles({
-    uids: Array.from(assignees.values()),
-  });
-
-  const unknownUsers = getUnknownUsers(assignees, userProfiles);
-
   const [assigneesSelection, setAssigneesSelection] = useState<ItemsSelectionState>({
     selectedItems: [],
     unSelectedItems: [],
@@ -109,17 +76,10 @@ const EditAssigneesFlyoutComponent: React.FC<Props> = ({
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={fullHeight}>
-        {isLoadingUserProfiles ? (
-          <EuiLoadingSpinner />
-        ) : (
-          <EditAssigneesSelectable
-            selectedCases={selectedCases}
-            isLoading={isLoadingUserProfiles}
-            userProfiles={userProfiles ?? new Map()}
-            onChangeAssignees={setAssigneesSelection}
-            unknownUsers={unknownUsers}
-          />
-        )}
+        <EditAssigneesSelectable
+          selectedCases={selectedCases}
+          onChangeAssignees={setAssigneesSelection}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

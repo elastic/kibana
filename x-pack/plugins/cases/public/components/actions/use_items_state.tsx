@@ -28,6 +28,7 @@ enum ItemState {
 export enum Actions {
   CHECK_ITEM,
   UNCHECK_ITEM,
+  SET_NEW_STATE,
 }
 
 enum ICONS {
@@ -39,7 +40,8 @@ enum ICONS {
 type Payload = Array<Pick<Item, 'key' | 'data'>>;
 type Action =
   | { type: Actions.CHECK_ITEM; payload: Payload }
-  | { type: Actions.UNCHECK_ITEM; payload: Payload };
+  | { type: Actions.UNCHECK_ITEM; payload: Payload }
+  | { type: Actions.SET_NEW_STATE; payload: State };
 
 interface Item {
   key: string;
@@ -136,6 +138,9 @@ const itemsReducer: React.Reducer<State, Action> = (state: State, action): State
       }
 
       return { ...state, items: { ...state.items, ...unSelectedItems } };
+
+    case Actions.SET_NEW_STATE:
+      return { ...action.payload };
 
     default:
       assertNever(action);
@@ -243,8 +248,7 @@ export const useItemsState = ({
 
   const [state, dispatch] = useReducer(
     itemsReducer,
-    { items, selectedCases, fieldSelector },
-    getInitialItemsState
+    getInitialItemsState({ items, selectedCases, fieldSelector })
   );
 
   const stateToOptions = useCallback((): ItemSelectableOption[] => {
@@ -323,7 +327,26 @@ export const useItemsState = ({
     (item) => item.itemState === ItemState.CHECKED || item.itemState === ItemState.PARTIAL
   ).length;
 
-  return { state, options, totalSelectedItems, onChange, onSelectAll, onSelectNone };
+  const setNewItems = useCallback(
+    (newItems: string[]) => {
+      const newState = getInitialItemsState({ items: newItems, selectedCases, fieldSelector });
+      dispatch({ type: Actions.SET_NEW_STATE, payload: newState });
+    },
+    [fieldSelector, selectedCases]
+  );
+
+  return useMemo(
+    () => ({
+      state,
+      options,
+      totalSelectedItems,
+      onChange,
+      onSelectAll,
+      onSelectNone,
+      setNewItems,
+    }),
+    [onChange, onSelectAll, onSelectNone, options, setNewItems, state, totalSelectedItems]
+  );
 };
 
 export type UseItemsState = ReturnType<typeof useItemsState>;

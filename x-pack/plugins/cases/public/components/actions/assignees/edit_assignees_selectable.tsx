@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import { isEmpty, sortBy } from 'lodash';
 import {
   EuiSelectable,
@@ -19,10 +19,12 @@ import {
   EuiText,
   useEuiTheme,
   EuiButtonEmpty,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { getUserDisplayName } from '@kbn/user-profile-components';
+import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useIsUserTyping } from '../../../common/use_is_user_typing';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import type { Case } from '../../../../common';
@@ -37,9 +39,6 @@ import { NoSelectedAssignees } from './no_selected_assignees';
 
 interface Props {
   selectedCases: Case[];
-  userProfiles: Map<string, UserProfileWithAvatar>;
-  isLoading: boolean;
-  unknownUsers: string[];
   onChangeAssignees: (args: ItemsSelectionState) => void;
 }
 
@@ -47,16 +46,46 @@ type AssigneeSelectableOption = ItemSelectableOption<
   Partial<UserProfileWithAvatar> & { unknownUser?: boolean }
 >;
 
+const getUnknownUsers = (
+  assignees: Set<string>,
+  userProfiles?: Map<string, UserProfileWithAvatar>
+) => {
+  const unknownUsers: string[] = [];
+
+  if (!userProfiles) {
+    return unknownUsers;
+  }
+
+  for (const assignee of assignees) {
+    if (!userProfiles.has(assignee)) {
+      unknownUsers.push(assignee);
+    }
+  }
+
+  return unknownUsers;
+};
+
 const EditAssigneesSelectableComponent: React.FC<Props> = ({
   selectedCases,
-  userProfiles,
-  isLoading,
-  unknownUsers,
   onChangeAssignees,
 }) => {
   const { owner: owners } = useCasesContext();
   const { euiTheme } = useEuiTheme();
   const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
+  const hasDataBeenSetToStateAfterFetched = useRef<boolean>(false);
+
+  const assignees = useMemo(
+    () => new Set(selectedCases.map((theCase) => theCase.assignees.map(({ uid }) => uid)).flat()),
+    [selectedCases]
+  );
+
+  const { data, isLoading: isLoadingUserProfiles } = useBulkGetUserProfiles({
+    uids: Array.from(assignees.values()),
+  });
+
+  const userProfiles = useMemo(() => data ?? new Map(), [data]);
+
+  const unknownUsers = getUnknownUsers(assignees, userProfiles);
 
   const userProfileIds = [...userProfiles.keys(), ...unknownUsers];
 
@@ -96,13 +125,18 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
     [searchResultUserProfiles, userProfiles]
   );
 
-  const { options, totalSelectedItems, onChange, onSelectNone } = useItemsState({
+  const { options, totalSelectedItems, onChange, onSelectNone, setNewItems } = useItemsState({
     items: userProfileIds,
     selectedCases,
     fieldSelector: (theCase) => theCase.assignees.map(({ uid }) => uid),
     onChangeItems: onChangeAssignees,
     itemToSelectableOption,
   });
+
+  if (data && !hasDataBeenSetToStateAfterFetched.current) {
+    hasDataBeenSetToStateAfterFetched.current = true;
+    setNewItems(userProfileIds);
+  }
 
   const finalOptions = getDisplayOptions({
     searchResultUserProfiles: searchResultUserProfiles ?? [],
@@ -111,7 +145,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
     initialUserProfiles: userProfiles,
   });
 
-  const isLoadingData = isLoading || isLoadingSuggest || isUserTyping;
+  const isLoadingData = isLoadingUserProfiles || isLoadingSuggest || isUserTyping;
 
   const renderOption = useCallback(
     (option: AssigneeSelectableOption, search: string) => {
@@ -170,6 +204,10 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
     },
     [onContentChange]
   );
+
+  if (isLoadingUserProfiles) {
+    return <EuiLoadingSpinner />;
+  }
 
   return (
     <EuiSelectable
