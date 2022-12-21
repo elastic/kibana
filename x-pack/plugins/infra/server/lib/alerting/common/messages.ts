@@ -271,3 +271,10 @@ export const tagsActionVariableDescription = i18n.translate(
     defaultMessage: 'List of tags associated with the entity where this alert triggered.',
   }
 );
+
+export const originalAlertStateActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.originalAlertStateActionVariableDescription',
+  {
+    defaultMessage: 'The original alert state. This is only available in the recovery context',
+  }
+);
