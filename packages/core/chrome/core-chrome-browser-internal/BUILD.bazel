@@ -69,6 +69,8 @@ TYPES_DEPS = [
   "//packages/core/application/core-application-browser:npm_module_types",
   "//packages/core/application/core-application-browser-internal:npm_module_types",
   "//packages/core/chrome/core-chrome-browser:npm_module_types",
+  "//packages/core/custom-branding/core-custom-branding-browser:npm_module_types",
+  "//packages/core/custom-branding/core-custom-branding-common:npm_module_types",
 ]
 
 jsts_transpiler(

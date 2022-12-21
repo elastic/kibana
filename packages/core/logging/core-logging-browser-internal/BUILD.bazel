@@ -43,6 +43,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//rxjs",
   "//packages/kbn-logging:npm_module_types",
   "//packages/core/logging/core-logging-common-internal:npm_module_types",
 ]
