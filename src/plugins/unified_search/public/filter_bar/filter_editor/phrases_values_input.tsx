@@ -10,17 +10,11 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  euiScrollBarStyles,
-  withEuiTheme,
-  WithEuiThemeProps,
-} from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiFlexGroup, EuiFlexItem, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { TruncatedLabel } from './truncated_label';
+import { phrasesValuesComboboxCss } from './phrases_values_input.styles';
 
 interface Props {
   values?: string[];
@@ -50,14 +44,6 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
     const { suggestions } = this.state;
     const { values, intl, onChange, fullWidth, onParamsUpdate, compressed, disabled } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
-    const someClassName = css`
-      > .euiFormControlLayout {
-        ${euiScrollBarStyles(this.props.theme)}
-
-        overflow: auto;
-        max-height: 100px;
-      }
-    `;
 
     return (
       <div ref={this.comboBoxRef}>
@@ -76,7 +62,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
           onCreateOption={(option: string) => {
             onParamsUpdate(option.trim());
           }}
-          className={someClassName}
+          className={phrasesValuesComboboxCss(this.props.theme)}
           onChange={onChange}
           isClearable={false}
           data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
