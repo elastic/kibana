@@ -18,12 +18,13 @@ import {
 
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { SyntheticsMonitorStatusTranslations } from '../../../../../common/rules/synthetics/translations';
 import { StatusRuleParams } from '../../../../../common/rules/status_rule';
 import { getMonitorRouteFromMonitorId } from '../../../../../common/utils/get_monitor_url';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '../../../../../common/constants/synthetics_alerts';
-import { MonitorStatusTranslations } from '../../../../../common/translations';
 import { AlertTypeInitializer } from '.';
-const { defaultActionMessage, defaultRecoveryMessage, description } = MonitorStatusTranslations;
+const { defaultActionMessage, defaultRecoveryMessage, description } =
+  SyntheticsMonitorStatusTranslations;
 
 const MonitorStatusAlert = React.lazy(() => import('./lazy_wrapper/monitor_status'));
 

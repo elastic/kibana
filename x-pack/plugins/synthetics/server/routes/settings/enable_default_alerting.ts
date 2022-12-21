@@ -18,6 +18,7 @@ import {
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { UptimeRequestHandlerContext } from '../../types';
+import { SyntheticsMonitorStatusTranslations } from '../../../common/rules/synthetics/translations';
 
 export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -101,6 +102,11 @@ export const createDefaultAlertIfNotExist = async ({
     groupId: ACTION_GROUP_DEFINITIONS.MONITOR_STATUS.id,
     defaultActions,
     defaultEmail: settings?.defaultEmail!,
+    translations: {
+      defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
+      defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
+      defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
+    },
   });
 
   if (data.length === 0) {

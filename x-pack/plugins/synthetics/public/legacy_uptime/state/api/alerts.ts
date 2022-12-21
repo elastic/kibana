@@ -7,6 +7,7 @@
 
 import type { ActionType, AsApiContract, Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { MonitorStatusTranslations } from '../../../../common/translations';
 import { ActionConnector } from '../../../../common/rules/types';
 import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
 import { apiService } from './utils';
@@ -81,6 +82,11 @@ export const createAlert = async ({
     defaultActions,
     defaultEmail,
     groupId: MONITOR_STATUS.id,
+    translations: {
+      defaultActionMessage: MonitorStatusTranslations.defaultActionMessage,
+      defaultRecoveryMessage: MonitorStatusTranslations.defaultRecoveryMessage,
+      defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
+    },
   });
 
   const data: NewMonitorStatusAlert = {
