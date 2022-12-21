@@ -1,0 +1,83 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema, TypeOf } from '@kbn/config-schema';
+import { SavedObject } from 'kibana/server';
+import { wrapError } from '..';
+import { ReportingCore } from '../..';
+import {
+  API_BASE_URL_V1,
+  CSV_SAVED_OBJECT_JOB_TYPE as CSV_JOB_TYPE,
+} from '../../../common/constants';
+import { JobParamsCsvFromSavedObject } from '../../../common/types';
+import { LevelLogger } from '../../lib';
+import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
+import { RequestHandler } from '../lib/request_handler';
+
+const CsvSavedSearchExportParamsSchema = schema.object({
+  savedObjectId: schema.string({ minLength: 2 }),
+});
+
+const CsvSavedSearchExportBodySchema = schema.object({
+  timerange: schema.object({
+    timezone: schema.string({ defaultValue: 'UTC' }),
+    min: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
+    max: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
+  }),
+});
+
+/**
+ * Register an API Endpoint for queuing report jobs
+ * Only CSV export from Saved Search ID is supported.
+ * @public
+ */
+export function registerGenerateFromSavedObject(reporting: ReportingCore, logger: LevelLogger) {
+  const csvSavedSearchExportPath = `${API_BASE_URL_V1}/generate/csv/saved-object/search:{savedObjectId}`;
+  const setupDeps = reporting.getPluginSetupDeps();
+  const { router } = setupDeps;
+
+  router.post(
+    {
+      path: csvSavedSearchExportPath,
+      validate: {
+        params: CsvSavedSearchExportParamsSchema,
+        body: CsvSavedSearchExportBodySchema,
+      },
+    },
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+      // 1. Read the saved object to guard against 404 and get the title
+      try {
+        const searchObject: SavedObject<{ title?: string }> =
+          await context.core.savedObjects.client.get('search', req.params.savedObjectId);
+
+        // 2. Store the job params in the Report queue
+        const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
+
+        const jobParams: JobParamsCsvFromSavedObject = {
+          browserTimezone: req.body.timerange.timezone,
+          savedObjectId: req.params.savedObjectId,
+          title: searchObject.attributes.title ?? 'Unknown search',
+          objectType: 'saved search',
+          version: '7.17',
+        };
+
+        const result = await requestHandler.handleGenerateRequest(CSV_JOB_TYPE, jobParams);
+
+        // 3. Return details of the stored report
+        return res.ok({
+          body: result,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (err) {
+        return res.customError(wrapError(err));
+      }
+    })
+  );
+}
+
+export type CsvSavedSearchExportParamsType = TypeOf<typeof CsvSavedSearchExportParamsSchema>;
+export type CsvSavedSearchExportBodyType = TypeOf<typeof CsvSavedSearchExportBodySchema>;
