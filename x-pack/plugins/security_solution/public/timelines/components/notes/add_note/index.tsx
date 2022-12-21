@@ -88,8 +88,8 @@ export const AddNote = React.memo<{
   );
 
   const isAddNoteDisabled = useMemo(() => {
-    return newNote.trim().length === 0 && authenticatedUser !== null;
-  }, [newNote, authenticatedUser]);
+    return newNote.trim().length === 0;
+  }, [newNote]);
 
   return (
     <AddNotesContainer onKeyDown={onKeyDown} role="dialog">
