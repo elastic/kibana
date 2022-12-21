@@ -9,6 +9,7 @@
 import type { URL } from 'url';
 import type { Request, RouteOptionsPayload } from '@hapi/hapi';
 import type { KibanaRouteOptions } from './request';
+import type { Headers } from './headers';
 
 /**
  * Represents a fake raw request.
@@ -16,7 +17,7 @@ import type { KibanaRouteOptions } from './request';
  */
 export interface FakeRawRequest {
   /** The headers associated with the request. */
-  headers: Record<string, string>;
+  headers: Headers;
   /** The path of the request */
   path: string;
   method?: string;
