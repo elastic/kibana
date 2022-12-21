@@ -157,7 +157,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   }, [dataView]);
 
   const [requestParamsFromUrl, updateRequestParams] =
-    usePageUrlState<ChangePointDetectionRequestParams>('change-point');
+    usePageUrlState<ChangePointDetectionRequestParams>('changePoint');
 
   const resultQuery = useMemo<Query>(() => {
     return (

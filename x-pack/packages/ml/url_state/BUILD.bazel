@@ -51,7 +51,9 @@ RUNTIME_DEPS = [
   "@npm//lodash",
   "@npm//query-string",
   "@npm//react-router-dom",
+  "@npm//rxjs",
   "//packages/kbn-rison",
+  "//x-pack/packages/ml/is_populated_object",
   "//x-pack/packages/ml/nested_property",
 ]
 
@@ -71,7 +73,9 @@ TYPES_DEPS = [
   "@npm//@types/lodash",
   "@npm//@types/react-router-dom",
   "@npm//query-string",
+  "@npm//rxjs",
   "//packages/kbn-rison:npm_module_types",
+  "//x-pack/packages/ml/is_populated_object:npm_module_types",
   "//x-pack/packages/ml/nested_property:npm_module_types",
 ]
 
