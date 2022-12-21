@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
-export interface TestDataEsArchive {
+export interface TestData {
   suiteTitle: string;
+  dataGenerator: string;
   isSavedSearch?: boolean;
   sourceIndexOrSavedSearch: string;
   rowsPerPage?: 10 | 25 | 50;
@@ -27,16 +26,4 @@ export interface TestDataEsArchive {
       impact: string;
     }>;
   };
-}
-
-export interface GeneratedDoc {
-  user: string;
-  response_code: string;
-  url: string;
-  version: string;
-  '@timestamp': number;
-}
-
-export interface TestDataGenerated extends TestDataEsArchive {
-  bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'];
 }

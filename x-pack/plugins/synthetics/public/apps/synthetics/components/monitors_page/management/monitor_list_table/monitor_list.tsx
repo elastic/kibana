@@ -23,9 +23,10 @@ import {
   ConfigKey,
   Ping,
   EncryptedSyntheticsSavedMonitor,
+  OverviewStatusState,
 } from '../../../../../../../common/runtime_types';
 import { SyntheticsSettingsContext } from '../../../../contexts/synthetics_settings_context';
-import { getMonitorListColumns } from './columns';
+import { useMonitorListColumns } from './columns';
 import * as labels from './labels';
 
 interface Props {
@@ -37,6 +38,7 @@ interface Props {
   loadPage: (state: MonitorListPageState) => void;
   reloadPage: () => void;
   errorSummaries?: Ping[];
+  status: OverviewStatusState | null;
 }
 
 export const MonitorList = ({
@@ -45,14 +47,15 @@ export const MonitorList = ({
   total,
   error,
   loading,
+  status,
   loadPage,
   reloadPage,
   errorSummaries,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const { basePath } = useContext(SyntheticsSettingsContext);
   const isXl = useIsWithinMinBreakpoint('xxl');
   const canEditSynthetics = useCanEditSynthetics();
-  const { euiTheme } = useEuiTheme();
 
   const errorSummariesById = useMemo(
     () =>
@@ -98,12 +101,12 @@ export const MonitorList = ({
   };
 
   const recordRangeLabel = labels.getRecordRangeLabel({
-    rangeStart: pageSize * pageIndex + 1,
+    rangeStart: total === 0 ? 0 : pageSize * pageIndex + 1,
     rangeEnd: pageSize * pageIndex + pageSize,
     total,
   });
 
-  const columns = getMonitorListColumns({
+  const columns = useMonitorListColumns({
     basePath,
     euiTheme,
     errorSummaries,
@@ -112,6 +115,7 @@ export const MonitorList = ({
     syntheticsMonitors,
     loading,
     reloadPage,
+    status,
   });
 
   return (

@@ -11,7 +11,7 @@ properties:
     type: string
   type:
     type: string
-    enum: ['elasticsearch']
+    enum: ['elasticsearch', 'logstash']
   hosts:
     type: array
     items:
@@ -26,13 +26,13 @@ properties:
     type: string
   ssl:
     type: object
-    properties: 
-      certificate:
-        type: string
+    properties:
       certificate_authorities:
         type: array
         items:
           type: string
+      certificate:
+        type: string
       key:
         type: string
 required:

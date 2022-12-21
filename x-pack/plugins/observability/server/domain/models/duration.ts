@@ -34,6 +34,10 @@ class Duration {
     return currentDurationMoment.asSeconds() < otherDurationMoment.asSeconds();
   }
 
+  isLongerOrEqualThan(other: Duration): boolean {
+    return !this.isShorterThan(other);
+  }
+
   format(): string {
     return `${this.value}${this.unit}`;
   }

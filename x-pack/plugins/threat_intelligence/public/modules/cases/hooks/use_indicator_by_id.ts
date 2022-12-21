@@ -11,6 +11,7 @@ import {
   IKibanaSearchResponse,
   isCompleteResponse,
 } from '@kbn/data-plugin/common';
+import { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks';
 import type { RawIndicatorsResponse } from '../../indicators/services/fetch_indicators';
 
@@ -25,7 +26,7 @@ export const useIndicatorById = (indicatorId: string) => {
       data: { search: searchService },
     },
   } = useKibana();
-  const [indicator, setIndicator] = useState<Record<string, unknown>>();
+  const [indicator, setIndicator] = useState<Indicator>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -42,11 +43,18 @@ export const useIndicatorById = (indicatorId: string) => {
         ],
       },
     };
+    const fields = [
+      {
+        field: '*',
+        include_unmapped: true,
+      },
+    ];
     const req = {
       params: {
         index: ['filebeat-*'],
         body: {
           query,
+          fields,
         },
       },
     };

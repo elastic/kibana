@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiImage, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -163,16 +163,16 @@ export const JourneyStepImagePopover: React.FC<StepImagePopoverProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const [imageData, setImageData] = React.useState<string | undefined>(imgSrc || undefined);
+  const [imageData, setImageData] = useState<string | undefined>(imgSrc || undefined);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // for legacy screenshots, when a new image arrives, we must overwrite it
     if (imgSrc && imgSrc !== imageData) {
       setImageData(imgSrc);
     }
   }, [imgSrc, imageData]);
 
-  const setImageDataCallback = React.useCallback(
+  const setImageDataCallback = useCallback(
     (newImageData: string | undefined) => setImageData(newImageData),
     [setImageData]
   );

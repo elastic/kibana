@@ -9,8 +9,6 @@ import { kea, MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 
-import { v4 as uuidv4 } from 'uuid';
-
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../../common/types/api';
@@ -20,6 +18,7 @@ import {
   FilteringPolicy,
   FilteringRule,
   FilteringRuleRule,
+  FilteringValidation,
   FilteringValidationState,
 } from '../../../../../../../common/types/connectors';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
@@ -79,6 +78,7 @@ type ConnectorFilteringActions = Pick<
 
 interface ConnectorFilteringValues {
   advancedSnippet: string;
+  draftErrors: FilteringValidation[];
   draftState: FilteringValidationState;
   editableFilteringRules: FilteringRule[];
   filteringConfig: FilteringConfig | null;
@@ -93,6 +93,20 @@ interface ConnectorFilteringValues {
   localAdvancedSnippet: string;
   localFilteringRules: FilteringRule[];
   status: Status;
+}
+
+function createDefaultRule(order: number) {
+  const now = new Date().toISOString();
+  return {
+    created_at: now,
+    field: '_',
+    id: 'DEFAULT',
+    order,
+    policy: FilteringPolicy.INCLUDE,
+    rule: FilteringRuleRule.REGEX,
+    updated_at: now,
+    value: '.*',
+  };
 }
 
 export const ConnectorFilteringLogic = kea<
@@ -253,19 +267,7 @@ export const ConnectorFilteringLogic = kea<
                 filteringRule,
                 filteringRules[filteringRules.length - 1],
               ]
-            : [
-                filteringRule,
-                {
-                  created_at: new Date().toISOString(),
-                  field: '_',
-                  id: uuidv4(),
-                  order: 0,
-                  policy: FilteringPolicy.INCLUDE,
-                  rule: FilteringRuleRule.EQUALS,
-                  updated_at: new Date().toISOString(),
-                  value: '.*',
-                },
-              ];
+            : [filteringRule, createDefaultRule(1)];
           return newFilteringRules.map((rule, index) => ({ ...rule, order: index }));
         },
         deleteFilteringRule: (filteringRules, filteringRule) =>
@@ -273,16 +275,7 @@ export const ConnectorFilteringLogic = kea<
         reorderFilteringRules: (filteringRules, newFilteringRules) => {
           const lastItem = filteringRules.length
             ? filteringRules[filteringRules.length - 1]
-            : {
-                created_at: new Date().toISOString(),
-                field: '_',
-                id: uuidv4(),
-                order: 0,
-                policy: FilteringPolicy.INCLUDE,
-                rule: FilteringRuleRule.EQUALS,
-                updated_at: new Date().toISOString(),
-                value: '.*',
-              };
+            : createDefaultRule(0);
           return [...newFilteringRules, lastItem].map((rule, index) => ({ ...rule, order: index }));
         },
         setLocalFilteringRules: (_, filteringRules) => filteringRules,

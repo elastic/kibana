@@ -104,6 +104,9 @@ import {
   NEW_TERMS_INPUT_AREA,
   ACTIONS_THROTTLE_INPUT,
   CONTINUE_BUTTON,
+  CREATE_WITHOUT_ENABLING_BTN,
+  RULE_INDICES,
+  ALERTS_INDEX_BUTTON,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -121,6 +124,13 @@ import { ruleFields } from '../data/detection_engine';
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
+  cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
+  cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
+};
+
+export const createRuleWithoutEnabling = () => {
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).click({ force: true });
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
   cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
   cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
 };
@@ -231,6 +241,7 @@ export const importSavedQuery = (timelineId: string) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(timelineId)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('not.be.empty');
+  removeAlertsIndex();
 };
 
 export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
@@ -336,11 +347,25 @@ const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
     cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
     cy.get(TIMELINE(rule.timeline.id)).click();
     cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
+    if (rule.dataSource.type === 'indexPatterns') {
+      removeAlertsIndex();
+    }
   } else {
     cy.get(CUSTOM_QUERY_INPUT)
       .first()
       .type(rule.customQuery || '');
   }
+};
+
+// called after import rule from saved timeline
+// if alerts index is created, it is included in the timeline
+// to be consistent in multiple test runs, remove it if it's there
+export const removeAlertsIndex = () => {
+  cy.get(RULE_INDICES).then(($body) => {
+    if ($body.find(ALERTS_INDEX_BUTTON).length > 0) {
+      cy.get(ALERTS_INDEX_BUTTON).click();
+    }
+  });
 };
 
 export const continueWithNextSection = () => {
@@ -682,20 +707,3 @@ export const checkLoadQueryDynamically = () => {
 export const uncheckLoadQueryDynamically = () => {
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true }).should('not.be.checked');
 };
-
-export const defineSection = { importSavedQuery };
-export const aboutSection = {
-  fillRuleName,
-  fillDescription,
-  fillSeverity,
-  fillRiskScore,
-  fillRuleTags,
-  expandAdvancedSettings,
-  fillReferenceUrls,
-  fillFalsePositiveExamples,
-  fillThreat,
-  fillThreatTechnique,
-  fillThreatSubtechnique,
-  fillNote,
-};
-export const scheduleSection = { fillFrom };

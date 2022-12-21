@@ -107,7 +107,7 @@ export async function getFullAgentPolicy(
     revision: agentPolicy.revision,
     agent: {
       download: {
-        source_uri: sourceUri,
+        sourceURI: sourceUri,
       },
       monitoring:
         agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0

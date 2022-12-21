@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     'discover:enableSql': true,
+    defaultIndex: 'log*',
   };
 
   async function switchToTextBasedLanguage(language: string) {
@@ -43,8 +44,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens text based language tests', () => {
     before(async () => {
-      await kibanaServer.uiSettings.replace(defaultSettings);
+      await kibanaServer.uiSettings.update(defaultSettings);
     });
+
     it('should navigate to text based languages mode correctly', async () => {
       await switchToTextBasedLanguage('SQL');
       expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);

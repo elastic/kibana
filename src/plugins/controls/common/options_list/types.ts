@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
 import { FieldSpec, DataView, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
+import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
 
+import { SortingType } from './suggestions_sorting';
 import { DataControlInput } from '../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
@@ -20,6 +21,8 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   singleSelect?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+  hideSort?: boolean;
+  sort?: SortingType;
   exclude?: boolean;
 }
 
@@ -65,5 +68,6 @@ export interface OptionsListRequestBody {
   textFieldName?: string;
   searchString?: string;
   fieldSpec?: FieldSpec;
+  sort?: SortingType;
   fieldName: string;
 }

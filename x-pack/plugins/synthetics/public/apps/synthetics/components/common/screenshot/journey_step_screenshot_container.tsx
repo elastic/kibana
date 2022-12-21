@@ -36,7 +36,7 @@ interface Props {
 }
 
 export const JourneyStepScreenshotContainer = ({
-  stepLabels = [],
+  stepLabels,
   checkGroup,
   stepStatus,
   allStepsLoaded,
@@ -55,7 +55,7 @@ export const JourneyStepScreenshotContainer = ({
   const { basePath } = useContext(SyntheticsSettingsContext);
 
   const imgPath = `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${stepNumber}`;
-  const stepLabel = stepLabels[stepNumber - 1] ?? '';
+  const stepLabel = stepLabels?.[stepNumber - 1] ?? '';
 
   const intersection = useIntersection(intersectionRef, {
     root: null,

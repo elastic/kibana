@@ -50,43 +50,46 @@ export const updateGlobalPacksCreateCallback = async (
     });
   });
 
-  await Promise.all(
-    map(packsContainingShardForPolicy, (pack) => {
-      packsClient.update(
-        packSavedObjectType,
-        pack.id,
-        {},
-        {
-          references: [
-            ...pack.references,
-            {
-              id: packagePolicy.policy_id,
-              name: agentPolicies[packagePolicy.policy_id]?.name,
-              type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-            },
-          ],
-        }
-      );
-    })
-  );
-  await packagePolicyService?.update(
-    packsClient,
-    esClient,
-    packagePolicy.id,
-    produce<PackagePolicy>(packagePolicy, (draft) => {
-      unset(draft, 'id');
-      if (!has(draft, 'inputs[0].streams')) {
-        set(draft, 'inputs[0].streams', []);
-      }
-
+  if (packsContainingShardForPolicy.length) {
+    await Promise.all(
       map(packsContainingShardForPolicy, (pack) => {
-        set(draft, `inputs[0].config.osquery.value.packs.${pack.attributes.name}`, {
-          shard: 100,
-          queries: convertSOQueriesToPackConfig(pack.attributes.queries),
-        });
-      });
+        packsClient.update(
+          packSavedObjectType,
+          pack.id,
+          {},
+          {
+            references: [
+              ...pack.references,
+              {
+                id: packagePolicy.policy_id,
+                name: agentPolicies[packagePolicy.policy_id]?.name,
+                type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+              },
+            ],
+          }
+        );
+      })
+    );
 
-      return draft;
-    })
-  );
+    await packagePolicyService?.update(
+      packsClient,
+      esClient,
+      packagePolicy.id,
+      produce<PackagePolicy>(packagePolicy, (draft) => {
+        unset(draft, 'id');
+        if (!has(draft, 'inputs[0].streams')) {
+          set(draft, 'inputs[0].streams', []);
+        }
+
+        map(packsContainingShardForPolicy, (pack) => {
+          set(draft, `inputs[0].config.osquery.value.packs.${pack.attributes.name}`, {
+            shard: 100,
+            queries: convertSOQueriesToPackConfig(pack.attributes.queries),
+          });
+        });
+
+        return draft;
+      })
+    );
+  }
 };

@@ -7,31 +7,23 @@
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type { ResponseActionValidatorRef } from './response_actions_form';
 import type { ResponseActionType } from './get_supported_response_actions';
 import { ResponseActionAddButton } from './response_action_add_button';
 import { ResponseActionTypeForm } from './response_action_type_form';
 import type { ArrayItem } from '../../shared_imports';
 import { UseField, useFormContext } from '../../shared_imports';
 
-interface IResponseActionsListProps {
+interface ResponseActionsListProps {
   items: ArrayItem[];
   removeItem: (id: number) => void;
   addItem: () => void;
   supportedResponseActionTypes: ResponseActionType[];
-  formRef: React.RefObject<ResponseActionValidatorRef>;
 }
 
 const GhostFormField = () => <></>;
 
 export const ResponseActionsList = React.memo(
-  ({
-    items,
-    removeItem,
-    supportedResponseActionTypes,
-    addItem,
-    formRef,
-  }: IResponseActionsListProps) => {
+  ({ items, removeItem, supportedResponseActionTypes, addItem }: ResponseActionsListProps) => {
     const actionTypeIdRef = useRef<string | null>(null);
     const updateActionTypeId = useCallback((id) => {
       actionTypeIdRef.current = id;
@@ -56,22 +48,20 @@ export const ResponseActionsList = React.memo(
         actionTypeIdRef.current = null;
       }
     }, [context, items.length]);
+
     return (
       <div data-test-subj={'response-actions-list'}>
         {items.map((actionItem, index) => {
           return (
             <div key={actionItem.id} data-test-subj={`response-actions-list-item-${index}`}>
               <EuiSpacer size="m" />
-              <ResponseActionTypeForm
-                item={actionItem}
-                onDeleteAction={removeItem}
-                formRef={formRef}
-              />
+              <ResponseActionTypeForm item={actionItem} onDeleteAction={removeItem} />
 
               <UseField path={`${actionItem.path}.actionTypeId`} component={GhostFormField} />
             </div>
           );
         })}
+        <EuiSpacer size="m" />
         {renderButton}
       </div>
     );

@@ -14,9 +14,9 @@ import { Root } from '@kbn/core-root-server-internal';
 import {
   createRootWithCorePlugins,
   createTestServers,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
-} from '../../../test_helpers/kbn_server';
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 
 describe('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MouseEvent, CSSProperties, ReactNode } from 'react';
+import type { MouseEvent, CSSProperties } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiSelectableProps } from '@elastic/eui';
 import {
@@ -21,9 +21,11 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiLink,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import onboardingLogo from '../images/security_administration_onboarding.svg';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -41,109 +43,126 @@ interface ManagementStep {
   children: JSX.Element;
 }
 
+const MissingFleetAccessInfo = React.memo(() => {
+  const { services } = useKibana();
+
+  return (
+    <EuiText size="s" color="subdued" data-test-subj="noFleetAccess">
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.onboarding.enableFleetAccess"
+        defaultMessage="Deploying Agents for the first time requires Fleet access. For more information, "
+      />
+      <EuiLink external href={`${services.docLinks.links.securitySolution.privileges}`}>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.onboarding.onboardingDocsLink"
+          defaultMessage="view the Elastic Security documentation"
+        />
+      </EuiLink>
+    </EuiText>
+  );
+});
+MissingFleetAccessInfo.displayName = 'MissingFleetAccessInfo';
+
 const PolicyEmptyState = React.memo<{
   loading: boolean;
   onActionClick?: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled?: boolean;
-  actionHidden?: boolean;
-  additionalInfo?: ReactNode;
   policyEntryPoint?: boolean;
-}>(
-  ({
-    loading,
-    onActionClick,
-    actionDisabled,
-    actionHidden,
-    additionalInfo,
-    policyEntryPoint = false,
-  }) => {
-    const docLinks = useKibana().services.docLinks;
-    return (
-      <div data-test-subj="emptyPolicyTable">
-        {loading ? (
-          <EuiFlexGroup alignItems="center" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="xl" className="essentialAnimation" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <EuiFlexGroup data-test-subj="policyOnboardingInstructions" alignItems="center">
-            <EuiFlexItem grow={1}>
-              <EuiText>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policyList.onboardingTitle"
-                    defaultMessage="Get started with Elastic Defend"
-                  />
-                </h1>
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiText size="s" color="subdued">
+}>(({ loading, onActionClick, actionDisabled, policyEntryPoint = false }) => {
+  const docLinks = useKibana().services.docLinks;
+  const { canAccessFleet, loading: authzLoading } = useUserPrivileges().endpointPrivileges;
+
+  return (
+    <div data-test-subj="emptyPolicyTable">
+      {loading ? (
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" className="essentialAnimation" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EuiFlexGroup data-test-subj="policyOnboardingInstructions" alignItems="center">
+          <EuiFlexItem grow={1}>
+            <EuiText>
+              <h1>
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policyList.onboardingSectionOne"
-                  defaultMessage="Protect your hosts with threat prevention, detection, and deep security data visibility."
+                  id="xpack.securitySolution.endpoint.policyList.onboardingTitle"
+                  defaultMessage="Get started with Elastic Defend"
                 />
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiText size="s" color="subdued">
-                {policyEntryPoint ? (
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromPolicyPage"
-                    defaultMessage="From this page, you’ll be able to view and manage the Elastic Defend Integration policies in your environment running Elastic Defend."
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromEndpointPage"
-                    defaultMessage="From this page, you’ll be able to view and manage the hosts in your environment running Elastic Defend."
-                  />
-                )}
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiText size="s" color="subdued">
+              </h1>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policyList.onboardingSectionOne"
+                defaultMessage="Protect your hosts with threat prevention, detection, and deep security data visibility."
+              />
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiText size="s" color="subdued">
+              {policyEntryPoint ? (
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policyList.onboardingSectionThree"
-                  defaultMessage="To get started, add the Elastic Defend integration to your Agents. For more information, "
+                  id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromPolicyPage"
+                  defaultMessage="From this page, you’ll be able to view and manage the Elastic Defend Integration policies in your environment running Elastic Defend."
                 />
-                <EuiLink external href={`${docLinks.links.siem.guide}`}>
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policyList.onboardingDocsLink"
-                    defaultMessage="view the Elastic Security documentation"
-                  />
-                </EuiLink>
-              </EuiText>
-              <EuiSpacer size="m" />
-              {additionalInfo}
-              {!actionHidden && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        fill
-                        iconType="plusInCircle"
-                        onClick={onActionClick}
-                        isDisabled={actionDisabled}
-                        data-test-subj="onboardingStartButton"
-                      >
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.policyList.actionButtonText"
-                          defaultMessage="Add Elastic Defend"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </>
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromEndpointPage"
+                  defaultMessage="From this page, you’ll be able to view and manage the hosts in your environment running Elastic Defend."
+                />
               )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={2}>
-              <EuiIcon type={onboardingLogo} size="original" style={MAX_SIZE_ONBOARDING_LOGO} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </div>
-    );
-  }
-);
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policyList.onboardingSectionThree"
+                defaultMessage="To get started, add the Elastic Defend integration to your Agents. For more information, "
+              />
+              <EuiLink external href={`${docLinks.links.siem.guide}`}>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyList.onboardingDocsLink"
+                  defaultMessage="view the Elastic Security documentation"
+                />
+              </EuiLink>
+            </EuiText>
+
+            <EuiSpacer size="m" />
+
+            {authzLoading && <EuiLoadingContent lines={1} />}
+
+            {!authzLoading && canAccessFleet && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      iconType="plusInCircle"
+                      onClick={onActionClick}
+                      isDisabled={actionDisabled}
+                      data-test-subj="onboardingStartButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.policyList.actionButtonText"
+                        defaultMessage="Add Elastic Defend"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
+
+            {!authzLoading && !canAccessFleet && <MissingFleetAccessInfo />}
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={2}>
+            <EuiIcon type={onboardingLogo} size="original" style={MAX_SIZE_ONBOARDING_LOGO} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </div>
+  );
+});
 
 const EndpointsEmptyState = React.memo<{
   loading: boolean;
