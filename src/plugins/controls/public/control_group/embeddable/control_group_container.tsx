@@ -39,7 +39,6 @@ import {
   ControlEmbeddable,
   ControlInput,
   ControlOutput,
-  IEditableControlFactory,
 } from '../../types';
 import { getNextPanelOrder } from './control_group_helpers';
 import type {
@@ -128,7 +127,7 @@ export class ControlGroupContainer extends Container<
     openAddDataControlFlyout(this);
   }
 
-  private getEditControlGroupButton = (closePopover: () => void) => {
+  public getEditControlGroupButton = (closePopover: () => void) => {
     const ControlsServicesProvider = pluginServices.getContextProvider();
 
     return (

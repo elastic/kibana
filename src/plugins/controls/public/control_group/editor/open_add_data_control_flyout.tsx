@@ -6,17 +6,28 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import type {
+  AddDataControlProps,
+  AddOptionsListControlProps,
+  AddRangeSliderControlProps,
+} from '../control_group_input_builder';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
 import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
+import { DataControlInput, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
+import { IEditableControlFactory } from '../../types';
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+} from '../../../common/control_group/control_group_constants';
 
 export function openAddDataControlFlyout(controlGroup: ControlGroupContainer) {
   const {
     overlays: { openFlyout, openConfirm },
-    controls: { getControlTypes, getControlFactory },
+    controls: { getControlFactory },
     theme: { theme$ },
   } = pluginServices.getServices();
   const ControlsServicesProvider = pluginServices.getContextProvider();

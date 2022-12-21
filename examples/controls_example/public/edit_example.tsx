@@ -34,7 +34,7 @@ export const EditExample = () => {
   async function onSave() {
     setIsSaving(true);
 
-    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroup.getInput()));
+    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroup!.getInput()));
 
     // simulated async save await
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -78,7 +78,7 @@ export const EditExample = () => {
               iconType="plusInCircle"
               isDisabled={controlGroup === undefined}
               onClick={() => {
-                controlGroup.openAddDataControlFlyout();
+                controlGroup!.openAddDataControlFlyout();
               }}
             >
               Add control
