@@ -11,6 +11,7 @@ import { UpsertMonitorResponse } from '..';
 import {
   EncryptedSyntheticsMonitor,
   MonitorManagementListResult,
+  SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 import { IHttpSerializedFetchError } from '../utils/http_error';
@@ -29,8 +30,8 @@ interface ToastParams<MessageType> {
 }
 
 export interface UpsertMonitorRequest {
-  id: string;
-  monitor: Partial<EncryptedSyntheticsMonitor>;
+  configId: string;
+  monitor: Partial<SyntheticsMonitor> | Partial<EncryptedSyntheticsMonitor>;
   success: ToastParams<string>;
   error: ToastParams<ErrorToastOptions>;
   /**
@@ -40,23 +41,24 @@ export interface UpsertMonitorRequest {
   shouldQuietFetchAfterSuccess?: boolean;
 }
 
+interface UpsertMonitorError {
+  configId: string;
+  error: IHttpSerializedFetchError;
+}
+
 export const fetchUpsertMonitorAction = createAction<UpsertMonitorRequest>('fetchUpsertMonitor');
 export const fetchUpsertSuccessAction = createAction<{
   id: string;
   attributes: { enabled: boolean };
 }>('fetchUpsertMonitorSuccess');
-export const fetchUpsertFailureAction = createAction<{
-  id: string;
-  error: IHttpSerializedFetchError;
-}>('fetchUpsertMonitorFailure');
+export const fetchUpsertFailureAction = createAction<UpsertMonitorError>(
+  'fetchUpsertMonitorFailure'
+);
 
 export const enableMonitorAlertAction = createAsyncAction<
   UpsertMonitorRequest,
   UpsertMonitorResponse,
-  {
-    id: string;
-    error: IHttpSerializedFetchError;
-  }
+  UpsertMonitorError
 >('enableMonitorAlertAction');
 
 export const clearMonitorUpsertStatus = createAction<string>('clearMonitorUpsertStatus');

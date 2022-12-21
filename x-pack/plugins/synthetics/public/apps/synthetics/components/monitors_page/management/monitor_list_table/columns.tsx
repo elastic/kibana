@@ -46,7 +46,7 @@ export function useMonitorListColumns({
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable({ reloadPage });
 
   const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
-    return alertStatus(fields[ConfigKey.CONFIG_ID]) !== FETCH_STATUS.LOADING;
+    return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;
   };
 
   return [

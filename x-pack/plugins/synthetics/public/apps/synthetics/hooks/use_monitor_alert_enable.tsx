@@ -37,7 +37,7 @@ export function useMonitorAlertEnable({ reloadPage }: { reloadPage?: () => void 
     }) => {
       dispatch(
         enableMonitorAlertAction.get({
-          id: configId,
+          configId,
           monitor,
           success: {
             message: monitor[ConfigKey.STATUS_ALERT_ENABLED]

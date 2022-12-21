@@ -6,6 +6,7 @@
  */
 
 import { SavedObject } from '@kbn/core-saved-objects-common';
+import { UpsertMonitorRequest } from '..';
 import { API_URLS } from '../../../../../common/constants';
 import {
   EncryptedSyntheticsMonitor,
@@ -58,10 +59,7 @@ export type UpsertMonitorResponse =
 export const fetchUpsertMonitor = async ({
   monitor,
   configId,
-}: {
-  monitor: Partial<SyntheticsMonitor> | Partial<EncryptedSyntheticsMonitor>;
-  configId?: string;
-}): Promise<UpsertMonitorResponse> => {
+}: UpsertMonitorRequest): Promise<UpsertMonitorResponse> => {
   if (configId) {
     return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${configId}`, monitor);
   } else {

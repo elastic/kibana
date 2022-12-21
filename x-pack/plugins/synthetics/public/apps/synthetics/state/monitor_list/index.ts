@@ -68,7 +68,7 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
       state.error = action.payload;
     })
     .addCase(fetchUpsertMonitorAction, (state, action) => {
-      state.monitorUpsertStatuses[action.payload.id] = {
+      state.monitorUpsertStatuses[action.payload.configId] = {
         status: FETCH_STATUS.LOADING,
       };
     })
@@ -79,11 +79,11 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
       };
     })
     .addCase(fetchUpsertFailureAction, (state, action) => {
-      state.monitorUpsertStatuses[action.payload.id] = { status: FETCH_STATUS.FAILURE };
+      state.monitorUpsertStatuses[action.payload.configId] = { status: FETCH_STATUS.FAILURE };
     })
     .addCase(enableMonitorAlertAction.get, (state, action) => {
-      state.monitorUpsertStatuses[action.payload.id] = {
-        ...state.monitorUpsertStatuses[action.payload.id],
+      state.monitorUpsertStatuses[action.payload.configId] = {
+        ...state.monitorUpsertStatuses[action.payload.configId],
         alertStatus: FETCH_STATUS.LOADING,
       };
     })
@@ -94,8 +94,8 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
       };
     })
     .addCase(enableMonitorAlertAction.fail, (state, action) => {
-      state.monitorUpsertStatuses[action.payload.id] = {
-        ...state.monitorUpsertStatuses[action.payload.id],
+      state.monitorUpsertStatuses[action.payload.configId] = {
+        ...state.monitorUpsertStatuses[action.payload.configId],
         alertStatus: FETCH_STATUS.FAILURE,
       };
     })

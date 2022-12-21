@@ -56,7 +56,7 @@ export function* enableMonitorAlertEffect() {
         sendErrorToast(action.payload.error, error);
         yield put(
           enableMonitorAlertAction.fail({
-            id: action.payload.id,
+            configId: action.payload.configId,
             error: serializeHttpFetchError(error),
           })
         );
@@ -87,7 +87,10 @@ export function* upsertMonitorEffect() {
           toastLifeTimeMs: action.payload.error.lifetimeMs,
         });
         yield put(
-          fetchUpsertFailureAction({ id: action.payload.id, error: serializeHttpFetchError(error) })
+          fetchUpsertFailureAction({
+            configId: action.payload.configId,
+            error: serializeHttpFetchError(error),
+          })
         );
       } finally {
         if (action.payload.shouldQuietFetchAfterSuccess !== false) {
@@ -98,7 +101,7 @@ export function* upsertMonitorEffect() {
             );
           }
         }
-        yield put(clearMonitorUpsertStatus(action.payload.id));
+        yield put(clearMonitorUpsertStatus(action.payload.configId));
       }
     }
   );
