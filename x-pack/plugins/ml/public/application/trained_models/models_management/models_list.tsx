@@ -25,6 +25,7 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { usePageUrlState } from '@kbn/ml-url-state';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
@@ -39,7 +40,6 @@ import { BUILT_IN_MODEL_TAG } from '../../../../common/constants/data_frame_anal
 import { DeleteModelsModal } from './delete_models_modal';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { ListingPageUrlState } from '../../../../common/types/common';
-import { usePageUrlState } from '../../util/url_state';
 import { ExpandedRow } from './expanded_row';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../../services/toast_notification_service';

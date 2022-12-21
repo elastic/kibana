@@ -17,9 +17,9 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { usePageUrlState } from '@kbn/ml-url-state';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
-import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';

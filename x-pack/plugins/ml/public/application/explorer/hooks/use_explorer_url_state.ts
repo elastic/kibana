@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PageUrlStateService, usePageUrlState } from '../../util/url_state';
+import { PageUrlStateService, usePageUrlState } from '@kbn/ml-url-state';
 import { ExplorerAppState } from '../../../../common/types/locator';
 import { ML_PAGES } from '../../../../common/constants/locator';
 

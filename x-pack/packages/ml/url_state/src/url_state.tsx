@@ -6,12 +6,24 @@
  */
 
 import { parse, stringify } from 'query-string';
-import React, { createContext, useCallback, useContext, useMemo, type FC } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useEffect,
+  type FC,
+} from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { isEqual } from 'lodash';
 
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { decode, encode } from '@kbn/rison';
+
+import { BehaviorSubject, Observable } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;
@@ -71,18 +83,16 @@ export function parseUrlState(search: string): Dictionary<any> {
 // This uses a context to be able to maintain only one instance
 // of the url state. It gets passed down with `UrlStateProvider`
 // and can be used via `useUrlState`.
-export const dataVisualizerUrlStateStore = createContext<UrlState>({
+export const urlStateStore = createContext<UrlState>({
   searchString: '',
   setUrlState: () => {},
 });
 
-export const { Provider } = dataVisualizerUrlStateStore;
+export const { Provider } = urlStateStore;
 
 export const UrlStateProvider: FC = ({ children }) => {
-  const { Provider: StateProvider } = dataVisualizerUrlStateStore;
-
   const history = useHistory();
-  const { search: urlSearchString } = useLocation();
+  const { search: searchString } = useLocation();
 
   const setUrlState: SetUrlState = useCallback(
     (
@@ -91,7 +101,7 @@ export const UrlStateProvider: FC = ({ children }) => {
       value?: any,
       replaceState?: boolean
     ) => {
-      const prevSearchString = urlSearchString;
+      const prevSearchString = searchString;
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
@@ -143,16 +153,20 @@ export const UrlStateProvider: FC = ({ children }) => {
         console.error('Could not save url state', error);
       }
     },
-    [history, urlSearchString]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchString]
   );
 
-  return (
-    <StateProvider value={{ searchString: urlSearchString, setUrlState }}>{children}</StateProvider>
-  );
+  return <Provider value={{ searchString, setUrlState }}>{children}</Provider>;
 };
 
-export const useUrlState = (accessor: Accessor) => {
-  const { searchString, setUrlState: setUrlStateContext } = useContext(dataVisualizerUrlStateStore);
+export const useUrlState = (
+  accessor: Accessor
+): [
+  Record<string, any>,
+  (attribute: string | Dictionary<unknown>, value?: unknown, replaceState?: boolean) => void
+] => {
+  const { searchString, setUrlState: setUrlStateContext } = useContext(urlStateStore);
 
   const urlState = useMemo(() => {
     const fullUrlState = parseUrlState(searchString);
@@ -163,7 +177,7 @@ export const useUrlState = (accessor: Accessor) => {
   }, [searchString]);
 
   const setUrlState = useCallback(
-    (attribute: string | Dictionary<any>, value?: any, replaceState?: boolean) => {
+    (attribute: string | Dictionary<unknown>, value?: unknown, replaceState?: boolean) => {
       setUrlStateContext(accessor, attribute, value, replaceState);
     },
     [accessor, setUrlStateContext]
@@ -171,35 +185,103 @@ export const useUrlState = (accessor: Accessor) => {
   return [urlState, setUrlState];
 };
 
-export const APP_STATE_KEY = {
-  AIOPS_INDEX_VIEWER: 'AIOPS_INDEX_VIEWER',
-  CHANGE_POINT_INDEX_VIEWER: 'CHANGE_POINT_INDEX_VIEWER',
-  DATA_VISUALIZER_INDEX_VIEWER: 'DATA_VISUALIZER_INDEX_VIEWER',
-} as const;
+/**
+ * Service for managing URL state of particular page.
+ */
+export class PageUrlStateService<T> {
+  private _pageUrlState$ = new BehaviorSubject<T | null>(null);
+  private _pageUrlStateCallback: ((update: Partial<T>, replaceState?: boolean) => void) | null =
+    null;
 
-export type AppStateKey = keyof typeof APP_STATE_KEY;
+  /**
+   * Provides updates for the page URL state.
+   */
+  public getPageUrlState$(): Observable<T> {
+    return this._pageUrlState$.pipe(distinctUntilChanged(isEqual));
+  }
+
+  public getPageUrlState(): T | null {
+    return this._pageUrlState$.getValue();
+  }
+
+  public updateUrlState(update: Partial<T>, replaceState?: boolean): void {
+    if (!this._pageUrlStateCallback) {
+      throw new Error('Callback has not been initialized.');
+    }
+    this._pageUrlStateCallback(update, replaceState);
+  }
+
+  /**
+   * Populates internal subject with currently active state.
+   * @param currentState
+   */
+  public setCurrentState(currentState: T): void {
+    this._pageUrlState$.next(currentState);
+  }
+
+  /**
+   * Sets the callback for the state update.
+   * @param callback
+   */
+  public setUpdateCallback(callback: (update: Partial<T>, replaceState?: boolean) => void): void {
+    this._pageUrlStateCallback = callback;
+  }
+}
 
 /**
  * Hook for managing the URL state of the page.
  */
-export const usePageUrlState = <PageUrlState extends {}>(
-  pageKey: AppStateKey,
+export const usePageUrlState = <PageUrlState extends object>(
+  pageKey: string,
   defaultState?: PageUrlState
-): [PageUrlState, (update: Partial<PageUrlState>, replaceState?: boolean) => void] => {
+): [
+  PageUrlState,
+  (update: Partial<PageUrlState>, replaceState?: boolean) => void,
+  PageUrlStateService<PageUrlState>
+] => {
   const [appState, setAppState] = useUrlState('_a');
   const pageState = appState?.[pageKey];
 
+  const setCallback = useRef<typeof setAppState>();
+
+  useEffect(() => {
+    setCallback.current = setAppState;
+  }, [setAppState]);
+
+  const prevPageState = useRef<PageUrlState | undefined>();
+
   const resultPageState: PageUrlState = useMemo(() => {
-    return {
+    const result = {
       ...(defaultState ?? {}),
       ...(pageState ?? {}),
     };
+
+    if (isEqual(result, prevPageState.current)) {
+      return prevPageState.current;
+    }
+
+    // Compare prev and current states to only update changed values
+    if (isPopulatedObject(prevPageState.current)) {
+      for (const key in result) {
+        if (isEqual(result[key], prevPageState.current[key])) {
+          result[key] = prevPageState.current[key];
+        }
+      }
+    }
+
+    prevPageState.current = result;
+
+    return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageState]);
 
   const onStateUpdate = useCallback(
     (update: Partial<PageUrlState>, replaceState?: boolean) => {
-      setAppState(
+      if (!setCallback?.current) {
+        throw new Error('Callback for URL state update has not been initialized.');
+      }
+
+      setCallback.current(
         pageKey,
         {
           ...resultPageState,
@@ -208,10 +290,20 @@ export const usePageUrlState = <PageUrlState extends {}>(
         replaceState
       );
     },
-    [pageKey, resultPageState, setAppState]
+    [pageKey, resultPageState]
+  );
+
+  const pageUrlStateService = useMemo(() => new PageUrlStateService<PageUrlState>(), []);
+
+  useEffect(
+    function updatePageUrlService() {
+      pageUrlStateService.setCurrentState(resultPageState);
+      pageUrlStateService.setUpdateCallback(onStateUpdate);
+    },
+    [pageUrlStateService, onStateUpdate, resultPageState]
   );
 
   return useMemo(() => {
-    return [resultPageState, onStateUpdate];
-  }, [resultPageState, onStateUpdate]);
+    return [resultPageState, onStateUpdate, pageUrlStateService];
+  }, [resultPageState, onStateUpdate, pageUrlStateService]);
 };

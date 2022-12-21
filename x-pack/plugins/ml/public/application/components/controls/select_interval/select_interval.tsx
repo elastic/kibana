@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { usePageUrlState } from '../../../util/url_state';
+import { usePageUrlState } from '@kbn/ml-url-state';
 
 export interface TableInterval {
   display: string;

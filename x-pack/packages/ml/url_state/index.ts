@@ -10,7 +10,7 @@ export {
   parseUrlState,
   usePageUrlState,
   useUrlState,
-  APP_STATE_KEY,
+  PageUrlStateService,
   Provider,
   UrlStateProvider,
   type Accessor,

@@ -18,7 +18,7 @@ import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import type { Query, Filter } from '@kbn/es-query';
-import { usePageUrlState, APP_STATE_KEY } from '@kbn/ml-url-state';
+import { usePageUrlState } from '@kbn/ml-url-state';
 import {
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
@@ -157,7 +157,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   }, [dataView]);
 
   const [requestParamsFromUrl, updateRequestParams] =
-    usePageUrlState<ChangePointDetectionRequestParams>(APP_STATE_KEY.CHANGE_POINT_INDEX_VIEWER);
+    usePageUrlState<ChangePointDetectionRequestParams>('change-point');
 
   const resultQuery = useMemo<Query>(() => {
     return (

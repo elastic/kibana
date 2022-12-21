@@ -43,7 +43,7 @@ const MockedTimeseriesexplorerNoJobsFound = TimeseriesexplorerNoJobsFound as jes
   typeof TimeseriesexplorerNoJobsFound
 >;
 
-jest.mock('../../util/url_state');
+jest.mock('@kbn/ml-url-state');
 
 jest.mock('../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state');
 

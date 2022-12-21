@@ -27,7 +27,7 @@ import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
-import { useUrlState, usePageUrlState, APP_STATE_KEY } from '@kbn/ml-url-state';
+import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
@@ -80,7 +80,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   } = useSpikeAnalysisTableRowContext();
 
   const [aiopsListState, setAiopsListState] = usePageUrlState(
-    APP_STATE_KEY.AIOPS_INDEX_VIEWER,
+    'explain-log-rate-spikes',
     restorableDefaults
   );
   const [globalState, setGlobalState] = useUrlState('_g');
