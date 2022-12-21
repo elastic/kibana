@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RulesConfigurationModal } from './rules_configuration_modal';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 
 export const RulesConfigurationLink = () => {
   const [isVisible, setIsVisible] = useState<boolean>(false);

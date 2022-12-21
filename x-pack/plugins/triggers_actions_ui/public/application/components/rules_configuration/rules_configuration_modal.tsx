@@ -7,7 +7,7 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RulesConfiguration } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,8 +19,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
-  EuiFormRowProps,
   EuiModal,
   EuiModalHeader,
   EuiModalBody,
@@ -28,18 +26,18 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiSwitch,
-  EuiRange,
-  EuiRangeProps,
-  EuiIconTip,
+  EuiPanel,
   EuiText,
-  EuiTitle,
   EuiEmptyPrompt,
-  useEuiTheme,
 } from '@elastic/eui';
-import { CenterJustifiedSpinner } from './center_justified_spinner';
-import { getRulesConfiguration } from '../lib/rule_api/get_rules_configuration';
-import { updateRulesConfiguration } from '../lib/rule_api/update_rules_configuration';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
+import { getRulesConfiguration } from '../../lib/rule_api/get_rules_configuration';
+import { updateRulesConfiguration } from '../../lib/rule_api/update_rules_configuration';
+import {
+  RulesConfigurationFlapping,
+  RulesConfigurationFlappingTitle,
+} from './rules_configuration_flapping';
+import { CenterJustifiedSpinner } from '../center_justified_spinner';
 
 const flappingDescription = i18n.translate(
   'xpack.triggersActionsUI.rulesConfiguration.modal.flappingDetectionDescription',
@@ -55,65 +53,6 @@ const flappingEnableLabel = i18n.translate(
     defaultMessage: 'Enabled flapping detection (recommended)',
   }
 );
-
-const lookBackWindowLabel = i18n.translate(
-  'xpack.triggersActionsUI.rulesConfiguration.modal.lookBackWindowLabel',
-  {
-    defaultMessage: 'Rule run look back window',
-  }
-);
-
-const statusChangeThresholdLabel = i18n.translate(
-  'xpack.triggersActionsUI.rulesConfiguration.modal.statusChangeThresholdLabel',
-  {
-    defaultMessage: 'Alert status change threshold',
-  }
-);
-
-const MIN_LOOK_BACK_WINDOW = 2;
-const MAX_LOOK_BACK_WINDOW = 20;
-
-const MIN_STATUS_CHANGE_THRESHOLD = 3;
-const MAX_STATUS_CHANGE_THRESHOLD = 20;
-
-export interface RulesConfigurationRangeProps {
-  label: EuiFormRowProps['label'];
-  labelPopoverText?: string;
-  min: number;
-  max: number;
-  value: number;
-  disabled?: EuiRangeProps['disabled'];
-  onChange?: EuiRangeProps['onChange'];
-}
-
-export const RulesConfigurationRange = (props: RulesConfigurationRangeProps) => {
-  const { label, labelPopoverText, min, max, value, disabled, onChange } = props;
-
-  const renderLabel = () => {
-    return (
-      <div>
-        {label}
-        &nbsp;
-        <EuiIconTip color="subdued" size="s" type="questionInCircle" content={labelPopoverText} />
-      </div>
-    );
-  };
-
-  return (
-    <EuiFormRow label={renderLabel()}>
-      <EuiRange
-        min={min}
-        max={max}
-        step={1}
-        value={value}
-        disabled={disabled}
-        onChange={onChange}
-        showLabels
-        showValue
-      />
-    </EuiFormRow>
-  );
-};
 
 export const RulesConfigurationErrorPrompt = () => {
   return (
@@ -164,20 +103,9 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
     rules_configuration: { save, flappingDetection },
   } = capabilities;
 
-  const { euiTheme } = useEuiTheme();
-
-  const euiTextStyles = useMemo(
-    () => ({
-      backgroundColor: euiTheme.colors.body,
-      padding: `${euiTheme.size.m} ${euiTheme.size.base}`,
-      marginTop: `${euiTheme.size.xs}`,
-    }),
-    [euiTheme]
-  );
-
   const handleConfigurationChange = (
-    value: number | boolean,
-    key: keyof RulesConfiguration['flapping']
+    key: keyof RulesConfiguration['flapping'],
+    value: number | boolean
   ) => {
     if (!configuration) {
       return;
@@ -252,36 +180,22 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
     return null;
   }
 
-  const renderFormTitle = () => {
-    return (
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h5>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.rulesConfiguration.modal.alertFlappingDetection"
-              defaultMessage="Alert Flapping Detection"
-            />
-          </h5>
-        </EuiTitle>
-      </EuiFlexItem>
-    );
-  };
-
   const renderFormLeft = () => {
     return (
       <EuiFlexItem>
         <EuiFlexGroup direction="column">
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiText color="subdued" size="s">
               <p>{flappingDescription}</p>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiSpacer size="s" />
+          <EuiFlexItem grow={false}>
             <EuiSwitch
               label={flappingEnableLabel}
               checked={configuration!.enabled}
               disabled={!flappingDetection}
-              onChange={() => handleConfigurationChange(!configuration!.enabled, 'enabled')}
+              onChange={(e) => handleConfigurationChange('enabled', e.target.checked)}
             />
             <EuiSpacer size="s" />
             <EuiText color="subdued" size="s">
@@ -298,70 +212,31 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
     );
   };
 
-  const renderFlappingConfigurationDescription = () => {
-    if (configuration!.enabled) {
+  const renderFormRight = () => {
+    if (!configuration) {
+      return null;
+    }
+    if (!configuration.enabled) {
       return (
-        <FormattedMessage
-          id="xpack.triggersActionsUI.rulesConfiguration.modal.flappingConfigurationDescription"
-          defaultMessage="An alert will be considered flapping if it changes status {lookBackWindow} within the last {statusChangeThreshold}."
-          values={{
-            lookBackWindow: <b>{configuration!.lookBackWindow} times</b>,
-            statusChangeThreshold: <b>{configuration!.statusChangeThreshold} rule runs</b>,
-          }}
-        />
+        <EuiFlexItem>
+          <EuiPanel borderRadius="none" color="subdued" grow={false}>
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.rulesConfiguration.flapping.flappingConfigurationOffDescription"
+                defaultMessage="Alert flapping detection is off. Alerts will be generated based on the rule interval. This may result in higher alert volume."
+              />
+            </EuiText>
+          </EuiPanel>
+        </EuiFlexItem>
       );
     }
-    return (
-      <FormattedMessage
-        id="xpack.triggersActionsUI.rulesConfiguration.modal.flappingConfigurationOffDescription"
-        defaultMessage="Alert flapping detection is off. Alerts will be generated based on the rule interval. This may result in higher alert volume."
-      />
-    );
-  };
 
-  const renderFormRight = () => {
     return (
       <EuiFlexItem>
-        <EuiFlexGroup direction="column">
-          {configuration!.enabled && (
-            <>
-              <EuiFlexItem>
-                <RulesConfigurationRange
-                  min={MIN_LOOK_BACK_WINDOW}
-                  max={MAX_LOOK_BACK_WINDOW}
-                  value={configuration!.lookBackWindow}
-                  onChange={(e) =>
-                    handleConfigurationChange(parseInt(e.currentTarget.value, 10), 'lookBackWindow')
-                  }
-                  label={lookBackWindowLabel}
-                  labelPopoverText="TODO: look back window helper text"
-                  disabled={!flappingDetection}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <RulesConfigurationRange
-                  min={MIN_STATUS_CHANGE_THRESHOLD}
-                  max={MAX_STATUS_CHANGE_THRESHOLD}
-                  value={configuration!.statusChangeThreshold}
-                  onChange={(e) =>
-                    handleConfigurationChange(
-                      parseInt(e.currentTarget.value, 10),
-                      'statusChangeThreshold'
-                    )
-                  }
-                  label={statusChangeThresholdLabel}
-                  labelPopoverText="TODO: status threshold helper text"
-                  disabled={!flappingDetection}
-                />
-              </EuiFlexItem>
-            </>
-          )}
-          <EuiFlexItem>
-            <EuiText style={euiTextStyles} size="s">
-              {renderFlappingConfigurationDescription()}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <RulesConfigurationFlapping
+          flappingConfiguration={configuration}
+          onChange={(key, value) => handleConfigurationChange(key, value)}
+        />
       </EuiFlexItem>
     );
   };
@@ -375,7 +250,11 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
     }
     return (
       <EuiForm>
-        <EuiFlexGroup>{renderFormTitle()}</EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <RulesConfigurationFlappingTitle />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiFlexGroup>
           {renderFormLeft()}

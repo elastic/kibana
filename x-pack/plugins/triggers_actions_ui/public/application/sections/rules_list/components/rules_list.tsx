@@ -111,7 +111,7 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
-import { RulesConfigurationLink } from '../../../components/rules_configuration_link';
+import { RulesConfigurationLink } from '../../../components/rules_configuration/rules_configuration_link';
 
 // Directly lazy import the flyouts because the suspendedComponentWithProps component
 // cause a visual hitch due to the loading spinner
