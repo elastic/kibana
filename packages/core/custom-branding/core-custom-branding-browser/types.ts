@@ -10,7 +10,6 @@ import { Observable } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 export interface CustomBrandingStart {
-  get: () => CustomBranding;
   set: (customBranding: CustomBranding) => void;
   customBranding$: Observable<CustomBranding>;
   hasCustomBranding$: Observable<boolean>;

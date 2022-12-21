@@ -26,7 +26,6 @@ const createSetupContractMock = () => {
 
 const createStartContractMock = () => {
   return {
-    get: jest.fn(),
     set: jest.fn(),
     customBranding$: of(createCustomBrandingMock()),
     hasCustomBranding$: of(false),

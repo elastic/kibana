@@ -34,10 +34,6 @@ export class CustomBrandingService {
     this.hasCustomBranding$.next(this.hasCustomBranding());
   }
 
-  private get() {
-    return this.customBranding;
-  }
-
   private hasCustomBranding() {
     return Object.keys(this.customBranding).length > 0;
   }
@@ -54,7 +50,6 @@ export class CustomBrandingService {
    */
   public start(): CustomBrandingStart {
     return {
-      get: this.get,
       set: this.set.bind(this),
       customBranding$: this.customBranding$.pipe(takeUntil(this.stop$)),
       hasCustomBranding$: this.hasCustomBranding$.pipe(takeUntil(this.stop$)),
