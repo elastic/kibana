@@ -82,8 +82,8 @@ export const MonitorServiceLocationCodec = t.intersection([
     label: t.string,
     geo: LocationGeoCodec,
     url: t.string,
-    isInvalid: t.boolean,
     isServiceManaged: t.boolean,
+    status: t.string,
   }),
 ]);
 

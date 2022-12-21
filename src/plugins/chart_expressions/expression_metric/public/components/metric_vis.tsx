@@ -174,6 +174,7 @@ const getColor = (
 };
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
+  const column = table.columns[columnIdx];
   return {
     name: 'filter',
     data: {
@@ -182,6 +183,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
           table,
           column: columnIdx,
           row: rowIdx,
+          value: table.rows[rowIdx][column.id],
         },
       ],
     },
@@ -336,9 +338,9 @@ export const MetricVis = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollDimensions = useResizeObserver(scrollContainerRef.current);
 
-  const {
-    metric: { minHeight },
-  } = getThemeService().useChartsBaseTheme();
+  const baseTheme = getThemeService().useChartsBaseTheme();
+
+  const minHeight = chartTheme.metric?.minHeight ?? baseTheme.metric.minHeight;
 
   useEffect(() => {
     const minimumRequiredVerticalSpace = minHeight * grid.length;
@@ -377,6 +379,7 @@ export const MetricVis = ({
               },
               chartTheme,
             ]}
+            baseTheme={baseTheme}
             onRenderChange={onRenderChange}
             onElementClick={(events) => {
               if (!filterable) {

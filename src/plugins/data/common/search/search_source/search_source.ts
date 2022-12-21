@@ -667,6 +667,8 @@ export class SearchSource {
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
+      case 'pit':
+        return addToRoot(key, val);
       case 'aggs':
         if ((val as unknown) instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());
@@ -768,7 +770,7 @@ export class SearchSource {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
-    const { body, index, query, filters, highlightAll } = searchRequest;
+    const { body, index, query, filters, highlightAll, pit } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
     const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
@@ -911,13 +913,17 @@ export class SearchSource {
       delete searchRequest.highlightAll;
     }
 
+    if (pit) {
+      body.pit = pit;
+    }
+
     return searchRequest;
   }
 
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
+  public getSerializedFields(recurse = false, includeFields = true): SerializedSearchSourceFields {
     const {
       filter: originalFilters,
       aggs: searchSourceAggs,
@@ -932,7 +938,9 @@ export class SearchSource {
       ...searchSourceFields,
     };
     if (index) {
-      serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toSpec();
+      serializedSearchSourceFields.index = index.isPersisted()
+        ? index.id
+        : index.toSpec(includeFields);
     }
     if (sort) {
       serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;
@@ -1005,6 +1013,7 @@ export class SearchSource {
     const filters = (
       typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters
     ) as Filter[] | Filter | undefined;
+
     const ast = buildExpression([
       buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
         q: query?.map(queryToAst),

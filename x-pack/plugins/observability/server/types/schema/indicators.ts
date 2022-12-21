@@ -6,21 +6,26 @@
  */
 
 import * as t from 'io-ts';
-import { allOrAnyString } from './common';
+import { allOrAnyString, dateRangeSchema } from './common';
 
-const apmTransactionDurationIndicatorTypeSchema = t.literal('slo.apm.transaction_duration');
+const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transaction_duration');
 const apmTransactionDurationIndicatorSchema = t.type({
   type: apmTransactionDurationIndicatorTypeSchema,
-  params: t.type({
-    environment: allOrAnyString,
-    service: allOrAnyString,
-    transaction_type: allOrAnyString,
-    transaction_name: allOrAnyString,
-    'threshold.us': t.number,
-  }),
+  params: t.intersection([
+    t.type({
+      environment: allOrAnyString,
+      service: allOrAnyString,
+      transaction_type: allOrAnyString,
+      transaction_name: allOrAnyString,
+      'threshold.us': t.number,
+    }),
+    t.partial({
+      index: t.string,
+    }),
+  ]),
 });
 
-const apmTransactionErrorRateIndicatorTypeSchema = t.literal('slo.apm.transaction_error_rate');
+const apmTransactionErrorRateIndicatorTypeSchema = t.literal('sli.apm.transaction_error_rate');
 const apmTransactionErrorRateIndicatorSchema = t.type({
   type: apmTransactionErrorRateIndicatorTypeSchema,
   params: t.intersection([
@@ -34,22 +39,27 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
       good_status_codes: t.array(
         t.union([t.literal('2xx'), t.literal('3xx'), t.literal('4xx'), t.literal('5xx')])
       ),
+      index: t.string,
     }),
   ]),
 });
 
-const kqlCustomIndicatorTypeSchema = t.literal('slo.kql.custom');
+const kqlCustomIndicatorTypeSchema = t.literal('sli.kql.custom');
 const kqlCustomIndicatorSchema = t.type({
   type: kqlCustomIndicatorTypeSchema,
   params: t.type({
     index: t.string,
-    query_filter: t.string,
-    numerator: t.string,
-    denominator: t.string,
+    filter: t.string,
+    good: t.string,
+    total: t.string,
   }),
 });
 
-const indicatorDataSchema = t.type({ good: t.number, total: t.number });
+const indicatorDataSchema = t.type({
+  date_range: dateRangeSchema,
+  good: t.number,
+  total: t.number,
+});
 
 const indicatorTypesSchema = t.union([
   apmTransactionDurationIndicatorTypeSchema,

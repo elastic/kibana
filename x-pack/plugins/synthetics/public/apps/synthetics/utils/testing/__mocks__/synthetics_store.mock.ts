@@ -66,10 +66,14 @@ export const mockState: SyntheticsAppState = {
   },
   monitorList: {
     pageState: {
+      query: undefined,
       pageIndex: 0,
       pageSize: 10,
-      sortOrder: 'asc',
       sortField: `${ConfigKey.NAME}.keyword`,
+      sortOrder: 'asc',
+      tags: undefined,
+      monitorType: undefined,
+      locations: undefined,
     },
     monitorUpsertStatuses: {},
     data: {
@@ -87,15 +91,18 @@ export const mockState: SyntheticsAppState = {
   overview: {
     pageState: {
       perPage: 10,
+      sortOrder: 'asc',
+      sortField: 'name.keyword',
     },
     data: {
       total: 0,
       allMonitorIds: [],
-      pages: {},
+      monitors: [],
     },
     error: null,
     loaded: false,
     loading: false,
+    flyoutConfig: null,
     status: null,
     statusError: null,
   },
@@ -103,6 +110,20 @@ export const mockState: SyntheticsAppState = {
   monitorDetails: getMonitorDetailsMockSlice(),
   browserJourney: getBrowserJourneyMockSlice(),
   networkEvents: {},
+  pingStatus: getPingStatusesMockSlice(),
+  agentPolicies: {
+    loading: false,
+    error: null,
+    data: null,
+  },
+  settings: {
+    loading: false,
+    error: null,
+    success: null,
+  },
+  dynamicSettings: {
+    loading: false,
+  },
 };
 
 function getBrowserJourneyMockSlice() {
@@ -360,6 +381,7 @@ function getMonitorDetailsMockSlice() {
     },
     syntheticsMonitor: {
       id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
+      config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
       type: DataStream.BROWSER,
       enabled: true,
       schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
@@ -407,9 +429,40 @@ function getMonitorDetailsMockSlice() {
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'] as TLSVersion[],
       revision: 1,
       updated_at: '2022-07-24T17:15:46.342Z',
+      created_at: '2022-05-24T13:20:49.322Z',
     },
     syntheticsMonitorLoading: false,
+    syntheticsMonitorDispatchedAt: 0,
     error: null,
     selectedLocationId: 'us_central',
   };
+}
+
+function getPingStatusesMockSlice() {
+  const monitorDetails = getMonitorDetailsMockSlice();
+
+  return {
+    pingStatuses: monitorDetails.pings.data.reduce((acc, cur) => {
+      if (!acc[cur.monitor.id]) {
+        acc[cur.monitor.id] = {};
+      }
+
+      if (!acc[cur.monitor.id][cur.observer.geo.name]) {
+        acc[cur.monitor.id][cur.observer.geo.name] = {};
+      }
+
+      acc[cur.monitor.id][cur.observer.geo.name][cur.timestamp] = {
+        timestamp: cur.timestamp,
+        error: undefined,
+        locationId: cur.observer.geo.name,
+        config_id: cur.config_id,
+        docId: cur.docId,
+        summary: cur.summary,
+      };
+
+      return acc;
+    }, {} as SyntheticsAppState['pingStatus']['pingStatuses']),
+    loading: false,
+    error: null,
+  } as SyntheticsAppState['pingStatus'];
 }

@@ -4385,6 +4385,18 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-common.LABEL_POSITIONS",
+        "type": "Enum",
+        "tags": [],
+        "label": "LABEL_POSITIONS",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.LAYER_TYPE",
         "type": "Enum",
         "tags": [],

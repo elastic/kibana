@@ -53,7 +53,7 @@ it('returns undefined until values are set', async () => {
   const log = makeTestLog();
   const cache = makeCache({
     dir: DIR,
-    prefix: 'prefix:',
+    prefix: 'prefix',
     log,
     pathRoot: '/foo/',
   });
@@ -81,6 +81,7 @@ it('returns undefined until values are set', async () => {
     PUT   [sourceMaps]   prefix:bar.js
     HIT   [mtimes]   prefix:bar.js
     HIT   [codes]   prefix:bar.js
+    PUT   [atimes]   prefix:bar.js
     HIT   [sourceMaps]   prefix:bar.js
     "
   `);

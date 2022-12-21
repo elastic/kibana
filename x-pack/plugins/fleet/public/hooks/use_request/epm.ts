@@ -85,6 +85,7 @@ export const useGetPackageInfoByKey = (
   options?: {
     ignoreUnverified?: boolean;
     prerelease?: boolean;
+    full?: boolean;
   }
 ) => {
   const confirmOpenUnverified = useConfirmOpenUnverified();
@@ -96,7 +97,7 @@ export const useGetPackageInfoByKey = (
     method: 'get',
     query: {
       ...options,
-      ...(ignoreUnverifiedQueryParam ? { ignoreUnverified: ignoreUnverifiedQueryParam } : {}),
+      ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
     },
   });
 
@@ -130,6 +131,7 @@ export const sendGetPackageInfoByKey = (
   options?: {
     ignoreUnverified?: boolean;
     prerelease?: boolean;
+    full?: boolean;
   }
 ) => {
   return sendRequest<GetInfoResponse>({

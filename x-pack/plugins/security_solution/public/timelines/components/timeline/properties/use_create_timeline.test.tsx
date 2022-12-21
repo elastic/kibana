@@ -93,9 +93,7 @@ describe('useCreateTimelineButton', () => {
         fill: false,
       });
       const wrapper = shallow(button);
-      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('fill')).toEqual(
-        false
-      );
+      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('fill')).toBeFalsy();
     });
   });
 

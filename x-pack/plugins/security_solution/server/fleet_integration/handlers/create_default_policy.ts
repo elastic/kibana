@@ -10,7 +10,6 @@ import {
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
 } from '../../../common/endpoint/models/policy_config';
 import type { LicenseService } from '../../../common/license/license';
-import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
 import type { AnyPolicyCreateConfig, PolicyCreateEndpointConfig } from '../types';
 import {
@@ -110,43 +109,16 @@ const getEndpointPolicyWithIntegrationConfig = (
  */
 const getCloudPolicyConfig = (policy: PolicyConfig): PolicyConfig => {
   // Disabling all protections, since it's not yet supported on Cloud integrations
-  const protections = {
-    memory_protection: {
-      supported: false,
-      mode: ProtectionModes.off,
-    },
-    malware: {
-      ...policy.linux.malware,
-      mode: ProtectionModes.off,
-    },
-    behavior_protection: {
-      ...policy.linux.behavior_protection,
-      mode: ProtectionModes.off,
-    },
-  };
+  const policyWithDisabledProtections = disableProtections(policy);
 
   return {
-    ...policy,
+    ...policyWithDisabledProtections,
     linux: {
-      ...policy.linux,
-      ...protections,
+      ...policyWithDisabledProtections.linux,
       events: {
-        ...policy.linux.events,
+        ...policyWithDisabledProtections.linux.events,
         session_data: true,
       },
-    },
-    windows: {
-      ...policy.windows,
-      ...protections,
-      // Disabling ransomware protection, since it's not supported on Cloud integrations
-      ransomware: {
-        supported: false,
-        mode: ProtectionModes.off,
-      },
-    },
-    mac: {
-      ...policy.mac,
-      ...protections,
     },
   };
 };

@@ -217,7 +217,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
         const action: any = actionsRes.hits.hits[0]._source;
-        expect(action.data.source_uri).contain('http://path/to/download');
+        expect(action.data.sourceURI).contain('http://path/to/download');
       });
       it('should respond 400 if trying to upgrade to a version that does not match installed kibana version', async () => {
         const kibanaVersion = await kibanaServer.version.get();
@@ -976,7 +976,7 @@ export default function (providerContext: FtrProviderContext) {
         });
         const action: any = actionsRes.hits.hits[0]._source;
 
-        expect(action.data.source_uri).contain('http://path/to/download');
+        expect(action.data.sourceURI).contain('http://path/to/download');
       });
 
       it('enrolled in a hosted agent policy bulk upgrade should respond with 200 and object of results. Should not update the hosted agent SOs', async () => {

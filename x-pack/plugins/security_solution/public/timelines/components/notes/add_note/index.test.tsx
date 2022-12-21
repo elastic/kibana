@@ -124,7 +124,7 @@ describe('AddNote', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
 
     expect(associateNote).toBeCalled();
   });
@@ -156,7 +156,7 @@ describe('AddNote', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
 
     expect(updateNewNote).toBeCalled();
   });
@@ -168,7 +168,7 @@ describe('AddNote', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
 
     expect(mockDispatch).toBeCalled();
   });

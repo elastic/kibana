@@ -239,6 +239,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             loader: 'raw-loader',
           },
         },
+        {
+          test: /\.peggy$/,
+          loader: '@kbn/peggy-loader',
+        },
       ],
     },
 

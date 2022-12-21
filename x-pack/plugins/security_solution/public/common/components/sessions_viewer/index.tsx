@@ -6,10 +6,12 @@
  */
 
 import React, { useMemo, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
-import { EVENT_ACTION } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { ENTRY_SESSION_ENTITY_ID_PROPERTY, EventAction } from '@kbn/session-view-plugin/public';
+import { useDispatch } from 'react-redux';
+import { EVENT_ACTION } from '@kbn/rule-data-utils';
+import { TableId } from '../../../../common/types';
+import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import type { SessionsComponentsProps } from './types';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import { StatefulEventsViewer } from '../events_viewer';
@@ -20,9 +22,13 @@ import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../hooks/use_license';
-import { TableId } from '../../../../common/types/timeline';
-export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 import { dataTableActions } from '../../store/data_table';
+import { eventsDefaultModel } from '../events_viewer/default_model';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+
+export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 
 export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
   query: {
@@ -70,6 +76,8 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   columns = sessionsHeaders,
   defaultColumns = sessionsHeaders,
 }) => {
+  const dispatch = useDispatch();
+  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const parsedFilterQuery: ESBoolQuery = useMemo(() => {
     if (filterQuery && filterQuery !== '') {
       return JSON.parse(filterQuery);
@@ -93,6 +101,26 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     ],
     [pageFilters, parsedFilterQuery]
   );
+
+  useEffect(() => {
+    dispatch(
+      dataTableActions.initializeDataTableSettings({
+        id: tableId,
+        title: i18n.SESSIONS_TITLE,
+        defaultColumns: eventsDefaultModel.columns.map((c) =>
+          !tGridEnabled && c.initialWidth == null
+            ? {
+                ...c,
+                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+              }
+            : c
+        ),
+        showCheckboxes: true,
+        selectAll: true,
+      })
+    );
+  }, [dispatch, tGridEnabled, tableId]);
+
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT =
     isEnterprisePlus || tableId === TableId.kubernetesPageSessions ? 5 : 4;
@@ -101,19 +129,23 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     [ACTION_BUTTON_COUNT]
   );
 
+  const addBulkToTimelineAction = useAddBulkToTimelineAction({
+    localFilters: sessionsFilter,
+    tableId,
+    from: startDate,
+    to: endDate,
+    scopeId: SourcererScopeName.default,
+  });
+
+  const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
+    return {
+      alertStatusActions: false,
+      customBulkActions: [addBulkToTimelineAction],
+    };
+  }, [addBulkToTimelineAction]);
+
   const unit = (c: number) =>
     c > 1 ? i18n.TOTAL_COUNT_OF_SESSIONS : i18n.SINGLE_COUNT_OF_SESSIONS;
-
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(
-      dataTableActions.initializeTGridSettings({
-        id: tableId,
-        title: i18n.SESSIONS_TITLE,
-      })
-    );
-  }, [dispatch, tableId]);
 
   return (
     <div data-test-subj={TEST_ID}>
@@ -121,12 +153,13 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
         pageFilters={sessionsFilter}
         defaultModel={getSessionsDefaultModel(columns, defaultColumns)}
         end={endDate}
+        bulkActions={bulkActions}
         entityType={entityType}
         tableId={tableId}
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        scopeId={SourcererScopeName.default}
+        sourcererScope={SourcererScopeName.default}
         start={startDate}
         unit={unit}
       />

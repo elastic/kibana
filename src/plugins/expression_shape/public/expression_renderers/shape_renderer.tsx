@@ -17,7 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { withSuspense, defaultTheme$ } from '@kbn/presentation-util-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ShapeRendererConfig } from '../../common/types';
 import { LazyShapeComponent } from '../components/shape';
 

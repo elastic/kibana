@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { parse, stringify } from 'query-string';
 import { createContext, useCallback, useContext, useMemo } from 'react';
-import { decode, encode } from 'rison-node';
+import { decode, encode } from '@kbn/rison';
 import { useHistory, useLocation } from 'react-router-dom';
 import { isEqual } from 'lodash';
 
@@ -184,12 +184,12 @@ export const useUrlState = (accessor: Accessor) => {
 };
 
 export const AppStateKey = 'AIOPS_INDEX_VIEWER';
-
+export const ChangePointStateKey = 'changePoint' as const;
 /**
  * Hook for managing the URL state of the page.
  */
 export const usePageUrlState = <PageUrlState extends {}>(
-  pageKey: typeof AppStateKey,
+  pageKey: typeof AppStateKey | typeof ChangePointStateKey,
   defaultState?: PageUrlState
 ): [PageUrlState, (update: Partial<PageUrlState>, replaceState?: boolean) => void] => {
   const [appState, setAppState] = useUrlState('_a');

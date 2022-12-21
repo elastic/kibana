@@ -19,7 +19,7 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Flights Dashboard', async ({ page }) => {
+  .step('Go to Flights Dashboard', async ({ page, log }) => {
     await page.click(subj('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'));
-    await waitForVisualizations(page, 14);
+    await waitForVisualizations(page, log, 14);
   });

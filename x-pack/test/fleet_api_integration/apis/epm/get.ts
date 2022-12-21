@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { PackageInfo } from '@kbn/fleet-plugin/common/types/models/epm';
 import fs from 'fs';
 import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -171,6 +172,41 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/epm/packages/input_only/0.1.0?ignoreUnverified=true&prerelease=true`)
           .expect(200);
       });
+    });
+    it('returns package info from the archive if ?full=true', async function () {
+      const res = await supertest
+        .get(`/api/fleet/epm/packages/non_epr_fields/1.0.0?full=true`)
+        .expect(200);
+      const packageInfo = res.body.item as PackageInfo;
+      expect(packageInfo?.data_streams?.length).equal(3);
+      const dataStream = packageInfo?.data_streams?.find(
+        ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
+      );
+      expect(dataStream?.elasticsearch?.source_mode).equal('default');
+    });
+    it('returns package info from the registry if ?full=false', async function () {
+      const res = await supertest
+        .get(`/api/fleet/epm/packages/non_epr_fields/1.0.0?full=false`)
+        .expect(200);
+      const packageInfo = res.body.item as PackageInfo;
+      expect(packageInfo?.data_streams?.length).equal(3);
+      const dataStream = packageInfo?.data_streams?.find(
+        ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
+      );
+      // this field is only returned if we go to the archive
+      // it is not part of the EPR API
+      expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
+    });
+    it('returns package info from the registry if ?full not provided', async function () {
+      const res = await supertest
+        .get(`/api/fleet/epm/packages/non_epr_fields/1.0.0?full=false`)
+        .expect(200);
+      const packageInfo = res.body.item as PackageInfo;
+      expect(packageInfo?.data_streams?.length).equal(3);
+      const dataStream = packageInfo?.data_streams?.find(
+        ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
+      );
+      expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
     });
   });
 }

@@ -16,7 +16,7 @@ import { deleteMonitorBulk } from './bulk_cruds/delete_monitor_bulk';
 
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
+  path: API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
   validate: {
     body: schema.object({
       monitors: schema.arrayOf(schema.string()),
@@ -47,10 +47,10 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
       {
         filter: `${syntheticsMonitorType}.attributes.${
           ConfigKey.PROJECT_ID
-        }: "${decodedProjectName}" AND ${getKqlFilter(
-          'journey_id',
-          monitorsToDelete.map((id: string) => `"${id}"`)
-        )}`,
+        }: "${decodedProjectName}" AND ${getKqlFilter({
+          field: 'journey_id',
+          values: monitorsToDelete.map((id: string) => `${id}`),
+        })}`,
         fields: [],
         perPage: 500,
       },

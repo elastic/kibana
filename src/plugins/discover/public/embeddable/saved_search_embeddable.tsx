@@ -34,6 +34,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
@@ -60,9 +61,12 @@ import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
 import { getRawRecordType } from '../application/main/utils/get_raw_record_type';
 import { fetchSql } from '../application/main/utils/fetch_sql';
+import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
+    savedSearchId?: string;
+    filters?: Filter[];
     settings?: DiscoverGridSettings;
     description?: string;
     sharedItemTitle?: string;
@@ -149,13 +153,13 @@ export class SavedSearchEmbeddable
       if (titleChanged) {
         this.panelTitle = this.output.title || '';
       }
-      if (
-        this.searchProps &&
-        (titleChanged ||
-          this.isFetchRequired(this.searchProps) ||
-          this.isRerenderRequired(this.searchProps))
-      ) {
-        this.reload();
+      if (!this.searchProps) {
+        return;
+      }
+      const isFetchRequired = this.isFetchRequired(this.searchProps);
+      const isRerenderRequired = this.isRerenderRequired(this.searchProps);
+      if (titleChanged || isFetchRequired || isRerenderRequired) {
+        this.reload(isFetchRequired);
       }
     });
   }
@@ -215,6 +219,7 @@ export class SavedSearchEmbeddable
       : child;
 
     const query = this.savedSearch.searchSource.getField('query');
+    const dataView = this.savedSearch.searchSource.getField('index')!;
     const recordRawType = getRawRecordType(query);
     const useSql = recordRawType === RecordRawType.PLAIN;
 
@@ -223,9 +228,10 @@ export class SavedSearchEmbeddable
       if (useSql && query) {
         const result = await fetchSql(
           this.savedSearch.searchSource.getField('query')!,
-          this.services.dataViews,
+          dataView,
           this.services.data,
           this.services.expressions,
+          this.services.inspector,
           this.input.filters,
           this.input.query
         );
@@ -300,8 +306,15 @@ export class SavedSearchEmbeddable
     }
     const sort = this.getSort(this.savedSearch.sort, dataView);
 
+    if (!dataView.isPersisted()) {
+      // one used adhoc data view
+      this.services.trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
+    }
+
     const props: SearchProps = {
       columns: this.savedSearch.columns,
+      savedSearchId: this.savedSearch.id,
+      filters: this.savedSearch.searchSource.getField('filter') as Filter[],
       dataView,
       isLoading: false,
       sort,
@@ -450,6 +463,8 @@ export class SavedSearchEmbeddable
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
+    searchProps.filters = this.savedSearch.searchSource.getField('filter') as Filter[];
+    searchProps.savedSearchId = this.savedSearch.id;
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);
@@ -566,9 +581,9 @@ export class SavedSearchEmbeddable
     }
   }
 
-  public reload() {
+  public reload(forceFetch = true) {
     if (this.searchProps) {
-      this.load(this.searchProps, true);
+      this.load(this.searchProps, forceFetch);
     }
   }
 

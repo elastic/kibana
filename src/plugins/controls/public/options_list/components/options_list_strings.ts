@@ -22,6 +22,10 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.control.negate', {
         defaultMessage: 'NOT',
       }),
+    getExcludeExists: () =>
+      i18n.translate('controls.optionsList.control.excludeExists', {
+        defaultMessage: 'DOES NOT',
+      }),
   },
   editor: {
     getAllowMultiselectTitle: () =>
@@ -37,12 +41,13 @@ export const OptionsListStrings = {
         defaultMessage:
           'Wait to display results until the list is complete. This setting is useful for large data sets, but the results might take longer to populate.',
       }),
-    getHideExcludeTitle: () =>
-      i18n.translate('controls.optionsList.editor.hideExclude', {
-        defaultMessage: 'Allow selections to be excluded',
-      }),
   },
   popover: {
+    getAriaLabel: (fieldName: string) =>
+      i18n.translate('controls.optionsList.popover.ariaLabel', {
+        defaultMessage: 'Popover for {fieldName} control',
+        values: { fieldName },
+      }),
     getLoadingMessage: () =>
       i18n.translate('controls.optionsList.popover.loading', {
         defaultMessage: 'Loading options',
@@ -111,5 +116,58 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.excludeOptionsLegend', {
         defaultMessage: 'Include or exclude selections',
       }),
+    getSortPopoverTitle: () =>
+      i18n.translate('controls.optionsList.popover.sortTitle', {
+        defaultMessage: 'Sort',
+      }),
+    getSortPopoverDescription: () =>
+      i18n.translate('controls.optionsList.popover.sortDescription', {
+        defaultMessage: 'Define the sort order',
+      }),
+    getSortDisabledTooltip: () =>
+      i18n.translate('controls.optionsList.popover.sortDisabledTooltip', {
+        defaultMessage: 'Ignore sorting when “Show only selected” is true.',
+      }),
+  },
+  controlAndPopover: {
+    getExists: (negate: number = +false) =>
+      i18n.translate('controls.optionsList.controlAndPopover.exists', {
+        defaultMessage: '{negate, plural, one {Exist} other {Exists}}',
+        values: { negate },
+      }),
+  },
+  editorAndPopover: {
+    getSortDirectionLegend: () =>
+      i18n.translate('controls.optionsList.popover.sortDirections', {
+        defaultMessage: 'Sort directions',
+      }),
+    sortBy: {
+      _count: {
+        getSortByLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortBy.docCount', {
+            defaultMessage: 'By document count',
+          }),
+      },
+      _key: {
+        getSortByLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortBy.alphabetical', {
+            defaultMessage: 'Alphabetically',
+          }),
+      },
+    },
+    sortOrder: {
+      asc: {
+        getSortOrderLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortOrder.asc', {
+            defaultMessage: 'Ascending',
+          }),
+      },
+      desc: {
+        getSortOrderLabel: () =>
+          i18n.translate('controls.optionsList.popover.sortOrder.desc', {
+            defaultMessage: 'Descending',
+          }),
+      },
+    },
   },
 };

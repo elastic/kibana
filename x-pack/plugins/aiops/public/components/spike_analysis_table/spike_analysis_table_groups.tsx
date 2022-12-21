@@ -20,15 +20,16 @@ import {
   EuiTableSortingType,
   EuiToolTip,
   RIGHT_ALIGNMENT,
+  useEuiTheme,
+  euiPaletteColorBlind,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { escapeKuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
-import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { MiniHistogram } from '../mini_histogram';
@@ -41,6 +42,7 @@ const NARROW_COLUMN_WIDTH = '120px';
 const EXPAND_COLUMN_WIDTH = '40px';
 const ACTIONS_COLUMN_WIDTH = '60px';
 const NOT_AVAILABLE = '--';
+const MAX_GROUP_BADGES = 10;
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
@@ -56,8 +58,8 @@ export interface GroupTableItem {
   id: string;
   docCount: number;
   pValue: number | null;
-  group: Record<string, string | number>;
-  repeatedValues: Record<string, string | number>;
+  group: FieldValuePair[];
+  repeatedValues: FieldValuePair[];
   histogram: ChangePoint['histogram'];
 }
 
@@ -82,7 +84,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     {}
   );
 
-  const euiTheme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
+  const visColors = euiPaletteColorBlind();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
   const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
@@ -96,23 +99,22 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       const { group, repeatedValues } = item;
 
       const expandedTableItems = [];
-      const fullGroup = { ...group, ...repeatedValues };
+      const fullGroup: FieldValuePair[] = [...group, ...repeatedValues];
 
-      for (const fieldName in fullGroup) {
-        if (fullGroup.hasOwnProperty(fieldName)) {
-          const fieldValue = fullGroup[fieldName];
-          expandedTableItems.push({
-            fieldName: `${fieldName}`,
-            fieldValue: `${fullGroup[fieldName]}`,
-            ...(changePoints.find(
-              (changePoint) =>
-                (changePoint.fieldName === fieldName ||
-                  changePoint.fieldName === `${fieldName}.keyword`) &&
-                (changePoint.fieldValue === fieldValue ||
-                  changePoint.fieldValue === `${fieldValue}.keyword`)
-            ) ?? {}),
-          });
-        }
+      for (const fullGroupItem of fullGroup) {
+        const { fieldName, fieldValue } = fullGroupItem;
+
+        expandedTableItems.push({
+          ...(changePoints.find(
+            (changePoint) =>
+              (changePoint.fieldName === fieldName ||
+                changePoint.fieldName === `${fieldName}.keyword`) &&
+              (changePoint.fieldValue === fieldValue ||
+                changePoint.fieldValue === `${fieldValue}.keyword`)
+          ) ?? {}),
+          fieldName: `${fieldName}`,
+          fieldValue: `${fieldValue}`,
+        });
       }
 
       itemIdToExpandedRowMapValues[item.id] = (
@@ -175,12 +177,12 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         query: {
           language: SEARCH_QUERY_LANGUAGE.KUERY,
           query: [
-            ...Object.entries(groupTableItem.group).map(
-              ([fieldName, fieldValue]) =>
+            ...groupTableItem.group.map(
+              ({ fieldName, fieldValue }) =>
                 `${escapeKuery(fieldName)}:${escapeKuery(String(fieldValue))}`
             ),
-            ...Object.entries(groupTableItem.repeatedValues).map(
-              ([fieldName, fieldValue]) =>
+            ...groupTableItem.repeatedValues.map(
+              ({ fieldName, fieldValue }) =>
                 `${escapeKuery(fieldName)}:${escapeKuery(String(fieldValue))}`
             ),
           ].join(' AND '),
@@ -220,7 +222,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                   }
                 )
           }
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
         />
       ),
       valign: 'top',
@@ -250,26 +252,26 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       ),
       render: (_, { group, repeatedValues }) => {
         const valuesBadges = [];
-        for (const fieldName in group) {
-          if (group.hasOwnProperty(fieldName)) {
-            valuesBadges.push(
-              <>
-                <EuiBadge
-                  key={`${fieldName}-id`}
-                  data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge"
-                  color="hollow"
-                >
-                  <span>{`${fieldName}: `}</span>
-                  <span
-                    style={{ color: euiTheme.euiCodeBlockStringColor }}
-                  >{`${group[fieldName]}`}</span>
-                </EuiBadge>
-                <EuiSpacer size="xs" />
-              </>
-            );
-          }
+        const hasExtraBadges = group.length > MAX_GROUP_BADGES;
+
+        for (const groupItem of group) {
+          const { fieldName, fieldValue } = groupItem;
+          if (valuesBadges.length === MAX_GROUP_BADGES) break;
+          valuesBadges.push(
+            <>
+              <EuiBadge
+                key={`${fieldName}-id`}
+                data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge"
+                color="hollow"
+              >
+                <span>{`${fieldName}: `}</span>
+                <span style={{ color: visColors[2] }}>{`${fieldValue}`}</span>
+              </EuiBadge>
+              <EuiSpacer size="xs" />
+            </>
+          );
         }
-        if (Object.keys(repeatedValues).length > 0) {
+        if (repeatedValues.length > 0 || hasExtraBadges) {
           valuesBadges.push(
             <>
               <EuiBadge
@@ -277,11 +279,23 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 data-test-subj="aiopsSpikeAnalysisGroupsTableColumnGroupBadge"
                 color="hollow"
               >
-                +{Object.keys(repeatedValues).length}{' '}
-                <FormattedMessage
-                  id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreLabel"
-                  defaultMessage="more field/value pairs also appearing in other groups"
-                />
+                {hasExtraBadges ? (
+                  <>
+                    <FormattedMessage
+                      id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreLabel"
+                      defaultMessage="+{count, plural, one {# more field/value pair} other {# more field/value pairs}}"
+                      values={{ count: group.length - MAX_GROUP_BADGES }}
+                    />
+                    <br />
+                  </>
+                ) : null}
+                {repeatedValues.length > 0 ? (
+                  <FormattedMessage
+                    id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreRepeatedLabel"
+                    defaultMessage="+{count, plural, one {# more field/value pair} other {# more field/value pairs}} also appearing in other groups"
+                    values={{ count: repeatedValues.length }}
+                  />
+                ) : null}
               </EuiBadge>
               <EuiSpacer size="xs" />
             </>
@@ -479,12 +493,12 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
 
     if (selectedGroup && selectedGroup.id === group.id) {
       return {
-        backgroundColor: euiTheme.euiColorLightestShade,
+        backgroundColor: euiTheme.colors.lightestShade,
       };
     }
 
     return {
-      backgroundColor: euiTheme.euiColorEmptyShade,
+      backgroundColor: euiTheme.colors.emptyShade,
     };
   };
 

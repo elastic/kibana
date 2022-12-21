@@ -18,6 +18,7 @@ import type {
   AgentPolicyServiceInterface,
 } from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
+import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
@@ -47,6 +48,7 @@ import {
 } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
+import { doesArtifactHaveData } from './services';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -168,6 +170,8 @@ export class EndpointAppContextService {
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
     const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
     const { endpointRbacEnabled, endpointRbacV1Enabled } = this.experimentalFeatures;
+    const isPlatinumPlus = this.getLicenseService().isPlatinumPlus();
+    const listClient = this.getExceptionListsClient();
 
     let endpointPermissions = defaultEndpointPermissions();
     if (this.security) {
@@ -181,12 +185,17 @@ export class EndpointAppContextService {
       endpointPermissions = calculatePermissionsFromPrivileges(privileges.kibana);
     }
 
+    const hasExceptionsListItems = !isPlatinumPlus
+      ? await doesArtifactHaveData(listClient, ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID)
+      : true;
+
     return calculateEndpointAuthz(
       this.getLicenseService(),
       fleetAuthz,
       userRoles,
       endpointRbacEnabled || endpointRbacV1Enabled,
-      endpointPermissions
+      endpointPermissions,
+      hasExceptionsListItems
     );
   }
 
@@ -254,5 +263,13 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.experimentalFeatures;
+  }
+
+  public getExceptionListsClient(): ExceptionListClient {
+    if (!this.startDependencies?.exceptionListsClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.exceptionListsClient;
   }
 }

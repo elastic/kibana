@@ -3876,16 +3876,6 @@
                 }
               }
             },
-            "sourcemap": {
-              "properties": {
-                "1d": {
-                  "type": "long"
-                },
-                "all": {
-                  "type": "long"
-                }
-              }
-            },
             "onboarding": {
               "properties": {
                 "1d": {
@@ -4042,13 +4032,6 @@
                 }
               }
             },
-            "sourcemap": {
-              "properties": {
-                "ms": {
-                  "type": "long"
-                }
-              }
-            },
             "onboarding": {
               "properties": {
                 "ms": {
@@ -4071,6 +4054,72 @@
         },
         "indices": {
           "properties": {
+            "metric": {
+              "properties": {
+                "shards": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "all": {
+                  "properties": {
+                    "total": {
+                      "properties": {
+                        "docs": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "store": {
+                          "properties": {
+                            "size_in_bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "traces": {
+              "properties": {
+                "shards": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "all": {
+                  "properties": {
+                    "total": {
+                      "properties": {
+                        "docs": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "store": {
+                          "properties": {
+                            "size_in_bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
             "shards": {
               "properties": {
                 "total": {
@@ -4121,6 +4170,12 @@
             "properties": {
               "service_id": {
                 "type": "keyword"
+              },
+              "num_service_nodes": {
+                "type": "long"
+              },
+              "num_transaction_types": {
+                "type": "long"
               },
               "timed_out": {
                 "type": "boolean"
@@ -4991,13 +5046,9 @@
           }
         },
         "flags": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "keyword",
-              "_meta": {
-                "description": "Flags received by the client"
-              }
-            }
+          "type": "pass_through",
+          "_meta": {
+            "description": "Flags received by the client"
           }
         },
         "flagNames": {
@@ -13014,6 +13065,16 @@
               }
             }
           }
+        },
+        "endpointMetrics": {
+          "properties": {
+            "unique_endpoint_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of active unique endpoints in last 24 hours"
+              }
+            }
+          }
         }
       }
     },
@@ -13335,6 +13396,29 @@
           }
         },
         "failed_tasks": {
+          "type": "long"
+        },
+        "recurring_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "adhoc_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "capacity": {
           "type": "long"
         }
       }

@@ -24,6 +24,7 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   agentIds,
   ruleName,
   alertId,
+  ecsData,
 }) => {
   const { data: actionsData } = useAllLiveQueries({
     filterQuery: { term: { alert_ids: alertId } },
@@ -49,6 +50,7 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
             startDate={startDate}
             ruleName={ruleName}
             agentIds={agentIds}
+            ecsData={ecsData}
           />
         );
       })}

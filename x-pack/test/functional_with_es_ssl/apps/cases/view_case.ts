@@ -181,6 +181,95 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           );
         });
       });
+
+      describe('draft comments', () => {
+        createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+        it('persists new comment when status is updated in dropdown', async () => {
+          const commentArea = await find.byCssSelector(
+            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+          );
+          await commentArea.focus();
+          await commentArea.type('Test comment from automation');
+
+          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+          // validate user action
+          await find.byCssSelector(
+            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
+          );
+          // validates dropdown tag
+          await testSubjects.existOrFail(
+            'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
+          );
+
+          await testSubjects.click('submit-comment');
+
+          // validate user action
+          const newComment = await find.byCssSelector(
+            '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          );
+          expect(await newComment.getVisibleText()).equal('Test comment from automation');
+        });
+
+        it('persists new comment when case is closed the close case button', async () => {
+          const commentArea = await find.byCssSelector(
+            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+          );
+          await commentArea.focus();
+          await commentArea.type('Test comment from automation');
+
+          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+          await header.waitUntilLoadingHasFinished();
+          await testSubjects.click('case-view-status-action-button');
+          await header.waitUntilLoadingHasFinished();
+
+          await testSubjects.existOrFail(
+            'header-page-supplements > case-status-badge-popover-button-closed',
+            {
+              timeout: 5000,
+            }
+          );
+
+          // validate user action
+          await find.byCssSelector(
+            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
+          );
+          // validates dropdown tag
+          await testSubjects.existOrFail(
+            'case-view-status-dropdown >case-status-badge-popover-button-closed'
+          );
+
+          await testSubjects.click('submit-comment');
+
+          // validate user action
+          const newComment = await find.byCssSelector(
+            '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          );
+          expect(await newComment.getVisibleText()).equal('Test comment from automation');
+        });
+
+        it('persists new comment to the case when user goes to case list table and comes back to the case', async () => {
+          const commentArea = await find.byCssSelector(
+            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+          );
+          await commentArea.focus();
+          await commentArea.type('Test comment from automation');
+
+          await testSubjects.click('backToCases');
+
+          const caseLink = await find.byCssSelector('[data-test-subj="case-details-link"');
+
+          caseLink.click();
+
+          await testSubjects.click('submit-comment');
+
+          // validate user action
+          const newComment = await find.byCssSelector(
+            '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          );
+          expect(await newComment.getVisibleText()).equal('Test comment from automation');
+        });
+      });
     });
 
     describe('actions', () => {

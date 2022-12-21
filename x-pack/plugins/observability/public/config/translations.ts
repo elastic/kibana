@@ -122,9 +122,4 @@ export const translations = {
       }
     ),
   },
-  alertsSearchBar: {
-    placeholder: i18n.translate('xpack.observability.alerts.searchBarPlaceholder', {
-      defaultMessage: 'Search alerts (e.g. kibana.alert.evaluation.threshold > 75)',
-    }),
-  },
 };

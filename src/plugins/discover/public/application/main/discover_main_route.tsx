@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, memo, useCallback } from 'react';
+import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { DataViewListItem } from '@kbn/data-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewSavedObjectConflictError } from '@kbn/data-views-plugin/public';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -27,9 +28,9 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/bread
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getUrlTracker } from '../../kibana_services';
+import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
-import { HistoryLocationState } from '../../locator';
+import { MainHistoryLocationState } from '../../locator';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -39,7 +40,6 @@ interface DiscoverLandingParams {
 
 interface Props {
   isDev: boolean;
-  historyLocationState?: HistoryLocationState;
 }
 
 export function DiscoverMainRoute(props: Props) {
@@ -63,6 +63,14 @@ export function DiscoverMainRoute(props: Props) {
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const { id } = useParams<DiscoverLandingParams>();
+
+  /**
+   * Get location state of scoped history only on initial load
+   */
+  const historyLocationState = useMemo(
+    () => getScopedHistory().location.state as MainHistoryLocationState | undefined,
+    []
+  );
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -94,16 +102,22 @@ export function DiscoverMainRoute(props: Props) {
         }
 
         const { appStateContainer } = getState({ history, savedSearch: nextSavedSearch, services });
-        const { index } = appStateContainer.getState();
+        const { index, query } = appStateContainer.getState();
         const ip = await loadDataView(
           data.dataViews,
           config,
           index,
-          props.historyLocationState?.dataViewSpec
+          historyLocationState?.dataViewSpec
         );
 
         const ipList = ip.list;
-        const dataViewData = resolveDataView(ip, nextSavedSearch.searchSource, toastNotifications);
+        const isTextBasedQuery = query && isOfAggregateQueryType(query);
+        const dataViewData = resolveDataView(
+          ip,
+          nextSavedSearch.searchSource,
+          toastNotifications,
+          isTextBasedQuery
+        );
         await data.dataViews.refreshFields(dataViewData);
         setDataViewList(ipList);
 
@@ -117,7 +131,7 @@ export function DiscoverMainRoute(props: Props) {
       data.dataViews,
       history,
       isDev,
-      props.historyLocationState?.dataViewSpec,
+      historyLocationState?.dataViewSpec,
       toastNotifications,
       services,
     ]

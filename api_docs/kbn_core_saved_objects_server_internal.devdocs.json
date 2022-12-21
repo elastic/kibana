@@ -119,7 +119,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ elasticsearch, pluginsInitialized, docLinks, }: ",
+              "({ elasticsearch, pluginsInitialized, docLinks, node, }: ",
               "SavedObjectsStartDeps",
               ") => Promise<",
               {
@@ -140,7 +140,7 @@
                 "id": "def-server.SavedObjectsService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    elasticsearch,\n    pluginsInitialized = true,\n    docLinks,\n  }",
+                "label": "{\n    elasticsearch,\n    pluginsInitialized = true,\n    docLinks,\n    node,\n  }",
                 "description": [],
                 "signature": [
                   "SavedObjectsStartDeps"

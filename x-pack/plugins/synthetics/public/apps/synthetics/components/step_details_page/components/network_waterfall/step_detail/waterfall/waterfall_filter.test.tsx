@@ -59,17 +59,15 @@ describe('waterfall filter', () => {
 
     fireEvent.click(getByTitle('XHR'));
 
-    expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL)).toHaveAttribute(
-      'class',
-      'euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall'
+    expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL).className).toMatchInlineSnapshot(
+      `"euiButtonIcon euiButtonIcon--xSmall css-1q7ycil-euiButtonIcon-empty-primary-hoverStyles"`
     );
 
     // toggle it back to inactive
     fireEvent.click(getByTitle('XHR'));
 
-    expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL)).toHaveAttribute(
-      'class',
-      'euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall'
+    expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL).className).toMatchInlineSnapshot(
+      `"euiButtonIcon euiButtonIcon--xSmall css-o2mzw-euiButtonIcon-empty-text-hoverStyles"`
     );
   });
 

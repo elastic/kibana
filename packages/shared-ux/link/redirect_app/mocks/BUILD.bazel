@@ -67,7 +67,7 @@ TYPES_DEPS = [
   "@npm//@types/react",
   "@npm//@storybook/addon-actions",
   "@npm//rxjs",
-  "//packages/shared-ux/link/redirect_app/types",
+  "//packages/shared-ux/link/redirect_app/types:npm_module_types",
   "//packages/shared-ux/storybook/mock:npm_module_types",
 ]
 

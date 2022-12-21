@@ -40,7 +40,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/moment-timezone",
+  "@npm//moment-timezone",
   "@npm//rxjs",
   "//packages/kbn-logging:npm_module_types",
   "//packages/kbn-config-schema:npm_module_types"

@@ -371,6 +371,10 @@ export class RuleTypeRegistry {
       )
     );
   }
+
+  public getAllTypes(): string[] {
+    return [...this.ruleTypes.keys()];
+  }
 }
 
 function normalizedActionVariables(actionVariables: RuleType['actionVariables']) {

@@ -45,7 +45,9 @@ journey('UX Visitor Breakdown', async ({ page, params }) => {
 
   step('Confirm charts are visible', async () => {
     // Wait until chart data is loaded
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForLoadState('networkidle');
+    await waitForLoadingToFinish({ page });
 
     await Promise.all(
       chartIds.map(

@@ -16,7 +16,9 @@
         "type": "Class",
         "tags": [],
         "label": "SavedObjectsRepository",
-        "description": [],
+        "description": [
+          "\nSaved Objects Respositiry - the client entry point for saved object manipulation.\n\nThe SOR calls the Elasticsearch client and leverages extension implementations to\nsupport spaces, security, and encryption features.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-api-server-internal",
@@ -541,6 +543,8 @@
                 "section": "def-server.SavedObjectsFindOptions",
                 "text": "SavedObjectsFindOptions"
               },
+              ", internalOptions?: ",
+              "SavedObjectsFindInternalOptions",
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -570,6 +574,21 @@
                     "section": "def-server.SavedObjectsFindOptions",
                     "text": "SavedObjectsFindOptions"
                   }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.find.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "internalOptions",
+                "description": [],
+                "signature": [
+                  "SavedObjectsFindInternalOptions"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
                 "deprecated": false,
@@ -1051,7 +1070,7 @@
                 "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
                 "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
               },
-              " | undefined) => Promise<",
+              ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "server",
@@ -1101,13 +1120,12 @@
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
                     "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
                     "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
-                  },
-                  " | undefined"
+                  }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -1138,7 +1156,7 @@
                 "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
                 "text": "SavedObjectsUpdateObjectsSpacesOptions"
               },
-              " | undefined) => Promise<",
+              ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "server",
@@ -1218,13 +1236,12 @@
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
                     "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
                     "text": "SavedObjectsUpdateObjectsSpacesOptions"
-                  },
-                  " | undefined"
+                  }
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -1529,7 +1546,7 @@
               "\n{@inheritDoc ISavedObjectsRepository.openPointInTimeForType}"
             ],
             "signature": [
-              "(type: string | string[], { keepAlive, preference }?: ",
+              "(type: string | string[], options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "server",
@@ -1537,6 +1554,8 @@
                 "section": "def-server.SavedObjectsOpenPointInTimeOptions",
                 "text": "SavedObjectsOpenPointInTimeOptions"
               },
+              ", internalOptions?: ",
+              "SavedObjectsFindInternalOptions",
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -1571,7 +1590,7 @@
                 "id": "def-server.SavedObjectsRepository.openPointInTimeForType.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ keepAlive = '5m', preference }",
+                "label": "options",
                 "description": [],
                 "signature": [
                   {
@@ -1581,6 +1600,21 @@
                     "section": "def-server.SavedObjectsOpenPointInTimeOptions",
                     "text": "SavedObjectsOpenPointInTimeOptions"
                   }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "internalOptions",
+                "description": [],
+                "signature": [
+                  "SavedObjectsFindInternalOptions"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
                 "deprecated": false,
@@ -1608,7 +1642,9 @@
                 "section": "def-server.SavedObjectsBaseOptions",
                 "text": "SavedObjectsBaseOptions"
               },
-              " | undefined) => Promise<",
+              " | undefined, internalOptions?: ",
+              "SavedObjectsFindInternalOptions",
+              ") => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "server",
@@ -1658,6 +1694,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.closePointInTime.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "internalOptions",
+                "description": [],
+                "signature": [
+                  "SavedObjectsFindInternalOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -1688,6 +1739,8 @@
                 "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
                 "text": "SavedObjectsCreatePointInTimeFinderDependencies"
               },
+              " | undefined, internalOptions?: ",
+              "SavedObjectsFindInternalOptions",
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -1738,6 +1791,22 @@
                     "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
                     "text": "SavedObjectsCreatePointInTimeFinderDependencies"
                   },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-api-server-internal",
+                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "internalOptions",
+                "description": [],
+                "signature": [
+                  "SavedObjectsFindInternalOptions",
                   " | undefined"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts",

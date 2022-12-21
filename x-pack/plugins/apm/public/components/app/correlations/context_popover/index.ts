@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CorrelationsContextPopover } from './context_popover';
+export { FieldStatsPopover } from './field_stats_popover';

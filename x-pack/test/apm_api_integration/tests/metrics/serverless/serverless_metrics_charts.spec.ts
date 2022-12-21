@@ -177,7 +177,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Compute usage', () => {
         const GBSeconds = 1024 * 1024 * 1024 * 1000;
-        const expectedValue = (memoryTotal * billedDurationMs) / GBSeconds;
         let computeUsageMetric: typeof serverlessMetrics.charts[0] | undefined;
         before(() => {
           computeUsageMetric = serverlessMetrics.charts.find((chart) => {
@@ -185,10 +184,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
         it('returns correct overall value', () => {
+          const expectedValue =
+            ((memoryTotal * billedDurationMs) / GBSeconds) * numberOfTransactionsCreated * 2;
           expect(computeUsageMetric?.series[0].overallValue).to.equal(expectedValue);
         });
 
         it('returns correct mean value', () => {
+          const expectedValue = ((memoryTotal * billedDurationMs) / GBSeconds) * 2;
           const meanValue = meanBy(
             computeUsageMetric?.series[0]?.data.filter((item) => item.y !== 0),
             'y'
@@ -298,7 +300,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('Compute usage', () => {
         const GBSeconds = 1024 * 1024 * 1024 * 1000;
-        const expectedValue = (memoryTotal * billedDurationMs) / GBSeconds;
         let computeUsageMetric: typeof serverlessMetrics.charts[0] | undefined;
         before(() => {
           computeUsageMetric = serverlessMetrics.charts.find((chart) => {
@@ -306,10 +307,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         });
         it('returns correct overall value', () => {
+          const expectedValue =
+            ((memoryTotal * billedDurationMs) / GBSeconds) * numberOfTransactionsCreated;
           expect(computeUsageMetric?.series[0].overallValue).to.equal(expectedValue);
         });
 
         it('returns correct mean value', () => {
+          const expectedValue = (memoryTotal * billedDurationMs) / GBSeconds;
           const meanValue = meanBy(
             computeUsageMetric?.series[0]?.data.filter((item) => item.y !== 0),
             'y'

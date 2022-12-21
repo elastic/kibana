@@ -53,7 +53,7 @@ export const useObjectMetrics = () => {
   };
 };
 
-const formatBytes = (bytes: number, decimals = 0) => {
+export const formatBytes = (bytes: number, decimals = 0) => {
   if (bytes === 0) return '0 Bytes';
 
   const k = 1024;

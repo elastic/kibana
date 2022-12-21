@@ -96,7 +96,9 @@ describe('useActions', () => {
     });
 
     act(() => {
-      userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`));
+      userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`), undefined, {
+        skipPointerEventsCheck: true,
+      });
     });
 
     await waitFor(() => {

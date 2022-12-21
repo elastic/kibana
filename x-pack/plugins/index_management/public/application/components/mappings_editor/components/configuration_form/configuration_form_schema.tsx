@@ -12,10 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../../services/documentation';
-import { FormSchema, FIELD_TYPES, VALIDATION_TYPES, fieldValidators } from '../../shared_imports';
+import { FormSchema, FIELD_TYPES, fieldValidators } from '../../shared_imports';
 import { ComboBoxOption } from '../../types';
 
-const { containsCharsField, isJsonField } = fieldValidators;
+const { isJsonField } = fieldValidators;
 
 const fieldPathComboBoxConfig = {
   helpText: i18n.translate(
@@ -168,20 +168,6 @@ export const configurationFormSchema: FormSchema = {
       ),
       type: FIELD_TYPES.COMBO_BOX,
       defaultValue: ['strict_date_optional_time', 'yyyy/MM/dd HH:mm:ss Z||yyyy/MM/dd Z'],
-      validations: [
-        {
-          validator: containsCharsField({
-            message: i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldValidationErrorMessage',
-              {
-                defaultMessage: 'Spaces are not allowed.',
-              }
-            ),
-            chars: ' ',
-          }),
-          type: VALIDATION_TYPES.ARRAY_ITEM,
-        },
-      ],
     },
   },
   _routing: {

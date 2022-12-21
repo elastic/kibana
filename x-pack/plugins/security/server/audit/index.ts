@@ -16,6 +16,5 @@ export {
   httpRequestEvent,
   savedObjectEvent,
   spaceAuditEvent,
-  SavedObjectAction,
   SpaceAuditAction,
 } from './audit_events';

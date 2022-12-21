@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "outDir": "./target_types",
+    "outDir": "target_types",
     "declaration": true,
     "emitDeclarationOnly": true,
     "types": [

@@ -10,7 +10,7 @@ import { Indicator } from '../../../../../../common/types/indicator';
 import { IndicatorEmptyPrompt } from '../empty_prompt';
 import { IndicatorFieldsTable } from '../fields_table';
 
-export const TABLE_TEST_ID = 'tiFlyoutTableTabRow';
+export const TABLE_TEST_ID = 'tiFlyoutTable';
 
 const search = {
   box: {

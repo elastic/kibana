@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiEmptyPrompt } from '@elastic/eui';
 import {
   ExpressionRendererEvent,
-  ReactExpressionRendererType,
   ReactExpressionRendererProps,
+  ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ExecutionContextSearch } from '@kbn/data-plugin/public';
@@ -41,10 +41,11 @@ export interface ExpressionWrapperProps {
   syncTooltips?: boolean;
   syncCursor?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
+  getCompatibleCellValueActions?: ReactExpressionRendererProps['getCompatibleCellValueActions'];
   style?: React.CSSProperties;
   className?: string;
   canEdit: boolean;
-  onRuntimeError: () => void;
+  onRuntimeError: (message?: string) => void;
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
@@ -116,6 +117,7 @@ export function ExpressionWrapper({
   syncTooltips,
   syncCursor,
   hasCompatibleActions,
+  getCompatibleCellValueActions,
   style,
   className,
   errors,
@@ -148,7 +150,9 @@ export function ExpressionWrapper({
             syncCursor={syncCursor}
             executionContext={executionContext}
             renderError={(errorMessage, error) => {
-              onRuntimeError();
+              const messages = getOriginalRequestErrorMessages(error);
+              onRuntimeError(messages[0] ?? errorMessage);
+
               return (
                 <div data-test-subj="expression-renderer-error">
                   <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
@@ -156,7 +160,7 @@ export function ExpressionWrapper({
                       <EuiIcon type="alert" color="danger" />
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      {(getOriginalRequestErrorMessages(error) || [errorMessage]).map((message) => (
+                      {messages.map((message) => (
                         <EuiText size="s">{message}</EuiText>
                       ))}
                     </EuiFlexItem>
@@ -166,6 +170,7 @@ export function ExpressionWrapper({
             }}
             onEvent={handleEvent}
             hasCompatibleActions={hasCompatibleActions}
+            getCompatibleCellValueActions={getCompatibleCellValueActions}
           />
         </div>
       )}

@@ -6,7 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { schema } from '@kbn/config-schema';
 import datemath, { Unit } from '@kbn/datemath';
 import { IKibanaResponse, SavedObjectsClientContract } from '@kbn/core/server';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -15,7 +14,8 @@ import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { getMonitors } from '../common';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { ConfigKey, OverviewStatus } from '../../../common/runtime_types';
+import { ConfigKey, OverviewStatus, OverviewStatusMetaData } from '../../../common/runtime_types';
+import { QuerySchema, MonitorsQuery } from '../common';
 
 /**
  * Helper function that converts a monitor's schedule to a value to use to generate
@@ -35,8 +35,8 @@ export async function queryMonitorStatus(
   esClient: UptimeEsClient,
   maxLocations: number,
   maxPeriod: number,
-  ids: Array<string | undefined>
-): Promise<Pick<OverviewStatus, 'up' | 'down'>> {
+  ids: string[]
+): Promise<Omit<OverviewStatus, 'disabledCount'>> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / maxLocations);
   const pageCount = Math.ceil(ids.length / idSize);
   const promises: Array<Promise<any>> = [];
@@ -92,7 +92,7 @@ export async function queryMonitorStatus(
                       },
                     ],
                     _source: {
-                      includes: ['@timestamp', 'summary'],
+                      includes: ['@timestamp', 'summary', 'monitor', 'observer', 'config_id'],
                     },
                   },
                 },
@@ -107,20 +107,37 @@ export async function queryMonitorStatus(
   }
   let up = 0;
   let down = 0;
+  const upConfigs: Record<string, OverviewStatusMetaData> = {};
+  const downConfigs: Record<string, OverviewStatusMetaData> = {};
   for await (const response of promises) {
     response.aggregations?.id.buckets.forEach(({ location }: { key: string; location: any }) => {
       location.buckets.forEach(({ status }: { key: string; status: any }) => {
         const downCount = status.hits.hits[0]._source.summary.down;
         const upCount = status.hits.hits[0]._source.summary.up;
+        const configId = status.hits.hits[0]._source.config_id;
+        const monitorQueryId = status.hits.hits[0]._source.monitor.id;
+        const locationName = status.hits.hits[0]._source.observer?.geo?.name;
         if (upCount > 0) {
           up += 1;
+          upConfigs[`${configId}-${locationName}`] = {
+            configId,
+            monitorQueryId,
+            location: locationName,
+            status: 'up',
+          };
         } else if (downCount > 0) {
           down += 1;
+          downConfigs[`${configId}-${locationName}`] = {
+            configId,
+            monitorQueryId,
+            location: locationName,
+            status: 'down',
+          };
         }
       });
     });
   }
-  return { up, down };
+  return { up, down, upConfigs, downConfigs, enabledIds: ids };
 }
 
 /**
@@ -132,10 +149,12 @@ export async function queryMonitorStatus(
 export async function getStatus(
   uptimeEsClient: UptimeEsClient,
   savedObjectsClient: SavedObjectsClientContract,
-  syntheticsMonitorClient: SyntheticsMonitorClient
+  syntheticsMonitorClient: SyntheticsMonitorClient,
+  params: MonitorsQuery
 ) {
+  const { query } = params;
   let monitors;
-  const enabledIds: Array<string | undefined> = [];
+  const enabledIds: string[] = [];
   let disabledCount = 0;
   let page = 1;
   let maxPeriod = 0;
@@ -153,6 +172,13 @@ export async function getStatus(
         page,
         sortField: 'name.keyword',
         sortOrder: 'asc',
+        query,
+        fields: [
+          ConfigKey.ENABLED,
+          ConfigKey.LOCATIONS,
+          ConfigKey.MONITOR_QUERY_ID,
+          ConfigKey.SCHEDULE,
+        ],
       },
       syntheticsMonitorClient.syntheticsService,
       savedObjectsClient
@@ -162,14 +188,14 @@ export async function getStatus(
       if (monitor.attributes[ConfigKey.ENABLED] === false) {
         disabledCount += monitor.attributes[ConfigKey.LOCATIONS].length;
       } else {
-        enabledIds.push(monitor.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id);
-        maxLocations = Math.max(maxLocations, monitor.attributes.locations.length);
-        maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes.schedule));
+        enabledIds.push(monitor.attributes[ConfigKey.MONITOR_QUERY_ID]);
+        maxLocations = Math.max(maxLocations, monitor.attributes[ConfigKey.LOCATIONS].length);
+        maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes[ConfigKey.SCHEDULE]));
       }
     });
   } while (monitors.saved_objects.length === monitors.per_page);
 
-  const { up, down } = await queryMonitorStatus(
+  const { up, down, upConfigs, downConfigs } = await queryMonitorStatus(
     uptimeEsClient,
     maxLocations,
     maxPeriod,
@@ -177,9 +203,12 @@ export async function getStatus(
   );
 
   return {
+    enabledIds,
     disabledCount,
     up,
     down,
+    upConfigs,
+    downConfigs,
   };
 }
 
@@ -187,16 +216,18 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs:
   method: 'GET',
   path: SYNTHETICS_API_URLS.OVERVIEW_STATUS,
   validate: {
-    query: schema.object({}),
+    query: QuerySchema,
   },
   handler: async ({
     uptimeEsClient,
     savedObjectsClient,
     syntheticsMonitorClient,
     response,
+    request,
   }): Promise<IKibanaResponse<OverviewStatus>> => {
+    const params = request.query;
     return response.ok({
-      body: await getStatus(uptimeEsClient, savedObjectsClient, syntheticsMonitorClient),
+      body: await getStatus(uptimeEsClient, savedObjectsClient, syntheticsMonitorClient, params),
     });
   },
 });

@@ -95,15 +95,13 @@ function createRule(shouldWriteAlerts: boolean = true) {
       scheduleActions.mockClear();
 
       state = ((await type.executor({
-        alertId: 'alertId',
-        createdBy: 'createdBy',
         executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
         logger: loggerMock.create(),
-        name: 'name',
         namespace: 'namespace',
         params: {},
         previousStartedAt,
         rule: {
+          id: 'alertId',
           actions: [],
           consumer: 'consumer',
           createdAt,
@@ -135,8 +133,6 @@ function createRule(shouldWriteAlerts: boolean = true) {
         spaceId: 'spaceId',
         startedAt,
         state,
-        tags: ['tags'],
-        updatedBy: 'updatedBy',
       })) ?? {}) as Record<string, any>;
 
       previousStartedAt = startedAt;
@@ -239,6 +235,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.action": "open",
               "event.kind": "signal",
               "kibana.alert.duration.us": 0,
+              "kibana.alert.flapping": false,
               "kibana.alert.instance.id": "opbeans-java",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
@@ -270,6 +267,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.action": "open",
               "event.kind": "signal",
               "kibana.alert.duration.us": 0,
+              "kibana.alert.flapping": false,
               "kibana.alert.instance.id": "opbeans-node",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",

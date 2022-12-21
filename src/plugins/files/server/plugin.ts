@@ -14,28 +14,45 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 
+import { AnalyticsServiceStart } from '@kbn/core/server';
 import { PLUGIN_ID } from '../common/constants';
 import {
   setFileKindsRegistry,
   getFileKindsRegistry,
   FileKindsRegistryImpl,
 } from '../common/file_kinds_registry';
+import { registerDefaultFileKinds } from '../common/register_default_file_kinds';
 
 import { BlobStorageService } from './blob_storage_service';
 import { FileServiceFactory } from './file_service';
-import type { FilesPluginSetupDependencies, FilesSetup, FilesStart } from './types';
+import type {
+  FilesPluginSetupDependencies,
+  FilesPluginStartDependencies,
+  FilesSetup,
+  FilesStart,
+} from './types';
 
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes, registerFileKindRoutes } from './routes';
 import { Counters, registerUsageCollector } from './usage';
 
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
+  private static analytics?: AnalyticsServiceStart;
   private readonly logger: Logger;
   private fileServiceFactory: undefined | FileServiceFactory;
   private securitySetup: FilesPluginSetupDependencies['security'];
+  private securityStart: FilesPluginStartDependencies['security'];
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+  }
+
+  public static getAnalytics() {
+    return this.analytics;
+  }
+
+  private static setAnalytics(analytics: AnalyticsServiceStart) {
+    this.analytics = analytics;
   }
 
   public setup(
@@ -50,6 +67,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
       PLUGIN_ID,
       async (ctx, req) => {
         return {
+          security: this.securityStart,
           fileService: {
             asCurrentUser: () => this.fileServiceFactory!.asScoped(req),
             asInternalUser: () => this.fileServiceFactory!.asInternal(),
@@ -74,6 +92,9 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
       getFileService: () => this.fileServiceFactory?.asInternal(),
     });
 
+    // Now that everything is set up:
+    registerDefaultFileKinds();
+
     return {
       registerFileKind(fileKind) {
         getFileKindsRegistry().register(fileKind);
@@ -81,8 +102,10 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
     };
   }
 
-  public start(coreStart: CoreStart): FilesStart {
-    const { savedObjects } = coreStart;
+  public start(coreStart: CoreStart, { security }: FilesPluginStartDependencies): FilesStart {
+    const { savedObjects, analytics } = coreStart;
+    this.securityStart = security;
+    FilesPlugin.setAnalytics(analytics);
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const blobStorageService = new BlobStorageService(
       esClient,

@@ -18,7 +18,7 @@ import {
   TRACE_ID,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -106,7 +106,17 @@ export async function getAggregatedCriticalPath({
             map_script: {
               source: `
                 String toHash (def item) {
-                  return item.toString();
+                  long FNV_32_INIT = 0x811c9dc5L;
+                  long FNV_32_PRIME = 0x01000193L;
+                  char[] chars = item.toString().toCharArray();
+                  long rv = FNV_32_INIT;
+                  int len = chars.length;
+                  for(int i = 0; i < len; i++) {
+                      byte bt = (byte) chars[i];
+                      rv ^= bt;
+                      rv *= FNV_32_PRIME;
+                  }
+                  return rv.toString();
                 }
                 
                 def id;
@@ -160,7 +170,17 @@ export async function getAggregatedCriticalPath({
             reduce_script: {
               source: `
                 String toHash (def item) {
-                  return item.toString();
+                  long FNV_32_INIT = 0x811c9dc5L;
+                  long FNV_32_PRIME = 0x01000193L;
+                  char[] chars = item.toString().toCharArray();
+                  long rv = FNV_32_INIT;
+                  int len = chars.length;
+                  for(int i = 0; i < len; i++) {
+                      byte bt = (byte) chars[i];
+                      rv ^= bt;
+                      rv *= FNV_32_PRIME;
+                  }
+                  return rv.toString();
                 }
                 
                 def processEvent (def context, def event) {

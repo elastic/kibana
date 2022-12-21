@@ -21,7 +21,7 @@ import { Direction } from '../../../common/search_strategy';
 import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
 import type { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import type { TGridModel } from '../store/data_table/model';
+import type { DataTableModel } from '../store/data_table/model';
 
 export const mockOpenTimelineQueryResults = {
   totalCount: 11,
@@ -2030,7 +2030,7 @@ export const mockTimelineModel: TimelineModel = {
   version: '1',
 };
 
-export const mockTGridModel: TGridModel = {
+export const mockDataTableModel: DataTableModel = {
   columns: mockTimelineModelColumns,
   defaultColumns: mockTimelineModelColumns,
   dataViewId: null,
@@ -2073,6 +2073,7 @@ export const mockTGridModel: TGridModel = {
   title: 'Test rule',
   showCheckboxes: false,
   selectAll: false,
+  totalCount: 0,
 };
 
 export const mockGetOneTimelineResult: TimelineResult = {

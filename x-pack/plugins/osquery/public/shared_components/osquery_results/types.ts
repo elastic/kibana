@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import type { AlertEcsData } from '../../common/contexts';
+
 export interface OsqueryActionResultsProps {
   agentIds?: string[];
   ruleName?: string[];
   alertId: string;
+  ecsData: AlertEcsData;
 }

@@ -11,7 +11,7 @@ import type {
   FieldCapsResponse,
   TermsEnumRequest,
   TermsEnumResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ValuesType } from 'utility-types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
@@ -88,7 +88,7 @@ export class APMEventClient {
   private readonly esClient: ElasticsearchClient;
   private readonly debug: boolean;
   private readonly request: KibanaRequest;
-  private readonly indices: ApmIndicesConfig;
+  public readonly indices: ApmIndicesConfig;
   private readonly includeFrozen: boolean;
   private readonly forceSyntheticSource: boolean;
 

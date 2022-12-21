@@ -97,7 +97,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
     );
 
     await act(async () => {
-      wrapper.find('[data-test-subj="swimlaneConfigureMapping"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="swimlaneConfigureMapping"]').first().simulate('click');
       await nextTick();
       wrapper.update();
     });
@@ -144,7 +144,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
     );
 
     await act(async () => {
-      wrapper.find('[data-test-subj="swimlaneConfigureMapping"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="swimlaneConfigureMapping"]').first().simulate('click');
       await nextTick();
       wrapper.update();
     });
@@ -190,7 +190,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
     );
 
     await act(async () => {
-      wrapper.find('[data-test-subj="swimlaneConfigureMapping"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="swimlaneConfigureMapping"]').first().simulate('click');
       await nextTick();
       wrapper.update();
     });
@@ -256,7 +256,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
     });
 
     await act(async () => {
-      wrapper.find('[data-test-subj="swimlaneConfigureMapping"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="swimlaneConfigureMapping"]').first().simulate('click');
       await nextTick();
       wrapper.update();
     });

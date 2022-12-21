@@ -41,6 +41,7 @@ describe('opsgenie action params validation', () => {
       errors: {
         'subActionParams.message': [],
         'subActionParams.alias': [],
+        jsonEditorError: [],
       },
     });
   });
@@ -57,6 +58,7 @@ describe('opsgenie action params validation', () => {
       errors: {
         'subActionParams.message': [],
         'subActionParams.alias': [],
+        jsonEditorError: [],
       },
     });
   });
@@ -71,6 +73,7 @@ describe('opsgenie action params validation', () => {
       errors: {
         'subActionParams.message': ['Message is required.'],
         'subActionParams.alias': [],
+        jsonEditorError: [],
       },
     });
   });
@@ -85,6 +88,21 @@ describe('opsgenie action params validation', () => {
       errors: {
         'subActionParams.message': [],
         'subActionParams.alias': ['Alias is required.'],
+        jsonEditorError: [],
+      },
+    });
+  });
+
+  it('sets the jsonEditorError when the jsonEditorError field is set to true', async () => {
+    const actionParams = {
+      jsonEditorError: true,
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        'subActionParams.message': [],
+        'subActionParams.alias': [],
+        jsonEditorError: ['JSON editor error exists'],
       },
     });
   });

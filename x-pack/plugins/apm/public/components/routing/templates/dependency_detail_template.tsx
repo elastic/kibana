@@ -6,21 +6,22 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ApmMainTemplate } from './apm_main_template';
-import { SpanIcon } from '../../shared/span_icon';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
-import { SearchBar } from '../../shared/search_bar';
+import React from 'react';
 import {
   getKueryBarBoolFilter,
   kueryBarPlaceholder,
 } from '../../../../common/dependencies';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { useOperationBreakdownEnabledSetting } from '../../../hooks/use_operations_breakdown_enabled_setting';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { BetaBadge } from '../../shared/beta_badge';
+import { SearchBar } from '../../shared/search_bar';
+import { SpanIcon } from '../../shared/span_icon';
+import { ApmMainTemplate } from './apm_main_template';
 
 interface Props {
   children: React.ReactNode;
@@ -90,6 +91,7 @@ export function DependencyDetailTemplate({ children }: Props) {
           isSelected:
             path === '/dependencies/operations' ||
             path === '/dependencies/operation',
+          append: <BetaBadge icon="beta" />,
         },
       ]
     : [];

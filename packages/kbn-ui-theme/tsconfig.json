@@ -3,8 +3,7 @@
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "./target_types",
-    "stripInternal": true,
+    "outDir": "target_types",
     "types": ["node"]
   },
   "include": [

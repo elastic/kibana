@@ -47,7 +47,10 @@ describe('rule_quick_edit_buttons', () => {
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
+        onEnable={async () => {}}
+        onDisable={async () => {}}
         setRulesToDelete={() => {}}
+        setRulesToDeleteFilter={() => {}}
         setRulesToUpdateAPIKey={() => {}}
         setRulesToSnooze={() => {}}
         setRulesToUnsnooze={() => {}}
@@ -61,10 +64,10 @@ describe('rule_quick_edit_buttons', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="enableAll"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="disableAll"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkEnable"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkDisable"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="updateAPIKeys"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="deleteAll"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkDelete"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="bulkSnooze"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="bulkUnsnooze"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').exists()).toBeTruthy();
@@ -84,7 +87,10 @@ describe('rule_quick_edit_buttons', () => {
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
+        onEnable={async () => {}}
+        onDisable={async () => {}}
         setRulesToDelete={() => {}}
+        setRulesToDeleteFilter={() => {}}
         setRulesToUpdateAPIKey={() => {}}
         setRulesToSnooze={() => {}}
         setRulesToUnsnooze={() => {}}
@@ -98,8 +104,8 @@ describe('rule_quick_edit_buttons', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="enableAll"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="disableAll"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="bulkEnable"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkDisable"]').exists()).toBeTruthy();
   });
 
   it('disables the disable/enable/delete bulk actions if in select all mode', async () => {
@@ -115,7 +121,10 @@ describe('rule_quick_edit_buttons', () => {
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
+        onEnable={async () => {}}
+        onDisable={async () => {}}
         setRulesToDelete={() => {}}
+        setRulesToDeleteFilter={() => {}}
         setRulesToUpdateAPIKey={() => {}}
         setRulesToSnooze={() => {}}
         setRulesToUnsnooze={() => {}}
@@ -129,8 +138,8 @@ describe('rule_quick_edit_buttons', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="disableAll"]').first().prop('isDisabled')).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="deleteAll"]').first().prop('isDisabled')).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkEnable"]').first().prop('isDisabled')).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="bulkDelete"]').first().prop('isDisabled')).toBeFalsy();
     expect(wrapper.find('[data-test-subj="updateAPIKeys"]').first().prop('isDisabled')).toBeFalsy();
     expect(wrapper.find('[data-test-subj="bulkSnooze"]').first().prop('isDisabled')).toBeFalsy();
     expect(wrapper.find('[data-test-subj="bulkUnsnooze"]').first().prop('isDisabled')).toBeFalsy();
@@ -156,7 +165,10 @@ describe('rule_quick_edit_buttons', () => {
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
+        onEnable={async () => {}}
+        onDisable={async () => {}}
         setRulesToDelete={() => {}}
+        setRulesToDeleteFilter={() => {}}
         setRulesToSnooze={setRulesToSnooze}
         setRulesToUnsnooze={setRulesToUnsnooze}
         setRulesToSchedule={setRulesToSchedule}
@@ -206,7 +218,10 @@ describe('rule_quick_edit_buttons', () => {
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
+        onEnable={async () => {}}
+        onDisable={async () => {}}
         setRulesToDelete={() => {}}
+        setRulesToDeleteFilter={() => {}}
         setRulesToSnooze={setRulesToSnooze}
         setRulesToUnsnooze={setRulesToUnsnooze}
         setRulesToSchedule={setRulesToSchedule}
