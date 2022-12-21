@@ -25,19 +25,8 @@ module.exports = {
   // An array of file extensions your modules use
   moduleFileExtensions: ['ts', 'tsx', 'js', 'mjs', 'json', 'node'],
 
-  // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
-    '^@elastic/eui/lib/(.*)?': '@elastic/eui/test-env/$1',
-    '^@elastic/eui$': '@elastic/eui/test-env',
-    '^elastic-apm-node$': '<rootDir>/packages/kbn-test/src/jest/mocks/apm_agent_mock.ts',
-    '\\.module.(css|scss)$': '<rootDir>/packages/kbn-test/src/jest/mocks/css_module_mock.js',
-    '\\.(css|less|scss)$': '<rootDir>/packages/kbn-test/src/jest/mocks/style_mock.js',
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-      '<rootDir>/packages/kbn-test/src/jest/mocks/file_mock.js',
-    '\\.ace\\.worker$': '<rootDir>/packages/kbn-test/src/jest/mocks/worker_module_mock.js',
-    '\\.editor\\.worker(\\.js)?$':
-      '<rootDir>/packages/kbn-test/src/jest/mocks/worker_module_mock.js',
-    '^(!!)?file-loader!': '<rootDir>/packages/kbn-test/src/jest/mocks/file_mock.js',
+    // do not use these, they're so slow. We have a custom resolver that can handle resolving different types of requests.
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
