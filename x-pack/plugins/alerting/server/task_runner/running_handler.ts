@@ -1,4 +1,3 @@
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,15 +5,15 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository, Logger } from "../../../../../src/core/server";
-import { partiallyUpdateAlert } from "../saved_objects/partially_update_alert";
+import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { partiallyUpdateAlert } from '../saved_objects/partially_update_alert';
 
 const TIME_TO_WAIT = 2000;
 
 export class RunningHandler {
   private client: ISavedObjectsRepository;
   private logger: Logger;
-  private ruleTypeId: string
+  private ruleTypeId: string;
 
   private runningTimeoutId?: NodeJS.Timeout;
   private isUpdating: boolean = false;
@@ -25,7 +24,6 @@ export class RunningHandler {
     this.logger = logger;
     this.ruleTypeId = ruleTypeId;
   }
-
 
   public start(ruleId: string, namespace?: string) {
     this.runningTimeoutId = setTimeout(() => {
@@ -64,5 +62,4 @@ export class RunningHandler {
       this.logger.error(`error updating running attribute rule for ${this.ruleTypeId}:${ruleId} ${err.message}`);
     })
   }
-
 }

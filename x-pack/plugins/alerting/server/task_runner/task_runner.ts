@@ -666,7 +666,7 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId))
+    this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
     const runDate = new Date();
     this.logger.debug(`executing rule ${this.ruleType.id}:${ruleId} at ${runDate.toISOString()}`);
 
