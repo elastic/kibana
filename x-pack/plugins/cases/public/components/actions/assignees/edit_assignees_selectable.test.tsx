@@ -378,4 +378,20 @@ describe('EditAssigneesSelectable', () => {
       unSelectedItems: ['123'],
     });
   });
+
+  it('remove all assignees', async () => {
+    const result = appMock.render(<EditAssigneesSelectable {...propsMultipleCases} />);
+
+    expect(result.getByRole('button', { name: 'Remove all assignees' })).toBeInTheDocument();
+    userEvent.click(result.getByRole('button', { name: 'Remove all assignees' }));
+
+    expect(propsMultipleCases.onChangeAssignees).toBeCalledTimes(1);
+    expect(propsMultipleCases.onChangeAssignees).toBeCalledWith({
+      selectedItems: [],
+      unSelectedItems: [
+        'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+        'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
+      ],
+    });
+  });
 });

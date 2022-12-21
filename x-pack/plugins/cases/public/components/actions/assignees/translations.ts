@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 export { CANCEL, UNKNOWN } from '../../../common/translations';
 export { EDITED_CASES, SELECTED_CASES, SAVE_SELECTION } from '../translations';
+export { REMOVE_ASSIGNEES } from '../../user_profiles/translations';
 
 export const EDIT_ASSIGNEES = i18n.translate('xpack.cases.actions.assignees.edit', {
   defaultMessage: 'Edit assignees',

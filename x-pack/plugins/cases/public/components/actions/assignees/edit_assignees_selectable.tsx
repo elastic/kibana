@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   useEuiTheme,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -95,7 +96,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
     [searchResultUserProfiles, userProfiles]
   );
 
-  const { options, totalSelectedItems, onChange } = useItemsState({
+  const { options, totalSelectedItems, onChange, onSelectNone } = useItemsState({
     items: userProfileIds,
     selectedCases,
     fieldSelector: (theCase) => theCase.assignees.map(({ uid }) => uid),
@@ -212,6 +213,21 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
                 <EuiText size="xs" color="subdued">
                   {i18n.SELECTED_ASSIGNEES(totalSelectedItems)}
                 </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
+                <EuiFlexGroup
+                  responsive={false}
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="flexEnd"
+                  gutterSize="xs"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty size="xs" flush="right" onClick={onSelectNone}>
+                      {i18n.REMOVE_ASSIGNEES}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
