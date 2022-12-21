@@ -481,6 +481,14 @@ export function App({
           title={persistedDoc?.title}
           lensInspector={lensInspector}
           currentDoc={currentDoc}
+          isCurrentStateDirty={
+            !isLensEqual(
+              persistedDoc,
+              lastKnownDoc,
+              data.query.filterManager.inject.bind(data.query.filterManager),
+              datasourceMap
+            )
+          }
           goBackToOriginatingApp={goBackToOriginatingApp}
           contextOriginatingApp={contextOriginatingApp}
           initialContextIsEmbedded={initialContextIsEmbedded}

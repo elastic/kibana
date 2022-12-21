@@ -94,9 +94,12 @@ export const downloadCsvShareProvider = ({
       csvEnabled: boolean;
     };
 
-    const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
-      defaultMessage: 'CSV Download',
-    });
+    const panelTitle = i18n.translate(
+      'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
+      {
+        defaultMessage: 'CSV Download',
+      }
+    );
 
     return [
       {

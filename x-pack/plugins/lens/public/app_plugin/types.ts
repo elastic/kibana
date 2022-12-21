@@ -122,6 +122,7 @@ export interface LensTopNavMenuProps {
   indexPatternService: IndexPatternServiceAPI;
   onTextBasedSavedAndExit: ({ onSave }: { onSave: () => void }) => Promise<void>;
   shortUrlService?: (params: LensAppLocatorParams) => Promise<string>;
+  isCurrentStateDirty: boolean;
 }
 
 export interface HistoryLocationState {

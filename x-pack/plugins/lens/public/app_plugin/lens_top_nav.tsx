@@ -192,7 +192,7 @@ function getLensTopNavConfig(options: {
 
   if (actions.share.visible) {
     topNavMenu.push({
-      label: i18n.translate('x-pack.lens.app.shareTitle', {
+      label: i18n.translate('xpack.lens.app.shareTitle', {
         defaultMessage: 'Share',
       }),
       run: actions.share.execute,
@@ -285,6 +285,7 @@ export const LensTopNavMenu = ({
   currentDoc,
   onTextBasedSavedAndExit,
   shortUrlService,
+  isCurrentStateDirty,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -637,7 +638,7 @@ export const LensTopNavMenu = ({
                 defaultMessage: 'Lens visualization',
               }),
               sharingData,
-              isDirty: false,
+              isDirty: isCurrentStateDirty,
               showPublicUrlSwitch: () => false,
               onClose: () => {
                 anchorElement?.focus();
@@ -781,6 +782,7 @@ export const LensTopNavMenu = ({
     data.search.session,
     activeDatasourceId,
     currentDoc?.savedObjectId,
+    isCurrentStateDirty,
     datasourceMap,
     onAppLeave,
     runSave,
