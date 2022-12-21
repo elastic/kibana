@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { EuiText, EuiRadio, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
+import { EuiButton, EuiText, EuiRadio, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from './translations';
 import { ExceptionsAddToListsTable } from '../add_to_lists_table';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 interface ExceptionsAddToListsOptionsComponentProps {
   rulesCount: number;
@@ -27,13 +28,14 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
   onListsSelectionChange,
   onRadioChange,
 }): JSX.Element => {
+  const { navigateToApp } = useKibana().services.application;
   return (
     <>
       <EuiRadio
         id="add_to_lists"
         label={
           <EuiFlexGroup
-            alignItems="center"
+            alignItems="flexStart"
             gutterSize="s"
             responsive={false}
             ata-test-subj="addToListsRadioOptionLabel"
@@ -54,6 +56,19 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
                 type="iInCircle"
                 data-test-subj="addToListsOptionTooltip"
               />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {sharedLists.length === 0 && (
+                <EuiButton
+                  iconType="popout"
+                  iconSide="right"
+                  onClick={() =>
+                    navigateToApp('security', { openInNewTab: true, path: '/exceptions' })
+                  }
+                >
+                  {i18n.GO_TO_EXCEPTIONS}
+                </EuiButton>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         }

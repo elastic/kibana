@@ -14,6 +14,13 @@ export const ADD_TO_LISTS_OPTION = i18n.translate(
   }
 );
 
+export const GO_TO_EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsOptions.gotToSharedExceptions',
+  {
+    defaultMessage: 'Manage shared exceptions',
+  }
+);
+
 export const ADD_TO_LISTS_OPTION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsOptions.addToListsTooltip',
   {
