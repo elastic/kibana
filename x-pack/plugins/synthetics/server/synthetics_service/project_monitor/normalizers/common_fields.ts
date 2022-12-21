@@ -21,6 +21,7 @@ import {
 } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
+import { i18n } from '@kbn/i18n';
 
 export interface NormalizedProjectProps {
   locations: Locations;
@@ -114,13 +115,27 @@ export const getMonitorLocations = ({
     .map((loc) => formatLocation(loc!)) as BrowserFields[ConfigKey.LOCATIONS];
 };
 
+const UNSUPPORTED_OPTION_TITLE = i18n.translate(
+  'xpack.synthetics.projectMonitorApi.validation.unsupportedOption.title',
+  {
+    defaultMessage: 'Unsupported Heartbeat option',
+  }
+);
+
+const INVALID_CONFIGURATION_TITLE = i18n.translate(
+  'xpack.synthetics.projectMonitorApi.validation.invalidConfiguration.title',
+  {
+    defaultMessage: 'Invalid Heartbeat configuration',
+  }
+);
+
 export const getUnsupportedKeysError = (
   monitor: ProjectMonitor,
   unsupportedKeys: string[],
   version: string
 ) => ({
   id: monitor.id,
-  reason: 'Unsupported Heartbeat option',
+  reason: UNSUPPORTED_OPTION_TITLE,
   details: `The following Heartbeat options are not supported for ${
     monitor.type
   } project monitors in ${version}: ${unsupportedKeys.join(
@@ -134,13 +149,13 @@ export const getMultipleUrlsOrHostsError = (
   version: string
 ) => ({
   id: monitor.id,
-  reason: 'Unsupported Heartbeat option',
+  reason: INVALID_CONFIGURATION_TITLE,
   details: `Multiple ${key} are not supported for ${
     monitor.type
   } project monitors in ${version}. Please set only 1 ${key.slice(
     0,
     -1
-  )} per monitor. You monitor was not created or updated.`,
+  )} per monitor. Your monitor was not created or updated.`,
 });
 
 export const getNoUrlsOrHostsError = (
@@ -149,8 +164,8 @@ export const getNoUrlsOrHostsError = (
   version: string
 ) => ({
   id: monitor.id,
-  reason: 'Unsupported Heartbeat option',
-  details: `Monitor must specify 1 ${key} for ${monitor.type} project monitors in ${version}. You monitor was not created or updated.`,
+  reason: INVALID_CONFIGURATION_TITLE,
+  details: `Monitor must specify 1 ${key} for ${monitor.type} project monitors in ${version}. Your monitor was not created or updated.`,
 });
 
 export const getValueInSeconds = (value: string) => {
