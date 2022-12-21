@@ -37,7 +37,7 @@ export const useLensAttributes = ({
   scopeId?: SourcererScopeName;
   alertsOptions?: AlertsOptions;
 }): LensAttributes | null => {
-  const { selectedPatterns, dataViewId } = useSourcererDataView(scopeId);
+  const { selectedPatterns, dataViewId, indicesExist } = useSourcererDataView(scopeId);
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -111,5 +111,5 @@ export const useLensAttributes = ({
     dataViewId,
   ]);
 
-  return lensAttrsWithInjectedData;
+  return indicesExist ? lensAttrsWithInjectedData : null;
 };

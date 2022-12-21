@@ -8,8 +8,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -152,7 +154,16 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             showInspector={false}
           />
         </LensComponentWrapper>
-      ) : null}
+      ) : (
+        <EuiEmptyPrompt
+          body={
+            <FormattedMessage
+              id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
+              defaultMessage="No data to display"
+            />
+          }
+        />
+      )}
       {isShowingModal && requests.request !== null && responses.response !== null && (
         <ModalInspectQuery
           additionalRequests={requests.additionalRequests}
