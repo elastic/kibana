@@ -26,7 +26,7 @@ export const buildNewVarDefinition = (ind: number): AutocompleteCommandDefinitio
 
 export const pipeDefinition: AutocompleteCommandDefinition = {
   label: '|',
-  insertText: '| ',
+  insertText: '|',
   kind: 1,
   detail: i18n.translate('monaco.esql.autocomplete.pipeDoc', {
     defaultMessage: 'Pipe (|)',
@@ -37,7 +37,7 @@ export const pipeDefinition: AutocompleteCommandDefinition = {
 export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
   {
     label: 'stats',
-    insertText: 'stats ',
+    insertText: 'stats',
     kind: 1,
     detail: i18n.translate('monaco.esql.autocomplete.statsDoc', {
       defaultMessage:
@@ -53,7 +53,7 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
   },
   {
     label: 'limit',
-    insertText: 'limit ',
+    insertText: 'limit',
     kind: 1,
     detail: i18n.translate('monaco.esql.autocomplete.limitDoc', {
       defaultMessage:
@@ -66,7 +66,7 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
   },
   {
     label: 'eval',
-    insertText: 'eval ',
+    insertText: 'eval',
     kind: 1,
     detail: i18n.translate('monaco.esql.autocomplete.evalDoc', {
       defaultMessage:
@@ -81,7 +81,7 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
   },
   {
     label: 'sort',
-    insertText: 'sort ',
+    insertText: 'sort',
     kind: 1,
     detail: i18n.translate('monaco.esql.autocomplete.sortDoc', {
       defaultMessage:
@@ -98,7 +98,7 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
   },
   {
     label: 'where',
-    insertText: 'where ',
+    insertText: 'where',
     kind: 1,
     detail: i18n.translate('monaco.esql.autocomplete.whereDoc', {
       defaultMessage:

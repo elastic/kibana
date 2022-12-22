@@ -338,13 +338,15 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     for (const s of ctx.userDefinedVariables.sourceIdentifiers) {
       if (s) {
         try {
-          resultData = [...resultData, ...(await dataViews.get(s)).fields.map((f) => f.name)];
+          const [dataView] = await dataViews.find(s, 1);
+          if (dataView) {
+            resultData = [...resultData, ...dataView.fields.map((f) => f.name)];
+          }
         } catch (e) {
           // nothing to be here
         }
       }
     }
-
     return resultData;
   };
 

@@ -14,7 +14,7 @@ import type { AutocompleteCommandDefinition } from '../types';
 export const sourceCommandsDefinitions: AutocompleteCommandDefinition[] = [
   {
     label: 'from',
-    insertText: 'from ',
+    insertText: 'from',
     kind: 0,
     detail: i18n.translate('monaco.esql.autocomplete.fromDoc', {
       defaultMessage:
