@@ -14,7 +14,6 @@ import { FieldMap } from '../field_maps/types';
 
 const PLUGIN_DIR = path.resolve(path.join(__dirname, '..'));
 const ALERT_SCHEMA_FILE = 'schemas/alert_schema.ts';
-const ECS_SCHEMA_FILE = 'schemas/ecs_schema.ts';
 
 const createSchema = (outputFile: string, fieldMap: FieldMap, schemaPrefix: string) => {
   const lineWriters = {
