@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { cloneDeep } from 'lodash/fp';
-import type { EuiLinkAnchorProps } from '@elastic/eui';
+import type { EuiMarkdownFormatProps, EuiLinkAnchorProps } from '@elastic/eui';
 import { EuiMarkdownFormat } from '@elastic/eui';
 import { MarkdownLink } from './markdown_link';
 import { usePlugins } from './use_plugins';
@@ -15,7 +15,7 @@ import { usePlugins } from './use_plugins';
 interface Props {
   children: string;
   disableLinks?: boolean;
-  textSize?: 's' | 'xs' | 'm' | 'relative' | undefined;
+  textSize?: EuiMarkdownFormatProps['textSize'];
 }
 
 const withDisabledLinks = (disableLinks?: boolean): React.FC<EuiLinkAnchorProps> => {
