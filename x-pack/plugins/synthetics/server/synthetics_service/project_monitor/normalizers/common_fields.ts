@@ -154,7 +154,7 @@ export const getInvalidUrlsOrHostsError = (
     'xpack.synthetics.projectMonitorApi.validation.invalidUrlOrHosts.description',
     {
       defaultMessage:
-        '{monitorType} project monitors must have exactly one value for field `{key}` in version `{version}`. Your monitor was not created or updated.',
+        '`{monitorType}` project monitors must have exactly one value for field `{key}` in version `{version}`. Your monitor was not created or updated.',
       values: {
         monitorType: monitor.type,
         key,

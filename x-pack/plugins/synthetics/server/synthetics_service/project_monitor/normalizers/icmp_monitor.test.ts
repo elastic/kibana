@@ -185,7 +185,7 @@ describe('icmp normalizers', () => {
           errors: [
             {
               details:
-                'icmp project monitors must have exactly one value for field `hosts` in version `8.5.0`. Your monitor was not created or updated.',
+                '`icmp` project monitors must have exactly one value for field `hosts` in version `8.5.0`. Your monitor was not created or updated.',
               id: 'Cloudflare-DNS-3',
               reason: 'Invalid Heartbeat configuration',
             },

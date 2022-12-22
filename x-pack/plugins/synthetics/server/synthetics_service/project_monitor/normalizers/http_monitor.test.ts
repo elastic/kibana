@@ -130,7 +130,7 @@ describe('http normalizers', () => {
           errors: [
             {
               details:
-                'http project monitors must have exactly one value for field `urls` in version `8.5.0`. Your monitor was not created or updated.',
+                '`http` project monitors must have exactly one value for field `urls` in version `8.5.0`. Your monitor was not created or updated.',
               id: 'my-monitor-2',
               reason: 'Invalid Heartbeat configuration',
             },
