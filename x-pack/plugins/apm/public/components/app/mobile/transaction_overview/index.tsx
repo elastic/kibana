@@ -21,17 +21,18 @@ import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transact
 import { MobileTransactionCharts } from '../../../shared/charts/transaction_charts/mobile_transaction_charts';
 import { TransactionsTable } from '../../../shared/transactions_table';
 import { replace } from '../../../shared/links/url_helpers';
+import { useKueryWithFilters } from '../../../../hooks/use_kuery_with_filters';
 
 export function MobileTransactionOverview() {
   const {
     query: {
       environment,
-      kuery,
       rangeFrom,
       rangeTo,
       transactionType: transactionTypeFromUrl,
     },
   } = useApmParams('/mobile-services/{serviceName}/transactions');
+  const kueryWithFilters = useKueryWithFilters();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -60,7 +61,7 @@ export function MobileTransactionOverview() {
         </>
       )}
       <MobileTransactionCharts
-        kuery={kuery}
+        kuery={kueryWithFilters}
         environment={environment}
         start={start}
         end={end}
@@ -72,7 +73,7 @@ export function MobileTransactionOverview() {
           numberOfTransactionsPerPage={25}
           showAggregationAccurateCallout
           environment={environment}
-          kuery={kuery}
+          kuery={kueryWithFilters}
           start={start}
           end={end}
           saveTableOptionsToUrl
