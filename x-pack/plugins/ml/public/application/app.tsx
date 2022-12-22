@@ -26,7 +26,7 @@ import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
-
+import { ML_STORAGE_KEYS } from '../../common/types/storage';
 export type MlDependencies = Omit<
   MlSetupDependencies,
   'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing'

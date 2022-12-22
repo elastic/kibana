@@ -7,7 +7,7 @@
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 
 import {
@@ -24,8 +24,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useStorage } from '@kbn/ml-local-storage';
-import { setFullTimeRange } from './full_time_range_selector_service';
-import { useDataVisualizerKibana } from '../../../kibana_context';
+import { setFullTimeRange } from '../services/full_time_range_selector_service';
+import { useMlDatePickerContext } from '../hooks/use_ml_date_picker_context';
 import {
   DV_FROZEN_TIER_PREFERENCE,
   FROZEN_TIER_PREFERENCE,
@@ -54,10 +54,8 @@ export const FullTimeRangeSelector: FC<Props> = ({
   callback,
 }) => {
   const {
-    services: {
-      notifications: { toasts },
-    },
-  } = useDataVisualizerKibana();
+    notifications: { toasts },
+  } = useMlDatePickerContext();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   const setRange = useCallback(
