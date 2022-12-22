@@ -694,15 +694,13 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private setupParams(node: ProcessableStatementNode, name: string): NonBlockHelperOptions;
   private setupParams(node: ProcessableNode, name: string): AmbiguousHelperOptions;
   private setupParams(node: ProcessableNode, name: string): AmbiguousHelperOptions {
-    const options = Object.assign(
-      {
-        name,
-        hash: this.getHash(node),
-        data: this.runtimeOptions!.data,
-        loc: { start: node.loc.start, end: node.loc.end },
-      },
-      this.defaultHelperOptions
-    );
+    const options = {
+      name,
+      hash: this.getHash(node),
+      data: this.runtimeOptions!.data,
+      loc: { start: node.loc.start, end: node.loc.end },
+      ...this.defaultHelperOptions,
+    };
 
     if (isBlock(node)) {
       // TODO: Is there a way in TypeScript to infer that `options` is `Handlebars.HelperOptions` inside this if-statement. If not, is there a way to just cast once?
