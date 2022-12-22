@@ -7,6 +7,7 @@
  */
 
 import Fs from 'fs';
+import Fsp from 'fs/promises';
 import Path from 'path';
 import { pipeline } from 'stream/promises';
 import { createHash } from 'crypto';
@@ -14,17 +15,29 @@ import * as Rx from 'rxjs';
 import globby from 'globby';
 import { Task } from '../lib';
 
+const readToVersion = (baseDir: string) => async (path: string) => {
+  try {
+    const content = await Fsp.readFile(Path.resolve(baseDir, path), 'utf8');
+    const parsed = JSON.parse(content);
+    return parsed.version || 'missing version field';
+  } catch (error) {
+    throw new Error(`failed to parse package.json file at [${path}]: ${error.message}`);
+  }
+};
+
+const readToHash = (baseDir: string) => async (path: string) => {
+  const hash = createHash('sha1');
+  await pipeline(Fs.createReadStream(Path.resolve(baseDir, path)), hash);
+  return hash.digest('hex');
+};
+
 async function readToEntries(
-  baseDir: string,
-  iter: NodeJS.ReadableStream
+  iter: NodeJS.ReadableStream,
+  map: (path: string) => Promise<string>
 ): Promise<Array<[string, string]>> {
   return await Rx.lastValueFrom(
     (Rx.from(iter) as Rx.Observable<string>).pipe(
-      Rx.mergeMap(async (path): Promise<[string, string]> => {
-        const hash = createHash('sha1');
-        await pipeline(Fs.createReadStream(Path.resolve(baseDir, path)), hash);
-        return [path, hash.digest('hex')];
-      }, 50),
+      Rx.mergeMap(async (path): Promise<[string, string]> => [path, await map(path)], 50),
       Rx.toArray(),
       Rx.map((entries) => entries.sort((a, b) => a[0].localeCompare(b[0])))
     )
@@ -38,23 +51,33 @@ export const CreateCiChecksum: Task = {
       const dir = build.resolvePathForPlatform(platform, '.');
       const dest = build.getPlatformArchivePath(platform) + `.ci-checksum`;
 
-      const [pkgEntries, fileEntries] = await Promise.all([
+      const [npmEntries, pkgEntries, srcEntries] = await Promise.all([
         readToEntries(
-          dir,
           globby.stream(['node_modules/*/package.json', 'node_modules/@*/*/package.json'], {
+            ignore: ['node_modules/@kbn'],
             cwd: dir,
             onlyFiles: true,
             absolute: false,
-          })
+          }),
+          readToVersion(dir)
         ),
         readToEntries(
-          dir,
           globby.stream(['**/*'], {
             ignore: ['node_modules'],
+            cwd: Path.resolve(dir, 'node_modules/@kbn'),
+            onlyFiles: true,
+            absolute: false,
+          }),
+          readToHash(Path.resolve(dir, 'node_modules/@kbn'))
+        ),
+        readToEntries(
+          globby.stream(['**/*'], {
+            ignore: ['node_modules', 'node'],
             cwd: dir,
             onlyFiles: true,
             absolute: false,
-          })
+          }),
+          readToHash(dir)
         ),
       ]);
 
@@ -64,7 +87,7 @@ export const CreateCiChecksum: Task = {
           `dist checksum: ${platform.getBuildName()}`,
           '',
           `root level pkgs:`,
-          ...pkgEntries.map(([path, checksum]) => {
+          ...npmEntries.map(([path, checksum]) => {
             const segs = path.split('/');
             const i = segs.indexOf('node_modules');
             if (i === -1) {
@@ -79,7 +102,7 @@ export const CreateCiChecksum: Task = {
           }),
           ``,
           `files:`,
-          ...fileEntries.map(([path, checksum]) => `  ${path}: ${checksum}`),
+          ...pkgEntries.concat(srcEntries).map(([path, checksum]) => `  ${path}: ${checksum}`),
         ].join('\n')
       );
     }
