@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { APMRouteHandlerResources } from '../typings';
+import { APMRouteHandlerResources } from '../../routes/typings';
 
 export type ApmAlertsClient = Awaited<ReturnType<typeof getApmAlertsClient>>;
 

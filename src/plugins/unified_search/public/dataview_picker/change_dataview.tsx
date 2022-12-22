@@ -302,8 +302,8 @@ export function ChangeDataView({
           isTextBasedLangSelected={isTextBasedLangSelected}
           setPopoverIsOpen={setPopoverIsOpen}
           onChangeDataView={async (newId) => {
-            const dataView = await data.dataViews.get(newId);
-            await data.dataViews.refreshFields(dataView);
+            // refreshing the field list
+            await dataViews.get(newId, undefined, true);
             setSelectedDataViewId(newId);
             setPopoverIsOpen(false);
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {
