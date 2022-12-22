@@ -18,31 +18,30 @@ interface ActionContext {
 
 export const ACTION_UNLINK_BOOK_FROM_LIBRARY = 'ACTION_UNLINK_BOOK_FROM_LIBRARY';
 
-export const createUnlinkBookFromLibraryAction = () =>
-  ({
-    getDisplayName: () =>
-      i18n.translate('embeddableExamples.book.unlinkFromLibrary', {
-        defaultMessage: 'Unlink Book from Library Item',
-      }),
-    id: ACTION_UNLINK_BOOK_FROM_LIBRARY,
-    type: ACTION_UNLINK_BOOK_FROM_LIBRARY,
-    order: 100,
-    getIconType: () => 'folderExclamation',
-    isCompatible: async ({ embeddable }: ActionContext) => {
-      return (
-        embeddable.type === BOOK_EMBEDDABLE &&
-        embeddable.getInput().viewMode === ViewMode.EDIT &&
-        embeddable.getRoot().isContainer &&
-        embeddable.getRoot().type !== DASHBOARD_CONTAINER_TYPE &&
-        isReferenceOrValueEmbeddable(embeddable) &&
-        embeddable.inputIsRefType(embeddable.getInput())
-      );
-    },
-    execute: async ({ embeddable }: ActionContext) => {
-      if (!isReferenceOrValueEmbeddable(embeddable)) {
-        throw new IncompatibleActionError();
-      }
-      const newInput = await embeddable.getInputAsValueType();
-      embeddable.updateInput(newInput);
-    },
-  });
+export const createUnlinkBookFromLibraryAction = () => ({
+  getDisplayName: () =>
+    i18n.translate('embeddableExamples.book.unlinkFromLibrary', {
+      defaultMessage: 'Unlink Book from Library Item',
+    }),
+  id: ACTION_UNLINK_BOOK_FROM_LIBRARY,
+  type: ACTION_UNLINK_BOOK_FROM_LIBRARY,
+  order: 100,
+  getIconType: () => 'folderExclamation',
+  isCompatible: async ({ embeddable }: ActionContext) => {
+    return (
+      embeddable.type === BOOK_EMBEDDABLE &&
+      embeddable.getInput().viewMode === ViewMode.EDIT &&
+      embeddable.getRoot().isContainer &&
+      embeddable.getRoot().type !== DASHBOARD_CONTAINER_TYPE &&
+      isReferenceOrValueEmbeddable(embeddable) &&
+      embeddable.inputIsRefType(embeddable.getInput())
+    );
+  },
+  execute: async ({ embeddable }: ActionContext) => {
+    if (!isReferenceOrValueEmbeddable(embeddable)) {
+      throw new IncompatibleActionError();
+    }
+    const newInput = await embeddable.getInputAsValueType();
+    embeddable.updateInput(newInput);
+  },
+});

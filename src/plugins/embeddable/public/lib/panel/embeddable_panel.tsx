@@ -164,12 +164,14 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       return;
     }
 
-    type BadgeAction = Action<EmbeddableContext<IEmbeddable<EmbeddableInput, EmbeddableOutput, any>>>;
+    type BadgeAction = Action<
+      EmbeddableContext<IEmbeddable<EmbeddableInput, EmbeddableOutput, any>>
+    >;
 
     let badges: BadgeAction[] =
-      (await this.props.getActions?.(PANEL_BADGE_TRIGGER, {
+      ((await this.props.getActions?.(PANEL_BADGE_TRIGGER, {
         embeddable: this.props.embeddable,
-      })) as BadgeAction[] ?? [];
+      })) as BadgeAction[]) ?? [];
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -191,12 +193,14 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       return;
     }
 
-    type NotificationAction = Action<EmbeddableContext<IEmbeddable<EmbeddableInput, EmbeddableOutput, any>>>;
+    type NotificationAction = Action<
+      EmbeddableContext<IEmbeddable<EmbeddableInput, EmbeddableOutput, any>>
+    >;
 
     let notifications: NotificationAction[] =
-      (await this.props.getActions?.(PANEL_NOTIFICATION_TRIGGER, {
+      ((await this.props.getActions?.(PANEL_NOTIFICATION_TRIGGER, {
         embeddable: this.props.embeddable,
-      })) as NotificationAction[] ?? [];
+      })) as NotificationAction[]) ?? [];
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {

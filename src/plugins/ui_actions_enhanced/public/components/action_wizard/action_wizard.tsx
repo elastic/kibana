@@ -298,11 +298,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
       )}
       <EuiSpacer size="m" />
       <div>
-        <actionFactory.CollectConfig
-          config={config}
-          onConfig={onConfigChange}
-          context={context}
-        />
+        <actionFactory.CollectConfig config={config} onConfig={onConfigChange} context={context} />
       </div>
     </div>
   );

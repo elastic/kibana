@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-
 import { ViewMode } from '../../types';
 import { IEmbeddable } from '../..';
 

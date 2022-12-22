@@ -37,7 +37,9 @@ const visualizeAction = new ActionInternal({
   getHref: async () => '/app/test',
 });
 
-jest.spyOn(uiActions, 'getTriggerCompatibleActions').mockResolvedValue([visualizeAction as ActionInternal<object>]);
+jest
+  .spyOn(uiActions, 'getTriggerCompatibleActions')
+  .mockResolvedValue([visualizeAction as ActionInternal<object>]);
 jest.spyOn(uiActions, 'getTrigger').mockReturnValue({
   id: ACTION_VISUALIZE_LENS_FIELD,
   exec: mockExecuteAction,

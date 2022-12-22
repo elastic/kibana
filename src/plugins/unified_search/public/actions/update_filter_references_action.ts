@@ -24,7 +24,9 @@ export interface UpdateFilterReferencesActionContext extends ActionExecutionMeta
   defaultDataView?: string;
 }
 
-export function createUpdateFilterReferencesAction(filterManager: FilterManager): UiActionsActionDefinition<UpdateFilterReferencesActionContext> {
+export function createUpdateFilterReferencesAction(
+  filterManager: FilterManager
+): UiActionsActionDefinition<UpdateFilterReferencesActionContext> {
   return {
     type: UPDATE_FILTER_REFERENCES_ACTION,
     id: UPDATE_FILTER_REFERENCES_ACTION,
