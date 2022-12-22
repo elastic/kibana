@@ -198,7 +198,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private blockParamValues: any[][] = [];
   private ast?: hbs.AST.Program;
   private container: Container;
-  private defaultHelperOptions: Partial<NonBlockHelperOptions> = {};
+  private defaultHelperOptions: Pick<NonBlockHelperOptions, 'lookupProperty'>;
   private processedRootDecorators = false; // Root decorators should not have access to input arguments. This flag helps us detect them.
   private processedDecoratorsForProgram = new Set(); // It's important that a given program node only has its decorators run once, we use this Map to keep track of them
 
@@ -282,7 +282,9 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       hooks: {},
     });
 
-    this.defaultHelperOptions.lookupProperty = container.lookupProperty;
+    this.defaultHelperOptions = {
+      lookupProperty: container.lookupProperty,
+    };
   }
 
   render(context: any, options: ExtendedRuntimeOptions = {}): string {
@@ -692,18 +694,15 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private setupParams(node: ProcessableStatementNode, name: string): NonBlockHelperOptions;
   private setupParams(node: ProcessableNode, name: string): AmbiguousHelperOptions;
   private setupParams(node: ProcessableNode, name: string): AmbiguousHelperOptions {
-    // TODO: Is this the way to type `options` based on `node`?
-    type OptionsReturnType = typeof node extends hbs.AST.BlockStatement
-      ? Handlebars.HelperOptions
-      : NonBlockHelperOptions;
-    // TODO: I have to use `Partial` because `lookupProperty` (which is a required property of `OptionsReturnType`) isn't defined when the `options` object is first constructed.
-    // But it's added via the `Object.assign` at the end. But is this way to do make TypeScript happy in this scenario?
-    const options: Partial<OptionsReturnType> = {
-      name,
-      hash: this.getHash(node),
-      data: this.runtimeOptions!.data,
-      loc: { start: node.loc.start, end: node.loc.end },
-    };
+    const options = Object.assign(
+      {
+        name,
+        hash: this.getHash(node),
+        data: this.runtimeOptions!.data,
+        loc: { start: node.loc.start, end: node.loc.end },
+      },
+      this.defaultHelperOptions
+    );
 
     if (isBlock(node)) {
       // TODO: Is there a way in TypeScript to infer that `options` is `Handlebars.HelperOptions` inside this if-statement. If not, is there a way to just cast once?
@@ -715,7 +714,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         this.processDecorators(node.inverse, (options as Handlebars.HelperOptions).inverse);
     }
 
-    return Object.assign(options, this.defaultHelperOptions) as OptionsReturnType;
+    return options;
   }
 
   private generateProgramFunction(program: hbs.AST.Program) {
