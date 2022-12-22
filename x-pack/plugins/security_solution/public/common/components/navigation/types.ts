@@ -101,6 +101,7 @@ export type GenericNavRecord = Record<string, NavTab>;
 export interface SecuritySolutionTabNavigationProps {
   display?: 'default' | 'condensed';
   navTabs: GenericNavRecord;
+  tabName?: SiemRouteType;
 }
 
 export type NavigateToUrl = (url: string) => void;

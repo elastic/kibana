@@ -96,6 +96,7 @@ export const SecuritySolutionTabNavigation: React.FC<SecuritySolutionTabNavigati
 
       return <SecuritySolutionTabNavigationRedux {...stateNavReduxProps} />;
     },
-    (prevProps, nextProps) => deepEqual(prevProps.navTabs, nextProps.navTabs)
+    (prevProps, nextProps) =>
+      deepEqual(prevProps.navTabs, nextProps.navTabs) && prevProps.tabName === nextProps.tabName
   );
 SecuritySolutionTabNavigation.displayName = 'SecuritySolutionTabNavigation';

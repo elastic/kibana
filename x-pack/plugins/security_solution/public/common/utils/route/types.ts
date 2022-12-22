@@ -9,6 +9,7 @@ import type * as H from 'history';
 import type React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 
+import type { AllRulesTabs } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
 import type { TimelineType } from '../../../../common/types/timeline';
 
 import type { HostsTableType } from '../../../explore/hosts/store/model';
@@ -25,7 +26,8 @@ export type SiemRouteType =
   | AlertDetailRouteType
   | TimelineType
   | AdministrationType
-  | UsersTableType;
+  | UsersTableType
+  | AllRulesTabs;
 export interface RouteSpyState {
   pageName: SecurityPageName;
   detailName: string | undefined;

@@ -68,7 +68,7 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(({ activeTab
 
   return (
     <ToolbarLayout>
-      <SecuritySolutionTabNavigation navTabs={allRulesTabs} />
+      <SecuritySolutionTabNavigation navTabs={allRulesTabs} tabName={activeTab} />
       <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
         <EuiSwitch
           data-test-subj={

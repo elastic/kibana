@@ -40,11 +40,6 @@ const RulesSubRoutes = [
     exact: true,
   },
   {
-    path: '/rules/:tabName',
-    main: RulesPage,
-    exact: false,
-  },
-  {
     path: '/rules',
     main: RulesPage,
     exact: false,
