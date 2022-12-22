@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { DatePickerWrapper } from './src/components/date_picker_wrapper';
+export { MlDatePickerContextProvider } from './src/hooks/use_ml_date_picker_context';
+export { MlDatePickerWrapper } from './src/components/ml_date_picker_wrapper';

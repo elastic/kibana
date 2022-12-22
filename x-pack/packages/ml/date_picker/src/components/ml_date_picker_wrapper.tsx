@@ -35,11 +35,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState } from '@kbn/ml-url-state';
 
-import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../../hooks/use_time_filter';
-import { useKibanaDatePicker } from '../../hooks/kibana_context';
-import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
+import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../hooks/use_time_filter';
+import { useMlDatePickerContext } from '../hooks/use_ml_date_picker_context';
+import { dataVisualizerRefresh$ } from '../services/timefilter_refresh_service';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5000;
+const DATE_PICKER_MAX_WIDTH = 540;
 
 interface TimePickerQuickRange {
   from: string;
@@ -74,19 +75,19 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
   dataVisualizerRefresh$.next({ lastRefresh: Date.now(), timeRange });
 }
 
-// FIXME: Consolidate this component with ML and AIOps's component
-export const DatePickerWrapper: FC<{ isAutoRefreshOnly?: boolean; showRefresh?: boolean }> = ({
-  isAutoRefreshOnly,
-  showRefresh,
-}) => {
+export const DatePickerWrapper: FC<{
+  isAutoRefreshOnly?: boolean;
+  showRefresh?: boolean;
+  compact?: boolean;
+}> = ({ isAutoRefreshOnly, showRefresh, compact = false }) => {
   const {
-    services,
+    data,
     notifications: { toasts },
-  } = useKibanaDatePicker();
-  const config = services.uiSettings;
-  const theme$ = services.theme.theme$;
+    theme: { theme$ },
+    uiSettings: config,
+  } = useMlDatePickerContext();
 
-  const { timefilter, history } = services.data.query.timefilter;
+  const { timefilter, history } = data.query.timefilter;
 
   const [globalState, setGlobalState] = useUrlState('_g');
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(history);
@@ -149,7 +150,7 @@ export const DatePickerWrapper: FC<{ isAutoRefreshOnly?: boolean; showRefresh?: 
       // Only warn about short interval with enabled auto-refresh.
       if (!isTooShort || refreshInterval.pause) return;
 
-      toasts.warning({
+      toasts.addWarning({
         title: i18n.translate(
           'xpack.dataVisualizer.index.datePicker.shortRefreshIntervalURLWarningMessage',
           {
@@ -248,9 +249,18 @@ export const DatePickerWrapper: FC<{ isAutoRefreshOnly?: boolean; showRefresh?: 
     <EuiFlexGroup
       gutterSize="s"
       alignItems="center"
-      className="mlNavigationMenu__datePickerWrapper"
+      data-test-subj="mlNavigationMenuDatePickerWrapper"
     >
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        grow={false}
+        css={
+          compact
+            ? {
+                maxWidth: DATE_PICKER_MAX_WIDTH,
+              }
+            : null
+        }
+      >
         <EuiSuperDatePicker
           start={time.from}
           end={time.to}
@@ -263,6 +273,7 @@ export const DatePickerWrapper: FC<{ isAutoRefreshOnly?: boolean; showRefresh?: 
           recentlyUsedRanges={recentlyUsedRanges}
           dateFormat={dateFormat}
           commonlyUsedRanges={commonlyUsedRanges}
+          updateButtonProps={{ iconOnly: compact }}
         />
       </EuiFlexItem>
 

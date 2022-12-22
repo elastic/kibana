@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs/operators';
-import { useDataVisualizerKibana } from '../../kibana_context';
+import { useMlDatePickerContext } from './use_ml_date_picker_context';
 
 interface UseTimefilterOptions {
   timeRangeSelector?: boolean;
@@ -19,8 +19,8 @@ export const useTimefilter = ({
   timeRangeSelector,
   autoRefreshSelector,
 }: UseTimefilterOptions = {}) => {
-  const { services } = useDataVisualizerKibana();
-  const { timefilter } = services.data.query.timefilter;
+  const { data } = useMlDatePickerContext();
+  const { timefilter } = data.query.timefilter;
 
   useEffect(() => {
     if (timeRangeSelector === true) {

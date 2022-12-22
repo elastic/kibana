@@ -26,6 +26,7 @@ import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
+import { MlDatePickerContextProvider, MlDatePickerWrapper } from '@kbn/ml-date-picker';
 
 import { useStorage } from '@kbn/ml-local-storage';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
@@ -57,7 +58,6 @@ import { OMIT_FIELDS } from '../../../../../common/constants';
 import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
-import { DatePickerWrapper } from '../../../common/components/date_picker_wrapper';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
@@ -147,7 +147,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { services } = useDataVisualizerKibana();
-  const { notifications, uiSettings, data } = services;
+  const { notifications, uiSettings, data, theme } = services;
   const { toasts } = notifications;
 
   const [dataVisualizerListState, setDataVisualizerListState] =
@@ -484,30 +484,32 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             </EuiPageContentHeaderSection>
 
             {compact ? <EuiSpacer size="m" /> : null}
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="s"
-              data-test-subj="dataVisualizerTimeRangeSelectorSection"
-            >
-              {hasValidTimeField ? (
+            <MlDatePickerContextProvider deps={{ data, notifications, theme, uiSettings }}>
+              <EuiFlexGroup
+                alignItems="center"
+                justifyContent="flexEnd"
+                gutterSize="s"
+                data-test-subj="dataVisualizerTimeRangeSelectorSection"
+              >
+                {hasValidTimeField ? (
+                  <EuiFlexItem grow={false}>
+                    <FullTimeRangeSelector
+                      dataView={currentDataView}
+                      query={undefined}
+                      disabled={false}
+                      timefilter={timefilter}
+                    />
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
-                  <FullTimeRangeSelector
-                    dataView={currentDataView}
-                    query={undefined}
-                    disabled={false}
-                    timefilter={timefilter}
+                  <MlDatePickerWrapper
+                    isAutoRefreshOnly={!hasValidTimeField}
+                    showRefresh={!hasValidTimeField}
+                    compact={compact}
                   />
                 </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem grow={false}>
-                <DatePickerWrapper
-                  isAutoRefreshOnly={!hasValidTimeField}
-                  showRefresh={!hasValidTimeField}
-                  compact={compact}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              </EuiFlexGroup>
+            </MlDatePickerContextProvider>
           </EuiPageContentHeader>
         </EuiFlexItem>
       </EuiFlexGroup>
