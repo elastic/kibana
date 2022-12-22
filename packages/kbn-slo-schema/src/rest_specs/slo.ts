@@ -64,7 +64,7 @@ const findSLOParamsSchema = t.partial({
   }),
 });
 
-const getSLOResponseSchema = t.type({
+const SLOResponseSchema = t.type({
   id: t.string,
   name: t.string,
   description: t.string,
@@ -72,12 +72,18 @@ const getSLOResponseSchema = t.type({
   time_window: timeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
-  settings: settingsSchema,
-  summary: summarySchema,
   revision: t.number,
+  settings: settingsSchema,
   created_at: dateType,
   updated_at: dateType,
 });
+
+const SLOWithSummaryResponseSchema = t.intersection([
+  SLOResponseSchema,
+  t.type({ summary: summarySchema }),
+]);
+
+const getSLOResponseSchema = SLOWithSummaryResponseSchema;
 
 const updateSLOParamsSchema = t.type({
   path: t.type({
@@ -94,51 +100,31 @@ const updateSLOParamsSchema = t.type({
   }),
 });
 
-const updateSLOResponseSchema = t.type({
-  id: t.string,
-  name: t.string,
-  description: t.string,
-  indicator: indicatorSchema,
-  time_window: timeWindowSchema,
-  budgeting_method: budgetingMethodSchema,
-  objective: objectiveSchema,
-  settings: settingsSchema,
-  revision: t.number,
-  created_at: dateType,
-  updated_at: dateType,
-});
+const updateSLOResponseSchema = SLOResponseSchema;
 
 const findSLOResponseSchema = t.type({
   page: t.number,
   per_page: t.number,
   total: t.number,
-  results: t.array(
-    t.type({
-      id: t.string,
-      name: t.string,
-      description: t.string,
-      indicator: indicatorSchema,
-      time_window: timeWindowSchema,
-      budgeting_method: budgetingMethodSchema,
-      objective: objectiveSchema,
-      summary: summarySchema,
-      settings: settingsSchema,
-      revision: t.number,
-      created_at: dateType,
-      updated_at: dateType,
-    })
-  ),
+  results: t.array(SLOWithSummaryResponseSchema),
 });
+
+type SLOResponse = t.OutputOf<typeof SLOResponseSchema>;
+type SLOWithSummaryResponse = t.OutputOf<typeof SLOWithSummaryResponseSchema>;
 
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
+
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
+
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
+
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
 export {
+  SLOResponseSchema,
   createSLOParamsSchema,
   deleteSLOParamsSchema,
   getSLOParamsSchema,
@@ -149,6 +135,8 @@ export {
   findSLOResponseSchema,
 };
 export type {
+  SLOResponse,
+  SLOWithSummaryResponse,
   CreateSLOParams,
   CreateSLOResponse,
   GetSLOResponse,
