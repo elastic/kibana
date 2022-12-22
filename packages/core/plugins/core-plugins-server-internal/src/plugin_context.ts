@@ -194,7 +194,12 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerProvider: deps.capabilities.registerProvider,
       registerSwitcher: deps.capabilities.registerSwitcher,
     },
-    customBranding: deps.customBranding,
+    customBranding: {
+      register: () => {
+        deps.customBranding.register(plugin.name);
+      },
+      setUiSettingsKeys: (uiSettingsKeys) => deps.customBranding.setUiSettingsKeys(uiSettingsKeys),
+    },
     docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,

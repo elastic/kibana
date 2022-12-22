@@ -24,7 +24,7 @@ import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-s
 import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
 import type { InternalUiSettingsServiceSetup } from '@kbn/core-ui-settings-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
+import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -46,5 +46,5 @@ export interface InternalCoreSetup {
   metrics: InternalMetricsServiceSetup;
   deprecations: InternalDeprecationsServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
-  customBranding: CustomBrandingSetup;
+  customBranding: InternalCustomBrandingSetup;
 }

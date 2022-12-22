@@ -10,6 +10,7 @@ import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-s
 import type { InternalUiSettingsServiceStart } from '@kbn/core-ui-settings-server-internal';
 
 /** @public */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CustomBrandingStart {}
 
 export interface CustomBrandingStartDeps {
@@ -20,4 +21,5 @@ export interface CustomBrandingStartDeps {
 /** @public */
 export interface CustomBrandingSetup {
   register: () => void;
+  setUiSettingsKeys: (uiSettingsKeys: string[]) => void;
 }

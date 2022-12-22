@@ -19,10 +19,19 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 
+/**
+ * @internal
+ */
+export interface InternalCustomBrandingSetup {
+  register: (pluginName: string) => void;
+  setUiSettingsKeys: (uiSettingsKeys: string[]) => void;
+}
+
 export class CustomBrandingService {
-  private pluginRegistered: boolean = false;
+  private pluginName: string | undefined;
   private savedObjects?: InternalSavedObjectsServiceStart;
   private uiSettings?: InternalUiSettingsServiceStart;
+  private settingsKeys?: string[];
   private logger: Logger;
 
   constructor(coreContext: CoreContext) {
@@ -30,10 +39,9 @@ export class CustomBrandingService {
   }
 
   private getBrandingFrom = async (uiSettingsClient: IUiSettingsClient) => {
-    const keys = ['logo', 'customizedLogo', 'pageTitle', 'faviconPNG', 'faviconSVG'];
     const branding: CustomBranding = {};
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
+    for (let i = 0; i < this.settingsKeys!.length; i++) {
+      const key = this.settingsKeys![i];
       const fullKey = `customBranding:${key}`;
       // @ts-expect-error
       branding[key] = await uiSettingsClient.get(fullKey);
@@ -42,34 +50,29 @@ export class CustomBrandingService {
   };
 
   public getBrandingFor = async (request: KibanaRequest): Promise<CustomBranding> => {
-    this.logger.info('getBrandingFor');
-    if (!this.pluginRegistered) {
+    if (!this.pluginName || this.pluginName !== 'customBranding' || !this.settingsKeys) {
       return {};
     }
     const soClient = this.savedObjects!.getScopedClient(request);
     const uiSettings = this.uiSettings!.globalAsScopedToClient(soClient);
-    const branding = await this.getBrandingFrom(uiSettings);
-    return branding;
+    return await this.getBrandingFrom(uiSettings);
   };
 
-  /**
-   * @public
-   */
-  public setup(): CustomBrandingSetup {
-    this.logger.info('CustomBrandingService setup');
+  public setup(): InternalCustomBrandingSetup {
     return {
-      register: () => {
-        if (this.pluginRegistered) {
+      register: (pluginName) => {
+        this.logger.info('CustomBrandingService registering plugin: ' + pluginName);
+        if (this.pluginName) {
           throw new Error('Another plugin already registered');
         }
-        this.pluginRegistered = true;
+        this.pluginName = pluginName;
+      },
+      setUiSettingsKeys: (uiSettingsKeys: string[]) => {
+        this.settingsKeys = uiSettingsKeys;
       },
     };
   }
 
-  /**
-   * @public
-   */
   public start({ savedObjects, uiSettings }: CustomBrandingStartDeps): CustomBrandingStart {
     this.savedObjects = savedObjects;
     this.uiSettings = uiSettings;
