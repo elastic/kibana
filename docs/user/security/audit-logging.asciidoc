@@ -248,6 +248,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has accessed an alert as part of a search operation.
 | `failure` | User is not authorized to access alerts.
 
+.2+| `case_bulk_get`
+| `success` | User has accessed multiple case.
+| `failure` | User is not authorized to access multiple case.
+
 3+a|
 ===== Category: web
 

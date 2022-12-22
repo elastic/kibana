@@ -287,5 +287,18 @@ describe('utils', () => {
       const res = getAuthorizedAndUnauthorizedSavedObjects(cases, authorizedEntities);
       expect(res).toEqual([[{ id: '1' }], [{ id: '2' }, { id: '3' }]]);
     });
+
+    it('partitions authorized and unauthorized cases correctly when there are not authorized entities', () => {
+      const cases = [{ id: '1' }, { id: '2' }, { id: '3' }] as unknown as SavedObject[];
+
+      const res = getAuthorizedAndUnauthorizedSavedObjects(cases, []);
+      expect(res).toEqual([[], cases]);
+    });
+
+    it('partitions authorized and unauthorized cases correctly when there are no saved objects', () => {
+      const authorizedEntities = [{ id: '1', owner: 'cases' }];
+      const res = getAuthorizedAndUnauthorizedSavedObjects([], authorizedEntities);
+      expect(res).toEqual([[], []]);
+    });
   });
 });

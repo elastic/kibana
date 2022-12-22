@@ -122,7 +122,7 @@ export class Authorization {
 
   /**
    *
-   * Returns all authorized entities for an operation. It throws if the user is not authorized
+   * Returns all authorized entities for an operation. It throws error if the user is not authorized
    * to any of the owners
    *
    * @param entities an array of entities describing the case owners in conjunction with the saved object ID attempting

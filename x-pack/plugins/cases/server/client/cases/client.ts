@@ -62,7 +62,7 @@ export interface CasesSubClient {
    */
   resolve(params: GetParams): Promise<ICaseResolveResponse>;
   /**
-   * Retrieves a single case with the specified ID.
+   * Retrieves multiple cases with the specified IDs.
    */
   bulkGet(params: CasesBulkGetRequest): Promise<ICasesBulkGetResponse>;
   /**

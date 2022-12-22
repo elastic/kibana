@@ -59,8 +59,8 @@ export const bulkGet = async (
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    throwIfCaseIdsReachTheLimit(request.ids);
-    throwIfFieldsAreInvalid(fields);
+    throwErrorIfCaseIdsReachTheLimit(request.ids);
+    throwErrorIfFieldsAreInvalid(fields);
 
     const finalFields = fields?.length ? [...fields, 'id', 'version'] : fields;
     const cases = await caseService.getCases({ caseIds: request.ids, fields: finalFields });
@@ -134,7 +134,7 @@ export const bulkGet = async (
   }
 };
 
-const throwIfFieldsAreInvalid = (fields?: string[]) => {
+const throwErrorIfFieldsAreInvalid = (fields?: string[]) => {
   if (!fields || fields.length === 0) {
     return;
   }
@@ -149,7 +149,7 @@ const throwIfFieldsAreInvalid = (fields?: string[]) => {
   }
 };
 
-const throwIfCaseIdsReachTheLimit = (ids: string[]) => {
+const throwErrorIfCaseIdsReachTheLimit = (ids: string[]) => {
   if (ids.length > MAX_BULK_GET_CASES) {
     throw Boom.badRequest(`Maximum request limit of ${MAX_BULK_GET_CASES} cases reached`);
   }
