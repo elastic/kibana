@@ -134,7 +134,7 @@ export const useExceptionsListCard = ({
       },
       {
         key: 'ManageRules',
-        icon: 'trash',
+        icon: 'gear',
         disabled: listCannotBeEdited,
         label: 'Manage Rules',
         onClick: (e: React.MouseEvent<Element, MouseEvent>) => {

@@ -122,14 +122,6 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       handleManageRules: onManageRules,
     });
 
-    // useEffect(() => {
-    //   const fetchAndSetLinkedRules = async () => {
-    //     const listRules = await getListRules(listId);
-    //     setLinkedRules(listRules);
-    //   };
-    //   fetchAndSetLinkedRules();
-    // }, [listId]);
-
     return (
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
