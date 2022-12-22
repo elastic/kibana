@@ -102,6 +102,7 @@ export type {
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
+  RegistryStreamWithDataStream,
   RegistryPolicyTemplate,
   PackageList,
   PackageListItem,

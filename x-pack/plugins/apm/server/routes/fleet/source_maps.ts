@@ -18,32 +18,26 @@ import { APMPluginStartDependencies } from '../../types';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import { APM_SERVER, PackagePolicy } from './register_fleet_policy_callbacks';
 
-export interface ApmArtifactBody {
+const doUnzip = promisify(unzip);
+
+interface ApmSourceMapArtifactBody {
   serviceName: string;
   serviceVersion: string;
   bundleFilepath: string;
   sourceMap: SourceMap;
 }
 export type ArtifactSourceMap = Omit<Artifact, 'body'> & {
-  body: ApmArtifactBody;
+  body: ApmSourceMapArtifactBody;
 };
 
 export type FleetPluginStart = NonNullable<APMPluginStartDependencies['fleet']>;
 
-const doUnzip = promisify(unzip);
-
-async function unzipArtifactBody(
-  artifact: Artifact
-): Promise<ArtifactSourceMap> {
-  const body = await doUnzip(Buffer.from(artifact.body, 'base64'));
-
-  return {
-    ...artifact,
-    body: JSON.parse(body.toString()) as ApmArtifactBody,
-  };
+export async function getUnzippedArtifactBody(artifactBody: string) {
+  const unzippedBody = await doUnzip(Buffer.from(artifactBody, 'base64'));
+  return JSON.parse(unzippedBody.toString()) as ApmSourceMapArtifactBody;
 }
 
-function getApmArtifactClient(fleetPluginStart: FleetPluginStart) {
+export function getApmArtifactClient(fleetPluginStart: FleetPluginStart) {
   return fleetPluginStart.createArtifactsClient('apm');
 }
 
@@ -66,17 +60,20 @@ export async function listSourceMapArtifacts({
   });
 
   const artifacts = await Promise.all(
-    artifactsResponse.items.map(unzipArtifactBody)
+    artifactsResponse.items.map(async (item) => {
+      const body = await getUnzippedArtifactBody(item.body);
+      return { ...item, body };
+    })
   );
 
   return { artifacts, total: artifactsResponse.total };
 }
 
-export async function createApmArtifact({
+export async function createFleetSourceMapArtifact({
   apmArtifactBody,
   fleetPluginStart,
 }: {
-  apmArtifactBody: ApmArtifactBody;
+  apmArtifactBody: ApmSourceMapArtifactBody;
   fleetPluginStart: FleetPluginStart;
 }) {
   const apmArtifactClient = getApmArtifactClient(fleetPluginStart);
@@ -89,7 +86,7 @@ export async function createApmArtifact({
   });
 }
 
-export async function deleteApmArtifact({
+export async function deleteFleetSourcemapArtifact({
   id,
   fleetPluginStart,
 }: {
@@ -141,12 +138,12 @@ export async function updateSourceMapsOnFleetPolicies({
   core,
   fleetPluginStart,
   savedObjectsClient,
-  elasticsearchClient,
+  internalESClient,
 }: {
   core: { setup: CoreSetup; start: () => Promise<CoreStart> };
   fleetPluginStart: FleetPluginStart;
   savedObjectsClient: SavedObjectsClientContract;
-  elasticsearchClient: ElasticsearchClient;
+  internalESClient: ElasticsearchClient;
 }) {
   const { artifacts } = await listSourceMapArtifacts({ fleetPluginStart });
   const apmFleetPolicies = await getApmPackagePolicies({
@@ -171,7 +168,7 @@ export async function updateSourceMapsOnFleetPolicies({
 
       await fleetPluginStart.packagePolicyService.update(
         savedObjectsClient,
-        elasticsearchClient,
+        internalESClient,
         id,
         updatedPackagePolicy
       );
@@ -179,11 +176,11 @@ export async function updateSourceMapsOnFleetPolicies({
   );
 }
 
-export function getCleanedBundleFilePath(bundleFilePath: string) {
+export function getCleanedBundleFilePath(bundleFilepath: string) {
   try {
-    const cleanedBundleFilepath = new URL(bundleFilePath);
+    const cleanedBundleFilepath = new URL(bundleFilepath);
     return cleanedBundleFilepath.href;
   } catch (e) {
-    return bundleFilePath;
+    return bundleFilepath;
   }
 }

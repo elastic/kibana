@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MonitorOverviewResult, OverviewStatus } from '../../../../../common/runtime_types';
+import { MonitorOverviewResult, OverviewStatusState } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
@@ -31,6 +31,6 @@ export interface MonitorOverviewState {
   loading: boolean;
   loaded: boolean;
   error: IHttpSerializedFetchError | null;
-  status: OverviewStatus | null;
+  status: OverviewStatusState | null;
   statusError: IHttpSerializedFetchError | null;
 }

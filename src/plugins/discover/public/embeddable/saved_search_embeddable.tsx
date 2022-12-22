@@ -153,13 +153,13 @@ export class SavedSearchEmbeddable
       if (titleChanged) {
         this.panelTitle = this.output.title || '';
       }
-      if (
-        this.searchProps &&
-        (titleChanged ||
-          this.isFetchRequired(this.searchProps) ||
-          this.isRerenderRequired(this.searchProps))
-      ) {
-        this.reload();
+      if (!this.searchProps) {
+        return;
+      }
+      const isFetchRequired = this.isFetchRequired(this.searchProps);
+      const isRerenderRequired = this.isRerenderRequired(this.searchProps);
+      if (titleChanged || isFetchRequired || isRerenderRequired) {
+        this.reload(isFetchRequired);
       }
     });
   }
@@ -219,6 +219,7 @@ export class SavedSearchEmbeddable
       : child;
 
     const query = this.savedSearch.searchSource.getField('query');
+    const dataView = this.savedSearch.searchSource.getField('index')!;
     const recordRawType = getRawRecordType(query);
     const useSql = recordRawType === RecordRawType.PLAIN;
 
@@ -227,9 +228,10 @@ export class SavedSearchEmbeddable
       if (useSql && query) {
         const result = await fetchSql(
           this.savedSearch.searchSource.getField('query')!,
-          this.services.dataViews,
+          dataView,
           this.services.data,
           this.services.expressions,
+          this.services.inspector,
           this.input.filters,
           this.input.query
         );
@@ -579,9 +581,9 @@ export class SavedSearchEmbeddable
     }
   }
 
-  public reload() {
+  public reload(forceFetch = true) {
     if (this.searchProps) {
-      this.load(this.searchProps, true);
+      this.load(this.searchProps, forceFetch);
     }
   }
 

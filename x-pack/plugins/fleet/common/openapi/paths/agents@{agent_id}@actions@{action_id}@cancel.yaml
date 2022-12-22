@@ -1,0 +1,23 @@
+parameters:
+  - schema:
+      type: string
+    name: actionId
+    in: path
+    required: true
+post:
+  summary: Agent - Cancel Action
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/agent_action.yaml
+
+  operationId: agent-action-cancel
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml

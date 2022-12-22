@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./population_analysis'));
     loadTestFile(require.resolve('./custom_urls'));
     loadTestFile(require.resolve('./mapping_anomalies'));
+    loadTestFile(require.resolve('./finding_anomalies'));
   });
 }

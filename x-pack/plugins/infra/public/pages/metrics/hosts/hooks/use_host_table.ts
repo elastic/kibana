@@ -16,6 +16,10 @@ export const useHostTable = (nodes: SnapshotNode[]) => {
     return nodes.map(({ metrics, path, name }) => ({
       name,
       os: path.at(-1)?.os ?? '-',
+      title: {
+        name,
+        cloudProvider: path.at(-1)?.cloudProvider ?? null,
+      },
       ...metrics.reduce((data, metric) => {
         data[metric.name as keyof HostMetics] = metric;
         return data;

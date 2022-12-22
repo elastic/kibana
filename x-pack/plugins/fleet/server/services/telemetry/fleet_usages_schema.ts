@@ -7,6 +7,25 @@
 
 import type { RootSchema } from '@kbn/analytics-client';
 
+export const fleetAgentsSchema: RootSchema<any> = {
+  agents_per_version: {
+    properties: {
+      version: {
+        type: 'keyword',
+        _meta: {
+          description: 'Agent version enrolled to this kibana',
+        },
+      },
+      count: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents enrolled that use this version',
+        },
+      },
+    },
+  },
+};
+
 export const fleetUsagesSchema: RootSchema<any> = {
   agents_enabled: { type: 'boolean', _meta: { description: 'agents enabled' } },
   agents: {
@@ -104,13 +123,6 @@ export const fleetUsagesSchema: RootSchema<any> = {
         version: { type: 'keyword' },
         enabled: { type: 'boolean' },
       },
-    },
-  },
-  agent_versions: {
-    type: 'array',
-    items: {
-      type: 'keyword',
-      _meta: { description: 'The agent versions enrolled in this deployment.' },
     },
   },
   agents_per_policy: {

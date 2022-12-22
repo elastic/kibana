@@ -11,7 +11,7 @@ import {
   cleanTestMonitors,
   enableMonitorManagedViaApi,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey('OverviewSorting', async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
@@ -26,22 +26,13 @@ journey('OverviewSorting', async ({ page, params }) => {
     await addTestMonitor(params.kibanaUrl, testMonitor1);
     await addTestMonitor(params.kibanaUrl, testMonitor2);
     await addTestMonitor(params.kibanaUrl, testMonitor3);
-
-    await syntheticsApp.waitForLoadingToFinish();
   });
 
   step('Go to monitor-management', async () => {
-    await syntheticsApp.navigateToOverview();
-  });
-
-  step('login to Kibana', async () => {
-    await syntheticsApp.loginToKibana();
-    const invalid = await page.locator(`text=Username or password is incorrect. Please try again.`);
-    expect(await invalid.isVisible()).toBeFalsy();
+    await syntheticsApp.navigateToOverview(true);
   });
 
   step('sort alphabetical asc', async () => {
-    await syntheticsApp.navigateToOverview();
     await page.waitForSelector(`[data-test-subj="syntheticsOverviewGridItem"]`);
     await page.click('[data-test-subj="syntheticsOverviewSortButton"]');
     await page.click('button:has-text("Alphabetical")');
