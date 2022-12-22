@@ -4,23 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useLoadRules } from './use_load_rules';
+import { useLoadRulesQuery as useLoadRules } from './use_load_rules_query';
 import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
 } from '@kbn/alerting-plugin/common';
 import { RuleStatus } from '../../types';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useKibana } from '../../common/lib/kibana';
+import { IToasts } from '@kbn/core-notifications-browser';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/rules_kuery_filter', () => ({
   loadRulesWithKueryFilter: jest.fn(),
 }));
 
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
 const { loadRulesWithKueryFilter } = jest.requireMock('../lib/rule_api/rules_kuery_filter');
 
-const onError = jest.fn();
 const onPage = jest.fn();
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
+const wrapper = ({ children }: { children: Node }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
 
 const mockedRulesData = [
   {
@@ -233,7 +250,13 @@ const MOCK_RULE_DATA = {
 
 describe('useLoadRules', () => {
   beforeEach(() => {
+    useKibanaMock().services.notifications.toasts = {
+      addDanger: jest.fn(),
+    } as unknown as IToasts;
     loadRulesWithKueryFilter.mockResolvedValue(MOCK_RULE_DATA);
+  });
+  afterEach(() => {
+    queryClient.clear();
     jest.clearAllMocks();
   });
 
@@ -243,37 +266,52 @@ describe('useLoadRules', () => {
         index: 0,
         size: 25,
       },
-      searchText: '',
-      typesFilter: [],
-      actionTypesFilter: [],
-      ruleExecutionStatusesFilter: [],
-      ruleStatusesFilter: [],
-      tagsFilter: [],
+      filters: {
+        searchText: '',
+        types: [],
+        actionTypes: [],
+        ruleExecutionStatuses: [],
+        ruleLastRunOutcomes: [],
+        ruleStatuses: [],
+        tags: [],
+      },
+      onPage: () => {},
+      enabled: true,
+      sort: { field: 'name', direction: 'asc' },
     };
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useLoadRules({
-        ...params,
-        onPage,
-        onError,
-      })
-    );
+    const { result, waitForNextUpdate } = renderHook(() => useLoadRules(params), { wrapper });
 
-    expect(result.current.initialLoad).toBeTruthy();
-    expect(result.current.noData).toBeTruthy();
-    expect(result.current.rulesState.isLoading).toBeFalsy();
+    expect(result.current.rulesState.initialLoad).toBeTruthy();
+    expect(result.current.hasData).toBeFalsy();
+    expect(result.current.rulesState.isLoading).toBeTruthy();
 
     await act(async () => {
       result.current.loadRules();
       await waitForNextUpdate();
     });
 
-    expect(result.current.initialLoad).toBeFalsy();
-    expect(result.current.noData).toBeFalsy();
+    expect(result.current.rulesState.initialLoad).toBeFalsy();
+    expect(result.current.hasData).toBeTruthy();
     expect(result.current.rulesState.isLoading).toBeFalsy();
 
     expect(onPage).toBeCalledTimes(0);
-    expect(loadRulesWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
+    expect(loadRulesWithKueryFilter).toBeCalledWith(
+      expect.objectContaining({
+        page: {
+          index: 0,
+          size: 25,
+        },
+        searchText: '',
+        typesFilter: [],
+        actionTypesFilter: [],
+        ruleExecutionStatusesFilter: [],
+        ruleLastRunOutcomesFilter: [],
+        ruleStatusesFilter: [],
+        tagsFilter: [],
+        sort: { field: 'name', direction: 'asc' },
+      })
+    );
     expect(result.current.rulesState.data).toEqual(expect.arrayContaining(MOCK_RULE_DATA.data));
     expect(result.current.rulesState.totalItemCount).toEqual(MOCK_RULE_DATA.total);
   });
@@ -284,28 +322,43 @@ describe('useLoadRules', () => {
         index: 0,
         size: 25,
       },
-      searchText: 'test',
-      typesFilter: ['type1', 'type2'],
-      actionTypesFilter: ['action1', 'action2'],
-      ruleExecutionStatusesFilter: ['status1', 'status2'],
-      ruleStatusesFilter: ['enabled', 'snoozed'] as RuleStatus[],
-      tagsFilter: ['tag1', 'tag2'],
+      filters: {
+        searchText: 'test',
+        types: ['type1', 'type2'],
+        actionTypes: ['action1', 'action2'],
+        ruleExecutionStatuses: ['status1', 'status2'],
+        ruleLastRunOutcomes: ['outcome1', 'outcome2'],
+        ruleStatuses: ['enabled', 'snoozed'] as RuleStatus[],
+        tags: ['tag1', 'tag2'],
+      },
+      onPage: () => {},
+      enabled: true,
+      sort: { field: 'name', direction: 'asc' },
     };
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useLoadRules({
-        ...params,
-        onPage,
-        onError,
-      })
-    );
+    const { result, waitForNextUpdate } = renderHook(() => useLoadRules(params), { wrapper });
 
     await act(async () => {
       result.current.loadRules();
       await waitForNextUpdate();
     });
 
-    expect(loadRulesWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
+    expect(loadRulesWithKueryFilter).toBeCalledWith(
+      expect.objectContaining({
+        page: {
+          index: 0,
+          size: 25,
+        },
+        searchText: 'test',
+        typesFilter: ['type1', 'type2'],
+        actionTypesFilter: ['action1', 'action2'],
+        ruleExecutionStatusesFilter: ['status1', 'status2'],
+        ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
+        ruleStatusesFilter: ['enabled', 'snoozed'],
+        tagsFilter: ['tag1', 'tag2'],
+        sort: { field: 'name', direction: 'asc' },
+      })
+    );
   });
 
   it('should reset the page if the data is fetched while paged', async () => {
@@ -319,20 +372,25 @@ describe('useLoadRules', () => {
         index: 1,
         size: 25,
       },
-      searchText: '',
-      typesFilter: [],
-      actionTypesFilter: [],
-      ruleExecutionStatusesFilter: [],
-      ruleStatusesFilter: [],
-      tagsFilter: [],
+      filters: {
+        searchText: '',
+        types: [],
+        actionTypes: [],
+        ruleExecutionStatuses: [],
+        ruleLastRunOutcomes: [],
+        ruleStatuses: [],
+        tags: [],
+      },
+      onPage,
+      enabled: true,
+      sort: { field: 'name', direction: 'asc' },
     };
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useLoadRules({
-        ...params,
-        onPage,
-        onError,
-      })
+    const { result, waitForNextUpdate } = renderHook(
+      () => {
+        return useLoadRules(params);
+      },
+      { wrapper }
     );
 
     await act(async () => {
@@ -353,128 +411,95 @@ describe('useLoadRules', () => {
         index: 0,
         size: 25,
       },
-      searchText: '',
-      typesFilter: [],
-      actionTypesFilter: [],
-      ruleExecutionStatusesFilter: [],
-      ruleStatusesFilter: [],
-      tagsFilter: [],
+      filters: {
+        searchText: '',
+        types: [],
+        actionTypes: [],
+        ruleExecutionStatuses: [],
+        ruleLastRunOutcomes: [],
+        ruleStatuses: [],
+        tags: [],
+      },
+      onPage: () => {},
+      enabled: true,
+      sort: { field: 'name', direction: 'asc' },
     };
 
-    const { result } = renderHook(() =>
-      useLoadRules({
-        ...params,
-        onPage,
-        onError,
-      })
-    );
+    const { result } = renderHook(() => useLoadRules(params), { wrapper });
 
     await act(async () => {
       result.current.loadRules();
     });
 
-    expect(onError).toBeCalled();
+    expect(useKibanaMock().services.notifications.toasts.addDanger).toBeCalled();
   });
 
   describe('No data', () => {
-    it('noData should be true, if there is no Filter and no rules', async () => {
+    it('hasData should be false, if there is no Filter and no rules', async () => {
       loadRulesWithKueryFilter.mockResolvedValue({ ...MOCK_RULE_DATA, data: [] });
       const params = {
         page: {
           index: 0,
           size: 25,
         },
-        searchText: '',
-        typesFilter: [],
-        actionTypesFilter: [],
-        ruleExecutionStatusesFilter: [],
-        ruleStatusesFilter: [],
-        tagsFilter: [],
+        filters: {
+          searchText: '',
+          types: [],
+          actionTypes: [],
+          ruleExecutionStatuses: [],
+          ruleLastRunOutcomes: [],
+          ruleStatuses: [],
+          tags: [],
+        },
+        onPage: () => {},
+        enabled: true,
+        sort: { field: 'name', direction: 'asc' },
       };
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useLoadRules({
-          ...params,
-          onPage,
-          onError,
-        })
-      );
+      const { result, waitForNextUpdate } = renderHook(() => useLoadRules(params), { wrapper });
 
-      expect(result.current.noData).toBeTruthy();
+      expect(result.current.hasData).toBeFalsy();
 
       await act(async () => {
         result.current.loadRules();
         await waitForNextUpdate();
       });
 
-      expect(result.current.noData).toBeTruthy();
+      expect(result.current.hasData).toBeFalsy();
     });
 
-    it('noData should be false, if there is rule types filter and no rules', async () => {
+    it('hasData should be false, if there is rule types filter and no rules with hasDefaultRuleTypesFiltersOn = true', async () => {
       loadRulesWithKueryFilter.mockResolvedValue({ ...MOCK_RULE_DATA, data: [] });
       const params = {
         page: {
           index: 0,
           size: 25,
         },
-        searchText: '',
-        typesFilter: ['some-kind-of-filter'],
-        actionTypesFilter: [],
-        ruleExecutionStatusesFilter: [],
-        ruleStatusesFilter: [],
-        tagsFilter: [],
-      };
-
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useLoadRules({
-          ...params,
-          onPage,
-          onError,
-        })
-      );
-
-      expect(result.current.noData).toBeTruthy();
-
-      await act(async () => {
-        result.current.loadRules();
-        await waitForNextUpdate();
-      });
-
-      expect(result.current.noData).toBeFalsy();
-    });
-
-    it('noData should be true, if there is rule types filter and no rules with hasDefaultRuleTypesFiltersOn = true', async () => {
-      loadRulesWithKueryFilter.mockResolvedValue({ ...MOCK_RULE_DATA, data: [] });
-      const params = {
-        page: {
-          index: 0,
-          size: 25,
+        filters: {
+          searchText: '',
+          types: ['some-kind-of-filter'],
+          actionTypes: [],
+          ruleExecutionStatuses: [],
+          ruleLastRunOutcomes: [],
+          ruleStatuses: [],
+          tags: [],
         },
-        searchText: '',
-        typesFilter: ['some-kind-of-filter'],
-        actionTypesFilter: [],
-        ruleExecutionStatusesFilter: [],
-        ruleStatusesFilter: [],
-        tagsFilter: [],
+        onPage: () => {},
+        enabled: true,
+        sort: { field: 'name', direction: 'asc' },
         hasDefaultRuleTypesFiltersOn: true,
       };
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useLoadRules({
-          ...params,
-          onPage,
-          onError,
-        })
-      );
+      const { result, waitForNextUpdate } = renderHook(() => useLoadRules(params), { wrapper });
 
-      expect(result.current.noData).toBeTruthy();
+      expect(result.current.hasData).toBeFalsy();
 
       await act(async () => {
         result.current.loadRules();
         await waitForNextUpdate();
       });
 
-      expect(result.current.noData).toBeTruthy();
+      expect(result.current.hasData).toBeFalsy();
     });
   });
 });
