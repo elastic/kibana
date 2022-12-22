@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
         )
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
-        .expect(201);
+        .expect(200);
 
       expect(body).to.eql(response);
     });
