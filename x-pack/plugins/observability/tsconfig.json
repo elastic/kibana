@@ -11,8 +11,9 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../typings/**/*"
-, "../../../packages/kbn-slo-schema/src/models/duration.test.ts", "../../../packages/kbn-slo-schema/src/schema", "../../../packages/kbn-slo-schema/src/rest_specs"  ],
+    "../../../typings/**/*",
+    "../../../packages/kbn-slo-schema/**/*"
+  ],
   "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },

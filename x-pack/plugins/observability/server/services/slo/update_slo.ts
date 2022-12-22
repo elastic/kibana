@@ -88,6 +88,7 @@ export class UpdateSLO {
       time_window: slo.time_window,
       objective: slo.objective,
       settings: slo.settings,
+      revision: slo.revision,
       created_at: slo.created_at,
       updated_at: slo.updated_at,
     });

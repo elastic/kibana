@@ -103,6 +103,7 @@ const updateSLOResponseSchema = t.type({
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
   settings: settingsSchema,
+  revision: t.number,
   created_at: dateType,
   updated_at: dateType,
 });
