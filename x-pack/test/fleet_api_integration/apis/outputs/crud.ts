@@ -110,9 +110,16 @@ export default function (providerContext: FtrProviderContext) {
         const newOutput = outputs.filter((o: any) => o.id === defaultOutputId);
 
         expect(newOutput[0].shipper).to.eql({
+          compression_level: null,
+          disk_queue_compression_enabled: null,
           disk_queue_enabled: true,
-          disk_queue_path: 'path/to/disk/queue',
           disk_queue_encryption_enabled: true,
+          disk_queue_max_size: null,
+          disk_queue_path: 'path/to/disk/queue',
+          loadbalance: null,
+          max_batch_bytes: null,
+          mem_queue_events: null,
+          queue_flush_timeout: null,
         });
       });
 
@@ -300,9 +307,16 @@ export default function (providerContext: FtrProviderContext) {
         } = await supertest.get(`/api/fleet/outputs`).expect(200);
         const newOutput = outputs.filter((o: any) => o.name === 'output 1');
         expect(newOutput[0].shipper).to.eql({
+          compression_level: null,
+          disk_queue_compression_enabled: null,
           disk_queue_enabled: true,
-          disk_queue_path: 'path/to/disk/queue',
           disk_queue_encryption_enabled: true,
+          disk_queue_max_size: null,
+          disk_queue_path: 'path/to/disk/queue',
+          loadbalance: null,
+          max_batch_bytes: null,
+          mem_queue_events: null,
+          queue_flush_timeout: null,
         });
       });
 
@@ -356,9 +370,16 @@ export default function (providerContext: FtrProviderContext) {
         } = await supertest.get(`/api/fleet/outputs`).expect(200);
         const newOutput = outputs.filter((o: any) => o.name === 'Logstash Output');
         expect(newOutput[0].shipper).to.eql({
+          compression_level: null,
+          disk_queue_compression_enabled: null,
           disk_queue_enabled: true,
-          disk_queue_path: 'path/to/disk/queue',
           disk_queue_encryption_enabled: true,
+          disk_queue_max_size: null,
+          disk_queue_path: 'path/to/disk/queue',
+          loadbalance: null,
+          max_batch_bytes: null,
+          mem_queue_events: null,
+          queue_flush_timeout: null,
         });
       });
 
