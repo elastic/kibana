@@ -508,6 +508,62 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     };
   }
 
+  const dataTable = useMemo(
+    () => (
+      <DataTableComponent
+        additionalControls={alertBulkActions}
+        unitCountText={unitCountText}
+        browserFields={browserFields}
+        data={nonDeletedEvents}
+        disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
+        id={tableId}
+        loadPage={loadPage}
+        renderCellValue={renderCellValue}
+        rowRenderers={rowRenderers}
+        totalItems={totalCountMinusDeleted}
+        bulkActions={bulkActions}
+        fieldBrowserOptions={fieldBrowserOptions}
+        defaultCellActions={defaultCellActions}
+        hasCrudPermissions={hasCrudPermissions}
+        filters={filters}
+        leadingControlColumns={transformedLeadingControlColumns}
+        pagination={{
+          pageIndex: pageInfo.activePage,
+          pageSize: itemsPerPage,
+          pageSizeOptions: itemsPerPageOptions,
+          onChangeItemsPerPage,
+          onChangePage,
+        }}
+        isEventRenderedView={tableView === 'eventRenderedView'}
+        rowHeightsOptions={rowHeightsOptions}
+      />
+    ),
+    [
+      alertBulkActions,
+      browserFields,
+      bulkActions,
+      defaultCellActions,
+      fieldBrowserOptions,
+      filters,
+      hasCrudPermissions,
+      itemsPerPage,
+      itemsPerPageOptions,
+      loadPage,
+      nonDeletedEvents,
+      onChangeItemsPerPage,
+      onChangePage,
+      pageInfo.activePage,
+      renderCellValue,
+      rowHeightsOptions,
+      rowRenderers,
+      tableId,
+      tableView,
+      totalCountMinusDeleted,
+      transformedLeadingControlColumns,
+      unitCountText,
+    ]
+  );
+
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -547,33 +603,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                     >
                       <ScrollableFlexItem grow={1}>
                         <StatefulEventContext.Provider value={activeStatefulEventContext}>
-                          <DataTableComponent
-                            additionalControls={alertBulkActions}
-                            unitCountText={unitCountText}
-                            browserFields={browserFields}
-                            data={nonDeletedEvents}
-                            disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
-                            id={tableId}
-                            loadPage={loadPage}
-                            renderCellValue={renderCellValue}
-                            rowRenderers={rowRenderers}
-                            totalItems={totalCountMinusDeleted}
-                            bulkActions={bulkActions}
-                            fieldBrowserOptions={fieldBrowserOptions}
-                            defaultCellActions={defaultCellActions}
-                            hasCrudPermissions={hasCrudPermissions}
-                            filters={filters}
-                            leadingControlColumns={transformedLeadingControlColumns}
-                            pagination={{
-                              pageIndex: pageInfo.activePage,
-                              pageSize: itemsPerPage,
-                              pageSizeOptions: itemsPerPageOptions,
-                              onChangeItemsPerPage,
-                              onChangePage,
-                            }}
-                            isEventRenderedView={tableView === 'eventRenderedView'}
-                            rowHeightsOptions={rowHeightsOptions}
-                          />
+                          {dataTable}
                         </StatefulEventContext.Provider>
                       </ScrollableFlexItem>
                     </FullWidthFlexGroupTable>
