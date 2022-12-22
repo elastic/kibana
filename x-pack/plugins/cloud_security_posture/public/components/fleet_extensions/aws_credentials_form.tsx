@@ -169,7 +169,7 @@ const options: AwsOptions = {
   },
 };
 
-type AwsCredentialsType = keyof typeof options;
+export type AwsCredentialsType = keyof typeof options;
 const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
   id: value as AwsCredentialsType,
   label: options[value as keyof typeof options].label,
@@ -177,7 +177,7 @@ const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
 
 interface Props {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' | 'cloudbeat/cis_aws' }>;
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' | 'cloudbeat/cis_eks' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
 }
 

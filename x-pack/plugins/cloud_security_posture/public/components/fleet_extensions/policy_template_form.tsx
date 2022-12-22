@@ -10,22 +10,22 @@ import type {
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
-import type { PostureInput } from '../../../common/constants';
+import { CLOUDBEAT_AWS, CLOUDBEAT_VANILLA, PostureInput } from '../../../common/constants';
 import {
   getUpdatedPosturePolicy,
   INPUTS_WITH_AWS_VARS,
   getPostureInput,
   type NewPackagePolicyPostureInput,
 } from './utils';
-import { AwsCredentialsForm } from './aws_credentials_form';
+import { AwsCredentialsForm, type AwsCredentialsType } from './aws_credentials_form';
 import { PolicyInputSelector } from './policy_template_input_selector';
 
 const DEFAULT_INPUT_TYPE = {
-  kspm: 'cloudbeat/cis_k8s',
-  cspm: 'cloudbeat/cis_aws',
+  kspm: CLOUDBEAT_VANILLA,
+  cspm: CLOUDBEAT_AWS,
 } as const;
 
-const DEFAULT_AWS_VARS_GROUP = 'assume_role';
+const DEFAULT_AWS_VARS_GROUP: AwsCredentialsType = 'assume_role';
 
 interface Props extends PackagePolicyCreateExtensionComponentProps {
   edit?: boolean;
