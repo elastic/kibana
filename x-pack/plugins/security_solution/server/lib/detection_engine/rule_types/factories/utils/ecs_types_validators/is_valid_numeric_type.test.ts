@@ -28,6 +28,10 @@ describe('isValidNumericType', () => {
     expect(isValidNumericType('-63767236376723637672363.7672363767236376723')).toBe(true);
   });
 
+  it('should validate string with space', () => {
+    expect(isValidNumericType('24 ')).toBe(true);
+  });
+
   it('should not validate invalid values', () => {
     expect(isValidNumericType('non-valid')).toBe(false);
     expect(isValidNumericType(true)).toBe(false);

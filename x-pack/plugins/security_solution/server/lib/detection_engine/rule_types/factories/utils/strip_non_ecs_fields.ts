@@ -14,6 +14,7 @@ import { isValidIpType } from './ecs_types_validators/is_valid_ip_type';
 import { isValidDateType } from './ecs_types_validators/is_valid_date_type';
 import { isValidNumericType } from './ecs_types_validators/is_valid_numeric_type';
 import { isValidBooleanType } from './ecs_types_validators/is_valid_boolean_type';
+import { isValidLongType } from './ecs_types_validators/is_valid_long_type';
 
 type SourceFieldRecord = Record<string, SearchTypes>;
 type SourceField = SearchTypes | SourceFieldRecord;
@@ -116,12 +117,13 @@ const computeIsEcsCompliant = (value: SourceField, path: string) => {
   const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
   const isEcsFieldObject = getIsEcsFieldObject(path);
 
+  // validate if value is a long type
+  if (ecsField?.type === 'long') {
+    return isValidLongType(value);
+  }
+
   // validate if value is a numeric type
-  if (
-    ecsField?.type === 'long' ||
-    ecsField?.type === 'float' ||
-    ecsField?.type === 'scaled_float'
-  ) {
+  if (ecsField?.type === 'float' || ecsField?.type === 'scaled_float') {
     return isValidNumericType(value);
   }
 
