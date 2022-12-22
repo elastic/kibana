@@ -33,7 +33,7 @@ import {
 } from './slo_edit_form_objectives';
 import { paths } from '../../../config';
 import { SLO } from '../../../typings';
-import type { CreateSLOParams, Duration } from '../../../../server/types/rest_specs';
+import type { CreateSLOParamsForFE, BudgetingMethod } from '../../../../server/types/rest_specs';
 
 export interface SloEditFormProps {
   slo: SLO | undefined;
@@ -50,7 +50,7 @@ export function SloEditForm({ slo }: SloEditFormProps) {
     notifications: { toasts },
   } = useKibana().services;
 
-  const defaultValues: CreateSLOParams = {
+  const defaultValues: CreateSLOParamsForFE = {
     name: '',
     description: '',
     indicator: {
@@ -63,10 +63,10 @@ export function SloEditForm({ slo }: SloEditFormProps) {
       },
     },
     time_window: {
-      duration: TIMEWINDOW_OPTIONS[0].value as unknown as Duration,
+      duration: TIMEWINDOW_OPTIONS[0].value,
       is_rolling: true,
     },
-    budgeting_method: BUDGETING_METHOD_OPTIONS[0].value,
+    budgeting_method: BUDGETING_METHOD_OPTIONS[0].value as BudgetingMethod,
     objective: {
       target: 0,
     },
@@ -174,7 +174,7 @@ export function SloEditForm({ slo }: SloEditFormProps) {
 
           <EuiSpacer size="xl" />
 
-          <SloEditFormObjectives control={control} />
+          <SloEditFormObjectives control={control} watch={watch} />
 
           <EuiSpacer size="xl" />
         </EuiPanel>

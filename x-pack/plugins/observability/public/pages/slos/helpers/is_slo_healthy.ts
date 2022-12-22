@@ -7,5 +7,5 @@
 import { SLO } from '../../../typings';
 
 export function isSloHealthy(slo: SLO) {
-  return slo.objective.target <= slo.summary.sliValue;
+  return slo.objective.target <= slo.summary.sli_value;
 }

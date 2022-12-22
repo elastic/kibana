@@ -29,7 +29,7 @@ export function SloSummaryStats({ slo }: SloSummaryStatsProps) {
               description={i18n.translate('xpack.observability.slos.slo.stats.observedValue', {
                 defaultMessage: 'Observed value',
               })}
-              title={asPercentWithTwoDecimals(slo.summary.sliValue, 1, 'n/a')}
+              title={asPercentWithTwoDecimals(slo.summary.sli_value, 1, 'n/a')}
               titleColor={isHealthy ? '' : 'danger'}
               titleSize="m"
               reverse
@@ -65,7 +65,7 @@ export function SloSummaryStats({ slo }: SloSummaryStatsProps) {
               description={i18n.translate('xpack.observability.slos.slo.stats.budgetRemaining', {
                 defaultMessage: 'Budget remaining',
               })}
-              title={asPercentWithTwoDecimals(slo.summary.errorBudget.remaining, 1, 'n/a')}
+              title={asPercentWithTwoDecimals(slo.summary.error_budget.remaining, 1, 'n/a')}
               titleColor={isHealthy ? '' : 'danger'}
               titleSize="m"
               reverse

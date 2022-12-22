@@ -17,7 +17,6 @@ import {
   settingsSchema,
   summarySchema,
   timeWindowSchema,
-  durationType,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -130,14 +129,14 @@ const findSLOResponseSchema = t.type({
 });
 
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
+type CreateSLOParamsForFE = t.OutputOf<typeof createSLOParamsSchema.props.body>;
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
-
-type Duration = t.TypeOf<typeof durationType>;
+type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
 
 export {
   createSLOParamsSchema,
@@ -151,11 +150,12 @@ export {
 };
 export type {
   CreateSLOParams,
+  CreateSLOParamsForFE,
   CreateSLOResponse,
   GetSLOResponse,
   UpdateSLOParams,
   UpdateSLOResponse,
   FindSLOParams,
   FindSLOResponse,
-  Duration,
+  BudgetingMethod,
 };

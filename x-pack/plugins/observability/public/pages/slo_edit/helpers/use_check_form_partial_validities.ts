@@ -6,11 +6,11 @@
  */
 
 import { FormState, UseFormGetFieldState } from 'react-hook-form';
-import type { CreateSLOParams } from '../../../../server/types/rest_specs';
+import type { CreateSLOParamsForFE } from '../../../../server/types/rest_specs';
 
 interface UseCheckFormPartialValiditiesProps {
-  getFieldState: UseFormGetFieldState<CreateSLOParams>;
-  formState: FormState<CreateSLOParams>;
+  getFieldState: UseFormGetFieldState<CreateSLOParamsForFE>;
+  formState: FormState<CreateSLOParamsForFE>;
 }
 
 export function useCheckFormPartialValidities({

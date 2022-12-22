@@ -16,7 +16,7 @@ export function sortSlos(sort: SortType | undefined) {
       return differenceA - differenceB;
     }
     if (sort === 'budgetRemaining') {
-      return a.summary.errorBudget.remaining - b.summary.errorBudget.remaining;
+      return a.summary.error_budget.remaining - b.summary.error_budget.remaining;
     }
     return 0;
   };

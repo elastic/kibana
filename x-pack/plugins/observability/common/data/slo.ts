@@ -19,13 +19,13 @@ export const sloList: SLOList = {
     {
       id: '1f1c6ee7-433f-4b56-b727-5682262e0d7d',
       name: 'latency',
-      timeWindow: {
+      time_window: {
         duration: { value: 7, unit: 'd' },
       },
       objective: { target: 0.98 },
       summary: {
-        sliValue: 0.99872,
-        errorBudget: {
+        sli_value: 0.99872,
+        error_budget: {
           remaining: 0.936,
         },
       },
@@ -33,13 +33,13 @@ export const sloList: SLOList = {
     {
       id: 'c0f8d669-9177-4706-9098-f397a88173a6',
       name: 'availability',
-      timeWindow: {
+      time_window: {
         duration: { value: 30, unit: 'd' },
       },
       objective: { target: 0.98 },
       summary: {
-        sliValue: 0.97,
-        errorBudget: {
+        sli_value: 0.97,
+        error_budget: {
           remaining: 0,
         },
       },
@@ -53,15 +53,15 @@ export const sloList: SLOList = {
 export const anSLO: SLO = {
   id: '2f17deb0-725a-11ed-ab7c-4bb641cfc57e',
   name: 'SLO latency service log',
-  timeWindow: {
+  time_window: {
     duration: { value: 7, unit: 'd' },
   },
   objective: {
     target: 0.98,
   },
   summary: {
-    sliValue: 0.990097,
-    errorBudget: {
+    sli_value: 0.990097,
+    error_budget: {
       remaining: 0.504831,
     },
   },

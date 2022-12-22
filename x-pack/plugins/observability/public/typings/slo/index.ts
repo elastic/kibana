@@ -17,15 +17,15 @@ interface Duration {
 interface SLO {
   id: string;
   name: string;
-  timeWindow: {
+  time_window: {
     duration: Duration;
   };
   objective: {
     target: number;
   };
   summary: {
-    sliValue: number;
-    errorBudget: {
+    sli_value: number;
+    error_budget: {
       remaining: number;
     };
   };
