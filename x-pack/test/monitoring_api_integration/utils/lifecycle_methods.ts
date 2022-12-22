@@ -28,7 +28,7 @@ export const getLifecycleMethods = (getService: FtrProviderContext['getService']
       await Promise.all(archivesArray.map((archive) => esArchiver.load(archive)));
     },
 
-    async tearDown(archives: string[] | string = []) {
+    async tearDown() {
       // .monitoring-* and metrics-* mappings are already installed when we initiate
       // the tests suites. since the archiver doesn't have any reference to the
       // mappings it can't automatically delete it and we have to do the cleanup manually

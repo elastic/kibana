@@ -31,7 +31,7 @@ export function getTestRunner(opts: RunTestsOpts) {
       archives.forEach(({ path, variant }) => {
         describe(variant, function () {
           before('load archive', () => setup(path));
-          after('unload archive', () => tearDown(path));
+          after('unload archive', () => tearDown());
 
           assert();
         });
