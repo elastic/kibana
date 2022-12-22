@@ -100,6 +100,7 @@ export const cleanTestParams = async (params: Record<string, any>) => {
 
 export const testDataMonitor = {
   type: 'browser',
+  alert: { status: { enabled: true } },
   form_monitor_type: 'single',
   enabled: true,
   schedule: { unit: 'm', number: '10' },

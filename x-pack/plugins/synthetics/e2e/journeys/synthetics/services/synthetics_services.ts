@@ -34,6 +34,7 @@ export class SyntheticsServices {
 
   async addTestMonitor(name: string, data: Record<string, any> = { type: 'browser' }) {
     const testData = {
+      alert: { status: { enabled: true } },
       locations: [{ id: 'us_central', isServiceManaged: true }],
       ...(data?.type !== 'browser' ? {} : data),
       ...(data || {}),

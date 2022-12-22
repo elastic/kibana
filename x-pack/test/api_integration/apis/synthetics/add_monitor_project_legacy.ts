@@ -139,7 +139,9 @@ export default function ({ getService }: FtrProviderContext) {
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,
             alert: {
-              status: true,
+              status: {
+                enabled: true,
+              },
             },
             'filter_journeys.match': 'check if title is present',
             'filter_journeys.tags': [],
@@ -269,7 +271,9 @@ export default function ({ getService }: FtrProviderContext) {
             },
             enabled: false,
             alert: {
-              status: true,
+              status: {
+                enabled: true,
+              },
             },
             form_monitor_type: 'http',
             journey_id: journeyId,
@@ -374,7 +378,9 @@ export default function ({ getService }: FtrProviderContext) {
             'check.send': '',
             enabled: true,
             alert: {
-              status: true,
+              status: {
+                enabled: true,
+              },
             },
             form_monitor_type: 'tcp',
             journey_id: journeyId,
@@ -471,7 +477,9 @@ export default function ({ getService }: FtrProviderContext) {
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,
             alert: {
-              status: true,
+              status: {
+                enabled: true,
+              },
             },
             form_monitor_type: 'icmp',
             journey_id: journeyId,

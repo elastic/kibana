@@ -47,7 +47,10 @@ export function* enableMonitorAlertEffect() {
         const response = yield call(fetchUpsertMonitor, action.payload);
         yield put(enableMonitorAlertAction.success(response as SavedObject<SyntheticsMonitor>));
         sendSuccessToast(action.payload.success);
-        if ((response as SavedObject<SyntheticsMonitor>).attributes[ConfigKey.ALERT_CONFIG]) {
+        if (
+          (response as SavedObject<SyntheticsMonitor>).attributes[ConfigKey.ALERT_CONFIG]?.status
+            ?.enabled
+        ) {
           yield put(enableDefaultAlertingAction.get());
         }
       } catch (error) {

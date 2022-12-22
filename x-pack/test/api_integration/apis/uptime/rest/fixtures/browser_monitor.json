@@ -2,7 +2,9 @@
   "type": "browser",
   "enabled": true,
   "alert": {
-    "status": true
+    "status": {
+      "enabled": true
+    }
   },
   "journey_id": "",
   "project_id": "",

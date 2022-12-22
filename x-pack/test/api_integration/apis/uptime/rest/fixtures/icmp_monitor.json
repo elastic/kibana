@@ -4,7 +4,9 @@
   "journey_id": "",
   "enabled": true,
   "alert": {
-    "status": true
+    "status": {
+      "enabled": true
+    }
   },
   "schedule": {
     "number": "3",
