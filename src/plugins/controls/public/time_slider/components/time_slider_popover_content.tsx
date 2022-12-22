@@ -100,7 +100,7 @@ export function TimeSliderPopoverContent(props: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <SettingsForm />
+      <SettingsForm value={props.value} onChange={props.onChange} timeRangeMin={props.timeRangeMin}  />
     </>
   );
 }

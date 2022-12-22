@@ -14,7 +14,13 @@ import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
 import { getIsAnchored } from '../time_slider_selectors';
 
-export const SettingsForm: FC = () => {
+interface Props {
+  value: [number, number];
+  onChange: (value?: [number, number]) => void;
+  timeRangeMin: number;
+}
+
+export const SettingsForm: FC = (props: Props) => {
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
@@ -22,6 +28,14 @@ export const SettingsForm: FC = () => {
   } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
   const dispatch = useEmbeddableDispatch();
   const isAnchored = select(getIsAnchored);
+
+  function onChange(e) {
+    const newIsChecked = e.target.checked;
+    if (newIsChecked) {
+      props.onChange([props.timeRangeMin, props.value[1]])
+    }
+    dispatch(setIsAnchored({ isAnchored: newIsChecked }))
+  }
 
   return (
     <EuiFormRow
@@ -32,7 +46,7 @@ export const SettingsForm: FC = () => {
           defaultMessage: 'Anchor start',
         })}
         checked={isAnchored}
-        onChange={(e) => dispatch(setIsAnchored({ isAnchored: event.target.checked }))}
+        onChange={onChange}
         compressed
       />
     </EuiFormRow>
