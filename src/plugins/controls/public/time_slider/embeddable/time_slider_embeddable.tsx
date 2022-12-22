@@ -336,6 +336,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
           <TimeSlider
             formatDate={this.formatDate}
             onChange={(value?: [number, number]) => {
+              console.log(value);
               this.onTimesliceChange(value);
               const range = value ? value[TO_INDEX] - value[FROM_INDEX] : undefined;
               this.onRangeChange(range);

@@ -7,21 +7,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { Ref, ComponentProps } from 'react';
+import React, { Ref } from 'react';
 import {
   EuiButtonIcon,
-  EuiDualRange,
   EuiRangeTick,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import type { EuiDualRangeClass } from '@elastic/eui/src/components/form/range/dual_range';
 import { SettingsForm } from './settings_form';
-
-// Unfortunately, wrapping EuiDualRange in `withEuiTheme` has created a super annoying/verbose typing
-export type EuiDualRangeRef = EuiDualRangeClass & ComponentProps<typeof EuiDualRange>;
+import { AnchoredRange } from './anchored_range';
+import { EuiDualRangeRef, SlidingWindowRange } from './sliding_window_range';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import { timeSliderReducers } from '../time_slider_reducers';
+import { TimeSliderReduxState } from '../types';
+import { getIsAnchored } from '../time_slider_selectors';
 
 interface Props {
   value: [number, number];
@@ -35,10 +36,6 @@ interface Props {
 }
 
 export function TimeSliderPopoverContent(props: Props) {
-  function onChange(value?: [number | string, number | string]) {
-    props.onChange(value as [number, number]);
-  }
-
   const ticks =
     props.ticks.length <= 12
       ? props.ticks
@@ -52,6 +49,27 @@ export function TimeSliderPopoverContent(props: Props) {
           };
         });
 
+  const { useEmbeddableSelector: select } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
+  const isAnchored = select(getIsAnchored);
+  const rangeInput = isAnchored
+    ? <AnchoredRange
+        value={props.value}
+        onChange={props.onChange}
+        stepSize={props.stepSize}
+        ticks={ticks}
+        timeRangeMin={props.timeRangeMin}
+        timeRangeMax={props.timeRangeMax}
+      />
+    : <SlidingWindowRange 
+        value={props.value}
+        onChange={props.onChange}
+        stepSize={props.stepSize}
+        rangeRef={props.rangeRef}
+        ticks={ticks}
+        timeRangeMin={props.timeRangeMin}
+        timeRangeMax={props.timeRangeMax}
+      />
+
   return (
     <>
       <EuiFlexGroup
@@ -61,18 +79,7 @@ export function TimeSliderPopoverContent(props: Props) {
         responsive={false}
       >
         <EuiFlexItem>
-          <EuiDualRange
-            ref={props.rangeRef}
-            fullWidth={true}
-            value={props.value}
-            onChange={onChange}
-            showTicks={true}
-            min={props.timeRangeMin}
-            max={props.timeRangeMax}
-            step={props.stepSize}
-            ticks={ticks}
-            isDraggable
-          />
+          {rangeInput}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip
