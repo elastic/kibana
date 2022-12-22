@@ -150,15 +150,18 @@ export const getInvalidUrlsOrHostsError = (
 ) => ({
   id: monitor.id,
   reason: INVALID_CONFIGURATION_TITLE,
-  details: i18n.translate('', {
-    defaultMessage:
-      '{monitorType} project monitors must have exactly one value for field `{key}` in version `{version}`. Your monitor was not created or updated.',
-    values: {
-      monitorType: monitor.type,
-      key,
-      version,
-    },
-  }),
+  details: i18n.translate(
+    'xpack.synthetics.projectMonitorApi.validation.invalidUrlOrHosts.description',
+    {
+      defaultMessage:
+        '{monitorType} project monitors must have exactly one value for field `{key}` in version `{version}`. Your monitor was not created or updated.',
+      values: {
+        monitorType: monitor.type,
+        key,
+        version,
+      },
+    }
+  ),
 });
 
 export const getValueInSeconds = (value: string) => {
