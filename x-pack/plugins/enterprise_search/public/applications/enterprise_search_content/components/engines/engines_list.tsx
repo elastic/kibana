@@ -16,18 +16,24 @@ import { i18n } from '@kbn/i18n';
 import { DataPanel } from '../../../shared/data_panel/data_panel';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-import { EnginesTable } from './components/tables/engines_table';
+import { EnginesListTable } from './components/tables/engines_table';
 
 import { EnginesListLogic } from './engines_list_logic';
+// import { EngineListDetails, Meta } from './types';
 
 export const EnginesList = () => {
-  const { engines } = useValues(EnginesListLogic);
-
-  const { loadEngines } = useActions(EnginesListLogic);
+  const { fetchEngines } = useActions(EnginesListLogic);
+  const { meta, enginesList } = useValues(EnginesListLogic);
 
   useEffect(() => {
-    loadEngines();
+    fetchEngines({
+      meta,
+    });
+    // onPaginate();
+    // loadEngines();
   }, []);
+
+  useEffect(() => {}, []);
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -94,8 +100,9 @@ export const EnginesList = () => {
           </h2>
         }
       >
-        <EnginesTable
-          items={engines}
+        <EnginesListTable
+          enginesList={enginesList}
+          // meta={meta}
           loading={false}
           pagination={{
             pageIndex: 0,

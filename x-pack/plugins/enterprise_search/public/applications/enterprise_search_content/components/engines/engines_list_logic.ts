@@ -7,56 +7,57 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { HttpError } from '../../../../../common/types/api';
+
 import { flashAPIErrors } from '../../../shared/flash_messages';
 
-import { mockedEngines } from './_mocks_/mocked_engines';
-import { EngineListDetails, EnginesListAPIResponse } from './types';
+import { FetchEnginesAPILogic } from '../../api/engines/fetch_engines_api_logic';
 
-interface EngineListValues {
-  engines: EngineListDetails[];
+import { EngineListDetails, Meta } from './types';
+
+export interface EnginesListActions {
+  apiError(error: HttpError): HttpError;
+  apiSuccess({ enginesList, meta }: { enginesList: EngineListDetails[]; meta: Meta }): {
+    enginesList: EngineListDetails[];
+    meta: Meta;
+  };
+  fetchEngines({ meta }: { meta: Meta }): { meta: Meta };
+  makeRequest: typeof FetchEnginesAPILogic.actions.makeRequest;
+  onPaginate(pageNumber: number): { pageNumber: number };
+  // loadEngines: () => void; // check if we need this
+  // onEnginesLoad({ meta, results }: EnginesListAPIResponse): EnginesListAPIResponse;
+  // loadEngines({meta,results}:EnginesListAPIResponse):EnginesListAPIResponse;
 }
-
-interface EnginesListActions {
-  onEnginesPagination(page: number): { page: number };
-  onEnginesLoad({ results, meta }: EnginesListAPIResponse): EnginesListAPIResponse;
-  loadEngines(): void;
+export interface EngineListValues {
+  data: typeof FetchEnginesAPILogic.values.data;
+  enginesList: EngineListDetails[];
+  meta: Meta;
 }
 
 export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListActions>>({
-  path: ['enterprise_search', 'engines_logic'],
+  connect: {
+    actions: [FetchEnginesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    values: [FetchEnginesAPILogic, ['data', 'status']],
+  },
+  path: ['enterprise_search', 'content', 'engine_list_logic'],
   actions: {
-    onEnginesLoad: ({ results, meta }) => ({ results, meta }),
-    loadEngines: true,
+    fetchEngines: ({ meta }) => ({
+      meta,
+    }),
+    onPaginate: (pageNumber) => ({ pageNumber }),
+    // loadEngines:true,
   },
-  reducers: {
-    engines: [
-      [],
-      {
-        onEnginesLoad: (_, { results }) => results,
-      },
-    ],
-  },
-  selectors: {},
-  listeners: ({ actions }) => ({
-    loadEngines: () => {
-      // TODO: Remove this with Backend API call
-      try {
-        const response = {
-          meta: {
-            page: {
-              current: 1,
-              size: 10,
-              total_pages: 1,
-              total_results: 2,
-            },
-          },
-          results: mockedEngines,
-        };
+  reducers: ({}) => ({}),
 
-        actions.onEnginesLoad(response);
-      } catch (e) {
-        flashAPIErrors(e);
-      }
+  selectors: ({ selectors }) => ({
+    enginesList: [() => [selectors.data], (data) => (data?.results ? data.results : [])],
+  }),
+  listeners: ({ actions }) => ({
+    apiError: (e) => {
+      flashAPIErrors(e);
+    },
+    fetchEngines: async (input) => {
+      actions.makeRequest(input);
     },
   }),
 });

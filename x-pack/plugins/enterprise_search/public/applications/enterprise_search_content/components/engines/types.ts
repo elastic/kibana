@@ -9,19 +9,20 @@ import { ReactNode } from 'react';
 
 import { CriteriaWithPagination } from '@elastic/eui';
 
-import { Meta } from '../../../../../common/types';
-
-export interface Engine {
-  name: string;
+export interface Meta {
+  from: number;
+  size: number;
+  total: number;
 }
-export interface EngineListDetails extends Engine {
+export interface EngineListDetails {
+  name: string;
+  indices: string[];
   last_updated: string;
   document_count: number;
-  indices: { index_count: number };
 }
 
 export interface EnginesListTableProps {
-  items: EngineListDetails[];
+  enginesList: EngineListDetails[];
   loading: boolean;
   noItemsMessage?: ReactNode;
   pagination: {
@@ -30,6 +31,7 @@ export interface EnginesListTableProps {
     totalItemCount: number;
     showPerPageOptions: boolean;
   };
+  // meta:Meta,
   onChange(criteria: CriteriaWithPagination<EngineListDetails>): void;
 }
 export interface EnginesListAPIResponse {
