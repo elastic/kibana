@@ -68,7 +68,7 @@ export class SortingService<T = unknown> {
   sortData(data: T[]) {
     const compare = (a: string, b: string) => a.localeCompare(b);
 
-    return data.sort((a, b) => {
+    return [...data].sort((a, b) => {
       const firstComparableField = this.callbacks[this.column](a);
       const secondComparableField = this.callbacks[this.column](b);
 
