@@ -17,6 +17,7 @@ import {
   settingsSchema,
   summarySchema,
   timeWindowSchema,
+  durationType,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -136,6 +137,8 @@ type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
+type Duration = t.TypeOf<typeof durationType>;
+
 export {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
@@ -154,4 +157,5 @@ export type {
   UpdateSLOResponse,
   FindSLOParams,
   FindSLOResponse,
+  Duration,
 };

@@ -33,7 +33,7 @@ import {
 } from './slo_edit_form_objectives';
 import { paths } from '../../../config';
 import { SLO } from '../../../typings';
-import type { CreateSLOParams } from '../../../../server/types/rest_specs';
+import type { CreateSLOParams, Duration } from '../../../../server/types/rest_specs';
 
 export interface SloEditFormProps {
   slo: SLO | undefined;
@@ -63,7 +63,7 @@ export function SloEditForm({ slo }: SloEditFormProps) {
       },
     },
     time_window: {
-      duration: TIMEWINDOW_OPTIONS[0].value,
+      duration: TIMEWINDOW_OPTIONS[0].value as unknown as Duration,
       is_rolling: true,
     },
     budgeting_method: BUDGETING_METHOD_OPTIONS[0].value,

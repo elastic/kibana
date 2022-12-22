@@ -84,7 +84,12 @@ export function SloEditFormObjectives({ control }: SloEditFormObjectivesProps) {
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
-                <EuiSelect id={timeWindowSelect} options={TIMEWINDOW_OPTIONS} {...field} />
+                <EuiSelect
+                  id={timeWindowSelect}
+                  options={TIMEWINDOW_OPTIONS}
+                  {...field}
+                  value={String(field.value)}
+                />
               )}
             />
           </EuiFlexItem>
