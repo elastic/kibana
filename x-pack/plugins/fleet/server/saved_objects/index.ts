@@ -276,6 +276,7 @@ const getSavedObjectTypes = (
           properties: {
             id: { type: 'keyword' },
             type: { type: 'keyword' },
+            version: { type: 'keyword' },
           },
         },
         installed_kibana: {
