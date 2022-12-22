@@ -330,6 +330,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
         originalAlertState,
+        originalAlertStateWasALERT: originalAlertState === stateToAlertMessage[AlertStates.ALERT],
+        originalAlertStateWasWARNING:
+          originalAlertState === stateToAlertMessage[AlertStates.WARNING],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        originalAlertStateWasNO_DATA:
+          originalAlertState === stateToAlertMessage[AlertStates.NO_DATA],
         ...additionalContext,
       });
     }
