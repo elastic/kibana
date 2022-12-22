@@ -1311,8 +1311,6 @@
     "moduleResolution": "node",
     // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
     "resolveJsonModule": true,
-    // Do not resolve symlinks to their real path; treat a symlinked file like a real one.
-    "preserveSymlinks": true,
     // Disallow inconsistently-cased references to the same file.
     "forceConsistentCasingInFileNames": false,
     // Forbid unused local variables as the rule was deprecated by ts-lint
