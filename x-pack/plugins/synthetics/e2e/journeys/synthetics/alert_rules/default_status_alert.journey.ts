@@ -61,7 +61,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
   step('Disable default alert for monitor', async () => {
     await page.click('text=Disable status alert');
-    await page.waitForSelector('text=\'Alert for Monitor "Test Monitor" disabled successfully.\'');
+    await page.waitForSelector('text=\'Alert for monitor "Test Monitor" disabled successfully.\'');
     await page.click('text=Enable status alert');
   });
 

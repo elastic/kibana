@@ -150,8 +150,8 @@ export const getMonitorSummary = (
 
   const summary = {
     checkedAt,
-    locationId,
-    configId,
+    ...(locationId ? { locationId } : {}),
+    ...(configId ? { configId } : {}),
     monitorUrl: monitorInfo.url?.full,
     monitorId: monitorInfo.monitor?.id,
     monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
