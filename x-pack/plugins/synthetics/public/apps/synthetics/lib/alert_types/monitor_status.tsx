@@ -18,9 +18,9 @@ import {
 
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { getSyntheticsMonitorRouteFromMonitorId } from '../../../../../common/utils/get_synthetics_monitor_url';
 import { SyntheticsMonitorStatusTranslations } from '../../../../../common/rules/synthetics/translations';
 import { StatusRuleParams } from '../../../../../common/rules/status_rule';
-import { getMonitorRouteFromMonitorId } from '../../../../../common/utils/get_monitor_url';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '../../../../../common/constants/synthetics_alerts';
 import { AlertTypeInitializer } from '.';
 const { defaultActionMessage, defaultRecoveryMessage, description } =
@@ -46,16 +46,14 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   },
   defaultActionMessage,
   defaultRecoveryMessage,
-  requiresAppContext: false,
+  requiresAppContext: true,
   format: ({ fields }) => ({
     reason: fields[ALERT_REASON] || '',
-    link: getMonitorRouteFromMonitorId({
-      monitorId: fields['monitor.id']!,
+    link: getSyntheticsMonitorRouteFromMonitorId({
+      configId: fields.configId,
       dateRangeEnd: fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE ? 'now' : fields[ALERT_END]!,
       dateRangeStart: moment(new Date(fields[ALERT_START]!)).subtract('5', 'm').toISOString(),
-      filters: {
-        'observer.geo.name': [fields?.['observer.geo.name']?.[0]],
-      },
+      locationId: fields['location.id'],
     }),
   }),
 });

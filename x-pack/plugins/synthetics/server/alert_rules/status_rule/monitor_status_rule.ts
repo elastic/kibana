@@ -8,6 +8,7 @@
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { isEmpty } from 'lodash';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { getSyntheticsMonitorRouteFromMonitorId } from '../../../common/utils/get_synthetics_monitor_url';
 import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { OverviewStatus } from '../../../common/runtime_types';
@@ -25,7 +26,6 @@ import {
 } from '../common';
 import { getActionVariables } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
-import { getMonitorRouteFromMonitorId } from '../../../common/utils/get_monitor_url';
 import {
   ALERT_DETAILS_URL,
   VIEW_IN_APP_URL,
@@ -83,6 +83,7 @@ export const registerSyntheticsStatusCheckRule = (
         params,
         savedObjectsClient,
         scopedClusterClient.asCurrentUser,
+        server,
         syntheticsMonitorClient
       );
 
@@ -90,8 +91,9 @@ export const registerSyntheticsStatusCheckRule = (
         ruleState.meta?.downConfigs as OverviewStatus['downConfigs']
       );
 
-      Object.entries(downConfigs).forEach(([idWithLocation, { ping }]) => {
-        const monitorSummary = getMonitorSummary(ping, 'is down.');
+      Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId }]) => {
+        const locationId = statusRule.getLocationId(ping.observer?.geo?.name!) ?? '';
+        const monitorSummary = getMonitorSummary(ping, 'is down.', locationId, configId);
         const alertId = getInstanceId(ping, idWithLocation);
         const alert = alertWithLifecycle({
           id: alertId,
@@ -110,13 +112,11 @@ export const registerSyntheticsStatusCheckRule = (
           idWithLocation,
         });
 
-        const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
-          monitorId: monitorSummary.monitorId,
+        const relativeViewInAppUrl = getSyntheticsMonitorRouteFromMonitorId({
+          configId,
           dateRangeEnd: 'now',
           dateRangeStart: indexedStartedAt,
-          filters: {
-            'observer.geo.name': [monitorSummary.observerLocation],
-          },
+          locationId,
         });
 
         alert.scheduleActions(MONITOR_STATUS.id, {

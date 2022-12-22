@@ -50,6 +50,6 @@ export const SyntheticsMonitorStatusTranslations = {
     defaultMessage: 'Synthetics monitor status',
   }),
   description: i18n.translate('xpack.synthetics.alerts.syntheticsMonitorStatus.description', {
-    defaultMessage: 'Alert when a monitor is down or an availability threshold is breached.',
+    defaultMessage: 'Alert when a synthetics monitor is down.',
   }),
 };

@@ -32988,7 +32988,6 @@
     "xpack.synthetics.alerts.monitorStatus.actionVariables.down": "在过去 {interval}中失败 {count} 次。大于 {numTimes} 时告警。",
     "xpack.synthetics.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage": "{downMonitorsMessage} {availabilityBreachMessage}",
     "xpack.synthetics.alerts.monitorStatus.availability.threshold.value": "&lt; {value}% 的检查",
-    "xpack.synthetics.alerts.monitorStatus.defaultActionMessage": "在 {observerLocation}，URL 为 {monitorUrl} 的监测 {monitorName} 是 {statusMessage} 最新错误消息是 {latestErrorMessage}",
     "xpack.synthetics.alerts.monitorStatus.defaultRecoveryMessage": "来自 {observerLocation} 且 url 为 {monitorUrl} 的监测 {monitorName} 的告警已恢复",
     "xpack.synthetics.alerts.monitorStatus.monitorCallOut.title": "此告警将应用到大约 {snapshotCount} 个监测。",
     "xpack.synthetics.alerts.monitorStatus.timerangeValueField.value": "上一 {value}",

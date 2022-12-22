@@ -30,7 +30,6 @@ import { PageRouter } from './routes';
 import { store, storage, setBasePath } from './state';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
-import { SyntheticsAlertsFlyoutWrapper } from './components/alerts/header/synthetics_alerts_flyout_wrapper';
 
 const Application = (props: SyntheticsAppProps) => {
   const {
@@ -108,7 +107,6 @@ const Application = (props: SyntheticsAppProps) => {
                                 application={core.application}
                               >
                                 <InspectorContextProvider>
-                                  <SyntheticsAlertsFlyoutWrapper />
                                   <PageRouter />
                                   <ActionMenu appMountParameters={appMountParameters} />
                                 </InspectorContextProvider>

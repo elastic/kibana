@@ -10,6 +10,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { GetMonitorDownStatusMessageParams } from '../../legacy_uptime/lib/requests/get_monitor_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
@@ -23,6 +24,7 @@ import {
 } from '../../../common/runtime_types';
 import { statusCheckTranslations } from '../../legacy_uptime/lib/alerts/translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 
 export interface StaleDownConfig extends OverviewStatusMetaData {
   isDeleted?: boolean;
@@ -38,14 +40,18 @@ export class StatusRuleExecutor {
   params: StatusRuleParams;
   esClient: UptimeEsClient;
   soClient: SavedObjectsClientContract;
+  server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];
+
+  public locationIdNameMap: Record<string, string> = {};
 
   constructor(
     previousStartedAt: Date | null,
     p: StatusRuleParams,
     soClient: SavedObjectsClientContract,
     scopedClient: ElasticsearchClient,
+    server: UptimeServerSetup,
     syntheticsMonitorClient: SyntheticsMonitorClient
   ) {
     this.previousStartedAt = previousStartedAt;
@@ -55,10 +61,32 @@ export class StatusRuleExecutor {
       esClient: scopedClient,
       savedObjectsClient: this.soClient,
     });
+    this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
   }
 
+  async getAllLocationNames() {
+    const { publicLocations, privateLocations } = await getAllLocations(
+      this.server,
+      this.syntheticsMonitorClient,
+      this.soClient
+    );
+
+    publicLocations.forEach((loc) => {
+      this.locationIdNameMap[loc.label] = loc.id;
+    });
+
+    privateLocations.forEach((loc) => {
+      this.locationIdNameMap[loc.label] = loc.id;
+    });
+  }
+
+  getLocationId(name: string) {
+    return this.locationIdNameMap[name];
+  }
+
   async getMonitors() {
+    await this.getAllLocationNames();
     this.monitors = await getAllMonitors(this.soClient, 'attributes.status_alert_enabled: true');
     const allIds: string[] = [];
     const enabledIds: string[] = [];

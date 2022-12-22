@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { MonitorStatusTranslations } from '@kbn/synthetics-plugin/common/translations';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { deleteUptimeSettingsObject } from '../../../functional/apps/uptime';
 
@@ -96,8 +97,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           actionTypeId: '.slack',
           group: 'recovered',
           params: {
-            message:
-              'Alert for monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} has recovered',
+            message: MonitorStatusTranslations.defaultRecoveryMessage,
           },
           id: 'my-slack1',
         },
@@ -105,8 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           actionTypeId: '.slack',
           group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
           params: {
-            message:
-              'Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} {{{context.statusMessage}}} The latest error message is {{{context.latestErrorMessage}}}',
+            message: MonitorStatusTranslations.defaultActionMessage,
           },
           id: 'my-slack1',
         },

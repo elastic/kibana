@@ -5,19 +5,91 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useDispatch } from 'react-redux';
-import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../state';
-import { ToggleAlertFlyoutButtonComponent } from './components/toggle_alert_flyout_component';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+  EuiHeaderLink,
+  EuiPopover,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ManageRulesLink } from '../common/links/manage_rules_link';
+import { ClientPluginsStart } from '../../../../plugin';
+import { ToggleFlyoutTranslations } from './hooks/translations';
+import { useSyntheticsAlert } from './hooks/use_synthetics_alert';
+import { selectAlertFlyoutVisibility, setAlertFlyoutVisible } from '../../state';
 
-export const ToggleAlertFlyoutButton: React.FC = () => {
+export const ToggleAlertFlyoutButton = () => {
   const dispatch = useDispatch();
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { application } = useKibana<ClientPluginsStart>().services;
+  const hasUptimeWrite = application?.capabilities.uptime?.save ?? false;
+
+  const { EditAlertFlyout } = useSyntheticsAlert(isOpen);
+
+  const monitorStatusAlertContextMenuItem: EuiContextMenuPanelItemDescriptor = {
+    'aria-label': ToggleFlyoutTranslations.toggleMonitorStatusAriaLabel,
+    'data-test-subj': 'xpack.synthetics.toggleAlertFlyout',
+    name: ToggleFlyoutTranslations.toggleMonitorStatusContent,
+    onClick: () => {
+      dispatch(setAlertFlyoutVisible(true));
+      setIsOpen(false);
+    },
+    toolTipContent: !hasUptimeWrite ? noWritePermissionsTooltipContent : null,
+    disabled: !hasUptimeWrite,
+    icon: 'bell',
+  };
+
+  const managementContextItem: EuiContextMenuPanelItemDescriptor = {
+    'aria-label': ToggleFlyoutTranslations.navigateToAlertingUIAriaLabel,
+    'data-test-subj': 'xpack.synthetics.navigateToAlertingUi',
+    name: <ManageRulesLink />,
+    icon: 'tableOfContents',
+  };
+
+  const panels: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 0,
+      items: [monitorStatusAlertContextMenuItem, managementContextItem],
+    },
+  ];
+
+  const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
+
   return (
-    <ToggleAlertFlyoutButtonComponent
-      setAlertFlyoutType={(value: string) => dispatch(setAlertFlyoutType(value))}
-      setAlertFlyoutVisible={(value: boolean) => {
-        dispatch(setAlertFlyoutVisible(value));
-      }}
-    />
+    <>
+      <EuiPopover
+        button={
+          <EuiHeaderLink
+            color="text"
+            aria-label={ToggleFlyoutTranslations.toggleButtonAriaLabel}
+            data-test-subj="xpack.synthetics.alertsPopover.toggleButton"
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {ToggleFlyoutTranslations.alertsAndRules}
+          </EuiHeaderLink>
+        }
+        closePopover={() => setIsOpen(false)}
+        isOpen={isOpen}
+        ownFocus
+        panelPaddingSize="none"
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+      </EuiPopover>
+      {alertFlyoutVisible && EditAlertFlyout}
+    </>
   );
 };
+
+const noWritePermissionsTooltipContent = i18n.translate(
+  'xpack.synthetics.alertDropdown.noWritePermissions',
+  {
+    defaultMessage: 'You need read-write access to Uptime to create alerts in this app.',
+  }
+);
