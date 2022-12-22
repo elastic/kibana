@@ -26,6 +26,7 @@ import {
   getCspPackagePolicies,
 } from '../../lib/fleet_util';
 import { checkIndexStatus } from '../../lib/check_index_status';
+import { getInstalledPolicyTemplates } from '../../fleet_integration/fleet_integration';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
 
@@ -105,6 +106,7 @@ const getCspStatus = async ({
     installation,
     latestCspPackage,
     installedPackagePolicies,
+    installedPolicyTemplates,
   ] = await Promise.all([
     checkIndexStatus(esClient.asCurrentUser, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
     checkIndexStatus(esClient.asCurrentUser, FINDINGS_INDEX_PATTERN, logger),
@@ -114,6 +116,7 @@ const getCspStatus = async ({
     getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
       per_page: 10000,
     }),
+    getInstalledPolicyTemplates(packagePolicyService, soClient, logger),
   ]);
 
   const healthyAgents = await getHealthyAgents(
@@ -155,6 +158,8 @@ const getCspStatus = async ({
 
   if (status === 'not-installed')
     return {
+      installedPolicyTemplates,
+      latestCspPackage,
       status,
       indicesDetails,
       latestPackageVersion: latestCspPackageVersion,
@@ -164,6 +169,7 @@ const getCspStatus = async ({
     };
 
   const response = {
+    installedPolicyTemplates,
     status,
     indicesDetails,
     latestPackageVersion: latestCspPackageVersion,

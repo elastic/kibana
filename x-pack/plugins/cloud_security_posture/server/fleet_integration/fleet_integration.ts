@@ -5,19 +5,21 @@
  * 2.0.
  */
 import type {
+  ISavedObjectsRepository,
+  Logger,
   SavedObjectsBulkCreateObject,
+  SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
-  ISavedObjectsRepository,
-  SavedObjectsClientContract,
-  Logger,
 } from '@kbn/core/server';
 import {
-  PackagePolicy,
   DeletePackagePoliciesResponse,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PackagePolicy,
   PackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
 import { DeepReadonly } from 'utility-types';
+import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../common/utils/helpers';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -148,4 +150,31 @@ const generateRulesFromTemplates = (
 const getInputType = (inputType: string): string => {
   // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>
   return inputType.split('/')[1];
+};
+
+export const getInstalledPolicyTemplates = async (
+  packagePolicyClient: PackagePolicyClient,
+  soClient: SavedObjectsClientContract,
+  logger: Logger
+) => {
+  try {
+    // getting all installed csp package policies
+    const queryResult = await packagePolicyClient.list(soClient, {
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`,
+      page: 1,
+    });
+
+    // getting installed policy templates by findings enabled inputs
+    const enabledPolicyTemplates = queryResult.items.map((policy) => {
+      return policy.inputs.find((input) => input.enabled)?.policy_template;
+    });
+
+    // removing duplicates
+    const installedPolicyTemplates = [...new Set(enabledPolicyTemplates)];
+
+    return installedPolicyTemplates;
+  } catch (e) {
+    logger.error(e);
+    return false;
+  }
 };
