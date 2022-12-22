@@ -851,9 +851,6 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // this dimension group in the hierarchy. If not specified, the position of the dimension in the array is used. specified nesting
   // orders are always higher in the hierarchy than non-specified ones.
   nestingOrder?: number;
-  // some type of layers can produce groups even if invalid. Keep this information to visually show the user that.
-  invalid?: boolean;
-  invalidMessage?: string;
   // need a special flag to know when to pass the previous column on duplicating
   requiresPreviousColumnOnDuplicate?: boolean;
   supportStaticValue?: boolean;
