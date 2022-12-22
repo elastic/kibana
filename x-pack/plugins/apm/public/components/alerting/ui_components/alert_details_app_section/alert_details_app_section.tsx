@@ -44,6 +44,7 @@ import {
 import { getAggsTypeFromRule } from './helpers';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
+import { LatencyAlertsHistoryChart } from './latency_alerts_history_chart';
 
 export function AlertDetailsAppSection({
   rule,
@@ -409,6 +410,19 @@ export function AlertDetailsAppSection({
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiPanel>
+              <LatencyAlertsHistoryChart
+                serviceName={serviceName}
+                start={start}
+                end={end}
+                transactionType={transactionType}
+                latencyAggregationType={latencyAggregationType}
+                environment={environment}
+                timeZone={timeZone}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
         </EuiFlexItem>
       </ChartPointerEventContextProvider>
     </EuiFlexGroup>
