@@ -780,7 +780,7 @@ export class AlertsClient {
     return this.mgetAlertsAuditOperate({
       ids,
       indexName: index,
-      operation: WriteOperations.Update,
+      operation: ReadOperations.Get,
       fieldToUpdate: (source) => this.getAlertCaseIdsFieldUpdate(source, caseIds),
     });
   }

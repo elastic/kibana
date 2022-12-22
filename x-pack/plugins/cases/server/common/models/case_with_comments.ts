@@ -12,6 +12,7 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import pMap from 'p-map';
 import type {
   CaseResponse,
   CommentAttributes,
@@ -30,6 +31,7 @@ import {
 import {
   CASE_SAVED_OBJECT,
   MAX_ALERTS_PER_CASE,
+  MAX_CONCURRENT_SEARCHES,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
@@ -41,11 +43,13 @@ import {
   flattenCommentSavedObjects,
   transformNewComment,
   getOrUpdateLensReferences,
-  createAlertUpdateRequest,
+  createAlertUpdateStatusRequest,
   isCommentRequestTypeAlert,
+  getAlertInfoFromComments,
 } from '../utils';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
+
 const ALERT_LIMIT_MSG = `Case has reached the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts.`;
 
 /**
@@ -310,18 +314,21 @@ export class CaseCommentModel {
   }
 
   private async handleAlertComments(attachments: CommentRequest[]) {
-    const alerts = attachments.filter(
-      (attachment) =>
-        attachment.type === CommentType.alert && this.caseInfo.attributes.settings.syncAlerts
+    const alertAttachments = attachments.filter(
+      (attachment): attachment is CommentRequestAlertType => attachment.type === CommentType.alert
     );
 
-    await this.updateAlertsStatus(alerts);
+    if (this.caseInfo.attributes.settings.syncAlerts) {
+      await this.updateAlertsStatus(alertAttachments);
+    }
+
+    await this.updateAlertsSchemaWithCaseInfo(alertAttachments);
   }
 
   private async updateAlertsStatus(alerts: CommentRequest[]) {
     const alertsToUpdate = alerts
       .map((alert) =>
-        createAlertUpdateRequest({
+        createAlertUpdateStatusRequest({
           comment: alert,
           status: this.caseInfo.attributes.status,
         })
@@ -329,6 +336,39 @@ export class CaseCommentModel {
       .flat();
 
     await this.params.services.alertsService.updateAlertsStatus(alertsToUpdate);
+  }
+
+  private async updateAlertsSchemaWithCaseInfo(alertAttachments: CommentRequestAlertType[]) {
+    try {
+      const alerts = getAlertInfoFromComments(alertAttachments);
+      const alertsGroupedByIndex = new Map<string, Set<string>>();
+
+      for (const alert of alerts) {
+        const idsSet = alertsGroupedByIndex.get(alert.index) ?? new Set();
+        idsSet.add(alert.id);
+        alertsGroupedByIndex.set(alert.index, idsSet);
+      }
+
+      await pMap(
+        alertsGroupedByIndex.entries(),
+        async ([index, idsSet]) =>
+          this.params.alertsClient.bulkUpdateCases({
+            ids: Array.from(idsSet.values()),
+            index,
+            caseIds: [this.caseInfo.id],
+          }),
+        {
+          concurrency: MAX_CONCURRENT_SEARCHES,
+        }
+      );
+    } catch (error) {
+      throw createCaseError({
+        // TODO:  better error message
+        message: `Failed to update alerts case schema: ${error}`,
+        error,
+        logger: this.params.logger,
+      });
+    }
   }
 
   private async createCommentUserAction(

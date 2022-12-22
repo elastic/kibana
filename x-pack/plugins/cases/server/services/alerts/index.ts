@@ -16,7 +16,7 @@ import { CaseStatuses } from '../../../common/api';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import type { AlertInfo } from '../../common/types';
-import type { UpdateAlertRequest } from '../../client/alerts/types';
+import type { UpdateAlertStatusRequest } from '../../client/alerts/types';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 
 export class AlertService {
@@ -75,7 +75,7 @@ export class AlertService {
     };
   }
 
-  public async updateAlertsStatus(alerts: UpdateAlertRequest[]) {
+  public async updateAlertsStatus(alerts: UpdateAlertStatusRequest[]) {
     try {
       const bucketedAlerts = this.bucketAlertsByIndexAndStatus(alerts);
       const indexBuckets = Array.from(bucketedAlerts.entries());
@@ -96,7 +96,7 @@ export class AlertService {
   }
 
   private bucketAlertsByIndexAndStatus(
-    alerts: UpdateAlertRequest[]
+    alerts: UpdateAlertStatusRequest[]
   ): Map<string, Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>> {
     return alerts.reduce<Map<string, Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>>>(
       (acc, alert) => {
@@ -130,7 +130,7 @@ export class AlertService {
     return isEmpty(alert.id) || isEmpty(alert.index);
   }
 
-  private translateStatus(alert: UpdateAlertRequest): STATUS_VALUES {
+  private translateStatus(alert: UpdateAlertStatusRequest): STATUS_VALUES {
     const translatedStatuses: Record<string, STATUS_VALUES> = {
       [CaseStatuses.open]: 'open',
       [CaseStatuses['in-progress']]: 'acknowledged',
