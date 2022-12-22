@@ -22,7 +22,7 @@ const strings = {
     }),
   getCancelButton: () =>
     i18n.translate('unifiedSearch.filter.closeEditorConfirmModal.cancelButton', {
-      defaultMessage: 'Close',
+      defaultMessage: 'Cancel',
     }),
   getConfirmButton: () =>
     i18n.translate('unifiedSearch.filter.closeEditorConfirmModal.confirmButton', {
