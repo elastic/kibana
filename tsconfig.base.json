@@ -622,6 +622,8 @@
       "@kbn/type-summarizer-core/*": ["packages/kbn-type-summarizer-core/*"],
       "@kbn/typed-react-router-config": ["packages/kbn-typed-react-router-config"],
       "@kbn/typed-react-router-config/*": ["packages/kbn-typed-react-router-config/*"],
+      "@kbn/ui-actions-browser": ["packages/kbn-ui-actions-browser"],
+      "@kbn/ui-actions-browser/*": ["packages/kbn-ui-actions-browser/*"],
       "@kbn/ui-framework": ["packages/kbn-ui-framework"],
       "@kbn/ui-framework/*": ["packages/kbn-ui-framework/*"],
       "@kbn/ui-shared-deps-npm": ["packages/kbn-ui-shared-deps-npm"],

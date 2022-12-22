@@ -4137,6 +4137,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ui-actions-browser@link:bazel-bin/packages/kbn-ui-actions-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-framework@link:bazel-bin/packages/kbn-ui-framework":
   version "0.0.0"
   uid ""
