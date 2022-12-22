@@ -139,18 +139,6 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
             readPolicyManagement: {
               executePackageAction: true,
             },
-            readTrustedApplications: {
-              executePackageAction: true,
-            },
-            readEventFilters: {
-              executePackageAction: true,
-            },
-            readHostIsolationExceptions: {
-              executePackageAction: true,
-            },
-            readBlocklist: {
-              executePackageAction: true,
-            },
           },
         },
       },
