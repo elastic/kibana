@@ -11,6 +11,7 @@ import type {
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 import type { EndpointSuggestionsBody } from '../../../../../common/endpoint/schema/suggestions';
 import { SUGGESTIONS_ROUTE } from '../../../../../common/endpoint/constants';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
@@ -20,24 +21,7 @@ import { EVENT_FILTER_LIST_DEFINITION } from '../constants';
 function writeTransform<T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema>(
   item: T
 ): T {
-  if (item.entries.some((entry) => entry.type === 'nested')) {
-    return {
-      ...item,
-      entries: item.entries.map((entry) => {
-        if (entry.type === 'nested') {
-          return {
-            ...entry,
-            // Remove `id` field from nested entries
-            entries: entry.entries.map((nestedEntry) => ({ ...nestedEntry, id: undefined })),
-          };
-        } else {
-          return entry;
-        }
-      }),
-    } as T;
-  } else {
-    return item;
-  }
+  return removeIdFromExceptionItemsEntries(item) as T;
 }
 
 /**
