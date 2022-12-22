@@ -39,14 +39,14 @@ export type Output = NewOutput & {
 };
 
 export interface ShipperOutput {
-  disk_queue_enabled?: boolean;
-  disk_queue_path?: string;
-  disk_queue_max_size?: number;
-  disk_queue_encryption_enabled?: boolean;
-  disk_queue_compression_enabled?: boolean;
-  compression_level?: number;
-  loadbalance?: boolean;
-  mem_queue_events?: number;
-  queue_flush_timeout?: number;
-  max_batch_bytes?: number;
+  disk_queue_enabled?: boolean | null;
+  disk_queue_path?: string | null;
+  disk_queue_max_size?: number | null;
+  disk_queue_encryption_enabled?: boolean | null;
+  disk_queue_compression_enabled?: boolean | null;
+  compression_level?: number | null;
+  loadbalance?: boolean | null;
+  mem_queue_events?: number | null;
+  queue_flush_timeout?: number | null;
+  max_batch_bytes?: number | null;
 }
