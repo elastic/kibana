@@ -14,10 +14,10 @@ import type {
   Ecs,
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
+import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import type { PackSavedObjectAttributes } from './common/types';
 import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
 import { packSavedObjectType } from '../common/types';
@@ -137,9 +137,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
       if (registerIngestCallback) {
         registerIngestCallback(
-          'packagePolicyPostCreate',
-          async (packagePolicy: PackagePolicy): Promise<PackagePolicy> => {
-            if (packagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
+          'packagePolicyCreate',
+          async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
+            if (newPackagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
               await this.initialize(core, dataViewsService);
 
               const allPacks = await client.find<PackSavedObjectAttributes>({
@@ -147,17 +147,16 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
               });
 
               if (allPacks.saved_objects) {
-                await updateGlobalPacksCreateCallback(
-                  packagePolicy,
+                return updateGlobalPacksCreateCallback(
+                  newPackagePolicy,
                   client,
                   allPacks,
-                  this.osqueryAppContextService,
-                  esClient
+                  this.osqueryAppContextService
                 );
               }
             }
 
-            return packagePolicy;
+            return newPackagePolicy;
           }
         );
 
