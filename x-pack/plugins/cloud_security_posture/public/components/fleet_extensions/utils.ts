@@ -7,6 +7,7 @@
 import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
+  NewPackagePolicyInputStream,
   PackagePolicyConfigRecordEntry,
 } from '@kbn/fleet-plugin/common';
 import merge from 'lodash/merge';
@@ -16,8 +17,8 @@ import {
   CLOUDBEAT_VANILLA,
   SUPPORTED_POLICY_TEMPLATES,
   SUPPORTED_CLOUDBEAT_INPUTS,
-  PostureInput,
-  PosturePolicyTemplate,
+  type PostureInput,
+  type PosturePolicyTemplate,
 } from '../../../common/constants';
 import { assert } from '../../../common/utils/helpers';
 import { cloudPostureIntegrations } from '../../common/constants';
@@ -91,10 +92,19 @@ const getUpdatedStreamVars = (item: NewPackagePolicyInput, key: string, value: s
   };
 };
 
-export type NewPackagePolicyPostureInput = NewPackagePolicyInput & {
-  type: PostureInput;
-  policy_template: PosturePolicyTemplate;
-};
+type StreamWithRequiredVars = Array<
+  NewPackagePolicyInputStream & Required<Pick<NewPackagePolicyInputStream, 'vars'>>
+>;
+
+// Extend NewPackagePolicyInput with known string literals for input type, policy template and streams
+export type NewPackagePolicyPostureInput = NewPackagePolicyInput &
+  (
+    | { type: 'cloudbeat/cis_aws'; policy_template: 'cspm'; streams: StreamWithRequiredVars }
+    | { type: 'cloudbeat/cis_gcp'; policy_template: 'cspm' }
+    | { type: 'cloudbeat/cis_azure'; policy_template: 'cspm' }
+    | { type: 'cloudbeat/cis_eks'; policy_template: 'kspm'; streams: StreamWithRequiredVars }
+    | { type: 'cloudbeat/cis_k8s'; policy_template: 'kspm' }
+  );
 
 export const isPostureInput = (
   input: NewPackagePolicyInput
@@ -102,6 +112,33 @@ export const isPostureInput = (
   SUPPORTED_POLICY_TEMPLATES.includes(input.policy_template as PosturePolicyTemplate) &&
   SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as PostureInput);
 
+const getInputTypePolicyTemplate = (inputs: NewPackagePolicyInput[], inputType: PostureInput) =>
+  inputs.filter(isPostureInput).find((i) => i.type === inputType)!.policy_template;
+
+const getUpdatedPostureInput = (
+  input: NewPackagePolicyInput,
+  inputType: PostureInput,
+  inputVars?: Record<string, PackagePolicyConfigRecordEntry>
+) => {
+  const isInputEnabled = input.type === inputType;
+
+  return {
+    ...input,
+    enabled: isInputEnabled,
+    streams: input.streams.map((stream) => ({
+      ...stream,
+      enabled: isInputEnabled,
+      // Merge new vars with existing vars
+      ...(isInputEnabled &&
+        stream.vars &&
+        inputVars && { vars: merge({}, stream.vars, inputVars) }),
+    })),
+  };
+};
+
+/**
+ * Get a new object with the updated policy input and vars
+ */
 export const getUpdatedPosturePolicy = (
   newPolicy: NewPackagePolicy,
   inputType: PostureInput,
@@ -109,28 +146,12 @@ export const getUpdatedPosturePolicy = (
 ): NewPackagePolicy => ({
   ...newPolicy,
   // Enable new policy input and disable all others
-  inputs: newPolicy.inputs.map((item) => ({
-    ...item,
-    enabled: item.type === inputType,
-    streams: item.streams.map((stream) => ({
-      ...stream,
-      enabled: item.type === inputType,
-      // Merge new vars with existing vars
-      ...(item.type === inputType &&
-        stream.vars &&
-        inputVars && { vars: merge({}, stream.vars, inputVars) }),
-    })),
-  })),
+  inputs: newPolicy.inputs.map((item) => getUpdatedPostureInput(item, inputType, inputVars)),
   // Set hidden policy vars
-  vars: {
-    ...newPolicy.vars,
-    deployment: { ...newPolicy.vars?.deployment, value: inputType },
-    posture: {
-      ...newPolicy.vars?.posture,
-      value: newPolicy.inputs.find((input) => input.type === inputType)
-        ?.policy_template as PosturePolicyTemplate,
-    },
-  },
+  vars: merge({}, newPolicy.vars, {
+    deployment: { value: inputType },
+    posture: { value: getInputTypePolicyTemplate(newPolicy.inputs, inputType) },
+  }),
 });
 
 export const getPolicyTemplateInputOptions = (policyTemplate: PosturePolicyTemplate) =>

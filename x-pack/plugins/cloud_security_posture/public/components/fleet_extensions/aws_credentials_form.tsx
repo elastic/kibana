@@ -170,7 +170,6 @@ const options: AwsOptions = {
 };
 
 type AwsCredentialsType = keyof typeof options;
-const DEFAULT_AWS_VARS_TYPE: AwsCredentialsType = 'assume_role';
 const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
   id: value as AwsCredentialsType,
   label: options[value as keyof typeof options].label,
@@ -178,7 +177,7 @@ const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
 
 interface Props {
   newPolicy: NewPackagePolicy;
-  input: NewPackagePolicyPostureInput;
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' | 'cloudbeat/cis_aws' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
 }
 
@@ -199,7 +198,7 @@ const getInputVarsFields = (
     });
 
 const getDefaultAwsType = (input: Props['input']): AwsCredentialsType =>
-  input?.streams[0]?.vars?.['aws.credentials.type']?.value || DEFAULT_AWS_VARS_TYPE;
+  input.streams[0].vars['aws.credentials.type'].value;
 
 export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
   const awsCredentialsType = getDefaultAwsType(input);
