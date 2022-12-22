@@ -9,15 +9,15 @@ import {
   EuiFlexGroupProps,
   EuiFlexItem,
   EuiSelect,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
-import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../../../hooks/use_time_range';
+import { useFetcher, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { push } from '../../../../shared/links/url_helpers';
 
@@ -28,6 +28,33 @@ const ALL_OPTION = {
   value: 'all',
   text: 'All',
 };
+
+const MOBILE_FILTERS: Array<{ key: MobileFilter['key']; label: string }> = [
+  {
+    key: 'device',
+    label: i18n.translate('xpack.apm.mobile.filters.device', {
+      defaultMessage: 'Device',
+    }),
+  },
+  {
+    key: 'osVersion',
+    label: i18n.translate('xpack.apm.mobile.filters.osVersion', {
+      defaultMessage: 'OS version',
+    }),
+  },
+  {
+    key: 'appVersion',
+    label: i18n.translate('xpack.apm.mobile.filters.appVersion', {
+      defaultMessage: 'App version',
+    }),
+  },
+  {
+    key: 'netConnectionType',
+    label: i18n.translate('xpack.apm.mobile.filters.nct', {
+      defaultMessage: 'NCT',
+    }),
+  },
+];
 
 export function MobileFilters() {
   const history = useHistory();
@@ -51,6 +78,7 @@ export function MobileFilters() {
     '/mobile-services/{serviceName}/transactions',
     '/mobile-services/{serviceName}/transactions/view'
   );
+
   const filters = { netConnectionType, device, osVersion, appVersion };
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -61,12 +89,12 @@ export function MobileFilters() {
         {
           params: {
             path: { serviceName },
-            query: { end, environment, kuery, start, transactionType },
+            query: { start, end, environment, kuery, transactionType },
           },
         }
       );
     },
-    [end, environment, kuery, serviceName, start, transactionType]
+    [start, end, environment, kuery, serviceName, transactionType]
   );
 
   function toSelectOptions(items?: string[]) {
@@ -93,29 +121,30 @@ export function MobileFilters() {
       responsive={false}
       direction={groupDirection}
     >
-      {isPending(status) ? (
-        <EuiLoadingSpinner size="m" />
-      ) : (
-        data.mobileFilters.map((filter) => {
-          return (
-            <EuiFlexItem
-              grow={false}
-              key={filter.key}
-              style={isLarge ? {} : { width: '225px' }}
-            >
-              <EuiSelect
-                fullWidth={isSmall}
-                prepend={filter.label}
-                options={toSelectOptions(filter.options)}
-                value={filters[filter.key]}
-                onChange={(e) => {
-                  onChangeFilter(filter.key, e.target.value);
-                }}
-              />
-            </EuiFlexItem>
-          );
-        })
-      )}
+      {MOBILE_FILTERS.map(({ key, label }) => {
+        const selectOptions =
+          data?.mobileFilters.find((filter: MobileFilter) => filter.key === key)
+            ?.options ?? [];
+
+        return (
+          <EuiFlexItem
+            grow={false}
+            key={key}
+            style={isLarge ? {} : { width: '225px' }}
+          >
+            <EuiSelect
+              fullWidth={isSmall}
+              isLoading={status === FETCH_STATUS.LOADING}
+              prepend={label}
+              options={toSelectOptions(selectOptions)}
+              value={filters?.[key]}
+              onChange={(e) => {
+                onChangeFilter(key, e.target.value);
+              }}
+            />
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 }
