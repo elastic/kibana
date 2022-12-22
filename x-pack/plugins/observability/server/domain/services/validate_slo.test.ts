@@ -8,7 +8,7 @@
 import { validateSLO } from '.';
 import { oneMinute, sixHours } from '../../services/slo/fixtures/duration';
 import { createSLO } from '../../services/slo/fixtures/slo';
-import { Duration, DurationUnit } from '../models/duration';
+import { Duration, DurationUnit } from '../models';
 
 describe('validateSLO', () => {
   describe('any slo', () => {

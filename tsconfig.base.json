@@ -586,6 +586,8 @@
       "@kbn/shared-svg/*": ["packages/kbn-shared-svg/*"],
       "@kbn/shared-ux-utility": ["packages/kbn-shared-ux-utility"],
       "@kbn/shared-ux-utility/*": ["packages/kbn-shared-ux-utility/*"],
+      "@kbn/slo-schema": ["packages/kbn-slo-schema"],
+      "@kbn/slo-schema/*": ["packages/kbn-slo-schema/*"],
       "@kbn/some-dev-log": ["packages/kbn-some-dev-log"],
       "@kbn/some-dev-log/*": ["packages/kbn-some-dev-log/*"],
       "@kbn/sort-package-json": ["packages/kbn-sort-package-json"],
