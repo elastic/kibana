@@ -683,6 +683,7 @@ export const LensTopNavMenu = ({
         },
         goBack: {
           visible: Boolean(contextOriginatingApp),
+          enabled: Boolean(contextOriginatingApp),
           execute: () => {
             if (contextOriginatingApp) {
               goBackToOriginatingApp?.();
