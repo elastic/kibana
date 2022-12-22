@@ -331,12 +331,10 @@
 <   it('GH-1135 : Context handling within each iteration', function() {
 ---
 >   it('GH-1135 : Context handling within each iteration', () => {
-314,315c240,241
-<       .withHelpers({
+315c241
 <         myif: function(conditional, options) {
 ---
->       .withHelpers<Handlebars.HelperDelegate1Param>({
->         myif(conditional, options) {
+>         myif(conditional, options: Handlebars.HelperOptions) {
 321c247
 <         }
 ---
@@ -478,12 +476,10 @@
 <   it('should allow hash with protected array names', function() {
 ---
 >   it('should allow hash with protected array names', () => {
-460,461c264,265
-<       .withHelpers({
+461c265
 <         helpa: function(options) {
 ---
->       .withHelpers<Handlebars.HelperDelegate0Param>({
->         helpa(options) {
+>         helpa(options: Handlebars.HelperOptions) {
 463c267
 <         }
 ---

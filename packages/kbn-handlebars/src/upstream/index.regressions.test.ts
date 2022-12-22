@@ -237,8 +237,8 @@ describe('Regressions', () => {
         '{{/each}}'
     )
       .withInput({ array: [1], name: 'John' })
-      .withHelpers<Handlebars.HelperDelegate1Param>({
-        myif(conditional, options) {
+      .withHelpers({
+        myif(conditional, options: Handlebars.HelperOptions) {
           if (conditional) {
             return options.fn(this);
           } else {
@@ -261,8 +261,8 @@ describe('Regressions', () => {
   it('should allow hash with protected array names', () => {
     expectTemplate('{{helpa length="foo"}}')
       .withInput({ array: [1], name: 'John' })
-      .withHelpers<Handlebars.HelperDelegate0Param>({
-        helpa(options) {
+      .withHelpers({
+        helpa(options: Handlebars.HelperOptions) {
           return options.hash.length;
         },
       })
