@@ -327,7 +327,7 @@ export const useItemsState = ({
     (item) => item.itemState === ItemState.CHECKED || item.itemState === ItemState.PARTIAL
   ).length;
 
-  const setNewItems = useCallback(
+  const resetItems = useCallback(
     (newItems: string[]) => {
       const newState = getInitialItemsState({ items: newItems, selectedCases, fieldSelector });
       dispatch({ type: Actions.SET_NEW_STATE, payload: newState });
@@ -343,9 +343,9 @@ export const useItemsState = ({
       onChange,
       onSelectAll,
       onSelectNone,
-      setNewItems,
+      resetItems,
     }),
-    [onChange, onSelectAll, onSelectNone, options, setNewItems, state, totalSelectedItems]
+    [onChange, onSelectAll, onSelectNone, options, resetItems, state, totalSelectedItems]
   );
 };
 

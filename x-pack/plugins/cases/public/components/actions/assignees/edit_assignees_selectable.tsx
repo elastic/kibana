@@ -125,7 +125,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
     [searchResultUserProfiles, userProfiles]
   );
 
-  const { options, totalSelectedItems, onChange, onSelectNone, setNewItems } = useItemsState({
+  const { options, totalSelectedItems, onChange, onSelectNone, resetItems } = useItemsState({
     items: userProfileIds,
     selectedCases,
     fieldSelector: (theCase) => theCase.assignees.map(({ uid }) => uid),
@@ -135,7 +135,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
 
   if (data && !hasDataBeenSetToStateAfterFetched.current) {
     hasDataBeenSetToStateAfterFetched.current = true;
-    setNewItems(userProfileIds);
+    resetItems(userProfileIds);
   }
 
   const finalOptions = getDisplayOptions({
