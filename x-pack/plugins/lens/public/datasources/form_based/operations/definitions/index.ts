@@ -12,7 +12,7 @@ import {
   CoreStart,
 } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type {
+import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
@@ -25,6 +25,8 @@ import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
 import { percentileOperation } from './percentile';
 import { percentileRanksOperation } from './percentile_ranks';
+import { rateOperation } from './rate';
+import { timeSeriesOperation } from './time_series';
 import {
   minOperation,
   averageOperation,
@@ -114,6 +116,7 @@ const internalOperationDefinitions = [
   filtersOperation,
   termsOperation,
   dateHistogramOperation,
+  timeSeriesOperation,
   minOperation,
   maxOperation,
   averageOperation,
@@ -129,6 +132,7 @@ const internalOperationDefinitions = [
   cumulativeSumOperation,
   counterRateOperation,
   derivativeOperation,
+  rateOperation,
   movingAverageOperation,
   mathOperation,
   formulaOperation,
@@ -168,6 +172,8 @@ export {
 } from './calculations';
 export { formulaOperation } from './formula/formula';
 export { staticValueOperation } from './static_value';
+export { rateOperation } from './rate';
+export { timeSeriesOperation } from './time_series';
 
 /**
  * Properties passed to the operation-specific part of the popover editor
@@ -489,7 +495,7 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}>
    * Returns the meta data of the operation if applied. Undefined
    * if the field is not applicable.
    */
-  getPossibleOperation: () => OperationMetadata;
+  getPossibleOperation: (index: IndexPattern) => OperationMetadata | undefined;
   /**
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.

@@ -26,10 +26,13 @@ import {
 
 import { estypes } from '@elastic/elasticsearch';
 import type { DateRange } from '../../../common/types';
-import type { FramePublicAPI, IndexPattern, StateSetter } from '../../types';
+import type { FramePublicAPI, IndexPattern, IndexPatternField, StateSetter } from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
-import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
+import type {
+  FieldBasedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+} from './operations/definitions/column_types';
 
 import {
   operationDefinitionMap,
@@ -51,6 +54,10 @@ import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
 import { isQueryValid } from '../../shared_components';
+import {
+  checkForDateHistogram,
+  checkReferences,
+} from './operations/definitions/calculations/utils';
 
 export function isColumnInvalid(
   layer: FormBasedLayer,
@@ -114,6 +121,48 @@ export function fieldIsInvalid(
     return false;
   }
   return !!getInvalidFieldMessage(column, indexPattern)?.length;
+}
+
+export function isMetricCounterField(field?: IndexPatternField) {
+  return field?.timeSeriesMetric === 'counter';
+}
+
+function checkReferencedColumnMetric(
+  layer: FormBasedLayer,
+  columnId: string,
+  indexPattern: IndexPattern
+) {
+  const column = layer.columns[columnId] as ReferenceBasedIndexPatternColumn;
+  return column.references
+    .filter((referencedId) => 'sourceField' in layer.columns[referencedId])
+    .map((referencedId) => {
+      const fieldName = (layer.columns[referencedId] as FieldBasedIndexPatternColumn).sourceField;
+      if (!isMetricCounterField(indexPattern.getFieldByName(fieldName))) {
+        return i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
+          defaultMessage: 'Dimension "{dimensionLabel}" is configured incorrectly',
+          values: {
+            dimensionLabel: layer.columns[referencedId].label,
+          },
+        });
+      }
+    });
+}
+
+export function getErrorForRateReference(
+  layer: FormBasedLayer,
+  columnId: string,
+  name: string,
+  indexPattern: IndexPattern
+) {
+  const dateErrors = checkForDateHistogram(layer, name) ?? [];
+  const referenceErrors = checkReferences(layer, columnId) ?? [];
+  const metricCounterErrors = checkReferencedColumnMetric(layer, columnId, indexPattern) ?? [];
+  if (metricCounterErrors.length) {
+    return metricCounterErrors.concat(referenceErrors);
+  }
+  if (dateErrors.length) {
+    return dateErrors.concat(referenceErrors);
+  }
 }
 
 const accuracyModeDisabledWarning = (
