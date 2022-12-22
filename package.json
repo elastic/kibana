@@ -428,6 +428,7 @@
     "@kbn/timelion-grammar": "link:bazel-bin/packages/kbn-timelion-grammar",
     "@kbn/tinymath": "link:bazel-bin/packages/kbn-tinymath",
     "@kbn/typed-react-router-config": "link:bazel-bin/packages/kbn-typed-react-router-config",
+    "@kbn/ui-actions-browser": "link:bazel-bin/packages/kbn-ui-actions-browser",
     "@kbn/ui-framework": "link:bazel-bin/packages/kbn-ui-framework",
     "@kbn/ui-shared-deps-npm": "link:bazel-bin/packages/kbn-ui-shared-deps-npm",
     "@kbn/ui-shared-deps-src": "link:bazel-bin/packages/kbn-ui-shared-deps-src",
