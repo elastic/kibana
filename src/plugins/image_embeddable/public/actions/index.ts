@@ -6,11 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
-import { ImageEmbeddablePlugin } from './plugin';
-
-export { ImageClickContext, IMAGE_CLICK_TRIGGER } from './actions';
-
-export function plugin(context: PluginInitializerContext) {
-  return new ImageEmbeddablePlugin(context);
-}
+export * from './image_click_trigger';

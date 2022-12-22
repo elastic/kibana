@@ -15,6 +15,7 @@ import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
+import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
 import { ActionExecutionContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { Query, Filter, TimeRange } from '@kbn/es-query';
 import type {
@@ -65,7 +66,8 @@ export type UrlTrigger =
   | typeof VALUE_CLICK_TRIGGER
   | typeof SELECT_RANGE_TRIGGER
   | typeof ROW_CLICK_TRIGGER
-  | typeof CONTEXT_MENU_TRIGGER;
+  | typeof CONTEXT_MENU_TRIGGER
+  | typeof IMAGE_CLICK_TRIGGER;
 
 export interface ActionFactoryContext extends BaseActionFactoryContext {
   embeddable?: EmbeddableWithQueryInput;
@@ -110,7 +112,13 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
   public readonly euiIcon = 'link';
 
   supportedTriggers(): UrlTrigger[] {
-    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, ROW_CLICK_TRIGGER, CONTEXT_MENU_TRIGGER];
+    return [
+      VALUE_CLICK_TRIGGER,
+      SELECT_RANGE_TRIGGER,
+      ROW_CLICK_TRIGGER,
+      CONTEXT_MENU_TRIGGER,
+      IMAGE_CLICK_TRIGGER,
+    ];
   }
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({

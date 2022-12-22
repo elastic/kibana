@@ -12,16 +12,26 @@ import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { ImageEmbeddableInput } from './image_embeddable_factory';
 import { ImageViewer, ImageViewerContext } from '../image_viewer';
 import { createValidateUrl } from '../utils/validate_url';
+import { imageClickTrigger, ImageClickContext } from '../actions';
+import './image_embeddable.scss';
 
 export const IMAGE_EMBEDDABLE_TYPE = 'image';
 
 export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
   public readonly type = IMAGE_EMBEDDABLE_TYPE;
 
+  supportedTriggers(): string[] {
+    return [imageClickTrigger.id];
+  }
+
   constructor(
     private deps: {
       getImageDownloadHref: (fileId: string) => string;
       validateUrl: ReturnType<typeof createValidateUrl>;
+      actions: {
+        executeTriggerActions: (triggerId: string, context: ImageClickContext) => void;
+        hasTriggerActions: (triggerId: string, context: ImageClickContext) => Promise<boolean>;
+      };
     },
     initialInput: ImageEmbeddableInput,
     parent?: IContainer
@@ -47,6 +57,15 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
 
   private ImageEmbeddableViewer = (props: { embeddable: ImageEmbeddable }) => {
     const input = useObservable(props.embeddable.getInput$(), props.embeddable.getInput());
+    const [hasTriggerActions, setHasTriggerActions] = React.useState(false);
+    React.useEffect(() => {
+      this.deps.actions
+        .hasTriggerActions(imageClickTrigger.id, { embeddable: this })
+        .then((hasActions) => setHasTriggerActions(hasActions))
+        .catch(() => {
+          setHasTriggerActions(false);
+        });
+    });
 
     return (
       <ImageViewerContext.Provider
@@ -56,6 +75,7 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
         }}
       >
         <ImageViewer
+          className="imageEmbeddableImage"
           imageConfig={input.imageConfig}
           onLoad={() => {
             this.renderComplete.dispatchComplete();
@@ -63,6 +83,15 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
           onError={() => {
             this.renderComplete.dispatchError();
           }}
+          onClick={
+            hasTriggerActions
+              ? () => {
+                  this.deps.actions.executeTriggerActions(imageClickTrigger.id, {
+                    embeddable: this,
+                  });
+                }
+              : undefined
+          }
         />
       </ImageViewerContext.Provider>
     );
