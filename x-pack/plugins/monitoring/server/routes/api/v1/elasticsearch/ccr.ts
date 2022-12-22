@@ -38,12 +38,15 @@ function getBucketScript(max: string, min: string) {
   };
 }
 
-function buildRequest(
-  req: LegacyRequest<unknown, unknown, { timeRange: TimeRange }>,
-  config: MonitoringConfig,
-  esIndexPattern: string
-) {
-  const { min, max } = req.payload.timeRange;
+interface BuildRequestParams {
+  clusterUuid: string;
+  config: MonitoringConfig;
+  esIndexPattern: string;
+  timeRange: TimeRange;
+}
+
+function buildRequest({ clusterUuid, config, esIndexPattern, timeRange }: BuildRequestParams) {
+  const { min, max } = timeRange;
   const maxBucketSize = config.ui.max_bucket_size;
   const aggs = {
     ops_synced_max: {
@@ -125,6 +128,13 @@ function buildRequest(
       query: {
         bool: {
           must: [
+            {
+              term: {
+                cluster_uuid: {
+                  value: clusterUuid,
+                },
+              },
+            },
             {
               bool: {
                 should: [
@@ -224,6 +234,7 @@ export function ccrRoute(server: MonitoringCore) {
     async handler(req) {
       const config = server.config;
       const ccs = req.payload.ccs;
+      const { clusterUuid } = req.params;
       const dataset = 'ccr';
       const moduleType = 'elasticsearch';
       const esIndexPattern = getIndexPatterns({
@@ -235,7 +246,12 @@ export function ccrRoute(server: MonitoringCore) {
 
       try {
         const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-        const params = buildRequest(req, config, esIndexPattern);
+        const params = buildRequest({
+          clusterUuid,
+          config,
+          esIndexPattern,
+          timeRange: req.payload.timeRange,
+        });
         const response: ElasticsearchResponse = await callWithRequest(req, 'search', params);
 
         if (!response || Object.keys(response).length === 0) {
@@ -265,6 +281,7 @@ export function ccrRoute(server: MonitoringCore) {
           }, {}) ?? {};
 
         const buckets = response.aggregations?.by_follower_index.buckets ?? [];
+
         const data = buckets.reduce((accum: any, bucket: any) => {
           const leaderIndex = get(bucket, 'leader_index.buckets[0].key');
           const remoteCluster = get(
