@@ -262,12 +262,87 @@ describe('action_type_form', () => {
     // Clearing all mocks will also reset fake timers.
     jest.clearAllMocks();
   });
+
+  it('enforces the minimum throttle prop', async () => {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.pagerduty',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        const validationResult = { errors: {} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFields,
+      defaultActionParams: {
+        dedupKey: 'test',
+        eventAction: 'resolve',
+      },
+    });
+    actionTypeRegistry.get.mockReturnValue(actionType);
+
+    const wrapper = mountWithIntl(
+      getActionTypeForm(
+        1,
+        undefined,
+        {
+          id: '123',
+          actionTypeId: '.pagerduty',
+          group: 'recovered',
+          params: {
+            eventAction: 'recovered',
+            dedupKey: undefined,
+            summary: '2323',
+            source: 'source',
+            severity: '1',
+            timestamp: new Date().toISOString(),
+            component: 'test',
+            group: 'group',
+            class: 'test class',
+          },
+          frequency: {
+            throttle: '3m',
+            notifyWhen: 'onThrottleInterval',
+            summary: false,
+          },
+        },
+        [5, 'h']
+      )
+    );
+
+    // Wait for active space to resolve before requesting the component to update
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
+    const throttleUnitField = wrapper.find('[data-test-subj="throttleUnitInput"]');
+    expect(throttleField.exists()).toBeTruthy();
+    expect(throttleUnitField.exists()).toBeTruthy();
+
+    // expect(throttleField.first().prop('value')).toEqual(5);
+    // expect(throttleUnitField.first().prop('value')).toEqual('h');
+
+    const newThrottle = 3;
+    throttleField.first().simulate('change', { target: { value: newThrottle.toString() } });
+    await nextTick();
+    wrapper.update();
+    const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
+    expect(throttleFieldAfterUpdate.first().prop('value')).toEqual(5);
+
+    throttleUnitField.first().simulate('change', { target: { value: 'd' } });
+    throttleField.first().simulate('change', { target: { value: newThrottle.toString() } });
+    const throttleFieldAfterUpdate2 = wrapper.find('[data-test-subj="throttleInput"]');
+    expect(throttleFieldAfterUpdate2.first().prop('value')).toEqual(5);
+  });
 });
 
 function getActionTypeForm(
   index?: number,
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>,
   actionItem?: RuleAction,
+  minimumThrottleInterval?: [number | undefined, string],
   defaultActionGroupId?: string,
   connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>,
   actionTypeIndex?: Record<string, ActionType>,
@@ -355,6 +430,7 @@ function getActionTypeForm(
       index={index ?? 1}
       actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
       actionTypeRegistry={actionTypeRegistry}
+      minimumThrottleInterval={minimumThrottleInterval}
     />
   );
 }
