@@ -15,7 +15,7 @@ is_pr_with_label "ci:build-docker-cross-compile" && BUILD_ARG="$BUILD_ARGS --doc
 is_pr_with_label "ci:build-os-packages" || BUILD_ARGS="$BUILD_ARGS --skip-os-packages"
 is_pr_with_label "ci:build-canvas-shareable-runtime" || BUILD_ARGS="$BUILD_ARGS --skip-canvas-shareable-runtime"
 is_pr_with_label "ci:build-docker-contexts" || BUILD_ARGS="$BUILD_ARGS --skip-docker-contexts"
-node scripts/build $BUILD_ARGS
+node scripts/build --ci-checksum $BUILD_ARGS
 
 if is_pr_with_label "ci:build-cloud-image"; then
   echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co

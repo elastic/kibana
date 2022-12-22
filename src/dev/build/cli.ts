@@ -51,6 +51,7 @@ if (showHelp) {
         --verbose,-v                         {dim Turn on verbose logging}
         --no-debug                           {dim Turn off debug logging}
         --epr-registry                       {dim Specify the EPR registry to use for Fleet packages, 'production' or 'snapshot'}
+        --ci-checksum                        {dim Calculate the "CI Checksum" so we can diff builds in CI}
     `) + '\n'
   );
   process.exit(1);

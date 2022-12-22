@@ -34,6 +34,7 @@ export interface BuildOptions {
   targetAllPlatforms: boolean;
   buildExamplePlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
+  createCiChecksum: boolean;
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
@@ -161,4 +162,8 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    * finalize artifacts by writing sha1sums of each into the target directory
    */
   await run(Tasks.WriteShaSums);
+
+  if (options.createCiChecksum) {
+    await run(Tasks.CreateCiChecksum);
+  }
 }

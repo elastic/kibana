@@ -43,6 +43,7 @@ export function readCliArgs(argv: string[]) {
       'silent',
       'debug',
       'help',
+      'ci-checksum',
     ],
     string: ['epr-registry'],
     alias: {
@@ -138,6 +139,7 @@ export function readCliArgs(argv: string[]) {
     targetAllPlatforms: Boolean(flags['all-platforms']),
     eprRegistry: flags['epr-registry'],
     buildCanvasShareableRuntime: !Boolean(flags['skip-canvas-shareable-runtime']),
+    createCiChecksum: Boolean(flags['ci-checksum']),
   };
 
   return {
