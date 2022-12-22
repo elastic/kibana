@@ -9,7 +9,7 @@ import { buildAlertsOptionsFilters } from './utils';
 
 export const getAlertsTreemapLensAttributes: GetLensAttributes = (
   stackByField = 'kibana.alert.rule.name',
-  alertsOptions = {
+  extraOptions = {
     showOnlyThreatIndicatorAlerts: false,
     showBuildingBlockAlerts: false,
   }
@@ -42,7 +42,7 @@ export const getAlertsTreemapLensAttributes: GetLensAttributes = (
       query: '',
       language: 'kuery',
     },
-    filters: buildAlertsOptionsFilters(alertsOptions),
+    filters: buildAlertsOptionsFilters(extraOptions),
     datasourceStates: {
       formBased: {
         layers: {
@@ -74,11 +74,11 @@ export const getAlertsTreemapLensAttributes: GetLensAttributes = (
                 },
               },
               '75ce269b-ee9c-4c7d-a14e-9226ba0fe059': {
-                label: `Top values of ${alertsOptions.breakdownField}`,
+                label: `Top values of ${extraOptions.breakdownField}`,
                 dataType: 'string',
                 operationType: 'terms',
                 scale: 'ordinal',
-                sourceField: alertsOptions.breakdownField,
+                sourceField: extraOptions.breakdownField,
                 isBucketed: true,
                 params: {
                   size: 1000,

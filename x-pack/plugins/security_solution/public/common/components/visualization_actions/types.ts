@@ -15,7 +15,7 @@ import type { SourcererScopeName } from '../../store/sourcerer/model';
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export type GetLensAttributes = (
   stackByField?: string,
-  alertsOptions?: AlertsOptions
+  alertsOptions?: ExtraOptions
 ) => LensAttributes;
 
 export interface VisualizationActionsProps {
@@ -34,7 +34,7 @@ export interface VisualizationActionsProps {
 }
 
 export interface LensEmbeddableComponentProps {
-  extraOptions?: AlertsOptions;
+  extraOptions?: ExtraOptions;
   extraActions?: Action[];
   getLensAttributes?: GetLensAttributes;
   height?: string;
@@ -85,7 +85,7 @@ export interface Response {
   time?: number;
 }
 
-export interface AlertsOptions {
+export interface ExtraOptions {
   showBuildingBlockAlerts?: boolean;
   showOnlyThreatIndicatorAlerts?: boolean;
   status?: Status;

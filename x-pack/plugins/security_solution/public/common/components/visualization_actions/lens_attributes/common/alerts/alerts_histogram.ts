@@ -10,7 +10,7 @@ import { buildAlertsOptionsFilters } from './utils';
 
 export const getAlertsHistogramLensAttributes: GetLensAttributes = (
   stackByField = 'kibana.alert.rule.name',
-  alertsOptions = {
+  extraOptions = {
     showOnlyThreatIndicatorAlerts: false,
     showBuildingBlockAlerts: false,
   }
@@ -58,7 +58,7 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
         query: '',
         language: 'kuery',
       },
-      filters: buildAlertsOptionsFilters(alertsOptions),
+      filters: buildAlertsOptionsFilters(extraOptions),
       datasourceStates: {
         formBased: {
           layers: {

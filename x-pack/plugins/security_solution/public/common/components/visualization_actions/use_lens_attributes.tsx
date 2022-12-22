@@ -14,7 +14,7 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import type { LensAttributes, GetLensAttributes, AlertsOptions } from './types';
+import type { LensAttributes, GetLensAttributes, ExtraOptions } from './types';
 import {
   getHostDetailsPageFilter,
   sourceOrDestinationIpExistsFilter,
@@ -30,7 +30,7 @@ export const useLensAttributes = ({
   stackByField,
   title,
 }: {
-  extraOptions?: AlertsOptions;
+  extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   lensAttributes?: LensAttributes | null;
   scopeId?: SourcererScopeName;

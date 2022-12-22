@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { AlertsOptions } from '../../../types';
+import type { ExtraOptions } from '../../../types';
 
 export const buildAlertsOptionsFilters = ({
   showBuildingBlockAlerts = false,
   showOnlyThreatIndicatorAlerts = false,
   status,
-}: AlertsOptions) => [
+}: ExtraOptions) => [
   ...(status
     ? [
         {
