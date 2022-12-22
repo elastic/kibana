@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import semverIsValid from 'semver/functions/valid';
+
 import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { NewAgentActionSchema } from '../models';
