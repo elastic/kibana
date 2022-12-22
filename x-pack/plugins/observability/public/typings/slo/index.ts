@@ -6,6 +6,7 @@
  */
 
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { CreateSLOParamsForFE } from '../../../server/types/rest_specs';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
 
@@ -14,22 +15,7 @@ interface Duration {
   unit: DurationUnit;
 }
 
-interface SLO {
-  id: string;
-  name: string;
-  time_window: {
-    duration: Duration;
-  };
-  objective: {
-    target: number;
-  };
-  summary: {
-    sli_value: number;
-    error_budget: {
-      remaining: number;
-    };
-  };
-}
+type SLO = { id: string } & CreateSLOParamsForFE;
 
 interface SLOList {
   results: SLO[];
