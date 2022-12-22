@@ -6,14 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
+import { KibanaRequest } from '@kbn/core-http-server';
+import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
+import type { InternalUiSettingsServiceStart } from '@kbn/core-ui-settings-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
-export interface CustomBrandingStart {
-  set: (customBranding: CustomBranding) => void;
-  customBranding$: Observable<CustomBranding>;
+/** @public */
+export interface CustomBrandingStart {}
+
+export interface CustomBrandingStartDeps {
+  savedObjects: InternalSavedObjectsServiceStart;
+  uiSettings: InternalUiSettingsServiceStart;
 }
 
+/** @public */
 export interface CustomBrandingSetup {
-  register: (pluginName: string) => void;
+  register: () => void;
+  getBrandingFor: (request: KibanaRequest) => Promise<CustomBranding>;
 }

@@ -8,13 +8,18 @@
 
 import { Observable } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 
 export interface CustomBrandingStart {
-  set: (customBranding: CustomBranding) => void;
   customBranding$: Observable<CustomBranding>;
   hasCustomBranding$: Observable<boolean>;
 }
 
 export interface CustomBrandingSetup {
-  register: (pluginName: string) => void;
+  customBranding$: Observable<CustomBranding>;
+  hasCustomBranding$: Observable<boolean>;
+}
+
+export interface CustomBrandingSetupDeps {
+  injectedMetadata: InternalInjectedMetadataSetup;
 }

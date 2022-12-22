@@ -12,9 +12,9 @@ export interface CustomBranding {
    * */
   logo?: string;
   /**
-   * Custom replacement for favicon
+   * Custom replacement for favicon in SVG format
    */
-  favicon?: string;
+  faviconSVG?: string;
 
   /** Custom page title */
   pageTitle?: string;
@@ -23,4 +23,9 @@ export interface CustomBranding {
    * @link packages/core/chrome/core-chrome-browser-internal/src/ui/header/elastic_mark.tsx
    */
   customizedLogo?: string;
+
+  /**
+   * Custom replacement for favicon in PNG format
+   */
+  faviconPNG?: string;
 }

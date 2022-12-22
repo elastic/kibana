@@ -12,7 +12,6 @@ export class CustomBrandingPlugin
   implements Plugin<CustomBrandingPluginSetup, CustomBrandingPluginStart>
 {
   public setup(core: CoreSetup): CustomBrandingPluginSetup {
-    core.customBranding.register('customBranding');
     return {};
   }
 

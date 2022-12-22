@@ -17,6 +17,7 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -65,6 +66,7 @@ export class RenderingService {
     http,
     status,
     uiPlugins,
+    customBranding,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -77,12 +79,12 @@ export class RenderingService {
     });
 
     return {
-      render: this.render.bind(this, { elasticsearch, http, uiPlugins, status }),
+      render: this.render.bind(this, { elasticsearch, http, uiPlugins, status, customBranding }),
     };
   }
 
   private async render(
-    { elasticsearch, http, uiPlugins, status }: RenderOptions,
+    { elasticsearch, http, uiPlugins, status, customBranding }: RenderOptions,
     request: KibanaRequest,
     uiSettings: {
       client: IUiSettingsClient;
@@ -105,6 +107,11 @@ export class RenderingService {
       defaults: uiSettings.globalClient?.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
     };
+
+    let branding: CustomBranding = {};
+    if (customBranding) {
+      branding = await customBranding.getBrandingFor(request);
+    }
 
     let clusterInfo = {};
     try {
@@ -142,6 +149,11 @@ export class RenderingService {
       darkMode,
       themeVersion,
       stylesheetPaths,
+      customBranding: {
+        faviconSVG: branding.faviconSVG,
+        faviconPNG: branding.faviconPNG,
+        pageTitle: branding.pageTitle,
+      },
       injectedMetadata: {
         version: env.packageInfo.version,
         buildNumber: env.packageInfo.buildNum,
@@ -158,6 +170,10 @@ export class RenderingService {
         theme: {
           darkMode,
           version: themeVersion,
+        },
+        customBranding: {
+          logo: branding.logo,
+          customizedLogo: branding.customizedLogo,
         },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,

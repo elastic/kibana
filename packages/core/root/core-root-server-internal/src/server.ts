@@ -326,19 +326,20 @@ export class Server {
       coreUsageData: coreUsageDataSetup,
     });
 
+    const customBrandingSetup = this.customBranding.setup();
+
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
       status: statusSetup,
       uiPlugins,
+      customBranding: customBrandingSetup,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
       http: httpSetup,
       rendering: renderingSetup,
     });
-
-    const customBrandingSetup = this.customBranding.setup();
 
     const loggingSetup = this.logging.setup();
 
@@ -384,7 +385,6 @@ export class Server {
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
     const elasticsearchStart = await this.elasticsearch.start();
-    const customBrandingStart = this.customBranding.start();
     const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
@@ -398,6 +398,10 @@ export class Server {
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
+    const customBrandingStart = this.customBranding.start({
+      uiSettings: uiSettingsStart,
+      savedObjects: savedObjectsStart,
+    });
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
     const coreUsageDataStart = this.coreUsageData.start({

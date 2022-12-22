@@ -61,6 +61,7 @@ export interface InternalInjectedMetadataSetup {
   getInjectedVars: () => {
     [key: string]: unknown;
   };
+  getCustomBranding: () => unknown;
 }
 
 /** @internal */

@@ -6,62 +6,49 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import type { CustomBrandingStart, CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
+import { of, Subject, Observable } from 'rxjs';
+import { shareReplay, takeUntil } from 'rxjs/operators';
+import type {
+  CustomBrandingStart,
+  CustomBrandingSetup,
+  CustomBrandingSetupDeps,
+} from '@kbn/core-custom-branding-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-
-const CUSTOM_BRANDING_PLUGIN = 'customBranding';
 
 export class CustomBrandingService {
   private customBranding: CustomBranding = {};
-  private registeredPlugin?: string;
-  private hasCustomBranding$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  private customBranding$: BehaviorSubject<CustomBranding> = new BehaviorSubject<CustomBranding>(
-    this.customBranding
-  );
+  private hasCustomBranding$: Observable<boolean> = new Observable<boolean>();
+  private customBranding$: Observable<CustomBranding> = new Observable<CustomBranding>();
   private stop$ = new Subject<void>();
-
-  private set(customBranding: CustomBranding) {
-    if (this.registeredPlugin !== CUSTOM_BRANDING_PLUGIN) {
-      throw new Error('Plugin needs to register before setting custom branding');
-    }
-    Object.keys(customBranding).forEach((key) => {
-      this.customBranding[key as keyof CustomBranding] =
-        customBranding[key as keyof CustomBranding];
-    });
-    this.customBranding$.next(this.customBranding);
-    this.hasCustomBranding$.next(this.hasCustomBranding());
-  }
 
   private hasCustomBranding() {
     return Object.keys(this.customBranding).length > 0;
-  }
-
-  private register(pluginName: string) {
-    if (this.registeredPlugin) {
-      throw new Error('Plugin already registered');
-    }
-    this.registeredPlugin = pluginName;
   }
 
   /**
    * @public
    */
   public start(): CustomBrandingStart {
+    if (!this.hasCustomBranding$ || !this.customBranding$) {
+      throw new Error('Setup needs to be called before start');
+    }
     return {
-      set: this.set.bind(this),
-      customBranding$: this.customBranding$.pipe(takeUntil(this.stop$)),
-      hasCustomBranding$: this.hasCustomBranding$.pipe(takeUntil(this.stop$)),
+      customBranding$: this.customBranding$.pipe(takeUntil(this.stop$), shareReplay(1)),
+      hasCustomBranding$: this.hasCustomBranding$.pipe(takeUntil(this.stop$), shareReplay(1)),
     };
   }
 
   /**
    * @public
    */
-  public setup(): CustomBrandingSetup {
+  public setup({ injectedMetadata }: CustomBrandingSetupDeps): CustomBrandingSetup {
+    const customBranding = injectedMetadata.getCustomBranding() as CustomBranding;
+    this.customBranding$ = of(customBranding);
+    this.hasCustomBranding$ = of(this.hasCustomBranding());
+
     return {
-      register: this.register.bind(this),
+      customBranding$: this.customBranding$.pipe(takeUntil(this.stop$), shareReplay(1)),
+      hasCustomBranding$: this.hasCustomBranding$.pipe(takeUntil(this.stop$), shareReplay(1)),
     };
   }
 
