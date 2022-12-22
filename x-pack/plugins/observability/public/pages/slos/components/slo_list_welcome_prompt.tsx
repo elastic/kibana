@@ -24,7 +24,11 @@ export function SloListWelcomePrompt() {
   };
 
   return (
-    <EuiPageTemplate minHeight="0" data-test-subj="slosPageWelcomePrompt">
+    <EuiPageTemplate
+      minHeight="0"
+      data-test-subj="slosPageWelcomePrompt"
+      style={{ paddingBlockStart: 0 }}
+    >
       <EuiPageTemplate.EmptyPrompt
         title={
           <EuiTitle size="l">
