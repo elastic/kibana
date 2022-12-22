@@ -78,8 +78,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       onCompleteEditTimelineAction,
     } = useEditTimelineActions();
 
+    const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
     const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
-      deleteTimelines,
+      deleteTimelines: kibanaSecuritySolutionsPrivileges.crud ? deleteTimelines : undefined,
       selectedItems,
       tableRef,
       timelineType,
@@ -148,7 +149,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       }
     }, [setImportDataModalToggle, refetch]);
 
-    const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
       if (kibanaSecuritySolutionsPrivileges.crud) {
         const createRule: ActionTimelineToShow[] = ['createRule'];
@@ -172,6 +172,10 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         }
 
         return timelineActions;
+      }
+      // user with read access should only see export
+      if (timelineStatus !== TimelineStatus.immutable) {
+        return ['export', 'selectable'];
       }
       return [];
     }, [

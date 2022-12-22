@@ -149,10 +149,9 @@ export const getActionsColumns = ({
     'data-test-subj': 'create-rule-from-timeline',
     available: () => actionTimelineToShow.includes('createRule') && onCreateRule != null,
   };
-
   return [
     {
-      width: '80px',
+      width: '150px',
       actions: [
         createTimelineFromTemplate,
         createTemplateFromTimeline,
