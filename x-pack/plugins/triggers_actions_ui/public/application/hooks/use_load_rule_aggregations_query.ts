@@ -36,11 +36,6 @@ export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQuery
     notifications: { toasts },
   } = useKibana().services;
 
-  const initialData = () => ({
-    ruleExecutionStatus: initializeAggregationResult(RuleExecutionStatusValues),
-    ruleLastRunOutcome: initializeAggregationResult(RuleLastRunOutcomeValues),
-  });
-
   const internalLoadRuleAggregations = () => {
     return loadRuleAggregationsWithKueryFilter({
       http,
@@ -80,17 +75,23 @@ export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQuery
       },
     ],
     queryFn: internalLoadRuleAggregations,
-    initialData,
     onError: onErrorFn,
     enabled,
     keepPreviousData: true,
     cacheTime: 0,
   });
 
+  const aggregation = data
+    ? data
+    : {
+        ruleExecutionStatus: initializeAggregationResult(RuleExecutionStatusValues),
+        ruleLastRunOutcome: initializeAggregationResult(RuleLastRunOutcomeValues),
+      };
+
   return {
     loadRuleAggregations: refetch,
-    rulesStatusesTotal: data?.ruleExecutionStatus ?? {},
-    rulesLastRunOutcomesTotal: data?.ruleLastRunOutcome ?? {},
+    rulesStatusesTotal: aggregation.ruleExecutionStatus,
+    rulesLastRunOutcomesTotal: aggregation.ruleLastRunOutcome,
     isLoading: isLoading && isFetching,
   };
 };
