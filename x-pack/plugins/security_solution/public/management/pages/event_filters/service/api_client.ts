@@ -7,8 +7,19 @@
 
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
+import type {
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { EVENT_FILTER_LIST_DEFINITION } from '../constants';
+
+function writeTransform<T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema>(
+  item: T
+): T {
+  return removeIdFromExceptionItemsEntries(item) as T;
+}
 
 /**
  * Event filters Api client class using ExceptionsListApiClient as base class
@@ -17,10 +28,22 @@ import { EVENT_FILTER_LIST_DEFINITION } from '../constants';
  */
 export class EventFiltersApiClient extends ExceptionsListApiClient {
   constructor(http: HttpStart) {
-    super(http, ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_DEFINITION);
+    super(
+      http,
+      ENDPOINT_EVENT_FILTERS_LIST_ID,
+      EVENT_FILTER_LIST_DEFINITION,
+      undefined,
+      writeTransform
+    );
   }
 
   public static getInstance(http: HttpStart): ExceptionsListApiClient {
-    return super.getInstance(http, ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_DEFINITION);
+    return super.getInstance(
+      http,
+      ENDPOINT_EVENT_FILTERS_LIST_ID,
+      EVENT_FILTER_LIST_DEFINITION,
+      undefined,
+      writeTransform
+    );
   }
 }
