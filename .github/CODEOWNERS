@@ -998,6 +998,7 @@ packages/kbn-type-summarizer @elastic/kibana-operations
 packages/kbn-type-summarizer-cli @elastic/kibana-operations
 packages/kbn-type-summarizer-core @elastic/kibana-operations
 packages/kbn-typed-react-router-config @elastic/apm-ui
+packages/kbn-ui-actions-browser @elastic/kibana-global-experience
 packages/kbn-ui-framework @elastic/kibana-design
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations
