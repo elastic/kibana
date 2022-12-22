@@ -14,14 +14,12 @@ describe('ScheduleNotificationResponseActions', () => {
   const signals = [signalOne, signalTwo];
   const defaultQueryParams = {
     ecsMapping: { testField: { field: 'testField', value: 'testValue' } },
-    id: 'test1',
     savedQueryId: 'testSavedQueryId',
     query: undefined,
     queries: [],
     packId: undefined,
   };
   const defaultPackParams = {
-    id: 'test1',
     packId: 'testPackId',
     queries: [],
     query: undefined,
@@ -39,7 +37,6 @@ describe('ScheduleNotificationResponseActions', () => {
   const defaultResultParams = {
     agent_ids: ['agent-id-1', 'agent-id-2'],
     alert_ids: ['alert-id-1', 'alert-id-2'],
-    id: 'test1',
   };
   const defaultQueryResultParams = {
     ...defaultResultParams,
@@ -47,12 +44,13 @@ describe('ScheduleNotificationResponseActions', () => {
     ecsMapping: undefined,
     saved_query_id: 'testSavedQueryId',
     savedQueryId: undefined,
+    queries: [],
   };
   const defaultPackResultParams = {
     ...defaultResultParams,
-    id: 'test1',
-    pack_id: undefined,
-    packId: undefined,
+    query: undefined,
+    saved_query_id: undefined,
+    ecs_mapping: { testField: { field: 'testField', value: 'testValue' } },
   };
 
   const simpleQuery = 'select * from uptime';
@@ -70,13 +68,10 @@ describe('ScheduleNotificationResponseActions', () => {
     ];
     scheduleNotificationResponseActions({ signals, responseActions }, osqueryActionMock);
 
-    expect(osqueryActionMock).toHaveBeenCalledWith(
-      {
-        ...defaultQueryResultParams,
-        query: simpleQuery,
-      },
-      signalOne
-    );
+    expect(osqueryActionMock).toHaveBeenCalledWith({
+      ...defaultQueryResultParams,
+      query: simpleQuery,
+    });
     //
   });
   it('should handle osquery response actions with packs', async () => {
@@ -100,12 +95,9 @@ describe('ScheduleNotificationResponseActions', () => {
     ];
     scheduleNotificationResponseActions({ signals, responseActions }, osqueryActionMock);
 
-    expect(osqueryActionMock).toHaveBeenCalledWith(
-      {
-        ...defaultPackResultParams,
-        queries: [{ ...defaultQueries, id: 'query-1', query: simpleQuery }],
-      },
-      signalOne
-    );
+    expect(osqueryActionMock).toHaveBeenCalledWith({
+      ...defaultPackResultParams,
+      queries: [{ ...defaultQueries, id: 'query-1', query: simpleQuery }],
+    });
   });
 });
