@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { ALERT_ACTION_GROUP, ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import {
   ActionGroup,
@@ -15,6 +15,7 @@ import {
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { createGetOriginalAlertState } from '../../../utils/get_original_alert_state';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
@@ -57,6 +58,7 @@ type InventoryMetricThresholdAlert = Alert<
 type InventoryMetricThresholdAlertFactory = (
   id: string,
   reason: string,
+  actionGroup: string,
   additionalContext?: AdditionalContext | null,
   threshold?: number | undefined,
   value?: number | undefined
@@ -90,11 +92,17 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       getAlertUuid,
       getAlertByAlertUuid,
     } = services;
-    const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason, additionalContext) =>
+    const alertFactory: InventoryMetricThresholdAlertFactory = (
+      id,
+      reason,
+      actionGroup,
+      additionalContext
+    ) =>
       alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
+          [ALERT_ACTION_GROUP]: actionGroup,
           [ALERT_RULE_PARAMETERS]: params as any, // the type assumes the object is already flattened when writing the same way as when reading https://github.com/elastic/kibana/blob/main/x-pack/plugins/rule_registry/common/field_map/runtime_type_from_fieldmap.ts#L60
           ...flattenAdditionalContext(additionalContext),
         },
@@ -108,7 +116,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         logger.error(e.message);
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
-        const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason);
+        const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason, actionGroupId);
         const indexedStartedDate =
           getAlertStartedDate(UNGROUPED_FACTORY_KEY) ?? startedAt.toISOString();
         const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
@@ -217,7 +225,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
         const additionalContext = results && results.length > 0 ? results[0][group].context : null;
 
-        const alert = alertFactory(group, reason, additionalContext);
+        const alert = alertFactory(group, reason, actionGroupId, additionalContext);
         const indexedStartedDate = getAlertStartedDate(group) ?? startedAt.toISOString();
         const alertUuid = getAlertUuid(group);
 
@@ -256,6 +264,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       const alertUuid = getAlertUuid(recoveredAlertId);
       const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
+      const getOriginalAlertState = createGetOriginalAlertState(actionGroupToAlertState);
+      const originalAlertState = getOriginalAlertState(alertHits);
 
       alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
@@ -271,6 +281,10 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           timestamp: indexedStartedDate,
           spaceId,
         }),
+        originalAlertState,
+        originalAlertStateWasALERT: originalAlertState === stateToAlertMessage[AlertStates.ALERT],
+        originalAlertStateWasWARNING:
+          originalAlertState === stateToAlertMessage[AlertStates.WARNING],
         ...additionalContext,
       });
     }
@@ -347,6 +361,15 @@ export const WARNING_ACTIONS = {
   name: i18n.translate('xpack.infra.metrics.alerting.threshold.warning', {
     defaultMessage: 'Warning',
   }),
+};
+
+const actionGroupToAlertState = (actionGroupId: string | undefined): string | undefined => {
+  if (actionGroupId === FIRED_ACTIONS.id) {
+    return stateToAlertMessage[AlertStates.ALERT];
+  }
+  if (actionGroupId === WARNING_ACTIONS.id) {
+    return stateToAlertMessage[AlertStates.WARNING];
+  }
 };
 
 const formatMetric = (metric: SnapshotMetricType, value: number) => {

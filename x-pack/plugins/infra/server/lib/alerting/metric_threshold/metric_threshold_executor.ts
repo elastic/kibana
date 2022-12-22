@@ -16,6 +16,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { createGetOriginalAlertState } from '../../../utils/get_original_alert_state';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
@@ -318,6 +319,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
       const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
+      const getOriginalAlertState = createGetOriginalAlertState(actionGroupToAlertState);
       const originalAlertState = getOriginalAlertState(alertHits);
 
       alert.setContext({
@@ -381,11 +383,6 @@ const actionGroupToAlertState = (actionGroupId: string | undefined): string | un
   if (actionGroupId === NO_DATA_ACTIONS.id) {
     return stateToAlertMessage[AlertStates.NO_DATA];
   }
-};
-
-const getOriginalAlertState = (alertHits: Array<{ [id: string]: any }> | null | undefined) => {
-  const source = alertHits && alertHits.length > 0 ? alertHits[0]._source : undefined;
-  return actionGroupToAlertState(source?.[ALERT_ACTION_GROUP]);
 };
 
 const mapToConditionsLookup = (
