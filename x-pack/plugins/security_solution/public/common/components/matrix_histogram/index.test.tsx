@@ -15,7 +15,6 @@ import { MatrixHistogramType } from '../../../../common/search_strategy/security
 import { TestProviders } from '../../mock';
 import { mockRuntimeMappings } from '../../containers/source/mock';
 import { dnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
-import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { useQueryToggle } from '../../containers/query_toggle';
 
 jest.mock('../../containers/query_toggle');
@@ -176,15 +175,7 @@ describe('Matrix Histogram Component', () => {
   });
 
   describe('Inspect button', () => {
-    test("it doesn't render Inspect button by default on Host page", () => {
-      (useRouteSpy as jest.Mock).mockReturnValue([
-        {
-          detailName: 'mockHost',
-          pageName: 'hosts',
-          tabName: 'events',
-        },
-      ]);
-
+    test("it doesn't render Inspect button by default", () => {
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
         lensAttributes: dnsTopDomainsLensAttributes,
@@ -193,57 +184,11 @@ describe('Matrix Histogram Component', () => {
         wrappingComponent: TestProviders,
       });
       expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(false);
-    });
-
-    test("it doesn't render Inspect button by default on Network page", () => {
-      (useRouteSpy as jest.Mock).mockReturnValue([
-        {
-          detailName: undefined,
-          pageName: 'network',
-          tabName: 'external-alerts',
-        },
-      ]);
-
-      const testProps = {
-        ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsLensAttributes,
-      };
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
-      });
-      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(false);
-    });
-
-    test('it render Inspect button by default on other pages', () => {
-      (useRouteSpy as jest.Mock).mockReturnValue([
-        {
-          detailName: undefined,
-          pageName: 'overview',
-          tabName: undefined,
-        },
-      ]);
-
-      const testProps = {
-        ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsLensAttributes,
-      };
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
-      });
-      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toBe(true);
     });
   });
 
   describe('VisualizationActions', () => {
-    test('it renders VisualizationActions on Host page if lensAttributes is provided', () => {
-      (useRouteSpy as jest.Mock).mockReturnValue([
-        {
-          detailName: 'mockHost',
-          pageName: 'hosts',
-          tabName: 'events',
-        },
-      ]);
-
+    test('it renders VisualizationActions if lensAttributes is provided', () => {
       const testProps = {
         ...mockMatrixOverTimeHistogramProps,
         lensAttributes: dnsTopDomainsLensAttributes,
@@ -255,48 +200,6 @@ describe('Matrix Histogram Component', () => {
       expect(wrapper.find('[data-test-subj="mock-viz-actions"]').prop('className')).toEqual(
         'histogram-viz-actions'
       );
-    });
-
-    test('it renders VisualizationActions on Network page if lensAttributes is provided', () => {
-      (useRouteSpy as jest.Mock).mockReturnValue([
-        {
-          detailName: undefined,
-          pageName: 'network',
-          tabName: 'events',
-        },
-      ]);
-
-      const testProps = {
-        ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsLensAttributes,
-      };
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
-      });
-      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').prop('className')).toEqual(
-        'histogram-viz-actions'
-      );
-    });
-
-    test("it doesn't renders VisualizationActions except Host / Network pages", () => {
-      const testProps = {
-        ...mockMatrixOverTimeHistogramProps,
-        lensAttributes: dnsTopDomainsLensAttributes,
-      };
-
-      (useRouteSpy as jest.Mock).mockReturnValue([
-        {
-          detailName: undefined,
-          pageName: 'overview',
-          tabName: undefined,
-        },
-      ]);
-
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders,
-      });
-      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(false);
     });
   });
 
