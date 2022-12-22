@@ -334,11 +334,11 @@ export const createLifecycleExecutor =
         alertFactory
       );
 
-    const allEventsToIndex = [
+    const allTrackedEventsToIndex = [
       ...getAlertsForNotification(trackedEventsToIndex),
       ...newEventsToIndex,
-      ...earlyRecoveredEvents,
     ];
+    const allEventsToIndex = [...allTrackedEventsToIndex, ...earlyRecoveredEvents];
 
     // Only write alerts if:
     // - writing is enabled
@@ -367,7 +367,7 @@ export const createLifecycleExecutor =
     }
 
     const nextTrackedAlerts = Object.fromEntries(
-      allEventsToIndex
+      allTrackedEventsToIndex
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
         .map(({ event, flappingHistory, flapping, pendingRecoveredCount }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
@@ -381,7 +381,7 @@ export const createLifecycleExecutor =
     );
 
     const nextTrackedAlertsRecovered = Object.fromEntries(
-      [...allEventsToIndex, ...trackedRecoveredEventsToIndex]
+      [...allTrackedEventsToIndex, ...trackedRecoveredEventsToIndex]
         .filter(
           ({ event, flappingHistory, flapping }) =>
             // return recovered alerts if they are flapping or if the flapping array is not at capacity
