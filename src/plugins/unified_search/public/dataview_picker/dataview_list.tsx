@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiSelectable,
   EuiSelectableProps,
@@ -53,13 +53,13 @@ export function DataViewsList({
     []
   );
 
-  const [sortedDataViewsList, setSortedDataViewsList] = useState(
+  const [sortedDataViewsList, setSortedDataViewsList] = useState<DataViewListItemEnhanced[]>(
     sortingService.sortData(dataViewsList)
   );
 
-  const handleSortingChange = useCallback(() => {
+  const handleSortingChange = () => {
     setSortedDataViewsList((dataViews) => sortingService.sortData(dataViews));
-  }, [sortingService]);
+  };
 
   return (
     <EuiSelectable<{
