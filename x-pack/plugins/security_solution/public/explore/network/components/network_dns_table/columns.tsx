@@ -10,18 +10,13 @@ import React from 'react';
 
 import type { NetworkDnsItem } from '../../../../../common/search_strategy';
 import { NetworkDnsFields } from '../../../../../common/search_strategy';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { Columns } from '../../../components/paginated_table';
-import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
-import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 
 import * as i18n from './translations';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 export type NetworkDnsColumns = [
   Columns<NetworkDnsItem['dnsName']>,
   Columns<NetworkDnsItem['queryCount']>,
@@ -39,36 +34,13 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
     sortable: true,
     render: (dnsName) => {
       if (dnsName != null) {
-        const id = escapeDataProviderId(`networkDns-table--name-${dnsName}`);
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: dnsName,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: 'dns.question.registered_domain',
-                value: dnsName,
-                operator: IS_OPERATOR,
-              },
-            }}
-            isAggregatable={true}
-            fieldType={'keyword'}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                defaultToEmptyTag(dnsName)
-              )
-            }
-          />
-        );
+        return getRowItemsWithActions({
+          values: [dnsName],
+          fieldName: 'dns.question.registered_domain',
+          fieldType: 'keyword',
+          idPrefix: escapeDataProviderId(`networkDns-table--name-${dnsName}`),
+          render: defaultToEmptyTag,
+        });
       } else {
         return getEmptyTagValue();
       }
