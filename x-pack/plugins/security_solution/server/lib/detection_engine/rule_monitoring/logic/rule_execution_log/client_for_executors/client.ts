@@ -178,9 +178,7 @@ export const createClientForExecutors = (
       ruleResultService?.addLastRunWarning(message);
     }
 
-    if (newStatus === RuleExecutionStatus.succeeded) {
-      ruleResultService?.setLastRunOutcomeMessage(message);
-    }
+    ruleResultService?.setLastRunOutcomeMessage(message);
 
     if (totalSearchDurationMs) {
       ruleMonitoringService?.setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs);
