@@ -308,7 +308,7 @@
 <         .withHelper('helper', function(options) {
 <           return options.fn.run;
 ---
->         .withHelper<Handlebars.HelperDelegate0Param>('helper', function (options) {
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
 >           return (options.fn as any).run;
 302,303c206,207
 <         .withDecorator('decorator', function(fn) {
@@ -324,7 +324,7 @@
 <         .withHelper('helper', function(options) {
 <           return options.fn() + options.fn.run;
 ---
->         .withHelper<Handlebars.HelperDelegate0Param>('helper', function (options) {
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
 >           return options.fn() + (options.fn as any).run;
 314,315c218,219
 <         .withDecorator('decorator', function(fn) {
@@ -342,7 +342,7 @@
 ---
 >     it('should apply block decorators', () => {
 >       expectTemplate('{{#helper}}{{#*decorator}}success{{/decorator}}{{/helper}}')
->         .withHelper<Handlebars.HelperDelegate0Param>('helper', function (options) {
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
 >           return (options.fn as any).run;
 327,328c229,230
 <         .withDecorator('decorator', function(fn, props, container, options) {
@@ -358,7 +358,7 @@
 <         .withHelper('helper', function(options) {
 <           return options.fn.run;
 ---
->         .withHelper<Handlebars.HelperDelegate0Param>('helper', function (options) {
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
 >           return (options.fn as any).run;
 342,343c244,245
 <           decorator: function(fn, props, container, options) {
@@ -382,7 +382,7 @@
 <         .withHelper('helper', function(options) {
 <           return options.fn.run;
 ---
->         .withHelper<Handlebars.HelperDelegate0Param>('helper', function (options) {
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
 >           return (options.fn as any).run;
 360,361c262,263
 <         .withDecorator('decorator', function(fn, props, container, options) {
@@ -398,7 +398,7 @@
 <         .withHelper('helper', function(options) {
 <           return options.fn.run;
 ---
->         .withHelper<Handlebars.HelperDelegate0Param>('helper', function (options) {
+>         .withHelper('helper', function (options: Handlebars.HelperOptions) {
 >           return (options.fn as any).run;
 372,373c274,275
 <         .withDecorator('decorator', function(fn, props, container, options) {
