@@ -282,6 +282,9 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           spaceId,
         }),
         originalAlertState,
+        originalAlertStateWasALERT: originalAlertState === stateToAlertMessage[AlertStates.ALERT],
+        originalAlertStateWasWARNING:
+          originalAlertState === stateToAlertMessage[AlertStates.WARNING],
         ...additionalContext,
       });
     }

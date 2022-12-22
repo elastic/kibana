@@ -34,6 +34,7 @@ import {
   metricActionVariableDescription,
   orchestratorActionVariableDescription,
   originalAlertStateActionVariableDescription,
+  originalAlertStateWasActionVariableDescription,
   reasonActionVariableDescription,
   tagsActionVariableDescription,
   thresholdActionVariableDescription,
@@ -126,6 +127,14 @@ export async function registerMetricInventoryThresholdRuleType(
         { name: 'labels', description: labelsActionVariableDescription },
         { name: 'tags', description: tagsActionVariableDescription },
         { name: 'originalAlertState', description: originalAlertStateActionVariableDescription },
+        {
+          name: 'originalAlertStateWasALERT',
+          description: originalAlertStateWasActionVariableDescription,
+        },
+        {
+          name: 'originalAlertStateWasWARNING',
+          description: originalAlertStateWasActionVariableDescription,
+        },
       ],
     },
     getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
