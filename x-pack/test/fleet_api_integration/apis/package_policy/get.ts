@@ -86,6 +86,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: agentPolicyId,
             enabled: true,
             inputs: [],
+            force: true,
             package: {
               name: 'endpoint',
               title: 'Elastic Defend',
@@ -110,6 +111,13 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/package_policies/delete`)
           .set('kbn-xsrf', 'xxxx')
           .send({ packagePolicyIds: [packagePolicyId, endpointPackagePolicyId] })
+          .expect(200);
+
+        // uninstall endpoint package
+        await supertest
+          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
           .expect(200);
       });
 
