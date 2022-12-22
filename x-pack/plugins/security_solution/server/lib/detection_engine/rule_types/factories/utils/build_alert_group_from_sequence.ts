@@ -7,8 +7,6 @@
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
-import type { Logger } from '@kbn/core/server';
-
 import type { ConfigType } from '../../../../../config';
 import type { Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { buildAlert, buildAncestors, generateAlertId } from './build_alert';
