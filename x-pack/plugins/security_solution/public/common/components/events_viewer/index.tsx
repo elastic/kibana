@@ -501,12 +501,14 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     [totalCountMinusDeleted, unit]
   );
 
-  let rowHeightsOptions: EuiDataGridRowHeightsOptions | undefined;
-  if (tableView === 'eventRenderedView') {
-    rowHeightsOptions = {
-      defaultHeight: 'auto' as const,
-    };
-  }
+  const rowHeightsOptions: EuiDataGridRowHeightsOptions | undefined = useMemo(() => {
+    if (tableView === 'eventRenderedView') {
+      return {
+        defaultHeight: 'auto' as const,
+      };
+    }
+    return undefined;
+  }, [tableView]);
 
   const dataTable = useMemo(
     () => (
