@@ -10,6 +10,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { GetMonitorDownStatusMessageParams } from '../../legacy_uptime/lib/requests/get_monitor_status';
@@ -89,7 +90,7 @@ export class StatusRuleExecutor {
     await this.getAllLocationNames();
     this.monitors = await getAllMonitors(
       this.soClient,
-      `attributes.${ConfigKey.ALERT_CONFIG}: true`
+      `attributes.${AlertConfigKey.STATUS_ENABLED}: true`
     );
     const allIds: string[] = [];
     const enabledIds: string[] = [];

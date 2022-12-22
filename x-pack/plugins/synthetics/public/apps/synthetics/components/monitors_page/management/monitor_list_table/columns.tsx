@@ -47,7 +47,7 @@ export function useMonitorListColumns({
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
 
-  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable({ reloadPage });
+  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
 
   const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
     return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;

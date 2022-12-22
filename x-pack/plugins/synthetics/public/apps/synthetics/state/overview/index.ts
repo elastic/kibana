@@ -6,6 +6,7 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
+import { isStatusEnabled } from '../../../../../common/runtime_types/monitor_management/alert_config';
 import { MonitorOverviewState } from './models';
 
 import {
@@ -81,7 +82,7 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     .addCase(enableMonitorAlertAction.success, (state, action) => {
       const attrs = action.payload.attributes;
       if (!('errors' in attrs)) {
-        const isStatusAlertEnabled = Boolean(attrs[ConfigKey.ALERT_CONFIG]);
+        const isStatusAlertEnabled = isStatusEnabled(attrs[ConfigKey.ALERT_CONFIG]);
         state.data.monitors = state.data.monitors.map((monitor) => {
           if (
             monitor.id === action.payload.id ||

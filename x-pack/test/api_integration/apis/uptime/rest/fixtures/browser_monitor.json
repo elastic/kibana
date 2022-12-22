@@ -1,7 +1,9 @@
 {
   "type": "browser",
   "enabled": true,
-  "status_alert_enabled": true,
+  "alert": {
+    "status": true
+  },
   "journey_id": "",
   "project_id": "",
   "schedule": {

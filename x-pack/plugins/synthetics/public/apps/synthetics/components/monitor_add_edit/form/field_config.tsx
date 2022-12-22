@@ -29,7 +29,6 @@ import {
   EuiLink,
   EuiTextArea,
 } from '@elastic/eui';
-import { toggleStatusAlert } from '../../../../../../common/runtime_types/monitor_management/alert_config';
 import { formatLocation } from '../../../../../../common/utils/location_formatter';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
@@ -48,7 +47,7 @@ import {
   VerificationMode,
   FieldMeta,
 } from '../types';
-import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
+import { AlertConfigKey, DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
 import { HeaderField } from '../fields/header_field';
 import { RequestBodyField } from '../fields/request_body_field';
 import { ResponseBodyIndexField } from '../fields/index_response_body_field';
@@ -439,7 +438,7 @@ export const FIELD: Record<string, FieldMeta> = {
     }),
   },
   [ConfigKey.ALERT_CONFIG]: {
-    fieldKey: ConfigKey.ALERT_CONFIG,
+    fieldKey: AlertConfigKey.STATUS_ENABLED,
     component: EuiSwitch,
     label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
       defaultMessage: 'Enable status alert',
@@ -455,7 +454,7 @@ export const FIELD: Record<string, FieldMeta> = {
             defaultMessage: 'Enable status alert on this monitor.',
           }),
       onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-        setValue(ConfigKey.ALERT_CONFIG, toggleStatusAlert(field?.value));
+        setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
       },
     }),
   },
@@ -519,7 +518,7 @@ export const FIELD: Record<string, FieldMeta> = {
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.apmServiceName.helpText', {
       defaultMessage:
-        'Corrseponds to the service.name ECS field from APM. Set this to enable integrations between APM and Synthetics data.',
+        'Corresponds to the service.name ECS field from APM. Set this to enable integrations between APM and Synthetics data.',
     }),
     controlled: true,
     props: ({ field }) => ({

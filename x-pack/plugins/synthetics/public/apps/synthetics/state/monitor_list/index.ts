@@ -9,7 +9,12 @@ import { isEqual } from 'lodash';
 import { createReducer } from '@reduxjs/toolkit';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 
-import { ConfigKey, MonitorManagementListResult } from '../../../../../common/runtime_types';
+import { SavedObject } from '@kbn/core-saved-objects-common';
+import {
+  ConfigKey,
+  MonitorManagementListResult,
+  SyntheticsMonitor,
+} from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
@@ -92,6 +97,14 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
         ...state.monitorUpsertStatuses[action.payload.id],
         alertStatus: FETCH_STATUS.SUCCESS,
       };
+      if ('updated_at' in action.payload) {
+        state.data.monitors = state.data.monitors.map((monitor) => {
+          if (monitor.id === action.payload.id) {
+            return action.payload as SavedObject<SyntheticsMonitor>;
+          }
+          return monitor;
+        });
+      }
     })
     .addCase(enableMonitorAlertAction.fail, (state, action) => {
       state.monitorUpsertStatuses[action.payload.configId] = {

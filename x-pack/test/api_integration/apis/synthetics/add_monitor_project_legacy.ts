@@ -138,7 +138,9 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,
-            status_alert_enabled: true,
+            alert: {
+              status: true,
+            },
             'filter_journeys.match': 'check if title is present',
             'filter_journeys.tags': [],
             form_monitor_type: 'multistep',
@@ -266,7 +268,9 @@ export default function ({ getService }: FtrProviderContext) {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
             enabled: false,
-            status_alert_enabled: true,
+            alert: {
+              status: true,
+            },
             form_monitor_type: 'http',
             journey_id: journeyId,
             locations: [
@@ -369,7 +373,9 @@ export default function ({ getService }: FtrProviderContext) {
             'check.receive': '',
             'check.send': '',
             enabled: true,
-            status_alert_enabled: true,
+            alert: {
+              status: true,
+            },
             form_monitor_type: 'tcp',
             journey_id: journeyId,
             locations: [
@@ -464,7 +470,9 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             enabled: true,
-            status_alert_enabled: true,
+            alert: {
+              status: true,
+            },
             form_monitor_type: 'icmp',
             journey_id: journeyId,
             locations: [

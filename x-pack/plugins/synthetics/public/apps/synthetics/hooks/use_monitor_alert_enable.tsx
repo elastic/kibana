@@ -18,7 +18,7 @@ export interface EnableStateMonitorLabels {
   disabledSuccessLabel: string;
 }
 
-export function useMonitorAlertEnable({ reloadPage }: { reloadPage?: () => void }) {
+export function useMonitorAlertEnable() {
   const dispatch = useDispatch();
   const upsertStatuses = useSelector(selectMonitorUpsertStatuses);
   const alertStatus = useCallback(
@@ -56,9 +56,8 @@ export function useMonitorAlertEnable({ reloadPage }: { reloadPage?: () => void 
           },
         })
       );
-      if (reloadPage) reloadPage();
     },
-    [dispatch, reloadPage]
+    [dispatch]
   );
 
   return { updateAlertEnabledState, alertStatus };

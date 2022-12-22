@@ -118,7 +118,7 @@ export function ActionsPopover({
     labels,
   });
 
-  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable({});
+  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
 
   const [enableLabel, setEnableLabel] = useState(
     monitor.isEnabled ? disableMonitorLabel : enableMonitorLabel
@@ -188,7 +188,9 @@ export function ActionsPopover({
       onClick: () => {
         if (!alertLoading) {
           updateAlertEnabledState({
-            monitor: toggleStatusAlert(monitorFields?.[ConfigKey.ALERT_CONFIG]),
+            monitor: {
+              [ConfigKey.ALERT_CONFIG]: toggleStatusAlert(monitorFields?.[ConfigKey.ALERT_CONFIG]),
+            },
             configId: monitor.configId,
             name: monitor.name,
           });

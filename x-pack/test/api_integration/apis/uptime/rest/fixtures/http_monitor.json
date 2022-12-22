@@ -1,7 +1,9 @@
 {
   "type": "http",
   "enabled": true,
-  "status_alert_enabled": true,
+  "alert": {
+    "status": true
+  },
   "tags": [
     "tag1",
     "tag2"

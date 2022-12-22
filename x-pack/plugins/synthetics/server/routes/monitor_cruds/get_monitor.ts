@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import { ConfigKey, MonitorOverviewItem, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
@@ -120,7 +121,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
             name: monitor.attributes[ConfigKey.NAME],
             location,
             isEnabled: monitor.attributes[ConfigKey.ENABLED],
-            isStatusAlertEnabled: monitor.attributes[ConfigKey.ALERT_CONFIG] ?? false,
+            isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
           };
           allMonitors.push(config);
           total++;
