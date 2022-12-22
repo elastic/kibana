@@ -309,13 +309,22 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const range = getState().componentState.range;
     const ticks = getState().componentState.ticks;
     const isAnchored = getIsAnchored(getState());
-
-    if (isAnchored) {
-      return;
-    }
-
     const tickRange = ticks[1].value - ticks[0].value;
     const timeRangeBounds = getRoundedTimeRangeBounds(getState());
+
+    if (isAnchored) {
+      const prevTick = value
+        ?
+          [...ticks].reverse().find(tick => {
+            return tick.value < value[TO_INDEX];
+          })
+        : ticks[ticks.length - 1];
+      this.onTimesliceChange([
+        timeRangeBounds[FROM_INDEX], 
+        prevTick ? prevTick.value : timeRangeBounds[TO_INDEX]
+      ]);
+      return;
+    }
 
     if (value === undefined || value[FROM_INDEX] <= timeRangeBounds[FROM_INDEX]) {
       const to = timeRangeBounds[TO_INDEX];
