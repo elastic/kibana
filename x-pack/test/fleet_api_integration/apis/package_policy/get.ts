@@ -15,6 +15,8 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const superTestWithoutAuth = getService('supertestWithoutAuth');
   const dockerServers = getService('dockerServers');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   const server = dockerServers.get('registry');
   // use function () {} and not () => {} here
@@ -25,18 +27,13 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
-      await getService('kibanaServer').savedObjects.cleanStandardList();
-
-      await getService('esArchiver').load(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
+      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     after(async () => {
-      await getService('esArchiver').unload(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
-      await getService('kibanaServer').savedObjects.cleanStandardList();
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('get by id', async function () {
@@ -127,7 +124,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should succeed when requesting with policy ids that match package names allowed by package privileges', async function () {
         await superTestWithoutAuth
-          .post(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+          .get(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
           .set('kbn-xsrf', 'xxxx')
           .auth(
             testUsers.endpoint_integr_read_policy.username,
@@ -204,6 +201,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: agentPolicyId,
             enabled: true,
             inputs: [],
+            force: true,
             package: {
               name: 'endpoint',
               title: 'Elastic Defend',
@@ -228,6 +226,13 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/package_policies/delete`)
           .set('kbn-xsrf', 'xxxx')
           .send({ packagePolicyIds: [packagePolicyId, endpointPackagePolicyId] })
+          .expect(200);
+
+        // uninstall endpoint package
+        await supertest
+          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
           .expect(200);
       });
 
