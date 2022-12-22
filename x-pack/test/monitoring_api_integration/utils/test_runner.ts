@@ -15,7 +15,7 @@ interface RunTestsOpts {
 
 /**
  * abstracts the duplication of tests running once for metricbeat data and once
- * for package data. Expects that the provided <archiveRoot> path contains two
+ * for package data. Expects that the provided <archiveRoot> path defines two
  * subdirectories (metricbeat and package) containing their respective archived
  * data. The runner takes care of loading and unloading the test data.
  */
@@ -26,13 +26,15 @@ export function getTestRunner(opts: RunTestsOpts) {
   ];
   const { setup, tearDown } = getLifecycleMethods(opts.getService);
 
-  return function executeTest(assert: (variant: string) => void) {
+  return function executeTest(assert: () => void) {
     describe(opts.testName, function () {
       archives.forEach(({ path, variant }) => {
-        before('load archive', () => setup(path));
-        after('unload archive', () => tearDown(path));
+        describe(variant, function () {
+          before('load archive', () => setup(path));
+          after('unload archive', () => tearDown(path));
 
-        assert(variant);
+          assert();
+        });
       });
     });
   };
