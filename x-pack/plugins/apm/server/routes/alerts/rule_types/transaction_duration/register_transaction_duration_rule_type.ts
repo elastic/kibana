@@ -57,6 +57,7 @@ import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
+import { alertRegistration } from '../get_alert_registration';
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
@@ -113,6 +114,7 @@ export function registerTransactionDurationRuleType({
     producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
+    alerts: alertRegistration,
     executor: async ({ params: ruleParams, services, spaceId }) => {
       const config = await firstValueFrom(config$);
 

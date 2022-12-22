@@ -11,6 +11,7 @@ import { LicenseType } from '@kbn/licensing-plugin/server';
 import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
+import { alertRegistration } from '../get_alert_registration';
 import { FIRED_ACTION, getRuleExecutor } from './executor';
 
 const durationSchema = schema.object({
@@ -51,6 +52,7 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
         { name: 'shortWindow', description: windowActionVariableDescription },
       ],
     },
+    alert: alertRegistration,
   };
 }
 

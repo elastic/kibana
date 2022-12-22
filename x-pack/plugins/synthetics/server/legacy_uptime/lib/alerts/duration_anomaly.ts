@@ -33,6 +33,7 @@ import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monit
 
 import { createUptimeESClient } from '../lib';
 import { ALERT_REASON_MSG, ACTION_VARIABLES, VIEW_IN_APP_URL } from './action_variables';
+import { alertRegistration } from './get_alert_registration';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof DURATION_ANOMALY>;
 
@@ -109,6 +110,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
     ],
     state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
   },
+  alerts: alertRegistration,
   isExportable: true,
   minimumLicenseRequired: 'platinum',
   doesSetRecoveryContext: true,

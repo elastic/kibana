@@ -9,7 +9,7 @@ import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/a
 import { mappingFromFieldMap } from './mapping_from_field_map';
 import { FieldMap } from './types';
 
-interface GetComponentTemplateFromFieldMapOpts {
+export interface GetComponentTemplateFromFieldMapOpts {
   name: string;
   fieldLimit?: number;
   fieldMap: FieldMap;

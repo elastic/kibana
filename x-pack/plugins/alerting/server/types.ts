@@ -47,6 +47,7 @@ import {
   RuleLastRun,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
+import { FieldMap } from '../common/alert_schema/field_maps/types';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -151,6 +152,10 @@ export interface SummarizedAlerts {
   };
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
+export interface IRuleTypeAlerts {
+  registrationContext: string;
+  fieldMap: FieldMap;
+}
 
 export interface RuleType<
   Params extends RuleTypeParams = never,
@@ -197,6 +202,7 @@ export interface RuleType<
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
   getSummarizedAlerts?: GetSummarizedAlertsFn;
+  alerts?: IRuleTypeAlerts;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

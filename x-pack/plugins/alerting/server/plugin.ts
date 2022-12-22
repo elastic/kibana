@@ -225,17 +225,6 @@ export class AlertingPlugin {
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
-    const ruleTypeRegistry = new RuleTypeRegistry({
-      logger: this.logger,
-      taskManager: plugins.taskManager,
-      taskRunnerFactory: this.taskRunnerFactory,
-      licenseState: this.licenseState,
-      licensing: plugins.licensing,
-      minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
-      inMemoryMetrics: this.inMemoryMetrics,
-    });
-    this.ruleTypeRegistry = ruleTypeRegistry;
-
     if (this.config.enableFrameworkAlerts) {
       this.alertsService = new AlertsService({
         logger: this.logger,
@@ -251,6 +240,18 @@ export class AlertingPlugin {
         this.logger.error(`Error initializing alert resources! - ${err.message}`);
       });
     }
+
+    const ruleTypeRegistry = new RuleTypeRegistry({
+      logger: this.logger,
+      taskManager: plugins.taskManager,
+      taskRunnerFactory: this.taskRunnerFactory,
+      licenseState: this.licenseState,
+      licensing: plugins.licensing,
+      alertsService: this.alertsService,
+      minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
+      inMemoryMetrics: this.inMemoryMetrics,
+    });
+    this.ruleTypeRegistry = ruleTypeRegistry;
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {

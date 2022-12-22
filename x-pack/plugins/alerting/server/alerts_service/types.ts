@@ -5,8 +5,37 @@
  * 2.0.
  */
 
-export const INDEX_TEMPLATE_NAME = '.alerts-default-template';
-export const DEFAULT_ALERTS_INDEX = '.alerts-default';
-export const DEFAULT_ALERTS_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-*`;
-export const INITIAL_ALERTS_INDEX_NAME = `${DEFAULT_ALERTS_INDEX}-000001`;
-export const ALERTS_COMPONENT_TEMPLATE_NAME = 'alerts-default-component-template';
+import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { getComponentTemplateFromFieldMap } from '../../common/alert_schema';
+import { FieldMap } from '../../common/alert_schema/field_maps/types';
+
+export const getComponentTemplateName = (context?: string) =>
+  `alerts-${context ? context : 'default'}-component-template`;
+
+export interface IIndexPatternString {
+  template: string;
+  pattern: string;
+  alias: string;
+  name: string;
+}
+
+export const getIndexTemplateAndPattern = (context?: string): IIndexPatternString => {
+  const pattern = context ? context : 'default';
+  return {
+    template: `.alerts-${pattern}-template`,
+    pattern: `.alerts-${pattern}-*`,
+    alias: `.alerts-${pattern}`,
+    name: `.alerts-${pattern}-000001`,
+  };
+};
+
+export const getComponentTemplate = (
+  fieldMap: FieldMap,
+  context?: string
+): ClusterPutComponentTemplateRequest =>
+  getComponentTemplateFromFieldMap({
+    name: getComponentTemplateName(context),
+    fieldMap,
+    // set field limit slightly higher than actual number of fields
+    fieldLimit: Math.round(Object.keys(fieldMap).length * 1.5),
+  });

@@ -24,5 +24,6 @@ export interface FieldMap {
     multi_fields?: MultiField[];
     path?: string;
     scaling_factor?: number;
+    dynamic?: boolean | string;
   };
 }

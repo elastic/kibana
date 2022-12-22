@@ -10,27 +10,21 @@ import {
   IndicesSimulateIndexTemplateResponse,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, isEqual } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
-import { alertFieldMap, getComponentTemplateFromFieldMap } from '../../common/alert_schema';
+import { FieldMap } from '../../common/alert_schema/field_maps/types';
+import { alertFieldMap } from '../../common/alert_schema';
 import { ILM_POLICY_NAME, DEFAULT_ILM_POLICY } from './default_lifecycle_policy';
 import {
-  ALERTS_COMPONENT_TEMPLATE_NAME,
-  DEFAULT_ALERTS_INDEX,
-  DEFAULT_ALERTS_INDEX_PATTERN,
-  INDEX_TEMPLATE_NAME,
-  INITIAL_ALERTS_INDEX_NAME,
+  getComponentTemplate,
+  getComponentTemplateName,
+  getIndexTemplateAndPattern,
+  IIndexPatternString,
 } from './types';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { IRuleTypeAlerts } from '../types';
 
-const componentTemplatesToInstall = [
-  {
-    name: ALERTS_COMPONENT_TEMPLATE_NAME,
-    fieldMap: alertFieldMap,
-    fieldLimit: 100,
-  },
-];
 const TOTAL_FIELDS_LIMIT = 2500;
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
 
@@ -56,14 +50,21 @@ interface IAlertsService {
    * Not using data streams because those are meant for append-only data
    * and we expect to mutate these documents
    */
-  initialize(): void;
+  initialize(timeoutMs?: number): Promise<void>;
+  initializeRegistrationContext(opts: IRuleTypeAlerts, timeoutMs?: number): Promise<void>;
+  isInitialized(): boolean;
 }
 
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
+  private registrationContexts: Map<string, FieldMap> = new Map();
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
+  }
+
+  public isInitialized(): boolean {
+    return this.initialized;
   }
 
   public async initialize(timeoutMs?: number) {
@@ -74,16 +75,60 @@ export class AlertsService implements IAlertsService {
 
     const esClient = await this.options.elasticsearchClientPromise;
 
-    await this.installWithTimeout(esClient, this.createOrUpdateIlmPolicy.bind(this), timeoutMs);
-    await this.installWithTimeout(
-      esClient,
-      this.createOrUpdateComponentTemplates.bind(this),
-      timeoutMs
-    );
-    await this.installWithTimeout(esClient, this.createOrUpdateIndexTemplate.bind(this), timeoutMs);
-    await this.installWithTimeout(esClient, this.createConcreteWriteIndex.bind(this), timeoutMs);
+    const initFns = [
+      () => this.createOrUpdateIlmPolicy(esClient),
+      () => this.createOrUpdateComponentTemplate(esClient, getComponentTemplate(alertFieldMap)),
+    ];
+
+    for (let i = 0; i < initFns.length; ++i) {
+      await this.installWithTimeout(async () => await initFns[i](), timeoutMs);
+    }
 
     this.initialized = true;
+  }
+
+  public async initializeRegistrationContext(
+    { registrationContext, fieldMap }: IRuleTypeAlerts,
+    timeoutMs?: number
+  ) {
+    // check that this registration context has not been registered before
+    if (this.registrationContexts.has(registrationContext)) {
+      const registeredFieldMap = this.registrationContexts.get(registrationContext);
+      if (!isEqual(fieldMap, registeredFieldMap)) {
+        throw new Error(
+          `${registrationContext} has already been registered with a different mapping`
+        );
+      }
+      this.options.logger.info(
+        `Resources for registration context "${registrationContext}" have already been installed.`
+      );
+      return;
+    }
+    this.options.logger.debug(
+      `Initializing resources for registrationContext ${registrationContext}`
+    );
+    const esClient = await this.options.elasticsearchClientPromise;
+    const indexTemplateAndPattern = getIndexTemplateAndPattern(registrationContext);
+
+    const initFns = [
+      async () =>
+        await this.createOrUpdateComponentTemplate(
+          esClient,
+          getComponentTemplate(fieldMap, registrationContext)
+        ),
+      async () =>
+        await this.createOrUpdateIndexTemplate(esClient, indexTemplateAndPattern, [
+          getComponentTemplateName(),
+          getComponentTemplateName(registrationContext),
+        ]),
+      async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
+    ];
+
+    for (let i = 0; i < initFns.length; ++i) {
+      await this.installWithTimeout(async () => await initFns[i](), timeoutMs);
+    }
+
+    this.registrationContexts.set(registrationContext, fieldMap);
   }
 
   /**
@@ -105,26 +150,6 @@ export class AlertsService implements IAlertsService {
       this.options.logger.error(`Error installing ILM policy ${ILM_POLICY_NAME} - ${err.message}`);
       throw err;
     }
-  }
-
-  /**
-   * Installs component templates if they don't already exist, updates them if
-   * they do.
-   */
-  private async createOrUpdateComponentTemplates(esClient: ElasticsearchClient) {
-    this.options.logger.info(
-      `Installing ${componentTemplatesToInstall.length} component templates`
-    );
-
-    await Promise.all(
-      componentTemplatesToInstall.map((componentTemplateSpec) =>
-        this.createOrUpdateComponentTemplate(
-          esClient,
-          // dynamically generate component template from field map specification
-          getComponentTemplateFromFieldMap(componentTemplateSpec)
-        )
-      )
-    );
   }
 
   private async createOrUpdateComponentTemplate(
@@ -151,21 +176,25 @@ export class AlertsService implements IAlertsService {
    * conflicts. Simulate should return an empty mapping if a template
    * conflicts with an already installed template.
    */
-  private async createOrUpdateIndexTemplate(esClient: ElasticsearchClient) {
-    this.options.logger.info(`Installing index template ${INDEX_TEMPLATE_NAME}`);
+  private async createOrUpdateIndexTemplate(
+    esClient: ElasticsearchClient,
+    indexPatterns: IIndexPatternString,
+    componentTemplateNames: string[]
+  ) {
+    this.options.logger.info(`Installing index template ${indexPatterns.template}`);
 
     const indexTemplate = {
-      name: INDEX_TEMPLATE_NAME,
+      name: indexPatterns.template,
       body: {
-        index_patterns: [DEFAULT_ALERTS_INDEX_PATTERN],
-        composed_of: [ALERTS_COMPONENT_TEMPLATE_NAME],
+        index_patterns: [indexPatterns.pattern],
+        composed_of: componentTemplateNames,
         template: {
           settings: {
             auto_expand_replicas: '0-1',
             hidden: true,
             'index.lifecycle': {
               name: ILM_POLICY_NAME,
-              rollover_alias: DEFAULT_ALERTS_INDEX,
+              rollover_alias: indexPatterns.alias,
             },
             'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
           },
@@ -187,14 +216,14 @@ export class AlertsService implements IAlertsService {
       mappings = simulateResponse.template.mappings;
     } catch (err) {
       this.options.logger.error(
-        `Failed to simulate index template mappings for ${INDEX_TEMPLATE_NAME}; not applying mappings - ${err.message}`
+        `Failed to simulate index template mappings for ${indexPatterns.template}; not applying mappings - ${err.message}`
       );
       return;
     }
 
     if (isEmpty(mappings)) {
       throw new Error(
-        `No mappings would be generated for ${INDEX_TEMPLATE_NAME}, possibly due to failed/misconfigured bootstrapping`
+        `No mappings would be generated for ${indexPatterns.template}, possibly due to failed/misconfigured bootstrapping`
       );
     }
 
@@ -204,7 +233,7 @@ export class AlertsService implements IAlertsService {
       });
     } catch (err) {
       this.options.logger.error(
-        `Error installing index template ${INDEX_TEMPLATE_NAME} - ${err.message}`
+        `Error installing index template ${indexPatterns.template} - ${err.message}`
       );
       throw err;
     }
@@ -301,14 +330,17 @@ export class AlertsService implements IAlertsService {
     }
   }
 
-  private async createConcreteWriteIndex(esClient: ElasticsearchClient) {
+  private async createConcreteWriteIndex(
+    esClient: ElasticsearchClient,
+    indexPatterns: IIndexPatternString
+  ) {
     this.options.logger.info(`Creating concrete write index`);
 
     // check if a concrete write index already exists
     let concreteIndices: ConcreteIndexInfo[] = [];
     try {
       const response = await esClient.indices.getAlias({
-        index: DEFAULT_ALERTS_INDEX_PATTERN,
+        index: indexPatterns.pattern,
       });
 
       concreteIndices = Object.entries(response).flatMap(([index, { aliases }]) =>
@@ -326,7 +358,7 @@ export class AlertsService implements IAlertsService {
       // 404 is expected if no concrete write indices have been created
       if (error.statusCode !== 404) {
         this.options.logger.error(
-          `Error fetching concrete indices for ${DEFAULT_ALERTS_INDEX_PATTERN} pattern - ${error.message}`
+          `Error fetching concrete indices for ${indexPatterns.pattern} pattern - ${error.message}`
         );
         throw error;
       }
@@ -338,17 +370,17 @@ export class AlertsService implements IAlertsService {
       await this.updateIndexMappings(esClient, concreteIndices);
 
       const concreteIndicesExist = concreteIndices.some(
-        (index) => index.alias === DEFAULT_ALERTS_INDEX
+        (index) => index.alias === indexPatterns.alias
       );
       concreteWriteIndicesExist = concreteIndices.some(
-        (index) => index.alias === DEFAULT_ALERTS_INDEX && index.isWriteIndex
+        (index) => index.alias === indexPatterns.alias && index.isWriteIndex
       );
 
       // If there are some concrete indices but none of them are the write index, we'll throw an error
       // because one of the existing indices should have been the write target.
       if (concreteIndicesExist && !concreteWriteIndicesExist) {
         throw new Error(
-          `Indices matching pattern ${DEFAULT_ALERTS_INDEX_PATTERN} exist but none are set as the write index for alias ${DEFAULT_ALERTS_INDEX}`
+          `Indices matching pattern ${indexPatterns.pattern} exist but none are set as the write index for alias ${indexPatterns.alias}`
         );
       }
     }
@@ -359,10 +391,10 @@ export class AlertsService implements IAlertsService {
         await retryTransientEsErrors(
           () =>
             esClient.indices.create({
-              index: INITIAL_ALERTS_INDEX_NAME,
+              index: indexPatterns.name,
               body: {
                 aliases: {
-                  [DEFAULT_ALERTS_INDEX]: {
+                  [indexPatterns.alias]: {
                     is_write_index: true,
                   },
                 },
@@ -379,14 +411,13 @@ export class AlertsService implements IAlertsService {
         // index, that's bad, throw an error.
         if (error?.meta?.body?.error?.type === 'resource_already_exists_exception') {
           const existingIndices = await esClient.indices.get({
-            index: INITIAL_ALERTS_INDEX_NAME,
+            index: indexPatterns.name,
           });
           if (
-            !existingIndices[INITIAL_ALERTS_INDEX_NAME]?.aliases?.[DEFAULT_ALERTS_INDEX]
-              ?.is_write_index
+            !existingIndices[indexPatterns.name]?.aliases?.[indexPatterns.alias]?.is_write_index
           ) {
             throw Error(
-              `Attempted to create index: ${INITIAL_ALERTS_INDEX_NAME} as the write index for alias: ${DEFAULT_ALERTS_INDEX}, but the index already exists and is not the write index for the alias`
+              `Attempted to create index: ${indexPatterns.name} as the write index for alias: ${indexPatterns.alias}, but the index already exists and is not the write index for the alias`
             );
           }
         } else {
@@ -397,14 +428,13 @@ export class AlertsService implements IAlertsService {
   }
 
   private async installWithTimeout(
-    esClient: ElasticsearchClient,
-    installFn: (esClient: ElasticsearchClient) => Promise<void>,
+    installFn: () => Promise<void>,
     timeoutMs: number = INSTALLATION_TIMEOUT
   ): Promise<void> {
     try {
       let timeoutId: NodeJS.Timeout;
       const install = async (): Promise<void> => {
-        await installFn(esClient);
+        await installFn();
         if (timeoutId) {
           clearTimeout(timeoutId);
         }

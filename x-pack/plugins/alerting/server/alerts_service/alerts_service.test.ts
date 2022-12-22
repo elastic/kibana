@@ -76,17 +76,17 @@ const IlmPutBody = {
 };
 
 const IndexTemplatePutBody = {
-  name: '.alerts-default-template',
+  name: '.alerts-test-template',
   body: {
-    index_patterns: ['.alerts-default-*'],
-    composed_of: ['alerts-default-component-template'],
+    index_patterns: ['.alerts-test-*'],
+    composed_of: ['alerts-default-component-template', 'alerts-test-component-template'],
     template: {
       settings: {
         auto_expand_replicas: '0-1',
         hidden: true,
         'index.lifecycle': {
           name: 'alerts-default-ilm-policy',
-          rollover_alias: '.alerts-default',
+          rollover_alias: '.alerts-test',
         },
         'index.mapping.total_fields.limit': 2500,
       },
@@ -98,6 +98,11 @@ const IndexTemplatePutBody = {
       managed: true,
     },
   },
+};
+
+const TestRegistrationContext = {
+  registrationContext: 'test',
+  fieldMap: { field: { type: 'keyword', required: false } },
 };
 
 describe('Alerts Service', () => {
@@ -120,7 +125,7 @@ describe('Alerts Service', () => {
     pluginStop$.complete();
   });
   describe('initialize()', () => {
-    test('should correctly initialize all resources', async () => {
+    test('should correctly initialize common resources', async () => {
       const alertsService = new AlertsService({
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
@@ -134,22 +139,6 @@ describe('Alerts Service', () => {
 
       const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
       expect(componentTemplate1.name).toEqual('alerts-default-component-template');
-
-      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(IndexTemplatePutBody);
-      expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({ index: '.alerts-default-*' });
-      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
-      expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
-      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
-      expect(clusterClient.indices.create).toHaveBeenCalledWith({
-        index: '.alerts-default-000001',
-        body: {
-          aliases: {
-            '.alerts-default': {
-              is_write_index: true,
-            },
-          },
-        },
-      });
     });
 
     test('should throw error if adding ILM policy throws error', async () => {
@@ -170,16 +159,9 @@ describe('Alerts Service', () => {
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
       expect(clusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
-      expect(clusterClient.indices.simulateTemplate).not.toHaveBeenCalled();
-      expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
-      expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
-      expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
-      expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
-      expect(clusterClient.indices.create).not.toHaveBeenCalled();
     });
 
-    test('should throw error if updating component template throws error', async () => {
+    test('should throw error if creating/updating common component template throws error', async () => {
       clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(new Error('fail'));
       const alertsService = new AlertsService({
         logger,
@@ -197,13 +179,78 @@ describe('Alerts Service', () => {
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
-      expect(clusterClient.indices.simulateTemplate).not.toHaveBeenCalled();
-      expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
-      expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
-      expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
-      expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
-      expect(clusterClient.indices.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('initializeRegistrationContext()', () => {
+    test('should correctly initialize all resources for registration context', async () => {
+      const alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
+
+      const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
+      expect(componentTemplate1.name).toEqual('alerts-default-component-template');
+      const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
+      expect(componentTemplate2.name).toEqual('alerts-test-component-template');
+
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(IndexTemplatePutBody);
+      expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({ index: '.alerts-test-*' });
+      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.create).toHaveBeenCalledWith({
+        index: '.alerts-test-000001',
+        body: {
+          aliases: {
+            '.alerts-test': {
+              is_write_index: true,
+            },
+          },
+        },
+      });
+    });
+
+    test('should skip initialization if registration context already exists', async () => {
+      const alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+
+      expect(logger.info).toHaveBeenCalledWith(
+        `Resources for registration context "test" have already been installed.`
+      );
+    });
+
+    test('should throw error if registration context already exists and has been registered with a different field map', async () => {
+      const alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      await expect(
+        alertsService.initializeRegistrationContext({
+          ...TestRegistrationContext,
+          fieldMap: { anotherField: { type: 'keyword', required: false } },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"test has already been registered with a different mapping"`
+      );
     });
 
     test('should not update index template if simulating template throws error', async () => {
@@ -215,13 +262,14 @@ describe('Alerts Service', () => {
       });
 
       await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to simulate index template mappings for .alerts-default-template; not applying mappings - fail`
+        `Failed to simulate index template mappings for .alerts-test-template; not applying mappings - fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       // putIndexTemplate is skipped but other operations are called as expected
       expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
@@ -246,12 +294,15 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await expect(alertsService.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. No mappings would be generated for .alerts-default-template, possibly due to failed/misconfigured bootstrapping"`
+      await alertsService.initialize();
+      await expect(
+        alertsService.initializeRegistrationContext(TestRegistrationContext)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure during installation. No mappings would be generated for .alerts-test-template, possibly due to failed/misconfigured bootstrapping"`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
@@ -269,16 +320,17 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await expect(alertsService.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. fail"`
-      );
+      await alertsService.initialize();
+      await expect(
+        alertsService.initializeRegistrationContext(TestRegistrationContext)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure during installation. fail"`);
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Error installing index template .alerts-default-template - fail`
+        `Error installing index template .alerts-test-template - fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
@@ -296,16 +348,17 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await expect(alertsService.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. fail"`
-      );
+      await alertsService.initialize();
+      await expect(
+        alertsService.initializeRegistrationContext(TestRegistrationContext)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure during installation. fail"`);
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Error fetching concrete indices for .alerts-default-* pattern - fail`
+        `Error fetching concrete indices for .alerts-test-* pattern - fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
@@ -325,9 +378,10 @@ describe('Alerts Service', () => {
       });
 
       await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
@@ -344,16 +398,17 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await expect(alertsService.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. fail"`
-      );
+      await alertsService.initialize();
+      await expect(
+        alertsService.initializeRegistrationContext(TestRegistrationContext)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure during installation. fail"`);
 
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to PUT index.mapping.total_fields.limit settings for alias alias_1: fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).toHaveBeenCalled();
@@ -372,13 +427,14 @@ describe('Alerts Service', () => {
       });
 
       await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
 
       expect(logger.error).toHaveBeenCalledWith(
         `Ignored PUT mappings for alias alias_1; error generating simulated mappings: fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).toHaveBeenCalled();
@@ -396,14 +452,15 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await expect(alertsService.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. fail"`
-      );
+      await alertsService.initialize();
+      await expect(
+        alertsService.initializeRegistrationContext(TestRegistrationContext)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure during installation. fail"`);
 
       expect(logger.error).toHaveBeenCalledWith(`Failed to PUT mapping for alias alias_1: fail`);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).toHaveBeenCalled();
@@ -422,9 +479,10 @@ describe('Alerts Service', () => {
       });
 
       await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).toHaveBeenCalled();
@@ -436,9 +494,9 @@ describe('Alerts Service', () => {
 
     test('should throw error if concrete indices exist but none are write index', async () => {
       clusterClient.indices.getAlias.mockImplementationOnce(async () => ({
-        '.alerts-default-0001': {
+        '.alerts-test-0001': {
           aliases: {
-            '.alerts-default': {
+            '.alerts-test': {
               is_write_index: false,
               is_hidden: true,
             },
@@ -455,12 +513,15 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await expect(alertsService.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. Indices matching pattern .alerts-default-* exist but none are set as the write index for alias .alerts-default"`
+      await alertsService.initialize();
+      await expect(
+        alertsService.initializeRegistrationContext(TestRegistrationContext)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure during installation. Indices matching pattern .alerts-test-* exist but none are set as the write index for alias .alerts-test"`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).toHaveBeenCalled();
@@ -472,9 +533,9 @@ describe('Alerts Service', () => {
 
     test('does not create new index if concrete write index exists', async () => {
       clusterClient.indices.getAlias.mockImplementationOnce(async () => ({
-        '.alerts-default-0001': {
+        '.alerts-test-0001': {
           aliases: {
-            '.alerts-default': {
+            '.alerts-test': {
               is_write_index: true,
               is_hidden: true,
             },
@@ -492,9 +553,10 @@ describe('Alerts Service', () => {
       });
 
       await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).toHaveBeenCalled();
@@ -512,14 +574,15 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await expect(alertsService.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. fail"`
-      );
+      await alertsService.initialize();
+      await expect(
+        alertsService.initializeRegistrationContext(TestRegistrationContext)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure during installation. fail"`);
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).toHaveBeenCalled();
@@ -540,7 +603,7 @@ describe('Alerts Service', () => {
       };
       clusterClient.indices.create.mockRejectedValueOnce(error);
       clusterClient.indices.get.mockImplementationOnce(async () => ({
-        '.alerts-default-000001': { aliases: { '.alerts-default': { is_write_index: true } } },
+        '.alerts-test-000001': { aliases: { '.alerts-test': { is_write_index: true } } },
       }));
       const alertsService = new AlertsService({
         logger,
@@ -549,11 +612,12 @@ describe('Alerts Service', () => {
       });
 
       await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).toHaveBeenCalled();
@@ -575,7 +639,7 @@ describe('Alerts Service', () => {
       };
       clusterClient.indices.create.mockRejectedValueOnce(error);
       clusterClient.indices.get.mockImplementationOnce(async () => ({
-        '.alerts-default-000001': { aliases: { '.alerts-default': { is_write_index: false } } },
+        '.alerts-test-000001': { aliases: { '.alerts-test': { is_write_index: false } } },
       }));
       const alertsService = new AlertsService({
         logger,
@@ -583,14 +647,17 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await expect(alertsService.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. Attempted to create index: .alerts-default-000001 as the write index for alias: .alerts-default, but the index already exists and is not the write index for the alias"`
+      await alertsService.initialize();
+      await expect(
+        alertsService.initializeRegistrationContext(TestRegistrationContext)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure during installation. Attempted to create index: .alerts-test-000001 as the write index for alias: .alerts-test, but the index already exists and is not the write index for the alias"`
       );
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).toHaveBeenCalled();
@@ -645,6 +712,7 @@ describe('Alerts Service', () => {
       });
 
       await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
     });
 
@@ -660,6 +728,7 @@ describe('Alerts Service', () => {
       });
 
       await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
       expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
     });
 
@@ -675,6 +744,7 @@ describe('Alerts Service', () => {
       });
 
       await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
       expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(4);
     });
 
@@ -690,6 +760,7 @@ describe('Alerts Service', () => {
       });
 
       await alertsService.initialize();
+      await alertsService.initializeRegistrationContext(TestRegistrationContext);
       expect(clusterClient.indices.create).toHaveBeenCalledTimes(3);
     });
   });
