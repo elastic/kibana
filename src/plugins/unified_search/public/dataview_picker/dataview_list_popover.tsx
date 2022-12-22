@@ -12,18 +12,14 @@ import {
   EuiPopover,
   EuiButtonIcon,
   EuiPopoverTitle,
-  EuiSelectableOption,
   EuiHorizontalRule,
   useEuiTheme,
 } from '@elastic/eui';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { EuiSelectableOption } from '@elastic/eui';
 
 import { optionsListStrings } from './dataview_list_strings';
 import { SortingService } from './sorting_service';
-
-export interface DataViewListItemEnhanced extends DataViewListItem {
-  isAdhoc?: boolean;
-}
+import type { DataViewListItemEnhanced } from './dataview_list';
 
 export interface DataViewsListPopoverProps {
   handleSortingChange: () => void;

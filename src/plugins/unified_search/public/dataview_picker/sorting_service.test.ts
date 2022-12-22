@@ -7,10 +7,10 @@
  */
 
 import { SortDirection } from '@elastic/eui';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { DataViewListItemEnhanced } from './dataview_list';
+import type { DataViewListItemEnhanced } from './dataview_list';
 import { ALPHABETICALLY, SortingService } from './sorting_service';
 
 describe('Sorting service', () => {

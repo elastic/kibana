@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiPanel,
 } from '@elastic/eui';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 
 import { css } from '@emotion/react';
 

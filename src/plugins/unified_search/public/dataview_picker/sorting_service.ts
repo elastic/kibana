@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Direction, SortDirection } from '@elastic/eui';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { IStorageWrapper, Storage } from '@kbn/kibana-utils-plugin/public';
-
-export interface DataViewListItemEnhanced extends DataViewListItem {
-  isAdhoc?: boolean;
-}
+import type { Direction } from '@elastic/eui';
+import { SortDirection } from '@elastic/eui';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 const storageKey = 'unified_search_sorting';
 export const ALPHABETICALLY = 'alphabetically';
