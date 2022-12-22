@@ -7,6 +7,7 @@
  */
 
 import moment, { Moment } from 'moment';
+import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiDatePickerRange, EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { get } from 'lodash';
@@ -14,7 +15,7 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { ValueInputType } from './value_input_type';
-import { compressedDatepickerStyle } from './value_input_type.styles';
+import { compressedDatepickerStyle } from './datepicker.styles';
 
 interface RangeParams {
   from: number | string;
@@ -84,11 +85,11 @@ function RangeValueInputUI(props: Props) {
   };
 
   const onDatePickerFromChange = (date: Moment) => {
-    props.onChange({ from: date.utc().format(), to: get(props, 'value.to') });
+    props.onChange({ from: date ? date.utc().format() : undefined, to: get(props, 'value.to') });
   };
 
   const onDatePickerToChange = (date: Moment) => {
-    props.onChange({ from: get(props, 'value.from'), to: date.utc().format() });
+    props.onChange({ from: get(props, 'value.from'), to: date ? date.utc().format() : undefined });
   };
 
   const { field, value, intl, fullWidth, disabled, compressed } = props;
@@ -112,6 +113,8 @@ function RangeValueInputUI(props: Props) {
               fullWidth={fullWidth}
               showTimeSelect
               isInvalid={isInvalid}
+              locale={i18n.getLocale()}
+              dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
             />
           }
           endDateControl={
@@ -124,6 +127,8 @@ function RangeValueInputUI(props: Props) {
               fullWidth={fullWidth}
               showTimeSelect
               isInvalid={isInvalid}
+              locale={i18n.getLocale()}
+              dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
             />
           }
         />

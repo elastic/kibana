@@ -7,6 +7,7 @@
  */
 
 import moment, { Moment } from 'moment';
+import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { cx } from '@emotion/css';
@@ -14,7 +15,7 @@ import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { validateParams } from './lib/filter_editor_utils';
-import { compressedDatepickerStyle } from './value_input_type.styles';
+import { compressedDatepickerStyle } from './datepicker.styles';
 
 interface Props {
   value?: string | number;
@@ -96,6 +97,8 @@ class ValueInputTypeUI extends Component<Props> {
             onBlur={this.onBlur}
             isInvalid={this.props.isInvalid}
             data-test-subj={this.props.dataTestSubj}
+            locale={i18n.getLocale()}
+            dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
           />
         );
         break;
