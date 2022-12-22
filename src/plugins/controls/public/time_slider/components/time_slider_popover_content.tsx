@@ -14,9 +14,11 @@ import {
   EuiRangeTick,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import type { EuiDualRangeClass } from '@elastic/eui/src/components/form/range/dual_range';
+import { SettingsForm } from './settings_form';
 
 // Unfortunately, wrapping EuiDualRange in `withEuiTheme` has created a super annoying/verbose typing
 export type EuiDualRangeRef = EuiDualRangeClass & ComponentProps<typeof EuiDualRange>;
@@ -51,43 +53,47 @@ export function TimeSliderPopoverContent(props: Props) {
         });
 
   return (
-    <EuiFlexGroup
-      className="rangeSlider__actions"
-      gutterSize="none"
-      data-test-subj="timeSlider-popoverContents"
-      responsive={false}
-    >
-      <EuiFlexItem>
-        <EuiDualRange
-          ref={props.rangeRef}
-          fullWidth={true}
-          value={props.value}
-          onChange={onChange}
-          showTicks={true}
-          min={props.timeRangeMin}
-          max={props.timeRangeMax}
-          step={props.stepSize}
-          ticks={ticks}
-          isDraggable
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
-            defaultMessage: 'Clear time selection',
-          })}
-        >
-          <EuiButtonIcon
-            iconType="eraser"
-            color="danger"
-            onClick={props.onClear}
-            aria-label={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
+    <>
+      <EuiFlexGroup
+        className="rangeSlider__actions"
+        gutterSize="none"
+        data-test-subj="timeSlider-popoverContents"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiDualRange
+            ref={props.rangeRef}
+            fullWidth={true}
+            value={props.value}
+            onChange={onChange}
+            showTicks={true}
+            min={props.timeRangeMin}
+            max={props.timeRangeMax}
+            step={props.stepSize}
+            ticks={ticks}
+            isDraggable
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
               defaultMessage: 'Clear time selection',
             })}
-            data-test-subj="timeSlider__clearTimeButton"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          >
+            <EuiButtonIcon
+              iconType="eraser"
+              color="danger"
+              onClick={props.onClear}
+              aria-label={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
+                defaultMessage: 'Clear time selection',
+              })}
+              data-test-subj="timeSlider__clearTimeButton"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <SettingsForm />
+    </>
   );
 }
