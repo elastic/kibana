@@ -92,5 +92,16 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
         await testSubjects.click('confirmModalConfirmButton');
       }
     },
+
+    async ensureApiKeyExists(apiKeyName: string) {
+      const existingApiKeyNameCells = await testSubjects.findAll('apiKeyNameCell');
+      for (const existingApiKeyNameCell of existingApiKeyNameCells) {
+        if (apiKeyName === (await existingApiKeyNameCell.getVisibleText())) {
+          return;
+        }
+      }
+
+      throw new Error(`API key ("${apiKeyName}") does not exist.`);
+    },
   };
 }
