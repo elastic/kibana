@@ -224,7 +224,7 @@ export class CoreKibanaRequest<
   }
 
   private getAuthRequired(request: RawRequest): boolean | 'optional' {
-    if (!isRealRawRequest(request)) {
+    if (isFakeRawRequest(request)) {
       return true;
     }
 

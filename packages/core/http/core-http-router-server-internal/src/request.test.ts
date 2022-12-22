@@ -304,7 +304,7 @@ describe('CoreKibanaRequest', () => {
 
   describe('using fake requests', () => {
     describe('isFakeRequest', () => {
-      it('should be false', () => {
+      it('should be true', () => {
         const request: FakeRawRequest = {
           headers: {},
           path: '/',
