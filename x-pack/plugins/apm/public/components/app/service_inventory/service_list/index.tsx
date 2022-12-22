@@ -87,7 +87,7 @@ export function getServiceColumns({
           {
             field: ServiceInventoryFieldName.AlertsCount,
             name: '',
-            width: `${unit * 4}px`,
+            width: `${unit * 5}px`,
             sortable: true,
             render: (_, { serviceName, alertsCount }) => {
               if (!alertsCount) {
@@ -98,7 +98,7 @@ export function getServiceColumns({
                 <EuiBadge
                   iconType="alert"
                   color="danger"
-                  href={link('/services/{serviceName}/alerts?', {
+                  href={link('/services/{serviceName}/alerts', {
                     path: { serviceName },
                     query,
                   })}

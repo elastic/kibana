@@ -9,12 +9,17 @@ import {
   AggregationsCardinalityAggregate,
   AggregationsFilterAggregate,
 } from '@elastic/elasticsearch/lib/api/types';
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ALERT_RULE_PRODUCER, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { kqlQuery } from '@kbn/observability-plugin/server';
+import {
+  ALERT_RULE_PRODUCER,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ServiceGroup } from '../../../../common/service_groups';
-import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import { serviceGroupQuery } from '../../../lib/service_group_query';
 
 interface ServiceAggResponse {
   buckets: Array<
@@ -29,15 +34,11 @@ export async function getServicesAlerts({
   apmAlertsClient,
   kuery,
   maxNumServices,
-  start,
-  end,
   serviceGroup,
 }: {
   apmAlertsClient: ApmAlertsClient;
   kuery: string;
   maxNumServices: number;
-  start: number;
-  end: number;
   serviceGroup: ServiceGroup | null;
 }) {
   const params = {
@@ -46,8 +47,7 @@ export async function getServicesAlerts({
       bool: {
         filter: [
           { term: { [ALERT_RULE_PRODUCER]: 'apm' } },
-          { term: { [ALERT_STATUS]: 'active' } },
-          ...rangeQuery(start, end),
+          { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
           ...kqlQuery(kuery),
           ...serviceGroupQuery(serviceGroup),
         ],
@@ -62,7 +62,7 @@ export async function getServicesAlerts({
         aggs: {
           alerts_count: {
             cardinality: {
-              field: 'kibana.alert.uuid',
+              field: ALERT_UUID,
             },
           },
         },

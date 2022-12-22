@@ -66,9 +66,7 @@ export function ServiceGroupsCard({
           <ServiceStat loading={isLoading}>
             <EuiFlexItem>
               <EuiText size="s" textAlign="left">
-                {serviceGroupCounts === undefined ? (
-                  <>&nbsp;</>
-                ) : (
+                {serviceGroupCounts !== undefined &&
                   i18n.translate(
                     'xpack.apm.serviceGroups.cardsList.serviceCount',
                     {
@@ -76,8 +74,7 @@ export function ServiceGroupsCard({
                         '{servicesCount} {servicesCount, plural, one {service} other {services}}',
                       values: { servicesCount: serviceGroupCounts.services },
                     }
-                  )
-                )}
+                  )}
               </EuiText>
             </EuiFlexItem>
           </ServiceStat>

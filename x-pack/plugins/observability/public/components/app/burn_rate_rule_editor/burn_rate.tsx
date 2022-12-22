@@ -7,24 +7,18 @@
 
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 
 interface Props {
+  initialBurnRate?: number;
   maxBurnRate: number;
+  errors?: string[];
   onChange: (burnRate: number) => void;
 }
 
-export function BurnRate({ onChange, maxBurnRate }: Props) {
-  const [burnRate, setBurnRate] = useState<number>(1);
-  const [burnRateError, setBurnRateError] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    if (burnRate > maxBurnRate) {
-      setBurnRateError(getErrorText(maxBurnRate));
-    } else {
-      setBurnRateError(undefined);
-    }
-  }, [burnRate, maxBurnRate]);
+export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }: Props) {
+  const [burnRate, setBurnRate] = useState<number>(initialBurnRate);
+  const hasError = errors !== undefined && errors.length > 0;
 
   const onBurnRateChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value);
@@ -33,7 +27,12 @@ export function BurnRate({ onChange, maxBurnRate }: Props) {
   };
 
   return (
-    <EuiFormRow label={rowLabel} fullWidth isInvalid={!!burnRateError} error={burnRateError}>
+    <EuiFormRow
+      label={rowLabel}
+      fullWidth
+      isInvalid={hasError}
+      error={hasError ? errors[0] : undefined}
+    >
       <EuiFieldNumber
         fullWidth
         step={0.1}
@@ -50,9 +49,3 @@ export function BurnRate({ onChange, maxBurnRate }: Props) {
 const rowLabel = i18n.translate('xpack.observability.slo.rules.burnRate.rowLabel', {
   defaultMessage: 'Burn rate threshold',
 });
-
-const getErrorText = (maxBurnRate: number) =>
-  i18n.translate('xpack.observability.slo.rules.burnRate.errorText', {
-    defaultMessage: 'Burn rate cannot exceed {maxBurnRate}',
-    values: { maxBurnRate },
-  });
