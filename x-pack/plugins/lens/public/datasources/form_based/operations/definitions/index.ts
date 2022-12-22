@@ -12,7 +12,7 @@ import {
   CoreStart,
 } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type {
+import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
@@ -26,6 +26,7 @@ import { cardinalityOperation } from './cardinality';
 import { percentileOperation } from './percentile';
 import { percentileRanksOperation } from './percentile_ranks';
 import { rateOperation } from './rate';
+import { timeSeriesOperation } from './time_series';
 import {
   minOperation,
   averageOperation,
@@ -117,6 +118,7 @@ const internalOperationDefinitions = [
   filtersOperation,
   termsOperation,
   dateHistogramOperation,
+  timeSeriesOperation,
   minOperation,
   maxOperation,
   averageOperation,
@@ -173,6 +175,7 @@ export {
 export { formulaOperation } from './formula/formula';
 export { staticValueOperation } from './static_value';
 export { rateOperation } from './rate';
+export { timeSeriesOperation } from './time_series';
 
 /**
  * Properties passed to the operation-specific part of the popover editor
