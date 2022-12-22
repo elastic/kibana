@@ -73,6 +73,7 @@
 /src/plugins/ui_actions/ @elastic/kibana-global-experience
 /src/plugins/ui_actions_enhanced/ @elastic/kibana-global-experience
 /src/plugins/navigation/ @elastic/kibana-global-experience
+/src/plugins/image_embeddable/ @elastic/kibana-global-experience
 /x-pack/plugins/notifications/ @elastic/kibana-global-experience
 
 ## Examples
@@ -310,7 +311,11 @@
 /x-pack/plugins/licensing/  @elastic/kibana-core
 /x-pack/plugins/global_search/  @elastic/kibana-core
 /x-pack/plugins/cloud/ @elastic/kibana-core
-/x-pack/plugins/cloud_integrations/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_chat/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_experiments/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_full_story/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_gain_sight/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_links/ @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
@@ -424,9 +429,10 @@
 /x-pack/plugins/ingest_pipelines/  @elastic/platform-deployment-management
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/platform-deployment-management
 
-# Management Experience - Platform Onboarding
+# Platform Onboarding
 /src/plugins/guided_onboarding/ @elastic/platform-onboarding
 /examples/guided_onboarding_example/ @elastic/platform-onboarding
+/x-pack/plugins/cloud_integrations/cloud_data_migration/ @elastic/platform-onboarding
 
 # Security Solution
 /x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
@@ -497,20 +503,15 @@
 /x-pack/plugins/security_solution/public/common/components/navigation @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/news_feed @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/overview_description_list @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/paginated_table @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/sidebar_header @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/stat_items @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/tables @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/top_n @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/with_hover_actions @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/containers/hosts_risk @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/containers/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/lib/cell_actions @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/cases @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/hosts @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/network @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/public/explore @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/overview @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/users @elastic/security-threat-hunting-explore
 
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-explore
@@ -642,11 +643,6 @@ x-pack/plugins/threat_intelligence @elastic/protections-experience
 x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections-experience
 x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
-
-# Security Intelligence And Analytics
-/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules @elastic/security-intelligence-analytics
-
-
 # Security Asset Management
 /x-pack/plugins/osquery @elastic/security-asset-management
 /x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-asset-management
@@ -705,7 +701,7 @@ packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/analytics/shippers/gainsight @elastic/kibana-core
-packages/content-management/inspector @elastic/kibana-global-experience
+packages/content-management/content_editor @elastic/kibana-global-experience
 packages/content-management/table_list @elastic/kibana-global-experience
 packages/core/analytics/core-analytics-browser @elastic/kibana-core
 packages/core/analytics/core-analytics-browser-internal @elastic/kibana-core
@@ -788,7 +784,6 @@ packages/core/i18n/core-i18n-browser-mocks @elastic/kibana-core
 packages/core/i18n/core-i18n-server @elastic/kibana-core
 packages/core/i18n/core-i18n-server-internal @elastic/kibana-core
 packages/core/i18n/core-i18n-server-mocks @elastic/kibana-core
-packages/core/injected-metadata/core-injected-metadata-browser @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-browser-internal @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-browser-mocks @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-common-internal @elastic/kibana-core
@@ -886,6 +881,7 @@ packages/home/sample_data_types @elastic/kibana-global-experience
 packages/kbn-ace @elastic/platform-deployment-management
 packages/kbn-alerts @elastic/security-solution
 packages/kbn-ambient-common-types @elastic/kibana-operations
+packages/kbn-ambient-ftr-types @elastic/kibana-operations
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core
@@ -917,6 +913,7 @@ packages/kbn-dev-utils @elastic/kibana-operations
 packages/kbn-doc-links @elastic/kibana-docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-ebt-tools @elastic/kibana-core
+packages/kbn-ecs @elastic/kibana-core
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations
 packages/kbn-es-errors @elastic/kibana-core

@@ -11,10 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import type { SnapshotMetricInput, SnapshotNodeMetric } from '../../../../../common/http_api';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
+import { CloudProviderIconWithTitle, CloudProviders } from './cloud_provider_icon_with_title';
+import { TruncateLinkWithTooltip } from './truncate_link_with_tooltip';
 
 interface HostNodeRow extends HostMetics {
   os?: string | null;
   servicesOnHost?: number | null;
+  title: { name: string; cloudProvider?: CloudProviders | null };
   name: string;
 }
 
@@ -35,10 +38,24 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     name: i18n.translate('xpack.infra.hostsTable.nameColumnHeader', {
       defaultMessage: 'Name',
     }),
-    field: 'name',
+    field: 'title',
     sortable: true,
     truncateText: true,
-    textOnly: true,
+    render: (title: HostNodeRow['title']) => (
+      <CloudProviderIconWithTitle
+        provider={title?.cloudProvider}
+        text={title.name}
+        title={
+          <TruncateLinkWithTooltip
+            text={title.name}
+            linkProps={{
+              app: 'metrics',
+              pathname: `/detail/host/${title.name}`,
+            }}
+          />
+        }
+      />
+    ),
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.operatingSystemColumnHeader', {

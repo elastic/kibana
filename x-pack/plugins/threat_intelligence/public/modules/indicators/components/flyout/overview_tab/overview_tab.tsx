@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, VFC } from 'react';
+import { useIndicatorsFlyoutContext } from '../use_context';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../../common/types/indicator';
 import { unwrapValue } from '../../../utils';
@@ -30,6 +31,7 @@ const highLevelFields = [
   RawIndicatorFieldId.Confidence,
 ];
 
+export const TI_FLYOUT_OVERVIEW_TITLE = 'tiFlyoutOverviewTitle';
 export const TI_FLYOUT_OVERVIEW_TABLE = 'tiFlyoutOverviewTableRow';
 export const TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS = 'tiFlyoutOverviewHighLevelBlocks';
 
@@ -42,6 +44,8 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
   indicator,
   onViewAllFieldsInTable,
 }) => {
+  const { indicatorName } = useIndicatorsFlyoutContext();
+
   const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
 
   const highLevelBlocks = useMemo(
@@ -67,7 +71,10 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
     return unwrappedDescription ? <EuiText>{unwrappedDescription}</EuiText> : null;
   }, [indicator]);
 
-  const indicatorName = unwrapValue(indicator, RawIndicatorFieldId.Name) || EMPTY_VALUE;
+  const title =
+    indicatorName != null
+      ? indicatorName
+      : unwrapValue(indicator, RawIndicatorFieldId.Name) || EMPTY_VALUE;
 
   if (!indicatorType) {
     return <IndicatorEmptyPrompt />;
@@ -76,7 +83,7 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
   return (
     <>
       <EuiTitle>
-        <h2>{indicatorName}</h2>
+        <h2 data-test-subj={TI_FLYOUT_OVERVIEW_TITLE}>{title}</h2>
       </EuiTitle>
 
       {indicatorDescription}
