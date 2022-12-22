@@ -18,6 +18,7 @@ import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { CellActionsContextProvider } from '@kbn/ui-actions-plugin/public';
 import { ConsoleManager } from '../../management/components/console';
 import type { State } from '../store';
 import { createStore } from '../store';
@@ -38,6 +39,7 @@ interface Props {
   children?: React.ReactNode;
   store?: Store;
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
+  cellActions?: Action[];
 }
 
 export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
@@ -54,6 +56,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
   children,
   store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
+  cellActions = [],
 }) => {
   const queryClient = new QueryClient();
   return (
@@ -63,7 +66,11 @@ export const TestProvidersComponent: React.FC<Props> = ({
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
             <QueryClientProvider client={queryClient}>
               <ConsoleManager>
-                <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                <CellActionsContextProvider
+                  getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                >
+                  <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                </CellActionsContextProvider>
               </ConsoleManager>
             </QueryClientProvider>
           </ThemeProvider>
@@ -81,6 +88,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   children,
   store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
+  cellActions = [],
 }) => (
   <I18nProvider>
     <MockKibanaContextProvider>
@@ -94,7 +102,11 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
               } as unknown as Capabilities
             }
           >
-            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+            <CellActionsContextProvider
+              getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+            >
+              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+            </CellActionsContextProvider>
           </UserPrivilegesProvider>
         </ThemeProvider>
       </ReduxStoreProvider>

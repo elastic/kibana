@@ -10,14 +10,14 @@ import { shallow } from 'enzyme';
 
 import '../../mock/match_media';
 import {
-  getRowItemDraggables,
   RowItemOverflowComponent,
-  getRowItemDraggable,
   OverflowFieldComponent,
+  getRowItemsWithActions,
 } from './helpers';
 import { TestProviders } from '../../mock';
-import { getEmptyValue } from '../empty_value';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { getEmptyValue } from '../empty_value';
+import { render } from '@testing-library/react';
 
 jest.mock('../../lib/kibana');
 
@@ -25,159 +25,75 @@ describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];
   const mount = useMountAppended();
 
-  describe('#getRowItemDraggable', () => {
-    test('it returns correctly against snapshot', () => {
-      const rowItem = getRowItemDraggable({
-        rowItem: 'item1',
-        attrName: 'attrName',
+  describe('#getRowItemsWithActions', () => {
+    test('it returns empty value when values is undefined', () => {
+      const rowItem = getRowItemsWithActions({
+        values: undefined,
+        fieldName: 'attrName',
         idPrefix: 'idPrefix',
       });
-      const wrapper = shallow(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.find('DraggableWrapper')).toMatchSnapshot();
+
+      const { container } = render(<TestProviders>{rowItem}</TestProviders>);
+
+      expect(container.textContent).toBe(getEmptyValue());
     });
 
-    test('it returns empty value when rowItem is undefined', () => {
-      const rowItem = getRowItemDraggable({
-        rowItem: undefined,
-        attrName: 'attrName',
+    test('it returns empty string value when values is empty', () => {
+      const rowItem = getRowItemsWithActions({
+        values: [''],
+        fieldName: 'attrName',
         idPrefix: 'idPrefix',
-        displayCount: 0,
       });
-      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.find('DragDropContext').text()).toBe(getEmptyValue());
-    });
+      const { container } = render(<TestProviders>{rowItem}</TestProviders>);
 
-    test('it returns empty string value when rowItem is empty', () => {
-      const rowItem = getRowItemDraggable({
-        rowItem: '',
-        attrName: 'attrName',
-        idPrefix: 'idPrefix',
-        displayCount: 0,
-      });
-      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
-        '(Empty string)'
-      );
+      expect(container.textContent).toContain('(Empty string)');
     });
 
     test('it returns empty value when rowItem is null', () => {
-      const rowItem = getRowItemDraggable({
-        rowItem: null,
-        attrName: 'attrName',
+      const rowItem = getRowItemsWithActions({
+        values: null,
+        fieldName: 'attrName',
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
-
-      expect(wrapper.text()).toBe(getEmptyValue());
+      const { container } = render(<TestProviders>{rowItem}</TestProviders>);
+      expect(container.textContent).toBe(getEmptyValue());
     });
 
     test('it uses custom renderer', () => {
       const renderer = (item: string) => <>{`Hi ${item} renderer`}</>;
-      const rowItem = getRowItemDraggable({
-        rowItem: 'item1',
-        attrName: 'attrName',
+      const rowItem = getRowItemsWithActions({
+        values: ['item1'],
+        fieldName: 'attrName',
         idPrefix: 'idPrefix',
         render: renderer,
       });
-      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
-        'Hi item1 renderer'
-      );
-    });
-  });
+      const { container } = render(<TestProviders>{rowItem}</TestProviders>);
 
-  describe('#getRowItemDraggables', () => {
-    test('it returns correctly against snapshot', () => {
-      const rowItems = getRowItemDraggables({
-        rowItems: items,
-        attrName: 'attrName',
-        idPrefix: 'idPrefix',
-      });
-      const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.find('DragDropContext')).toMatchSnapshot();
-    });
-
-    test('it returns empty value when rowItems is undefined', () => {
-      const rowItems = getRowItemDraggables({
-        rowItems: undefined,
-        attrName: 'attrName',
-        idPrefix: 'idPrefix',
-        displayCount: 0,
-      });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.text()).toBe(getEmptyValue());
-    });
-
-    test('it returns empty string value when rowItem is empty', () => {
-      const rowItems = getRowItemDraggables({
-        rowItems: [''],
-        attrName: 'attrName',
-        idPrefix: 'idPrefix',
-      });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
-        '(Empty string)'
-      );
-    });
-
-    test('it returns empty value when rowItems is null', () => {
-      const rowItems = getRowItemDraggables({
-        rowItems: null,
-        attrName: 'attrName',
-        idPrefix: 'idPrefix',
-        displayCount: 0,
-      });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.text()).toBe(getEmptyValue());
-    });
-
-    test('it returns no items when provided a 0 displayCount', () => {
-      const rowItems = getRowItemDraggables({
-        rowItems: items,
-        attrName: 'attrName',
-        idPrefix: 'idPrefix',
-        displayCount: 0,
-      });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.text()).toBe(getEmptyValue());
+      expect(container.textContent).toContain('Hi item1 renderer');
     });
 
     test('it returns no items when provided an empty array', () => {
-      const rowItems = getRowItemDraggables({
-        rowItems: [],
-        attrName: 'attrName',
+      const rowItems = getRowItemsWithActions({
+        values: [],
+        fieldName: 'attrName',
         idPrefix: 'idPrefix',
       });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.text()).toBe(getEmptyValue());
+      const { container } = render(<TestProviders>{rowItems}</TestProviders>);
+      expect(container.textContent).toBe(getEmptyValue());
     });
 
-    // Using hostNodes due to this issue: https://github.com/airbnb/enzyme/issues/836
-
-    test('it returns 2 items then overflows', () => {
-      const rowItems = getRowItemDraggables({
-        rowItems: items,
-        attrName: 'attrName',
+    test('it returns 2 items then overflows when displayCount is 2', () => {
+      const rowItems = getRowItemsWithActions({
+        values: items,
+        fieldName: 'attrName',
         idPrefix: 'idPrefix',
         displayCount: 2,
       });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="withHoverActionsButton"]').hostNodes().length).toBe(2);
-    });
+      const { queryAllByTestId, queryByTestId } = render(<TestProviders>{rowItems}</TestProviders>);
 
-    test('it uses custom renderer', () => {
-      const renderer = (item: string) => <>{`Hi ${item} renderer`}</>;
-      const rowItems = getRowItemDraggables({
-        rowItems: items,
-        attrName: 'attrName',
-        idPrefix: 'idPrefix',
-        render: renderer,
-      });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
-        'Hi item1 renderer'
-      );
+      expect(queryAllByTestId('cellActions').length).toBe(2);
+      expect(queryByTestId('overflow-button')).toBeInTheDocument();
     });
   });
 
@@ -185,11 +101,12 @@ describe('Table Helpers', () => {
     test('it returns correctly against snapshot', () => {
       const wrapper = shallow(
         <RowItemOverflowComponent
-          rowItems={items}
-          attrName="attrName"
+          values={items}
+          fieldName="attrName"
           idPrefix="idPrefix"
           maxOverflowItems={1}
           overflowIndexStart={1}
+          fieldType="keyword"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -198,11 +115,12 @@ describe('Table Helpers', () => {
     test('it does not show "more not shown" when maxOverflowItems are not exceeded', () => {
       const wrapper = shallow(
         <RowItemOverflowComponent
-          rowItems={items}
-          attrName="attrName"
+          values={items}
+          fieldName="attrName"
           idPrefix="idPrefix"
           maxOverflowItems={5}
           overflowIndexStart={1}
+          fieldType="keyword"
         />
       );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(0);
@@ -212,11 +130,12 @@ describe('Table Helpers', () => {
       const wrapper = mount(
         <TestProviders>
           <RowItemOverflowComponent
-            rowItems={items}
-            attrName="attrName"
+            values={items}
+            fieldName="attrName"
             idPrefix="idPrefix"
             maxOverflowItems={5}
             overflowIndexStart={1}
+            fieldType="keyword"
           />
         </TestProviders>
       );
@@ -231,11 +150,12 @@ describe('Table Helpers', () => {
     test('it shows "more not shown" when maxOverflowItems are exceeded', () => {
       const wrapper = shallow(
         <RowItemOverflowComponent
-          rowItems={items}
-          attrName="attrName"
+          values={items}
+          fieldName="attrName"
           idPrefix="idPrefix"
           maxOverflowItems={1}
           overflowIndexStart={1}
+          fieldType="keyword"
         />
       );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(1);

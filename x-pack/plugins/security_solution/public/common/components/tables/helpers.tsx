@@ -8,14 +8,10 @@ import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import styled from 'styled-components';
-
 import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
-import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
-import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { MoreContainer } from '../../../timelines/components/field_renderers/field_renderers';
 import { SECURITY_SOLUTION_ACTION_TRIGGER } from '../../../../common/constants';
 
@@ -23,76 +19,13 @@ const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
 `;
 
-interface GetRowItemDraggableParams {
-  rowItem: string | null | undefined;
-  attrName: string;
-  idPrefix: string;
-  render?: (item: string) => JSX.Element;
-  fieldType?: string;
-  isAggregatable?: boolean;
-  displayCount?: number;
-  dragDisplayValue?: string;
-  maxOverflow?: number;
-}
-
-/**
- * @deprecated
- */
-export const getRowItemDraggable = ({
-  rowItem,
-  attrName,
-  idPrefix,
-  fieldType,
-  isAggregatable,
-  render,
-  dragDisplayValue,
-}: GetRowItemDraggableParams): JSX.Element => {
-  if (rowItem != null) {
-    const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
-    return (
-      <DraggableWrapper
-        key={id}
-        dataProvider={{
-          and: [],
-          enabled: true,
-          id,
-          name: rowItem,
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field: attrName,
-            value: rowItem,
-            displayValue: dragDisplayValue || rowItem,
-            operator: IS_OPERATOR,
-          },
-        }}
-        fieldType={fieldType}
-        isAggregatable={isAggregatable}
-        render={(dataProvider, _, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider dataProvider={dataProvider} />
-            </DragEffects>
-          ) : (
-            <>{render ? render(rowItem) : defaultToEmptyTag(rowItem)}</>
-          )
-        }
-      />
-    );
-  } else {
-    return getEmptyTagValue();
-  }
-};
-
 interface GetRowItemsWithActionsParams {
   values: string[] | null | undefined;
   fieldName: string;
   fieldType?: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
-  isAggregatable?: boolean;
   displayCount?: number;
-  dragDisplayValue?: string;
   maxOverflow?: number;
 }
 
@@ -137,76 +70,6 @@ export const getRowItemsWithActions = ({
           maxOverflowItems={maxOverflow}
           overflowIndexStart={displayCount}
         />
-      </>
-    ) : (
-      getEmptyTagValue()
-    );
-  } else {
-    return getEmptyTagValue();
-  }
-};
-
-export const getRowItemDraggables = ({
-  rowItems,
-  attrName,
-  idPrefix,
-  render,
-  dragDisplayValue,
-  fieldType = 'keyword',
-  isAggregatable = false,
-  displayCount = 5,
-  maxOverflow = 5,
-}: GetRowItemDraggablesParams): JSX.Element => {
-  if (rowItems != null && rowItems.length > 0) {
-    const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
-      const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
-      return (
-        <React.Fragment key={id}>
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: rowItem,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: attrName,
-                value: rowItem,
-                displayValue: dragDisplayValue || rowItem,
-                operator: IS_OPERATOR,
-              },
-            }}
-            fieldType={fieldType}
-            isAggregatable={isAggregatable}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <>{render ? render(rowItem) : defaultToEmptyTag(rowItem)}</>
-              )
-            }
-          />
-        </React.Fragment>
-      );
-    });
-
-    return draggables.length > 0 ? (
-      <>
-        {draggables}{' '}
-        {/* <RowItemOverflow
-          attrName={attrName}
-          dragDisplayValue={dragDisplayValue}
-          idPrefix={idPrefix}
-          maxOverflowItems={maxOverflow}
-          overflowIndexStart={displayCount}
-          rowItems={rowItems}
-          fieldType={fieldType}
-          isAggregatable={isAggregatable}
-        /> */}
       </>
     ) : (
       getEmptyTagValue()

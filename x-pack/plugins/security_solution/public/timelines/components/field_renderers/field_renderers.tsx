@@ -408,11 +408,10 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               fieldName={attrName}
               idPrefix={idPrefix}
               render={render}
-              rowItems={rowItems}
+              values={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
               fieldType={fieldType}
-              isAggregatable={isAggregatable}
             />
           </EuiPopover>
         )}
