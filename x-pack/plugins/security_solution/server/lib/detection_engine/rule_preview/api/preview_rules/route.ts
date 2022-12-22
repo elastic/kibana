@@ -197,7 +197,7 @@ export const previewRulesRoute = async (
             alertLimit: {
               getValue: () => number;
               setLimitReached: () => void;
-              trimRecovered: () => [];
+              getEarlyRecoveredAlerts: () => [];
             };
             done: () => { getRecoveredAlerts: () => [] };
           }
@@ -307,7 +307,7 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  trimRecovered: () => [],
+                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
@@ -333,7 +333,7 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  trimRecovered: () => [],
+                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
@@ -354,7 +354,7 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  trimRecovered: () => [],
+                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
@@ -375,7 +375,7 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  trimRecovered: () => [],
+                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
@@ -394,7 +394,7 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  trimRecovered: () => [],
+                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
@@ -413,7 +413,7 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  trimRecovered: () => [],
+                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
@@ -432,7 +432,7 @@ export const previewRulesRoute = async (
                 alertLimit: {
                   getValue: () => 1000,
                   setLimitReached: () => {},
-                  trimRecovered: () => [],
+                  getEarlyRecoveredAlerts: () => [],
                 },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }

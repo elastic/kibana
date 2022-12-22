@@ -17,18 +17,6 @@ jest.mock('../lib', () => ({
 
 let clock: sinon.SinonFakeTimers;
 const logger = loggingSystemMock.create().get();
-const alert1 = {
-  index: 1,
-  flappingHistory: [true, true, true, true],
-};
-const alert2 = {
-  index: 2,
-  flappingHistory: new Array(20).fill(false),
-};
-const alert3 = {
-  index: 3,
-  flappingHistory: [true, true],
-};
 
 describe('createAlertFactory()', () => {
   beforeAll(() => {
@@ -310,34 +298,6 @@ describe('createAlertFactory()', () => {
     alertFactory.alertLimit.setLimitReached(false);
     alertFactory.alertLimit.checkLimitUsage();
   });
-
-  test('trimRecovered should return longest recovered alerts', () => {
-    const alertFactory = createAlertFactory({
-      alerts: {},
-      logger,
-      maxAlerts: 2,
-    });
-
-    const recoveredAlerts = [alert1, alert2, alert3];
-    const trimmedAlerts = alertFactory.alertLimit.trimRecovered(recoveredAlerts);
-    expect(trimmedAlerts).toEqual([alert2]);
-
-    expect(logger.warn).toBeCalledWith(
-      'Recovered alerts have exceeded the max alert limit: dropping 1 alert.'
-    );
-  });
-
-  test('trimRecovered should not return alerts if the num of recovered alerts is not at the limit', () => {
-    const alertFactory = createAlertFactory({
-      alerts: {},
-      logger,
-      maxAlerts: 2,
-    });
-
-    const recoveredAlerts = [alert1, alert2];
-    const trimmedAlerts = alertFactory.alertLimit.trimRecovered(recoveredAlerts);
-    expect(trimmedAlerts).toEqual([]);
-  });
 });
 
 describe('getPublicAlertFactory', () => {
@@ -352,7 +312,7 @@ describe('getPublicAlertFactory', () => {
     expect(alertFactory.alertLimit.getValue).toBeDefined();
     expect(alertFactory.alertLimit.setLimitReached).toBeDefined();
     expect(alertFactory.alertLimit.checkLimitUsage).toBeDefined();
-    expect(alertFactory.alertLimit.trimRecovered).toBeDefined();
+    expect(alertFactory.alertLimit.getEarlyRecoveredAlerts).toBeDefined();
     expect(alertFactory.hasReachedAlertLimit).toBeDefined();
     expect(alertFactory.done).toBeDefined();
 
@@ -362,7 +322,7 @@ describe('getPublicAlertFactory', () => {
     expect(publicAlertFactory.done).toBeDefined();
     expect(publicAlertFactory.alertLimit.getValue).toBeDefined();
     expect(publicAlertFactory.alertLimit.setLimitReached).toBeDefined();
-    expect(publicAlertFactory.alertLimit.trimRecovered).toBeDefined();
+    expect(publicAlertFactory.alertLimit.getEarlyRecoveredAlerts).toBeDefined();
 
     // @ts-expect-error
     expect(publicAlertFactory.alertLimit.checkLimitUsage).not.toBeDefined();

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
 import { map } from 'lodash';
 import { Alert } from '../alert';
-import { AlertFactory } from '../alert/create_alert_factory';
-import { AlertInstanceState, AlertInstanceContext, WithoutReservedActionGroups } from '../types';
+import { AlertInstanceState, AlertInstanceContext } from '../types';
 
 interface TrimmedRecoveredAlertsResult<
   State extends AlertInstanceState,
@@ -19,19 +19,22 @@ interface TrimmedRecoveredAlertsResult<
   trimmedAlertsRecoveredCurrent: Record<string, Alert<State, Context, RecoveryActionGroupIds>>;
 }
 
+export interface TrimRecoveredOpts {
+  index: number | string;
+  flappingHistory: boolean[];
+  trackedEvents?: boolean;
+}
+
 export function trimRecoveredAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   RecoveryActionGroupIds extends string,
   ActionGroupIds extends string
 >(
+  logger: Logger,
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {},
   currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {},
-  alertFactory: AlertFactory<
-    State,
-    Context,
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupIds>
-  >
+  maxAlerts: number
 ): TrimmedRecoveredAlertsResult<State, Context, RecoveryActionGroupIds> {
   const alerts = map(recoveredAlerts, (value, key) => {
     return {
@@ -39,7 +42,7 @@ export function trimRecoveredAlerts<
       flappingHistory: value.getFlappingHistory() || [],
     };
   });
-  const earlyRecoveredAlerts = alertFactory.alertLimit.trimRecovered(alerts);
+  const earlyRecoveredAlerts = getEarlyRecoveredAlerts(logger, alerts, maxAlerts);
   // Dropping the "early recovered" alerts for now.
   // In #143445 we will want to recover these alerts and set flapping to false
   earlyRecoveredAlerts.forEach((alert) => {
@@ -50,4 +53,25 @@ export function trimRecoveredAlerts<
     trimmedAlertsRecovered: recoveredAlerts,
     trimmedAlertsRecoveredCurrent: currentRecoveredAlerts,
   };
+}
+
+export function getEarlyRecoveredAlerts(
+  logger: Logger,
+  recoveredAlerts: TrimRecoveredOpts[],
+  maxAlerts: number
+) {
+  let earlyRecoveredAlerts: TrimRecoveredOpts[] = [];
+  if (recoveredAlerts.length > maxAlerts) {
+    recoveredAlerts.sort((a, b) => {
+      return a.flappingHistory.length - b.flappingHistory.length;
+    });
+
+    earlyRecoveredAlerts = recoveredAlerts.splice(maxAlerts);
+    logger.warn(
+      `Recovered alerts have exceeded the max alert limit: dropping ${
+        earlyRecoveredAlerts.length
+      } ${earlyRecoveredAlerts.length > 1 ? 'alerts' : 'alert'}.`
+    );
+  }
+  return earlyRecoveredAlerts;
 }
