@@ -9,6 +9,15 @@ import queryString from 'query-string';
 import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 
+export function useInRouterContext() {
+  try {
+    useLocation();
+    return true;
+  } catch (e: unknown) {
+    return false;
+  }
+}
+
 function useQuery<T extends Record<string, unknown> = {}>() {
   const { search } = useLocation();
   return useMemo<T>(() => queryString.parse(search) as T, [search]);
