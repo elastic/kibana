@@ -21,6 +21,16 @@ describe('replaceParamsQuery', () => {
     expect(result).toBe(expectedQuery);
     expect(skipped).toBe(false);
   });
+  it('should return proper value instead of params with multiple params', () => {
+    const query =
+      'SELECT * FROM processes WHERE version = {{kibana.version}} and pid = {{kibana.pid}}';
+    const { result, skipped } = replaceParamsQuery(query, {
+      kibana: { version: '8.7.0', pid: '123' },
+    });
+    const expectedQuery = 'SELECT * FROM processes WHERE version = 8.7.0 and pid = 123';
+    expect(result).toBe(expectedQuery);
+    expect(skipped).toBe(false);
+  });
   it('should return proper value if param has white spaces inside', () => {
     const query = 'SELECT * FROM processes WHERE version = {{  kibana.version  }}';
     const { result, skipped } = replaceParamsQuery(query, { kibana: { version: '8.7.0' } });

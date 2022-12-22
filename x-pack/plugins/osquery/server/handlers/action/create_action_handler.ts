@@ -10,15 +10,13 @@ import moment from 'moment';
 import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { Ecs, SavedObjectsClientContract } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
+import { createDynamicQueries, createQueries } from './create_queries';
 import { getInternalSavedObjectsClient } from '../../routes/utils';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
-import { isSavedQueryPrebuilt } from '../../routes/saved_query/utils';
 import { ACTIONS_INDEX } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObjectAttributes } from '../../common/types';
@@ -104,45 +102,12 @@ export const createActionHandler = async (
             (value) => !isEmpty(value)
           )
         )
-      : params.queries?.length
-      ? map(params.queries, ({ query, ...restQuery }) => {
-          const replacedQuery = replacedQueries(query, ecsData);
-
-          return pickBy(
-            {
-              ...replacedQuery,
-              ...restQuery,
-              action_id: uuid.v4(),
-              agents: selectedAgents,
-            },
-            (value) => !isEmpty(value) || value === true
-          );
-        })
-      : [
-          pickBy(
-            {
-              action_id: uuid.v4(),
-              id: uuid.v4(),
-              ...replacedQueries(params.query, ecsData),
-              // just for single queries - we need to overwrite the error property
-              error: undefined,
-              saved_query_id: params.saved_query_id,
-              saved_query_prebuilt: params.saved_query_id
-                ? await isSavedQueryPrebuilt(
-                    osqueryContext.service.getPackageService()?.asInternalUser,
-                    params.saved_query_id
-                  )
-                : undefined,
-              ecs_mapping: params.ecs_mapping,
-              agents: selectedAgents,
-            },
-            (value) => !isEmpty(value)
-          ),
-        ],
+      : ecsData
+      ? await createDynamicQueries(params, ecsData, osqueryContext)
+      : await createQueries(params, selectedAgents, osqueryContext),
   };
 
   const fleetActions = map(
-    // we filter out the queries that were skipped (contain erorr)
     filter(osqueryAction.queries, (query) => !query.error),
     (query) => ({
       action_id: query.action_id,
@@ -182,27 +147,4 @@ export const createActionHandler = async (
   return {
     response: osqueryAction,
   };
-};
-
-const replacedQueries = (
-  query: string | undefined,
-  ecsData?: Ecs
-): { query: string | undefined; error?: string } => {
-  if (ecsData && query) {
-    const { result, skipped } = replaceParamsQuery(query, ecsData);
-
-    return {
-      query: result,
-      ...(skipped
-        ? {
-            error: i18n.translate('xpack.osquery.liveQueryActions.error.notFoundParameters', {
-              defaultMessage:
-                "This query hasn't been called due to parameter used and its value not found in the alert.",
-            }),
-          }
-        : {}),
-    };
-  }
-
-  return { query };
 };

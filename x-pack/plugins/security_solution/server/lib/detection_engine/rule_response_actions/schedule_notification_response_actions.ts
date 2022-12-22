@@ -6,7 +6,7 @@
  */
 
 import type { Ecs } from '@kbn/ecs';
-import { find, map, uniq, reduce } from 'lodash';
+import { uniq, reduce, some, each } from 'lodash';
 import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { SetupPlugins } from '../../../plugin_contract';
@@ -16,54 +16,69 @@ interface ScheduleNotificationActions {
   responseActions: RuleResponseAction[];
 }
 
+interface AlertsWithAgentType {
+  alerts: Ecs[];
+  agents: string[];
+  alertIds: string[];
+}
+
 export const scheduleNotificationResponseActions = (
   { signals, responseActions }: ScheduleNotificationActions,
   osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction']
 ) => {
   const filteredAlerts = (signals as Ecs[]).filter((alert) => alert.agent?.id);
 
-  const alertsWithAgent = reduce(
+  const { alerts, agents, alertIds }: AlertsWithAgentType = reduce(
     filteredAlerts,
-    (acc: string[], alert) => {
+    (acc, alert) => {
       const agentId = alert.agent?.id;
       if (agentId !== undefined) {
-        acc.push(agentId);
+        return {
+          alerts: [...acc.alerts, alert],
+          agents: [...acc.agents, agentId],
+          alertIds: [...acc.alertIds, (alert as unknown as { _id: string })._id],
+        };
       }
       return acc;
     },
-    []
+    { alerts: [], agents: [], alertIds: [] } as AlertsWithAgentType
   );
-  const agentIds = uniq(alertsWithAgent);
-  const alertIds = map(filteredAlerts, '_id');
+  const agentIds = uniq(agents);
 
-  const foundAlert = find(filteredAlerts, (alert) => alert.agent?.id === agentIds?.[0]);
-
+  const containsDynamicParameterRegex = /\{{([^}]+)\}}/g; // when there are 2 opening and 2 closing curly brackets (including brackets)
   responseActions.forEach((responseAction) => {
     if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
-      const { savedQueryId, packId, queries, ecsMapping, query, ...rest } = responseAction.params;
+      const temporaryQueries = responseAction.params.queries?.length
+        ? responseAction.params.queries
+        : [{ query: responseAction.params.query }];
+      const containsDynamicQueries = some(temporaryQueries, (query) => {
+        return query.query ? containsDynamicParameterRegex.test(query.query) : false;
+      });
+      const { savedQueryId, packId, queries, ecsMapping, ...rest } = responseAction.params;
 
-      if (packId) {
-        return osqueryCreateAction(
-          {
-            ...rest,
-            queries,
-            agent_ids: agentIds,
-            alert_ids: alertIds,
-          },
-          foundAlert
-        );
-      }
-      return osqueryCreateAction(
-        {
+      if (!containsDynamicQueries) {
+        return osqueryCreateAction({
           ...rest,
-          query,
+          queries,
           ecs_mapping: ecsMapping,
           saved_query_id: savedQueryId,
           agent_ids: agentIds,
           alert_ids: alertIds,
-        },
-        foundAlert
-      );
+        });
+      }
+      each(alerts, (alert) => {
+        return osqueryCreateAction(
+          {
+            ...rest,
+            queries,
+            ecs_mapping: ecsMapping,
+            saved_query_id: savedQueryId,
+            agent_ids: alert.agent?.id ? [alert.agent.id] : [],
+            alert_ids: [(alert as unknown as { _id: string })._id],
+          },
+          alert
+        );
+      });
     }
   });
 };
