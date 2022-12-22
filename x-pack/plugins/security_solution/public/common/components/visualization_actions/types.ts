@@ -34,7 +34,7 @@ export interface VisualizationActionsProps {
 }
 
 export interface LensEmbeddableComponentProps {
-  alertsOptions?: AlertsOptions;
+  extraOptions?: AlertsOptions;
   extraActions?: Action[];
   getLensAttributes?: GetLensAttributes;
   height?: string;

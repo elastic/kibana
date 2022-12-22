@@ -200,7 +200,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       inputId: InputsModelId.global,
       queryId: uniqueQueryId,
     });
-    const alertsOptions = useMemo(
+    const extraVisualizationOptions = useMemo(
       () => ({
         showBuildingBlockAlerts,
         showOnlyThreatIndicatorAlerts,
@@ -438,9 +438,9 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           {toggleStatus ? (
             isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
               <LensEmbeddable
-                alertsOptions={alertsOptions}
                 data-test-subj="embeddable-matrix-histogram"
                 extraActions={extraActions}
+                extraOptions={extraVisualizationOptions}
                 getLensAttributes={getLensAttributes}
                 height={ChartHeight}
                 id={uniqueQueryId}

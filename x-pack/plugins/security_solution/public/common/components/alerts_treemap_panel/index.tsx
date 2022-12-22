@@ -166,7 +166,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
     inputId: InputsModelId.global,
     queryId: uniqueQueryId,
   });
-  const alertsOptions = useMemo(
+  const extraVisualizationOptions = useMemo(
     () => ({
       breakdownField: stackByField1,
       showBuildingBlockAlerts,
@@ -231,9 +231,9 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
         {isPanelExpanded ? (
           isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
             <LensEmbeddable
-              alertsOptions={alertsOptions}
               data-test-subj="embeddable-matrix-histogram"
               extraActions={extraActions}
+              extraOptions={extraVisualizationOptions}
               getLensAttributes={getLensAttributes}
               height={`${DEFAULT_MIN_CHART_HEIGHT}px`}
               id={uniqueQueryId}

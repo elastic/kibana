@@ -23,19 +23,19 @@ import {
 } from './utils';
 
 export const useLensAttributes = ({
-  lensAttributes,
+  extraOptions,
   getLensAttributes,
+  lensAttributes,
+  scopeId = SourcererScopeName.default,
   stackByField,
   title,
-  scopeId = SourcererScopeName.default,
-  alertsOptions,
 }: {
-  lensAttributes?: LensAttributes | null;
+  extraOptions?: AlertsOptions;
   getLensAttributes?: GetLensAttributes;
+  lensAttributes?: LensAttributes | null;
+  scopeId?: SourcererScopeName;
   stackByField?: string;
   title?: string;
-  scopeId?: SourcererScopeName;
-  alertsOptions?: AlertsOptions;
 }): LensAttributes | null => {
   const { selectedPatterns, dataViewId, indicesExist } = useSourcererDataView(scopeId);
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
@@ -76,7 +76,7 @@ export const useLensAttributes = ({
       lensAttributes ??
       ((getLensAttributes &&
         stackByField &&
-        getLensAttributes(stackByField, alertsOptions)) as LensAttributes);
+        getLensAttributes(stackByField, extraOptions)) as LensAttributes);
 
     return {
       ...attrs,
@@ -98,8 +98,8 @@ export const useLensAttributes = ({
       })),
     } as LensAttributes;
   }, [
-    alertsOptions,
     dataViewId,
+    extraOptions,
     filters,
     getLensAttributes,
     indexFilters,
