@@ -21,6 +21,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_END,
   ALERT_STATUS_ACTIVE,
+  ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
 
 import {
@@ -93,6 +94,12 @@ export interface BulkUpdateOptions<Params extends RuleTypeParams> {
   query: object | string | undefined | null;
 }
 
+export interface BulkUpdateCasesOptions {
+  ids: string[];
+  caseIds: string[];
+  index: string;
+}
+
 interface GetAlertParams {
   id: string;
   index?: string;
@@ -119,6 +126,9 @@ interface SingleSearchAfterAndAudit {
   sort?: estypes.SortOptions[] | undefined;
   lastSortIds?: Array<string | number> | undefined;
 }
+
+// TODO: Maybe move it to Cases or to @kbn/rule-data-utils
+const MAX_CASES_PER_ALERT = 10;
 
 /**
  * Provides apis to interact with alerts as data
@@ -159,6 +169,12 @@ export class AlertsClient {
     return source?.[ALERT_WORKFLOW_STATUS] == null
       ? { signal: { status } }
       : { [ALERT_WORKFLOW_STATUS]: status };
+  }
+
+  private getAlertCaseIdsFieldUpdate(source: ParsedTechnicalFields | undefined, caseIds: string[]) {
+    const uniqueCaseIds = new Set([...(source?.[ALERT_CASE_IDS] ?? []), ...caseIds]);
+
+    return { [ALERT_CASE_IDS]: Array.from(uniqueCaseIds.values()) };
   }
 
   /**
@@ -323,14 +339,14 @@ export class AlertsClient {
    */
   private async mgetAlertsAuditOperate({
     ids,
-    status,
     indexName,
     operation,
+    fieldToUpdate,
   }: {
     ids: string[];
-    status: STATUS_VALUES;
     indexName: string;
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
+    fieldToUpdate: (source: ParsedTechnicalFields | undefined) => Record<string, unknown>;
   }) {
     try {
       const mgetRes = await this.esClient.mget<ParsedTechnicalFields>({
@@ -353,8 +369,6 @@ export class AlertsClient {
       }
 
       const bulkUpdateRequest = mgetRes.docs.flatMap((item) => {
-        // @ts-expect-error doesn't handle error branch in MGetResponse
-        const fieldToUpdate = this.getAlertStatusFieldUpdate(item?._source, status);
         return [
           {
             update: {
@@ -364,7 +378,8 @@ export class AlertsClient {
           },
           {
             doc: {
-              ...fieldToUpdate,
+              // @ts-expect-error doesn't handle error branch in MGetResponse
+              ...fieldToUpdate(item?._source),
             },
           },
         ];
@@ -379,6 +394,30 @@ export class AlertsClient {
       this.logger.error(`error in mgetAlertsAuditOperate ${exc}`);
       throw exc;
     }
+  }
+
+  /**
+   * When an update by ids is requested, do a multi-get, ensure authz and audit alerts, then execute bulk update
+   * @param param0
+   * @returns
+   */
+  private async mgetAlertsAuditOperateStatus({
+    ids,
+    status,
+    indexName,
+    operation,
+  }: {
+    ids: string[];
+    status: STATUS_VALUES;
+    indexName: string;
+    operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
+  }) {
+    return this.mgetAlertsAuditOperate({
+      ids,
+      indexName,
+      operation,
+      fieldToUpdate: (source) => this.getAlertStatusFieldUpdate(source, status),
+    });
   }
 
   private async buildEsQueryWithAuthz(
@@ -676,7 +715,7 @@ export class AlertsClient {
   }: BulkUpdateOptions<Params>) {
     // rejects at the route level if more than 1000 id's are passed in
     if (ids != null) {
-      return this.mgetAlertsAuditOperate({
+      return this.mgetAlertsAuditOperateStatus({
         ids,
         status,
         indexName: index,
@@ -724,6 +763,26 @@ export class AlertsClient {
     } else {
       throw Boom.badRequest('no ids or query were provided for updating');
     }
+  }
+
+  public async bulkUpdateCases({ ids, index, caseIds }: BulkUpdateCasesOptions) {
+    /**
+     * A document may have already some case ids. The check below
+     * does not ensure thats. We need to also throw in case
+     * alert.caseIds + caseIds > MAX_CASES_PER_ALERT
+     *
+     * TODO: check for each alert if the validation applies
+     */
+    if (caseIds.length > MAX_CASES_PER_ALERT) {
+      throw Boom.badRequest(`You cannot attach more than ${MAX_CASES_PER_ALERT} cases to an alert`);
+    }
+
+    return this.mgetAlertsAuditOperate({
+      ids,
+      indexName: index,
+      operation: WriteOperations.Update,
+      fieldToUpdate: (source) => this.getAlertCaseIdsFieldUpdate(source, caseIds),
+    });
   }
 
   public async find<Params extends RuleTypeParams = never>({
