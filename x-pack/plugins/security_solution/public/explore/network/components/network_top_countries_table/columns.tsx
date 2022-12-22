@@ -16,17 +16,12 @@ import type {
 } from '../../../../../common/search_strategy/security_solution/network';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
 import { networkModel } from '../../store';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { Columns } from '../../../components/paginated_table';
-import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 import * as i18n from './translations';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 
 export type NetworkTopCountriesColumns = [
   Columns<NetworkTopCountriesEdges>,
@@ -58,33 +53,13 @@ export const getNetworkTopCountriesColumns = (
       const geoAttr = `${flowTarget}.geo.country_iso_code`;
       const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-country-${geo}`);
       if (geo != null) {
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: geo,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: { field: geoAttr, value: geo, operator: IS_OPERATOR },
-            }}
-            isAggregatable={true}
-            fieldType={'keyword'}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <>
-                  <CountryFlagAndName countryCode={geo} />
-                </>
-              )
-            }
-          />
-        );
+        return getRowItemsWithActions({
+          values: [geo],
+          fieldName: geoAttr,
+          fieldType: 'keyword',
+          idPrefix: id,
+          render: (item) => <CountryFlagAndName countryCode={item} />,
+        });
       } else {
         return getEmptyTagValue();
       }

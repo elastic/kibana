@@ -17,16 +17,10 @@ import type {
 } from '../../../../../common/search_strategy';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { networkModel } from '../../store';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../../common/components/links';
 import type { Columns } from '../../../components/paginated_table';
-import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 import * as i18n from './translations';
 import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
@@ -67,58 +61,28 @@ export const getNetworkTopNFlowColumns = (
       if (ip != null) {
         return (
           <>
-            <DraggableWrapper
-              key={id}
-              dataProvider={{
-                and: [],
-                enabled: true,
-                id,
-                name: ip,
-                excluded: false,
-                kqlQuery: '',
-                queryMatch: { field: ipAttr, value: ip, operator: IS_OPERATOR },
-              }}
-              isAggregatable={true}
-              fieldType={'ip'}
-              render={(dataProvider, _, snapshot) =>
-                snapshot.isDragging ? (
-                  <DragEffects>
-                    <Provider dataProvider={dataProvider} />
-                  </DragEffects>
-                ) : (
-                  <NetworkDetailsLink ip={ip} flowTarget={flowTarget} />
-                )
-              }
-            />
+            {getRowItemsWithActions({
+              values: [ip],
+              fieldName: ipAttr,
+              fieldType: 'ip',
+              idPrefix: id,
+              render: (item) => <NetworkDetailsLink ip={item} flowTarget={flowTarget} />,
+            })}
 
-            {geo && (
-              <DraggableWrapper
-                key={`${id}-${geo}`}
-                dataProvider={{
-                  and: [],
-                  enabled: true,
-                  id: `${id}-${geo}`,
-                  name: geo,
-                  excluded: false,
-                  kqlQuery: '',
-                  queryMatch: { field: geoAttrName, value: geo, operator: IS_OPERATOR },
-                }}
-                isAggregatable={true}
-                fieldType={'geo_point'}
-                render={(dataProvider, _, snapshot) =>
-                  snapshot.isDragging ? (
-                    <DragEffects>
-                      <Provider dataProvider={dataProvider} />
-                    </DragEffects>
-                  ) : (
-                    <>
-                      {' '}
-                      <CountryFlag countryCode={geo} /> {geo}
-                    </>
-                  )
-                }
-              />
-            )}
+            {geo &&
+              getRowItemsWithActions({
+                values: [geo],
+                fieldName: geoAttrName,
+
+                fieldType: 'geo_point',
+                idPrefix: `${id}-${geo}`,
+                render: (item) => (
+                  <>
+                    {' '}
+                    <CountryFlag countryCode={item} /> {item}
+                  </>
+                ),
+              })}
           </>
         );
       } else {
