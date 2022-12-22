@@ -4107,6 +4107,70 @@
     "functions": [
       {
         "parentPluginId": "fleet",
+        "id": "def-server.buildAgentStatusRuntimeField",
+        "type": "Function",
+        "tags": [],
+        "label": "buildAgentStatusRuntimeField",
+        "description": [],
+        "signature": [
+          "(soClient: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          },
+          ", pathPrefix: string | undefined) => Promise<",
+          "MappingRuntimeFields",
+          ">"
+        ],
+        "path": "x-pack/plugins/fleet/server/services/agents/build_status_runtime_field.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.buildAgentStatusRuntimeField.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "soClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/server/services/agents/build_status_runtime_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.buildAgentStatusRuntimeField.$2",
+            "type": "string",
+            "tags": [],
+            "label": "pathPrefix",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/agents/build_status_runtime_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-server.getRegistryUrl",
         "type": "Function",
         "tags": [],
@@ -4272,7 +4336,7 @@
               "\nReturn the status by the Agent's Policy id"
             ],
             "signature": [
-              "(agentPolicyId?: string | undefined, filterKuery?: string | undefined) => Promise<{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; }>"
+              "(agentPolicyId?: string | undefined, filterKuery?: string | undefined) => Promise<{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
             "deprecated": false,
@@ -6570,7 +6634,7 @@
                 "section": "def-common.ListWithKuery",
                 "text": "ListWithKuery"
               },
-              ") => Promise<",
+              " & { withAgentCount?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6616,7 +6680,7 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-server.PackagePolicyClient.list.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
@@ -6627,7 +6691,8 @@
                     "docId": "kibFleetPluginApi",
                     "section": "def-common.ListWithKuery",
                     "text": "ListWithKuery"
-                  }
+                  },
+                  " & { withAgentCount?: boolean | undefined; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -11068,7 +11133,7 @@
             "label": "results",
             "description": [],
             "signature": [
-              "{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; }"
+              "{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; inactive: number; unenrolled: number; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
             "deprecated": false,
@@ -12895,6 +12960,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PackagePolicy.agents",
+            "type": "number",
+            "tags": [],
+            "label": "agents",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
@@ -14828,7 +14907,7 @@
         "label": "AgentStatus",
         "description": [],
         "signature": [
-          "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"enrolling\" | \"unenrolling\" | \"updating\" | \"degraded\""
+          "\"error\" | \"offline\" | \"online\" | \"inactive\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"degraded\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
         "deprecated": false,
