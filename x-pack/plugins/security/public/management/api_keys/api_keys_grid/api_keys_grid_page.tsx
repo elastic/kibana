@@ -475,6 +475,7 @@ export class APIKeysGridPage extends Component<Props, State> {
           defaultMessage: 'Name',
         }),
         sortable: true,
+        'data-test-subj': 'apiKeyNameCell',
       },
     ]);
 
