@@ -54,19 +54,3 @@ export const cspRuleTemplateMigrations: SavedObjectMigrationMap = {
   '8.4.0': migrateCspRuleMetadata,
   '8.7.0': deprecateCspRuleTemplateState,
 };
-
-// export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
-//   Omit<AgentPolicy, 'package_policies'> & {
-//   package_configs: string[];
-//   package_policies?: string[];
-// },
-//   Omit<AgentPolicy, 'package_policies'> & {
-//   package_policies?: string[];
-// }
-//   > = (agentPolicyDoc) => {
-//   agentPolicyDoc.attributes.package_policies = agentPolicyDoc.attributes.package_configs;
-//   // @ts-expect-error
-//   delete agentPolicyDoc.attributes.package_configs;
-//
-//   return agentPolicyDoc;
-// };
