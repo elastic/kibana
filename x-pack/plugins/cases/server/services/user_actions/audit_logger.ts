@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EcsEventType } from '@kbn/logging';
+import type { EcsEventType } from '@kbn/ecs';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { UserAction as Action } from '../../../common/api';
 import type { EventDetails } from './types';
