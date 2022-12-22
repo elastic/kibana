@@ -17,6 +17,7 @@ import type { EqlSequence } from '../../../../../../common/detection_engine/type
 import { generateBuildingBlockIds } from './generate_building_block_ids';
 import type { BuildReasonMessage } from '../../../signals/reason_formatters';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
+import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,
@@ -37,7 +38,7 @@ import type {
  * @param completeRule object representing the rule that found the sequence
  */
 export const buildAlertGroupFromSequence = (
-  logger: Logger,
+  ruleExecutionLogger: IRuleExecutionLogForExecutors,
   sequence: EqlSequence<SignalSource>,
   completeRule: CompleteRule<RuleParams>,
   mergeStrategy: ConfigType['alertMergeStrategy'],
@@ -65,7 +66,8 @@ export const buildAlertGroupFromSequence = (
         false,
         buildReasonMessage,
         indicesToQuery,
-        alertTimestampOverride
+        alertTimestampOverride,
+        ruleExecutionLogger
       )
     );
   } catch (error) {

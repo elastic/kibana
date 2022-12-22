@@ -16,13 +16,12 @@ import type { BaseSignalHit, SignalSource, SignalSourceHit } from '../../../sign
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
+import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import { buildRuleNameFromMapping } from '../../../signals/mappings/build_rule_name_from_mapping';
 import { buildSeverityFromMapping } from '../../../signals/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../../signals/mappings/build_risk_score_from_mapping';
 import type { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
 import { stripNonEcsFields } from './strip_non_ecs_fields';
-
-import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 
 const isSourceDoc = (
   hit: SignalSourceHit
@@ -56,7 +55,7 @@ export const buildBulkBody = (
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
   alertTimestampOverride: Date | undefined,
-  ruleExecutionLogger?: IRuleExecutionLogForExecutors
+  ruleExecutionLogger: IRuleExecutionLogForExecutors
 ): BaseFieldsLatest => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
 
