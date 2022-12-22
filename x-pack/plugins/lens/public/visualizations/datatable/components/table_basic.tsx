@@ -90,19 +90,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [props]);
 
   useEffect(() => {
-    setPagination((pag) => {
-      if (pag && pag.pageSize === props.args.pageSize) {
-        return pag;
-      }
-
-      return props.args.pageSize && props.args.pageSize < firstLocalTable.rows.length
+    setPagination(
+      props.args.pageSize
         ? {
             pageIndex: 0,
             pageSize: props.args.pageSize ?? DEFAULT_PAGE_SIZE,
           }
-        : undefined;
-    });
-  }, [props.args.pageSize, firstLocalTable]);
+        : undefined
+    );
+  }, [props.args.pageSize]);
 
   useDeepCompareEffect(() => {
     setColumnConfig({
@@ -121,7 +117,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   useEffect(() => {
     if (!pagination?.pageIndex && !pagination?.pageSize) return;
-    const lastPageIndex = Math.ceil(firstLocalTable.rows.length / pagination.pageSize) - 1;
+    const lastPageIndex = firstLocalTable.rows.length
+      ? Math.ceil(firstLocalTable.rows.length / pagination.pageSize) - 1
+      : 0;
     /**
      * When the underlying data changes, there might be a case when actual pagination page
      * doesn't exist anymore - if the number of rows has decreased.
