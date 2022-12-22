@@ -56,7 +56,8 @@ export const createShowTopNAction = ({
     getIconType: (): string => ICON,
     getDisplayName: ({ field }) => SHOW_TOP(field.name),
     getDisplayNameTooltip: ({ field }) => SHOW_TOP(field.name),
-    isCompatible: async ({ field }) => field.name != null && field.value != null,
+    isCompatible: async ({ field }) =>
+      field.name != null && field.value != null && field.type !== 'date' && field.type !== 'text',
     execute: async (context) => {
       const onClose = () => {
         if (context.extraContentNodeRef.current !== null) {
