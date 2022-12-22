@@ -216,7 +216,7 @@ describe('UpdateConnector renders', () => {
     ).toBeTruthy();
   });
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 150; i++) {
     it('should confirm the update when submit button clicked' + i, async () => {
       const onConfirm = jest.fn();
 
