@@ -24,7 +24,7 @@ const ToolbarLayout = styled.div`
 `;
 
 export enum AllRulesTabs {
-  rules = 'rules',
+  management = 'management',
   monitoring = 'monitoring',
 }
 
@@ -34,19 +34,19 @@ export const RulesTableToolbar = React.memo(() => {
     actions: { setIsInMemorySorting },
   } = useRulesTableContext();
   const { startTransaction } = useStartTransaction();
-  const allRulesTabs = useMemo(
+  const ruleTabs = useMemo(
     () => ({
-      [AllRulesTabs.rules]: {
+      [AllRulesTabs.management]: {
         id: '',
         name: i18n.RULES_TAB,
         disabled: false,
-        href: '/rules',
+        href: `/rules/${AllRulesTabs.management}`,
       },
       [AllRulesTabs.monitoring]: {
         id: AllRulesTabs.monitoring,
         name: i18n.MONITORING_TAB,
         disabled: false,
-        href: '/rules/monitoring',
+        href: `/rules/${AllRulesTabs.monitoring}`,
       },
     }),
     []
@@ -64,7 +64,7 @@ export const RulesTableToolbar = React.memo(() => {
 
   return (
     <ToolbarLayout>
-      <SecuritySolutionTabNavigation navTabs={allRulesTabs} />
+      <SecuritySolutionTabNavigation navTabs={ruleTabs} />
       <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
         <EuiSwitch
           data-test-subj={
