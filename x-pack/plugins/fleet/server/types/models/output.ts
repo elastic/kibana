@@ -57,16 +57,16 @@ const OutputBaseSchema = {
   proxy_id: schema.nullable(schema.string()),
   shipper: schema.maybe(
     schema.object({
-      disk_queue_enabled: schema.maybe(schema.boolean({ defaultValue: false })),
-      disk_queue_path: schema.maybe(schema.string()),
-      disk_queue_max_size: schema.maybe(schema.number()),
-      disk_queue_encryption_enabled: schema.maybe(schema.boolean({ defaultValue: false })),
-      disk_queue_compression_enabled: schema.maybe(schema.boolean({ defaultValue: false })),
-      compression_level: schema.maybe(schema.number()),
-      loadbalance: schema.maybe(schema.boolean({ defaultValue: false })),
-      mem_queue_events: schema.maybe(schema.number()),
-      queue_flush_timeout: schema.maybe(schema.number()),
-      max_batch_bytes: schema.maybe(schema.number()),
+      disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
+      disk_queue_path: schema.nullable(schema.string()),
+      disk_queue_max_size: schema.nullable(schema.number()),
+      disk_queue_encryption_enabled: schema.nullable(schema.boolean()),
+      disk_queue_compression_enabled: schema.nullable(schema.boolean()),
+      compression_level: schema.nullable(schema.number()),
+      loadbalance: schema.nullable(schema.boolean()),
+      mem_queue_events: schema.nullable(schema.number()),
+      queue_flush_timeout: schema.nullable(schema.number()),
+      max_batch_bytes: schema.nullable(schema.number()),
     })
   ),
 };
@@ -99,16 +99,16 @@ export const UpdateOutputSchema = schema.object({
   proxy_id: schema.nullable(schema.string()),
   shipper: schema.maybe(
     schema.object({
-      disk_queue_enabled: schema.maybe(schema.boolean({ defaultValue: false })),
-      disk_queue_path: schema.maybe(schema.string()),
-      disk_queue_max_size: schema.maybe(schema.number()),
-      disk_queue_encryption_enabled: schema.maybe(schema.boolean()),
-      disk_queue_compression_enabled: schema.maybe(schema.boolean()),
-      compression_level: schema.maybe(schema.number()),
-      loadbalance: schema.maybe(schema.boolean()),
-      mem_queue_events: schema.maybe(schema.number()),
-      queue_flush_timeout: schema.maybe(schema.number()),
-      max_batch_bytes: schema.maybe(schema.number()),
+      disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
+      disk_queue_path: schema.nullable(schema.string()),
+      disk_queue_max_size: schema.nullable(schema.number()),
+      disk_queue_encryption_enabled: schema.nullable(schema.boolean()),
+      disk_queue_compression_enabled: schema.nullable(schema.boolean()),
+      compression_level: schema.nullable(schema.number()),
+      loadbalance: schema.nullable(schema.boolean()),
+      mem_queue_events: schema.nullable(schema.number()),
+      queue_flush_timeout: schema.nullable(schema.number()),
+      max_batch_bytes: schema.nullable(schema.number()),
     })
   ),
 });

@@ -276,17 +276,17 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
             disk_queue_max_size:
               diskQueueEnabledInput.value && diskQueueMaxSizeInput.value
                 ? diskQueueMaxSizeInput.value
-                : 0,
+                : null,
             disk_queue_encryption_enabled:
               diskQueueEnabledInput.value && diskQueueEncryptionEnabled.value,
             disk_queue_compression_enabled: diskQueueCompressionEnabled.value,
             compression_level: diskQueueCompressionEnabled.value
               ? Number(compressionLevelInput.value)
-              : 0,
+              : null,
             loadbalance: loadBalanceEnabledInput.value,
-            mem_queue_events: memQueueEvents.value ? Number(memQueueEvents.value) : 0,
-            queue_flush_timeout: queueFlushTimeout.value ? Number(queueFlushTimeout.value) : 0,
-            max_batch_bytes: maxBatchBytes.value ? Number(maxBatchBytes.value) : 0,
+            mem_queue_events: memQueueEvents.value ? Number(memQueueEvents.value) : null,
+            queue_flush_timeout: queueFlushTimeout.value ? Number(queueFlushTimeout.value) : null,
+            max_batch_bytes: maxBatchBytes.value ? Number(maxBatchBytes.value) : null,
           },
         };
       }

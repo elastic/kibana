@@ -195,9 +195,9 @@ export function useNumberInput(
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-      const newValue = e.target.value ? Number(e.target.value) : 0;
+      const newValue = e.target.value ? Number(e.target.value) : undefined;
       setValue(newValue);
-      if (errors && validate && validate(newValue) === undefined) {
+      if (newValue && errors && validate && validate(newValue) === undefined) {
         setErrors(undefined);
       }
     },
@@ -229,7 +229,7 @@ export function useNumberInput(
       isInvalid,
     },
     clear: () => {
-      setValue(0);
+      setValue(undefined);
     },
     validate: () => {
       if (validate && value) {
