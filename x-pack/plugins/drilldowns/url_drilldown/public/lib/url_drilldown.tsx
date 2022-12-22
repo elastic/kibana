@@ -239,6 +239,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       case SELECT_RANGE_TRIGGER:
         return 'https://www.example.com/?from={{event.from}}&to={{event.to}}';
       case CONTEXT_MENU_TRIGGER:
+      case IMAGE_CLICK_TRIGGER:
         return 'https://www.example.com/?panel={{context.panel.title}}';
       case ROW_CLICK_TRIGGER:
         return 'https://www.example.com/keys={{event.keys}}&values={{event.values}}';
