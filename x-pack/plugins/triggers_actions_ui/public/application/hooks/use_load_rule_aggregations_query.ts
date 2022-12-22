@@ -90,8 +90,8 @@ export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQuery
 
   return {
     loadRuleAggregations: refetch,
-    rulesStatusesTotal: aggregation.ruleExecutionStatus,
-    rulesLastRunOutcomesTotal: aggregation.ruleLastRunOutcome,
+    rulesStatusesTotal: aggregation.ruleExecutionStatus ?? {},
+    rulesLastRunOutcomesTotal: aggregation.ruleLastRunOutcome ?? {},
     isLoading: isLoading && isFetching,
   };
 };

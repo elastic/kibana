@@ -15,7 +15,7 @@ interface RulesListPromptsProps {
   showSpinner: boolean;
   showNoAuthPrompt: boolean;
   showCreateFirstRulePrompt: boolean;
-  showCreateFirstRulePromptWithoutCreateButton: boolean;
+  showCreateRuleButtonInPrompt: boolean;
   onCreateRulesClick: () => void;
 }
 
@@ -23,15 +23,16 @@ export const RulesListPrompts = (props: RulesListPromptsProps) => {
   const {
     showNoAuthPrompt,
     showSpinner,
-    showCreateFirstRulePromptWithoutCreateButton,
+    showCreateRuleButtonInPrompt,
     showCreateFirstRulePrompt,
     onCreateRulesClick,
   } = props;
   if (showNoAuthPrompt) return <NoPermissionPrompt />;
-  if (showCreateFirstRulePromptWithoutCreateButton || showCreateFirstRulePrompt) {
+
+  if (showCreateFirstRulePrompt) {
     return (
       <EmptyPrompt
-        showCreateRule={showCreateFirstRulePrompt}
+        showCreateRule={showCreateRuleButtonInPrompt}
         onCreateRulesClick={onCreateRulesClick}
       />
     );

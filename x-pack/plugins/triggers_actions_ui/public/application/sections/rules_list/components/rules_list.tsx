@@ -279,7 +279,6 @@ export const RulesList = ({
     showRulesList,
     showNoAuthPrompt,
     showCreateFirstRulePrompt,
-    showCreateFirstRulePromptWithoutCreateButton,
     showHeaderWithCreateButton,
     showHeaderWithoutCreateButton,
   } = useUiState({
@@ -699,7 +698,7 @@ export const RulesList = ({
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}
-        showCreateFirstRulePromptWithoutCreateButton={showCreateFirstRulePromptWithoutCreateButton}
+        showCreateRuleButtonInPrompt={showCreateRuleButtonInPrompt}
         showSpinner={showSpinner}
         onCreateRulesClick={openFlyout}
       />

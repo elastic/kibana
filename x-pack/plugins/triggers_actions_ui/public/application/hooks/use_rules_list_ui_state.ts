@@ -53,8 +53,6 @@ export const useRulesListUiState = ({
 
   const showNoAuthPrompt = !isInitialLoadingRuleTypes && !authorizedToCreateAnyRules;
   const showCreateFirstRulePrompt = !isLoading && !hasData && !isFilterApplied;
-  const showCreateFirstRulePromptWithoutCreateButton =
-    showCreateFirstRulePrompt && authorizedToCreateAnyRules;
   const showSpinner =
     isInitialLoading && (isLoadingRuleTypes || (!showNoAuthPrompt && isLoadingRules));
   const showRulesList = !showSpinner && !showCreateFirstRulePrompt && !showNoAuthPrompt;
@@ -66,7 +64,6 @@ export const useRulesListUiState = ({
     showRulesList,
     showNoAuthPrompt,
     showCreateFirstRulePrompt,
-    showCreateFirstRulePromptWithoutCreateButton,
     showHeaderWithoutCreateButton,
     showHeaderWithCreateButton,
   };
