@@ -64,18 +64,12 @@ export class IndexPatternsFetcher {
     fields?: string[];
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
     const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, indexFilter } = options;
-    const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
     const allowNoIndices = fieldCapsOptions
       ? fieldCapsOptions.allow_no_indices
       : this.allowNoIndices;
-    let patternListActive: string[] = patternList;
-    // if only one pattern, don't bother with validation. We let getFieldCapabilities fail if the single pattern is bad regardless
-    if (patternList.length > 1 && !allowNoIndices) {
-      patternListActive = await this.validatePatternListActive(patternList);
-    }
     const fieldCapsResponse = await getFieldCapabilities({
       callCluster: this.elasticsearchClient,
-      indices: patternListActive,
+      indices: pattern,
       metaFields,
       fieldCapsOptions: {
         allow_no_indices: allowNoIndices,
