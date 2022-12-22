@@ -34,7 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ timeRange })
         .expect(200);
 
-      response.foo = 'bar';
       expect(body).to.eql(response);
     });
   });
