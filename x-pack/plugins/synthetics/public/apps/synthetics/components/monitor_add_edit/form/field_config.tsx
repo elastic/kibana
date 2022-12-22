@@ -29,6 +29,7 @@ import {
   EuiLink,
   EuiTextArea,
 } from '@elastic/eui';
+import { toggleStatusAlert } from '../../../../../../common/runtime_types/monitor_management/alert_config';
 import { formatLocation } from '../../../../../../common/utils/location_formatter';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
@@ -437,14 +438,14 @@ export const FIELD: Record<string, FieldMeta> = {
       },
     }),
   },
-  [ConfigKey.STATUS_ALERT_ENABLED]: {
-    fieldKey: ConfigKey.STATUS_ALERT_ENABLED,
+  [ConfigKey.ALERT_CONFIG]: {
+    fieldKey: ConfigKey.ALERT_CONFIG,
     component: EuiSwitch,
     label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
       defaultMessage: 'Enable status alert',
     }),
     controlled: true,
-    props: ({ isEdit, setValue }) => ({
+    props: ({ isEdit, setValue, field }) => ({
       id: 'syntheticsMonitorConfigIsAlertEnabled',
       label: isEdit
         ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertEnabled.label', {
@@ -454,7 +455,7 @@ export const FIELD: Record<string, FieldMeta> = {
             defaultMessage: 'Enable status alert on this monitor.',
           }),
       onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-        setValue(ConfigKey.STATUS_ALERT_ENABLED, !!event.target.checked);
+        setValue(ConfigKey.ALERT_CONFIG, toggleStatusAlert(field?.value));
       },
     }),
   },

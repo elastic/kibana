@@ -10,6 +10,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import {
+  isStatusEnabled,
+  toggleStatusAlert,
+} from '../../../../../../../common/runtime_types/monitor_management/alert_config';
 import { TagsBadges } from '../../../common/components/tag_badges';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
 import * as labels from './labels';
@@ -163,17 +167,18 @@ export function useMonitorListColumns({
         {
           description: labels.DISABLE_STATUS_ALERT,
           name: (fields) =>
-            fields[ConfigKey.STATUS_ALERT_ENABLED]
+            isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
               ? labels.DISABLE_STATUS_ALERT
               : labels.ENABLE_STATUS_ALERT,
-          icon: (fields) => (fields[ConfigKey.STATUS_ALERT_ENABLED] ? 'bellSlash' : 'bell'),
+          icon: (fields) =>
+            isStatusEnabled(fields[ConfigKey.ALERT_CONFIG]) ? 'bellSlash' : 'bell',
           type: 'icon',
           color: 'danger',
           enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
           onClick: (fields) => {
             updateAlertEnabledState({
               monitor: {
-                [ConfigKey.STATUS_ALERT_ENABLED]: !fields[ConfigKey.STATUS_ALERT_ENABLED],
+                [ConfigKey.ALERT_CONFIG]: toggleStatusAlert(fields[ConfigKey.ALERT_CONFIG]),
               },
               name: fields[ConfigKey.NAME],
               configId: fields[ConfigKey.CONFIG_ID],

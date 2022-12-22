@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { AlertConfigsCodec } from './alert_config';
 import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
@@ -88,7 +89,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.PROJECT_ID]: t.string,
     [ConfigKey.ORIGINAL_SPACE]: t.string,
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
-    [ConfigKey.STATUS_ALERT_ENABLED]: t.boolean,
+    [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec,
   }),
 ]);
 

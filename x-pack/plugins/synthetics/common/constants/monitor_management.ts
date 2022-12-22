@@ -7,12 +7,12 @@
 
 // values must match keys in the integration package
 export enum ConfigKey {
+  ALERT_CONFIG = 'alert',
   APM_SERVICE_NAME = 'service.name',
   CUSTOM_HEARTBEAT_ID = 'custom_heartbeat_id',
   CONFIG_ID = 'config_id',
   CONFIG_HASH = 'hash',
   ENABLED = 'enabled',
-  STATUS_ALERT_ENABLED = 'status_alert_enabled',
   FORM_MONITOR_TYPE = 'form_monitor_type',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',

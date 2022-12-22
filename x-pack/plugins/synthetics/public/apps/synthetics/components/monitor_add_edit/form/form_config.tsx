@@ -169,7 +169,7 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.MAX_REDIRECTS],
       FIELD[ConfigKey.TIMEOUT],
       FIELD[ConfigKey.ENABLED],
-      FIELD[ConfigKey.STATUS_ALERT_ENABLED],
+      FIELD[ConfigKey.ALERT_CONFIG],
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS,
@@ -188,7 +188,7 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.TIMEOUT],
       FIELD[ConfigKey.ENABLED],
-      FIELD[ConfigKey.STATUS_ALERT_ENABLED],
+      FIELD[ConfigKey.ALERT_CONFIG],
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS,
@@ -205,7 +205,7 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.THROTTLING_CONFIG],
       FIELD[ConfigKey.ENABLED],
-      FIELD[ConfigKey.STATUS_ALERT_ENABLED],
+      FIELD[ConfigKey.ALERT_CONFIG],
     ],
     step3: [FIELD[ConfigKey.SOURCE_INLINE], FIELD[ConfigKey.PARAMS]],
     scriptEdit: [FIELD[ConfigKey.SOURCE_INLINE]],
@@ -232,7 +232,7 @@ export const FORM_CONFIG: FieldConfig = {
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.THROTTLING_CONFIG],
       FIELD[ConfigKey.ENABLED],
-      FIELD[ConfigKey.STATUS_ALERT_ENABLED],
+      FIELD[ConfigKey.ALERT_CONFIG],
     ],
     advanced: [
       {

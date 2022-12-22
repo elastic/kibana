@@ -16,7 +16,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.LOCATIONS]: null,
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.ENABLED]: null,
-  [ConfigKey.STATUS_ALERT_ENABLED]: null,
+  [ConfigKey.ALERT_CONFIG]: null,
   [ConfigKey.CONFIG_ID]: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     JSON.stringify(

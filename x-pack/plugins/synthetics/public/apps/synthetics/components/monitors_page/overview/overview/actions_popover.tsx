@@ -17,6 +17,8 @@ import {
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
+import { useSelectedMonitor } from '../../../monitor_details/hooks/use_selected_monitor';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
 import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
@@ -99,6 +101,8 @@ export function ActionsPopover({
     locationId: monitor.location.id,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId });
+
+  const { monitor: monitorFields } = useSelectedMonitor(monitor.id);
 
   const labels = useMemo(
     () => ({
@@ -184,7 +188,7 @@ export function ActionsPopover({
       onClick: () => {
         if (!alertLoading) {
           updateAlertEnabledState({
-            monitor: { [ConfigKey.STATUS_ALERT_ENABLED]: !monitor.isStatusAlertEnabled },
+            monitor: toggleStatusAlert(monitorFields?.[ConfigKey.ALERT_CONFIG]),
             configId: monitor.configId,
             name: monitor.name,
           });

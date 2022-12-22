@@ -89,7 +89,7 @@ export class StatusRuleExecutor {
     await this.getAllLocationNames();
     this.monitors = await getAllMonitors(
       this.soClient,
-      `attributes.${ConfigKey.STATUS_ALERT_ENABLED}: true`
+      `attributes.${ConfigKey.ALERT_CONFIG}: true`
     );
     const allIds: string[] = [];
     const enabledIds: string[] = [];
