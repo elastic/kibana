@@ -23,16 +23,12 @@ const ToolbarLayout = styled.div`
   box-shadow: inset 0 -1px 0 ${({ theme }) => theme.eui.euiBorderColor};
 `;
 
-interface RulesTableToolbarProps {
-  activeTab: AllRulesTabs;
-}
-
 export enum AllRulesTabs {
   rules = 'rules',
   monitoring = 'monitoring',
 }
 
-export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(({ activeTab }) => {
+export const RulesTableToolbar = React.memo(() => {
   const {
     state: { isInMemorySorting },
     actions: { setIsInMemorySorting },
@@ -68,7 +64,7 @@ export const RulesTableToolbar = React.memo<RulesTableToolbarProps>(({ activeTab
 
   return (
     <ToolbarLayout>
-      <SecuritySolutionTabNavigation navTabs={allRulesTabs} tabName={activeTab} />
+      <SecuritySolutionTabNavigation navTabs={allRulesTabs} />
       <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
         <EuiSwitch
           data-test-subj={

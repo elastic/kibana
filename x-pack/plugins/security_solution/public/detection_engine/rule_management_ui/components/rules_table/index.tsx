@@ -8,26 +8,12 @@
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { Route } from '@kbn/kibana-react-plugin/public';
-import { Switch, useParams } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
 import { RulesManagementTour } from './rules_table/guided_onboarding/rules_management_tour';
 import { useInitializeRulesTableSavedState } from './rules_table/use_initialize_rules_table_saved_state';
 import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
 import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
-
-function TabContainer(): JSX.Element {
-  const params = useParams<{ tabName: string }>();
-  const activeTab =
-    params.tabName === AllRulesTabs.monitoring ? AllRulesTabs.monitoring : AllRulesTabs.rules;
-
-  return (
-    <>
-      <RulesTableToolbar activeTab={activeTab} />
-      <EuiSpacer />
-      <RulesTables selectedTab={activeTab} />
-    </>
-  );
-}
 
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
@@ -45,11 +31,19 @@ export const AllRules = React.memo(() => {
     <>
       <RulesManagementTour />
       <Switch>
-        <Route path="/rules/:tabName">
-          <TabContainer />
+        <Route path="/rules/monitoring">
+          <>
+            <RulesTableToolbar />
+            <EuiSpacer />
+            <RulesTables selectedTab={AllRulesTabs.monitoring} />
+          </>
         </Route>
-        <Route>
-          <TabContainer />
+        <Route path="/rules">
+          <>
+            <RulesTableToolbar />
+            <EuiSpacer />
+            <RulesTables selectedTab={AllRulesTabs.rules} />
+          </>
         </Route>
       </Switch>
     </>
