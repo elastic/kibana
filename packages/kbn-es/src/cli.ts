@@ -6,18 +6,21 @@
  * Side Public License, v 1.
  */
 
-const chalk = require('chalk');
-const getopts = require('getopts');
-const dedent = require('dedent');
-const commands = require('./cli_commands');
-const { isCliError } = require('./errors');
-const { log } = require('./utils');
+import chalk from 'chalk';
+import getopts from 'getopts';
+import dedent from 'dedent';
+import { commands } from './cli_commands';
+import { isCliError } from './errors';
+import { log } from './utils';
+
+const isCmdName = (string: any): string is keyof typeof commands =>
+  Object.hasOwn(commandNames, string);
+const commandNames = Object.keys(commands).filter(isCmdName);
 
 function help() {
-  const availableCommands = Object.keys(commands).map(
-    (name) => `${name} - ${commands[name].description}`
-  );
+  const availableCommands = commandNames.map((name) => `${name} - ${commands[name].description}`);
 
+  // eslint-disable-next-line no-console
   console.log(dedent`
     usage: es <command> [<args>]
 
@@ -33,7 +36,7 @@ function help() {
   `);
 }
 
-exports.run = async (defaults = {}) => {
+export async function run(defaults = {}) {
   try {
     const argv = process.argv.slice(2);
     const options = getopts(argv, {
@@ -51,13 +54,12 @@ exports.run = async (defaults = {}) => {
       return;
     }
 
-    const command = commands[commandName];
-
-    if (command === undefined) {
+    if (!isCmdName(commandName)) {
       log.error(chalk.red(`[${commandName}] is not a valid command, see 'es --help'`));
       process.exitCode = 1;
       return;
     }
+    const command = commands[commandName];
 
     if (commandName && options.help) {
       log.write(dedent`
@@ -83,4 +85,4 @@ exports.run = async (defaults = {}) => {
 
     process.exitCode = 1;
   }
-};
+}

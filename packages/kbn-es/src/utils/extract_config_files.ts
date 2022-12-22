@@ -6,20 +6,22 @@
  * Side Public License, v 1.
  */
 
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
  * Copies config references to an absolute path to
  * the provided destination. This is necessary as ES security
  * requires files to be within the installation directory
- *
- * @param {Array} config
- * @param {String} dest
  */
-exports.extractConfigFiles = function extractConfigFiles(config, dest, options = {}) {
+export function extractConfigFiles(
+  config: string | string[],
+  dest: string,
+  options?: { log: ToolingLog }
+) {
   const originalConfig = typeof config === 'string' ? [config] : config;
-  const localConfig = [];
+  const localConfig: string[] = [];
 
   originalConfig.forEach((prop) => {
     const [key, value] = prop.split('=');
@@ -29,9 +31,7 @@ exports.extractConfigFiles = function extractConfigFiles(config, dest, options =
       const destPath = path.resolve(dest, 'config', filename);
       copyFileSync(value, destPath);
 
-      if (options.log) {
-        options.log.info('moved %s in config to %s', value, destPath);
-      }
+      options?.log.info('moved %s in config to %s', value, destPath);
 
       localConfig.push(`${key}=${filename}`);
     } else {
@@ -40,13 +40,13 @@ exports.extractConfigFiles = function extractConfigFiles(config, dest, options =
   });
 
   return localConfig;
-};
+}
 
 function isFile(dest = '') {
   return path.isAbsolute(dest) && path.extname(dest).length > 0 && fs.existsSync(dest);
 }
 
-function copyFileSync(src, dest) {
+function copyFileSync(src: string, dest: string) {
   const destPath = path.dirname(dest);
 
   if (!fs.existsSync(destPath)) {

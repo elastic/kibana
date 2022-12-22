@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-const chalk = require('chalk');
+import chalk from 'chalk';
 
 /**
- * @param {String} data
- * @returns {Array} lines
+ * extract useful info about an es log line
  */
-exports.parseEsLog = function parseEsLog(data) {
+export function parseEsLog(data: string) {
   const lines = [];
   const regex = /\[([0-9-T:,]+)\]\[([A-Z]+)\s?\]\[([A-Za-z0-9.]+)\s*\]\s?([\S\s]+?(?=$|\n\[))/g;
   let capture = regex.exec(data);
@@ -40,9 +39,9 @@ exports.parseEsLog = function parseEsLog(data) {
     capture = regex.exec(data);
   } while (capture);
   return lines;
-};
+}
 
-function colorForLevel(level) {
+function colorForLevel(level: string) {
   switch (level) {
     case 'WARN':
       return chalk.yellow;

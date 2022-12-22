@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-exports.snapshot = require('./snapshot');
-exports.source = require('./source');
-exports.archive = require('./archive');
-exports.build_snapshots = require('./build_snapshots');
+export interface Command {
+  description: string;
+  usage?: string;
+  help: (defaults: Record<string, any>) => string;
+  run: (defaults: Record<string, any>) => Promise<void>;
+}
