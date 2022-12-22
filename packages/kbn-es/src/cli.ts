@@ -13,8 +13,7 @@ import { commands } from './cli_commands';
 import { isCliError } from './errors';
 import { log } from './utils';
 
-const isCmdName = (string: any): string is keyof typeof commands =>
-  Object.hasOwn(commandNames, string);
+const isCmdName = (string: any): string is keyof typeof commands => Object.hasOwn(commands, string);
 const commandNames = Object.keys(commands).filter(isCmdName);
 
 function help() {
