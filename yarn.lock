@@ -1527,10 +1527,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@71.0.0":
-  version "71.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-71.0.0.tgz#0d77ca3e513ebd59fee0be49abd7acf4b04206aa"
-  integrity sha512-5iHvGSJCJjin/VPHBT0RdHVKUCClH5PqXnygsr6LCkyQzj+frKiK0w28dK5EBReDp5+SRoF+VYSVse4Ia2DkLQ==
+"@elastic/eui@72.0.0":
+  version "72.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-72.0.0.tgz#ba001d694c0c944143b11e5e2b756476c6a6a924"
+  integrity sha512-XMIyARp5tI5PymDT1OeYoNnto+d0NtrnRCwHUIOtwDAQamkqmfyNNt+bMzj2ii+HBA/BII5+NKCmb6HNCUBq1A==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1562,7 +1562,7 @@
     rehype-stringify "^8.0.0"
     remark-breaks "^2.0.2"
     remark-emoji "^2.1.0"
-    remark-parse "^8.0.3"
+    remark-parse-no-trim "^8.0.4"
     remark-rehype "^8.0.0"
     tabbable "^5.2.1"
     text-diff "^1.0.1"
@@ -23635,6 +23635,27 @@ remark-mdx@1.6.22:
     is-alphabetical "1.0.4"
     remark-parse "8.0.3"
     unified "9.2.0"
+
+remark-parse-no-trim@^8.0.4:
+  version "8.0.4"
+  resolved "https://registry.yarnpkg.com/remark-parse-no-trim/-/remark-parse-no-trim-8.0.4.tgz#f5c9531644284071d4a57a49e19a42ad4e8040bd"
+  integrity sha512-WtqeHNTZ0LSdyemmY1/G6y9WoEFblTtgckfKF5/NUnri919/0/dEu8RCDfvXtJvu96soMvT+mLWWgYVUaiHoag==
+  dependencies:
+    ccount "^1.0.0"
+    collapse-white-space "^1.0.2"
+    is-alphabetical "^1.0.0"
+    is-decimal "^1.0.0"
+    is-whitespace-character "^1.0.0"
+    is-word-character "^1.0.0"
+    markdown-escapes "^1.0.0"
+    parse-entities "^2.0.0"
+    repeat-string "^1.5.4"
+    state-toggle "^1.0.0"
+    trim-trailing-lines "^1.0.0"
+    unherit "^1.0.4"
+    unist-util-remove-position "^2.0.0"
+    vfile-location "^3.0.0"
+    xtend "^4.0.1"
 
 remark-parse@8.0.3, remark-parse@^8.0.3:
   version "8.0.3"
