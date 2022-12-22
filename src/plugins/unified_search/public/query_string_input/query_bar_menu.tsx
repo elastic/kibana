@@ -189,9 +189,7 @@ function QueryBarMenuComponent({
                 onLocalFilterUpdate={setUpdatedFilter}
                 onLocalFilterCreate={setOriginalFilter}
                 closePopoverOnAdd={plainClosePopover}
-                closePopoverOnCancel={() => {
-                  closePopover();
-                }}
+                closePopoverOnCancel={closePopover}
               />,
             ]}
           />

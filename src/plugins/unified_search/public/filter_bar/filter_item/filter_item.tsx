@@ -389,9 +389,7 @@ function FilterItemComponent(props: FilterItemProps) {
                 indexPatterns={indexPatterns}
                 onSubmit={onSubmit}
                 onLocalFilterUpdate={setUpdatedFilter}
-                onCancel={() => {
-                  closePopover();
-                }}
+                onCancel={closePopover}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               />
             </div>,

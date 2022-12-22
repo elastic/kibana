@@ -81,9 +81,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         id="addFilterPopover"
         button={button}
         isOpen={showAddFilterPopover}
-        closePopover={() => {
-          closePopover();
-        }}
+        closePopover={closePopover}
         anchorPosition="downLeft"
         panelPaddingSize="none"
         panelProps={{
@@ -104,9 +102,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
           closePopoverOnAdd={() => {
             setShowAddFilterPopover(false);
           }}
-          closePopoverOnCancel={() => {
-            closePopover();
-          }}
+          closePopoverOnCancel={closePopover}
         />
       </EuiPopover>
     </EuiFlexItem>
