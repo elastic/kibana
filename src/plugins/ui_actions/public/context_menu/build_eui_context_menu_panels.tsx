@@ -11,7 +11,7 @@ import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Trigger } from '../triggers';
-import type { ActionDefinition, ActionExecutionContext, ActionInternal } from '../actions';
+import type { Action, ActionDefinition, ActionExecutionContext, ActionInternal } from '../actions';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',
@@ -22,7 +22,7 @@ export const txtMore = i18n.translate('uiActions.actionPanel.more', {
 });
 
 interface ActionWithContext<Context extends object = object> {
-  action: ActionInternal<ActionDefinition<Context>>;
+  action: Action | ActionInternal<ActionDefinition<Context>>;
   context: Context;
 
   /**
@@ -43,7 +43,7 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
 };
 
 const onClick =
-  (action: ActionInternal<ActionDefinition>, context: ActionExecutionContext<object>, close: () => void) =>
+  (action: Action | ActionInternal<ActionDefinition>, context: ActionExecutionContext<object>, close: () => void) =>
   (event: React.MouseEvent) => {
     if (event.currentTarget instanceof HTMLAnchorElement) {
       // from react-router's <Link/>
@@ -162,8 +162,8 @@ export async function buildContextMenuForActions({
       }
     }
     panels[parentPanel || 'mainMenu'].items!.push({
-      name: action.ReactMenuItem
-        ? React.createElement(action.ReactMenuItem, { context })
+      name: (action as ActionInternal<ActionDefinition>).ReactMenuItem
+        ? React.createElement((action as ActionInternal<ActionDefinition>).ReactMenuItem!, { context })
         : action.getDisplayName(context),
       icon: action.getIconType(context),
       toolTipContent: action.getDisplayNameTooltip ? action.getDisplayNameTooltip(context) : '',
@@ -172,7 +172,7 @@ export async function buildContextMenuForActions({
       href: action.getHref ? await action.getHref(context) : undefined,
       _order: action.order || 0,
       _title: action.getDisplayName(context),
-      disabled: action.definition.disabled,
+      disabled: action.disabled,
     });
   });
   await Promise.all(promises);
