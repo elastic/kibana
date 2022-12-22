@@ -52,7 +52,14 @@ export function fetchAll(
   reset = false,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
+  const {
+    initialFetchStatus,
+    appStateContainer,
+    services,
+    useNewFieldsApi,
+    data,
+    inspectorAdapters,
+  } = fetchDeps;
 
   try {
     const dataView = searchSource.getField('index')!;
@@ -81,7 +88,7 @@ export function fetchAll(
     // Start fetching all required requests
     const documents =
       useSql && query
-        ? fetchSql(query, services.dataViews, data, services.expressions)
+        ? fetchSql(query, dataView, data, services.expressions, inspectorAdapters)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
