@@ -41,10 +41,12 @@ export interface ShareContext {
    * If not set it will default to `window.location.href`
    */
   shareableUrl: string;
+  shareableUrlForSavedObject?: string;
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
   onClose: () => void;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
+  disabledShareUrl?: boolean;
 }
 
 /**
@@ -100,5 +102,4 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   snapshotShareWarning?: string;
   onClose?: () => void;
   panelTitle?: string;
-  disabledShareUrl?: boolean;
 }

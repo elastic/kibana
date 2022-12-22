@@ -17,7 +17,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import { ENABLE_SQL } from '../../common';
+import { ENABLE_SQL, getEditPath } from '../../common';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
 import {
@@ -602,23 +602,36 @@ export const LensTopNavMenu = ({
             const serializableDatasourceStates =
               datasourceStates as LensAppState['datasourceStates'] & SerializableRecord;
 
-            const shareableUrl =
-              (await shortUrlService?.({
-                filters,
-                query,
-                resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
-                visualization: serializableVisualization,
-                datasourceStates: serializableDatasourceStates,
-                activeDatasourceId,
-                searchSessionId: data.search.session.getSessionId(),
-                references,
-              })) || '';
+            const shareableUrl = await shortUrlService?.({
+              filters,
+              query,
+              resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+              visualization: serializableVisualization,
+              datasourceStates: serializableDatasourceStates,
+              activeDatasourceId,
+              searchSessionId: data.search.session.getSessionId(),
+              references,
+            });
+
+            const savedObjectURL = new URL(
+              `${application.getUrlForApp('lens', { absolute: true })}${
+                currentDoc?.savedObjectId
+                  ? getEditPath(
+                      currentDoc?.savedObjectId,
+                      data.query.timefilter.timefilter.getTime(),
+                      data.query.filterManager.getGlobalFilters(),
+                      data.query.timefilter.timefilter.getRefreshInterval()
+                    )
+                  : ''
+              }`
+            );
 
             share.toggleShareContextMenu({
               anchorElement,
               allowEmbed: false,
               allowShortUrl: false, // we'll manage this implicitly via the new service
-              shareableUrl,
+              shareableUrl: shareableUrl || '',
+              shareableUrlForSavedObject: savedObjectURL.href,
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens_visualization',
               panelTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
@@ -753,7 +766,7 @@ export const LensTopNavMenu = ({
     activeData,
     isSaveable,
     shortUrlService,
-    application.capabilities.visualize.createShortUrl,
+    application,
     getIsByValueMode,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
@@ -769,7 +782,7 @@ export const LensTopNavMenu = ({
     visualizationMap,
     filters,
     query,
-    data.query.timefilter.timefilter,
+    data.query,
     data.search.session,
     activeDatasourceId,
     currentDoc?.savedObjectId,

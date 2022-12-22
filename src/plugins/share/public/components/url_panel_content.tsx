@@ -42,6 +42,7 @@ export interface UrlPanelContentProps {
   objectId?: string;
   objectType: string;
   shareableUrl?: string;
+  shareableUrlForSavedObject?: string;
   urlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
@@ -270,11 +271,12 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   };
 
   private getSnapshotUrl = (forSavedObject?: boolean) => {
-    let url = this.props.shareableUrl;
-    // when generating a URL for the savedObject version, the shareableUrl might
-    // not contain the savedObject id, so try to use the current location
-    if (!url || (forSavedObject && this.props.objectId && !url.includes(this.props.objectId))) {
-      url = window.location.href;
+    let url = '';
+    if (forSavedObject && this.props.shareableUrlForSavedObject) {
+      url = this.props.shareableUrlForSavedObject;
+    }
+    if (!url) {
+      url = this.props.shareableUrl || window.location.href;
     }
     return this.updateUrlParams(url);
   };

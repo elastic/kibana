@@ -69,6 +69,7 @@ export class ShareMenuManager {
     sharingData,
     menuItems,
     shareableUrl,
+    shareableUrlForSavedObject,
     embedUrlParamExtensions,
     theme,
     showPublicUrlSwitch,
@@ -77,6 +78,7 @@ export class ShareMenuManager {
     snapshotShareWarning,
     onClose,
     panelTitle,
+    disabledShareUrl,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     urlService: BrowserUrlService;
@@ -112,12 +114,14 @@ export class ShareMenuManager {
               shareMenuItems={menuItems}
               sharingData={sharingData}
               shareableUrl={shareableUrl}
+              shareableUrlForSavedObject={shareableUrlForSavedObject}
               onClose={onClose}
               embedUrlParamExtensions={embedUrlParamExtensions}
               anonymousAccess={anonymousAccess}
               showPublicUrlSwitch={showPublicUrlSwitch}
               urlService={urlService}
               snapshotShareWarning={snapshotShareWarning}
+              disabledShareUrl={disabledShareUrl}
             />
           </EuiWrappingPopover>
         </KibanaThemeProvider>

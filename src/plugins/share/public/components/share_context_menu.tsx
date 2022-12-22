@@ -25,6 +25,7 @@ export interface ShareContextMenuProps {
   objectId?: string;
   objectType: string;
   shareableUrl?: string;
+  shareableUrlForSavedObject?: string;
   shareMenuItems: ShareMenuItem[];
   sharingData: any;
   onClose: () => void;
@@ -66,6 +67,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
           objectId={this.props.objectId}
           objectType={this.props.objectType}
           shareableUrl={this.props.shareableUrl}
+          shareableUrlForSavedObject={this.props.shareableUrlForSavedObject}
           anonymousAccess={this.props.anonymousAccess}
           showPublicUrlSwitch={this.props.showPublicUrlSwitch}
           urlService={this.props.urlService}
@@ -80,7 +82,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
       icon: 'link',
       panel: permalinkPanel.id,
       sortOrder: 0,
-      disabled: this.props.disabledShareUrl,
+      disabled: Boolean(this.props.disabledShareUrl),
     });
     panels.push(permalinkPanel);
 
@@ -97,6 +99,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
             objectId={this.props.objectId}
             objectType={this.props.objectType}
             shareableUrl={this.props.shareableUrl}
+            shareableUrlForSavedObject={this.props.shareableUrlForSavedObject}
             urlParamExtensions={this.props.embedUrlParamExtensions}
             anonymousAccess={this.props.anonymousAccess}
             showPublicUrlSwitch={this.props.showPublicUrlSwitch}

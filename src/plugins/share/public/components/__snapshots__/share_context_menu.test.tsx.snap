@@ -35,6 +35,7 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
           "items": Array [
             Object {
               "data-test-subj": "sharePanel-Permalinks",
+              "disabled": false,
               "icon": "link",
               "name": "Permalinks",
               "panel": 1,
@@ -119,6 +120,7 @@ exports[`should render context menu panel when there are more than one panel 1`]
             },
             Object {
               "data-test-subj": "sharePanel-Permalinks",
+              "disabled": false,
               "icon": "link",
               "name": "Permalinks",
               "panel": 1,
