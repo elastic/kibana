@@ -9,7 +9,7 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { ImageEmbeddablePlugin } from './plugin';
 
-export { ImageClickContext, IMAGE_CLICK_TRIGGER } from './actions';
+export { type ImageClickContext, IMAGE_CLICK_TRIGGER } from './actions';
 
 export function plugin(context: PluginInitializerContext) {
   return new ImageEmbeddablePlugin(context);
