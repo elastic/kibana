@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNil, omitBy } from 'lodash';
+import { isEmpty, isNil, omitBy } from 'lodash';
 import {
   BrowserFields,
   ConfigKey,
@@ -68,14 +68,34 @@ export const formatHeartbeatRequest = ({
   heartbeatId,
   runOnce,
   testRunId,
+  params: globalParams,
 }: {
   monitor: SyntheticsMonitor;
   monitorId: string;
   heartbeatId: string;
   runOnce?: boolean;
   testRunId?: string;
+  params: Record<string, string>;
 }): HeartbeatConfig => {
   const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
+
+  let params = { ...(globalParams ?? {}) };
+
+  let paramsString = '';
+
+  try {
+    const monParamsStr = (monitor as BrowserFields)[ConfigKey.PARAMS];
+
+    if (monParamsStr) {
+      const monitorParams = JSON.parse(monParamsStr);
+      params = { ...params, ...monitorParams };
+    }
+
+    paramsString = isEmpty(params) ? '' : JSON.stringify(params);
+  } catch (e) {
+    // ignore
+  }
+
   return {
     ...monitor,
     id: heartbeatId,
@@ -87,5 +107,6 @@ export const formatHeartbeatRequest = ({
       test_run_id: testRunId,
     },
     fields_under_root: true,
+    params: paramsString,
   };
 };

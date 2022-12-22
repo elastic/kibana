@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/fleet/tsconfig.json" }
+  ]
+}

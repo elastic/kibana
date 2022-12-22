@@ -34,8 +34,12 @@ interface AccordionWaterfallProps {
   waterfallItemId?: string;
   waterfall: IWaterfall;
   timelineMargins: Margins;
-  onClickWaterfallItem: (item: IWaterfallSpanOrTransaction) => void;
+  onClickWaterfallItem: (
+    item: IWaterfallSpanOrTransaction,
+    flyoutDetailTab: string
+  ) => void;
   showCriticalPath: boolean;
+  maxLevelOpen: number;
 }
 
 const ACCORDION_HEIGHT = '48px';
@@ -89,6 +93,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     timelineMargins,
     onClickWaterfallItem,
     showCriticalPath,
+    maxLevelOpen,
   } = props;
   const theme = useTheme();
 
@@ -157,8 +162,8 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
               isSelected={item.id === waterfallItemId}
               errorCount={errorCount}
               marginLeftLevel={marginLeftLevel}
-              onClick={() => {
-                onClickWaterfallItem(item);
+              onClick={(flyoutDetailTab: string) => {
+                onClickWaterfallItem(item, flyoutDetailTab);
               }}
               segments={criticalPathSegmentsById[item.id]
                 ?.filter((segment) => segment.self)
@@ -177,15 +182,16 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={toggleAccordion}
     >
-      {children.map((child) => (
-        <AccordionWaterfall
-          {...props}
-          key={child.id}
-          isOpen={isOpen}
-          level={level + 1}
-          item={child}
-        />
-      ))}
+      {isOpen &&
+        children.map((child) => (
+          <AccordionWaterfall
+            {...props}
+            key={child.id}
+            isOpen={maxLevelOpen > level}
+            level={level + 1}
+            item={child}
+          />
+        ))}
     </StyledAccordion>
   );
 }

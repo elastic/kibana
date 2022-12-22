@@ -9340,6 +9340,21 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.LENS_EMBEDDABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "LENS_EMBEDDABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"lens\""
+        ],
+        "path": "x-pack/plugins/lens/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.LensEmbeddableInput",
         "type": "Type",
         "tags": [],
