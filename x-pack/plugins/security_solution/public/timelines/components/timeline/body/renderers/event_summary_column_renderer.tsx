@@ -15,7 +15,6 @@ import type { Ecs } from '../../../../../../common/ecs';
 import type { ColumnRenderer } from './column_renderer';
 import { EVENT_SUMMARY_FIELD_NAME } from './constants';
 import { getRowRenderer } from './get_row_renderer';
-import { defaultRowRenderers } from '.';
 const EventRenderedFlexItem = styled(EuiFlexItem)`
   div:first-child {
     padding-left: 0px;
@@ -32,6 +31,7 @@ export const eventSummaryColumnRenderer: ColumnRenderer = {
     ecsData,
     scopeId,
     values,
+    rowRenderers,
   }: {
     columnName: string;
     ecsData?: Ecs;
@@ -45,11 +45,11 @@ export const eventSummaryColumnRenderer: ColumnRenderer = {
     truncate?: boolean;
     values: string[] | undefined | null;
   }) => {
-    if (ecsData) {
+    if (ecsData && rowRenderers) {
       const rowRenderer =
         getRowRenderer != null
-          ? getRowRenderer({ data: ecsData, rowRenderers: defaultRowRenderers })
-          : defaultRowRenderers.find((x) => x.isInstance(ecsData)) ?? null;
+          ? getRowRenderer({ data: ecsData, rowRenderers })
+          : rowRenderers.find((x) => x.isInstance(ecsData)) ?? null;
       return (
         <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
           {rowRenderer != null ? (
@@ -66,6 +66,12 @@ export const eventSummaryColumnRenderer: ColumnRenderer = {
           ) : (
             <>{values && <EuiFlexItem data-test-subj="plain-text-reason">{values}</EuiFlexItem>}</>
           )}
+        </EuiFlexGroup>
+      );
+    } else {
+      return (
+        <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
+          {values && <EuiFlexItem data-test-subj="plain-text-reason">{values}</EuiFlexItem>}
         </EuiFlexGroup>
       );
     }
