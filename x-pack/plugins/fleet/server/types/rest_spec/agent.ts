@@ -27,7 +27,7 @@ export const GetAgentsRequestSchema = {
     {
       validate: (request) => {
         if (request.page * request.perPage > SO_SEARCH_LIMIT) {
-          return `You cannot use page and perPage page through more than ${SO_SEARCH_LIMIT} agents`;
+          return `You cannot use page and perPage page over ${SO_SEARCH_LIMIT} agents`;
         }
       },
     }
