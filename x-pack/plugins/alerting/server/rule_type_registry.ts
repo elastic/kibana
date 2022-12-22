@@ -283,7 +283,8 @@ export class RuleTypeRegistry {
       },
     });
 
-    if (this.alertsService && this.alertsService.isInitialized() && ruleType.alerts) {
+    if (this.alertsService && ruleType.alerts) {
+      console.log('here');
       this.alertsService.initializeRegistrationContext(ruleType.alerts);
     }
 

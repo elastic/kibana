@@ -58,6 +58,7 @@ interface IAlertsService {
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
   private registrationContexts: Map<string, FieldMap> = new Map();
+  private initializedContexts: Map<string, boolean> = new Map();
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
@@ -84,6 +85,17 @@ export class AlertsService implements IAlertsService {
       await this.installWithTimeout(async () => await initFns[i](), timeoutMs);
     }
 
+    // if any contexts were registered, initialize resources for them
+    const uninitializedContexts = [...this.initializedContexts.keys()].filter(
+      (context: string) => this.initializedContexts.get(context) === false
+    );
+    for (let i = 0; i < uninitializedContexts.length; ++i) {
+      await this.initializeContext({
+        registrationContext: uninitializedContexts[i],
+        fieldMap: this.registrationContexts.get(uninitializedContexts[i])!,
+      });
+    }
+
     this.initialized = true;
   }
 
@@ -104,9 +116,24 @@ export class AlertsService implements IAlertsService {
       );
       return;
     }
-    this.options.logger.debug(
+
+    this.registrationContexts.set(registrationContext, fieldMap);
+
+    // Don't do anything yet if common resource initialization is not done
+    if (!this.initialized) {
+      console.log('hi');
+      this.initializedContexts.set(registrationContext, false);
+      return;
+    }
+
+    this.initializeContext({ registrationContext, fieldMap });
+  }
+
+  private async initializeContext({ registrationContext, fieldMap }: IRuleTypeAlerts) {
+    this.options.logger.info(
       `Initializing resources for registrationContext ${registrationContext}`
     );
+    console.log(JSON.stringify(fieldMap));
     const esClient = await this.options.elasticsearchClientPromise;
     const indexTemplateAndPattern = getIndexTemplateAndPattern(registrationContext);
 
@@ -125,10 +152,10 @@ export class AlertsService implements IAlertsService {
     ];
 
     for (let i = 0; i < initFns.length; ++i) {
-      await this.installWithTimeout(async () => await initFns[i](), timeoutMs);
+      await this.installWithTimeout(async () => await initFns[i]());
     }
 
-    this.registrationContexts.set(registrationContext, fieldMap);
+    this.initializedContexts.set(registrationContext, true);
   }
 
   /**
