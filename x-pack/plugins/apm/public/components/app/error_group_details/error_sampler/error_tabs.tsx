@@ -35,17 +35,9 @@ export const metadataTab: ErrorTab = {
   }),
 };
 
-export const summaryTab: ErrorTab = {
-  key: 'summary',
-  label: i18n.translate('xpack.apm.errorGroup.tabs.summaryLabel', {
-    defaultMessage: 'Summary',
-  }),
-};
-
 export function getTabs(error?: APMError) {
   const hasLogStacktrace = !isEmpty(error?.error.log?.stacktrace);
   return [
-    summaryTab,
     ...(hasLogStacktrace ? [logStacktraceTab] : []),
     exceptionStacktraceTab,
     metadataTab,

@@ -39,7 +39,6 @@ import {
   exceptionStacktraceTab,
   getTabs,
   logStacktraceTab,
-  metadataTab,
 } from './error_tabs';
 import { ExceptionStacktrace } from './exception_stacktrace';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -140,7 +139,6 @@ export function ErrorSampleDetails({
   const currentTab = getCurrentTab(tabs, detailTab) as ErrorTab;
 
   const errorUrl = error.error.page?.url || error.url?.full;
-
   const method = error.http?.request?.method;
   const status = error.http?.response?.status_code;
 
@@ -273,6 +271,14 @@ export function ErrorSampleDetails({
       )}
 
       <EuiSpacer />
+      {isLoading ? (
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="s" />
+          <EuiLoadingContent lines={3} data-test-sub="loading-content" />
+        </EuiFlexItem>
+      ) : (
+        <SampleSummary error={error} />
+      )}
 
       <EuiTabs>
         {tabs.map(({ key, label }) => {
@@ -328,9 +334,7 @@ function TabContent({
           exceptions={exceptions}
         />
       );
-    case metadataTab.key:
-      return <ErrorMetadata error={error} />;
     default:
-      return <SampleSummary error={error} />;
+      return <ErrorMetadata error={error} />;
   }
 }
