@@ -174,14 +174,12 @@ Object {
         },
       ],
       "legend": Object {
-        "isInside": true,
         "isVisible": true,
         "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",
       "valueLabels": "hide",
-      "valuesInLegend": true,
       "yLeftExtent": Object {
         "mode": "full",
       },
