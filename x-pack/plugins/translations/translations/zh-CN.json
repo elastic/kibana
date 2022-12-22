@@ -30531,7 +30531,6 @@
     "xpack.securitySolution.policy.list.updatedAt": "上次更新时间",
     "xpack.securitySolution.policyDetails.backToEndpointList": "查看所有终端",
     "xpack.securitySolution.policyDetails.backToPolicyButton": "返回到策略列表",
-    "xpack.securitySolution.policyList.endpointCountError": "检索终端计数时出错",
     "xpack.securitySolution.policyList.packageVersionError": "检索终端软件包版本时出错",
     "xpack.securitySolution.policyStatusText.failure": "失败",
     "xpack.securitySolution.policyStatusText.success": "成功",
