@@ -22,6 +22,8 @@ import { buildRiskScoreFromMapping } from '../../../signals/mappings/build_risk_
 import type { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
 import { stripNonEcsFields } from './strip_non_ecs_fields';
 
+import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
+
 const isSourceDoc = (
   hit: SignalSourceHit
 ): hit is BaseHit<{ '@timestamp': string; _source: SignalSource }> => {
@@ -53,12 +55,26 @@ export const buildBulkBody = (
   applyOverrides: boolean,
   buildReasonMessage: BuildReasonMessage,
   indicesToQuery: string[],
-  alertTimestampOverride: Date | undefined
+  alertTimestampOverride: Date | undefined,
+  ruleExecutionLogger?: IRuleExecutionLogForExecutors
 ): BaseFieldsLatest => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
-  const eventFields = stripNonEcsFields(buildEventTypeAlert(mergedDoc)).result;
+
+  const eventFields = buildEventTypeAlert(mergedDoc);
+  const { result: validatedEventFields, removed: removedEventFields } =
+    stripNonEcsFields(eventFields);
+
   const filteredSource = filterSource(mergedDoc);
-  const { result: validatedSource } = stripNonEcsFields(filteredSource);
+  const { result: validatedSource, removed: removedSourceFields } =
+    stripNonEcsFields(filteredSource);
+
+  if (removedEventFields.length || removedSourceFields.length) {
+    ruleExecutionLogger?.debug(
+      'Following fields were removed from alert source as ECS non-compliant:',
+      JSON.stringify(removedSourceFields),
+      JSON.stringify(removedEventFields)
+    );
+  }
 
   const overrides = applyOverrides
     ? {
@@ -89,7 +105,7 @@ export const buildBulkBody = (
   if (isSourceDoc(mergedDoc)) {
     return {
       ...validatedSource,
-      ...eventFields,
+      ...validatedEventFields,
       ...buildAlert(
         [mergedDoc],
         completeRule,
@@ -99,7 +115,10 @@ export const buildBulkBody = (
         alertTimestampOverride,
         overrides
       ),
-      ...additionalAlertFields({ ...mergedDoc, _source: { ...mergedDoc._source, ...eventFields } }),
+      ...additionalAlertFields({
+        ...mergedDoc,
+        _source: { ...mergedDoc._source, ...validatedEventFields },
+      }),
     };
   }
 

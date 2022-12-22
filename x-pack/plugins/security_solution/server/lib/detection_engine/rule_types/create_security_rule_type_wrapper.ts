@@ -294,6 +294,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               spaceId,
               indicesToQuery: inputIndex,
               alertTimestampOverride,
+              ruleExecutionLogger,
             });
 
             const wrapSequences = wrapSequencesFactory({
