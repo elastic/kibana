@@ -7,7 +7,7 @@
  */
 
 import { Agent, IncomingMessage } from 'http';
-import { pick, trimStart } from 'lodash';
+import { pick } from 'lodash';
 import { SemVer } from 'semver';
 
 import { KibanaRequest, RequestHandler } from '@kbn/core/server';
@@ -27,8 +27,6 @@ import { RouteDependencies } from '../../..';
 
 import { Body, Query } from './validation_config';
 import { toURL } from '../../../../lib/utils';
-
-const isPathToReindex = (path: string) => path === trimStart('_reindex', '/');
 
 function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
   const normalizeHeader = function (header: string) {
