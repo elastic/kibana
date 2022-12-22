@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
-import { EuiFormControlLayoutDelimited } from '@elastic/eui';
+import moment, { Moment } from 'moment';
+import { EuiDatePicker, EuiDatePickerRange, EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { ValueInputType } from './value_input_type';
+import { compressedDatepickerStyle } from './value_input_type.styles';
 
 interface RangeParams {
   from: number | string;
@@ -31,6 +32,24 @@ interface Props {
   compressed?: boolean;
   disabled?: boolean;
 }
+
+const strings = {
+  getRangeInputLabel: (intl: InjectedIntl) =>
+    intl.formatMessage({
+      id: 'unifiedSearch.filter.filterEditor.rangeInputLabel',
+      defaultMessage: 'Range',
+    }),
+  getRangeStartInputPlaceholder: (intl: InjectedIntl) =>
+    intl.formatMessage({
+      id: 'unifiedSearch.filter.filterEditor.rangeStartInputPlaceholder',
+      defaultMessage: 'Start',
+    }),
+  getRangeEndInputPlaceholder: (intl: InjectedIntl) =>
+    intl.formatMessage({
+      id: 'unifiedSearch.filter.filterEditor.rangeEndInputPlaceholder',
+      defaultMessage: 'End',
+    }),
+};
 
 export function isRangeParams(params: any): params is RangeParams {
   return Boolean(params && 'from' in params && 'to' in params);
@@ -64,48 +83,87 @@ function RangeValueInputUI(props: Props) {
     props.onChange({ from: get(props, 'value.from'), to: value });
   };
 
+  const onDatePickerFromChange = (date: Moment) => {
+    props.onChange({ from: date.utc().format(), to: get(props, 'value.to') });
+  };
+
+  const onDatePickerToChange = (date: Moment) => {
+    props.onChange({ from: get(props, 'value.from'), to: date.utc().format() });
+  };
+
+  const { field, value, intl, fullWidth, disabled, compressed } = props;
+
+  const type = field?.type ?? 'string';
+  const isInvalid = value && value.from > value.to;
+
+  if (['date', 'date_range'].includes(type)) {
+    return (
+      <div>
+        <EuiDatePickerRange
+          fullWidth={fullWidth}
+          aria-label={strings.getRangeInputLabel(intl)}
+          startDateControl={
+            <EuiDatePicker
+              className={compressed ? compressedDatepickerStyle : undefined}
+              selected={value && value.from ? moment(value.from) : undefined}
+              onChange={onDatePickerFromChange}
+              placeholder={strings.getRangeStartInputPlaceholder(intl)}
+              disabled={disabled}
+              fullWidth={fullWidth}
+              showTimeSelect
+              isInvalid={isInvalid}
+            />
+          }
+          endDateControl={
+            <EuiDatePicker
+              className={compressed ? compressedDatepickerStyle : undefined}
+              selected={value && value.to ? moment(value.to) : undefined}
+              onChange={onDatePickerToChange}
+              placeholder={strings.getRangeEndInputPlaceholder(intl)}
+              disabled={disabled}
+              fullWidth={fullWidth}
+              showTimeSelect
+              isInvalid={isInvalid}
+            />
+          }
+        />
+      </div>
+    );
+  }
+
   return (
     <div>
       <EuiFormControlLayoutDelimited
-        compressed={props.compressed}
-        fullWidth={props.fullWidth}
-        aria-label={props.intl.formatMessage({
-          id: 'unifiedSearch.filter.filterEditor.rangeInputLabel',
-          defaultMessage: 'Range',
-        })}
+        compressed={compressed}
+        fullWidth={fullWidth}
+        aria-label={strings.getRangeInputLabel(intl)}
         startControl={
           <ValueInputType
             controlOnly
-            compressed={props.compressed}
-            field={props.field}
-            value={props.value ? props.value.from : undefined}
+            compressed={compressed}
+            field={field}
+            value={value ? value.from : undefined}
             onChange={onFromChange}
-            onBlur={(value) => {
-              onFromChange(formatDateChange(value));
+            onBlur={(v) => {
+              onFromChange(formatDateChange(v));
             }}
-            placeholder={props.intl.formatMessage({
-              id: 'unifiedSearch.filter.filterEditor.rangeStartInputPlaceholder',
-              defaultMessage: 'Start',
-            })}
-            disabled={props.disabled}
+            placeholder={strings.getRangeStartInputPlaceholder(intl)}
+            disabled={disabled}
             dataTestSubj="range-start"
           />
         }
         endControl={
           <ValueInputType
             controlOnly
-            compressed={props.compressed}
-            field={props.field}
-            value={props.value ? props.value.to : undefined}
+            compressed={compressed}
+            field={field}
+            value={value ? value.to : undefined}
             onChange={onToChange}
-            onBlur={(value) => {
-              onToChange(formatDateChange(value));
+            onBlur={(v) => {
+              onToChange(formatDateChange(v));
             }}
-            placeholder={props.intl.formatMessage({
-              id: 'unifiedSearch.filter.filterEditor.rangeEndInputPlaceholder',
-              defaultMessage: 'End',
-            })}
-            disabled={props.disabled}
+            placeholder={strings.getRangeEndInputPlaceholder(intl)}
+            disabled={disabled}
             dataTestSubj="range-end"
           />
         }
