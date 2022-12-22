@@ -12,7 +12,6 @@ import { EuiDatePicker, EuiDatePickerRange, EuiFormControlLayoutDelimited } from
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { ValueInputType } from './value_input_type';
 import { compressedDatepickerStyle } from './datepicker.styles';
@@ -57,19 +56,6 @@ export function isRangeParams(params: any): params is RangeParams {
 }
 
 function RangeValueInputUI(props: Props) {
-  const kibana = useKibana();
-
-  const formatDateChange = (value: string | number | boolean) => {
-    if (typeof value !== 'string' && typeof value !== 'number') return value;
-
-    const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
-    const tz = !tzConfig || tzConfig === 'Browser' ? moment.tz.guess() : tzConfig;
-    const momentParsedValue = moment(value).tz(tz);
-    if (momentParsedValue.isValid()) return momentParsedValue?.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-
-    return value;
-  };
-
   const onFromChange = (value: string | number | boolean) => {
     if (typeof value !== 'string' && typeof value !== 'number') {
       throw new Error('Range params must be a string or number');
@@ -149,9 +135,7 @@ function RangeValueInputUI(props: Props) {
             field={field}
             value={value ? value.from : undefined}
             onChange={onFromChange}
-            onBlur={(v) => {
-              onFromChange(formatDateChange(v));
-            }}
+            onBlur={onFromChange}
             placeholder={strings.getRangeStartInputPlaceholder(intl)}
             disabled={disabled}
             dataTestSubj="range-start"
@@ -164,9 +148,7 @@ function RangeValueInputUI(props: Props) {
             field={field}
             value={value ? value.to : undefined}
             onChange={onToChange}
-            onBlur={(v) => {
-              onToChange(formatDateChange(v));
-            }}
+            onBlur={onToChange}
             placeholder={strings.getRangeEndInputPlaceholder(intl)}
             disabled={disabled}
             dataTestSubj="range-end"
