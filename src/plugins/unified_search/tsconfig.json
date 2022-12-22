@@ -7,7 +7,6 @@
   },
   "include": [
     "public/**/*",
-    "common/**/*",
     "config.ts",
     "public/**/*.json",
     "server/**/*",

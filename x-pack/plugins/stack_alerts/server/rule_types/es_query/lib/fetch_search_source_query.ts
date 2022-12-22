@@ -24,7 +24,6 @@ import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { Logger } from '@kbn/core/server';
-import { getFilterReferencesUpdater } from '@kbn/unified-search-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
@@ -166,7 +165,6 @@ async function generateLink(
   spacePrefix: string
 ) {
   const prevFilters = searchSource.getField('filter') as Filter[];
-  const getUpdatedFilters = getFilterReferencesUpdater(prevFilters);
 
   // make new adhoc data view
   const newDataView = await dataViews.create({
@@ -174,11 +172,7 @@ async function generateLink(
     version: undefined,
     id: undefined,
   });
-  const updatedFilters = getUpdatedFilters({
-    fromDataView: dataViewToUpdate.id!,
-    toDataView: newDataView.id,
-    usedDataViews: [],
-  });
+  const updatedFilters = updateFilterReferences(prevFilters, dataViewToUpdate.id!, newDataView.id);
 
   const redirectUrlParams: DiscoverAppLocatorParams = {
     dataViewSpec: newDataView.toSpec(false),
@@ -191,4 +185,20 @@ async function generateLink(
   const [start, end] = redirectUrl.split('/app');
 
   return start + spacePrefix + '/app' + end;
+}
+
+function updateFilterReferences(filters: Filter[], fromDataView: string, toDataView: string) {
+  return filters.map((filter) => {
+    if (filter.meta.index === fromDataView) {
+      return {
+        ...filter,
+        meta: {
+          ...filter.meta,
+          index: toDataView,
+        },
+      };
+    } else {
+      return filter;
+    }
+  });
 }

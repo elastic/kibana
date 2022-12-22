@@ -20,6 +20,7 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Logger } from '@kbn/logging';
 import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
@@ -79,6 +80,7 @@ export const createDefaultAlertExecutorOptions = <
     shouldStopExecution: () => false,
     searchSourceClient: searchSourceCommonMock,
     share: {} as SharePluginStart,
+    dataViews: dataViewPluginMocks.createStartContract(),
   },
   state,
   previousStartedAt: null,
