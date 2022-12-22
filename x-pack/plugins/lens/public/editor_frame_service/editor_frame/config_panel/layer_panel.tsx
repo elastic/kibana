@@ -32,6 +32,7 @@ import {
   isOperation,
   LayerAction,
   VisualizationDimensionGroupConfig,
+  UserMessagesGetter,
 } from '../../../types';
 import { DragDropIdentifier, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
@@ -91,6 +92,7 @@ export function LayerPanel(
       visualizationId?: string;
     }) => void;
     indexPatternService: IndexPatternServiceAPI;
+    getUserMessages: UserMessagesGetter;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -509,6 +511,17 @@ export function LayerPanel(
                     <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
                       {group.accessors.map((accessorConfig, accessorIndex) => {
                         const { columnId } = accessorConfig;
+
+                        const messages = props.getUserMessages('dimensionTrigger', {
+                          // TODO - support warnings
+                          severity: 'error',
+                          dimensionId: columnId,
+                          layerId,
+                        });
+
+                        const hasMessages = Boolean(messages.length);
+                        const messageToDisplay = hasMessages ? messages[0].shortMessage : undefined;
+
                         return (
                           <DraggableDimensionButton
                             activeVisualization={activeVisualization}
@@ -580,8 +593,8 @@ export function LayerPanel(
                                       groupId: group.groupId,
                                       filterOperations: group.filterOperations,
                                       hideTooltip,
-                                      invalid: group.invalid,
-                                      invalidMessage: group.invalidMessage,
+                                      invalid: hasMessages,
+                                      invalidMessage: messageToDisplay,
                                       indexPatterns: dataViews.indexPatterns,
                                     }}
                                   />

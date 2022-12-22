@@ -300,7 +300,7 @@ export type RemovableUserMessage = UserMessage & { uniqueId: string };
 
 export type UserMessagesGetter = (
   locationId: UserMessagesDisplayLocationId,
-  severity?: UserMessage['severity']
+  filters: { severity?: UserMessage['severity']; dimensionId?: string; layerId?: string }
 ) => UserMessage[];
 
 export type AddUserMessages = (messages: RemovableUserMessage[]) => () => void;

@@ -707,7 +707,7 @@ describe('workspace_panel', () => {
       instance.find('[data-test-subj="configuration-failure-more-errors"]').last().text()
     ).toEqual(' +1 error');
     expect(instance.find(expressionRendererMock)).toHaveLength(0);
-    expect(getUserMessages).toHaveBeenCalledWith('workspace', 'error');
+    expect(getUserMessages).toHaveBeenCalledWith('workspace', { severity: 'error' });
   });
 
   it('should NOT display config errors for unapplied changes', async () => {

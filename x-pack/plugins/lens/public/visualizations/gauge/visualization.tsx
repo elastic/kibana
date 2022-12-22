@@ -82,35 +82,52 @@ function computePaletteParams(params: CustomPaletteParams) {
   };
 }
 
-const checkInvalidConfiguration = (row?: DatatableRow, state?: GaugeVisualizationState) => {
+const getErrorMessages = (row?: DatatableRow, state?: GaugeVisualizationState): UserMessage[] => {
   if (!row || !state) {
-    return;
+    return [];
   }
+
+  const errors: UserMessage[] = [];
+
   const minAccessor = state?.minAccessor;
   const maxAccessor = state?.maxAccessor;
   const minValue = minAccessor ? getValueFromAccessor(minAccessor, row) : undefined;
   const maxValue = maxAccessor ? getValueFromAccessor(maxAccessor, row) : undefined;
   if (maxValue !== null && maxValue !== undefined && minValue != null && minValue !== undefined) {
     if (maxValue < minValue) {
-      return {
-        invalid: true,
-        invalidMessage: i18n.translate(
+      errors.push({
+        severity: 'error',
+        displayLocations: [
+          { id: 'dimensionTrigger', dimensionId: minAccessor!, layerId: state.layerId },
+          { id: 'dimensionTrigger', dimensionId: maxAccessor!, layerId: state.layerId },
+        ],
+        fixableInEditor: true,
+        shortMessage: i18n.translate(
           'xpack.lens.guageVisualization.chartCannotRenderMinGreaterMax',
           {
             defaultMessage: 'Minimum value may not be greater than maximum value',
           }
         ),
-      };
+        longMessage: '',
+      });
     }
     if (maxValue === minValue) {
-      return {
-        invalid: true,
-        invalidMessage: i18n.translate('xpack.lens.guageVisualization.chartCannotRenderEqual', {
+      errors.push({
+        severity: 'error',
+        displayLocations: [
+          { id: 'dimensionTrigger', dimensionId: minAccessor!, layerId: state.layerId },
+          { id: 'dimensionTrigger', dimensionId: maxAccessor!, layerId: state.layerId },
+        ],
+        fixableInEditor: true,
+        shortMessage: i18n.translate('xpack.lens.guageVisualization.chartCannotRenderEqual', {
           defaultMessage: 'Minimum and maximum values may not be equal',
         }),
-      };
+        longMessage: '',
+      });
     }
   }
+
+  return errors;
 };
 
 const toExpression = (
@@ -234,7 +251,6 @@ export const getGaugeVisualization = ({
       const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
       palette = displayStops.map(({ color }) => color);
     }
-    const invalidProps = checkInvalidConfiguration(row, state) || {};
 
     return {
       groups: [
@@ -296,7 +312,6 @@ export const getGaugeVisualization = ({
           dataTestSubj: 'lnsGauge_minDimensionPanel',
           prioritizedOperation: 'min',
           suggestedValue: () => (state.metricAccessor ? getMinValue(row, accessors) : undefined),
-          ...invalidProps,
         },
         {
           supportStaticValue: true,
@@ -323,7 +338,6 @@ export const getGaugeVisualization = ({
           dataTestSubj: 'lnsGauge_maxDimensionPanel',
           prioritizedOperation: 'max',
           suggestedValue: () => (state.metricAccessor ? getMaxValue(row, accessors) : undefined),
-          ...invalidProps,
         },
         {
           supportStaticValue: true,
@@ -483,9 +497,15 @@ export const getGaugeVisualization = ({
     }
 
     const row = frame.activeData?.[state.layerId]?.rows?.[0];
-    if (!row || checkInvalidConfiguration(row, state)) {
+    if (!row) {
       return [];
     }
+
+    const errors = getErrorMessages(row, state);
+    if (errors.length) {
+      return errors;
+    }
+
     const metricValue = row[metricAccessor];
     const maxValue = maxAccessor && row[maxAccessor];
     const minValue = minAccessor && row[minAccessor];

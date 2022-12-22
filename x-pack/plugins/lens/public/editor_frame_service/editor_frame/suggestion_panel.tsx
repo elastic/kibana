@@ -278,7 +278,7 @@ export function SuggestionPanel({
             ),
           }));
 
-    const hasErrors = getUserMessages('suggestionPanel', 'error').length > 0;
+    const hasErrors = getUserMessages('suggestionPanel', { severity: 'error' }).length > 0;
 
     const newStateExpression =
       currentVisualization.state && currentVisualization.activeId && !hasErrors

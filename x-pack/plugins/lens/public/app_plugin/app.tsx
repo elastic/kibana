@@ -502,11 +502,19 @@ export function App({
     {}
   );
 
-  const getUserMessages: UserMessagesGetter = (locationId, severity) =>
+  const getUserMessages: UserMessagesGetter = (locationId, { severity, dimensionId, layerId }) =>
     [...userMessages, ...Object.values(additionalUserMessages)].filter(
       (message) =>
-        Boolean(message.displayLocations.find((location) => location.id === locationId)) &&
-        (severity ? message.severity === severity : true)
+        Boolean(
+          message.displayLocations.find(
+            (location) =>
+              location.id === locationId &&
+              (location.id === 'dimensionTrigger' && dimensionId
+                ? dimensionId === location.dimensionId
+                : true) &&
+              (location.id === 'dimensionTrigger' && layerId ? layerId === location.layerId : true)
+          )
+        ) && (severity ? message.severity === severity : true)
     );
 
   const addUserMessages: AddUserMessages = (messages) => {

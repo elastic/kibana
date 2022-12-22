@@ -105,7 +105,7 @@ export function EditorFrame(props: EditorFrameProps) {
     showMemoizedErrorNotification(error);
   }, []);
 
-  const bannerMessages = props.getUserMessages('banner', 'warning');
+  const bannerMessages = props.getUserMessages('banner', { severity: 'warning' });
 
   return (
     <RootDragDropProvider>
@@ -142,6 +142,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 framePublicAPI={framePublicAPI}
                 uiActions={props.plugins.uiActions}
                 indexPatternService={props.indexPatternService}
+                getUserMessages={props.getUserMessages}
               />
             </ErrorBoundary>
           )

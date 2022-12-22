@@ -965,9 +965,9 @@ export const LensTopNavMenu = ({
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
-  const textBasedLanguageModeErrors = getUserMessages('textBasedLanguagesQueryInput', 'error').map(
-    ({ shortMessage }) => new Error(shortMessage)
-  );
+  const textBasedLanguageModeErrors = getUserMessages('textBasedLanguagesQueryInput', {
+    severity: 'error',
+  }).map(({ shortMessage }) => new Error(shortMessage));
 
   return (
     <AggregateQueryTopNavMenu
