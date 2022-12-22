@@ -160,9 +160,9 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   // These parameters are yet tbd - https://github.com/elastic/kibana/issues/147613
-  const memQueueEvents = useNumberInput(output?.shipper?.mem_queue_events);
-  const queueFlushTimeout = useNumberInput(output?.shipper?.queue_flush_timeout);
-  const maxBatchBytes = useNumberInput(output?.shipper?.max_batch_bytes);
+  const memQueueEvents = useNumberInput(output?.shipper?.mem_queue_events || undefined);
+  const queueFlushTimeout = useNumberInput(output?.shipper?.queue_flush_timeout || undefined);
+  const maxBatchBytes = useNumberInput(output?.shipper?.max_batch_bytes || undefined);
 
   // Logstash inputs
   const logstashHostsInput = useComboInput(
