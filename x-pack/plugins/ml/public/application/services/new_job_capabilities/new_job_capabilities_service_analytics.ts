@@ -46,11 +46,11 @@ class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
   public async initializeFromDataVIew(dataView: DataView) {
     try {
       const resp: NewJobCapsResponse = await ml.dataFrameAnalytics.newJobCapsAnalytics(
-        dataView.title,
+        dataView.getIndexPattern(),
         dataView.type === 'rollup'
       );
 
-      const allFields = removeNestedFieldChildren(resp, dataView.title);
+      const allFields = removeNestedFieldChildren(resp, dataView.getIndexPattern());
 
       const { fieldsPreferringKeyword } = processTextAndKeywordFields(allFields);
 
