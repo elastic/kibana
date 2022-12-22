@@ -6,9 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { termQuery } from '../../../../../common/utils/term_query';
-import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { useApmParams } from '../../../../hooks/use_apm_params';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -16,9 +13,12 @@ import {
   DEVICE_MODEL_NAME,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
-} from '../../../../../common/es_fields/apm';
+} from '../../common/es_fields/apm';
+import { termQuery } from '../../common/utils/term_query';
+import { useApmParams } from './use_apm_params';
+import { environmentQuery } from '../../common/utils/environment_query';
 
-export function useFiltersForMobileCharts() {
+export function useFiltersForEmbeddableCharts() {
   const {
     path: { serviceName },
     query: {
