@@ -8,117 +8,116 @@
 import React from 'react';
 import {
   EuiFieldNumber,
-  EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiFormLabel,
   EuiSelect,
+  EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Control, Controller } from 'react-hook-form';
+import { Control, Controller, UseFormWatch } from 'react-hook-form';
 
-import type { CreateSLOParams } from '../../../../server/types/rest_specs';
+import { SloEditFormObjectivesTimeslices } from './slo_edit_form_objectives_timeslices';
+import type { CreateSLOParamsForFE } from '../../../../server/types/rest_specs';
 
 export const BUDGETING_METHOD_OPTIONS = [
   { value: 'occurrences', text: 'Occurences' },
   { value: 'timeslices', text: 'Timeslices' },
 ];
 
-export const TIMEWINDOW_OPTIONS = [
-  {
-    value: '30d',
-    text: i18n.translate('xpack.observability.slos.sloEdit.objectives.days', {
-      defaultMessage: '{number} days',
-      values: { number: 30 },
-    }),
-  },
-  {
-    value: '7d',
-    text: i18n.translate('xpack.observability.slos.sloEdit.objectives.days', {
-      defaultMessage: '{number} days',
-      values: { number: 7 },
-    }),
-  },
-];
+export const TIMEWINDOW_OPTIONS = [30, 7].map((number) => ({
+  value: `${number}d`,
+  text: i18n.translate('xpack.observability.slos.sloEdit.objectives.days', {
+    defaultMessage: '{number} days',
+    values: { number },
+  }),
+}));
 
 interface SloEditFormObjectivesProps {
-  control: Control<CreateSLOParams>;
+  control: Control<CreateSLOParamsForFE>;
+  watch: UseFormWatch<CreateSLOParamsForFE>;
 }
 
-export function SloEditFormObjectives({ control }: SloEditFormObjectivesProps) {
+export function SloEditFormObjectives({ control, watch }: SloEditFormObjectivesProps) {
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexItem>
-        <EuiFlexGroup direction="row">
-          <EuiFlexItem>
-            <EuiFormLabel>
-              {i18n.translate('xpack.observability.slos.sloEdit.objectives.budgetingMethod', {
-                defaultMessage: 'Budgeting method',
-              })}
-            </EuiFormLabel>
+    <>
+      <EuiFlexGrid columns={3}>
+        <EuiFlexItem>
+          <EuiFormLabel>
+            {i18n.translate('xpack.observability.slos.sloEdit.objectives.budgetingMethod', {
+              defaultMessage: 'Budgeting method',
+            })}
+          </EuiFormLabel>
 
-            <Controller
-              name="budgeting_method"
-              shouldUnregister
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <EuiSelect id={budgetingSelect} options={BUDGETING_METHOD_OPTIONS} {...field} />
-              )}
-            />
-          </EuiFlexItem>
+          <Controller
+            name="budgeting_method"
+            shouldUnregister
+            control={control}
+            rules={{ required: true }}
+            render={({ field }) => (
+              <EuiSelect id={budgetingSelect} options={BUDGETING_METHOD_OPTIONS} {...field} />
+            )}
+          />
+        </EuiFlexItem>
 
-          <EuiFlexItem>
-            <EuiFormLabel>
-              {i18n.translate('xpack.observability.slos.sloEdit.objectives.timeWindow', {
-                defaultMessage: 'Time window',
-              })}
-            </EuiFormLabel>
+        <EuiFlexItem>
+          <EuiFormLabel>
+            {i18n.translate('xpack.observability.slos.sloEdit.objectives.timeWindow', {
+              defaultMessage: 'Time window',
+            })}
+          </EuiFormLabel>
 
-            <Controller
-              name="time_window.duration"
-              shouldUnregister
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <EuiSelect
-                  id={timeWindowSelect}
-                  options={TIMEWINDOW_OPTIONS}
-                  {...field}
-                  value={String(field.value)}
-                />
-              )}
-            />
-          </EuiFlexItem>
+          <Controller
+            name="time_window.duration"
+            shouldUnregister
+            control={control}
+            rules={{ required: true }}
+            render={({ field }) => (
+              <EuiSelect
+                id={timeWindowSelect}
+                options={TIMEWINDOW_OPTIONS}
+                {...field}
+                value={String(field.value)}
+              />
+            )}
+          />
+        </EuiFlexItem>
 
-          <EuiFlexItem>
-            <EuiFormLabel>
-              {i18n.translate('xpack.observability.slos.sloEdit.objectives.targetSlo', {
-                defaultMessage: 'Target / SLO (%)',
-              })}
-            </EuiFormLabel>
+        <EuiFlexItem>
+          <EuiFormLabel>
+            {i18n.translate('xpack.observability.slos.sloEdit.objectives.targetSlo', {
+              defaultMessage: 'Target / SLO (%)',
+            })}
+          </EuiFormLabel>
 
-            <Controller
-              name="objective.target"
-              shouldUnregister
-              control={control}
-              rules={{ required: true, min: 0.0001, max: 100, validate: (value) => value > 0 }}
-              render={({ field }) => (
-                <EuiFieldNumber
-                  {...field}
-                  min={0}
-                  max={100}
-                  step={0.0001}
-                  onChange={(event) => field.onChange(Number(event.target.value))}
-                />
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <Controller
+            name="objective.target"
+            shouldUnregister
+            control={control}
+            rules={{ required: true, min: 0.0001, max: 100, validate: (value) => value > 0 }}
+            render={({ field }) => (
+              <EuiFieldNumber
+                {...field}
+                min={0}
+                max={100}
+                step={0.0001}
+                onChange={(event) => field.onChange(Number(event.target.value))}
+              />
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGrid>
+
+      {watch('budgeting_method') === 'timeslices' ? (
+        <>
+          <EuiSpacer size="xl" />
+          <SloEditFormObjectivesTimeslices control={control} />
+        </>
+      ) : null}
+    </>
   );
 }
