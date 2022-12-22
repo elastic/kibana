@@ -8,7 +8,14 @@
 
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
 import classNames from 'classnames';
-import { SQLLang, monaco, ESQL_LANG_ID, ESQL_THEME_ID } from '@kbn/monaco';
+import {
+  SQLLang,
+  monaco,
+  ESQL_LANG_ID,
+  ESQL_THEME_ID,
+  ESQLLang,
+  ESQLCustomAutocompleteCallbacks,
+} from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
 import {
@@ -112,7 +119,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { uiSettings } = kibana.services;
+  const { uiSettings, dataViews } = kibana.services;
 
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
@@ -319,6 +326,28 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     getDocumentation();
   }, [language]);
 
+  const getSourceIdentifiers: ESQLCustomAutocompleteCallbacks['getSourceIdentifiers'] = (ctx) => {
+    return dataViews.getTitles();
+  };
+
+  const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] = async (
+    ctx
+  ) => {
+    let resultData: string[] = [];
+
+    for (const s of ctx.userDefinedVariables.sourceIdentifiers) {
+      if (s) {
+        try {
+          resultData = [...resultData, ...(await dataViews.get(s)).fields.map((f) => f.name)];
+        } catch (e) {
+          // nothing to be here
+        }
+      }
+    }
+
+    return resultData;
+  };
+
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
     accessibilitySupport: 'off',
@@ -503,6 +532,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       value={codeOneLiner || code}
                       options={codeEditorOptions}
                       width="100%"
+                      suggestionProvider={
+                        language === 'esql'
+                          ? ESQLLang.getSuggestionProvider?.({
+                              getSourceIdentifiers,
+                              getFieldsIdentifiers,
+                            })
+                          : undefined
+                      }
                       onChange={onQueryUpdate}
                       editorDidMount={(editor) => {
                         editor1.current = editor;
