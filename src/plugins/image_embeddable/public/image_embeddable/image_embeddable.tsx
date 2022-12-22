@@ -13,7 +13,6 @@ import { ImageEmbeddableInput } from './image_embeddable_factory';
 import { ImageViewer, ImageViewerContext } from '../image_viewer';
 import { createValidateUrl } from '../utils/validate_url';
 import { imageClickTrigger, ImageClickContext } from '../actions';
-import './image_embeddable.scss';
 
 export const IMAGE_EMBEDDABLE_TYPE = 'image';
 
@@ -54,6 +53,10 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
 
   private ImageEmbeddableViewer = (props: { embeddable: ImageEmbeddable }) => {
     const input = useObservable(props.embeddable.getInput$(), props.embeddable.getInput());
+
+    React.useLayoutEffect(() => {
+      import('./image_embeddable_lazy');
+    }, []);
 
     return (
       <ImageViewerContext.Provider
