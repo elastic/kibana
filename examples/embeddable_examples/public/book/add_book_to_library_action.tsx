@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ViewMode, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
 import { DASHBOARD_CONTAINER_TYPE } from '@kbn/dashboard-plugin/public';
 import { BookEmbeddable, BOOK_EMBEDDABLE } from './book_embeddable';
@@ -19,7 +19,7 @@ interface ActionContext {
 export const ACTION_ADD_BOOK_TO_LIBRARY = 'ACTION_ADD_BOOK_TO_LIBRARY';
 
 export const createAddBookToLibraryAction = () =>
-  createAction({
+  ({
     getDisplayName: () =>
       i18n.translate('embeddableExamples.book.addToLibrary', {
         defaultMessage: 'Add Book To Library',

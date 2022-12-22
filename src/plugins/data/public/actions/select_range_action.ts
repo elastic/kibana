@@ -7,7 +7,7 @@
  */
 
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { Action, createAction, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
 import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
 
@@ -27,8 +27,8 @@ export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
 
 export function createSelectRangeAction(
   getStartServices: () => { uiActions: UiActionsStart }
-): Action {
-  return createAction({
+): UiActionsActionDefinition<SelectRangeActionContext> {
+  return {
     type: ACTION_SELECT_RANGE,
     id: ACTION_SELECT_RANGE,
     shouldAutoExecute: async () => true,
@@ -47,5 +47,5 @@ export function createSelectRangeAction(
         console.warn(`Error [ACTION_SELECT_RANGE]: can\'t extract filters from action context`);
       }
     },
-  });
+  };
 }

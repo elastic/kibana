@@ -9,7 +9,6 @@
 import React from 'react';
 import { OverlayStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { createAction } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   ViewMode,
@@ -40,7 +39,7 @@ interface ActionContext {
 export const ACTION_EDIT_BOOK = 'ACTION_EDIT_BOOK';
 
 export const createEditBookAction = (getStartServices: () => Promise<StartServices>) =>
-  createAction({
+  ({
     getDisplayName: () =>
       i18n.translate('embeddableExamples.book.edit', { defaultMessage: 'Edit Book' }),
     id: ACTION_EDIT_BOOK,

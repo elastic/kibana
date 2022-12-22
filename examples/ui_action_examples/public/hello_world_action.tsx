@@ -9,7 +9,6 @@
 import React from 'react';
 import { EuiText, EuiModalBody, EuiButton } from '@elastic/eui';
 import { OverlayStart } from '@kbn/core/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
@@ -19,7 +18,7 @@ interface StartServices {
 }
 
 export const createHelloWorldAction = (getStartServices: () => Promise<StartServices>) =>
-  createAction({
+  ({
     id: ACTION_HELLO_WORLD,
     type: ACTION_HELLO_WORLD,
     getDisplayName: () => 'Hello World!',

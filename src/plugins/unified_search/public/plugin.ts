@@ -83,14 +83,14 @@ export class UnifiedSearchPublicPlugin
       },
     });
 
-    uiActions.addTriggerAction(
+    uiActions.attachAction(
       APPLY_FILTER_TRIGGER,
-      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
+      ACTION_GLOBAL_APPLY_FILTER,
     );
 
-    uiActions.addTriggerAction(
+    uiActions.attachAction(
       UPDATE_FILTER_REFERENCES_TRIGGER,
-      uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION)
+      UPDATE_FILTER_REFERENCES_ACTION
     );
 
     return {

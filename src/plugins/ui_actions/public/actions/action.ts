@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FC } from 'react';
 import { Presentable } from '../util/presentable';
 import { Trigger } from '../triggers';
 
@@ -67,12 +66,6 @@ export interface Action<Context extends object = object>
    * @param context
    */
   getDisplayName(context: ActionExecutionContext<Context>): string;
-
-  /**
-   * Component to render when displaying this action as a context menu item.
-   * If not provided, `getDisplayName` will be used instead.
-   */
-  MenuItem?: FC<ActionMenuItemProps<Context>>;
 
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,

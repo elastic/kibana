@@ -14,16 +14,17 @@ import { EnhancedEmbeddable } from '@kbn/embeddable-enhanced-plugin/public';
 
 test('<MenuItem/>', () => {
   const state = createStateContainer<{ events: object[] }>({ events: [] });
+  const context = {
+    embeddable: {
+      enhancements: {
+        dynamicActions: { state } as unknown as DynamicActionManager,
+      },
+    } as unknown as EnhancedEmbeddable,
+    trigger: {},
+  }
   const { getByText, queryByText } = render(
     <MenuItem
-      context={{
-        embeddable: {
-          enhancements: {
-            dynamicActions: { state } as unknown as DynamicActionManager,
-          },
-        } as unknown as EnhancedEmbeddable,
-        trigger: {} as any,
-      }}
+      context={context}
     />
   );
 

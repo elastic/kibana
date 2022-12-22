@@ -50,7 +50,7 @@ const embeddableReactFactory = new ContactCardEmbeddableReactFactory(
 const applicationMock = applicationServiceMock.createStartContract();
 const theme = themeServiceMock.createStartContract();
 
-actionRegistry.set(editModeAction.id, editModeAction);
+actionRegistry.set(editModeAction.id, editModeAction as unknown as Action<object>);
 triggerRegistry.set(trigger.id, trigger);
 setup.registerEmbeddableFactory(embeddableFactory.type, embeddableFactory);
 setup.registerEmbeddableFactory(embeddableReactFactory.type, embeddableReactFactory);

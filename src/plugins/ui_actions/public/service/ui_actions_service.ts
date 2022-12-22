@@ -7,7 +7,7 @@
  */
 
 import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
-import { ActionInternal, Action, ActionDefinition, ActionContext } from '../actions';
+import { ActionInternal, Action, ActionDefinition } from '../actions';
 import { Trigger } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
@@ -60,16 +60,16 @@ export class UiActionsService {
     return trigger.contract;
   };
 
-  public readonly registerAction = <A extends ActionDefinition>(
-    definition: A
-  ): Action<ActionContext<A>> => {
+  public readonly registerAction = <Context extends object>(
+    definition: ActionDefinition<Context>
+  ) => {
     if (this.actions.has(definition.id)) {
       throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
 
     const action = new ActionInternal(definition);
 
-    this.actions.set(action.id, action);
+    this.actions.set(action.id, action as unknown as ActionInternal<object>);
 
     return action;
   };
@@ -125,20 +125,20 @@ export class UiActionsService {
    */
   public readonly addTriggerAction = (
     triggerId: string,
-    action: ActionDefinition // TODO: remove `Action` https://github.com/elastic/kibana/issues/74501
+    action: ActionDefinition<any>
   ): void => {
     if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);
   };
 
-  public readonly getAction = <T extends ActionDefinition>(
+  public readonly getAction = (
     id: string
-  ): Action<ActionContext<T>> => {
+  ) => {
     if (!this.actions.has(id)) {
       throw new Error(`Action [action.id = ${id}] not registered.`);
     }
 
-    return this.actions.get(id) as ActionInternal<T>;
+    return this.actions.get(id);
   };
 
   public readonly getTriggerActions = (triggerId: string): Action[] => {
@@ -157,7 +157,7 @@ export class UiActionsService {
   public readonly getTriggerCompatibleActions = async (
     triggerId: string,
     context: object
-  ): Promise<Action[]> => {
+  ) => {
     const actions = this.getTriggerActions!(triggerId);
     const isCompatibles = await Promise.all(
       actions.map((action) =>

@@ -791,7 +791,7 @@ export class Embeddable
       const actions: Array<Action<CellValueContext>> = await getTriggerCompatibleActions(
         CELL_VALUE_TRIGGER,
         { data, embeddable }
-      );
+      ) as Array<Action<CellValueContext>> ;
       return actions
         .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
         .map((action) => ({
