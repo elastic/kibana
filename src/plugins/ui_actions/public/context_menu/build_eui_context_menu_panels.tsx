@@ -43,7 +43,11 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
 };
 
 const onClick =
-  (action: Action | ActionInternal<ActionDefinition>, context: ActionExecutionContext<object>, close: () => void) =>
+  (
+    action: Action | ActionInternal<ActionDefinition>,
+    context: ActionExecutionContext<object>,
+    close: () => void
+  ) =>
   (event: React.MouseEvent) => {
     if (event.currentTarget instanceof HTMLAnchorElement) {
       // from react-router's <Link/>
@@ -163,7 +167,9 @@ export async function buildContextMenuForActions({
     }
     panels[parentPanel || 'mainMenu'].items!.push({
       name: (action as ActionInternal<ActionDefinition>).ReactMenuItem
-        ? React.createElement((action as ActionInternal<ActionDefinition>).ReactMenuItem!, { context })
+        ? React.createElement((action as ActionInternal<ActionDefinition>).ReactMenuItem!, {
+            context,
+          })
         : action.getDisplayName(context),
       icon: action.getIconType(context),
       toolTipContent: action.getDisplayNameTooltip ? action.getDisplayNameTooltip(context) : '',
