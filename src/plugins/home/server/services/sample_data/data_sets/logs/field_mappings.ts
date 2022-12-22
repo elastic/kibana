@@ -8,13 +8,8 @@
 
 export const fieldMappings = {
   request: {
-    type: 'text',
-    fields: {
-      keyword: {
-        type: 'keyword',
-        time_series_dimension: true,
-      },
-    },
+    type: 'keyword',
+    time_series_dimension: true,
   },
   geo: {
     properties: {
