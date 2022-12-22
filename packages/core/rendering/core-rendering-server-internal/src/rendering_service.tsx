@@ -107,12 +107,7 @@ export class RenderingService {
       defaults: uiSettings.globalClient?.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
     };
-
     let branding: CustomBranding = {};
-    if (customBranding) {
-      branding = await customBranding.getBrandingFor(request);
-    }
-
     let clusterInfo = {};
     try {
       // Only provide the clusterInfo if the request is authenticated and the elasticsearch service is available.
@@ -123,6 +118,9 @@ export class RenderingService {
             catchError(() => of({}))
           )
         );
+        if (customBranding) {
+          branding = await customBranding.getBrandingFor(request);
+        }
       }
     } catch (err) {
       // swallow error

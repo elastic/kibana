@@ -41,6 +41,17 @@ export class CustomBrandingService {
     return branding;
   };
 
+  public getBrandingFor = async (request: KibanaRequest): Promise<CustomBranding> => {
+    this.logger.info('getBrandingFor');
+    if (!this.pluginRegistered) {
+      return {};
+    }
+    const soClient = this.savedObjects!.getScopedClient(request);
+    const uiSettings = this.uiSettings!.globalAsScopedToClient(soClient);
+    const branding = await this.getBrandingFrom(uiSettings);
+    return branding;
+  };
+
   /**
    * @public
    */
@@ -52,18 +63,6 @@ export class CustomBrandingService {
           throw new Error('Another plugin already registered');
         }
         this.pluginRegistered = true;
-      },
-      getBrandingFor: async (request: KibanaRequest): Promise<CustomBranding> => {
-        this.logger.info('getBrandingFor');
-        if (!this.pluginRegistered) {
-          return {};
-        }
-        const soClient = this.savedObjects!.getScopedClient(request);
-        const uiSettings = this.uiSettings!.globalAsScopedToClient(soClient);
-        const branding = await this.getBrandingFrom(uiSettings);
-        //  this.logger.info(branding!.pageTitle);
-        this.logger.info(branding + '');
-        return {};
       },
     };
   }

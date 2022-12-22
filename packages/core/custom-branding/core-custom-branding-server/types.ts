@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
 import type { InternalUiSettingsServiceStart } from '@kbn/core-ui-settings-server-internal';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 /** @public */
 export interface CustomBrandingStart {}
@@ -22,5 +20,4 @@ export interface CustomBrandingStartDeps {
 /** @public */
 export interface CustomBrandingSetup {
   register: () => void;
-  getBrandingFor: (request: KibanaRequest) => Promise<CustomBranding>;
 }

@@ -8,6 +8,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { License } from '@kbn/license-api-guard-plugin/server';
+import { schema } from '@kbn/config-schema';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
 import { registerRoutes } from './routes';
@@ -35,7 +36,7 @@ export class CustomBrandingPlugin implements Plugin {
     });
     const router = core.http.createRouter<CustomBrandingRequestHandlerContext>();
     registerRoutes(router);
-    /* core.uiSettings.registerGlobal({
+    core.uiSettings.registerGlobal({
       'customBranding:logo': {
         name: 'Custom Branding - Logo',
         value: LOGO,
@@ -54,7 +55,7 @@ export class CustomBrandingPlugin implements Plugin {
         schema: schema.string(),
         description: 'add some awesomeness',
       },
-    });*/
+    });
     core.customBranding.register();
     return {};
   }

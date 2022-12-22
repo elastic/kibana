@@ -333,7 +333,7 @@ export class Server {
       http: httpSetup,
       status: statusSetup,
       uiPlugins,
-      customBranding: customBrandingSetup,
+      customBranding: this.customBranding,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
