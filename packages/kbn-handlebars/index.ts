@@ -47,56 +47,6 @@ declare module 'handlebars' {
     // eslint-disable-next-line @typescript-eslint/prefer-function-type
     (...params: any[]): any;
   }
-  export type HelperDelegate0Param = (options: BlockHelperOptions | HelperOptions) => any;
-  export type HelperDelegate1Param = (
-    param1: any,
-    options: BlockHelperOptions | HelperOptions
-  ) => any;
-  export type HelperDelegate2Param = (
-    param1: any,
-    param2: any,
-    options: BlockHelperOptions | HelperOptions
-  ) => any;
-  export type HelperDelegate3Param = (
-    param1: any,
-    param2: any,
-    param3: any,
-    options: BlockHelperOptions | HelperOptions
-  ) => any;
-  export type HelperDelegate4Param = (
-    param1: any,
-    param2: any,
-    param3: any,
-    param4: any,
-    options: BlockHelperOptions | HelperOptions
-  ) => any;
-  export type HelperDelegate5Param = (
-    param1: any,
-    param2: any,
-    param3: any,
-    param4: any,
-    param5: any,
-    options: BlockHelperOptions | HelperOptions
-  ) => any;
-  export type HelperDelegate6Param = (
-    param1: any,
-    param2: any,
-    param3: any,
-    param4: any,
-    param5: any,
-    param6: any,
-    options: BlockHelperOptions | HelperOptions
-  ) => any;
-  export type HelperDelegate7Param = (
-    param1: any,
-    param2: any,
-    param3: any,
-    param4: any,
-    param5: any,
-    param6: any,
-    param7: any,
-    options: BlockHelperOptions | HelperOptions
-  ) => any;
 }
 
 const kHelper = Symbol('helper');
@@ -114,11 +64,10 @@ type ProcessableNodeWithPathPartsOrLiteral = ProcessableNode & {
   path: hbs.AST.PathExpression | hbs.AST.Literal;
 };
 
-type HelperOptions = Omit<Handlebars.HelperOptions, 'fn' | 'inverse'>;
-interface BlockHelperOptions
-  extends HelperOptions,
-    Pick<Handlebars.HelperOptions, 'fn' | 'inverse'> {}
-interface DecoratorOptions extends Omit<BlockHelperOptions, 'lookupProperties'> {
+export type NonBlockHelperOptions = Omit<Handlebars.HelperOptions, 'fn' | 'inverse'>;
+export type AmbiguousHelperOptions = Handlebars.HelperOptions | NonBlockHelperOptions;
+
+export interface DecoratorOptions extends Omit<Handlebars.HelperOptions, 'lookupProperties'> {
   args?: any[];
 }
 
@@ -249,7 +198,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private blockParamValues: any[][] = [];
   private ast?: hbs.AST.Program;
   private container: Container;
-  private defaultHelperOptions: Partial<HelperOptions> = {};
+  private defaultHelperOptions: Partial<NonBlockHelperOptions> = {};
   private processedRootDecorators = false; // Root decorators should not have access to input arguments. This flag helps us detect them.
   private processedDecoratorsForProgram = new Set(); // It's important that a given program node only has its decorators run once, we use this Map to keep track of them
 
@@ -710,7 +659,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     fn?: Handlebars.HelperDelegate;
     context: any[];
     params: any[];
-    options: HelperOptions | BlockHelperOptions;
+    options: AmbiguousHelperOptions;
   } {
     return {
       fn: this.container.lookupProperty(this.container.helpers, helperName),
@@ -739,14 +688,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     return options;
   }
 
-  private setupParams(node: ProcessableBlockStatementNode, name: string): BlockHelperOptions;
-  private setupParams(node: ProcessableStatementNode, name: string): HelperOptions;
-  private setupParams(node: ProcessableNode, name: string): HelperOptions | BlockHelperOptions;
-  private setupParams(node: ProcessableNode, name: string): HelperOptions | BlockHelperOptions {
+  private setupParams(node: ProcessableBlockStatementNode, name: string): Handlebars.HelperOptions;
+  private setupParams(node: ProcessableStatementNode, name: string): NonBlockHelperOptions;
+  private setupParams(node: ProcessableNode, name: string): AmbiguousHelperOptions;
+  private setupParams(node: ProcessableNode, name: string): AmbiguousHelperOptions {
     // TODO: Is this the way to type `options` based on `node`?
     type OptionsReturnType = typeof node extends hbs.AST.BlockStatement
-      ? BlockHelperOptions
-      : HelperOptions;
+      ? Handlebars.HelperOptions
+      : NonBlockHelperOptions;
     // TODO: I have to use `Partial` because `lookupProperty` (which is a required property of `OptionsReturnType`) isn't defined when the `options` object is first constructed.
     // But it's added via the `Object.assign` at the end. But is this way to do make TypeScript happy in this scenario?
     const options: Partial<OptionsReturnType> = {
@@ -757,12 +706,13 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     };
 
     if (isBlock(node)) {
-      // TODO: Is there a way in TypeScript to infer that `options` is `BlockHelperOptions` inside this if-statement. If not, is there a way to just cast once?
-      (options as BlockHelperOptions).fn = this.generateProgramFunction(node.program);
-      if (node.program) this.processDecorators(node.program, (options as BlockHelperOptions).fn);
-      (options as BlockHelperOptions).inverse = this.generateProgramFunction(node.inverse);
+      // TODO: Is there a way in TypeScript to infer that `options` is `Handlebars.HelperOptions` inside this if-statement. If not, is there a way to just cast once?
+      (options as Handlebars.HelperOptions).fn = this.generateProgramFunction(node.program);
+      if (node.program)
+        this.processDecorators(node.program, (options as Handlebars.HelperOptions).fn);
+      (options as Handlebars.HelperOptions).inverse = this.generateProgramFunction(node.inverse);
       if (node.inverse)
-        this.processDecorators(node.inverse, (options as BlockHelperOptions).inverse);
+        this.processDecorators(node.inverse, (options as Handlebars.HelperOptions).inverse);
     }
 
     return Object.assign(options, this.defaultHelperOptions) as OptionsReturnType;
@@ -876,7 +826,7 @@ function isDecorator(node: hbs.AST.Node): node is hbs.AST.Decorator | hbs.AST.De
   return node.type === 'Decorator' || node.type === 'DecoratorBlock';
 }
 
-function toDecoratorOptions(options: HelperOptions | BlockHelperOptions) {
+function toDecoratorOptions(options: AmbiguousHelperOptions) {
   // There's really no tests/documentation on this, but to match the upstream codebase we'll remove `lookupProperty` from the decorator context
   delete (options as any).lookupProperty;
 
