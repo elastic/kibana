@@ -7,26 +7,24 @@
  */
 
 import Fs from 'fs';
+import Path from 'path';
+import { pipeline } from 'stream/promises';
 import { createHash } from 'crypto';
 import * as Rx from 'rxjs';
 import globby from 'globby';
 import { Task } from '../lib';
 
-const read$ = Rx.bindNodeCallback(Fs.readFile);
-
-async function readToEntries(iter: NodeJS.ReadableStream): Promise<Array<[string, string]>> {
+async function readToEntries(
+  baseDir: string,
+  iter: NodeJS.ReadableStream
+): Promise<Array<[string, string]>> {
   return await Rx.lastValueFrom(
     (Rx.from(iter) as Rx.Observable<string>).pipe(
-      Rx.mergeMap(
-        (path) =>
-          read$(path).pipe(
-            Rx.map((content): [string, string] => [
-              path,
-              createHash('sha1').update(content).digest('hex'),
-            ])
-          ),
-        50
-      ),
+      Rx.mergeMap(async (path): Promise<[string, string]> => {
+        const hash = createHash('sha1');
+        await pipeline(Fs.createReadStream(Path.resolve(baseDir, path)), hash);
+        return [path, hash.digest('hex')];
+      }, 50),
       Rx.toArray(),
       Rx.map((entries) => entries.sort((a, b) => a[0].localeCompare(b[0])))
     )
@@ -42,6 +40,7 @@ export const CreateCiChecksum: Task = {
 
       const [pkgEntries, fileEntries] = await Promise.all([
         readToEntries(
+          dir,
           globby.stream(['node_modules/*/package.json', 'node_modules/@*/*/package.json'], {
             cwd: dir,
             onlyFiles: true,
@@ -49,6 +48,7 @@ export const CreateCiChecksum: Task = {
           })
         ),
         readToEntries(
+          dir,
           globby.stream(['**/*'], {
             ignore: ['node_modules'],
             cwd: dir,
