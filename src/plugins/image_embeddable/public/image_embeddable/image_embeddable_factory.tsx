@@ -56,16 +56,8 @@ export class ImageEmbeddableFactoryDefinition
       {
         getImageDownloadHref: this.getImageDownloadHref,
         validateUrl: createValidateUrl(this.deps.start().externalUrl),
-        actions: {
-          executeTriggerActions: (triggerId: string, context: ImageClickContext) =>
-            this.deps.start().uiActions.executeTriggerActions(triggerId, context),
-          hasTriggerActions: (triggerId: string, context: ImageClickContext) =>
-            this.deps
-              .start()
-              .uiActions.getTriggerCompatibleActions(triggerId, context)
-              .catch(() => [])
-              .then((actions) => actions.length > 0),
-        },
+        executeTriggerActions: (triggerId: string, context: ImageClickContext) =>
+          this.deps.start().uiActions.executeTriggerActions(triggerId, context),
       },
       initialInput,
       parent

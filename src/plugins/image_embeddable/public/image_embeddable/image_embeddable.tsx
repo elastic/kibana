@@ -28,10 +28,7 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
     private deps: {
       getImageDownloadHref: (fileId: string) => string;
       validateUrl: ReturnType<typeof createValidateUrl>;
-      actions: {
-        executeTriggerActions: (triggerId: string, context: ImageClickContext) => void;
-        hasTriggerActions: (triggerId: string, context: ImageClickContext) => Promise<boolean>;
-      };
+      executeTriggerActions: (triggerId: string, context: ImageClickContext) => void;
     },
     initialInput: ImageEmbeddableInput,
     parent?: IContainer
@@ -57,15 +54,6 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
 
   private ImageEmbeddableViewer = (props: { embeddable: ImageEmbeddable }) => {
     const input = useObservable(props.embeddable.getInput$(), props.embeddable.getInput());
-    const [hasTriggerActions, setHasTriggerActions] = React.useState(false);
-    React.useEffect(() => {
-      this.deps.actions
-        .hasTriggerActions(imageClickTrigger.id, { embeddable: this })
-        .then((hasActions) => setHasTriggerActions(hasActions))
-        .catch(() => {
-          setHasTriggerActions(false);
-        });
-    });
 
     return (
       <ImageViewerContext.Provider
@@ -83,15 +71,11 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
           onError={() => {
             this.renderComplete.dispatchError();
           }}
-          onClick={
-            hasTriggerActions
-              ? () => {
-                  this.deps.actions.executeTriggerActions(imageClickTrigger.id, {
-                    embeddable: this,
-                  });
-                }
-              : undefined
-          }
+          onClick={() => {
+            this.deps.executeTriggerActions(imageClickTrigger.id, {
+              embeddable: this,
+            });
+          }}
         />
       </ImageViewerContext.Provider>
     );

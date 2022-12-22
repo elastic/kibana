@@ -91,7 +91,7 @@ export function ImageViewer({
           className={classNames(className, { 'visually-hidden': hasFailedToLoad })}
           title={
             onChange
-              ? i18n.translate(`imageEmbeddable.imageViewer.selectDifferentImageTitle`, {
+              ? i18n.translate('imageEmbeddable.imageViewer.selectDifferentImageTitle', {
                   defaultMessage: 'Select a different image',
                 })
               : undefined
@@ -100,7 +100,7 @@ export function ImageViewer({
             width: '100%',
             height: '100%',
             objectFit: imageConfig?.sizing?.objectFit ?? 'contain',
-            cursor: onChange || onClick ? 'pointer' : 'initial',
+            cursor: onChange ? 'pointer' : 'initial',
             display: 'block', // needed to remove gap under the image
             backgroundColor: imageConfig.backgroundColor,
           }}
