@@ -7,9 +7,9 @@
 
 import { takeLeading } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
-import { enableDefaultAlertingAction } from './actions';
+import { enableDefaultAlertingAction, updateDefaultAlertingAction } from './actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { enableDefaultAlertingAPI } from './api';
+import { enableDefaultAlertingAPI, updateDefaultAlertingAPI } from './api';
 
 export function* enableDefaultAlertingEffect() {
   yield takeLeading(
@@ -18,6 +18,19 @@ export function* enableDefaultAlertingEffect() {
       enableDefaultAlertingAPI,
       enableDefaultAlertingAction.success,
       enableDefaultAlertingAction.fail,
+      successMessage,
+      failureMessage
+    )
+  );
+}
+
+export function* updateDefaultAlertingEffect() {
+  yield takeLeading(
+    updateDefaultAlertingAction.get,
+    fetchEffectFactory(
+      updateDefaultAlertingAPI,
+      updateDefaultAlertingAction.success,
+      updateDefaultAlertingAction.fail,
       successMessage,
       failureMessage
     )

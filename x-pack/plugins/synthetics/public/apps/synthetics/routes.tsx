@@ -368,6 +368,7 @@ const getMonitorSummaryHeader = (
         }),
         isSelected: selectedTab === 'overview',
         href: `${syntheticsPath}${MONITOR_ROUTE.replace(':monitorId?', monitorId)}${search}`,
+        'data-test-subj': 'syntheticsMonitorOverviewTab',
       },
       {
         label: i18n.translate('xpack.synthetics.monitorHistoryTab.title', {
@@ -375,6 +376,7 @@ const getMonitorSummaryHeader = (
         }),
         isSelected: selectedTab === 'history',
         href: `${syntheticsPath}${MONITOR_HISTORY_ROUTE.replace(':monitorId', monitorId)}${search}`,
+        'data-test-subj': 'syntheticsMonitorHistoryTab',
       },
       {
         label: i18n.translate('xpack.synthetics.monitorErrorsTab.title', {
@@ -383,6 +385,7 @@ const getMonitorSummaryHeader = (
         prepend: <EuiIcon type="alert" color="danger" />,
         isSelected: selectedTab === 'errors',
         href: `${syntheticsPath}${MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId)}${search}`,
+        'data-test-subj': 'syntheticsMonitorErrorsTab',
       },
     ],
   };

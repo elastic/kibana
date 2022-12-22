@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  enableDefaultAlertingRoute,
-  getDefaultAlertingRoute,
-} from './settings/enable_default_alerting';
+import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
 import { syncParamsSyntheticsParamsRoute } from './settings/sync_global_params';
 import { editSyntheticsParamsRoute } from './settings/edit_param';
 import { getSyntheticsParamsRoute } from './settings/params';
@@ -44,6 +41,8 @@ import {
 } from '../legacy_uptime/routes';
 import { getHasZipUrlMonitorRoute } from './fleet/get_has_zip_url_monitors';
 import { addSyntheticsParamsRoute } from './settings/add_param';
+import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
+import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
@@ -75,6 +74,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   syncParamsSyntheticsParamsRoute,
   enableDefaultAlertingRoute,
   getDefaultAlertingRoute,
+  updateDefaultAlertingRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [

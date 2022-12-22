@@ -7,13 +7,17 @@
 
 import axios from 'axios';
 import type { Client } from '@elastic/elasticsearch';
+import { KbnClient, uriencode } from '@kbn/test';
+import pMap from 'p-map';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { firstDownHit, firstUpHit } from '../alert_rules/sample_docs/sample_docs';
 
 export class SyntheticsServices {
   kibanaUrl: string;
-  constructor(kibanaUrl: string) {
-    this.kibanaUrl = kibanaUrl;
+  requester: KbnClient['requester'];
+  constructor(params: Record<string, any>) {
+    this.kibanaUrl = params.kibanaUrl;
+    this.requester = params.getService('kibanaServer').requester;
   }
 
   async enableMonitorManagedViaApi() {
@@ -44,6 +48,34 @@ export class SyntheticsServices {
       // eslint-disable-next-line no-console
       console.log(JSON.stringify(e));
     }
+  }
+
+  async deleteTestMonitorByQuery(query: string) {
+    const { data } = await this.requester.request({
+      description: 'get monitors by name',
+      path: uriencode`/internal/uptime/service/monitors`,
+      query: {
+        perPage: 10,
+        page: 1,
+        sortOrder: 'asc',
+        sortField: 'name.keyword',
+        query,
+      },
+      method: 'GET',
+    });
+
+    const { monitors = [] } = data as any;
+    await pMap(
+      monitors,
+      async (monitor: Record<string, any>) => {
+        await this.requester.request({
+          description: 'delete monitor',
+          path: uriencode`/internal/uptime/service/monitors/${monitor.id}`,
+          method: 'DELETE',
+        });
+      },
+      { concurrency: 10 }
+    );
   }
 
   async enableDefaultAlertingViaApi() {

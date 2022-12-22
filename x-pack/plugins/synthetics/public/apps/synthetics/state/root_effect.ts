@@ -6,7 +6,7 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
-import { enableDefaultAlertingEffect } from './alert_rules/effects';
+import { enableDefaultAlertingEffect, updateDefaultAlertingEffect } from './alert_rules/effects';
 import {
   fetchAlertConnectorsEffect,
   fetchDynamicSettingsEffect,
@@ -49,5 +49,6 @@ export const rootEffect = function* root(): Generator {
     fork(syncGlobalParamsEffect),
     fork(enableDefaultAlertingEffect),
     fork(enableMonitorAlertEffect),
+    fork(updateDefaultAlertingEffect),
   ]);
 };

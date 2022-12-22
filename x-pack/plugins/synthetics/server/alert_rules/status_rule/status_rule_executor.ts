@@ -87,7 +87,10 @@ export class StatusRuleExecutor {
 
   async getMonitors() {
     await this.getAllLocationNames();
-    this.monitors = await getAllMonitors(this.soClient, 'attributes.status_alert_enabled: true');
+    this.monitors = await getAllMonitors(
+      this.soClient,
+      `attributes.${ConfigKey.STATUS_ALERT_ENABLED}: true`
+    );
     const allIds: string[] = [];
     const enabledIds: string[] = [];
     let maxLocations = 1;
@@ -109,6 +112,7 @@ export class StatusRuleExecutor {
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
     const { maxLocations, enabledIds } = await this.getMonitors();
+
     if (enabledIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
         this.esClient,
@@ -147,7 +151,10 @@ export class StatusRuleExecutor {
     Object.keys(downConfigs).forEach((locPlusId) => {
       const downConfig = downConfigs[locPlusId];
       const monitor = monitors.find((m) => {
-        return m.id === downConfig.configId;
+        return (
+          m.id === downConfig.configId ||
+          m.attributes[ConfigKey.MONITOR_QUERY_ID] === downConfig.monitorQueryId
+        );
       });
       if (!monitor) {
         staleDownConfigs[locPlusId] = { ...downConfig, isDeleted: true };

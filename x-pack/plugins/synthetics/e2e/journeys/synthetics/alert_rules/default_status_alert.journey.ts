@@ -17,7 +17,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   page.setDefaultTimeout(60 * 1000);
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
-  const services = new SyntheticsServices(params.kibanaUrl);
+  const services = new SyntheticsServices(params);
 
   const getService = params.getService;
   const retry: RetryService = getService('retry');
@@ -65,7 +65,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.click('text=Enable status alert');
   });
 
-  step('set the monitor stats as down', async () => {
+  step('set the monitor status as down', async () => {
     downCheckTime = new Date(Date.now()).toISOString();
     await services.addTestSummaryDocument(params, {
       isDown: true,
@@ -159,5 +159,18 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
       expect(await alertReasonElem?.innerText()).toBe(reasonMessage);
     });
+  });
+
+  step('Deleting the monitor recovers the alert', async () => {
+    await services.deleteTestMonitorByQuery('"Test Monitor 2"');
+    await page.click(byTestId('alert-status-filter-recovered-button'));
+    await retry.tryForTime(2 * 60 * 1000, async () => {
+      await page.click(byTestId('querySubmitButton'));
+      expect(await page.isVisible(`text=1 Alert`)).toBe(true);
+    });
+
+    await page.click('[aria-label="View in app"]');
+    await page.click(byTestId('syntheticsMonitorOverviewTab'));
+    await page.waitForSelector('text=Monitor details');
   });
 });

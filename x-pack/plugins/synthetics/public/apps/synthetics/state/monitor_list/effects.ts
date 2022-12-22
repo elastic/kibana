@@ -50,7 +50,7 @@ export function* enableMonitorAlertEffect() {
         if (
           (response as SavedObject<SyntheticsMonitor>).attributes[ConfigKey.STATUS_ALERT_ENABLED]
         ) {
-          yield put(enableDefaultAlertingAction.get({}));
+          yield put(enableDefaultAlertingAction.get());
         }
       } catch (error) {
         sendErrorToast(action.payload.error, error);

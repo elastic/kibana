@@ -116,7 +116,7 @@ export const setRecoveredAlertsContext = ({
 
     alert.setContext({
       ...state,
-      [RECOVERY_REASON]: recoveryReason,
+      ...(recoveryReason ? { [RECOVERY_REASON]: recoveryReason } : {}),
       ...(basePath && spaceId && alertUuid
         ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }
         : {}),

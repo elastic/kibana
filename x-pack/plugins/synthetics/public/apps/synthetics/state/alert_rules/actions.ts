@@ -8,6 +8,10 @@
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { createAsyncAction } from '../utils/actions';
 
-export const enableDefaultAlertingAction = createAsyncAction<{ isUpdated?: boolean }, Rule>(
+export const enableDefaultAlertingAction = createAsyncAction<void, Rule>(
   'enableDefaultAlertingAction'
+);
+
+export const updateDefaultAlertingAction = createAsyncAction<void, Rule>(
+  'updateDefaultAlertingAction'
 );

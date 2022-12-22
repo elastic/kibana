@@ -9,11 +9,10 @@ import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service';
 
-export async function enableDefaultAlertingAPI({
-  isUpdated,
-}: { isUpdated?: boolean } = {}): Promise<Rule> {
-  return apiService.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING, {
-    isDisabled: false,
-    isUpdated,
-  });
+export async function enableDefaultAlertingAPI(): Promise<Rule> {
+  return apiService.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
+}
+
+export async function updateDefaultAlertingAPI(): Promise<Rule> {
+  return apiService.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
 }

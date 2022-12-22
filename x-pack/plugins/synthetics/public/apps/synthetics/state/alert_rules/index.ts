@@ -7,7 +7,7 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 import { IHttpSerializedFetchError } from '..';
-import { enableDefaultAlertingAction } from './actions';
+import { enableDefaultAlertingAction, updateDefaultAlertingAction } from './actions';
 
 export interface DefaultAlertingState {
   success: boolean | null;
@@ -31,6 +31,18 @@ export const defaultAlertingReducer = createReducer(initialSettingState, (builde
       state.loading = false;
     })
     .addCase(enableDefaultAlertingAction.fail, (state, action) => {
+      state.error = action.payload;
+      state.loading = false;
+      state.success = false;
+    })
+    .addCase(updateDefaultAlertingAction.get, (state) => {
+      state.loading = true;
+    })
+    .addCase(updateDefaultAlertingAction.success, (state, action) => {
+      state.success = Boolean(action.payload);
+      state.loading = false;
+    })
+    .addCase(updateDefaultAlertingAction.fail, (state, action) => {
       state.error = action.payload;
       state.loading = false;
       state.success = false;
