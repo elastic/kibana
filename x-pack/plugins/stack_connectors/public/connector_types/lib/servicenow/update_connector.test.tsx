@@ -216,51 +216,49 @@ describe('UpdateConnector renders', () => {
     ).toBeTruthy();
   });
 
-  for (let i = 0; i < 150; i++) {
-    it('should confirm the update when submit button clicked' + i, async () => {
-      const onConfirm = jest.fn();
+  it('should confirm the update when submit button clicked', async () => {
+    const onConfirm = jest.fn();
 
-      const { getByTestId } = render(
-        <I18nProvider>
-          <UpdateConnector
-            actionTypeId=".servicenow"
-            isOAuth={false}
-            updateErrorMessage={null}
-            readOnly={false}
-            isLoading={false}
-            onConfirm={onConfirm}
-            onCancel={() => {}}
-          />
-        </I18nProvider>
-      );
+    const { getByTestId } = render(
+      <I18nProvider>
+        <UpdateConnector
+          actionTypeId=".servicenow"
+          isOAuth={false}
+          updateErrorMessage={null}
+          readOnly={false}
+          isLoading={false}
+          onConfirm={onConfirm}
+          onCancel={() => {}}
+        />
+      </I18nProvider>
+    );
 
-      expect(onConfirm).not.toHaveBeenCalled();
+    expect(onConfirm).not.toHaveBeenCalled();
 
-      await reactAct(async () => {
-        const urlInput = getByTestId('credentialsApiUrlFromInput');
-        const usernameInput = getByTestId('connector-servicenow-username-form-input');
-        const passwordInput = getByTestId('connector-servicenow-password-form-input');
+    await reactAct(async () => {
+      const urlInput = getByTestId('credentialsApiUrlFromInput');
+      const usernameInput = getByTestId('connector-servicenow-username-form-input');
+      const passwordInput = getByTestId('connector-servicenow-password-form-input');
 
-        await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
-        await userEvent.type(usernameInput, 'user', { delay: 100 });
-        await userEvent.type(passwordInput, 'pass', { delay: 100 });
-        userEvent.click(getByTestId('snUpdateInstallationSubmit'));
-      });
-
-      // Wait for click event to be processed
-      await waitFor(() => expect(onConfirm).toHaveBeenCalled());
-
-      expect(onConfirm).toHaveBeenCalledWith({
-        config: {
-          apiUrl: 'https://example.com',
-        },
-        secrets: {
-          password: 'pass',
-          username: 'user',
-        },
-      });
+      await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
+      await userEvent.type(usernameInput, 'user', { delay: 100 });
+      await userEvent.type(passwordInput, 'pass', { delay: 100 });
+      userEvent.click(getByTestId('snUpdateInstallationSubmit'));
     });
-  }
+
+    // Wait for click event to be processed
+    await waitFor(() => expect(onConfirm).toHaveBeenCalled());
+
+    expect(onConfirm).toHaveBeenCalledWith({
+      config: {
+        apiUrl: 'https://example.com',
+      },
+      secrets: {
+        password: 'pass',
+        username: 'user',
+      },
+    });
+  });
 
   it('should cancel the update when cancel button clicked', () => {
     const onCancel = jest.fn();
