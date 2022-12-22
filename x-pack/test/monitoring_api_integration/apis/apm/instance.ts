@@ -25,8 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
     max: '2022-12-20T16:32:00.000Z',
   };
 
-  testRunner((variant: string) => {
-    it(`should load individual apm server - ${variant}`, async () => {
+  testRunner(() => {
+    it('should load individual apm server', async () => {
       const { body } = await supertest
         .post(
           '/api/monitoring/v1/clusters/3_pOMySBSkCwdyxxBdDbvA/apm/503d57eb-6f1f-4991-89c3-34250cef80d1'

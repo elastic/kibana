@@ -26,8 +26,8 @@ export default function ({ getService }: FtrProviderContext) {
     max: '2022-12-20T17:22:00.000Z',
   };
 
-  testRunner((variant: string) => {
-    it(`should load individual beat - ${variant}`, async () => {
+  testRunner(() => {
+    it('should load individual beat', async () => {
       const { body } = await supertest
         .post(
           '/api/monitoring/v1/clusters/3_pOMySBSkCwdyxxBdDbvA/beats/beat/52bac4f9-2985-467e-b00c-b3e9ca53fc57'

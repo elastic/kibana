@@ -25,8 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
     max: '2022-12-20T16:32:00.000Z',
   };
 
-  testRunner((variant: string) => {
-    it(`should summarize apm cluster with metrics - ${variant}`, async () => {
+  testRunner(() => {
+    it('should summarize apm cluster with metrics', async () => {
       const { body } = await supertest
         .post('/api/monitoring/v1/clusters/3_pOMySBSkCwdyxxBdDbvA/apm')
         .set('kbn-xsrf', 'xxx')

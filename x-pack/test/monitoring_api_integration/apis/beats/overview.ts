@@ -32,8 +32,8 @@ export default function ({ getService }: FtrProviderContext) {
   const omitLatestProperties = (overview: any) =>
     omit(overview, ['latestActive', 'latestTypes', 'latestVersions']);
 
-  testRunner((variant: string) => {
-    it(`should summarize beats cluster with metrics - ${variant}`, async () => {
+  testRunner(() => {
+    it('should summarize beats cluster with metrics', async () => {
       const { body } = await supertest
         .post('/api/monitoring/v1/clusters/3_pOMySBSkCwdyxxBdDbvA/beats')
         .set('kbn-xsrf', 'xxx')

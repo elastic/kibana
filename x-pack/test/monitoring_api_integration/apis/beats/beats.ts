@@ -26,8 +26,8 @@ export default function ({ getService }: FtrProviderContext) {
     max: '2022-12-20T17:22:00.000Z',
   };
 
-  testRunner((variant: string) => {
-    it(`should load beats - ${variant}`, async () => {
+  testRunner(() => {
+    it('should load beats', async () => {
       const { body } = await supertest
         .post('/api/monitoring/v1/clusters/3_pOMySBSkCwdyxxBdDbvA/beats/beats')
         .set('kbn-xsrf', 'xxx')
