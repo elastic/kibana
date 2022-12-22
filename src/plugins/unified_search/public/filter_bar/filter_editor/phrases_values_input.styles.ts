@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/injected-metadata/core-injected-metadata-browser'],
-};
+import { css } from '@emotion/css';
+import { euiScrollBarStyles, UseEuiTheme } from '@elastic/eui';
+
+export const phrasesValuesComboboxCss = (theme: UseEuiTheme) => css`
+  .euiComboBox__inputWrap {
+    ${euiScrollBarStyles(theme)}
+
+    overflow: auto;
+    max-height: 100px;
+  }
+`;
