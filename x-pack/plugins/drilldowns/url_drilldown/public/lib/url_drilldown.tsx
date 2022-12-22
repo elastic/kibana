@@ -19,10 +19,8 @@ import { ActionExecutionContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugi
 import type { Query, Filter, TimeRange } from '@kbn/es-query';
 import type {
   CollectConfigProps as CollectConfigPropsBase,
-  UiComponent,
 } from '@kbn/kibana-utils-plugin/public';
 import {
-  reactToUiComponent,
   UrlTemplateEditorVariable,
   KibanaContextProvider,
 } from '@kbn/kibana-react-plugin/public';
@@ -86,10 +84,10 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly getDisplayName = () => txtUrlDrilldownDisplayName;
 
-  public readonly actionMenuItem: UiComponent<{
+  public readonly actionMenuItem: React.FC<{
     config: Omit<SerializedAction<UrlDrilldownConfig>, 'factoryId'>;
     context: ActionContext | ActionExecutionContext<ActionContext>;
-  }> = reactToUiComponent(({ config, context }) => {
+  }> = ({ config, context }) => {
     const [title, setTitle] = React.useState(config.name);
     React.useEffect(() => {
       let unmounted = false;
@@ -105,15 +103,14 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       };
     });
     return <>{title}</>;
-  });
+  };
 
   public readonly euiIcon = 'link';
 
   supportedTriggers(): UrlTrigger[] {
     return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, ROW_CLICK_TRIGGER, CONTEXT_MENU_TRIGGER];
   }
-
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({
+  public readonly CollectConfig: React.FC<CollectConfigProps> = ({
     config,
     onConfig,
     context,
@@ -140,8 +137,6 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       </KibanaContextProvider>
     );
   };
-
-  public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
     url: {

@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-import React from 'react';
-import type { UiComponent } from '@kbn/kibana-utils-plugin/public';
-import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
+import * as React from 'react';
 import { Action, ActionContext as Context, ActionDefinition, ActionMenuItemProps } from './action';
 import { Presentable, PresentableGrouping } from '../util/presentable';
 
@@ -22,8 +19,7 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   public readonly id: string;
   public readonly type: string;
   public readonly order: number;
-  public readonly MenuItem?: UiComponent<ActionMenuItemProps<Context<A>>>;
-  public readonly ReactMenuItem?: React.FC<ActionMenuItemProps<Context<A>>>;
+  public readonly MenuItem?: React.FC<ActionMenuItemProps<any>>;
   public readonly grouping?: PresentableGrouping<Context<A>>;
   public readonly showNotification?: boolean;
 
@@ -32,7 +28,6 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
     this.type = this.definition.type || '';
     this.order = this.definition.order || 0;
     this.MenuItem = this.definition.MenuItem;
-    this.ReactMenuItem = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
     this.grouping = this.definition.grouping;
     this.showNotification = this.definition.showNotification;
   }

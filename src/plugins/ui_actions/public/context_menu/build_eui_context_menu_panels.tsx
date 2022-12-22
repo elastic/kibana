@@ -10,7 +10,6 @@ import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
 import { Action, ActionExecutionContext } from '../actions';
 import { Trigger } from '../triggers';
 
@@ -164,7 +163,7 @@ export async function buildContextMenuForActions({
     }
     panels[parentPanel || 'mainMenu'].items!.push({
       name: action.MenuItem
-        ? React.createElement(uiToReactComponent(action.MenuItem), { context })
+        ? React.createElement(action.MenuItem, { context })
         : action.getDisplayName(context),
       icon: action.getIconType(context),
       toolTipContent: action.getDisplayNameTooltip ? action.getDisplayNameTooltip(context) : '',

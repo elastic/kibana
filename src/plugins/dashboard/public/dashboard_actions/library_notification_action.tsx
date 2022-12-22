@@ -15,7 +15,7 @@ import {
   isReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { KibanaThemeProvider, reactToUiComponent } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { pluginServices } from '../services/plugin_services';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
@@ -47,7 +47,7 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
 
   private icon = 'folderCheck';
 
-  private LibraryNotification: React.FC<{ context: LibraryNotificationActionContext }> = ({
+  public readonly MenuItem = ({
     context,
   }: {
     context: LibraryNotificationActionContext;
@@ -65,8 +65,6 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
       </KibanaThemeProvider>
     );
   };
-
-  public readonly MenuItem = reactToUiComponent(this.LibraryNotification);
 
   public getDisplayName({ embeddable }: LibraryNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
