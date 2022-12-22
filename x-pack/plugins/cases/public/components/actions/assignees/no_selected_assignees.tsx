@@ -9,7 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTextAlign } 
 import React from 'react';
 import * as i18n from './translations';
 
-const NoSelectedAssigneesComponent: React.FC = () => {
+const NoSelectedAssigneesComponent: React.FC<{ totalSelectedCases: number }> = ({
+  totalSelectedCases,
+}) => {
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -25,7 +27,7 @@ const NoSelectedAssigneesComponent: React.FC = () => {
       <EuiFlexItem grow={false}>
         <EuiTextAlign textAlign="center">
           <EuiText size="s" color="default">
-            <strong>{i18n.NO_SELECTED_ASSIGNEES}</strong>
+            <strong>{i18n.NO_SELECTED_ASSIGNEES(totalSelectedCases)}</strong>
             <br />
           </EuiText>
           <EuiText size="s" color="subdued">

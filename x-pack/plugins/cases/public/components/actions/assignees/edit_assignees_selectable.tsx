@@ -225,7 +225,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
       listProps={{ showIcons: false }}
       onChange={onChange}
       noMatchesMessage={!isLoadingData ? <NoMatches /> : <EmptyMessage />}
-      emptyMessage={<NoSelectedAssignees />}
+      emptyMessage={<NoSelectedAssignees totalSelectedCases={selectedCases.length} />}
       data-test-subj="cases-actions-assignees-edit-selectable"
       height="full"
     >
