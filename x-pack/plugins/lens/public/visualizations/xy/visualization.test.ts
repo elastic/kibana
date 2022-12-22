@@ -1992,18 +1992,6 @@ describe('xy_visualization', () => {
         expect(config.groups[0].accessors).toEqual([
           { color: '#f04e98', columnId: 'an1', triggerIcon: 'color' },
         ]);
-        expect(config.groups[0].invalid).toEqual(false);
-      });
-
-      it('When data layer is empty, should return invalid state', () => {
-        const state = getStateWithAnnotationLayer();
-        (state.layers[0] as XYDataLayerConfig).xAccessor = undefined;
-        const config = xyVisualization.getConfiguration({
-          state,
-          frame,
-          layerId: 'annotations',
-        });
-        expect(config.groups[0].invalid).toEqual(true);
       });
     });
 
@@ -2548,9 +2536,19 @@ describe('xy_visualization', () => {
       });
 
       describe('Annotation layers', () => {
+        const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
+
         function createStateWithAnnotationProps(annotation: Partial<EventAnnotationConfig>) {
           return {
             layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                splitAccessor: undefined,
+                xAccessor: DATE_HISTORGRAM_COLUMN_ID,
+                accessors: ['b'],
+              },
               {
                 layerId: 'layerId',
                 layerType: 'annotations',
@@ -2570,13 +2568,68 @@ describe('xy_visualization', () => {
         }
 
         function getFrameMock() {
+          const datasourceMock = createMockDatasource('testDatasource');
+          datasourceMock.publicAPIMock.getOperationForColumnId.mockImplementation((id) =>
+            id === DATE_HISTORGRAM_COLUMN_ID
+              ? ({
+                  label: DATE_HISTORGRAM_COLUMN_ID,
+                  dataType: 'date',
+                  scale: 'interval',
+                } as OperationDescriptor)
+              : ({
+                  dataType: 'number',
+                  label: 'MyOperation',
+                } as OperationDescriptor)
+          );
+
           return createMockFramePublicAPI({
-            datasourceLayers: { first: mockDatasource.publicAPIMock },
+            datasourceLayers: { first: datasourceMock.publicAPIMock },
             dataViews: createMockDataViewsState({
               indexPatterns: { first: createMockedIndexPattern() },
             }),
           });
         }
+        test('When data layer is empty, should return error on dimension', () => {
+          const state: State = {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                splitAccessor: undefined,
+                xAccessor: undefined, // important
+                accessors: ['b'],
+              },
+              {
+                layerId: 'annotations',
+                layerType: layerTypes.ANNOTATIONS,
+                indexPatternId: 'indexPattern1',
+                annotations: [exampleAnnotation],
+                ignoreGlobalFilters: true,
+              },
+            ],
+          };
+          expect(xyVisualization.getUserMessages!(state, { frame: getFrameMock() }))
+            .toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "displayLocations": Array [
+                  Object {
+                    "dimensionId": "an1",
+                    "id": "dimensionTrigger",
+                    "layerId": "annotations",
+                  },
+                ],
+                "fixableInEditor": true,
+                "longMessage": "",
+                "severity": "error",
+                "shortMessage": "Annotations require a time based chart to work. Add a date histogram.",
+              },
+            ]
+          `);
+        });
+
         it('should return error if current annotation contains non-existent field as timeField', () => {
           const xyState = createStateWithAnnotationProps({
             timeField: 'non-existent',

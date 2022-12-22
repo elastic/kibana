@@ -604,13 +604,8 @@ export function LayerPanel(
                                       columnId,
                                       label: columnLabelMap?.[columnId] ?? '',
                                       hideTooltip,
-                                      ...(activeVisualization?.validateColumn?.(
-                                        visualizationState,
-                                        { dataViews },
-                                        layerId,
-                                        columnId,
-                                        group
-                                      ) || { invalid: false }),
+                                      invalid: hasMessages,
+                                      invalidMessage: messageToDisplay,
                                     })}
                                   </>
                                 )}

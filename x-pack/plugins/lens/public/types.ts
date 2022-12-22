@@ -1269,14 +1269,6 @@ export interface Visualization<T = unknown, P = unknown> {
    */
   getUserMessages?: (state: T, deps: { frame: FramePublicAPI }) => UserMessage[];
 
-  validateColumn?: (
-    state: T,
-    frame: Pick<FramePublicAPI, 'dataViews'>,
-    layerId: string,
-    columnId: string,
-    group?: VisualizationDimensionGroupConfig
-  ) => { invalid: boolean; invalidMessage?: string };
-
   /**
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */

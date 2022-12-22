@@ -54,9 +54,9 @@ import {
 } from './types';
 import {
   extractReferences,
+  getAnnotationLayerErrors,
   injectReferences,
   isHorizontalChart,
-  validateColumn,
 } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
@@ -73,6 +73,7 @@ import {
   setAnnotationsDimension,
   getUniqueLabels,
   onAnnotationDrop,
+  isDateHistogram,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
@@ -698,44 +699,59 @@ export const getXyVisualization = ({
       eventAnnotationService
     ),
 
-  validateColumn(state, frame, layerId, columnId, group) {
-    const { invalid, invalidMessages } = validateColumn(state, frame, layerId, columnId, group);
-    if (!invalid) {
-      return { invalid };
-    }
-    return { invalid, invalidMessage: invalidMessages![0] };
-  },
-
-  getUserMessages(state, { frame: { datasourceLayers, dataViews, activeData } }) {
+  getUserMessages(state, { frame }) {
+    const { datasourceLayers, dataViews, activeData } = frame;
     const annotationLayers = getAnnotationsLayers(state.layers);
     const errors: UserMessage[] = [];
 
+    const hasDateHistogram = isDateHistogram(getDataLayers(state.layers), frame);
+
     annotationLayers.forEach((layer) => {
       layer.annotations.forEach((annotation) => {
-        const validatedColumn = validateColumn(state, { dataViews }, layer.layerId, annotation.id);
-        if (validatedColumn?.invalid && validatedColumn.invalidMessages?.length) {
-          errors.push(
-            ...validatedColumn.invalidMessages.map((invalidMessage) => {
-              const message: UserMessage = {
-                severity: 'error',
-                fixableInEditor: true,
-                displayLocations: [{ id: 'workspace' }, { id: 'suggestionPanel' }],
-                shortMessage: invalidMessage,
-                longMessage: (
-                  <FormattedMessage
-                    id="xpack.lens.xyChart.annotationError"
-                    defaultMessage="Annotation {annotationName} has an error: {errorMessage}"
-                    values={{
-                      annotationName: annotation.label,
-                      errorMessage: invalidMessage,
-                    }}
-                  />
-                ),
-              };
-              return message;
-            })
-          );
+        if (!hasDateHistogram) {
+          errors.push({
+            severity: 'error',
+            fixableInEditor: true,
+            displayLocations: [
+              { id: 'dimensionTrigger', dimensionId: annotation.id, layerId: layer.layerId },
+            ],
+            shortMessage: i18n.translate(
+              'xpack.lens.xyChart.addAnnotationsLayerLabelDisabledHelp',
+              {
+                defaultMessage:
+                  'Annotations require a time based chart to work. Add a date histogram.',
+              }
+            ),
+            longMessage: '',
+          });
         }
+
+        const errorMessages = getAnnotationLayerErrors(layer, annotation.id, dataViews);
+        errors.push(
+          ...errorMessages.map((errorMessage) => {
+            const message: UserMessage = {
+              severity: 'error',
+              fixableInEditor: true,
+              displayLocations: [
+                { id: 'workspace' },
+                { id: 'suggestionPanel' },
+                { id: 'dimensionTrigger', dimensionId: annotation.id, layerId: layer.layerId },
+              ],
+              shortMessage: errorMessage,
+              longMessage: (
+                <FormattedMessage
+                  id="xpack.lens.xyChart.annotationError"
+                  defaultMessage="Annotation {annotationName} has an error: {errorMessage}"
+                  values={{
+                    annotationName: annotation.label,
+                    errorMessage,
+                  }}
+                />
+              ),
+            };
+            return message;
+          })
+        );
       });
     });
 
