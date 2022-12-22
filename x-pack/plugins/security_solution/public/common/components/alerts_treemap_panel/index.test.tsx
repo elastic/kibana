@@ -118,13 +118,13 @@ const defaultProps: Props = {
   setIsPanelExpanded: jest.fn(),
   setStackByField0: jest.fn(),
   setStackByField1: jest.fn(),
+  showBuildingBlockAlerts: false,
+  showOnlyThreatIndicatorAlerts: false,
   signalIndexName: '.alerts-security.alerts-default',
   stackByField0: 'kibana.alert.rule.name',
   stackByField1: 'host.name',
-  title: <ChartSelect alertViewSelection="treemap" setAlertViewSelection={jest.fn()} />,
-  showBuildingBlockAlerts: false,
   status: 'open' as Status,
-  showOnlyThreatIndicatorAlerts: false,
+  title: <ChartSelect alertViewSelection="treemap" setAlertViewSelection={jest.fn()} />,
 };
 
 describe('AlertsTreemapPanel', () => {

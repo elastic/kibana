@@ -98,11 +98,11 @@ jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
 
 describe('AlertsHistogramPanel', () => {
   const defaultProps = {
-    signalIndexName: 'signalIndexName',
     setQuery: jest.fn(),
-    updateDateRange: jest.fn(),
     showBuildingBlockAlerts: false,
     showOnlyThreatIndicatorAlerts: false,
+    signalIndexName: 'signalIndexName',
+    updateDateRange: jest.fn(),
   };
 
   const mockSetToggle = jest.fn();

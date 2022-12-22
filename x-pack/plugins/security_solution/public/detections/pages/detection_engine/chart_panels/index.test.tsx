@@ -105,6 +105,7 @@ const defaultProps = {
       },
     },
   ],
+  filterGroup: 'open' as Status,
   isLoadingIndexPattern: false,
   query: {
     query: '',
@@ -112,10 +113,9 @@ const defaultProps = {
   },
   runtimeMappings: {},
   signalIndexName: '.alerts-security.alerts-default',
-  updateDateRangeCallback: jest.fn(),
   showBuildingBlockAlerts: false,
-  filterGroup: 'open' as Status,
   showOnlyThreatIndicatorAlerts: false,
+  updateDateRangeCallback: jest.fn(),
 };
 
 const resetGroupByFields = () => {

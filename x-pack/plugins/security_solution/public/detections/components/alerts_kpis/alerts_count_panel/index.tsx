@@ -41,26 +41,26 @@ export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 interface AlertsCountPanelProps {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
+  extraActions?: Action[];
   filters?: Filter[];
   inspectTitle: string;
   panelHeight?: number;
   query?: Query;
+  runtimeMappings?: MappingRuntimeFields;
   setStackByField0: (stackBy: string) => void;
   setStackByField0ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
   setStackByField1: (stackBy: string | undefined) => void;
   setStackByField1ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
+  showBuildingBlockAlerts: boolean;
+  showOnlyThreatIndicatorAlerts: boolean;
   signalIndexName: string | null;
   stackByField0: string;
   stackByField0ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByField1: string | undefined;
   stackByField1ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByWidth?: number;
-  title?: React.ReactNode;
-  runtimeMappings?: MappingRuntimeFields;
-  showBuildingBlockAlerts: boolean;
   status: Status;
-  showOnlyThreatIndicatorAlerts: boolean;
-  extraActions?: Action[];
+  title?: React.ReactNode;
 }
 const ChartHeight = '180px';
 
@@ -68,6 +68,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
   ({
     alignHeader,
     chartOptionsContextMenu,
+    extraActions,
     filters,
     inspectTitle,
     panelHeight,
@@ -77,17 +78,16 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     setStackByField0ComboboxInputRef,
     setStackByField1,
     setStackByField1ComboboxInputRef,
+    showBuildingBlockAlerts,
+    showOnlyThreatIndicatorAlerts,
     signalIndexName,
     stackByField0,
     stackByField0ComboboxRef,
     stackByField1,
     stackByField1ComboboxRef,
     stackByWidth,
-    title = i18n.COUNT_TABLE_TITLE,
-    showBuildingBlockAlerts,
-    showOnlyThreatIndicatorAlerts,
     status,
-    extraActions,
+    title = i18n.COUNT_TABLE_TITLE,
   }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
@@ -133,10 +133,10 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     });
     const alertsOptions = useMemo(
       () => ({
+        breakdownField: stackByField1,
         showBuildingBlockAlerts,
         showOnlyThreatIndicatorAlerts,
         status,
-        breakdownField: stackByField1,
       }),
       [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, stackByField1, status]
     );
@@ -183,14 +183,14 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     ]);
 
     useInspectButton({
-      setQuery,
-      response,
-      request,
-      refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
-      uniqueQueryId,
       deleteQuery,
       loading: isLoadingAlerts,
+      refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
+      request,
+      response,
       searchSessionId,
+      setQuery,
+      uniqueQueryId,
     });
 
     return (
@@ -232,16 +232,16 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
           {toggleStatus ? (
             isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
               <LensEmbeddable
+                alertsOptions={alertsOptions}
                 data-test-subj="embeddable-matrix-histogram"
+                extraActions={extraActions}
                 getLensAttributes={getLensAttributes}
                 height={ChartHeight}
                 id={uniqueQueryId}
                 inspectTitle={inspectTitle}
+                scopeId={SourcererScopeName.detections}
                 stackByField={stackByField0}
                 timerange={timerange}
-                scopeId={SourcererScopeName.detections}
-                alertsOptions={alertsOptions}
-                extraActions={extraActions}
               />
             ) : alertsData != null ? (
               <AlertsCount

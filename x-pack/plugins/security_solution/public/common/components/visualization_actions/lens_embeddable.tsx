@@ -50,17 +50,17 @@ const initVisualizationData: {
 const style = { height: '100%', minWidth: '100px' };
 
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
+  alertsOptions,
+  extraActions,
   getLensAttributes,
   height: wrapperHeight,
   id,
   inputsModelId = InputsModelId.global,
+  inspectTitle,
   lensAttributes,
   scopeId = SourcererScopeName.default,
   stackByField,
   timerange,
-  inspectTitle,
-  alertsOptions,
-  extraActions,
 }) => {
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
@@ -69,12 +69,12 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
   const attributes = useLensAttributes({
-    lensAttributes,
+    alertsOptions,
     getLensAttributes,
+    lensAttributes,
+    scopeId,
     stackByField,
     title: '',
-    scopeId,
-    alertsOptions,
   });
 
   const LensComponent = lens.EmbeddableComponent;
@@ -89,11 +89,11 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   );
 
   const actions = useActions({
-    withActions: true,
     attributes,
-    timeRange: timerange,
-    inspectActionProps,
     extraActions,
+    inspectActionProps,
+    timeRange: timerange,
+    withActions: true,
   });
 
   const handleCloseModal = useCallback(() => {

@@ -34,6 +34,8 @@ export interface VisualizationActionsProps {
 }
 
 export interface LensEmbeddableComponentProps {
+  alertsOptions?: AlertsOptions;
+  extraActions?: Action[];
   getLensAttributes?: GetLensAttributes;
   height?: string;
   id: string;
@@ -43,8 +45,6 @@ export interface LensEmbeddableComponentProps {
   scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
-  alertsOptions?: AlertsOptions;
-  extraActions?: Action[];
 }
 
 export enum RequestStatus {

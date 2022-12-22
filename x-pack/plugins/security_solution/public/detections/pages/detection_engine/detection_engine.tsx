@@ -350,14 +350,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <ChartPanels
                 addFilter={addFilter}
                 alertsHistogramDefaultFilters={alertsHistogramDefaultFilters}
+                filterGroup={filterGroup}
                 isLoadingIndexPattern={isLoadingIndexPattern}
                 query={query}
                 runtimeMappings={runtimeMappings}
-                signalIndexName={signalIndexName}
-                updateDateRangeCallback={updateDateRangeCallback}
-                filterGroup={filterGroup}
                 showBuildingBlockAlerts={showBuildingBlockAlerts}
                 showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+                signalIndexName={signalIndexName}
+                updateDateRangeCallback={updateDateRangeCallback}
               />
 
               <EuiSpacer size="l" />

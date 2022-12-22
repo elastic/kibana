@@ -190,25 +190,25 @@ const ChartPanelsComponent: React.FC<Props> = ({
               chartOptionsContextMenu={chartOptionsContextMenu}
               comboboxRef={stackByField0ComboboxRef}
               defaultStackByOption={trendChartStackBy}
+              extraActions={resetGroupByFieldAction}
               filters={alertsHistogramDefaultFilters}
               inspectTitle={i18n.TREND}
-              setComboboxInputRef={setStackByField0ComboboxInputRef}
               onFieldSelected={updateCommonStackBy0}
               panelHeight={TREND_CHART_PANEL_HEIGHT}
               query={query}
+              runtimeMappings={runtimeMappings}
+              setComboboxInputRef={setStackByField0ComboboxInputRef}
+              showBuildingBlockAlerts={showBuildingBlockAlerts}
               showCountsInLegend={true}
               showGroupByPlaceholder={false}
+              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
               showTotalAlertsCount={false}
+              signalIndexName={signalIndexName}
               stackByLabel={GROUP_BY_LABEL}
+              status={filterGroup}
               title={title}
               titleSize={'s'}
-              signalIndexName={signalIndexName}
               updateDateRange={updateDateRangeCallback}
-              runtimeMappings={runtimeMappings}
-              showBuildingBlockAlerts={showBuildingBlockAlerts}
-              status={filterGroup}
-              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-              extraActions={resetGroupByFieldAction}
             />
           )}
         </FullHeightFlexItem>
@@ -222,6 +222,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
             <AlertsCountPanel
               alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
+              extraActions={resetGroupByFieldAction}
               filters={alertsHistogramDefaultFilters}
               inspectTitle={i18n.TABLE}
               panelHeight={TABLE_PANEL_HEIGHT}
@@ -229,18 +230,17 @@ const ChartPanelsComponent: React.FC<Props> = ({
               runtimeMappings={runtimeMappings}
               setStackByField0={updateCommonStackBy0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
-              stackByField0ComboboxRef={stackByField0ComboboxRef}
               setStackByField1={updateCommonStackBy1}
               setStackByField1ComboboxInputRef={setStackByField1ComboboxInputRef}
-              stackByField1ComboboxRef={stackByField1ComboboxRef}
+              showBuildingBlockAlerts={showBuildingBlockAlerts}
+              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
               signalIndexName={signalIndexName}
               stackByField0={countTableStackBy0}
+              stackByField0ComboboxRef={stackByField0ComboboxRef}
               stackByField1={countTableStackBy1}
-              title={title}
-              showBuildingBlockAlerts={showBuildingBlockAlerts}
+              stackByField1ComboboxRef={stackByField1ComboboxRef}
               status={filterGroup}
-              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-              extraActions={resetGroupByFieldAction}
+              title={title}
             />
           )}
         </FullHeightFlexItem>
@@ -255,27 +255,27 @@ const ChartPanelsComponent: React.FC<Props> = ({
               addFilter={addFilter}
               alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
+              extraActions={resetGroupByFieldAction}
+              filters={alertsHistogramDefaultFilters}
               inspectTitle={i18n.TREEMAP}
               isPanelExpanded={isTreemapPanelExpanded}
-              filters={alertsHistogramDefaultFilters}
               query={query}
+              riskSubAggregationField="kibana.alert.risk_score"
+              runtimeMappings={runtimeMappings}
               setIsPanelExpanded={setIsTreemapPanelExpanded}
               setStackByField0={updateCommonStackBy0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
-              stackByField0ComboboxRef={stackByField0ComboboxRef}
               setStackByField1={updateCommonStackBy1}
               setStackByField1ComboboxInputRef={setStackByField1ComboboxInputRef}
-              stackByField1ComboboxRef={stackByField1ComboboxRef}
+              showBuildingBlockAlerts={showBuildingBlockAlerts}
+              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
               signalIndexName={signalIndexName}
               stackByField0={riskChartStackBy0}
+              stackByField0ComboboxRef={stackByField0ComboboxRef}
               stackByField1={riskChartStackBy1}
-              title={title}
-              riskSubAggregationField="kibana.alert.risk_score"
-              runtimeMappings={runtimeMappings}
-              showBuildingBlockAlerts={showBuildingBlockAlerts}
+              stackByField1ComboboxRef={stackByField1ComboboxRef}
               status={filterGroup}
-              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-              extraActions={resetGroupByFieldAction}
+              title={title}
             />
           )}
         </FullHeightFlexItem>

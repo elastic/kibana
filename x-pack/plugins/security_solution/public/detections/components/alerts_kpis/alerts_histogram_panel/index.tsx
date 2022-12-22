@@ -85,35 +85,35 @@ interface AlertsHistogramPanelProps {
   combinedQueries?: string;
   comboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   defaultStackByOption?: string;
+  extraActions?: Action[];
   filters?: Filter[];
   headerChildren?: React.ReactNode;
   inspectTitle?: string;
+  legendPosition?: Position;
   onFieldSelected?: (field: string) => void;
   /** Override all defaults, and only display this field */
   onlyField?: AlertsStackByField;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   panelHeight?: number;
-  titleSize?: EuiTitleSize;
   query?: Query;
-  legendPosition?: Position;
+  runtimeMappings?: MappingRuntimeFields;
   setComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
-  signalIndexName: string | null;
+  showBuildingBlockAlerts: boolean;
   showCountsInLegend?: boolean;
   showGroupByPlaceholder?: boolean;
   showLegend?: boolean;
   showLinkToAlerts?: boolean;
-  showTotalAlertsCount?: boolean;
+  showOnlyThreatIndicatorAlerts: boolean;
   showStackBy?: boolean;
+  showTotalAlertsCount?: boolean;
+  signalIndexName: string | null;
   stackByLabel?: string;
   stackByWidth?: number;
+  status?: Status;
   timelineId?: string;
   title?: React.ReactNode;
+  titleSize?: EuiTitleSize;
   updateDateRange: UpdateDateRange;
-  runtimeMappings?: MappingRuntimeFields;
-  showBuildingBlockAlerts: boolean;
-  status?: Status;
-  showOnlyThreatIndicatorAlerts: boolean;
-  extraActions?: Action[];
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -126,34 +126,34 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     combinedQueries,
     comboboxRef,
     defaultStackByOption = DEFAULT_STACK_BY_FIELD,
+    extraActions,
     filters,
     headerChildren,
     inspectTitle,
+    legendPosition = 'right',
     onFieldSelected,
     onlyField,
     paddingSize = 'm',
     panelHeight = PANEL_HEIGHT,
     query,
-    legendPosition = 'right',
+    runtimeMappings,
     setComboboxInputRef,
-    signalIndexName,
+    showBuildingBlockAlerts,
     showCountsInLegend = false,
     showGroupByPlaceholder = false,
     showLegend = true,
     showLinkToAlerts = false,
-    showTotalAlertsCount = false,
+    showOnlyThreatIndicatorAlerts,
     showStackBy = true,
+    showTotalAlertsCount = false,
+    signalIndexName,
     stackByLabel,
     stackByWidth,
+    status,
     timelineId,
     title = i18n.HISTOGRAM_HEADER,
-    updateDateRange,
     titleSize = 'm',
-    runtimeMappings,
-    showBuildingBlockAlerts,
-    showOnlyThreatIndicatorAlerts,
-    status,
-    extraActions,
+    updateDateRange,
   }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
@@ -292,14 +292,14 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     }, [isInitialLoading, isLoadingAlerts, setIsInitialLoading]);
 
     useInspectButton({
-      setQuery,
-      response,
-      request,
-      refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
-      uniqueQueryId,
       deleteQuery,
       loading: isLoadingAlerts,
+      refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
+      request,
+      response,
       searchSessionId,
+      setQuery,
+      uniqueQueryId,
     });
 
     useEffect(() => {
@@ -438,16 +438,16 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           {toggleStatus ? (
             isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
               <LensEmbeddable
+                alertsOptions={alertsOptions}
                 data-test-subj="embeddable-matrix-histogram"
+                extraActions={extraActions}
                 getLensAttributes={getLensAttributes}
                 height={ChartHeight}
                 id={uniqueQueryId}
                 inspectTitle={inspectTitle}
+                scopeId={SourcererScopeName.detections}
                 stackByField={selectedStackByOption}
                 timerange={timerange}
-                scopeId={SourcererScopeName.detections}
-                alertsOptions={alertsOptions}
-                extraActions={extraActions}
               />
             ) : isInitialLoading ? (
               <MatrixLoader />

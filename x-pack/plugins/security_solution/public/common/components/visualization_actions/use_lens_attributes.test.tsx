@@ -28,9 +28,9 @@ jest.mock('../../utils/route/use_route_spy', () => ({
 describe('useLensAttributes', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
-      selectedPatterns: ['auditbeat-*'],
       dataViewId: 'security-solution-default',
       indicesExist: true,
+      selectedPatterns: ['auditbeat-*'],
     });
   });
 
@@ -102,9 +102,9 @@ describe('useLensAttributes', () => {
 
   it('should return null if no indices exist', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
-      selectedPatterns: ['auditbeat-*'],
       dataViewId: 'security-solution-default',
       indicesExist: false,
+      selectedPatterns: ['auditbeat-*'],
     });
     const { result } = renderHook(
       () =>

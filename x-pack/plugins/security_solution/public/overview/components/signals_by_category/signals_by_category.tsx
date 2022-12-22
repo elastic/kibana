@@ -77,17 +77,17 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       onlyField={onlyField}
       paddingSize={paddingSize}
       query={query}
+      runtimeMappings={runtimeMappings}
+      showBuildingBlockAlerts={false}
       showLegend={showLegend}
       showLinkToAlerts={onlyField == null ? true : false}
+      showOnlyThreatIndicatorAlerts={false}
       showStackBy={onlyField == null}
       showTotalAlertsCount={true}
       signalIndexName={signalIndexName}
-      runtimeMappings={runtimeMappings}
       title={i18n.ALERT_TREND}
       titleSize={onlyField == null ? 'm' : 's'}
       updateDateRange={updateDateRangeCallback}
-      showBuildingBlockAlerts={false}
-      showOnlyThreatIndicatorAlerts={false}
     />
   );
 };

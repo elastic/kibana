@@ -98,17 +98,17 @@ export const useLensAttributes = ({
       })),
     } as LensAttributes;
   }, [
-    lensAttributes,
-    getLensAttributes,
-    stackByField,
     alertsOptions,
-    title,
-    query,
-    filters,
-    pageFilters,
-    tabsFilters,
-    indexFilters,
     dataViewId,
+    filters,
+    getLensAttributes,
+    indexFilters,
+    lensAttributes,
+    pageFilters,
+    query,
+    stackByField,
+    tabsFilters,
+    title,
   ]);
 
   return indicesExist ? lensAttrsWithInjectedData : null;

@@ -55,13 +55,13 @@ jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
 describe('AlertsCountPanel', () => {
   const defaultProps = {
     inspectTitle: TABLE,
-    signalIndexName: 'signalIndexName',
-    stackByField0: DEFAULT_STACK_BY_FIELD,
-    stackByField1: DEFAULT_STACK_BY_FIELD1,
     setStackByField0: jest.fn(),
     setStackByField1: jest.fn(),
     showBuildingBlockAlerts: false,
     showOnlyThreatIndicatorAlerts: false,
+    signalIndexName: 'signalIndexName',
+    stackByField0: DEFAULT_STACK_BY_FIELD,
+    stackByField1: DEFAULT_STACK_BY_FIELD1,
     status: 'open' as Status,
   };
   const mockSetToggle = jest.fn();

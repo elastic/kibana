@@ -43,10 +43,11 @@ export interface Props {
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
-  inspectTitle: string;
-  isPanelExpanded: boolean;
+  extraActions?: Action[];
   filters?: Filter[];
   height?: number;
+  inspectTitle: string;
+  isPanelExpanded: boolean;
   query?: Query;
   riskSubAggregationField: string;
   runtimeMappings?: MappingRuntimeFields;
@@ -55,27 +56,27 @@ export interface Props {
   setStackByField0ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
   setStackByField1: (stackBy: string | undefined) => void;
   setStackByField1ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
+  showBuildingBlockAlerts: boolean;
+  showOnlyThreatIndicatorAlerts: boolean;
   signalIndexName: string | null;
   stackByField0: string;
   stackByField0ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByField1: string | undefined;
   stackByField1ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByWidth?: number;
-  title: React.ReactNode;
-  showBuildingBlockAlerts: boolean;
   status: Status;
-  showOnlyThreatIndicatorAlerts: boolean;
-  extraActions?: Action[];
+  title: React.ReactNode;
 }
 
 const AlertsTreemapPanelComponent: React.FC<Props> = ({
   addFilter,
   alignHeader,
   chartOptionsContextMenu,
-  inspectTitle,
-  isPanelExpanded,
+  extraActions,
   filters,
   height = DEFAULT_HEIGHT,
+  inspectTitle,
+  isPanelExpanded,
   query,
   riskSubAggregationField,
   runtimeMappings,
@@ -84,17 +85,16 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   setStackByField0ComboboxInputRef,
   setStackByField1,
   setStackByField1ComboboxInputRef,
+  showBuildingBlockAlerts,
+  showOnlyThreatIndicatorAlerts,
   signalIndexName,
   stackByField0,
   stackByField0ComboboxRef,
   stackByField1,
   stackByField1ComboboxRef,
   stackByWidth,
-  title,
-  showBuildingBlockAlerts,
-  showOnlyThreatIndicatorAlerts,
   status,
-  extraActions,
+  title,
 }: Props) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
@@ -168,10 +168,10 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   });
   const alertsOptions = useMemo(
     () => ({
+      breakdownField: stackByField1,
       showBuildingBlockAlerts,
       showOnlyThreatIndicatorAlerts,
       status,
-      breakdownField: stackByField1,
     }),
     [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, status, stackByField1]
   );
@@ -179,12 +179,12 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   useInspectButton({
     deleteQuery,
     loading: isLoadingAlerts,
-    response,
-    setQuery,
     refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch,
     request,
-    uniqueQueryId,
+    response,
     searchSessionId,
+    setQuery,
+    uniqueQueryId,
   });
 
   return (
@@ -231,16 +231,16 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
         {isPanelExpanded ? (
           isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
             <LensEmbeddable
+              alertsOptions={alertsOptions}
               data-test-subj="embeddable-matrix-histogram"
+              extraActions={extraActions}
               getLensAttributes={getLensAttributes}
               height={`${DEFAULT_MIN_CHART_HEIGHT}px`}
               id={uniqueQueryId}
               inspectTitle={inspectTitle}
+              scopeId={SourcererScopeName.detections}
               stackByField={stackByField0}
               timerange={timerange}
-              scopeId={SourcererScopeName.detections}
-              alertsOptions={alertsOptions}
-              extraActions={extraActions}
             />
           ) : isLoadingAlerts ? (
             <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
