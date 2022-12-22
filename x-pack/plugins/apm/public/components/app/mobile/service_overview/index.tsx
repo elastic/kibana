@@ -41,6 +41,7 @@ import { ServiceOverviewDependenciesTable } from '../../service_overview/service
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
 import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
+import { useKueryWithFilters } from '../../../../hooks/use_kuery_with_filters';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -51,6 +52,7 @@ export function MobileServiceOverview() {
   const { serviceName, fallbackToTransactions } = useApmServiceContext();
   const router = useApmRouter();
   const filters = useFiltersForEmbeddableCharts();
+  const kueryWithFilters = useKueryWithFilters();
 
   const {
     query,
@@ -224,7 +226,10 @@ export function MobileServiceOverview() {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <LatencyChart height={latencyChartHeight} kuery={kuery} />
+              <LatencyChart
+                height={latencyChartHeight}
+                kuery={kueryWithFilters}
+              />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -236,13 +241,13 @@ export function MobileServiceOverview() {
               <EuiFlexItem grow={3}>
                 <ServiceOverviewThroughputChart
                   height={nonLatencyChartHeight}
-                  kuery={kuery}
+                  kuery={kueryWithFilters}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
                   <TransactionsTable
-                    kuery={kuery}
+                    kuery={kueryWithFilters}
                     environment={environment}
                     fixedHeight={true}
                     isSingleColumn={isSingleColumn}
@@ -265,7 +270,7 @@ export function MobileServiceOverview() {
                 <FailedTransactionRateChart
                   height={nonLatencyChartHeight}
                   showAnnotations={false}
-                  kuery={kuery}
+                  kuery={kueryWithFilters}
                 />
               </EuiFlexItem>
 
