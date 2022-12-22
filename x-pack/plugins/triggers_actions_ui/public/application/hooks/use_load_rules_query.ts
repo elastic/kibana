@@ -6,7 +6,6 @@
  */
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 import { Pagination, RulesListFilters } from '../../types';
 import type { LoadRulesProps } from '../lib/rule_api';
@@ -24,7 +23,7 @@ type UseLoadRulesQueryProps = Omit<LoadRulesProps, 'http'> & {
 };
 
 export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
-  const { filters, hasDefaultRuleTypesFiltersOn, page, sort, onPage, enabled, refresh } = props;
+  const { filters, page, sort, onPage, enabled, refresh } = props;
   const {
     http,
     notifications: { toasts },
@@ -82,28 +81,17 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
     cacheTime: 0,
   });
 
-  const hasEmptyTypesFilter = hasDefaultRuleTypesFiltersOn ? true : isEmpty(filters.types);
+  const hasData = Boolean(rulesResponse && rulesResponse.data.length > 0);
 
-  const isFilterApplied = !(
-    hasEmptyTypesFilter &&
-    isEmpty(filters.searchText) &&
-    isEmpty(filters.actionTypes) &&
-    isEmpty(filters.ruleExecutionStatuses) &&
-    isEmpty(filters.ruleLastRunOutcomes) &&
-    isEmpty(filters.ruleStatuses) &&
-    isEmpty(filters.tags)
-  );
-
-  const noData = rulesResponse?.data.length === 0 && !isFilterApplied;
   return {
     rulesState: {
-      isLoading: isLoading || isFetching,
+      isLoading: enabled && (isLoading || isFetching),
       data: rulesResponse?.data ?? [],
       totalItemCount: rulesResponse?.total ?? 0,
+      initialLoad: isLoading || isInitialLoading,
     },
     lastUpdate: moment(dataUpdatedAt).format(),
-    noData,
-    initialLoad: isLoading || isInitialLoading,
+    hasData,
     loadRules: refetch,
   };
 };

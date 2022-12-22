@@ -71,7 +71,7 @@ import {
 
 interface RuleTypeState {
   isLoading: boolean;
-  isInitialized: boolean;
+  initialLoad: boolean;
   data: RuleTypeIndex;
 }
 
@@ -922,7 +922,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             pageIndex: page.index,
             pageSize: page.size,
             /* Don't display rule count until we have the rule types initialized */
-            totalItemCount: ruleTypesState.isInitialized === false ? 0 : rulesState.totalItemCount,
+            totalItemCount: ruleTypesState.initialLoad ? 0 : rulesState.totalItemCount,
           }}
           onChange={({
             page: changedPage,

@@ -98,6 +98,7 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { useUiState } from '../../../hooks/use_ui_state';
 
 // Directly lazy import the flyouts because the suspendedComponentWithProps component
 // cause a visual hitch due to the loading spinner
@@ -249,7 +250,7 @@ export const RulesList = ({
   const canLoadRules = isLoadRuleTypesSuccess && hasAnyAuthorizedRuleType;
 
   // Fetch rules
-  const { rulesState, loadRules, noData, lastUpdate, initialLoad } = useLoadRulesQuery({
+  const { rulesState, loadRules, hasData, lastUpdate } = useLoadRulesQuery({
     filters: computedFilter,
     hasDefaultRuleTypesFiltersOn,
     page,
@@ -271,6 +272,25 @@ export const RulesList = ({
   const { tags, loadTags } = useLoadTagsQuery({
     enabled: isRuleStatusFilterEnabled && canLoadRules,
     refresh,
+  });
+
+  const {
+    showSpinner,
+    showRulesList,
+    showNoAuthPrompt,
+    showCreateFirstRulePrompt,
+    showCreateFirstRulePromptWithoutCreateButton,
+    showHeaderWithCreateButton,
+    showHeaderWithoutCreateButton,
+  } = useUiState({
+    authorizedToCreateAnyRules,
+    filters,
+    hasDefaultRuleTypesFiltersOn,
+    isLoadingRuleTypes: ruleTypesState.isLoading,
+    isLoadingRules: rulesState.isLoading,
+    hasData,
+    isInitialLoadingRuleTypes: ruleTypesState.initialLoad,
+    isInitialLoadingRules: rulesState.initialLoad,
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
@@ -304,7 +324,7 @@ export const RulesList = ({
   ]);
 
   const tableItems = useMemo(() => {
-    if (ruleTypesState.isInitialized === false) {
+    if (ruleTypesState.initialLoad) {
       return [];
     }
     return convertRulesToTableItems({
@@ -595,20 +615,19 @@ export const RulesList = ({
     setRuleFlyoutVisibility(true);
   }, []);
 
-  const showPrompt = noData && !rulesState.isLoading && !ruleTypesState.isLoading;
-
   useEffect(() => {
-    if (!initialLoad && showPrompt && !authorizedToCreateAnyRules) {
-      setHeaderActions?.([<RulesListDocLink />]);
-      return;
-    }
-    if (!initialLoad && !showPrompt && authorizedToCreateAnyRules) {
-      setHeaderActions?.([<CreateRuleButton openFlyout={openFlyout} />, <RulesListDocLink />]);
-      return;
-    }
+    if (!setHeaderActions) return;
 
-    setHeaderActions?.();
-  }, [showPrompt, authorizedToCreateAnyRules, initialLoad]);
+    if (showHeaderWithoutCreateButton) {
+      setHeaderActions([<RulesListDocLink />]);
+      return;
+    }
+    if (showHeaderWithCreateButton) {
+      setHeaderActions([<CreateRuleButton openFlyout={openFlyout} />, <RulesListDocLink />]);
+      return;
+    }
+    setHeaderActions();
+  }, [showHeaderWithCreateButton, showHeaderWithoutCreateButton]);
 
   useEffect(() => {
     return () => setHeaderActions?.();
@@ -678,10 +697,10 @@ export const RulesList = ({
   return (
     <>
       <RulesListPrompts
-        showPrompt={showPrompt}
-        showCreateRule={showCreateRuleButtonInPrompt}
-        showSpinner={initialLoad}
-        authorizedToCreateRules={authorizedToCreateAnyRules}
+        showNoAuthPrompt={showNoAuthPrompt}
+        showCreateFirstRulePrompt={showCreateFirstRulePrompt}
+        showCreateFirstRulePromptWithoutCreateButton={showCreateFirstRulePromptWithoutCreateButton}
+        showSpinner={showSpinner}
         onCreateRulesClick={openFlyout}
       />
       <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
@@ -759,7 +778,7 @@ export const RulesList = ({
           />
         )}
         <EuiSpacer size="xs" />
-        {!showPrompt && !initialLoad ? (
+        {showRulesList ? (
           <>
             <RulesListFiltersBar
               inputText={inputText}

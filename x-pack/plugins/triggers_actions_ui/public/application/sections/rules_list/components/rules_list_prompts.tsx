@@ -12,32 +12,36 @@ import { CenterJustifiedSpinner } from '../../../components/center_justified_spi
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
 
 interface RulesListPromptsProps {
-  showPrompt: boolean;
-  showCreateRule: boolean;
   showSpinner: boolean;
-  authorizedToCreateRules: boolean;
+  showNoAuthPrompt: boolean;
+  showCreateFirstRulePrompt: boolean;
+  showCreateFirstRulePromptWithoutCreateButton: boolean;
   onCreateRulesClick: () => void;
 }
 
 export const RulesListPrompts = (props: RulesListPromptsProps) => {
-  const { showPrompt, authorizedToCreateRules, showSpinner, showCreateRule, onCreateRulesClick } =
-    props;
+  const {
+    showNoAuthPrompt,
+    showSpinner,
+    showCreateFirstRulePromptWithoutCreateButton,
+    showCreateFirstRulePrompt,
+    onCreateRulesClick,
+  } = props;
+  if (showNoAuthPrompt) return <NoPermissionPrompt />;
+  if (showCreateFirstRulePromptWithoutCreateButton || showCreateFirstRulePrompt) {
+    return (
+      <EmptyPrompt
+        showCreateRule={showCreateFirstRulePrompt}
+        onCreateRulesClick={onCreateRulesClick}
+      />
+    );
+  }
   if (showSpinner) {
     return (
       <EuiPageTemplate.Section grow={false} paddingSize="none">
         <CenterJustifiedSpinner />
       </EuiPageTemplate.Section>
     );
-  }
-
-  if (showPrompt) {
-    if (authorizedToCreateRules) {
-      return (
-        <EmptyPrompt showCreateRule={showCreateRule} onCreateRulesClick={onCreateRulesClick} />
-      );
-    } else {
-      return <NoPermissionPrompt />;
-    }
   }
 
   return null;
