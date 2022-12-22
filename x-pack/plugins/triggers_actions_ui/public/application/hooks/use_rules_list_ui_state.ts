@@ -36,7 +36,7 @@ const getFilterApplied = ({ hasEmptyTypesFilter, filters }: GetFilterAppliedProp
   );
 };
 
-export const useUiState = ({
+export const useRulesListUiState = ({
   authorizedToCreateAnyRules,
   filters,
   hasDefaultRuleTypesFiltersOn,
