@@ -73,7 +73,6 @@ export const TimelineParser: Plugin = function () {
     try {
       const timelineSearch = timelineUrl.split('?');
       const parseTimelineUrlSearch = parse(timelineSearch[1]) as { timeline: string };
-      // @ts-expect-error
       const { id: timelineId = '', graphEventId = '' } = decodeRisonUrlState(
         parseTimelineUrlSearch.timeline ?? ''
       ) ?? { id: null, graphEventId: '' };

@@ -67,7 +67,6 @@ interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
   indexPatterns?: DataViewBase;
-  // @ts-expect-error
   schema: FormSchema<T>;
 }
 
@@ -143,7 +142,6 @@ export const StepRuleDescription = memo(StepRuleDescriptionComponent);
 
 export const buildListItems = <T,>(
   data: unknown,
-  // @ts-expect-error
   schema: FormSchema<T>,
   filterManager: FilterManager,
   license: LicenseService,

@@ -107,7 +107,6 @@ describe('TableVisBasic', () => {
       undefined
     );
 
-    // @ts-expect-error
     const { onSort } = comp.find('EuiDataGrid').prop('sorting');
     // sort the first column
     onSort([{ id: 'first', direction: 'asc' }]);

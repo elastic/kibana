@@ -51,7 +51,6 @@ export const toJsonSchema = (type: t.Mixed): JSONSchema => {
       case 'ArrayType':
         return { type: 'array', items: toJsonSchema(type.type) };
 
-      // @ts-expect-error
       case 'BooleanType':
         return { type: 'boolean' };
 
@@ -74,11 +73,9 @@ export const toJsonSchema = (type: t.Mixed): JSONSchema => {
       case 'IntersectionType':
         return { allOf: type.types.map(toJsonSchema) };
 
-      // @ts-expect-error
       case 'NumberType':
         return { type: 'number' };
 
-      // @ts-expect-error
       case 'StringType':
         return { type: 'string' };
     }

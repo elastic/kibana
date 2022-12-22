@@ -49,11 +49,8 @@ export class Interval implements Iterable<number> {
   private readonly intervalAmount: number;
   private readonly intervalUnit: unitOfTime.DurationConstructor;
   generator<TField>(
-    // @ts-expect-error
     map: (timestamp: number, index?: number) => Serializable<TField> | Array<Serializable<TField>>
-    // @ts-expect-error
   ): EntityIterable<TField> {
-    // @ts-expect-error
     return new EntityGenerator(this, function* (i) {
       let index = 0;
       for (const x of i) {

@@ -20,7 +20,6 @@ export const createVisAsync = async <TVisParams = VisParams>(
   const { Vis } = await import('./vis');
   const vis = new Vis(visType, visState);
 
-  // @ts-expect-error
   await vis.setState(visState);
   return vis;
 };

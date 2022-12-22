@@ -11,7 +11,7 @@ import React, { FunctionComponent } from 'react';
 import { FieldHook, FieldConfig, FormData } from '../types';
 import { useFieldFromProps } from '../hooks';
 
-export interface Props<T, FormType extends FormData = FormData, I = T> {
+export interface Props<T, FormType = FormData, I = T> {
   path: string;
   config?: FieldConfig<T, FormType, I>;
   defaultValue?: T;
@@ -47,10 +47,7 @@ export interface Props<T, FormType extends FormData = FormData, I = T> {
   [key: string]: any;
 }
 
-function UseFieldComp<T = unknown, FormType extends FormData = FormData, I = T>(
-  props: Props<T, FormType, I>
-) {
-  // @ts-expect-error
+function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, FormType, I>) {
   const { field, propsToForward } = useFieldFromProps<T, FormType, I>(props);
 
   const ComponentToRender = props.component ?? 'input';
@@ -92,10 +89,10 @@ export const UseField = React.memo(UseFieldComp) as typeof UseFieldComp;
  *   <MyUseField path="textField_2" />
  * </Form>
  */
-export function getUseField<T1 = unknown, FormType1 extends FormData = FormData, I1 = T1>(
+export function getUseField<T1 = unknown, FormType1 = FormData, I1 = T1>(
   partialProps: Partial<Props<T1, FormType1, I1>>
 ) {
-  return function <T2 = T1, FormType2 extends FormData = FormType1, I2 = I1>(
+  return function <T2 = T1, FormType2 = FormType1, I2 = I1>(
     props: Partial<Props<T2, FormType2, I2>>
   ) {
     const componentProps = { ...partialProps, ...props } as Props<T2, FormType2, I2>;

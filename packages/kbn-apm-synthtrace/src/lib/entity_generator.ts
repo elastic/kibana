@@ -11,13 +11,10 @@ import { EntityStreams } from './entity_streams';
 import { EntityIterable } from './entity_iterable';
 import { Serializable } from './serializable';
 
-// @ts-expect-error
 export class EntityGenerator<TField> implements EntityIterable<TField> {
-  // @ts-expect-error
   private readonly _gen: () => Generator<Serializable<TField>>;
   constructor(
     private readonly interval: Interval,
-    // @ts-expect-error
     dataGenerator: (interval: Interval) => Generator<Serializable<TField>>
   ) {
     this._order = interval.from > interval.to ? 'desc' : 'asc';
@@ -46,14 +43,11 @@ export class EntityGenerator<TField> implements EntityIterable<TField> {
     return this._order;
   }
 
-  // @ts-expect-error
   toArray(): TField[] {
     return Array.from(this);
   }
 
-  // @ts-expect-error
   merge(...iterables: Array<EntityIterable<TField>>): EntityStreams<TField> {
-    // @ts-expect-error
     return new EntityStreams([this, ...iterables]);
   }
 

@@ -57,7 +57,7 @@ export interface SupplementalEventFormOption<T extends OperatingSystem> {
   tooltipText?: string;
   beta?: boolean;
   indented?: boolean;
-  isDisabled?(uiPolicyConfig: UIPolicyConfig): boolean;
+  isDisabled?(policyConfig: UIPolicyConfig): boolean;
 }
 
 export interface EventsFormProps<T extends OperatingSystem> {
@@ -120,7 +120,6 @@ const InnerEventsForm = <T extends OperatingSystem>({
             key={String(protectionField)}
             id={htmlIdGenerator()()}
             label={name}
-            // @ts-expect-error
             data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
             checked={selection[protectionField]}
             onChange={(event) => onValueSelection(protectionField, event.target.checked)}
@@ -165,7 +164,6 @@ const InnerEventsForm = <T extends OperatingSystem>({
                     <EuiCheckbox
                       id={htmlIdGenerator()()}
                       label={name}
-                      // @ts-expect-error
                       data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
                       checked={selection[protectionField]}
                       onChange={(event) => onValueSelection(protectionField, event.target.checked)}

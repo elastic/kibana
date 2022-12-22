@@ -81,7 +81,6 @@ export function getSessionIndexSettings({
   indexName: string;
   aliasName: string;
 }): IndicesCreateRequest {
-  // @ts-expect-error
   return Object.freeze({
     index: indexName,
     settings: {

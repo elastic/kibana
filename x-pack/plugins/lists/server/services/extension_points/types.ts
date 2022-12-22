@@ -177,20 +177,21 @@ export type ExtensionPointCallbackDataArgument = UnionToIntersection<
   Parameters<ExtensionPoint['callback']>[0]['data']
 >;
 
-type ExtensionPointDataArg<T extends ExtensionPoint['type']> = Parameters<
-  NarrowExtensionPointToType<T>['callback']
->[0]['data'];
-
 export interface ExtensionPointStorageClientInterface {
   get<T extends ExtensionPoint['type']>(
     extensionType: T
   ): Set<NarrowExtensionPointToType<T>> | undefined;
-  pipeRun<T extends ExtensionPoint['type']>(
+
+  pipeRun<
+    T extends ExtensionPoint['type'],
+    D extends NarrowExtensionPointToType<T> = NarrowExtensionPointToType<T>,
+    P extends Parameters<D['callback']> = Parameters<D['callback']>
+  >(
     extensionType: T,
-    initialCallbackInput: ExtensionPointDataArg<T>,
+    initialCallbackInput: P[0]['data'],
     callbackContext: ServerExtensionCallbackContext,
-    callbackResponseValidator?: (data: ExtensionPointDataArg<T>) => Error | undefined
-  ): Promise<ExtensionPointDataArg<T>>;
+    callbackResponseValidator?: (data: P[0]['data']) => Error | undefined
+  ): Promise<P[0]['data']>;
 }
 
 export interface ExtensionPointStorageInterface {

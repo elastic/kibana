@@ -38,7 +38,6 @@ export interface ArgumentSpec<ArgumentConfig = {}> {
     domNode: HTMLElement,
     config: ArgumentConfig,
     handlers: ArgumentHandlers,
-    // @ts-expect-error
     onMount: (ref: UpdatePropsRef<ArgumentConfig> | null) => void
   ) => void;
   /**
@@ -49,7 +48,6 @@ export interface ArgumentSpec<ArgumentConfig = {}> {
     domNode: HTMLElement,
     config: ArgumentConfig,
     handlers: ArgumentHandlers,
-    // @ts-expect-error
     onMount: (ref: UpdatePropsRef<ArgumentConfig> | null) => void
   ) => void;
 }

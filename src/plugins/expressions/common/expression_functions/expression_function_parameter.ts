@@ -46,7 +46,6 @@ export class ExpressionFunctionParameter<T = unknown> {
   }
 
   accepts(type: string) {
-    // @ts-expect-error
     return !this.types?.length || this.types.includes(type as KnownTypeToString<T>);
   }
 }

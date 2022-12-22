@@ -24,7 +24,6 @@ export function debouncedComponent<TProps>(component: FunctionComponent<TProps>,
     useEffect(() => () => debouncePropsChange.cancel(), [debouncePropsChange]);
     debouncePropsChange(props);
 
-    // @ts-expect-error
     return React.createElement(MemoizedComponent, cachedProps);
   };
 }

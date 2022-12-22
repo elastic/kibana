@@ -29,7 +29,6 @@ describe('AccordionList', () => {
   it('renders as an accordion with the passed in title and icon', () => {
     expect(wrapper.is(EuiAccordion)).toBe(true);
 
-    // @ts-expect-error
     const buttonContent = shallow(wrapper.prop('buttonContent'));
 
     expect(buttonContent.find(EuiIcon).prop('type')).toEqual('globe');
@@ -37,7 +36,6 @@ describe('AccordionList', () => {
   });
 
   it('shows the item count', () => {
-    // @ts-expect-error
     const extraActionContent = shallow(wrapper.prop('extraAction'));
 
     expect(extraActionContent.text()).toEqual('2');

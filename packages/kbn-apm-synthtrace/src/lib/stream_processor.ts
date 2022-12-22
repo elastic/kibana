@@ -246,18 +246,14 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
 
 export async function* streamProcessAsync<TFields>(
   processors: Array<(events: TFields[]) => TFields[]>,
-  // @ts-expect-error
   ...eventSources: Array<EntityIterable<TFields>>
 ) {
-  // @ts-expect-error
   return new StreamProcessor({ processors }).streamAsync(...eventSources);
 }
 
 export function streamProcessToArray<TFields>(
   processors: Array<(events: TFields[]) => TFields[]>,
-  // @ts-expect-error
   ...eventSources: Array<EntityIterable<TFields>>
 ) {
-  // @ts-expect-error
   return new StreamProcessor({ processors }).streamToArray(...eventSources);
 }

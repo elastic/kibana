@@ -20,10 +20,8 @@ export const unionWithNullType = <T extends runtimeTypes.Mixed>(type: T) =>
 export const stringEnum = <T>(enumObj: T, enumName = 'enum') =>
   new runtimeTypes.Type<T[keyof T], string>(
     enumName,
-    // @ts-expect-error parameter needs a constraint
     (u): u is T[keyof T] => Object.values(enumObj).includes(u),
     (u, c) =>
-      // @ts-expect-error parameter needs a constraint
       Object.values(enumObj).includes(u)
         ? runtimeTypes.success(u as T[keyof T])
         : runtimeTypes.failure(u, c),

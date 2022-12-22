@@ -19,7 +19,6 @@ export type {
   ArrayItem,
   FormArrayField,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-
 export {
   getUseField,
   getFieldValidityAndErrorMessage,

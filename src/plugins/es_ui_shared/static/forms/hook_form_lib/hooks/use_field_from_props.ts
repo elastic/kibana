@@ -18,7 +18,7 @@ import { useField, InternalFieldConfig } from './use_field';
  * @returns The field hook and props to forward to component to render for the field
  */
 
-export const useFieldFromProps = <T, FormType extends FormData, I>(
+export const useFieldFromProps = <T, FormType, I>(
   props: UseFieldProps<T, FormType, I>
 ): { field: FieldHook<T, I>; propsToForward: { [x: string]: unknown } } => {
   const form = useFormContext<FormType>();

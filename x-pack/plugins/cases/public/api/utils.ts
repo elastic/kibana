@@ -34,7 +34,6 @@ export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   }, []);
 
 export const convertToCamelCase = <T, U extends {}>(obj: T): U =>
-  // @ts-expect-error
   Object.entries(obj).reduce((acc, [key, value]) => {
     if (isArray(value)) {
       set(acc, camelCase(key), convertArrayToCamelCase(value));

@@ -69,11 +69,7 @@ export const EntSearchOverviewPage: React.FC<ComponentProps> = ({ clusters }) =>
       data-test-subj="entSearchOverviewPage"
     >
       <div data-test-subj="entSearchOverviewPage">
-        // @ts-expect-error
-        {
-          // @ts-expect-error
-          data && <EnterpriseSearchOverview {...data} onBrush={onBrush} zoomInfo={zoomInfo} />
-        }
+        {data && <EnterpriseSearchOverview {...data} onBrush={onBrush} zoomInfo={zoomInfo} />}
       </div>
     </EntSearchTemplate>
   );

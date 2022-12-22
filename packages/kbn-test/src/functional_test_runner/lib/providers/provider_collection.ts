@@ -17,7 +17,7 @@ import { GenericFtrService } from '../../public_types';
 export class ProviderCollection {
   static callProviderFn(providerFn: any, ctx: any) {
     if (providerFn.prototype instanceof GenericFtrService) {
-      const Constructor = providerFn as any as new (providerCtx: any) => any;
+      const Constructor = providerFn as any as new (ctx: any) => any;
       return new Constructor(ctx);
     }
 

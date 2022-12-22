@@ -68,9 +68,7 @@ export class MockRouter {
     const payloads = Object.keys(request) as PayloadType[];
 
     payloads.forEach((payload: PayloadType) => {
-      const payloadValidation = validate[payload] as {
-        validate(kibanaRequest: KibanaRequest): void;
-      };
+      const payloadValidation = validate[payload] as { validate(request: KibanaRequest): void };
       const payloadRequest = request[payload] as KibanaRequest;
 
       payloadValidation.validate(payloadRequest);

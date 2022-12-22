@@ -56,7 +56,6 @@ export function useConfirmModal() {
 export function withConfirmModalProvider<T>(WrappedComponent: React.FunctionComponent<T>) {
   return (props: T) => (
     <ConfirmModalProvider>
-      {/* @ts-expect-error */}
       <WrappedComponent {...props} />
     </ConfirmModalProvider>
   );

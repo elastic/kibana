@@ -986,13 +986,11 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       ) {
         const updater = layerIds.reduce(
           (acc, layerId) =>
-            // @ts-expect-error
             activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
           state.visualization.state
         );
 
         state.visualization.state =
-          // @ts-expect-error
           typeof updater === 'function' ? updater(current(state.visualization.state)) : updater;
       }
       layerIds.forEach((layerId) => {

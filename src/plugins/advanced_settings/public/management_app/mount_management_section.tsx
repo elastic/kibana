@@ -76,11 +76,7 @@ export async function mountManagementSection(
         <Router history={params.history}>
           <Switch>
             {/* TODO: remove route param (`query`) in 7.13 */}
-            <Route path={`/:${QUERY}`}>
-              {(props: RouteChildrenProps<{ query: string }, any>) => (
-                <Redirect to={redirectUrl(props)} />
-              )}
-            </Route>
+            <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
             <Route path="/">
               <AdvancedSettings
                 history={params.history}

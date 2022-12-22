@@ -41,7 +41,6 @@ export function manageQuery<T>(
     });
 
     const otherProps = omit(['refetch', 'setQuery'], props);
-    // @ts-expect-error
     return <WrappedComponent {...(otherProps as T)} />;
   };
 

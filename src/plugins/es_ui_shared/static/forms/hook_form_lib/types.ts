@@ -97,7 +97,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: <
     FieldType = unknown,
-    FormType extends FormData = FormData,
+    FormType = FormData,
     InternalFieldType = FieldType
   >(
     fieldPath: string

@@ -9,9 +9,7 @@
 import { EntityIterable } from './entity_iterable';
 import { merge } from './utils/merge_iterable';
 
-// @ts-expect-error
 export class EntityStreams<TFields> implements EntityIterable<TFields> {
-  // @ts-expect-error
   constructor(private readonly dataGenerators: Array<EntityIterable<TFields>>) {
     const orders = new Set<'desc' | 'asc'>(dataGenerators.map((d) => d.order()));
     if (orders.size > 1) throw Error('Can only combine intervals with the same order()');
@@ -32,30 +30,24 @@ export class EntityStreams<TFields> implements EntityIterable<TFields> {
     return this._ratePerMinute;
   }
 
-  // @ts-expect-error
   toArray(): TFields[] {
     return Array.from(this);
   }
 
-  // @ts-expect-error
   merge(...iterables: Array<EntityIterable<TFields>>): EntityStreams<TFields> {
     return new EntityStreams([...this.dataGenerators, ...iterables]);
   }
 
   *[Symbol.iterator](): Iterator<TFields> {
-    // @ts-expect-error
     const iterator = merge(this.dataGenerators);
     for (const fields of iterator) {
-      // @ts-expect-error
       yield fields;
     }
   }
 
   async *[Symbol.asyncIterator](): AsyncIterator<TFields> {
-    // @ts-expect-error
     const iterator = merge(this.dataGenerators);
     for await (const fields of iterator) {
-      // @ts-expect-error
       yield fields;
     }
   }

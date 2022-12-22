@@ -44,7 +44,6 @@ export class QueryContext {
   }
 
   async search<TParams>(params: TParams, operationName?: string) {
-    // @ts-expect-error
     return this.callES.search(params, operationName);
   }
 

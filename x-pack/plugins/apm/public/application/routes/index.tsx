@@ -9,7 +9,6 @@ import { RouteComponentProps, RouteProps } from 'react-router-dom';
 
 export type BreadcrumbTitle<T = {}> =
   | string
-  // @ts-expect-error
   | ((props: RouteComponentProps<T>) => string)
   | null;
 

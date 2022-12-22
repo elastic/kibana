@@ -118,7 +118,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
       throw new SecuritySolutionInvalidExperimentalValue(`[${value}] is not valid.`);
     }
 
-    enabledFeatures[value] = true;
+    enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 
   return {

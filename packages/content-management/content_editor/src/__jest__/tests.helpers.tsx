@@ -32,7 +32,6 @@ export function WithServices<P>(Comp: ComponentType<P>, overrides: Partial<Servi
     const services = getMockServices(overrides);
     return (
       <ContentEditorProvider {...services}>
-        {/* @ts-expect-error */}
         <Comp {...props} />
       </ContentEditorProvider>
     );

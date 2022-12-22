@@ -19,7 +19,6 @@ import uuid from 'uuid';
  */
 type NotArray<T> = T extends unknown[] ? never : T;
 export const addIdToItem = <T>(item: NotArray<T>): T => {
-  // @ts-expect-error
   const maybeId: typeof item & { id?: string } = item;
   if (maybeId.id != null) {
     return item;
@@ -42,7 +41,6 @@ export const removeIdFromItem = <T>(
       },
       Exclude<keyof T, 'id'>
     > => {
-  // @ts-expect-error
   const maybeId: typeof item & { id?: string } = item;
   if (maybeId.id != null) {
     const { id, ...noId } = maybeId;

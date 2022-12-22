@@ -72,7 +72,6 @@ import type { initFunctions as initClientFunctions } from '../public/functions';
  */
 // prettier-ignore
 export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Output> =
-  // @ts-expect-error
   () => ExpressionFunctionDefinition<Name, Input, Arguments, Output>
 
 /**
@@ -84,7 +83,6 @@ export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Out
 // prettier-ignore
 export type FunctionFactory<FnFactory> =
   FnFactory extends ExpressionFunctionFactory<infer Name, infer Input, infer Arguments, infer Output> ?
-    // @ts-expect-error
     ExpressionFunctionDefinition<Name, Input, Arguments, Awaited<Output>> :
     never;
 

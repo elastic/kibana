@@ -41,7 +41,6 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
       throw new TriggersActionsUIInvalidExperimentalValue(`[${value}] is not valid.`);
     }
 
-    // @ts-expect-error
     enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 

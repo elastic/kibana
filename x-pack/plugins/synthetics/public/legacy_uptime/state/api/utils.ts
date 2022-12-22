@@ -53,7 +53,6 @@ class ApiService {
       asResponse,
     });
 
-    // @ts-expect-error
     this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
 
     if (decodeType) {
@@ -81,7 +80,6 @@ class ApiService {
       query: params,
     });
 
-    // @ts-expect-error
     this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
 
     if (decodeType) {

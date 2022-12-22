@@ -27,7 +27,6 @@ export const findPotentialMatches = async (
   const { body: queryResult } = await query(queryContext, searchAfter, size);
   const monitorIds: string[] = [];
 
-  // @ts-expect-error
   (queryResult.aggregations?.monitors.buckets ?? []).forEach((b: any) => {
     const monitorId = b.key.monitor_id;
     monitorIds.push(monitorId as string);
@@ -35,7 +34,6 @@ export const findPotentialMatches = async (
 
   return {
     monitorIds,
-    // @ts-expect-error
     searchAfter: queryResult.aggregations?.monitors?.after_key,
   };
 };

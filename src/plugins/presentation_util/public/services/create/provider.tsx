@@ -18,7 +18,6 @@ import { PluginServiceFactory } from './factory';
  */
 export type PluginServiceProviders<Services, StartParameters = {}> = {
   [K in keyof Services]: PluginServiceProvider<
-    // @ts-expect-error
     Services[K],
     StartParameters,
     Services,
