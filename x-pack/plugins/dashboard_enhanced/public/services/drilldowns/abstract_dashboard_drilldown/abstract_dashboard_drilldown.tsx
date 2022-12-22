@@ -14,10 +14,7 @@ import {
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
   UiActionsEnhancedDrilldownDefinition as Drilldown,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import {
-  CollectConfigProps,
-  StartServicesGetter,
-} from '@kbn/kibana-utils-plugin/public';
+import { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DrilldownConfig } from '../../../../common/drilldowns/dashboard_drilldown/types';
 import { CollectConfigContainer } from './components';
 import { txtGoToDashboard } from './i18n';

@@ -11,9 +11,7 @@ import { useContainerState } from '@kbn/kibana-utils-plugin/public';
 import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
 import { txtDisplayName } from './i18n';
 
-export const MenuItem = ({
-  context,
-}: { context: EnhancedEmbeddableContext }) => {
+export const MenuItem = ({ context }: { context: EnhancedEmbeddableContext }) => {
   const { events } = useContainerState(context.embeddable.enhancements.dynamicActions.state);
   const count = events.length;
 
