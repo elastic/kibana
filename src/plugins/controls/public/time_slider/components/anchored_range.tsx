@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Ref } from 'react';
+import React from 'react';
 import { EuiRange, EuiRangeTick } from '@elastic/eui';
 
 interface Props {

@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { EuiFieldNumber, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
@@ -32,15 +32,13 @@ export const SettingsForm: FC = (props: Props) => {
   function onChange(e) {
     const newIsChecked = e.target.checked;
     if (newIsChecked) {
-      props.onChange([props.timeRangeMin, props.value[1]])
+      props.onChange([props.timeRangeMin, props.value[1]]);
     }
-    dispatch(setIsAnchored({ isAnchored: newIsChecked }))
+    dispatch(setIsAnchored({ isAnchored: newIsChecked }));
   }
 
   return (
-    <EuiFormRow
-      display="columnCompressed"
-    >
+    <EuiFormRow display="columnCompressed">
       <EuiSwitch
         label={i18n.translate('controls.timeSlider.settings.anchorStartSwitchLabel', {
           defaultMessage: 'Anchor start',

@@ -24,5 +24,7 @@ export function getRoundedTimeRangeBounds(state: TimeSliderReduxState): [number,
 }
 
 export function getIsAnchored(state: TimeSliderReduxState): boolean {
-  return typeof state.explicitInput.isAnchored === 'boolean' ? state.explicitInput.isAnchored : false;
+  return typeof state.explicitInput.isAnchored === 'boolean'
+    ? state.explicitInput.isAnchored
+    : false;
 }
