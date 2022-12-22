@@ -28,11 +28,6 @@ export interface RuleEcs {
   tags?: string[];
   threat?: unknown;
   threshold?: unknown;
-  // according to SecuritySolution's ECS it's unknown - and I don't need conflicts between these 2 types
-  // threshold?: {
-  //   field: string | string[];
-  //   value: number;
-  // };
   type?: string[];
   size?: string[];
   to?: string[];

@@ -30,6 +30,8 @@ export interface OsqueryFlyoutProps {
   ecsData?: Ecs;
 }
 
+const ACTIONS_QUERY_KEY = 'actions';
+
 const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
   agentId,
   defaultValues,
@@ -43,7 +45,7 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
 
   const invalidateQueries = useCallback(() => {
     queryClient.invalidateQueries({
-      queryKey: ['actions', { alertId: defaultValues?.alertIds?.[0] }],
+      queryKey: [ACTIONS_QUERY_KEY, { alertId: defaultValues?.alertIds?.[0] }],
     });
   }, [defaultValues?.alertIds, queryClient]);
 

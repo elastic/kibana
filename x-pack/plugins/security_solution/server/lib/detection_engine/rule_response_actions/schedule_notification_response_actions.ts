@@ -21,6 +21,7 @@ interface AlertsWithAgentType {
   agents: string[];
   alertIds: string[];
 }
+const CONTAINS_DYNAMIC_PARAMETER_REGEX = /\{{([^}]+)\}}/g; // when there are 2 opening and 2 closing curly brackets (including brackets)
 
 export const scheduleNotificationResponseActions = (
   { signals, responseActions }: ScheduleNotificationActions,
@@ -45,14 +46,13 @@ export const scheduleNotificationResponseActions = (
   );
   const agentIds = uniq(agents);
 
-  const containsDynamicParameterRegex = /\{{([^}]+)\}}/g; // when there are 2 opening and 2 closing curly brackets (including brackets)
-  responseActions.forEach((responseAction) => {
+  each(responseActions, (responseAction) => {
     if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
       const temporaryQueries = responseAction.params.queries?.length
         ? responseAction.params.queries
         : [{ query: responseAction.params.query }];
       const containsDynamicQueries = some(temporaryQueries, (query) => {
-        return query.query ? containsDynamicParameterRegex.test(query.query) : false;
+        return query.query ? CONTAINS_DYNAMIC_PARAMETER_REGEX.test(query.query) : false;
       });
       const { savedQueryId, packId, queries, ecsMapping, ...rest } = responseAction.params;
 

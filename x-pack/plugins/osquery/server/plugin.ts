@@ -94,10 +94,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     return {
       osqueryCreateAction: (params: CreateLiveQueryRequestBodySchema, ecsData?: Ecs) =>
-        createActionHandler(osqueryContext, params, { ecsData }).catch((error) =>
-          // eslint-disable-next-line no-console
-          console.log(error)
-        ),
+        createActionHandler(osqueryContext, params, { ecsData }),
     };
   }
 

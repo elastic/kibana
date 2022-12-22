@@ -26,6 +26,8 @@ export interface UseAllLiveQueriesConfig {
   alertId?: string;
 }
 
+const ACTIONS_QUERY_KEY = 'actions';
+
 export const useAllLiveQueries = ({
   activePage,
   direction = Direction.desc,
@@ -39,7 +41,10 @@ export const useAllLiveQueries = ({
   const setErrorToast = useErrorToast();
 
   return useQuery(
-    ['actions', { activePage, direction, limit, sortField, ...(alertId ? { alertId } : {}) }],
+    [
+      ACTIONS_QUERY_KEY,
+      { activePage, direction, limit, sortField, ...(alertId ? { alertId } : {}) },
+    ],
     () =>
       http.get<{ data: Omit<ActionsStrategyResponse, 'edges'> & { items: ActionEdges } }>(
         '/api/osquery/live_queries',

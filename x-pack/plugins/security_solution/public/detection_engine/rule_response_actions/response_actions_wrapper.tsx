@@ -49,7 +49,7 @@ export const ResponseActionsWrapper = React.memo(
     }, [context, items.length]);
 
     return (
-      <div data-test-subj={'response-actions-wrapper'}>
+      <div data-test-subj="response-actions-wrapper">
         <ResponseActionsList items={items} removeItem={removeItem} />
         {renderButton}
       </div>

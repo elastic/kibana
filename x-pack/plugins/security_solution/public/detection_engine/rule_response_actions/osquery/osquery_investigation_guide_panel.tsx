@@ -13,46 +13,47 @@ interface OsqueryInvestigationGuidePanelProps {
   onClick: () => void;
 }
 
-export const OsqueryInvestigationGuidePanel: React.FC<OsqueryInvestigationGuidePanelProps> = ({
-  onClick,
-}) => {
-  const [hideInvestigationGuideSuggestion, setHideInvestigationGuideSuggestion] = useState(false);
+export const OsqueryInvestigationGuidePanel: React.FC<OsqueryInvestigationGuidePanelProps> =
+  React.memo(({ onClick }) => {
+    const [hideInvestigationGuideSuggestion, setHideInvestigationGuideSuggestion] = useState(false);
 
-  const handleClick = useCallback(() => {
-    onClick();
-    setHideInvestigationGuideSuggestion(true);
-  }, [onClick]);
+    const handleClick = useCallback(() => {
+      onClick();
+      setHideInvestigationGuideSuggestion(true);
+    }, [onClick]);
 
-  if (hideInvestigationGuideSuggestion) {
-    return null;
-  }
-  return (
-    <EuiPanel color={'primary'} paddingSize={'xs'} css={{ marginBottom: '16px' }}>
-      <EuiFlexGroup direction={'row'} alignItems={'center'} css={{ padding: `0 24px` }}>
-        <EuiFlexItem grow={true}>
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.securitySolution.responseActionsList.investigationGuideSuggestion"
-              defaultMessage="It seems that you have suggested queries in investigation guide, would you like to add them as response actions?"
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size={'m'}
-            color={'primary'}
-            onClick={handleClick}
-            data-test-subj={'osqueryAddInvestigationGuideQueries'}
-          >
+    if (hideInvestigationGuideSuggestion) {
+      return null;
+    }
+    return (
+      <EuiPanel color={'primary'} paddingSize={'xs'} css={{ marginBottom: '16px' }}>
+        <EuiFlexGroup direction={'row'} alignItems={'center'} css={{ padding: `0 24px` }}>
+          <EuiFlexItem grow={true}>
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.securitySolution.responseActionsList.addButton"
-                defaultMessage="Add"
+                id="xpack.securitySolution.responseActionsList.investigationGuideSuggestion"
+                defaultMessage="It seems that you have suggested queries in investigation guide, would you like to add them as response actions?"
               />
             </EuiText>
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size={'m'}
+              color={'primary'}
+              onClick={handleClick}
+              data-test-subj={'osqueryAddInvestigationGuideQueries'}
+            >
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.securitySolution.responseActionsList.addButton"
+                  defaultMessage="Add"
+                />
+              </EuiText>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  });
+
+OsqueryInvestigationGuidePanel.displayName = 'OsqueryInvestigationGuidePanel';

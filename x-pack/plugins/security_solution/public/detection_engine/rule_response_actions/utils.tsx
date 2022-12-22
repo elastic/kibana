@@ -8,7 +8,6 @@
 import unified from 'unified';
 import markdown from 'remark-parse';
 import { filter, reduce } from 'lodash';
-import uuid from 'uuid';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import type { RuleResponseAction } from '../../../common/detection_engine/rule_response_actions/schemas';
@@ -37,7 +36,6 @@ export const getResponseActionsFromNote = (
   return reduce(
     osqueryQueries,
     (acc: { responseActions: RuleResponseAction[] }, { configuration }: OsqueryNoteQuery) => {
-      const uniqueId = uuid.v4();
       const responseActionPath = 'responseActions';
       acc[responseActionPath].push({
         actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
@@ -47,7 +45,6 @@ export const getResponseActionsFromNote = (
           queries: undefined,
           query: configuration.query,
           ecsMapping: configuration.ecs_mapping,
-          id: uniqueId,
         },
       });
 
