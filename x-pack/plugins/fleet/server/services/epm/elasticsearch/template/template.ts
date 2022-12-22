@@ -14,6 +14,7 @@ import type {
   IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
+  RegistryElasticsearch,
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
@@ -62,20 +63,23 @@ export function getTemplate({
   composedOfTemplates,
   templatePriority,
   hidden,
+  registryElasticsearch,
 }: {
   templateIndexPattern: string;
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
   hidden?: boolean;
+  registryElasticsearch: RegistryElasticsearch | undefined;
 }): IndexTemplate {
-  const template = getBaseTemplate(
+  const template = getBaseTemplate({
     templateIndexPattern,
     packageName,
     composedOfTemplates,
     templatePriority,
-    hidden
-  );
+    registryElasticsearch,
+    hidden,
+  });
   if (template.template.settings.index.final_pipeline) {
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
@@ -470,14 +474,28 @@ const flattenFieldsToNameAndType = (
   return newFields;
 };
 
-function getBaseTemplate(
-  templateIndexPattern: string,
-  packageName: string,
-  composedOfTemplates: string[],
-  templatePriority: number,
-  hidden?: boolean
-): IndexTemplate {
+function getBaseTemplate({
+  templateIndexPattern,
+  packageName,
+  composedOfTemplates,
+  templatePriority,
+  hidden,
+  registryElasticsearch,
+}: {
+  templateIndexPattern: string;
+  packageName: string;
+  composedOfTemplates: string[];
+  templatePriority: number;
+  hidden?: boolean;
+  registryElasticsearch: RegistryElasticsearch | undefined;
+}): IndexTemplate {
   const _meta = getESAssetMetadata({ packageName });
+
+  const isIndexModeTimeSeries = registryElasticsearch?.index_mode === 'time_series';
+
+  if (isIndexModeTimeSeries) {
+    // TODO here
+  }
 
   return {
     priority: templatePriority,

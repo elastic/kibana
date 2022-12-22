@@ -281,6 +281,9 @@ export function buildComponentTemplates(params: {
     (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
   );
 
+  const isIndexModeSyntheticEnabled = false;
+  // index_mode: time_series
+
   const sourceModeSynthetic =
     params.experimentalDataStreamFeature?.features.synthetic_source !== false &&
     (params.experimentalDataStreamFeature?.features.synthetic_source === true ||
@@ -517,6 +520,7 @@ export function prepareTemplate({
     composedOfTemplates: Object.keys(componentTemplates),
     templatePriority,
     hidden: dataStream.hidden,
+    registryElasticsearch: dataStream.elasticsearch,
   });
 
   return {
