@@ -31,12 +31,12 @@ const UI_SETTINGS = {
 } as const;
 
 import { i18n } from '@kbn/i18n';
-import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+// import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState } from '@kbn/ml-url-state';
 
 import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../../hooks/use_time_filter';
-import { useDataVisualizerKibana } from '../../hooks/kibana_context';
+import { useKibanaDatePicker } from '../../hooks/kibana_context';
 import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5000;
@@ -82,7 +82,7 @@ export const DatePickerWrapper: FC<{ isAutoRefreshOnly?: boolean; showRefresh?: 
   const {
     services,
     notifications: { toasts },
-  } = useDataVisualizerKibana();
+  } = useKibanaDatePicker();
   const config = services.uiSettings;
   const theme$ = services.theme.theme$;
 
@@ -157,23 +157,23 @@ export const DatePickerWrapper: FC<{ isAutoRefreshOnly?: boolean; showRefresh?: 
               'The refresh interval in the URL is shorter than the minimum supported by Machine Learning.',
           }
         ),
-        body: wrapWithTheme(
-          <EuiButton
-            onClick={setRefreshInterval.bind(null, {
-              pause: refreshInterval.pause,
-              value: DEFAULT_REFRESH_INTERVAL_MS,
-            })}
-          >
-            <FormattedMessage
-              id="xpack.dataVisualizer.index.pageRefreshResetButton"
-              defaultMessage="Set to {defaultInterval}"
-              values={{
-                defaultInterval: `${DEFAULT_REFRESH_INTERVAL_MS / 1000}s`,
-              }}
-            />
-          </EuiButton>,
-          theme$
-        ),
+        // body: wrapWithTheme(
+        //   <EuiButton
+        //     onClick={setRefreshInterval.bind(null, {
+        //       pause: refreshInterval.pause,
+        //       value: DEFAULT_REFRESH_INTERVAL_MS,
+        //     })}
+        //   >
+        //     <FormattedMessage
+        //       id="xpack.dataVisualizer.index.pageRefreshResetButton"
+        //       defaultMessage="Set to {defaultInterval}"
+        //       values={{
+        //         defaultInterval: `${DEFAULT_REFRESH_INTERVAL_MS / 1000}s`,
+        //       }}
+        //     />
+        //   </EuiButton>,
+        //   theme$
+        // ),
         toastLifeTimeMs: 30000,
       });
     },

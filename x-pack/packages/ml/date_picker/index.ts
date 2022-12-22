@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { DatePickerWrapper } from './src/components/date_picker_wrapper';
