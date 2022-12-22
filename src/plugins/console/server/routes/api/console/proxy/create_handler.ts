@@ -159,16 +159,6 @@ export const createHandler =
           agent,
         });
 
-        // check if the request is to the _reindex endpoint and the response is a 401
-        // if so, we need to return a 403 to the user to prevent them from being logged out
-        // this is due to the http interceptor in kibana that will log the user out if they receive a 401
-        // see https://github.com/elastic/kibana/issues/140536
-        if (isPathToReindex(path) && esIncomingMessage.statusCode === 401) {
-          return response.forbidden({
-            body: 'Unable to reindex. Please check your credentials and try again.',
-          });
-        }
-
         break;
       } catch (e) {
         // If we reached here it means we hit a lower level network issue than just, for e.g., a 500.
@@ -179,6 +169,10 @@ export const createHandler =
           return response.customError({
             statusCode: 502,
             body: e,
+            headers: {
+              'X-Kibana-Console-Status-Code': '502',
+              'X-Kibana-Console-Status-Text': 'Bad Gateway',
+            },
           });
         }
         // Otherwise, try the next host...
@@ -191,22 +185,18 @@ export const createHandler =
       headers: { warning },
     } = esIncomingMessage!;
 
-    if (method.toUpperCase() !== 'HEAD') {
-      return response.custom({
-        statusCode: statusCode!,
-        body: esIncomingMessage!,
-        headers: {
-          warning: warning || '',
-        },
-      });
-    }
-
-    return response.custom({
-      statusCode: statusCode!,
-      body: `${statusCode} - ${statusMessage}`,
+    const isHeadRequest = method.toUpperCase() === 'HEAD';
+    return response.ok({
+      body: isHeadRequest ? `${statusCode} - ${statusMessage}` : esIncomingMessage!,
       headers: {
         warning: warning || '',
-        'Content-Type': 'text/plain',
+        // We need to set the status code and status text as headers so that the client can access them
+        // in the response. This is needed because the client is using them to show the status of the request
+        // in the UI. By sending them as headers we avoid logging out users if the status code is 403. E.g.
+        // if the user is not authorized to access the cluster, we don't want to log them out. (See https://github.com/elastic/kibana/issues/140536)
+        'X-Kibana-Console-Status-Code': String(statusCode) || '',
+        'X-Kibana-Console-Status-Text': statusMessage || '',
+        ...(isHeadRequest && { 'Content-Type': 'text/plain' }),
       },
     });
   };

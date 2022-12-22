@@ -79,59 +79,63 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           asResponse: true,
         });
 
+        const statusCode = parseInt(
+          response?.headers.get('X-Kibana-Console-Status-Code') ?? '500',
+          10
+        );
+        const statusText = response?.headers.get('X-Kibana-Console-Status-Text') ?? 'error';
+
         if (reqId !== CURRENT_REQ_ID) {
           // Skip if previous request is not resolved yet. This can happen when issuing multiple requests at the same time and with slow networks
           return;
         }
 
         if (response) {
-          const isSuccess =
-            // Things like DELETE index where the index is not there are OK.
-            (response.status >= 200 && response.status < 300) || response.status === 404;
-
-          if (isSuccess) {
-            let value;
-            // check if object is ArrayBuffer
-            if (body instanceof ArrayBuffer) {
-              value = body;
-            } else {
-              value = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
-            }
-
-            const warnings = response.headers.get('warning');
-            if (warnings) {
-              const warningMessages = extractWarningMessages(warnings);
-              value = warningMessages.join('\n') + '\n' + value;
-            }
-
-            if (isMultiRequest) {
-              value = `# ${req.method} ${req.url} ${response.status} ${response.statusText}\n${value}`;
-            }
-
-            results.push({
-              response: {
-                timeMs: Date.now() - startTime,
-                statusCode: response.status,
-                statusText: response.statusText,
-                contentType: getContentType(response),
-                value,
-              },
-              request: {
-                data,
-                method,
-                path,
-              },
-            });
-
-            // single request terminate via sendNextRequest as well
-            await sendNextRequest();
+          let value;
+          // check if object is ArrayBuffer
+          if (body instanceof ArrayBuffer) {
+            value = body;
+          } else {
+            value = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
           }
+
+          const warnings = response.headers.get('warning');
+          if (warnings) {
+            const warningMessages = extractWarningMessages(warnings);
+            value = warningMessages.join('\n') + '\n' + value;
+          }
+
+          if (isMultiRequest) {
+            value = `# ${req.method} ${req.url} ${statusCode} ${statusText}\n${value}`;
+          }
+
+          results.push({
+            response: {
+              timeMs: Date.now() - startTime,
+              statusCode,
+              statusText,
+              contentType: getContentType(response),
+              value,
+            },
+            request: {
+              data,
+              method,
+              path,
+            },
+          });
+
+          // single request terminate via sendNextRequest as well
+          await sendNextRequest();
         }
       } catch (error) {
         let value;
         const { response, body } = error as IHttpFetchError;
-        const statusCode = response?.status ?? 500;
-        const statusText = response?.statusText ?? 'error';
+
+        const statusCode = parseInt(
+          response?.headers.get('X-Kibana-Console-Status-Code') ?? '500',
+          10
+        );
+        const statusText = response?.headers.get('X-Kibana-Console-Status-Text') ?? 'error';
 
         if (body) {
           value = JSON.stringify(body, null, 2);
