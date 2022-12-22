@@ -21,7 +21,7 @@ interface RunTestsOpts {
  */
 export function getTestRunner(opts: RunTestsOpts) {
   const archives = [
-    // { path: `${opts.archiveRoot}/metricbeat`, variant: 'Metricbeat (.monitoring-*)' },
+    { path: `${opts.archiveRoot}/metricbeat`, variant: 'Metricbeat (.monitoring-*)' },
     { path: `${opts.archiveRoot}/package`, variant: 'Package (metrics-*)' },
   ];
   const { setup, tearDown } = getLifecycleMethods(opts.getService);
