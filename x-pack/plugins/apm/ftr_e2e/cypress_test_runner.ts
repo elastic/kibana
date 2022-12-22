@@ -52,6 +52,12 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
     await kibanaClient.fetchLatestApmPackageVersion()
   );
 
+  const kibanaUrlWithoutAuth = Url.format({
+    protocol: config.get('servers.kibana.protocol'),
+    hostname: config.get('servers.kibana.hostname'),
+    port: config.get('servers.kibana.port'),
+  });
+
   const cypressProjectPath = path.join(__dirname);
   const { open, ...cypressCliArgs } = getCypressCliArgs();
   const cypressExecution = open ? cypress.open : cypress.run;
@@ -60,11 +66,11 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
     project: cypressProjectPath,
     config: {
       e2e: {
-        baseUrl: kibanaUrl,
+        baseUrl: kibanaUrlWithoutAuth,
       },
     },
     env: {
-      KIBANA_URL: kibanaUrl,
+      KIBANA_URL: kibanaUrlWithoutAuth,
       ES_NODE: esNode,
       ES_REQUEST_TIMEOUT: esRequestTimeout,
       TEST_CLOUD: process.env.TEST_CLOUD,
