@@ -157,22 +157,48 @@ export class SampleDataInstaller {
     const index = createIndexName(dataset.id, dataIndex.id);
     try {
       if (dataIndex.isDataStream) {
-        const request = {
+        /*const request = {
           name: index,
           body: {
             template: {
-              settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+              settings: {
+                number_of_shards: 1,
+                auto_expand_replicas: '0-1',
+                'index.mode': 'time_series',
+                'index.routing_path': 'request',
+                'index.time_series.start_time': '2022-11-01T00:00:00.000000Z',
+                'index.time_series.end_time': '2023-05-01T00:00:00.000000Z',
+              },
               mappings: { properties: dataIndex.fields },
             },
             index_patterns: [index],
             data_stream: {},
           },
+        };*/
+
+        const request = {
+          index,
+          body: {
+            settings: {
+              number_of_shards: 1,
+              auto_expand_replicas: '0-1',
+              'index.mode': 'time_series',
+              'index.routing_path': 'request',
+              'index.time_series.start_time': '2022-11-01T00:00:00.000000Z',
+              'index.time_series.end_time': '2023-05-01T00:00:00.000000Z',
+            },
+            mappings: { properties: dataIndex.fields },
+          },
         };
-        await this.esClient.asCurrentUser.indices.putIndexTemplate(request);
+
+        console.log(JSON.stringify(request));
+
+        await this.esClient.asCurrentUser.indices.create(request);
+        /*await this.esClient.asCurrentUser.indices.putIndexTemplate(request);
 
         await this.esClient.asCurrentUser.indices.createDataStream({
           name: index,
-        });
+        });*/
       } else {
         await this.esClient.asCurrentUser.indices.create({
           index,

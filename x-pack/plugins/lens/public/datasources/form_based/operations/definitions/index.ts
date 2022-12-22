@@ -25,6 +25,7 @@ import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
 import { percentileOperation } from './percentile';
 import { percentileRanksOperation } from './percentile_ranks';
+import { rateOperation } from './rate';
 import {
   minOperation,
   averageOperation,
@@ -104,6 +105,7 @@ export type {
 } from './calculations';
 export type { CountIndexPatternColumn } from './count';
 export type { LastValueIndexPatternColumn } from './last_value';
+export type { RateIndexPatternColumn } from './rate';
 export type { RangeIndexPatternColumn } from './ranges';
 export type { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
 export type { StaticValueIndexPatternColumn } from './static_value';
@@ -130,6 +132,7 @@ const internalOperationDefinitions = [
   cumulativeSumOperation,
   counterRateOperation,
   derivativeOperation,
+  rateOperation,
   movingAverageOperation,
   mathOperation,
   formulaOperation,
@@ -169,6 +172,7 @@ export {
 } from './calculations';
 export { formulaOperation } from './formula/formula';
 export { staticValueOperation } from './static_value';
+export { rateOperation } from './rate';
 
 /**
  * Properties passed to the operation-specific part of the popover editor
@@ -489,7 +493,7 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}>
    * Returns the meta data of the operation if applied. Undefined
    * if the field is not applicable.
    */
-  getPossibleOperation: () => OperationMetadata;
+  getPossibleOperation: (index?: IndexPattern) => OperationMetadata | undefined;
   /**
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
