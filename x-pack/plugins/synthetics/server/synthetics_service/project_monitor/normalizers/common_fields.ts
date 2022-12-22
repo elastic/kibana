@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import {
@@ -21,7 +22,6 @@ import {
 } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { i18n } from '@kbn/i18n';
 
 export interface NormalizedProjectProps {
   locations: Locations;
@@ -143,29 +143,22 @@ export const getUnsupportedKeysError = (
   )}. You monitor was not created or updated.`,
 });
 
-export const getMultipleUrlsOrHostsError = (
+export const getInvalidUrlsOrHostsError = (
   monitor: ProjectMonitor,
   key: 'hosts' | 'urls',
   version: string
 ) => ({
   id: monitor.id,
   reason: INVALID_CONFIGURATION_TITLE,
-  details: `Multiple ${key} are not supported for ${
-    monitor.type
-  } project monitors in ${version}. Please set only 1 ${key.slice(
-    0,
-    -1
-  )} per monitor. Your monitor was not created or updated.`,
-});
-
-export const getNoUrlsOrHostsError = (
-  monitor: ProjectMonitor,
-  key: 'host' | 'url',
-  version: string
-) => ({
-  id: monitor.id,
-  reason: INVALID_CONFIGURATION_TITLE,
-  details: `Monitor must specify 1 ${key} for ${monitor.type} project monitors in ${version}. Your monitor was not created or updated.`,
+  details: i18n.translate('', {
+    defaultMessage:
+      '{monitorType} project monitors must have exactly one value for field `{key}` in version `{version}`. Your monitor was not created or updated.',
+    values: {
+      monitorType: monitor.type,
+      key,
+      version,
+    },
+  }),
 });
 
 export const getValueInSeconds = (value: string) => {
