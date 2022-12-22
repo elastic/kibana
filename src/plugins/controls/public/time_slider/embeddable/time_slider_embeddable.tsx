@@ -272,14 +272,14 @@ export class TimeSliderControlEmbeddable extends Embeddable<
         return;
       }
 
-      const nextTick = ticks.find(tick => {
+      const nextTick = ticks.find((tick) => {
         return tick.value > value[TO_INDEX];
       });
       this.onTimesliceChange([
-        timeRangeBounds[FROM_INDEX], 
-        nextTick ? nextTick.value : timeRangeBounds[TO_INDEX]
+        timeRangeBounds[FROM_INDEX],
+        nextTick ? nextTick.value : timeRangeBounds[TO_INDEX],
       ]);
-      return
+      return;
     }
 
     if (value === undefined || value[TO_INDEX] >= timeRangeBounds[TO_INDEX]) {
@@ -314,14 +314,13 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
     if (isAnchored) {
       const prevTick = value
-        ?
-          [...ticks].reverse().find(tick => {
+        ? [...ticks].reverse().find((tick) => {
             return tick.value < value[TO_INDEX];
           })
         : ticks[ticks.length - 1];
       this.onTimesliceChange([
-        timeRangeBounds[FROM_INDEX], 
-        prevTick ? prevTick.value : timeRangeBounds[TO_INDEX]
+        timeRangeBounds[FROM_INDEX],
+        prevTick ? prevTick.value : timeRangeBounds[TO_INDEX],
       ]);
       return;
     }
