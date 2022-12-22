@@ -22,7 +22,7 @@ export const txtMore = i18n.translate('uiActions.actionPanel.more', {
 });
 
 interface ActionWithContext<Context extends object = object> {
-  action: Action | ActionInternal<ActionDefinition<Context>>;
+  action: Action<Context> | ActionInternal<ActionDefinition<Context>>;
   context: Context;
 
   /**
