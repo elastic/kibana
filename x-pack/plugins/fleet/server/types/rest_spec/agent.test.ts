@@ -22,6 +22,6 @@ describe('GetAgentsRequestSchema', () => {
         page: 501,
         perPage: 20,
       })
-    ).toThrowError(/You cannot use page and perPage page through more than 10000 agents/);
+    ).toThrowError(/You cannot use page and perPage page over 10000 agents/);
   });
 });
