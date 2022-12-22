@@ -48,7 +48,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       packages: packageService.asScoped(req),
       packagePolicy,
 
-      asScoped: this.asScoped.bind(this),
+      asInternal: this.asInternalUser.bind(this),
     };
   }
 
@@ -66,7 +66,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       packages: packageService.asInternalUser,
       packagePolicy,
 
-      asInternal: this.asInternalUser.bind(this),
+      asScoped: this.asScoped.bind(this),
       internalReadonlySoClient: createInternalReadonlySoClient(this.savedObjectsStart),
     };
   }
@@ -82,20 +82,21 @@ export interface EndpointFleetServicesInterface {
   packagePolicy: PackagePolicyClient;
 }
 
-export interface EndpointInternalFleetServicesInterface extends EndpointFleetServicesInterface {
+export interface EndpointScopedFleetServicesInterface extends EndpointFleetServicesInterface {
   /**
    * get internal fleet services instance
    */
   asInternal: EndpointFleetServicesFactoryInterface['asInternalUser'];
-  /**
-   * An internal SO client (readonly) that can be used with the Fleet services that require it
-   */
-  internalReadonlySoClient: SavedObjectsClientContract;
 }
 
-export interface EndpointScopedFleetServicesInterface extends EndpointFleetServicesInterface {
+export interface EndpointInternalFleetServicesInterface extends EndpointFleetServicesInterface {
   /**
    * get scoped endpoint fleet services instance
    */
   asScoped: EndpointFleetServicesFactoryInterface['asScoped'];
+
+  /**
+   * An internal SO client (readonly) that can be used with the Fleet services that require it
+   */
+  internalReadonlySoClient: SavedObjectsClientContract;
 }
