@@ -25,7 +25,7 @@ export const createRuleExecutionSummary = (
 
   return {
     last_execution: {
-      date: rule.monitoring?.run.last_run?.timestamp ?? '',
+      date: rule.monitoring?.run.last_run?.timestamp ?? new Date().toISOString(),
       status: ruleExecutionStatus,
       status_order: ruleExecutionStatusToNumber(ruleExecutionStatus),
       message: rule.lastRun?.outcomeMsg?.join(' ') ?? '',
