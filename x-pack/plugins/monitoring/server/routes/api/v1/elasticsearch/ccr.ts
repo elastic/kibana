@@ -24,7 +24,7 @@ import {
 import { MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { LegacyRequest, MonitoringCore } from '../../../../types';
+import { MonitoringCore } from '../../../../types';
 
 function getBucketScript(max: string, min: string) {
   return {
