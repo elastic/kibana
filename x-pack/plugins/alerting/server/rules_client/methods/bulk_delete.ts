@@ -6,14 +6,14 @@
  */
 
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsBulkDeleteObject } from '@kbn/core/server';
+import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { RawRule } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { getAuthorizationFilter, checkAuthorizationAndGetTotal } from '../lib';
+import { getAuthorizationFilter, checkAuthorizationAndGetTotal, getAlertFromRaw } from '../lib';
 import {
-  retryIfBulkDeleteConflicts,
+  retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
 } from '../common';
@@ -35,11 +35,15 @@ export const bulkDeleteRules = async (context: RulesClientContext, options: Bulk
     action: 'DELETE',
   });
 
-  const { apiKeysToInvalidate, errors, taskIdsToDelete } = await retryIfBulkDeleteConflicts(
-    context.logger,
-    (filterKueryNode: KueryNode | null) => bulkDeleteWithOCC(context, { filter: filterKueryNode }),
-    kueryNodeFilterWithAuth
-  );
+  const { rules, errors, accListSpecificForBulkOperation } = await retryIfBulkOperationConflicts({
+    action: 'DELETE',
+    logger: context.logger,
+    bulkOperation: (filterKueryNode: KueryNode | null) =>
+      bulkDeleteWithOCC(context, { filter: filterKueryNode }),
+    filter: kueryNodeFilterWithAuth,
+  });
+
+  const [apiKeysToInvalidate, taskIdsToDelete] = accListSpecificForBulkOperation;
 
   const taskIdsFailedToBeDeleted: string[] = [];
   const taskIdsSuccessfullyDeleted: string[] = [];
@@ -80,7 +84,18 @@ export const bulkDeleteRules = async (context: RulesClientContext, options: Bulk
     context.unsecuredSavedObjectsClient
   );
 
-  return { errors, total, taskIdsFailedToBeDeleted };
+  const deletedRules = rules.map(({ id, attributes, references }) => {
+    return getAlertFromRaw(
+      context,
+      id,
+      attributes.alertTypeId as string,
+      attributes as RawRule,
+      references,
+      false
+    );
+  });
+
+  return { errors, rules: deletedRules, total, taskIdsFailedToBeDeleted };
 };
 
 const bulkDeleteWithOCC = async (
@@ -97,7 +112,7 @@ const bulkDeleteWithOCC = async (
       }
     );
 
-  const rules: SavedObjectsBulkDeleteObject[] = [];
+  const rulesToDelete: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const apiKeysToInvalidate: string[] = [];
   const taskIdsToDelete: string[] = [];
   const errors: BulkOperationError[] = [];
@@ -116,7 +131,7 @@ const bulkDeleteWithOCC = async (
       if (rule.attributes.scheduledTaskId) {
         taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
       }
-      rules.push(rule);
+      rulesToDelete.push(rule);
 
       context.auditLogger?.log(
         ruleAuditEvent({
@@ -127,8 +142,11 @@ const bulkDeleteWithOCC = async (
       );
     }
   }
+  await rulesFinder.close();
 
-  const result = await context.unsecuredSavedObjectsClient.bulkDelete(rules);
+  const result = await context.unsecuredSavedObjectsClient.bulkDelete(rulesToDelete);
+
+  const deletedRuleIds: string[] = [];
 
   result.statuses.forEach((status) => {
     if (status.error === undefined) {
@@ -138,6 +156,7 @@ const bulkDeleteWithOCC = async (
       if (taskIdToRuleIdMapping[status.id]) {
         taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
       }
+      deletedRuleIds.push(status.id);
     } else {
       errors.push({
         message: status.error.message ?? 'n/a',
@@ -149,5 +168,11 @@ const bulkDeleteWithOCC = async (
       });
     }
   });
-  return { apiKeysToInvalidate, errors, taskIdsToDelete };
+  const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
+
+  return {
+    errors,
+    rules,
+    accListSpecificForBulkOperation: [apiKeysToInvalidate, taskIdsToDelete],
+  };
 };

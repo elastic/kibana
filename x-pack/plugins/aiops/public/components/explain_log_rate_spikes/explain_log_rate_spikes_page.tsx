@@ -38,7 +38,7 @@ import { SearchPanel } from '../search_panel';
 
 import { restorableDefaults } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
-import type { GroupTableItem } from '../spike_analysis_table/spike_analysis_table_groups';
+import type { GroupTableItem } from '../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
 
 // TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
@@ -97,7 +97,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
     }) => {
-      // When the user loads saved search and then clear or modify the query
+      // When the user loads a saved search and then clears or modifies the query
       // we should remove the saved search and replace it with the index pattern id
       if (currentSavedSearch !== null) {
         setCurrentSavedSearch(null);

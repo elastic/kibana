@@ -3802,7 +3802,7 @@
                 "id": "def-public.ExpressionRenderHandler.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      syncCursor,\n      interactive,\n      hasCompatibleActions = async () => false,\n      executionContext,\n    }",
+                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      syncCursor,\n      interactive,\n      hasCompatibleActions = async () => false,\n      getCompatibleCellValueActions = async () => [],\n      executionContext,\n    }",
                 "description": [],
                 "signature": [
                   "ExpressionRenderHandlerParams"
@@ -10902,6 +10902,20 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.getCompatibleCellValueActions",
+            "type": "Function",
+            "tags": [],
+            "label": "getCompatibleCellValueActions",
+            "description": [],
+            "signature": [
+              "((data: object[]) => Promise<unknown[]>) | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.IExpressionLoaderParams.executionContext",
             "type": "Object",
             "tags": [],
@@ -11165,6 +11179,38 @@
                     "text": "IInterpreterRenderEvent"
                   },
                   "<unknown>"
+                ],
+                "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IInterpreterRenderHandlers.getCompatibleCellValueActions",
+            "type": "Function",
+            "tags": [],
+            "label": "getCompatibleCellValueActions",
+            "description": [],
+            "signature": [
+              "((data: object[]) => Promise<unknown[]>) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.IInterpreterRenderHandlers.getCompatibleCellValueActions.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "object[]"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
                 "deprecated": false,
@@ -21163,6 +21209,38 @@
                     "text": "IInterpreterRenderEvent"
                   },
                   "<unknown>"
+                ],
+                "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.IInterpreterRenderHandlers.getCompatibleCellValueActions",
+            "type": "Function",
+            "tags": [],
+            "label": "getCompatibleCellValueActions",
+            "description": [],
+            "signature": [
+              "((data: object[]) => Promise<unknown[]>) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.IInterpreterRenderHandlers.getCompatibleCellValueActions.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "object[]"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
                 "deprecated": false,
@@ -35409,6 +35487,38 @@
                     "text": "IInterpreterRenderEvent"
                   },
                   "<unknown>"
+                ],
+                "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.IInterpreterRenderHandlers.getCompatibleCellValueActions",
+            "type": "Function",
+            "tags": [],
+            "label": "getCompatibleCellValueActions",
+            "description": [],
+            "signature": [
+              "((data: object[]) => Promise<unknown[]>) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.IInterpreterRenderHandlers.getCompatibleCellValueActions.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "object[]"
                 ],
                 "path": "src/plugins/expressions/common/expression_renderers/types.ts",
                 "deprecated": false,

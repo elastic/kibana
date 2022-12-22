@@ -12,6 +12,10 @@ beforeEach(() => {
   global.kbnHandlebarsEnv = Handlebars.create();
 });
 
+afterEach(() => {
+  global.kbnHandlebarsEnv = null;
+});
+
 describe('helpers', () => {
   it('helper with complex lookup$', () => {
     expectTemplate('{{#goodbyes}}{{{link ../prefix}}}{{/goodbyes}}')

@@ -10,7 +10,67 @@ import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
-const defaultSuccessfulResponse = { errors: [], total: 1, taskIdsFailedToBeDeleted: [] };
+const getDefaultRules = (response: any) => ({
+  id: response.body.rules[0].id,
+  apiKey: response.body.rules[0].apiKey,
+  notifyWhen: 'onThrottleInterval',
+  enabled: true,
+  name: 'abc',
+  tags: ['foo'],
+  consumer: 'alertsFixture',
+  throttle: '1m',
+  alertTypeId: 'test.noop',
+  apiKeyOwner: response.body.rules[0].apiKeyOwner,
+  createdBy: 'elastic',
+  updatedBy: response.body.rules[0].updatedBy,
+  muteAll: false,
+  mutedInstanceIds: [],
+  schedule: { interval: '1m' },
+  actions: [],
+  params: {},
+  snoozeSchedule: [],
+  updatedAt: response.body.rules[0].updatedAt,
+  createdAt: response.body.rules[0].createdAt,
+  scheduledTaskId: response.body.rules[0].scheduledTaskId,
+  executionStatus: response.body.rules[0].executionStatus,
+  monitoring: response.body.rules[0].monitoring,
+  ...(response.body.rules[0].nextRun ? { nextRun: response.body.rules[0].nextRun } : {}),
+  ...(response.body.rules[0].lastRun ? { lastRun: response.body.rules[0].lastRun } : {}),
+});
+
+const getThreeRules = (response: any) => {
+  const rules: any[] = [];
+  for (let i = 0; i < 3; i++) {
+    rules.push({
+      id: response.body.rules[i].id,
+      apiKey: response.body.rules[i].apiKey,
+      notifyWhen: 'onThrottleInterval',
+      enabled: true,
+      name: 'abc',
+      tags: ['multiple-rules-delete'],
+      consumer: 'alertsFixture',
+      throttle: '1m',
+      alertTypeId: 'test.noop',
+      apiKeyOwner: response.body.rules[i].apiKeyOwner,
+      createdBy: 'elastic',
+      updatedBy: response.body.rules[i].updatedBy,
+      muteAll: false,
+      mutedInstanceIds: [],
+      schedule: { interval: '1m' },
+      actions: [],
+      params: {},
+      snoozeSchedule: [],
+      updatedAt: response.body.rules[i].updatedAt,
+      createdAt: response.body.rules[i].createdAt,
+      scheduledTaskId: response.body.rules[i].scheduledTaskId,
+      executionStatus: response.body.rules[i].executionStatus,
+      monitoring: response.body.rules[i].monitoring,
+      ...(response.body.rules[i].nextRun ? { nextRun: response.body.rules[i].nextRun } : {}),
+      ...(response.body.rules[i].lastRun ? { lastRun: response.body.rules[i].lastRun } : {}),
+    });
+  }
+  return rules;
+};
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -76,7 +136,12 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                rules: [getDefaultRules(response)],
+                errors: [],
+                total: 1,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule1.scheduled_task_id);
@@ -147,7 +212,18 @@ export default ({ getService }: FtrProviderContext) => {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                rules: [
+                  {
+                    ...getDefaultRules(response),
+                    alertTypeId: 'test.restricted-noop',
+                    consumer: 'alertsRestrictedFixture',
+                  },
+                ],
+                errors: [],
+                total: 1,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule1.scheduled_task_id);
@@ -207,7 +283,12 @@ export default ({ getService }: FtrProviderContext) => {
               await getScheduledTask(createdRule1.scheduled_task_id);
               break;
             case 'superuser at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                rules: [{ ...getDefaultRules(response), alertTypeId: 'test.restricted-noop' }],
+                errors: [],
+                total: 1,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule1.scheduled_task_id);
@@ -267,7 +348,12 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                rules: [{ ...getDefaultRules(response), consumer: 'alerts' }],
+                errors: [],
+                total: 1,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule1.scheduled_task_id);
@@ -287,7 +373,7 @@ export default ({ getService }: FtrProviderContext) => {
               supertest
                 .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
                 .set('kbn-xsrf', 'foo')
-                .send(getTestRuleData({ tags: ['multiple-rules-edit'] }))
+                .send(getTestRuleData({ tags: ['multiple-rules-delete'] }))
                 .expect(200)
             )
           );
@@ -332,7 +418,12 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
+              expect(response.body).to.eql({
+                rules: getThreeRules(response),
+                errors: [],
+                total: 3,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               for (const rule of rules) {
                 try {
@@ -399,7 +490,12 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
+              expect(response.body).to.eql({
+                rules: getThreeRules(response),
+                errors: [],
+                total: 3,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               for (const rule of rules) {
                 try {
@@ -431,7 +527,12 @@ export default ({ getService }: FtrProviderContext) => {
           switch (scenario.id) {
             // This superuser has more privileges that we think
             case 'superuser at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                rules: [getDefaultRules(response)],
+                errors: [],
+                total: 1,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule.scheduled_task_id);

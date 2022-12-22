@@ -3043,6 +3043,20 @@
             "path": "x-pack/plugins/security/common/model/api_key.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.ApiKey.role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "role_descriptors",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

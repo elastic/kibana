@@ -13,6 +13,7 @@ import {
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  Rule,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -156,8 +157,9 @@ describe('Task Runner Cancel', () => {
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
     );
-    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -217,8 +219,9 @@ describe('Task Runner Cancel', () => {
         lastRun: {
           alertsCount: {},
           outcome: 'failed',
-          outcomeMsg:
+          outcomeMsg: [
             'test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m',
+          ],
           warning: 'timeout',
         },
         monitoring: {
