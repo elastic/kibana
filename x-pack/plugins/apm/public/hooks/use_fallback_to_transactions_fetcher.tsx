@@ -7,6 +7,7 @@
 import { useApmParams } from './use_apm_params';
 import { useFetcher } from './use_fetcher';
 import { useTimeRange } from './use_time_range';
+import { useKueryWithMobileFilters } from './use_kuery_with_mobile_filters';
 
 export function useFallbackToTransactionsFetcher({ kuery }: { kuery: string }) {
   const { query } = useApmParams('/*');
@@ -14,17 +15,31 @@ export function useFallbackToTransactionsFetcher({ kuery }: { kuery: string }) {
   const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
   const rangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
 
+  const device = 'device' in query ? query.device : undefined;
+  const osVersion = 'osVersion' in query ? query.osVersion : undefined;
+  const appVersion = 'appVersion' in query ? query.appVersion : undefined;
+  const netConnectionType =
+    'netConnectionType' in query ? query.netConnectionType : undefined;
+
+  const kueryWithFilters = useKueryWithMobileFilters({
+    device,
+    osVersion,
+    appVersion,
+    netConnectionType,
+    kuery,
+  });
+
   const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
   const { data = { fallbackToTransactions: false } } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/fallback_to_transactions', {
         params: {
-          query: { kuery, start, end },
+          query: { kuery: kueryWithFilters, start, end },
         },
       });
     },
-    [kuery, start, end]
+    [kueryWithFilters, start, end]
   );
 
   return data;

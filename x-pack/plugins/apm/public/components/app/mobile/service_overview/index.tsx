@@ -106,11 +106,6 @@ export function MobileServiceOverview() {
     >
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
-          {fallbackToTransactions && (
-            <EuiFlexItem>
-              <AggregatedTransactionsBadge />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem>
             <EuiHorizontalRule />
           </EuiFlexItem>
@@ -146,6 +141,11 @@ export function MobileServiceOverview() {
             </EuiCallOut>
             <EuiSpacer size="s" />
           </EuiFlexItem>
+          {fallbackToTransactions && (
+            <EuiFlexItem>
+              <AggregatedTransactionsBadge />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={5}>
@@ -186,7 +186,7 @@ export function MobileServiceOverview() {
                         metric={DEVICE_MODEL_NAME}
                         start={start}
                         end={end}
-                        kuery={kuery}
+                        kuery={kueryWithFilters}
                         filters={filters}
                       />
                     </EuiFlexItem>
@@ -202,7 +202,7 @@ export function MobileServiceOverview() {
                         metric={NETWORK_CONNECTION_TYPE}
                         start={start}
                         end={end}
-                        kuery={kuery}
+                        kuery={kueryWithFilters}
                         filters={filters}
                       />
                     </EuiFlexItem>
@@ -220,7 +220,7 @@ export function MobileServiceOverview() {
                         metric={HOST_OS_VERSION}
                         start={start}
                         end={end}
-                        kuery={kuery}
+                        kuery={kueryWithFilters}
                         filters={filters}
                       />
                     </EuiFlexItem>
@@ -236,7 +236,7 @@ export function MobileServiceOverview() {
                         metric={SERVICE_VERSION}
                         start={start}
                         end={end}
-                        kuery={kuery}
+                        kuery={kueryWithFilters}
                         filters={filters}
                       />
                     </EuiFlexItem>

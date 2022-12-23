@@ -42,7 +42,6 @@ function EmbeddedMapComponent({
     MapEmbeddable | ErrorEmbeddable | undefined
   >();
 
-  console.log('kuery map', kuery);
   const embeddableRoot: React.RefObject<HTMLDivElement> =
     useRef<HTMLDivElement>(null);
 
