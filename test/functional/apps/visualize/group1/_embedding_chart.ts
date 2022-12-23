@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.addFilter({
           field: '@timestamp',
           operation: 'is between',
-          value: { from: '2015-09-21', to: '2015-09-23' },
+          value: { from: 'Sep 21, 2015 @ 00:00:00', to: 'Sep 23, 2015 @ 00:00:00' },
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();

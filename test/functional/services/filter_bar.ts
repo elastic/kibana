@@ -239,11 +239,16 @@ export class FilterBarService extends FtrService {
     }
 
     if (this.isFilterWithRange(filter)) {
-      const startInput = await filterForm.findByTestSubject('range-start');
-      const endInput = await filterForm.findByTestSubject('range-end');
+      const fieldParams = await filterForm.findByTestSubject('filterParams');
+      const [startInput, endInput] = await fieldParams.findAllByTagName('input');
 
-      await startInput.type(`${filter.value.from ?? ''}`);
-      await endInput.type(`${filter.value.to ?? ''}`);
+      await startInput?.type(`${filter.value.from ?? ''}`);
+      await endInput?.click();
+      await endInput?.type(`${filter.value.to ?? ''}`);
+
+      if (await endInput?.elementHasClass('euiDatePicker')) {
+        this.browser.pressKeys(this.browser.keys.ESCAPE);
+      }
       return;
     }
 
