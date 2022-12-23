@@ -1,14 +1,15 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "types": ["jest"],
+    "outDir": "target/types",
+    "types": ["jest", "node"],
     "lib": [
       "ES2019"
     ],
     "esModuleInterop": true
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts"],
+  "exclude": [
+    "target/**/*",
+  ]
 }

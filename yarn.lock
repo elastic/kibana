@@ -2753,9 +2753,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-synthtrace@link:packages/kbn-apm-synthtrace":
-  version "0.0.0"
-  uid ""
+"@kbn/apm-synthtrace-client@./packages/kbn-apm-synthtrace-client":
+  version "0.1.0"
+
+"@kbn/apm-synthtrace@./packages/kbn-apm-synthtrace":
+  version "0.1.0"
 
 "@kbn/apm-utils@link:packages/kbn-apm-utils":
   version "0.0.0"

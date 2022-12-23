@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { BaseSpan } from './base_span';
 import { generateShortId } from '../utils/generate_id';
 import { ApmFields, SpanParams } from './apm_fields';
@@ -48,7 +47,7 @@ export function httpExitSpan({
   // host: 'opbeans-go:3000',
   // hostname: 'opbeans-go',
   // port: '3000',
-  const destination = new globalThis.URL(destinationUrl);
+  const destination = new URL(destinationUrl);
 
   const spanType = 'external';
   const spanSubtype = 'http';

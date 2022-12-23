@@ -88,6 +88,7 @@ export class BaseSpan extends Serializable<ApmFields> {
 
   labels(labels: Record<string, string>) {
     Object.entries(labels).forEach(([key, value]) => {
+      // @ts-expect-error
       this.fields[`labels.${key}`] = value;
     });
     return this;
