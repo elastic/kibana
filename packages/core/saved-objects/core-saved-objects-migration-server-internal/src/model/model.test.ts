@@ -1994,7 +1994,7 @@ describe('migrations v2 model', () => {
 
       it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action fails because the alias is not found', () => {
         const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATIONS'> = Either.left({
-          type: 'alias_not_found',
+          type: 'alias_not_found_exception',
         });
 
         const newState = model(state, res) as OutdatedDocumentsSearchOpenPit;
