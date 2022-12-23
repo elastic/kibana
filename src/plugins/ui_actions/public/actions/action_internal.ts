@@ -22,6 +22,7 @@ export class ActionInternal<Context extends object = object>
   public readonly MenuItem?: React.FC<ActionMenuItemProps<any>>;
   public readonly grouping?: PresentableGrouping<Context>;
   public readonly showNotification?: boolean;
+  public readonly disabled?: boolean;
 
   constructor(public readonly definition: ActionDefinition<Context>) {
     this.id = this.definition.id;
@@ -30,6 +31,7 @@ export class ActionInternal<Context extends object = object>
     this.MenuItem = this.definition.MenuItem;
     this.grouping = this.definition.grouping;
     this.showNotification = this.definition.showNotification;
+    this.disabled = this.definition.disabled;
   }
 
   public execute(context: Context) {
