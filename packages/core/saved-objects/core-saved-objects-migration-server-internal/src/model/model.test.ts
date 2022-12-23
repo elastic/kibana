@@ -1986,14 +1986,16 @@ describe('migrations v2 model', () => {
       };
 
       it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeds', () => {
-        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATIONS'> = Either.right({});
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
+          'update_aliases_succeeded'
+        );
         const newState = model(state, res) as OutdatedDocumentsSearchOpenPit;
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
         expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
 
       it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action fails because the alias is not found', () => {
-        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATIONS'> = Either.left({
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
           type: 'alias_not_found_exception',
         });
 
@@ -2003,8 +2005,8 @@ describe('migrations v2 model', () => {
       });
 
       it('throws an exception if action fails with an error other than a missing alias', () => {
-        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATIONS'> = Either.left({
-          type: 'index_not_found_exception',
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
+          type: 'remove_index_not_a_concrete_index',
         });
 
         expect(() => model(state, res)).toThrowErrorMatchingInlineSnapshot(
