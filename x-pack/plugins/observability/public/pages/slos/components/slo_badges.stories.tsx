@@ -10,7 +10,7 @@ import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloBadges as Component, SloBadgesProps } from './slo_badges';
-import { anSLO } from '../../../../common/data/slo';
+import { anSLO } from '../../../data/slo';
 
 export default {
   component: Component,
