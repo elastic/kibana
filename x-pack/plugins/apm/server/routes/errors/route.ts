@@ -14,7 +14,7 @@ import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
 import { getErrorGroupSummary } from './get_error_groups/get_error_group_summary';
 import { getErrorGroupSamples } from './get_error_groups/get_error_group_samples';
-import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
+import { getErrorGroupSampleDetails } from './get_error_groups/get_error_group_sample_details';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getTopErroneousTransactionsPeriods } from './erroneous_transactions/get_top_erroneous_transactions';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -266,7 +266,7 @@ const errorGroupsSamplesRoute = createApmServerRoute({
   },
 });
 
-const errorGroupSampleRoute = createApmServerRoute({
+const errorGroupSampleDetailsRoute = createApmServerRoute({
   endpoint:
     'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}',
   params: t.type({
@@ -291,7 +291,7 @@ const errorGroupSampleRoute = createApmServerRoute({
     const { serviceName, errorId } = params.path;
     const { environment, kuery, start, end } = params.query;
 
-    return getErrorGroupSample({
+    return getErrorGroupSampleDetails({
       environment,
       errorId,
       kuery,
@@ -405,7 +405,7 @@ export const errorsRouteRepository = {
   ...errorsDetailedStatisticsRoute,
   ...errorGroupsSummaryRoute,
   ...errorGroupsSamplesRoute,
-  ...errorGroupSampleRoute,
+  ...errorGroupSampleDetailsRoute,
   ...errorDistributionRoute,
   ...topErroneousTransactionsRoute,
 };

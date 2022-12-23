@@ -56,11 +56,9 @@ function getShortGroupId(errorGroupId?: string) {
 
 function ErrorGroupHeader({
   groupId,
-  isUnhandled,
   occurrencesCount,
 }: {
   groupId: string;
-  isUnhandled?: boolean;
   occurrencesCount?: number;
 }) {
   return (
@@ -85,16 +83,6 @@ function ErrorGroupHeader({
           })}
         </EuiBadge>
       </EuiFlexItem>
-
-      {isUnhandled && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="warning">
-            {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
-              defaultMessage: 'Unhandled',
-            })}
-          </EuiBadge>
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 }
@@ -249,9 +237,8 @@ export function ErrorGroupDetails() {
     return <ErrorGroupHeader groupId={groupId} />;
   }
 
-  // If there are 0 occurrences, show only distribution chart w. empty message
-  const showDetails = errorGroupData.occurrencesCount !== 0;
-  const isUnhandled = errorGroupData.error?.exception?.[0].handled === false;
+  // If there are 0 occurrences, show only charts w. empty message
+  const showDetails = errorSamplesData.errorSamples.length !== 0;
 
   return (
     <>
@@ -259,8 +246,7 @@ export function ErrorGroupDetails() {
 
       <ErrorGroupHeader
         groupId={groupId}
-        isUnhandled={isUnhandled}
-        occurrencesCount={errorGroupData.occurrencesCount}
+        occurrencesCount={errorSamplesData.errorSamples.length}
       />
 
       <EuiSpacer size={'m'} />

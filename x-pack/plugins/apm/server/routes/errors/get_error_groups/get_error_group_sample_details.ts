@@ -17,7 +17,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../../transactions/get_transaction';
 
-export async function getErrorGroupSample({
+export async function getErrorGroupSampleDetails({
   environment,
   kuery,
   serviceName,
