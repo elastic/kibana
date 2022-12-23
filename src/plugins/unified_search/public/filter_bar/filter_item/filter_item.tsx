@@ -87,7 +87,7 @@ function FilterItemComponent(props: FilterItemProps) {
 
   const closePopover = useCallback(() => {
     onCloseFilterPopover([() => setIsPopoverOpen(false)]);
-  }, [setIsPopoverOpen, onCloseFilterPopover]);
+  }, [onCloseFilterPopover]);
 
   const euiTheme = useEuiTheme();
 

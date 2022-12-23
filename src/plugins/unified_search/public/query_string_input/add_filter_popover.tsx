@@ -73,7 +73,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
 
   const closePopover = useCallback(() => {
     onCloseFilterPopover([() => setShowAddFilterPopover(false)]);
-  }, [setShowAddFilterPopover, onCloseFilterPopover]);
+  }, [onCloseFilterPopover]);
 
   return (
     <EuiFlexItem grow={false}>
