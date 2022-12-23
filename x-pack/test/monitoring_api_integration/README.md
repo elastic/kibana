@@ -42,4 +42,4 @@ patterns.
   - <output-dir> should point to a subdirectory of the `./archives` dir for consistency
     and since we're generating package data end with `package` dir. example `<kibana>/x-pack/test/monitoring_api_integration/archives/kibana/two-nodes/package`
 - <output-dir> will contain a `data.json.gz` and a `mappings.json` file. Remove the `mappings.json`
-- run the transform script to generate metricbeat data `ts-node utils/transform_archive.ts --src <output-dir>/data.json.gz`
+- run the transform script to generate metricbeat data `ts-node scripts/transform_archive.ts --src <output-dir>/data.json.gz`
