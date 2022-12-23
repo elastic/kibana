@@ -36,6 +36,14 @@ export function SloBadges({ slo }: SloBadgesProps) {
         </EuiBadge>
       )}
 
+      {slo.summary.status === STATUS.Degrading && (
+        <EuiBadge color={euiLightVars.euiColorWarning}>
+          {i18n.translate('xpack.observability.slos.slo.state.degrading', {
+            defaultMessage: 'Degrading',
+          })}
+        </EuiBadge>
+      )}
+
       {slo.summary.status === STATUS.Violated && (
         <EuiBadge color={euiLightVars.euiColorDanger}>
           {i18n.translate('xpack.observability.slos.slo.state.violated', {

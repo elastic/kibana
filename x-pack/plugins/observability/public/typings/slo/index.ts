@@ -18,7 +18,7 @@ export const STATUS = {
   Healthy: 'healthy',
   NoData: 'no_data',
   Violated: 'violated',
-  // Degrading: 'degrading',
+  Degrading: 'degrading',
 } as const;
 
 export type Status = typeof STATUS[keyof typeof STATUS];

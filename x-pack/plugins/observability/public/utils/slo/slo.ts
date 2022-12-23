@@ -38,6 +38,6 @@ function toStatus(result: any): Status {
   if (result.objective.target <= result.summary.sli_value) {
     return STATUS.Healthy;
   } else {
-    return STATUS.Violated;
+    return result.summary.error_budget.remaining > 0 ? STATUS.Degrading : STATUS.Violated;
   }
 }
