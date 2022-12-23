@@ -164,7 +164,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   step('Deleting the monitor recovers the alert', async () => {
     await services.deleteTestMonitorByQuery('"Test Monitor 2"');
     await page.click(byTestId('alert-status-filter-recovered-button'));
-    await retry.tryForTime(2 * 60 * 1000, async () => {
+    await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
       expect(await page.isVisible(`text=1 Alert`)).toBe(true);
     });

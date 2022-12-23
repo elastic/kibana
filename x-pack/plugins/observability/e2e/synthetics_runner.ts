@@ -106,7 +106,7 @@ export class SyntheticsRunner {
       },
       match: match === 'undefined' ? '' : match,
       pauseOnError,
-      screenshots: 'off',
+      screenshots: 'only-on-failure',
     });
 
     await this.assertResults(results);
