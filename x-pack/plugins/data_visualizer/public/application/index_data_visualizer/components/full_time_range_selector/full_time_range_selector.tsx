@@ -23,9 +23,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { useStorage } from '@kbn/ml-local-storage';
 import { setFullTimeRange } from './full_time_range_selector_service';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { DV_FROZEN_TIER_PREFERENCE, useStorage } from '../../hooks/use_storage';
+import { DV_FROZEN_TIER_PREFERENCE, type DVKey, type DVStorageMapped } from '../../types/storage';
 
 export const ML_FROZEN_TIER_PREFERENCE = 'ml.frozenDataTierPreference';
 
@@ -83,7 +84,10 @@ export const FullTimeRangeSelector: FC<Props> = ({
 
   const [isPopoverOpen, setPopover] = useState(false);
 
-  const [frozenDataPreference, setFrozenDataPreference] = useStorage<FrozenTierPreference>(
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    DVKey,
+    DVStorageMapped<typeof DV_FROZEN_TIER_PREFERENCE>
+  >(
     DV_FROZEN_TIER_PREFERENCE,
     // By default we will exclude frozen data tier
     FROZEN_TIER_PREFERENCE.EXCLUDE
