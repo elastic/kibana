@@ -12,13 +12,13 @@ export const SyntheticsMonitorStatusTranslations = {
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultActionMessage',
     {
       defaultMessage:
-        'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage}. The latest error message is {latestErrorMessage}, checked at {checkedAt}.',
+        'The monitor {monitorName} checking {monitorUrl} from {location} last ran at {checkedAt} and is {status}. The last error received is: {lastErrorMessage}.',
       values: {
         monitorName: '{{context.monitorName}}',
         monitorUrl: '{{{context.monitorUrl}}}',
-        statusMessage: '{{{context.statusMessage}}}',
-        latestErrorMessage: '{{{context.latestErrorMessage}}}',
-        observerLocation: '{{context.observerLocation}}',
+        status: '{{{context.status}}}',
+        lastErrorMessage: '{{{context.lastErrorMessage}}}',
+        location: '{{context.location}}',
         checkedAt: '{{context.checkedAt}}',
       },
     }
@@ -26,7 +26,7 @@ export const SyntheticsMonitorStatusTranslations = {
   defaultSubjectMessage: i18n.translate(
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultSubjectMessage',
     {
-      defaultMessage: 'Monitor {monitorName} with url {monitorUrl} is down',
+      defaultMessage: 'The monitor {monitorName} checking {monitorUrl} is down.',
       values: {
         monitorName: '{{context.monitorName}}',
         monitorUrl: '{{{context.monitorUrl}}}',
@@ -47,9 +47,9 @@ export const SyntheticsMonitorStatusTranslations = {
     }
   ),
   name: i18n.translate('xpack.synthetics.alerts.syntheticsMonitorStatus.clientName', {
-    defaultMessage: 'Synthetics monitor status',
+    defaultMessage: 'Monitor status',
   }),
   description: i18n.translate('xpack.synthetics.alerts.syntheticsMonitorStatus.description', {
-    defaultMessage: 'Alert when a synthetics monitor is down.',
+    defaultMessage: 'Alert when a monitor is down.',
   }),
 };
