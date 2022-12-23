@@ -7,6 +7,12 @@
 
 import React, { useMemo } from 'react';
 import moment from 'moment';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiText } from '@elastic/eui';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -36,8 +42,6 @@ export function LatencyAlertsHistoryChart({
   environment,
   timeZone,
 }: LatencyAlertsHistoryChartProps) {
-  console.log(moment().toISOString());
-  console.log(moment().subtract(30, 'days').toISOString());
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (
@@ -55,8 +59,8 @@ export function LatencyAlertsHistoryChart({
               query: {
                 environment,
                 kuery: '',
-                start: moment().toISOString(),
-                end: moment().subtract(30, 'days').toISOString(),
+                start: moment().subtract(30, 'days').toISOString(),
+                end: moment().toISOString(),
                 transactionType,
                 transactionName: undefined,
                 latencyAggregationType,
@@ -92,15 +96,81 @@ export function LatencyAlertsHistoryChart({
   const latencyFormatter = getDurationFormatter(latencyMaxY);
 
   return (
-    <TimeseriesChart
-      id="latencyChart"
-      height={200}
-      comparisonEnabled={false}
-      offset={''}
-      fetchStatus={status}
-      timeseries={timeseriesLatency}
-      yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-      timeZone={timeZone}
-    />
+    <EuiPanel hasBorder={true}>
+      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.apm.latencyChartHistory.chartTitle', {
+                defaultMessage: 'Kibana latency alerts history',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.apm.latencyChartHistory.last30days', {
+              defaultMessage: 'Last 30 days',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+
+      <EuiFlexGroup gutterSize="l">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiText color="danger">
+                <EuiTitle size="s">
+                  <h3>28</h3>
+                </EuiTitle>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                {i18n.translate(
+                  'xpack.apm.latencyChartHistory.alertsTriggered',
+                  {
+                    defaultMessage: 'Alerts triggered',
+                  }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexGroup gutterSize="xs" direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <EuiTitle size="s">
+                <h3>45 minutes</h3>
+              </EuiTitle>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {i18n.translate(
+                'xpack.apm.latencyChartHistory.avgTimeToRecover',
+                {
+                  defaultMessage: 'Avg time to recover',
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+
+      <TimeseriesChart
+        id="latencyChart"
+        height={200}
+        comparisonEnabled={false}
+        offset={''}
+        fetchStatus={status}
+        timeseries={timeseriesLatency}
+        yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+        timeZone={timeZone}
+      />
+    </EuiPanel>
   );
 }

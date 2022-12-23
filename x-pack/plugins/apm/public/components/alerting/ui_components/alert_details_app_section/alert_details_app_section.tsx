@@ -410,19 +410,17 @@ export function AlertDetailsAppSection({
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiPanel>
-              <LatencyAlertsHistoryChart
-                serviceName={serviceName}
-                start={start}
-                end={end}
-                transactionType={transactionType}
-                latencyAggregationType={latencyAggregationType}
-                environment={environment}
-                timeZone={timeZone}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LatencyAlertsHistoryChart
+            serviceName={serviceName}
+            start={start}
+            end={end}
+            transactionType={transactionType}
+            latencyAggregationType={latencyAggregationType}
+            environment={environment}
+            timeZone={timeZone}
+          />
         </EuiFlexItem>
       </ChartPointerEventContextProvider>
     </EuiFlexGroup>
