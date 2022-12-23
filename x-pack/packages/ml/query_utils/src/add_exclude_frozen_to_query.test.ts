@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addExcludeFrozenToQuery } from './query_utils';
+import { addExcludeFrozenToQuery } from './add_exclude_frozen_to_query';
 
 describe('Util: addExcludeFrozenToQuery()', () => {
   test('Validation checks.', () => {

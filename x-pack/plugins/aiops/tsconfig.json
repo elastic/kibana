@@ -44,7 +44,7 @@
     "@kbn/es-types",
     "@kbn/ml-url-state",
     "@kbn/ml-local-storage",
-    "@kbn/ml-nested-property",
+    "@kbn/ml-date-picker",
   ],
   "exclude": [
     "target/**/*",

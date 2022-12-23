@@ -9,9 +9,11 @@ import React, { createContext, useContext, type FC } from 'react';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreSetup, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 export interface MlDatePickerDependencies {
   data: DataPublicPluginStart;
+  http: HttpStart;
   notifications: CoreSetup['notifications'];
   theme: ThemeServiceStart;
   uiSettings: IUiSettingsClient;

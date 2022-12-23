@@ -163,7 +163,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { services } = useDataVisualizerKibana();
-  const { notifications, uiSettings, data, theme } = services;
+  const { http, notifications, uiSettings, data, theme } = services;
   const { toasts } = notifications;
 
   const [dataVisualizerListState, setDataVisualizerListState] =
@@ -500,7 +500,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             </EuiPageContentHeaderSection>
 
             {compact ? <EuiSpacer size="m" /> : null}
-            <MlDatePickerContextProvider deps={{ data, notifications, theme, uiSettings }}>
+            <MlDatePickerContextProvider deps={{ data, http, notifications, theme, uiSettings }}>
               <EuiFlexGroup
                 alignItems="center"
                 justifyContent="flexEnd"

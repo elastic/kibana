@@ -828,6 +828,8 @@
       "@kbn/ml-nested-property/*": ["x-pack/packages/ml/nested_property/*"],
       "@kbn/ml-plugin": ["x-pack/plugins/ml"],
       "@kbn/ml-plugin/*": ["x-pack/plugins/ml/*"],
+      "@kbn/ml-query-utils": ["x-pack/packages/ml/query_utils"],
+      "@kbn/ml-query-utils/*": ["x-pack/packages/ml/query_utils/*"],
       "@kbn/ml-string-hash": ["x-pack/packages/ml/string_hash"],
       "@kbn/ml-string-hash/*": ["x-pack/packages/ml/string_hash/*"],
       "@kbn/ml-url-state": ["x-pack/packages/ml/url_state"],

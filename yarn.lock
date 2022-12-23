@@ -3793,6 +3793,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-query-utils@link:x-pack/packages/ml/query_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-string-hash@link:x-pack/packages/ml/string_hash":
   version "0.0.0"
   uid ""

@@ -355,6 +355,7 @@
     "@kbn/ml-is-populated-object": "link:x-pack/packages/ml/is_populated_object",
     "@kbn/ml-local-storage": "link:x-pack/packages/ml/local_storage",
     "@kbn/ml-nested-property": "link:x-pack/packages/ml/nested_property",
+    "@kbn/ml-query-utils": "link:x-pack/packages/ml/query_utils",
     "@kbn/ml-string-hash": "link:x-pack/packages/ml/string_hash",
     "@kbn/ml-url-state": "link:x-pack/packages/ml/url_state",
     "@kbn/monaco": "link:packages/kbn-monaco",

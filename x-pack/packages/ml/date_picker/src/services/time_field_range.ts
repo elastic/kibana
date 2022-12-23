@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// TODO Consolidate with near duplicate service in
-// `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/services/time_field_range.ts`
-
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 

@@ -10,12 +10,17 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import dateMath from '@kbn/datemath';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import type { ToastsStart } from '@kbn/core/public';
+import type { ToastsStart, HttpStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { getTimeFieldRange } from '../../services/time_field_range';
-import type { GetTimeFieldRangeResponse } from '../../../../../common/types/time_field_request';
-import { addExcludeFrozenToQuery } from '../../utils/query_utils';
+import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
+import { getTimeFieldRange } from './time_field_range';
+
+export interface GetTimeFieldRangeResponse {
+  success: boolean;
+  start: { epoch: number; string: string };
+  end: { epoch: number; string: string };
+}
 
 export interface TimeRange {
   from: number;
@@ -25,9 +30,10 @@ export interface TimeRange {
 export async function setFullTimeRange(
   timefilter: TimefilterContract,
   dataView: DataView,
+  toasts: ToastsStart,
+  http: HttpStart,
   query?: QueryDslQueryContainer,
-  excludeFrozenData?: boolean,
-  toasts?: ToastsStart
+  excludeFrozenData?: boolean
 ): Promise<GetTimeFieldRangeResponse> {
   const runtimeMappings = dataView.getRuntimeMappings();
   const resp = await getTimeFieldRange({
@@ -35,6 +41,7 @@ export async function setFullTimeRange(
     timeFieldName: dataView.timeFieldName,
     query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
     ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
+    http,
   });
 
   if (resp.start.epoch && resp.end.epoch) {
@@ -43,8 +50,8 @@ export async function setFullTimeRange(
       to: moment(resp.end.epoch).toISOString(),
     });
   } else {
-    toasts?.addWarning({
-      title: i18n.translate('xpack.dataVisualizer.index.fullTimeRangeSelector.noResults', {
+    toasts.addWarning({
+      title: i18n.translate('xpack.ml.datePicker.fullTimeRangeSelector.noResults', {
         defaultMessage: 'No results match your search criteria',
       }),
     });

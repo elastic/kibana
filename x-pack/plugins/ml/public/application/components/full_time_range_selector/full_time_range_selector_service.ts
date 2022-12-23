@@ -12,10 +12,10 @@ import dateMath from '@kbn/datemath';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { getTimefilter, getToastNotifications } from '../../util/dependency_cache';
 import { ml, GetTimeFieldRangeResponse } from '../../services/ml_api_service';
 import type { RuntimeMappings } from '../../../../common/types/fields';
-import { addExcludeFrozenToQuery } from '../../../../common/util/query_utils';
 
 export interface TimeRange {
   from: number;

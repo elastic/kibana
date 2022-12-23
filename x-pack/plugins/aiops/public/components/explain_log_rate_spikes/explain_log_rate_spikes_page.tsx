@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { useStorage } from '@kbn/ml-local-storage';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
@@ -28,11 +29,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
+import { MlFullTimeRangeSelector, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
 import { useCss } from '../../hooks/use_css';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
-import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 import { SearchPanel } from '../search_panel';
@@ -41,6 +42,12 @@ import { restorableDefaults, type AiOpsPageUrlState } from './explain_log_rate_s
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
 import type { GroupTableItem } from '../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
+
+import {
+  AIOPS_FROZEN_TIER_PREFERENCE,
+  type AiOpsKey,
+  type AiOpsStorageMapped,
+} from '../../types/storage';
 
 function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: GroupTableItem) {
   if (changePoint) {
@@ -114,6 +121,15 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
       });
     },
     [currentSavedSearch, aiopsListState, setAiopsListState]
+  );
+
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    AiOpsKey,
+    AiOpsStorageMapped<typeof AIOPS_FROZEN_TIER_PREFERENCE>
+  >(
+    AIOPS_FROZEN_TIER_PREFERENCE,
+    // By default we will exclude frozen data tier
+    FROZEN_TIER_PREFERENCE.EXCLUDE
   );
 
   const {
@@ -205,7 +221,9 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
             >
               {dataView.timeFieldName !== undefined && (
                 <EuiFlexItem grow={false}>
-                  <FullTimeRangeSelector
+                  <MlFullTimeRangeSelector
+                    frozenDataPreference={frozenDataPreference}
+                    setFrozenDataPreference={setFrozenDataPreference}
                     dataView={dataView}
                     query={undefined}
                     disabled={false}

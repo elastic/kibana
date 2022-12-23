@@ -9,6 +9,7 @@ import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { useStorage } from '@kbn/ml-local-storage';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
@@ -26,7 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
-import { FullTimeRangeSelector } from '../full_time_range_selector';
+import { MlFullTimeRangeSelector, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 import { useCss } from '../../hooks/use_css';
 import { useData } from '../../hooks/use_data';
@@ -42,6 +43,11 @@ import type { EventRate, Category, SparkLinesPerCategory } from './use_categoriz
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
 import { InformationText } from './information_text';
+import {
+  AIOPS_FROZEN_TIER_PREFERENCE,
+  type AiOpsKey,
+  type AiOpsStorageMapped,
+} from '../../types/storage';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -103,6 +109,15 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
       });
     },
     [currentSavedSearch, aiopsListState, setAiopsListState]
+  );
+
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    AiOpsKey,
+    AiOpsStorageMapped<typeof AIOPS_FROZEN_TIER_PREFERENCE>
+  >(
+    AIOPS_FROZEN_TIER_PREFERENCE,
+    // By default we will exclude frozen data tier
+    FROZEN_TIER_PREFERENCE.EXCLUDE
   );
 
   const {
@@ -239,7 +254,9 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
             >
               {dataView.timeFieldName !== undefined && (
                 <EuiFlexItem grow={false}>
-                  <FullTimeRangeSelector
+                  <MlFullTimeRangeSelector
+                    frozenDataPreference={frozenDataPreference}
+                    setFrozenDataPreference={setFrozenDataPreference}
                     dataView={dataView}
                     query={undefined}
                     disabled={false}

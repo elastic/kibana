@@ -6,9 +6,8 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-plugin/common';
+
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   EuiButton,
@@ -21,20 +20,26 @@ import {
   EuiRadioGroupOption,
   EuiToolTip,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { setFullTimeRange } from '../services/full_time_range_selector_service';
+import type { DataView } from '@kbn/data-plugin/common';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlDatePickerContext } from '../hooks/use_ml_date_picker_context';
+import {
+  setFullTimeRange,
+  type GetTimeFieldRangeResponse,
+} from '../services/full_time_range_selector_service';
 import { FROZEN_TIER_PREFERENCE, type FrozenTierPreference } from '../storage';
 
-interface MlFullTimeRangeSelectorProps {
+export interface MlFullTimeRangeSelectorProps {
   frozenDataPreference: FrozenTierPreference;
   setFrozenDataPreference: (value: FrozenTierPreference | undefined) => void;
   timefilter: TimefilterContract;
   dataView: DataView;
   disabled: boolean;
   query?: QueryDslQueryContainer;
-  callback?: (a: any) => void;
+  callback?: (a: GetTimeFieldRangeResponse) => void;
 }
 
 // Component for rendering a button which automatically sets the range of the time filter
@@ -49,6 +54,7 @@ export const MlFullTimeRangeSelector: FC<MlFullTimeRangeSelectorProps> = ({
   callback,
 }) => {
   const {
+    http,
     notifications: { toasts },
   } = useMlDatePickerContext();
 
@@ -56,14 +62,21 @@ export const MlFullTimeRangeSelector: FC<MlFullTimeRangeSelectorProps> = ({
   const setRange = useCallback(
     async (i: DataView, q?: QueryDslQueryContainer, excludeFrozenData?: boolean) => {
       try {
-        const fullTimeRange = await setFullTimeRange(timefilter, i, q, excludeFrozenData, toasts);
+        const fullTimeRange = await setFullTimeRange(
+          timefilter,
+          i,
+          toasts,
+          http,
+          q,
+          excludeFrozenData
+        );
         if (typeof callback === 'function') {
           callback(fullTimeRange);
         }
       } catch (e) {
         toasts.addDanger(
           i18n.translate(
-            'xpack.dataVisualizer.index.fullTimeRangeSelector.errorSettingTimeRangeNotification',
+            'xpack.ml.datePicker.fullTimeRangeSelector.errorSettingTimeRangeNotification',
             {
               defaultMessage: 'An error occurred setting the time range.',
             }
@@ -71,7 +84,7 @@ export const MlFullTimeRangeSelector: FC<MlFullTimeRangeSelectorProps> = ({
         );
       }
     },
-    [callback, timefilter, toasts]
+    [callback, http, timefilter, toasts]
   );
 
   const [isPopoverOpen, setPopover] = useState(false);
@@ -98,7 +111,7 @@ export const MlFullTimeRangeSelector: FC<MlFullTimeRangeSelectorProps> = ({
       {
         id: FROZEN_TIER_PREFERENCE.EXCLUDE,
         label: i18n.translate(
-          'xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataExcludingFrozenMenuLabel',
+          'xpack.ml.datePicker.fullTimeRangeSelector.useFullDataExcludingFrozenMenuLabel',
           {
             defaultMessage: 'Exclude frozen data tier',
           }
@@ -107,7 +120,7 @@ export const MlFullTimeRangeSelector: FC<MlFullTimeRangeSelectorProps> = ({
       {
         id: FROZEN_TIER_PREFERENCE.INCLUDE,
         label: i18n.translate(
-          'xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataIncludingFrozenMenuLabel',
+          'xpack.ml.datePicker.fullTimeRangeSelector.useFullDataIncludingFrozenMenuLabel',
           {
             defaultMessage: 'Include frozen data tier',
           }
@@ -134,12 +147,12 @@ export const MlFullTimeRangeSelector: FC<MlFullTimeRangeSelectorProps> = ({
     () =>
       frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE ? (
         <FormattedMessage
-          id="xpack.dataVisualizer.fullTimeRangeSelector.useFullDataExcludingFrozenButtonTooltip"
+          id="xpack.ml.datePicker.fullTimeRangeSelector.useFullDataExcludingFrozenButtonTooltip"
           defaultMessage="Use full range of data excluding frozen data tier."
         />
       ) : (
         <FormattedMessage
-          id="xpack.dataVisualizer.fullTimeRangeSelector.useFullDataIncludingFrozenButtonTooltip"
+          id="xpack.ml.datePicker.fullTimeRangeSelector.useFullDataIncludingFrozenButtonTooltip"
           defaultMessage="Use full range of data including frozen data tier, which might have slower search results."
         />
       ),
@@ -152,10 +165,10 @@ export const MlFullTimeRangeSelector: FC<MlFullTimeRangeSelectorProps> = ({
         <EuiButton
           isDisabled={disabled}
           onClick={() => setRange(dataView, query, true)}
-          data-test-subj="dataVisualizerButtonUseFullData"
+          data-test-subj="mlDatePickerButtonUseFullData"
         >
           <FormattedMessage
-            id="xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataButtonLabel"
+            id="xpack.ml.datePicker.fullTimeRangeSelector.useFullDataButtonLabel"
             defaultMessage="Use full data"
           />
         </EuiButton>
@@ -169,7 +182,7 @@ export const MlFullTimeRangeSelector: FC<MlFullTimeRangeSelectorProps> = ({
               size="m"
               iconType="boxesVertical"
               aria-label={i18n.translate(
-                'xpack.dataVisualizer.index.fullTimeRangeSelector.moreOptionsButtonAriaLabel',
+                'xpack.ml.datePicker.fullTimeRangeSelector.moreOptionsButtonAriaLabel',
                 {
                   defaultMessage: 'More options',
                 }

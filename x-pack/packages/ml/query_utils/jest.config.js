@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { FullTimeRangeSelector } from './full_time_range_selector';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/query_utils'],
+};
