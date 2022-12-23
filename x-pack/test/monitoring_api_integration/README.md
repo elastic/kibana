@@ -33,7 +33,7 @@ patterns.
 - Create draft PR with the change to run against CI; or
 - Run the impacted test suite locally:
   - start test server: `node scripts/functional_tests_server --config x-pack/test/monitoring_api_integration/config`
-  - start test suite for the update server (eg Elasticsearch, Kibana..): `node scripts/functional_test_runner --config x-pack/test/monitoring_api_integration/config --grep "<Component>"`
+  - start test suite for the updated component (eg Elasticsearch, Kibana..): `node scripts/functional_test_runner --config x-pack/test/monitoring_api_integration/config --grep "<Component>"`
 
 ### Adding a new dataset
 - Generate elastic-agent data for the relevant integration and archive the data
