@@ -72,6 +72,9 @@ const RulesContainerComponent: React.FC = () => {
               />
             )}
           />
+          <Route path="/rules" exact>
+            <Redirect to={`/rules/${AllRulesTabs.management}`} />
+          </Route>
           {RulesSubRoutes.map((route) => (
             <Route
               key={`rules-route-${route.path}`}
