@@ -177,6 +177,14 @@ export class AlertsClient {
     return { [ALERT_CASE_IDS]: Array.from(uniqueCaseIds.values()) };
   }
 
+  private validateTotalCasesPerAlert(source: ParsedTechnicalFields | undefined, caseIds: string[]) {
+    const currentCaseIds = source?.[ALERT_CASE_IDS] ?? [];
+
+    if (currentCaseIds.length + caseIds.length > MAX_CASES_PER_ALERT) {
+      throw Boom.badRequest(`You cannot attach more than ${MAX_CASES_PER_ALERT} cases to an alert`);
+    }
+  }
+
   /**
    * Accepts an array of ES documents and executes ensureAuthorized for the given operation
    * @param items
@@ -342,11 +350,13 @@ export class AlertsClient {
     indexName,
     operation,
     fieldToUpdate,
+    validate,
   }: {
     ids: string[];
     indexName: string;
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
     fieldToUpdate: (source: ParsedTechnicalFields | undefined) => Record<string, unknown>;
+    validate?: (source: ParsedTechnicalFields | undefined) => void;
   }) {
     try {
       const mgetRes = await this.esClient.mget<ParsedTechnicalFields>({
@@ -368,8 +378,15 @@ export class AlertsClient {
         );
       }
 
-      const bulkUpdateRequest = mgetRes.docs.flatMap((item) => {
-        return [
+      const updateRequests = [];
+
+      for (const item of mgetRes.docs) {
+        if (validate) {
+          // @ts-expect-error doesn't handle error branch in MGetResponse
+          validate(item?._source);
+        }
+
+        updateRequests.push([
           {
             update: {
               _index: item._index,
@@ -382,8 +399,10 @@ export class AlertsClient {
               ...fieldToUpdate(item?._source),
             },
           },
-        ];
-      });
+        ]);
+      }
+
+      const bulkUpdateRequest = updateRequests.flat();
 
       const bulkUpdateResponse = await this.esClient.bulk({
         refresh: 'wait_for',
@@ -767,11 +786,14 @@ export class AlertsClient {
 
   public async bulkUpdateCases({ ids, index, caseIds }: BulkUpdateCasesOptions) {
     /**
-     * A document may have already some case ids. The check below
-     * does not ensure thats. We need to also throw in case
-     * alert.caseIds + caseIds > MAX_CASES_PER_ALERT
+     * First check in case the caseIds are more that the allowed limit.
+     * We do this check to avoid any mget calls or authorization checks
      *
-     * TODO: check for each alert if the validation applies
+     * The check below does not ensure that an alert may exceed the limit
+     * if we add the casedIds. We need to also throw in case
+     * alert.caseIds + caseIds > MAX_CASES_PER_ALERT. The validateTotalCasesPerAlert
+     * function ensures that.
+     *
      */
     if (caseIds.length > MAX_CASES_PER_ALERT) {
       throw Boom.badRequest(`You cannot attach more than ${MAX_CASES_PER_ALERT} cases to an alert`);
@@ -782,6 +804,7 @@ export class AlertsClient {
       indexName: index,
       operation: ReadOperations.Get,
       fieldToUpdate: (source) => this.getAlertCaseIdsFieldUpdate(source, caseIds),
+      validate: (source) => this.validateTotalCasesPerAlert(source, caseIds),
     });
   }
 
