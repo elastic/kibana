@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Presentable } from '../util/presentable';
-import { Trigger } from '../triggers';
+import type { Presentable } from '../util/presentable';
+import type { Trigger } from '../triggers';
 
 /**
  * During action execution we can provide additional information,
