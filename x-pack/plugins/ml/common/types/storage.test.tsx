@@ -9,8 +9,9 @@ import React, { FC } from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { MlStorageContextProvider, useStorage } from '@kbn/ml-local-storage';
 
-import { MlStorageContextProvider, useStorage } from './storage_context';
+import { ML_STORAGE_KEYS } from './storage';
 
 const mockSet = jest.fn();
 const mockRemove = jest.fn();
@@ -30,7 +31,11 @@ const mockStorage: Storage = {
 };
 
 const Provider: FC = ({ children }) => {
-  return <MlStorageContextProvider storage={mockStorage}>{children}</MlStorageContextProvider>;
+  return (
+    <MlStorageContextProvider storage={mockStorage} storageKeys={ML_STORAGE_KEYS}>
+      {children}
+    </MlStorageContextProvider>
+  );
 };
 
 describe('useStorage', () => {
