@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`entity_draggable renders correctly against snapshot 1`] = `
+<CellActions
+  field={
+    Object {
+      "name": "entity-name",
+      "type": "keyword",
+      "value": "entity-value",
+    }
+  }
+  mode="hover-popover"
+  triggerId="security-solution-default"
+  visibleCellActions={5}
+>
+  entity-name: "entity-value"
+</CellActions>
+`;

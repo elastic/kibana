@@ -31,7 +31,7 @@ describe('CellActions', () => {
       await getActionsPromise;
     });
 
-    expect(queryByTestId('cellActions')).toBeInTheDocument();
+    expect(queryByTestId(`render-content-${FIELD.name}`)).toBeInTheDocument();
   });
 
   it('renders InlineActions when mode is ALWAYS_VISIBLE', async () => {

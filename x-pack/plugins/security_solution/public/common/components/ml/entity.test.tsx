@@ -28,7 +28,7 @@ describe('entity_draggable', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <EntityComponent idPrefix="id-prefix" entityName="entity-name" entityValue="entity-value" />
+      <EntityComponent entityName="entity-name" entityValue="entity-value" />
     );
     expect(wrapper).toMatchSnapshot();
   });
@@ -36,7 +36,7 @@ describe('entity_draggable', () => {
   test('renders with entity name with entity value as text', () => {
     const wrapper = mount(
       <TestProviders>
-        <EntityComponent idPrefix="id-prefix" entityName="entity-name" entityValue="entity-value" />
+        <EntityComponent entityName="entity-name" entityValue="entity-value" />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('entity-name: "entity-value"');

@@ -274,14 +274,16 @@ describe('Field Renderers', () => {
 
     test('it should only render the items after overflowIndexStart', () => {
       render(
-        <MoreContainer
-          fieldType="keyword"
-          idPrefix={idPrefix}
-          isAggregatable={true}
-          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-          overflowIndexStart={5}
-          rowItems={rowItems}
-        />
+        <TestProviders>
+          <MoreContainer
+            fieldType="keyword"
+            idPrefix={idPrefix}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={5}
+            values={rowItems}
+            fieldName="mock.attr"
+          />
+        </TestProviders>
       );
 
       expect(screen.getByTestId('more-container').textContent).toEqual('item6item7');
@@ -289,14 +291,16 @@ describe('Field Renderers', () => {
 
     test('it should render all the items when overflowIndexStart is zero', () => {
       render(
-        <MoreContainer
-          fieldType="keyword"
-          idPrefix={idPrefix}
-          isAggregatable={true}
-          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-          overflowIndexStart={0}
-          rowItems={rowItems}
-        />
+        <TestProviders>
+          <MoreContainer
+            fieldType="keyword"
+            idPrefix={idPrefix}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={0}
+            values={rowItems}
+            fieldName="mock.attr"
+          />
+        </TestProviders>
       );
 
       expect(screen.getByTestId('more-container').textContent).toEqual(
@@ -306,14 +310,16 @@ describe('Field Renderers', () => {
 
     test('it should have the eui-yScroll to enable scrolling when necessary', () => {
       render(
-        <MoreContainer
-          fieldType="keyword"
-          idPrefix={idPrefix}
-          isAggregatable={true}
-          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-          overflowIndexStart={5}
-          rowItems={rowItems}
-        />
+        <TestProviders>
+          <MoreContainer
+            fieldType="keyword"
+            idPrefix={idPrefix}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={5}
+            values={rowItems}
+            fieldName="mock.attr"
+          />
+        </TestProviders>
       );
 
       expect(screen.getByTestId('more-container')).toHaveClass('eui-yScroll');
@@ -321,14 +327,16 @@ describe('Field Renderers', () => {
 
     test('it should use the moreMaxHeight prop as the value for the max-height style', () => {
       render(
-        <MoreContainer
-          fieldType="keyword"
-          idPrefix={idPrefix}
-          isAggregatable={true}
-          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-          overflowIndexStart={5}
-          rowItems={rowItems}
-        />
+        <TestProviders>
+          <MoreContainer
+            fieldType="keyword"
+            idPrefix={idPrefix}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={5}
+            values={rowItems}
+            fieldName="mock.attr"
+          />
+        </TestProviders>
       );
 
       expect(screen.getByTestId('more-container')).toHaveStyle(
@@ -338,15 +346,16 @@ describe('Field Renderers', () => {
 
     test('it should render with correct attrName prop', () => {
       render(
-        <MoreContainer
-          fieldType="keyword"
-          idPrefix={idPrefix}
-          isAggregatable={true}
-          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-          overflowIndexStart={5}
-          rowItems={rowItems}
-          attrName="mock.attr"
-        />
+        <TestProviders>
+          <MoreContainer
+            fieldType="keyword"
+            idPrefix={idPrefix}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={5}
+            values={rowItems}
+            fieldName="mock.attr"
+          />
+        </TestProviders>
       );
 
       screen
@@ -354,19 +363,21 @@ describe('Field Renderers', () => {
         .forEach((element) => expect(element).toBeInTheDocument());
     });
 
-    test('it should only invoke the optional render function, when provided, for the items after overflowIndexStart', () => {
+    test('it should only invoke the optional render function when provided', () => {
       const renderFn = jest.fn();
 
       render(
-        <MoreContainer
-          fieldType="keyword"
-          idPrefix={idPrefix}
-          isAggregatable={true}
-          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
-          overflowIndexStart={5}
-          render={renderFn}
-          rowItems={rowItems}
-        />
+        <TestProviders>
+          <MoreContainer
+            fieldType="keyword"
+            idPrefix={idPrefix}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={5}
+            render={renderFn}
+            values={rowItems}
+            fieldName="mock.attr"
+          />
+        </TestProviders>
       );
 
       expect(renderFn).toHaveBeenCalledTimes(2);
@@ -387,6 +398,7 @@ describe('Field Renderers', () => {
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
             rowItems={rowItems}
+            attrName={'mock.attr'}
           />
         </TestProviders>
       );
@@ -407,6 +419,7 @@ describe('Field Renderers', () => {
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
             rowItems={rowItems}
+            attrName={'mock.attr'}
           />
         </TestProviders>
       );

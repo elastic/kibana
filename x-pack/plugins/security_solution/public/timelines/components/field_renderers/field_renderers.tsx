@@ -330,18 +330,6 @@ export const MoreContainer = React.memo<MoreContainerProps>(
       [fieldName, fieldType, idPrefix, overflowIndexStart, render, values, timelineId]
     );
 
-    const moreItems = useMemo(
-      () =>
-        values.slice(overflowIndexStart).map((value, index) => {
-          return (
-            <EuiFlexItem grow={1} key={`${value}-${index}`}>
-              {(render && render(value)) ?? defaultToEmptyTag(value)}
-            </EuiFlexItem>
-          );
-        }),
-      [overflowIndexStart, render, values]
-    );
-
     return (
       <div
         data-test-subj="more-container"
@@ -352,7 +340,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
         }}
       >
         <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="overflow-items">
-          {fieldName != null ? moreItemsWithHoverActions : moreItems}
+          {moreItemsWithHoverActions}
         </EuiFlexGroup>
       </div>
     );
@@ -360,17 +348,9 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 );
 MoreContainer.displayName = 'MoreContainer';
 
+// TODO add dragging to FieldRendererOverflow when render in timeline
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
-  ({
-    attrName,
-    idPrefix,
-    moreMaxHeight,
-    overflowIndexStart = 5,
-    render,
-    rowItems,
-    fieldType,
-    isAggregatable,
-  }) => {
+  ({ attrName, idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems, fieldType }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
     const button = useMemo(

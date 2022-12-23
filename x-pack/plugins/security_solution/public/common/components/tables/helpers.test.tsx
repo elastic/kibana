@@ -92,7 +92,7 @@ describe('Table Helpers', () => {
       });
       const { queryAllByTestId, queryByTestId } = render(<TestProviders>{rowItems}</TestProviders>);
 
-      expect(queryAllByTestId('cellActions').length).toBe(2);
+      expect(queryAllByTestId('render-content-attrName').length).toBe(2);
       expect(queryByTestId('overflow-button')).toBeInTheDocument();
     });
   });

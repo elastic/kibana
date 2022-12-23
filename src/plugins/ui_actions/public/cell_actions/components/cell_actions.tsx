@@ -110,9 +110,11 @@ export const CellActions: React.FC<CellActionsProps> = ({
     [field, triggerId, metadata]
   );
 
+  const dataTestSubj = `render-content-${field.name}`;
+
   if (mode === CellActionsMode.HOVER_POPOVER) {
     return (
-      <div ref={nodeRef} data-test-subj={'cellActions'}>
+      <div ref={nodeRef} data-test-subj={dataTestSubj}>
         <HoverActionsPopover
           actionContext={actionContext}
           showActionTooltips={showActionTooltips}
@@ -127,7 +129,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
   }
 
   return (
-    <div ref={nodeRef} data-test-subj={'cellActions'}>
+    <div ref={nodeRef} data-test-subj={dataTestSubj}>
       {children}
       <InlineActions
         actionContext={actionContext}
