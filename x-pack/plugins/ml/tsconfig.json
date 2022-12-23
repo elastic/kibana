@@ -68,6 +68,7 @@
     "@kbn/repo-info",
     "@kbn/ml-url-state",
     "@kbn/ml-nested-property",
+    "@kbn/ml-local-storage",
   ],
   "exclude": [
     "target/**/*",
