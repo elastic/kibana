@@ -6,7 +6,8 @@
  */
 
 import path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 interface CreateTestConfigOptions {

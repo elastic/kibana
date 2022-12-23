@@ -10,14 +10,8 @@ import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/utils';
-
-interface RepoPath {
-  /** repo-relative path to the file */
-  repoRel: string;
-  /** absolute path to the file */
-  abs: string;
-}
+import { REPO_ROOT } from '@kbn/repo-info';
+import { RepoPath } from '@kbn/repo-path';
 
 /**
  * List the files in the repo, only including files which are manged by version
@@ -47,7 +41,7 @@ export async function getRepoFiles(include?: string[], exclude?: string[]) {
 
     const repoRel = line.slice(2); // trim the single char status and separating space from the line
     const existingPath = paths.get(repoRel);
-    const path = existingPath ?? { repoRel, abs: Path.resolve(REPO_ROOT, repoRel) };
+    const path = existingPath ?? new RepoPath(REPO_ROOT, repoRel);
     if (!existingPath) {
       paths.set(repoRel, path);
     }
