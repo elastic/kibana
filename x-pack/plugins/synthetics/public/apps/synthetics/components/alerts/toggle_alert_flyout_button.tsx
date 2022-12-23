@@ -12,7 +12,10 @@ import {
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHeaderLink,
+  EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -29,18 +32,27 @@ export const ToggleAlertFlyoutButton = () => {
   const { application } = useKibana<ClientPluginsStart>().services;
   const hasUptimeWrite = application?.capabilities.uptime?.save ?? false;
 
-  const { EditAlertFlyout } = useSyntheticsAlert(isOpen);
+  const { EditAlertFlyout, loading } = useSyntheticsAlert(isOpen);
 
   const monitorStatusAlertContextMenuItem: EuiContextMenuPanelItemDescriptor = {
     'aria-label': ToggleFlyoutTranslations.toggleMonitorStatusAriaLabel,
     'data-test-subj': 'xpack.synthetics.toggleAlertFlyout',
-    name: ToggleFlyoutTranslations.toggleMonitorStatusContent,
+    name: (
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>{ToggleFlyoutTranslations.toggleMonitorStatusContent}</EuiFlexItem>
+        {loading && (
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    ),
     onClick: () => {
       dispatch(setAlertFlyoutVisible(true));
       setIsOpen(false);
     },
     toolTipContent: !hasUptimeWrite ? noWritePermissionsTooltipContent : null,
-    disabled: !hasUptimeWrite,
+    disabled: !hasUptimeWrite || loading,
     icon: 'bell',
   };
 

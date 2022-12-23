@@ -47,7 +47,20 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
   step('Go to monitors page', async () => {
     await syntheticsApp.navigateToOverview(true);
+  });
 
+  step('should create default status alert', async () => {
+    await page.click(byTestId('xpack.synthetics.alertsPopover.toggleButton'));
+    await page.isDisabled(byTestId('xpack.synthetics.toggleAlertFlyout'));
+    await page.click(byTestId('xpack.synthetics.toggleAlertFlyout'));
+    await page.waitForSelector('text=Edit rule');
+    await page.selectOption(byTestId('intervalInputUnit'), { label: 'second' });
+    await page.fill(byTestId('intervalInput'), '10');
+    await page.click(byTestId('saveEditedRuleButton'));
+    await page.waitForSelector("text=Updated 'Synthetics internal alert'");
+  });
+
+  step('Monitor is as up in overview page', async () => {
     await retry.tryForTime(60 * 1000, async () => {
       const totalDown = await page.textContent(
         byTestId('xpack.uptime.synthetics.overview.status.up')
