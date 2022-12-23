@@ -14,9 +14,9 @@ import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import type { DataViewListItemEnhanced } from './dataview_list';
 import { SortingService } from './sorting_service';
 
-import { DataViewsListPopover } from './dataview_list_popover';
+import { SortingPopover } from './sorting_popover';
 
-describe('DataViewsListPopover', () => {
+describe('SortingPopover', () => {
   let storage: IStorageWrapper;
   let sortingService: SortingService<DataViewListItemEnhanced>;
 
@@ -31,7 +31,7 @@ describe('DataViewsListPopover', () => {
   });
   it('should render `EuiPopover`', () => {
     const wrapper = shallow(
-      <DataViewsListPopover sortingService={sortingService} handleSortingChange={jest.fn()} />
+      <SortingPopover sortingService={sortingService} handleSortingChange={jest.fn()} />
     );
     expect(wrapper).toMatchInlineSnapshot(`
     <EuiPopover

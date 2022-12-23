@@ -21,7 +21,7 @@ import { optionsListStrings } from './dataview_list_strings';
 import { SortingService } from './sorting_service';
 import type { DataViewListItemEnhanced } from './dataview_list';
 
-export interface DataViewsListPopoverProps {
+export interface SortingPopoverProps {
   handleSortingChange: () => void;
   sortingService: SortingService<DataViewListItemEnhanced>;
 }
@@ -34,10 +34,7 @@ function toSelectableOption(key: string, isChecked: boolean, label: string): Eui
   };
 }
 
-export function DataViewsListPopover({
-  sortingService,
-  handleSortingChange,
-}: DataViewsListPopoverProps) {
+export function SortingPopover({ sortingService, handleSortingChange }: SortingPopoverProps) {
   const { euiTheme } = useEuiTheme();
   const popoverStyle = euiTheme.base * 13;
 

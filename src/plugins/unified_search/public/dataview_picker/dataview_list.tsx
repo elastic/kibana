@@ -21,7 +21,7 @@ import { css } from '@emotion/react';
 
 import { optionsListStrings } from './dataview_list_strings';
 import { SortingService } from './sorting_service';
-import { DataViewsListPopover } from './dataview_list_popover';
+import { SortingPopover } from './sorting_popover';
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
@@ -115,7 +115,7 @@ export function DataViewsList({
               <EuiFlexItem>{search}</EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <DataViewsListPopover
+                <SortingPopover
                   sortingService={sortingService}
                   handleSortingChange={handleSortingChange}
                 />
