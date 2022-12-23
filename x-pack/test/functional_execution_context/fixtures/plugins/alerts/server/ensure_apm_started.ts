@@ -6,7 +6,8 @@
  */
 import apmAgent from 'elastic-apm-node';
 import { initApm } from '@kbn/apm-config-loader';
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 
 if (!apmAgent.isStarted()) {
   initApm(process.argv, REPO_ROOT, false, 'test-plugin');

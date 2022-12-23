@@ -10,7 +10,6 @@ export { OptimizerConfig } from './src/optimizer';
 export * from './src/run_optimizer';
 export * from './src/log_optimizer_state';
 export * from './src/log_optimizer_progress';
-export * from './src/node';
 export * from './src/limits';
 export * from './src/cli';
 export * from './src/report_optimizer_timings';
