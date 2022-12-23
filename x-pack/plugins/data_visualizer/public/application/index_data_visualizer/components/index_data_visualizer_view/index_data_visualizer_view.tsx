@@ -21,6 +21,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -31,9 +33,9 @@ import {
   MlDatePickerWrapper,
   FROZEN_TIER_PREFERENCE,
 } from '@kbn/ml-date-picker';
-
 import { useStorage } from '@kbn/ml-local-storage';
 import { MlFullTimeRangeSelector } from '@kbn/ml-date-picker';
+
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
   DV_FROZEN_TIER_PREFERENCE,
@@ -519,6 +521,9 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 ) : null}
                 <EuiFlexItem grow={false}>
                   <MlDatePickerWrapper
+                    uiSettingsKeys={UI_SETTINGS}
+                    wrapWithTheme={wrapWithTheme}
+                    toMountPoint={toMountPoint}
                     isAutoRefreshOnly={!hasValidTimeField}
                     showRefresh={!hasValidTimeField}
                     compact={compact}

@@ -20,19 +20,11 @@ import {
 
 import type { TimeRange } from '@kbn/es-query';
 
-// import { TimeHistoryContract, UI_SETTINGS } from '@kbn/data-plugin/public';
-
-interface TimeHistoryContract {
-  get: () => TimeRange[];
-}
-
-const UI_SETTINGS = {
-  TIMEPICKER_QUICK_RANGES: 'timepicker:quickRanges',
-} as const;
-
 import { i18n } from '@kbn/i18n';
-// import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { TimeHistoryContract } from '@kbn/data-plugin/public';
+import type { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { useUrlState } from '@kbn/ml-url-state';
 
 import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../hooks/use_time_filter';
@@ -79,7 +71,17 @@ export const MlDatePickerWrapper: FC<{
   isAutoRefreshOnly?: boolean;
   showRefresh?: boolean;
   compact?: boolean;
-}> = ({ isAutoRefreshOnly, showRefresh, compact = false }) => {
+  uiSettingsKeys: typeof UI_SETTINGS;
+  wrapWithTheme: typeof wrapWithTheme;
+  toMountPoint: typeof toMountPoint;
+}> = ({
+  isAutoRefreshOnly,
+  showRefresh,
+  compact = false,
+  uiSettingsKeys,
+  wrapWithTheme,
+  toMountPoint,
+}) => {
   const {
     data,
     notifications: { toasts },
@@ -158,23 +160,25 @@ export const MlDatePickerWrapper: FC<{
               'The refresh interval in the URL is shorter than the minimum supported by Machine Learning.',
           }
         ),
-        // body: wrapWithTheme(
-        //   <EuiButton
-        //     onClick={setRefreshInterval.bind(null, {
-        //       pause: refreshInterval.pause,
-        //       value: DEFAULT_REFRESH_INTERVAL_MS,
-        //     })}
-        //   >
-        //     <FormattedMessage
-        //       id="xpack.dataVisualizer.index.pageRefreshResetButton"
-        //       defaultMessage="Set to {defaultInterval}"
-        //       values={{
-        //         defaultInterval: `${DEFAULT_REFRESH_INTERVAL_MS / 1000}s`,
-        //       }}
-        //     />
-        //   </EuiButton>,
-        //   theme$
-        // ),
+        text: toMountPoint(
+          wrapWithTheme(
+            <EuiButton
+              onClick={setRefreshInterval.bind(null, {
+                pause: refreshInterval.pause,
+                value: DEFAULT_REFRESH_INTERVAL_MS,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.dataVisualizer.index.pageRefreshResetButton"
+                defaultMessage="Set to {defaultInterval}"
+                values={{
+                  defaultInterval: `${DEFAULT_REFRESH_INTERVAL_MS / 1000}s`,
+                }}
+              />
+            </EuiButton>,
+            theme$
+          )
+        ),
         toastLifeTimeMs: 30000,
       });
     },
@@ -190,7 +194,7 @@ export const MlDatePickerWrapper: FC<{
 
   const dateFormat = config.get('dateFormat');
   const timePickerQuickRanges = config.get<TimePickerQuickRange[]>(
-    UI_SETTINGS.TIMEPICKER_QUICK_RANGES
+    uiSettingsKeys.TIMEPICKER_QUICK_RANGES
   );
 
   const commonlyUsedRanges = useMemo(
