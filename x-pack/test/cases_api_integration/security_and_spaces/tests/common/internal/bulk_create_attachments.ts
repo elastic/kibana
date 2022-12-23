@@ -7,9 +7,8 @@
 
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   BulkCreateCommentRequest,
   CaseResponse,
@@ -35,17 +34,13 @@ import {
   createCaseAndBulkCreateAttachments,
   bulkCreateAttachments,
   updateCase,
+  createSecuritySolutionAlerts,
+  getSecuritySolutionAlerts,
 } from '../../../../common/lib/utils';
 import {
   createSignalsIndex,
   deleteSignalsIndex,
   deleteAllAlerts,
-  getRuleForSignalTesting,
-  waitForRuleSuccessOrStatus,
-  waitForSignalsToBePresent,
-  getSignalsByIds,
-  createRule,
-  getQuerySignalIds,
 } from '../../../../../detection_engine_api_integration/utils';
 import {
   globalRead,
@@ -483,7 +478,6 @@ export default ({ getService }: FtrProviderContext): void => {
         syncAlerts: boolean,
         expectedAlertStatus: string
       ) => {
-        const rule = getRuleForSignalTesting(['auditbeat-*']);
         const postedCase = await createCase(supertest, {
           ...postCaseReq,
           settings: { syncAlerts },
@@ -502,10 +496,8 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signals = await getSignalsByIds(supertest, log, [id]);
+        const signals = await createSecuritySolutionAlerts(supertest, log);
+
         const attachments: CommentRequest[] = [];
         const indices: string[] = [];
         const ids: string[] = [];
@@ -535,17 +527,53 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await es.indices.refresh({ index: indices });
 
-        const { body: updatedAlerts } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds(ids))
-          .expect(200);
+        const updatedAlerts = await getSecuritySolutionAlerts(supertest, ids);
 
-        updatedAlerts.hits.hits.forEach(
-          (alert: { _source: { 'kibana.alert.workflow_status': string } }) => {
-            expect(alert._source[ALERT_WORKFLOW_STATUS]).eql(expectedAlertStatus);
-          }
+        updatedAlerts.hits.hits.forEach((alert) => {
+          expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql(expectedAlertStatus);
+        });
+      };
+
+      const bulkCreateAlertsAndVerifyCaseIdsInAlertSchema = async (totalCases: number) => {
+        const cases = await Promise.all(
+          [...Array(totalCases).keys()].map((index) =>
+            createCase(supertest, {
+              ...postCaseReq,
+              settings: { syncAlerts: false },
+            })
+          )
         );
+
+        const signals = await createSecuritySolutionAlerts(supertest, log);
+        const alert = signals.hits.hits[0];
+
+        for (const theCase of cases) {
+          await bulkCreateAttachments({
+            supertest,
+            caseId: theCase.id,
+            params: [
+              {
+                alertId: alert._id,
+                index: alert._index,
+                rule: {
+                  id: 'id',
+                  name: 'name',
+                },
+                owner: 'securitySolutionFixture',
+                type: CommentType.alert,
+              },
+            ],
+          });
+        }
+
+        await es.indices.refresh({ index: alert._index });
+
+        const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id]);
+        const caseIds = cases.map((theCase) => theCase.id);
+
+        expect(updatedAlert.hits.hits[0]._source?.[ALERT_CASE_IDS]).eql(caseIds);
+
+        return updatedAlert;
       };
 
       it('should change the status of the alerts if sync alert is on', async () => {
@@ -554,6 +582,42 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should NOT change the status of the alert if sync alert is off', async () => {
         await bulkCreateAlertsAndVerifyAlertStatus(false, 'open');
+      });
+
+      it('should add the case ID to the alert schema', async () => {
+        await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(1);
+      });
+
+      it('should add multiple case ids to the alert schema', async () => {
+        await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(2);
+      });
+
+      it('should not add more than 10 cases to an alert', async () => {
+        const updatedAlert = await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(10);
+        const alert = updatedAlert.hits.hits[0];
+
+        const postedCase = await createCase(supertest, {
+          ...postCaseReq,
+          settings: { syncAlerts: false },
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              alertId: alert._id,
+              index: alert._index,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              owner: 'securitySolutionFixture',
+              type: CommentType.alert,
+            },
+          ],
+          expectedHttpCode: 400,
+        });
       });
     });
 
