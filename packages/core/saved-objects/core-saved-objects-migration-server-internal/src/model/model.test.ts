@@ -2010,7 +2010,7 @@ describe('migrations v2 model', () => {
         });
 
         expect(() => model(state, res)).toThrowErrorMatchingInlineSnapshot(
-          `"PREPARE_COMPATIBLE_MIGRATION received unexpected action response: {\\"type\\":\\"index_not_found_exception\\"}"`
+          `"PREPARE_COMPATIBLE_MIGRATION received unexpected action response: {\\"type\\":\\"remove_index_not_a_concrete_index\\"}"`
         );
       });
     });
