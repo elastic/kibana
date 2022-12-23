@@ -5,11 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks/dom';
 import { useLoadTagsQuery as useLoadTags } from './use_load_tags_query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '../../common/lib/kibana';
 import { IToasts } from '@kbn/core-notifications-browser';
+import { waitFor } from '@testing-library/dom';
 
 const MOCK_TAGS = ['a', 'b', 'c'];
 
@@ -49,14 +50,15 @@ describe('useLoadTags', () => {
   });
 
   it('should call loadRuleTags API and handle result', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useLoadTags({ enabled: true }), {
-      wrapper,
-    });
+    const { rerender, result, waitForNextUpdate } = renderHook(
+      () => useLoadTags({ enabled: true }),
+      {
+        wrapper,
+      }
+    );
 
-    await act(async () => {
-      result.current.loadTags();
-      await waitForNextUpdate();
-    });
+    rerender();
+    await waitForNextUpdate();
 
     expect(loadRuleTags).toBeCalled();
     expect(result.current.tags).toEqual(MOCK_TAGS);
@@ -67,12 +69,10 @@ describe('useLoadTags', () => {
 
     const { result } = renderHook(() => useLoadTags({ enabled: true }), { wrapper });
 
-    await act(async () => {
-      result.current.loadTags();
-    });
-
     expect(loadRuleTags).toBeCalled();
-    expect(useKibanaMock().services.notifications.toasts.addDanger).toBeCalled();
     expect(result.current.tags).toEqual([]);
+    await waitFor(() =>
+      expect(useKibanaMock().services.notifications.toasts.addDanger).toBeCalled()
+    );
   });
 });
