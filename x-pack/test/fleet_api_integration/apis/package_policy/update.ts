@@ -5,10 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
-import { endpointPolicyConfig } from './endpoint_policy_config_for_update';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -261,7 +261,9 @@ export default function (providerContext: FtrProviderContext) {
               enabled: true,
               streams: [],
               config: {
-                policy: endpointPolicyConfig,
+                policy: {
+                  value: policyFactory(),
+                },
               },
               type: 'endpoint',
             },
