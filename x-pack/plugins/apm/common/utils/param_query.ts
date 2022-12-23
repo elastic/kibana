@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { escapeKuery } from '@kbn/es-query';
+
 export function paramQuery<T extends string>(
   field: T,
   value: string | boolean | number | undefined | null
 ) {
   if (!value) return [];
-  return [`${[field]}: ${value}`];
+  return [escapeKuery(`${[field]}: ${value}`)];
 }
