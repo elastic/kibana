@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { stringify } from 'querystring';
 import { Env } from '@kbn/config';
-import { schema } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -146,49 +144,7 @@ export class CoreAppsService {
     );
   }
 
-  private registerCommonDefaultRoutes({
-    router,
-    basePath,
-    uiPlugins,
-    onResourceNotFound,
-    httpResources,
-  }: CommonRoutesParams) {
-    // catch-all route
-    httpResources.register(
-      {
-        path: '/{path*}',
-        validate: {
-          params: schema.object({
-            path: schema.maybe(schema.string()),
-          }),
-          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-        },
-      },
-      async (context, req, res) => {
-        const { query, params } = req;
-        const { path } = params;
-        if (!path || !path.endsWith('/') || path.startsWith('/')) {
-          return onResourceNotFound(req, res);
-        }
-
-        // remove trailing slash
-        const requestBasePath = basePath.get(req);
-        let rewrittenPath = path.slice(0, -1);
-        if (`/${path}`.startsWith(requestBasePath)) {
-          rewrittenPath = rewrittenPath.substring(requestBasePath.length);
-        }
-
-        const querystring = query ? stringify(query) : undefined;
-        const url = `${requestBasePath}/${rewrittenPath}${querystring ? `?${querystring}` : ''}`;
-
-        return res.redirected({
-          headers: {
-            location: url,
-          },
-        });
-      }
-    );
-
+  private registerCommonDefaultRoutes({ router, basePath, uiPlugins }: CommonRoutesParams) {
     router.get({ path: '/core', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })
     );
