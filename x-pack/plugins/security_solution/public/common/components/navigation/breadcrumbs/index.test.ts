@@ -10,7 +10,7 @@ import { encodeIpv6 } from '../../../lib/helpers';
 import type { ObjectWithNavTabs } from '.';
 import { getBreadcrumbsForRoute, useSetBreadcrumbs } from '.';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
-import type { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
+import type { RouteSpyState } from '../../../utils/route/types';
 import { NetworkRouteType } from '../../../../explore/network/pages/navigation/types';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { AdministrationSubTab } from '../../../../management/types';
@@ -24,6 +24,9 @@ import { navTabs } from '../../../../app/home/home_navigations';
 import { links } from '../../../links/app_links';
 import { updateAppLinks } from '../../../links';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
+import { AlertDetailRouteType } from '../../../../detections/pages/alert_details/types';
+import { AllRulesTabs } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
+import { UsersTableType } from '../../../../explore/users/store/model';
 
 jest.mock('../../../hooks/use_selector');
 
@@ -42,31 +45,82 @@ const chromeMock = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
 
-const mockDefaultTab = (pageName: string): SiemRouteType | undefined => {
-  switch (pageName) {
-    case 'hosts':
-      return HostsTableType.authentications;
-    case 'network':
-      return NetworkRouteType.flows;
-    case 'administration':
-      return AdministrationSubTab.endpoints;
-    default:
-      return undefined;
-  }
-};
-
 const getMockObject = (
   pageName: SecurityPageName,
   pathName: string,
   detailName: string | undefined
-): RouteSpyState & ObjectWithNavTabs => ({
-  detailName,
-  navTabs,
-  pageName,
-  pathName,
-  search: '',
-  tabName: mockDefaultTab(pageName) as HostsTableType,
-});
+): RouteSpyState & ObjectWithNavTabs => {
+  switch (pageName) {
+    case SecurityPageName.hosts:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+        tabName: HostsTableType.authentications,
+      };
+
+    case SecurityPageName.users:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+        tabName: UsersTableType.allUsers,
+      };
+
+    case SecurityPageName.network:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+        tabName: NetworkRouteType.flows,
+      };
+
+    case SecurityPageName.administration:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+        tabName: AdministrationSubTab.endpoints,
+      };
+
+    case SecurityPageName.alerts:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+        tabName: AlertDetailRouteType.summary,
+      };
+
+    case SecurityPageName.rules:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+        tabName: AllRulesTabs.management,
+      };
+
+    default:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+      };
+  }
+};
 
 (useDeepEqualSelector as jest.Mock).mockImplementation(() => {
   return {
