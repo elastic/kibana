@@ -25,6 +25,7 @@ export function toSLO(result: any): SLO {
       sliValue: Number(result.summary.sli_value),
       errorBudget: {
         remaining: Number(result.summary.error_budget.remaining),
+        isEstimated: result.summary.error_budget.is_estimated,
       },
     },
   };

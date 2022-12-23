@@ -13,11 +13,11 @@ import { euiLightVars } from '@kbn/ui-theme';
 import type { SLO } from '../../../typings';
 import { STATUS } from '../../../typings';
 
-export interface SloBadgesProps {
+export interface SloStatusProps {
   slo: SLO;
 }
 
-export function SloBadges({ slo }: SloBadgesProps) {
+export function SloStatusBadge({ slo }: SloStatusProps) {
   return (
     <div>
       {slo.summary.status === STATUS.NoData && (

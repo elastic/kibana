@@ -37,6 +37,7 @@ interface SLO {
     sliValue: number;
     errorBudget: {
       remaining: number;
+      isEstimated: boolean;
     };
   };
 }

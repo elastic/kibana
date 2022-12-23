@@ -29,6 +29,7 @@ export const sloList: SLOList = {
         sliValue: 0.99872,
         errorBudget: {
           remaining: 0.936,
+          isEstimated: false,
         },
       },
     },
@@ -44,6 +45,7 @@ export const sloList: SLOList = {
         sliValue: 0.97,
         errorBudget: {
           remaining: 0,
+          isEstimated: false,
         },
       },
     },
@@ -59,6 +61,7 @@ export const sloList: SLOList = {
         sliValue: -1,
         errorBudget: {
           remaining: 1,
+          isEstimated: false,
         },
       },
     },
@@ -74,6 +77,7 @@ export const sloList: SLOList = {
         sliValue: 0.97,
         errorBudget: {
           remaining: 0.12,
+          isEstimated: false,
         },
       },
     },
@@ -97,6 +101,26 @@ export const anSLO: SLO = {
     sliValue: 0.990097,
     errorBudget: {
       remaining: 0.504831,
+      isEstimated: false,
+    },
+  },
+};
+
+export const aForecastedSLO: SLO = {
+  id: '2f17deb0-725a-11ed-ab7c-4bb641cfc57e',
+  name: 'SLO latency service log',
+  timeWindow: {
+    duration: { value: 7, unit: 'd' },
+  },
+  objective: {
+    target: 0.98,
+  },
+  summary: {
+    status: STATUS.Healthy,
+    sliValue: 0.990097,
+    errorBudget: {
+      remaining: 0.504831,
+      isEstimated: true,
     },
   },
 };

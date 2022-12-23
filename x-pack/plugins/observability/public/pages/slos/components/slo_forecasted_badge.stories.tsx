@@ -9,22 +9,20 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloBadges as Component, SloBadgesProps } from './slo_badges';
-import { anSLO } from '../../../data/slo';
+import { SloForecastedBadge as Component, Props } from './slo_forecasted_badge';
+import { aForecastedSLO } from '../../../data/slo';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/SloBadges',
+  title: 'app/SLO/ListPage/SloForecastedBadge',
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: SloBadgesProps) => (
-  <Component {...props} />
-);
+const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
 const defaultProps = {
-  slo: anSLO,
+  slo: aForecastedSLO,
 };
 
-export const SloBadges = Template.bind({});
-SloBadges.args = defaultProps;
+export const SloForecastedBadge = Template.bind({});
+SloForecastedBadge.args = defaultProps;
