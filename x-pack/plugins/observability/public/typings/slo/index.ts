@@ -14,6 +14,15 @@ interface Duration {
   unit: DurationUnit;
 }
 
+export const STATUS = {
+  Healthy: 'healthy',
+  NoData: 'no_data',
+  Violated: 'violated',
+  // Degrading: 'degrading',
+} as const;
+
+export type Status = typeof STATUS[keyof typeof STATUS];
+
 interface SLO {
   id: string;
   name: string;
@@ -24,6 +33,7 @@ interface SLO {
     target: number;
   };
   summary: {
+    status: Status;
     sliValue: number;
     errorBudget: {
       remaining: number;

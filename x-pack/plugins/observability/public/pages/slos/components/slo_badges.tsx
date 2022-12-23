@@ -9,8 +9,9 @@ import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
-import { isSloHealthy } from '../helpers/is_slo_healthy';
-import { SLO } from '../../../typings';
+
+import type { SLO } from '../../../typings';
+import { STATUS } from '../../../typings';
 
 export interface SloBadgesProps {
   slo: SLO;
@@ -18,20 +19,30 @@ export interface SloBadgesProps {
 
 export function SloBadges({ slo }: SloBadgesProps) {
   return (
-    <>
-      {isSloHealthy(slo) ? (
+    <div>
+      {slo.summary.status === STATUS.NoData && (
+        <EuiBadge color={euiLightVars.euiColorDisabled}>
+          {i18n.translate('xpack.observability.slos.slo.state.noData', {
+            defaultMessage: 'No data',
+          })}
+        </EuiBadge>
+      )}
+
+      {slo.summary.status === STATUS.Healthy && (
         <EuiBadge color={euiLightVars.euiColorSuccess}>
           {i18n.translate('xpack.observability.slos.slo.state.healthy', {
             defaultMessage: 'Healthy',
           })}
         </EuiBadge>
-      ) : (
+      )}
+
+      {slo.summary.status === STATUS.Violated && (
         <EuiBadge color={euiLightVars.euiColorDanger}>
           {i18n.translate('xpack.observability.slos.slo.state.violated', {
             defaultMessage: 'Violated',
           })}
         </EuiBadge>
       )}
-    </>
+    </div>
   );
 }
