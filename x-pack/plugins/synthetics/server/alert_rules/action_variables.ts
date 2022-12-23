@@ -10,7 +10,6 @@ import { UptimeCorePluginsSetup } from '../legacy_uptime/lib/adapters';
 import { commonMonitorStateI18, commonStateTranslations } from './translations';
 
 export const MESSAGE = 'message';
-export const MONITOR_WITH_GEO = 'downMonitorsWithGeo';
 export const ALERT_REASON_MSG = 'reason';
 export const ALERT_DETAILS_URL = 'alertDetailsUrl';
 export const VIEW_IN_APP_URL = 'viewInAppUrl';
@@ -20,7 +19,6 @@ export const getActionVariables = ({ plugins }: { plugins: UptimeCorePluginsSetu
   return {
     context: [
       ACTION_VARIABLES[MESSAGE],
-      ACTION_VARIABLES[MONITOR_WITH_GEO],
       ...(plugins.observability.getAlertDetailsConfig()?.uptime.enabled
         ? [ACTION_VARIABLES[ALERT_DETAILS_URL]]
         : []),
@@ -39,17 +37,7 @@ export const ACTION_VARIABLES = {
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.context.message.description',
       {
-        defaultMessage: 'A generated message summarizing the currently down monitors',
-      }
-    ),
-  },
-  [MONITOR_WITH_GEO]: {
-    name: MONITOR_WITH_GEO,
-    description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
-      {
-        defaultMessage:
-          'A generated summary that shows some or all of the monitors detected as "down" by the alert',
+        defaultMessage: 'A generated message summarizing the status of monitors currently down',
       }
     ),
   },
@@ -67,8 +55,7 @@ export const ACTION_VARIABLES = {
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.context.alertDetailUrl.description',
       {
-        defaultMessage:
-          'Link to the view within Elastic that shows further details and context surrounding this alert',
+        defaultMessage: 'Link to a view showing further details and context on this alert',
       }
     ),
   },
@@ -77,8 +64,7 @@ export const ACTION_VARIABLES = {
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.context.viewInAppUrl.description',
       {
-        defaultMessage:
-          'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+        defaultMessage: 'Open alert details and context in Synthetics app.',
       }
     ),
   },

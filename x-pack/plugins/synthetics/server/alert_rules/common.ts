@@ -27,7 +27,6 @@ export const updateState = (
   if (!isRight(decoded)) {
     const triggerVal = isTriggeredNow ? now : undefined;
     return {
-      currentTriggerStarted: triggerVal,
       firstCheckedAt: now,
       firstTriggeredAt: triggerVal,
       isTriggered: isTriggeredNow,
@@ -38,7 +37,6 @@ export const updateState = (
     };
   }
   const {
-    currentTriggerStarted,
     firstCheckedAt,
     firstTriggeredAt,
     lastTriggeredAt,
@@ -48,15 +46,8 @@ export const updateState = (
     lastResolvedAt,
   } = decoded.right;
 
-  let cts: string | undefined;
-  if (isTriggeredNow && !currentTriggerStarted) {
-    cts = now;
-  } else if (isTriggeredNow) {
-    cts = currentTriggerStarted;
-  }
   return {
     meta,
-    currentTriggerStarted: cts,
     firstCheckedAt: firstCheckedAt ?? now,
     firstTriggeredAt: isTriggeredNow && !firstTriggeredAt ? now : firstTriggeredAt,
     lastCheckedAt: now,

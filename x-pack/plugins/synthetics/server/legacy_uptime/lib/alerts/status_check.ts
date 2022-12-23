@@ -48,7 +48,6 @@ import {
   ALERT_DETAILS_URL,
   ALERT_REASON_MSG,
   MESSAGE,
-  MONITOR_WITH_GEO,
   VIEW_IN_APP_URL,
 } from './action_variables';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
@@ -185,7 +184,15 @@ export const getReasonMessage = ({
 }) => {
   const checkedAt = moment(timestamp).format('LLL');
 
-  return `Monitor "${name}" from ${location} ${status} Checked at ${checkedAt}`;
+  return i18n.translate('xpack.uptime.alerts.monitorStatus.reasonMessage', {
+    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}.`,
+    values: {
+      name,
+      status,
+      location,
+      checkedAt,
+    },
+  });
 };
 
 export const getMonitorAlertDocument = (monitorSummary: Record<string, string | undefined>) => ({
@@ -323,7 +330,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   actionVariables: {
     context: [
       ACTION_VARIABLES[MESSAGE],
-      ACTION_VARIABLES[MONITOR_WITH_GEO],
       ...(plugins.observability.getAlertDetailsConfig()?.uptime.enabled
         ? [ACTION_VARIABLES[ALERT_DETAILS_URL]]
         : []),

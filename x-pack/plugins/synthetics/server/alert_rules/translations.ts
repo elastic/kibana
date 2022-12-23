@@ -17,8 +17,7 @@ export const commonMonitorStateI18 = [
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitor',
       {
-        defaultMessage:
-          'A human friendly rendering of name or ID, preferring name (e.g. My Monitor)',
+        defaultMessage: 'Name of the monitor.',
       }
     ),
   },
@@ -50,39 +49,38 @@ export const commonMonitorStateI18 = [
     ),
   },
   {
-    name: 'statusMessage',
+    name: 'status',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.statusMessage',
+      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.status',
       {
-        defaultMessage:
-          'Status message e.g down or is below availability threshold in case of availability check or both.',
+        defaultMessage: 'Monitor status (e.g "down").',
       }
     ),
   },
   {
-    name: 'latestErrorMessage',
+    name: 'lastErrorMessage',
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastErrorMessage',
       {
-        defaultMessage: 'Monitor latest error message',
+        defaultMessage: 'Monitor last error message.',
       }
     ),
   },
   {
-    name: 'observerLocation',
+    name: 'location',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.observerLocation',
+      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.location',
       {
-        defaultMessage: 'Observer location from which heartbeat check is performed.',
+        defaultMessage: 'Location from which the check is performed.',
       }
     ),
   },
   {
-    name: 'observerHostname',
+    name: 'hostName',
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.state.observerHostname',
       {
-        defaultMessage: 'Observer hostname from which heartbeat check is performed.',
+        defaultMessage: 'Hostname of the location from which the check is performed.',
       }
     ),
   },
@@ -91,7 +89,7 @@ export const commonMonitorStateI18 = [
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.state.checkedAt',
       {
-        defaultMessage: 'Timestamp at which monitor is checked.',
+        defaultMessage: 'Timestamp of the monitor run.',
       }
     ),
   },
@@ -103,7 +101,7 @@ export const commonStateTranslations = [
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.state.firstCheckedAt',
       {
-        defaultMessage: 'Timestamp indicating when this alert first checked',
+        defaultMessage: 'Timestamp indicating when the alert was first checked.',
       }
     ),
   },
@@ -112,17 +110,7 @@ export const commonStateTranslations = [
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.state.firstTriggeredAt',
       {
-        defaultMessage: 'Timestamp indicating when the alert first triggered',
-      }
-    ),
-  },
-  {
-    name: 'currentTriggerStarted',
-    description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.currentTriggerStarted',
-      {
-        defaultMessage:
-          'Timestamp indicating when the current trigger state began, if alert is triggered',
+        defaultMessage: 'Timestamp indicating when the alert first triggered.',
       }
     ),
   },
@@ -131,7 +119,7 @@ export const commonStateTranslations = [
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.state.isTriggered',
       {
-        defaultMessage: `Flag indicating if the alert is currently triggering`,
+        defaultMessage: `Flag indicating if the alert is currently triggering.`,
       }
     ),
   },
@@ -140,7 +128,7 @@ export const commonStateTranslations = [
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastCheckedAt',
       {
-        defaultMessage: `Timestamp indicating the alert's most recent check time`,
+        defaultMessage: `Timestamp indicating the alert most recent check time.`,
       }
     ),
   },
@@ -149,7 +137,7 @@ export const commonStateTranslations = [
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastResolvedAt',
       {
-        defaultMessage: `Timestamp indicating the most recent resolution time for this alert`,
+        defaultMessage: `Timestamp indicating the most recent resolution time for this alert.`,
       }
     ),
   },
@@ -158,7 +146,7 @@ export const commonStateTranslations = [
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastTriggeredAt',
       {
-        defaultMessage: `Timestamp indicating the alert's most recent trigger time`,
+        defaultMessage: `Timestamp indicating the alert most recent trigger time.`,
       }
     ),
   },

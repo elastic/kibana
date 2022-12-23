@@ -38,9 +38,10 @@ export function* updateDefaultAlertingEffect() {
 }
 
 const successMessage = i18n.translate('xpack.synthetics.settings.enableAlerting', {
-  defaultMessage: 'Successfully updated monitor status alert.',
+  defaultMessage:
+    'Monitor status rule type successfully updated. Next rule alerts will take the changes into account.',
 });
 
 const failureMessage = i18n.translate('xpack.synthetics.settings.enabledAlert.fail', {
-  defaultMessage: 'Failed to update monitor status alert.',
+  defaultMessage: 'Failed to update monitor status rule type.',
 });

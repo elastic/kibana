@@ -87,7 +87,7 @@ export const commonMonitorStateI18 = [
     description: i18n.translate(
       'xpack.synthetics.alerts.monitorStatus.actionVariables.state.checkedAt',
       {
-        defaultMessage: 'Timestamp at which monitor is checked.',
+        defaultMessage: 'Timestamp of the monitor check.',
       }
     ),
   },

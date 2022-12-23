@@ -9,7 +9,6 @@ import * as t from 'io-ts';
 
 export const SyntheticsCommonStateType = t.intersection([
   t.partial({
-    currentTriggerStarted: t.string,
     firstTriggeredAt: t.string,
     lastTriggeredAt: t.string,
     lastResolvedAt: t.string,

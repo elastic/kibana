@@ -103,7 +103,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       try {
         // we do this async, so we don't block the user, error handling will be done on the UI via separate api
         const statusAlertService = new StatusAlertService(context, server, savedObjectsClient);
-        await statusAlertService.createDefaultAlertIfNotExist().then(() => {
+        statusAlertService.createDefaultAlertIfNotExist().then(() => {
           server.logger.debug(
             `Successfully created default alert for monitor: ${newMonitor.attributes.name}`
           );
