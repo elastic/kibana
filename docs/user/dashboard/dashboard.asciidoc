@@ -37,6 +37,9 @@ Panels display your data in charts, tables, maps, and more, which allow you to c
 | <<add-text,Text>>
 | Add context to your panels with *Text*.
 
+| <<add-image,Image>>
+| Personalize your dashboard with a custom image.
+
 |===
 
 [float]
@@ -248,13 +251,6 @@ To personalize your dashboards, add your own logos and graphics. Use *Image* pan
 
 [role="screenshot"]
 image::images/dashboard_addImageEditor_8.7.0.png[Add image editor]
-
-For example, configured logo could look like this: 
-
-[role="screenshot"]
-image::images/dashboard_addImageEditorExample_8.7.0.png[Add image editor example]
-
-. Click *Save* to add the image panel to the dashboard.
 
 [NOTE]
 ============================================================================
