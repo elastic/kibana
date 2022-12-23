@@ -21,7 +21,7 @@ export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction'
 export function createApplyEntityFieldFiltersAction(
   getStartServices: MlCoreSetup['getStartServices']
 ): UiActionsActionDefinition<AnomalyChartsFieldSelectionContext> {
-  return ({
+  return {
     id: 'apply-entity-field-filters',
     type: APPLY_ENTITY_FIELD_FILTERS_ACTION,
     getIconType(context: AnomalyChartsFieldSelectionContext): string {
@@ -88,5 +88,5 @@ export function createApplyEntityFieldFiltersAction(
     async isCompatible({ embeddable, data }) {
       return embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE && data !== undefined;
     },
-  });
+  };
 }

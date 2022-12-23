@@ -13,7 +13,9 @@ import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, EditSwimlanePanelContext } from '../e
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
-export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['getStartServices']): UiActionsActionDefinition<EditSwimlanePanelContext> {
+export function createEditSwimlanePanelAction(
+  getStartServices: MlCoreSetup['getStartServices']
+): UiActionsActionDefinition<EditSwimlanePanelContext> {
   return {
     id: 'edit-anomaly-swimlane',
     type: EDIT_SWIMLANE_PANEL_ACTION,

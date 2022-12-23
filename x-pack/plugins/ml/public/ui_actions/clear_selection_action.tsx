@@ -15,8 +15,10 @@ export interface ClearSelectionContext {
   updateCallback: () => void;
 }
 
-export function createClearSelectionAction(getStartServices: MlCoreSetup['getStartServices']): UiActionsActionDefinition<ClearSelectionContext> {
-  return ({
+export function createClearSelectionAction(
+  getStartServices: MlCoreSetup['getStartServices']
+): UiActionsActionDefinition<ClearSelectionContext> {
+  return {
     id: 'clear-selection-action',
     type: CLEAR_SELECTION_ACTION,
     getIconType(context): string {
@@ -33,5 +35,5 @@ export function createClearSelectionAction(getStartServices: MlCoreSetup['getSta
     async isCompatible({ updateCallback }) {
       return typeof updateCallback === 'function';
     },
-  });
+  };
 }

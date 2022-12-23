@@ -12,8 +12,10 @@ import { MlCoreSetup } from '../plugin';
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
-export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getStartServices']): UiActionsActionDefinition<{ embeddable: Embeddable }> {
-  return ({
+export function createLensVisToADJobAction(
+  getStartServices: MlCoreSetup['getStartServices']
+): UiActionsActionDefinition<{ embeddable: Embeddable }> {
+  return {
     id: 'create-ml-ad-job-action',
     type: CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION,
     getIconType(context): string {
@@ -66,5 +68,5 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
         return false;
       }
     },
-  });
+  };
 }

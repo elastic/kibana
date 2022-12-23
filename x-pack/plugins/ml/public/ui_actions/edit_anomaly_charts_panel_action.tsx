@@ -19,7 +19,7 @@ export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
 export function createEditAnomalyChartsPanelAction(
   getStartServices: MlCoreSetup['getStartServices']
 ): UiActionsActionDefinition<EditAnomalyChartsPanelContext> {
-  return ({
+  return {
     id: 'edit-anomaly-charts',
     type: EDIT_ANOMALY_CHARTS_PANEL_ACTION,
     getIconType(context): string {
@@ -56,5 +56,5 @@ export function createEditAnomalyChartsPanelAction(
         embeddable.getInput().viewMode === ViewMode.EDIT
       );
     },
-  });
+  };
 }

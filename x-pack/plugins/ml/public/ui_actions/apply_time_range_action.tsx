@@ -20,7 +20,7 @@ const supportedApps = [DASHBOARD_APP_ID];
 export function createApplyTimeRangeSelectionAction(
   getStartServices: MlCoreSetup['getStartServices']
 ): UiActionsActionDefinition<SwimLaneDrilldownContext> {
-  return ({
+  return {
     id: 'apply-time-range-selection',
     type: APPLY_TIME_RANGE_SELECTION_ACTION,
     getIconType(context): string {
@@ -61,5 +61,5 @@ export function createApplyTimeRangeSelectionAction(
         supportedApps.includes(appId!)
       );
     },
-  });
+  };
 }

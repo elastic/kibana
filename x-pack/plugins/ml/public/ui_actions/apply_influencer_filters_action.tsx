@@ -22,7 +22,7 @@ const supportedApps = [DASHBOARD_APP_ID];
 export function createApplyInfluencerFiltersAction(
   getStartServices: MlCoreSetup['getStartServices']
 ): UiActionsActionDefinition<SwimLaneDrilldownContext> {
-  return ({
+  return {
     id: 'apply-to-current-view',
     type: APPLY_INFLUENCER_FILTERS_ACTION,
     getIconType(context: SwimLaneDrilldownContext): string {
@@ -85,5 +85,5 @@ export function createApplyInfluencerFiltersAction(
         supportedApps.includes(appId!)
       );
     },
-  });
+  };
 }
