@@ -10,7 +10,6 @@
     "server/**/*",
     "typings/**/*",
     "../../../typings/**/*",
-    "../../../packages/kbn-slo-schema/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -67,6 +66,7 @@
     "@kbn/core-saved-objects-common",
     "@kbn/share-plugin",
     "@kbn/core-notifications-browser",
+    "@kbn/slo-schema",
   ],
   "exclude": [
     "target/**/*",
