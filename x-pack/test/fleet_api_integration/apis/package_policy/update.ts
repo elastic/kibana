@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
-import { endpointPolicyConfig } from './endpointUpdatePolicyConfig';
+import { endpointPolicyConfig } from './endpoint_policy_config_for_update';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
