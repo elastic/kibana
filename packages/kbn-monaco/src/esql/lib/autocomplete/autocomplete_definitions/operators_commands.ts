@@ -21,7 +21,7 @@ export const byOperatorDefinition: AutocompleteCommandDefinition = {
 
 export const assignOperatorDefinition: AutocompleteCommandDefinition = {
   label: '=',
-  insertText: '= ',
+  insertText: '=',
   kind: 11,
   detail: i18n.translate('monaco.esql.autocomplete.assignDoc', {
     defaultMessage: 'Assign (=)',

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
+import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import {
   SQLLang,
@@ -326,29 +326,41 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     getDocumentation();
   }, [language]);
 
-  const getSourceIdentifiers: ESQLCustomAutocompleteCallbacks['getSourceIdentifiers'] = (ctx) => {
-    return dataViews.getTitles();
-  };
+  const getSourceIdentifiers: ESQLCustomAutocompleteCallbacks['getSourceIdentifiers'] =
+    useCallback(() => {
+      return dataViews.getTitles();
+    }, [dataViews]);
 
-  const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] = async (
-    ctx
-  ) => {
-    let resultData: string[] = [];
+  const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] =
+    useMemo(() => {
+      let source: string;
+      let cachedSuggestions: string[] = [];
 
-    for (const s of ctx.userDefinedVariables.sourceIdentifiers) {
-      if (s) {
-        try {
-          const [dataView] = await dataViews.find(s, 1);
-          if (dataView) {
-            resultData = [...resultData, ...dataView.fields.map((f) => f.name)];
-          }
-        } catch (e) {
-          // nothing to be here
+      return async (ctx) => {
+        let data: string[] = [];
+        const sourceKey = ctx.userDefinedVariables.sourceIdentifiers.join(',');
+        if (sourceKey === source) {
+          return cachedSuggestions;
         }
-      }
-    }
-    return resultData;
-  };
+        for (const s of ctx.userDefinedVariables.sourceIdentifiers) {
+          if (s) {
+            try {
+              const [dataView] = await dataViews.find(s, 1);
+              if (dataView) {
+                data = [...data, ...dataView.fields.map((f) => f.name)];
+              }
+            } catch (e) {
+              // nothing to be here
+            }
+          }
+        }
+
+        cachedSuggestions = data;
+        source = sourceKey;
+
+        return cachedSuggestions;
+      };
+    }, [dataViews]);
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,

@@ -33,7 +33,7 @@ export const orderingCommandsDefinitions: AutocompleteCommandDefinition[] = [
 
 export const nullsCommandsDefinition: AutocompleteCommandDefinition = {
   label: 'nulls',
-  insertText: 'nulls ',
+  insertText: 'nulls',
   kind: 13,
   sortText: 'D',
 };
@@ -41,13 +41,13 @@ export const nullsCommandsDefinition: AutocompleteCommandDefinition = {
 export const nullsOrderingCommandsDefinitions: AutocompleteCommandDefinition[] = [
   {
     label: 'first',
-    insertText: 'first ',
+    insertText: 'first',
     kind: 13,
     sortText: 'D',
   },
   {
     label: 'last',
-    insertText: 'last ',
+    insertText: 'last',
     kind: 13,
     sortText: 'D',
   },
