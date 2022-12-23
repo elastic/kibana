@@ -167,7 +167,7 @@ describe('Discover component', () => {
     expect(
       container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
     ).toBeNull();
-  });
+  }, 10000);
 
   test('selected data view with time field displays chart toggle', async () => {
     const container = document.createElement('div');
@@ -206,16 +206,16 @@ describe('Discover component', () => {
     test('should be opened if discover:sidebarClosed was not set', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, undefined);
       expect(component.find(DiscoverSidebar).length).toBe(1);
-    });
+    }, 10000);
 
     test('should be opened if discover:sidebarClosed is false', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, false);
       expect(component.find(DiscoverSidebar).length).toBe(1);
-    });
+    }, 10000);
 
     test('should be closed if discover:sidebarClosed is true', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, true);
       expect(component.find(DiscoverSidebar).length).toBe(0);
-    });
+    }, 10000);
   });
 });

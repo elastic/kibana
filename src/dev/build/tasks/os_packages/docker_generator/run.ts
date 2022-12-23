@@ -11,7 +11,7 @@ import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
