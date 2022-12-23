@@ -12,7 +12,6 @@ import {
   EuiSelectableProps,
   EuiBadge,
   EuiFlexGroup,
-  EuiFormRow,
   EuiFlexItem,
   EuiPanel,
 } from '@elastic/eui';
@@ -106,24 +105,22 @@ export function DataViewsList({
             color="transparent"
             paddingSize="s"
           >
-            <EuiFormRow fullWidth>
-              <EuiFlexGroup
-                gutterSize="xs"
-                direction="row"
-                justifyContent="spaceBetween"
-                alignItems="center"
-                responsive={false}
-              >
-                <EuiFlexItem>{search}</EuiFlexItem>
+            <EuiFlexGroup
+              gutterSize="xs"
+              direction="row"
+              justifyContent="spaceBetween"
+              alignItems="center"
+              responsive={false}
+            >
+              <EuiFlexItem>{search}</EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <DataViewsListPopover
-                    sortingService={sortingService}
-                    handleSortingChange={handleSortingChange}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFormRow>
+              <EuiFlexItem grow={false}>
+                <DataViewsListPopover
+                  sortingService={sortingService}
+                  handleSortingChange={handleSortingChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPanel>
           {list}
         </>
