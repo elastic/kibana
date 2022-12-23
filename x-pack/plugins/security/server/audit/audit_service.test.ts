@@ -8,14 +8,14 @@
 import type { Socket } from 'net';
 import { lastValueFrom, Observable, of } from 'rxjs';
 
+import type { FakeRawRequest } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import type { FakeRawRequest } from '@kbn/core/server'
-import { CoreKibanaRequest } from '@kbn/core/server'
 
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
@@ -239,24 +239,24 @@ describe('#asScoped', () => {
       event: { action: 'ACTION' },
     });
     expect(logger.info).toHaveBeenLastCalledWith('MESSAGE', {
-      "client": {
-        "ip": undefined,
+      client: {
+        ip: undefined,
       },
-      "event": {
-        "action": "ACTION",
+      event: {
+        action: 'ACTION',
       },
-      "http": undefined,
-      "kibana": {
-        "session_id": undefined,
-        "space_id": undefined,
+      http: undefined,
+      kibana: {
+        session_id: undefined,
+        space_id: undefined,
       },
-      "trace": {
-        "id": expect.any(String),
+      trace: {
+        id: expect.any(String),
       },
-      "user": {
-        "id": "uid",
-        "name": "jdoe",
-        "roles": ["admin"],
+      user: {
+        id: 'uid',
+        name: 'jdoe',
+        roles: ['admin'],
       },
     });
     audit.stop();
