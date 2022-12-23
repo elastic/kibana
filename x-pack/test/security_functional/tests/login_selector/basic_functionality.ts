@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(`${deployment.getHostPort()}/authentication/app?one=two`);
 
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
-      expect(await PageObjects.security.loginPage.getErrorMessage()).to.contain('error');
+      expect(await PageObjects.security.loginPage.getErrorMessage()).to.be.ok();
 
       await getService('supertest')
         .post('/authentication/app/setup')
@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.user.disable(testCredentials.username);
       await browser.refresh();
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
-      expect(await PageObjects.security.loginPage.getErrorMessage()).to.be('error');
+      expect(await PageObjects.security.loginPage.getErrorMessage()).to.be.ok();
 
       // 3. Re-enable user and try to login again.
       await security.user.enable(testCredentials.username);
