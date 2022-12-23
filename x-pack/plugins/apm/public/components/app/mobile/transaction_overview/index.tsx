@@ -21,7 +21,7 @@ import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transact
 import { MobileTransactionCharts } from '../../../shared/charts/transaction_charts/mobile_transaction_charts';
 import { TransactionsTable } from '../../../shared/transactions_table';
 import { replace } from '../../../shared/links/url_helpers';
-import { useKueryWithFilters } from '../../../../hooks/use_kuery_with_filters';
+import { useKueryWithMobileFilters } from '../../../../hooks/use_kuery_with_mobile_filters';
 
 export function MobileTransactionOverview() {
   const {
@@ -30,9 +30,21 @@ export function MobileTransactionOverview() {
       rangeFrom,
       rangeTo,
       transactionType: transactionTypeFromUrl,
+      device,
+      osVersion,
+      appVersion,
+      netConnectionType,
+      kuery,
     },
   } = useApmParams('/mobile-services/{serviceName}/transactions');
-  const kueryWithFilters = useKueryWithFilters();
+
+  const kueryWithFilters = useKueryWithMobileFilters({
+    device,
+    osVersion,
+    appVersion,
+    netConnectionType,
+    kuery,
+  });
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

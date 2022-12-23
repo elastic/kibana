@@ -41,7 +41,7 @@ import { ServiceOverviewDependenciesTable } from '../../service_overview/service
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
 import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
-import { useKueryWithFilters } from '../../../../hooks/use_kuery_with_filters';
+import { useKueryWithMobileFilters } from '../../../../hooks/use_kuery_with_mobile_filters';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -52,12 +52,28 @@ export function MobileServiceOverview() {
   const { serviceName, fallbackToTransactions } = useApmServiceContext();
   const router = useApmRouter();
   const filters = useFiltersForEmbeddableCharts();
-  const kueryWithFilters = useKueryWithFilters();
 
   const {
     query,
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      device,
+      osVersion,
+      appVersion,
+      netConnectionType,
+    },
   } = useApmParams('/mobile-services/{serviceName}/overview');
+
+  const kueryWithFilters = useKueryWithMobileFilters({
+    device,
+    osVersion,
+    appVersion,
+    netConnectionType,
+    kuery,
+  });
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const dependenciesLink = router.link('/services/{serviceName}/dependencies', {

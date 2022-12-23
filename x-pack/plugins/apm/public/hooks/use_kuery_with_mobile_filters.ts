@@ -13,16 +13,20 @@ import {
   SERVICE_VERSION,
 } from '../../common/es_fields/apm';
 import { paramQuery } from '../../common/utils/param_query';
-import { useAnyOfApmParams } from './use_apm_params';
 
-export function useKueryWithFilters() {
-  const {
-    query: { device, osVersion, appVersion, netConnectionType, kuery },
-  } = useAnyOfApmParams(
-    '/mobile-services/{serviceName}/overview',
-    '/mobile-services/{serviceName}/transactions'
-  );
-
+export function useKueryWithMobileFilters({
+  device,
+  osVersion,
+  appVersion,
+  netConnectionType,
+  kuery,
+}: {
+  device?: string;
+  osVersion?: string;
+  appVersion?: string;
+  netConnectionType?: string;
+  kuery?: string;
+}) {
   return useMemo(
     () =>
       [
