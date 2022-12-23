@@ -102,7 +102,7 @@ export function ActionsPopover({
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId });
 
-  const { monitor: monitorFields } = useSelectedMonitor(monitor.id);
+  const { monitor: monitorFields } = useSelectedMonitor(monitor.configId);
 
   const labels = useMemo(
     () => ({
