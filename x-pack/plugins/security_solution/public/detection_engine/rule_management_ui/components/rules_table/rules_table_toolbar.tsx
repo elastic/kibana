@@ -37,7 +37,7 @@ export const RulesTableToolbar = React.memo(() => {
   const ruleTabs = useMemo(
     () => ({
       [AllRulesTabs.management]: {
-        id: '',
+        id: AllRulesTabs.management,
         name: i18n.RULES_TAB,
         disabled: false,
         href: `/rules/${AllRulesTabs.management}`,
