@@ -26,8 +26,8 @@ are already installed by elasticseach at startup, and available at `.monitoring-
 patterns.
 
 ### Validating a new package version
-- Get the locally built package from <integrations-repos>/build/packages/<package-<version>.zip; or
-- Download the package zip at <package-registry>/epr/<package>/<package>-<version>.zip
+- Get the locally built package from `<integrations-repos>/build/packages/<package>-<version>.zip`; or
+- Download the package zip at `<package-registry>/epr/<package>/<package>-<version>.zip`
 - Add the zipped package of the new version under `./fixtures/packages` and remove the previous version
 - Update the package version in `./packages.ts`
 - Create draft PR with the change to run against CI; or
