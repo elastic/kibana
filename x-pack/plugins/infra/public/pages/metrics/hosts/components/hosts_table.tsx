@@ -14,10 +14,11 @@ import { SnapshotNodeMetric } from '../../../../../common/http_api';
 import { HostMetics, HostsTableColumns } from './hosts_table_columns';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
-import { useHostsViewContext } from '../hooks/use_host_table';
+import { useHostsViewContext } from '../hooks/use_host_view';
 import { useTableProperties } from '../hooks/use_table_properties_url_state';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { useSnapshot } from '../../inventory_view/hooks/use_snaphot';
+import { useHostTable } from '../hooks/use_host_table';
 
 type MappedMetrics = Record<keyof HostMetics, SnapshotNodeMetric>;
 
@@ -32,7 +33,7 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
 
 export const HostsTable = () => {
   const { panelFilters } = useUnifiedSearchContext();
-  const { baseRequest, refetch$, state$ } = useHostsViewContext();
+  const { baseRequest, fetch$, state$ } = useHostsViewContext();
   const [properties, setProperties] = useTableProperties();
 
   // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
@@ -43,44 +44,29 @@ export const HostsTable = () => {
     metrics: HOST_TABLE_METRICS,
   });
 
+  const items = useHostTable(nodes);
+
   const onReload = () => {
-    refetch$.next('reload');
+    fetch$.next('reload');
   };
 
   useEffect(() => {
-    if (!loading) {
-      state$.next({
-        loading,
-        totalHits: nodes.length,
-        error,
-      });
-    }
+    state$.next({
+      loading,
+      totalHits: nodes.length,
+      error,
+    });
   }, [error, loading, nodes.length, state$]);
 
   useEffect(() => {
-    const refetch = refetch$.subscribe(() => {
+    const refetch = fetch$.subscribe(() => {
       reload();
       state$.next({ loading: true, totalHits: 0, error: null });
     });
     return () => {
       refetch.unsubscribe();
     };
-  }, [reload, refetch$, state$]);
-
-  const getTableRows = useCallback(() => {
-    return nodes.map(({ metrics, path, name }) => ({
-      name,
-      os: path.at(-1)?.os ?? '-',
-      title: {
-        name,
-        cloudProvider: path.at(-1)?.cloudProvider ?? null,
-      },
-      ...metrics.reduce((data, metric) => {
-        data[metric.name as keyof HostMetics] = metric;
-        return data;
-      }, {} as MappedMetrics),
-    }));
-  }, [nodes]);
+  }, [reload, fetch$, state$]);
 
   const onTableChange = useCallback(
     ({ page = {}, sort = {} }) => {
@@ -100,7 +86,6 @@ export const HostsTable = () => {
     [setProperties, properties.pagination, properties.sorting]
   );
 
-  const items = getTableRows();
   const noData = !!error || items.length === 0;
 
   if (loading || !panelFilters) {

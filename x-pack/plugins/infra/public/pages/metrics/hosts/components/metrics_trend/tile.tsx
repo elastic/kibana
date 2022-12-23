@@ -5,13 +5,17 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
+import type { SnapshotMetricType } from '../../../../../../common/inventory_models/types';
 
 import { useSnapshot } from '../../../inventory_view/hooks/use_snaphot';
-import { useHostsViewContext } from '../../hooks/use_host_table';
-import { ChartBaseProps, MetricsChart } from './metrics_chart';
+import { useHostsViewContext } from '../../hooks/use_host_view';
+import { type ChartBaseProps, MetricsChart } from './metrics_chart';
 
-export const MetricsTile = ({ type, ...props }: ChartBaseProps) => {
-  const { baseRequest, refetch$ } = useHostsViewContext();
+interface Props extends Omit<ChartBaseProps, 'type'> {
+  type: SnapshotMetricType;
+}
+export const MetricsTile = ({ type, ...props }: Props) => {
+  const { baseRequest, fetch$ } = useHostsViewContext();
 
   const { nodes, loading, reload } = useSnapshot({
     ...baseRequest,
@@ -21,11 +25,11 @@ export const MetricsTile = ({ type, ...props }: ChartBaseProps) => {
   });
 
   useEffect(() => {
-    const subscribe = refetch$.subscribe(() => reload());
+    const subscribe = fetch$.subscribe(() => reload());
     return () => {
       subscribe.unsubscribe();
     };
-  }, [refetch$, reload]);
+  }, [fetch$, reload]);
 
   return (
     <MetricsChart id={`$metric-${type}`} type={type} nodes={nodes} loading={loading} {...props} />

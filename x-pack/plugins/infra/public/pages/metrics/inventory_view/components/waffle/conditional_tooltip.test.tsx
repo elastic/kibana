@@ -19,6 +19,7 @@ jest.mock('../../hooks/use_snaphot');
 import { useSnapshot, UseSnapshotRequest } from '../../hooks/use_snaphot';
 jest.mock('../../hooks/use_waffle_options');
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+
 const mockedUseSnapshot = useSnapshot as jest.Mock<ReturnType<typeof useSnapshot>>;
 const mockedUseWaffleOptionsContext = useWaffleOptionsContext as jest.Mock<
   ReturnType<typeof useWaffleOptionsContext>
@@ -66,7 +67,7 @@ describe('ConditionalToolTip', () => {
       error: null,
       loading: false,
       interval: '60s',
-      reload: jest.fn(() => Promise.resolve()),
+      reload: jest.fn(() => Promise.resolve<any>()),
     });
     mockedUseWaffleOptionsContext.mockReturnValue(mockedUseWaffleOptionsContexReturnValue);
     const expectedQuery = JSON.stringify({

@@ -28,6 +28,8 @@ export interface UseSnapshotRequest
 export function useSnapshot({
   timerange,
   currentTime,
+  accountId = '',
+  region = '',
   groupBy = null,
   sendRequestImmediately = true,
   includeTimeseries = true,
@@ -42,6 +44,8 @@ export function useSnapshot({
 
   const payload: Omit<SnapshotRequest, 'filterQuery'> = {
     ...args,
+    accountId,
+    region,
     groupBy,
     timerange: timerange ?? {
       to: currentTime,

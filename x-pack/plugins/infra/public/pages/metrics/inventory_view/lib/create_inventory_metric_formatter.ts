@@ -35,10 +35,6 @@ const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.number,
     template: '{{value}}',
   },
-  hostsCount: {
-    formatter: InfraFormatterType.abbreviatedNumber,
-    template: '{{value}}',
-  },
   memory: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',

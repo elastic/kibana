@@ -81,21 +81,18 @@ export const createCompositeAggregations = (options: MetricsAPIRequest) => {
         ...(after ? { after } : {}),
       },
       aggs: {
-        ...createAggregations(options),
+        ...(options.includeTimeseries
+          ? createMetricHistogramAggs(options)
+          : createMetricsAggregations(options)),
+        ...METRICSET_AGGS,
       },
     },
   };
 };
 
 export const createAggregations = (options: MetricsAPIRequest) => {
-  if (!options.includeTimeseries && !!options.metrics.find((p) => p.id === 'logRate')) {
-    throw Boom.badRequest('logRate metric is not supported without time series');
-  }
-
   return {
-    ...(options.includeTimeseries
-      ? createMetricHistogramAggs(options)
-      : createMetricsAggregations(options)),
+    ...createMetricHistogramAggs(options),
     ...METRICSET_AGGS,
   };
 };

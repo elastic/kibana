@@ -19,18 +19,20 @@ import { EuiLoadingChart } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
-import { SnapshotNode, SnapshotNodeMetric } from '../../../../../../common/http_api';
+import type { SnapshotNode, SnapshotNodeMetric } from '../../../../../../common/http_api';
 import { createInventoryMetricFormatter } from '../../../inventory_view/lib/create_inventory_metric_formatter';
-import { SnapshotMetricType } from '../../../../../../common/inventory_models/types';
+import type { SnapshotMetricType } from '../../../../../../common/inventory_models/types';
 
 type MetricType = keyof Pick<SnapshotNodeMetric, 'avg' | 'max' | 'value'>;
+
+type AcceptedType = SnapshotMetricType | 'hostsCount';
 
 export interface ChartBaseProps
   extends Pick<
     MetricWTrend,
     'title' | 'color' | 'extra' | 'subtitle' | 'trendA11yDescription' | 'trendA11yTitle'
   > {
-  type: SnapshotMetricType;
+  type: AcceptedType;
   toolTip: string;
   metricType: MetricType;
 }
@@ -39,6 +41,7 @@ interface Props extends ChartBaseProps {
   id: string;
   nodes: SnapshotNode[];
   loading: boolean;
+  overrideValue?: number;
 }
 
 export const MetricsChart = ({
@@ -46,8 +49,9 @@ export const MetricsChart = ({
   extra,
   id,
   loading,
-  nodes,
   metricType,
+  nodes,
+  overrideValue,
   subtitle,
   title,
   toolTip,
@@ -58,7 +62,7 @@ export const MetricsChart = ({
   const metrics = useMemo(() => (nodes ?? [])[0]?.metrics ?? [], [nodes]);
 
   const getTimeseries = useCallback(
-    (metricName: SnapshotMetricType) => {
+    (metricName: AcceptedType) => {
       if (!metrics || !metrics.length) {
         return null;
       }
@@ -68,7 +72,7 @@ export const MetricsChart = ({
   );
 
   const getValue = useCallback(
-    (metricName: SnapshotMetricType) => {
+    (metricName: AcceptedType) => {
       if (!metrics || !metrics.length) {
         return 0;
       }
@@ -78,7 +82,10 @@ export const MetricsChart = ({
   );
 
   const metricsTimeseries = useMemo(() => getTimeseries(type), [getTimeseries, type]);
-  const metricsValue = useMemo(() => getValue(type), [getValue, type]);
+  const metricsValue = useMemo(
+    () => overrideValue ?? getValue(type),
+    [getValue, overrideValue, type]
+  );
 
   const metricData: MetricWNumber = {
     title,
@@ -86,10 +93,11 @@ export const MetricsChart = ({
     color,
     extra,
     value: metricsValue,
-    valueFormatter: (d: number) => createInventoryMetricFormatter({ type })(d),
+    valueFormatter: (d: number) =>
+      type === 'hostsCount' ? d.toString() : createInventoryMetricFormatter({ type })(d),
     ...(!!metricsTimeseries
       ? {
-          trend: metricsTimeseries.rows.map((row) => ({ x: row.timestamp, y: row.metric_0 })),
+          trend: metricsTimeseries.rows.map((row) => ({ x: row.timestamp, y: row.metric_0 ?? 0 })),
           trendShape: MetricTrendShape.Area,
           trendA11yTitle,
           trendA11yDescription,
@@ -98,7 +106,7 @@ export const MetricsChart = ({
   };
 
   return (
-    <EuiPanel paddingSize="none" hasBorder={!loading}>
+    <EuiPanel paddingSize="none">
       {loading ? (
         <EuiFlexGroup style={{ minHeight: 150 }} justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>

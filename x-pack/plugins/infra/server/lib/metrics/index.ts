@@ -16,7 +16,6 @@ import {
   AggregationResponse,
   CompositeResponse,
   HistogramBucketRT,
-  HistogramRT,
 } from './types';
 import { EMPTY_RESPONSE } from './constants';
 import { createAggregations, createCompositeAggregations } from './lib/create_aggregations';
@@ -97,7 +96,7 @@ export const query = async (
     series: getSeriesFromHistogram(aggregations, options, bucketSize * 1000),
     info: {
       afterKey: null,
-      interval: rawOptions.includeTimeseries ? bucketSize : undefined,
+      interval: bucketSize,
     },
   };
 };
@@ -108,12 +107,7 @@ const getSeriesFromHistogram = (
   bucketSize: number
 ): MetricsAPIResponse['series'] => {
   return [
-    convertBucketsToMetricsApiSeries(
-      ['*'],
-      options,
-      HistogramRT.is(aggregations) ? aggregations.histogram.buckets : [aggregations],
-      bucketSize
-    ),
+    convertBucketsToMetricsApiSeries(['*'], options, aggregations.histogram.buckets, bucketSize),
   ];
 };
 

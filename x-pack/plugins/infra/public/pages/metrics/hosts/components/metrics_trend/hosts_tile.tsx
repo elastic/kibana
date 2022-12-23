@@ -6,46 +6,27 @@
  */
 import React, { useEffect, useState } from 'react';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { useSnapshot } from '../../../inventory_view/hooks/use_snaphot';
-import { HostViewState, useHostsViewContext } from '../../hooks/use_host_table';
+import { type HostViewState, useHostsViewContext } from '../../hooks/use_host_view';
 import { type ChartBaseProps, MetricsChart } from './metrics_chart';
 
 export const MetricsHostsTile = ({ type, ...props }: ChartBaseProps) => {
-  const { baseRequest, state$, refetch$ } = useHostsViewContext();
+  const { state$, fetch$ } = useHostsViewContext();
   const [hostView, setHostView] = useState<HostViewState>(state$.getValue());
-
-  const { nodes, loading, reload } = useSnapshot({
-    ...baseRequest,
-    filterQuery: null,
-    metrics: [{ type }],
-    groupBy: null,
-    includeTimeseries: false,
-  });
-
-  useEffect(() => {
-    const subscribe = refetch$.subscribe(() => reload());
-    return () => {
-      subscribe.unsubscribe();
-    };
-  }, [refetch$, reload]);
 
   useEffect(() => {
     const subscribe = state$.subscribe(setHostView);
     return () => {
       subscribe.unsubscribe();
     };
-  }, [refetch$, state$]);
+  }, [fetch$, state$]);
 
   return (
     <MetricsChart
       id={`$metric-${type}`}
       type={type}
-      nodes={nodes}
-      loading={loading}
-      extra={
-        !!hostView?.loading ? <EuiLoadingSpinner size="s" /> : <>{hostView?.totalHits} total</>
-      }
+      nodes={[]}
+      loading={hostView.loading}
+      overrideValue={hostView?.totalHits}
       {...props}
     />
   );
