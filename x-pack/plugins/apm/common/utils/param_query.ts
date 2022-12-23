@@ -12,5 +12,8 @@ export function paramQuery<T extends string>(
   value: string | boolean | number | undefined | null
 ) {
   if (!value) return [];
-  return [escapeKuery(`${[field]}: ${value}`)];
+
+  const escapedValue = escapeKuery(value.toString());
+
+  return [`${[field]}: ${escapedValue}`];
 }
