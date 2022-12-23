@@ -51,14 +51,17 @@ export interface AnomalyExplorerPanelsState {
   mainPage: { size: number };
 }
 
-export type MlStorage = Partial<{
+export interface MlStorageRecord {
+  [key: string]: unknown;
   [ML_ENTITY_FIELDS_CONFIG]: PartitionFieldsConfig;
   [ML_APPLY_TIME_RANGE_CONFIG]: ApplyTimeRangeConfig;
   [ML_GETTING_STARTED_CALLOUT_DISMISSED]: boolean | undefined;
   [ML_FROZEN_TIER_PREFERENCE]: 'exclude-frozen' | 'include-frozen';
   [ML_ANOMALY_EXPLORER_PANELS]: AnomalyExplorerPanelsState | undefined;
   [ML_NOTIFICATIONS_LAST_CHECKED_AT]: number | undefined;
-}> | null;
+}
+
+export type MlStorage = Partial<MlStorageRecord> | null;
 
 export type MlStorageKey = keyof Exclude<MlStorage, null>;
 

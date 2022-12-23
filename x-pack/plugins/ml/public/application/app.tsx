@@ -15,7 +15,8 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { MlStorageContextProvider } from './contexts/storage';
+import { MlStorageContextProvider } from '@kbn/ml-local-storage';
+import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
@@ -111,7 +112,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
               mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
             }}
           >
-            <MlStorageContextProvider>
+            <MlStorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
               <MlRouter pageDeps={pageDeps} />
             </MlStorageContextProvider>
           </KibanaContextProvider>

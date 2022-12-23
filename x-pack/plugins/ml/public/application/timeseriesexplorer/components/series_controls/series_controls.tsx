@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+import { useStorage } from '@kbn/ml-local-storage';
 import { EntityControl } from '../entity_control';
 import { mlJobService } from '../../../services/job_service';
 import { Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
@@ -26,7 +27,6 @@ import {
   PartitionFieldConfig,
   PartitionFieldsConfig,
 } from '../../../../../common/types/storage';
-import { useStorage } from '../../../contexts/storage';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';

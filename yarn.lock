@@ -3745,6 +3745,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-local-storage@link:x-pack/packages/ml/local_storage":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-string-hash@link:x-pack/packages/ml/string_hash":
   version "0.0.0"
   uid ""
