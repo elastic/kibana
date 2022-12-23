@@ -149,6 +149,9 @@ BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-loca
 export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
 retry 5 5 vault read -field=service_account_json secret/kibana-issues/dev/kibana-ci-bazel-remote-cache-local-dev > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
 
+echo '--- Setup GH CLI'
+gh repo set-default https://github.com/elastic/kibana
+
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then
   source "$PIPELINE_PRE_COMMAND"
