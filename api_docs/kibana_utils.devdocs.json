@@ -6692,17 +6692,17 @@
           "{ [K in keyof T]: ReturnType<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
+            "section": "def-common.Ensure",
             "text": "Ensure"
           },
           "<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
+            "section": "def-common.Ensure",
             "text": "Ensure"
           },
           "<T[K], ",
@@ -6738,9 +6738,9 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
+            "section": "def-common.Ensure",
             "text": "Ensure"
           },
           "<T, ",
@@ -7824,9 +7824,9 @@
           "(res: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ", err: ",
@@ -7840,9 +7840,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
+            "section": "def-common.IKibanaResponse",
             "text": "IKibanaResponse"
           },
           "<any>"
@@ -7863,9 +7863,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaResponseFactory",
+                "section": "def-common.KibanaResponseFactory",
                 "text": "KibanaResponseFactory"
               }
             ],
@@ -9553,9 +9553,9 @@
           "<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Serializable",
+            "section": "def-common.Serializable",
             "text": "Serializable"
           },
           ">) => S"
@@ -9603,9 +9603,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.Serializable",
+                "section": "def-common.Serializable",
                 "text": "Serializable"
               },
               ">"
@@ -11531,17 +11531,17 @@
           "(state: ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ", version: string) => ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           }
         ],
@@ -11560,9 +11560,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               }
             ],
@@ -11635,17 +11635,17 @@
           "{ [K in keyof T]: ReturnType<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
+            "section": "def-common.Ensure",
             "text": "Ensure"
           },
           "<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
+            "section": "def-common.Ensure",
             "text": "Ensure"
           },
           "<T[K], ",
@@ -11681,9 +11681,9 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
+            "section": "def-common.Ensure",
             "text": "Ensure"
           },
           "<T, ",
