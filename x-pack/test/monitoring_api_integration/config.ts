@@ -5,22 +5,9 @@
  * 2.0.
  */
 
-import path from 'path';
-
 import { FtrConfigProviderContext } from '@kbn/test';
 
-const PACKAGES = [{ name: 'beat', version: '0.0.1' }];
-
-const getPackagesArgs = () => {
-  return PACKAGES.flatMap((pkg, i) => {
-    return [
-      `--xpack.fleet.packages.${i}.name=${pkg.name}`,
-      `--xpack.fleet.packages.${i}.version=${pkg.version}`,
-    ];
-  });
-};
-
-const getFullPath = (relativePath: string) => path.join(path.dirname(__filename), relativePath);
+import { bundledPackagesLocation, getPackagesArgs } from './packages';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
@@ -37,7 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.fleet.developer.bundledPackageLocation=${getFullPath('/fixtures/packages')}`,
+        `--xpack.fleet.developer.bundledPackageLocation=${bundledPackagesLocation}`,
         ...getPackagesArgs(),
       ],
     },
