@@ -33,7 +33,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import { FILTER_OPEN, TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import {
   useDeepEqualSelector,
@@ -809,7 +809,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
-              <SecuritySolutionTabNavigation navTabs={pageTabs} />
+              <TabNavigationWithBreadcrumbs navTabs={pageTabs} />
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>

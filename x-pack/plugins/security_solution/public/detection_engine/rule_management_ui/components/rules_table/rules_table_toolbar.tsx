@@ -9,7 +9,7 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSwitch, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
@@ -64,7 +64,7 @@ export const RulesTableToolbar = React.memo(() => {
 
   return (
     <ToolbarLayout>
-      <SecuritySolutionTabNavigation navTabs={ruleTabs} />
+      <TabNavigationWithBreadcrumbs navTabs={ruleTabs} />
       <EuiToolTip content={i18n.EXPERIMENTAL_DESCRIPTION}>
         <EuiSwitch
           data-test-subj={
