@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -32,7 +32,7 @@ interface Props {
   onSaveAssignees: (args: ItemsSelectionState) => void;
 }
 
-const fullHeight = css`
+const FlyoutBody = styled(EuiFlyoutBody)`
   ${euiFullHeight()}
 
   .euiFlyoutBody__overflowContent {
@@ -75,12 +75,12 @@ const EditAssigneesFlyoutComponent: React.FC<Props> = ({
           <p>{headerSubtitle}</p>
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody css={fullHeight}>
+      <FlyoutBody>
         <EditAssigneesSelectable
           selectedCases={selectedCases}
           onChangeAssignees={setAssigneesSelection}
         />
-      </EuiFlyoutBody>
+      </FlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
