@@ -84,6 +84,7 @@ export interface RuleExecutorServices<
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;
+  ruleResultService?: PublicRuleResultService;
 }
 
 export interface RuleExecutorOptions<
@@ -131,6 +132,7 @@ export interface GetSummarizedAlertsFnOpts {
   executionUuid?: string;
   ruleId: string;
   spaceId: string;
+  excludedAlertInstanceIds: string[];
 }
 
 // TODO - add type for these alerts when we determine which alerts-as-data
@@ -138,15 +140,15 @@ export interface GetSummarizedAlertsFnOpts {
 export interface SummarizedAlerts {
   new: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
   ongoing: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
   recovered: {
     count: number;
-    alerts: unknown[];
+    data: unknown[];
   };
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
@@ -313,13 +315,23 @@ export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
-export interface PublicRuleMonitoringService {
+export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
   setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
   setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
   setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
   setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
 }
+
+export interface PublicLastRunSetters {
+  addLastRunError: (outcome: string) => void;
+  addLastRunWarning: (outcomeMsg: string) => void;
+  setLastRunOutcomeMessage: (warning: string) => void;
+}
+
+export type PublicRuleMonitoringService = PublicMetricsSetters;
+
+export type PublicRuleResultService = PublicLastRunSetters;
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}

@@ -65,5 +65,9 @@ export interface InjectedMetadata {
       defaults: Record<string, any>; // unreferencing UiSettingsParams here
       user: Record<string, any>; // unreferencing UserProvidedValues here
     };
+    globalUiSettings: {
+      defaults: Record<string, any>; // unreferencing UiSettingsParams here
+      user: Record<string, any>; // unreferencing UserProvidedValues here
+    };
   };
 }

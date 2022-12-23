@@ -8,13 +8,18 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingLogo,
   EuiPageHeaderProps,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
+
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
+import { useHistory } from 'react-router-dom';
 import {
   isMobileAgentName,
   isRumAgentName,
@@ -35,6 +40,8 @@ import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
+import { replace } from '../../../shared/links/url_helpers';
+import { isPending } from '../../../../hooks/use_fetcher';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -77,6 +84,8 @@ function TemplateWithContext({
     query,
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/*');
+  const history = useHistory();
+  const location = useLocation();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -84,7 +93,9 @@ function TemplateWithContext({
 
   const tabs = useTabs({ selectedTab });
 
-  const { agentName } = useApmServiceContext();
+  const { agentName, serviceAgentStatus } = useApmServiceContext();
+
+  const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
 
   useBreadcrumb(
     () => ({
@@ -96,6 +107,12 @@ function TemplateWithContext({
     }),
     [query, router, selectedTab, serviceName, title]
   );
+
+  if (isMobileAgentName(agentName)) {
+    replace(history, {
+      pathname: location.pathname.replace('/services/', '/mobile-services/'),
+    });
+  }
 
   return (
     <ApmMainTemplate
@@ -119,11 +136,6 @@ function TemplateWithContext({
                     end={end}
                   />
                 </EuiFlexItem>
-                {isMobileAgentName(agentName) && (
-                  <EuiFlexItem grow={false}>
-                    <TechnicalPreviewBadge />
-                  </EuiFlexItem>
-                )}
               </EuiFlexGroup>
             </EuiFlexItem>
 
@@ -134,10 +146,21 @@ function TemplateWithContext({
         ),
       }}
     >
-      <SearchBar {...searchBarOptions} />
-      <ServiceAnomalyTimeseriesContextProvider>
-        {children}
-      </ServiceAnomalyTimeseriesContextProvider>
+      {isPendingServiceAgent ? (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="l" />
+            <EuiLoadingLogo logo="logoObservability" size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <>
+          <SearchBar {...searchBarOptions} />
+          <ServiceAnomalyTimeseriesContextProvider>
+            {children}
+          </ServiceAnomalyTimeseriesContextProvider>
+        </>
+      )}
     </ApmMainTemplate>
   );
 }
@@ -154,9 +177,7 @@ export function isMetricsTabHidden({
   if (isServerlessAgent(runtimeName)) {
     return !isAwsLambdaEnabled;
   }
-  return (
-    !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName)
-  );
+  return !agentName || isRumAgentName(agentName);
 }
 
 export function isInfraTabHidden({
@@ -167,10 +188,7 @@ export function isInfraTabHidden({
   runtimeName?: string;
 }) {
   return (
-    !agentName ||
-    isRumAgentName(agentName) ||
-    isMobileAgentName(agentName) ||
-    isServerlessAgent(runtimeName)
+    !agentName || isRumAgentName(agentName) || isServerlessAgent(runtimeName)
   );
 }
 
@@ -244,7 +262,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
         defaultMessage: 'Errors',
       }),
-      hidden: isMobileAgentName(agentName),
     },
     {
       key: 'metrics',
@@ -298,8 +315,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       append: isServerlessAgent(runtimeName) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
-      hidden:
-        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
+      hidden: !agentName || isRumAgentName(agentName),
     },
     {
       key: 'alerts',
