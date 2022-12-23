@@ -103,10 +103,6 @@ export class SyntheticsRunner {
           height: 900,
           width: 1600,
         },
-        use: {
-          testIdAttribute: 'data-test-subj',
-        },
-        testIdAttribute: 'data-test-subj',
       },
       match: match === 'undefined' ? '' : match,
       pauseOnError,
