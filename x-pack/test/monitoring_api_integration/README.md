@@ -26,11 +26,11 @@ are already installed by elasticseach at startup, and available at `.monitoring-
 patterns. So we are always running the metricbeat tests against the latest version of
 the mappings.
 We could have a similar approach for packages, for example by installing the latest
-packages versions from public EPR before the test suites. Besides the questionable
-reliance on remote services for running tests, this is also dangerous given that
-packages are released in a continuous model. This means that whenever the test suite
-would execute against the latest version of packages it would be too late, as in
-already available to users.
+packages versions from public EPR before the test suites run, instead of using pinned
+versions. Besides the questionable reliance on remote services for running tests,
+this is also dangerous given that packages are released in a continuous model.
+This means that whenever the test suite would execute against the latest version
+of packages it would be too late, as in already available to users.
 
 ### Validating a new package version
 - Get the locally built package from `<integrations-repos>/build/packages/<package>-<version>.zip`; or
@@ -42,11 +42,12 @@ already available to users.
   - start test server: `node scripts/functional_tests_server --config x-pack/test/monitoring_api_integration/config`
   - start test suite for the updated component (eg Elasticsearch, Kibana..): `node scripts/functional_test_runner --config x-pack/test/monitoring_api_integration/config --grep "<Component>"`
 
-### Adding a new dataset
+### Adding a new archive
 - Generate elastic-agent data for the relevant integration and archive the data
   with the kbn-es-archiver. Assuming the data is extracted from an elastic-package
   stack: `node scripts/es_archiver.js save <output-dir> 'metrics-<component>.stack_monitoring.*' --es-url=https://elastic:changeme@localhost:9200 --es-ca=~/.elastic-package/profiles/default/certs/ca-cert.pem`
-  - <output-dir> should point to a subdirectory of the `./archives` dir for consistency
-    and since we're generating package data end with `package` dir. example `<kibana>/x-pack/test/monitoring_api_integration/archives/kibana/two-nodes/package`
-- <output-dir> will contain a `data.json.gz` and a `mappings.json` file. Remove the `mappings.json`
+  - `<output-dir>` should point to a subdirectory of the `./archives` dir for consistency,
+    and since we're generating package data, end with `package` dir. example `<kibana>/x-pack/test/monitoring_api_integration/archives/kibana/two-nodes/package`
+- `<output-dir>` will contain a `data.json.gz` and a `mappings.json` file. Remove the `mappings.json`
 - run the transform script to generate metricbeat data `ts-node scripts/transform_archive.ts --src <output-dir>/data.json.gz`
+- create a test case with the new archive
