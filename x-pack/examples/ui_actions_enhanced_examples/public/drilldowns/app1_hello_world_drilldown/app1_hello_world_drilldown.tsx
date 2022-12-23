@@ -19,7 +19,7 @@ export interface Config extends SerializableRecord {
 type Trigger = typeof SAMPLE_APP1_CLICK_TRIGGER;
 type Context = SampleApp1ClickContext;
 
-export type CollectConfigProps = CollectConfigPropsBase<Config, any>;
+export type CollectConfigProps = CollectConfigPropsBase<Config, { triggers: string[] }>;
 
 export const APP1_HELLO_WORLD_DRILLDOWN = 'APP1_HELLO_WORLD_DRILLDOWN';
 
