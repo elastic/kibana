@@ -279,7 +279,7 @@ export class Plugin
           // See https://github.com/elastic/kibana/issues/103325.
           const otherLinks: NavigationEntry[] = deepLinks
             .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
-            .filter((link) => (link.id === 'slos' ? config.unsafe.slo.enabled : link))
+            .filter((link) => (link.id === 'slos' ? config.unsafe.slo.enabled : true))
             .map((link) => ({
               app: observabilityAppId,
               label: link.title,
@@ -313,6 +313,7 @@ export class Plugin
     const { application } = coreStart;
 
     updateGlobalNavigation({
+      config: this.initContext.config.get(),
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,

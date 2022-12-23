@@ -9,18 +9,22 @@ import { Subject } from 'rxjs';
 import { AppNavLinkStatus, AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId } from '../common';
+import { ConfigSchema } from './plugin';
 
 export function updateGlobalNavigation({
+  config,
   capabilities,
   deepLinks,
   updater$,
 }: {
+  config: ConfigSchema;
   capabilities: ApplicationStart['capabilities'];
   deepLinks: AppDeepLink[];
   updater$: Subject<AppUpdater>;
 }) {
   const { apm, logs, metrics, uptime } = capabilities.navLinks;
   const someVisible = Object.values({ apm, logs, metrics, uptime }).some((visible) => visible);
+  const isSloFeatureEnabled = !!config.unsafe.slo.enabled;
 
   const updatedDeepLinks = deepLinks.map((link) => {
     switch (link.id) {
@@ -40,7 +44,7 @@ export function updateGlobalNavigation({
       case 'slos':
         return {
           ...link,
-          navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+          navLinkStatus: isSloFeatureEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
         };
       case 'rules':
         return {
@@ -54,6 +58,7 @@ export function updateGlobalNavigation({
 
   updater$.next(() => ({
     deepLinks: updatedDeepLinks,
-    navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    navLinkStatus:
+      someVisible || isSloFeatureEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
   }));
 }

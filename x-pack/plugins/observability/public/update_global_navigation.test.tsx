@@ -9,9 +9,22 @@ import { Subject } from 'rxjs';
 import { App, AppDeepLink, ApplicationStart, AppNavLinkStatus, AppUpdater } from '@kbn/core/public';
 import { casesFeatureId } from '../common';
 import { updateGlobalNavigation } from './update_global_navigation';
+import { ConfigSchema } from './plugin';
 
 // Used in updater callback
 const app = {} as unknown as App;
+
+const config: ConfigSchema = {
+  unsafe: {
+    slo: { enabled: false },
+    alertDetails: {
+      apm: { enabled: false },
+      logs: { enabled: false },
+      metrics: { enabled: false },
+      uptime: { enabled: false },
+    },
+  },
+};
 
 describe('updateGlobalNavigation', () => {
   describe('when no observability apps are enabled', () => {
@@ -25,7 +38,7 @@ describe('updateGlobalNavigation', () => {
         next: (cb: AppUpdater) => callback(cb(app)),
       } as unknown as Subject<AppUpdater>;
 
-      updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+      updateGlobalNavigation({ config, capabilities, deepLinks, updater$ });
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
@@ -45,7 +58,7 @@ describe('updateGlobalNavigation', () => {
         next: (cb: AppUpdater) => callback(cb(app)),
       } as unknown as Subject<AppUpdater>;
 
-      updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+      updateGlobalNavigation({ config, capabilities, deepLinks, updater$ });
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
@@ -75,7 +88,7 @@ describe('updateGlobalNavigation', () => {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ config, capabilities, deepLinks, updater$ });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
@@ -111,7 +124,7 @@ describe('updateGlobalNavigation', () => {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ config, capabilities, deepLinks, updater$ });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
@@ -146,7 +159,7 @@ describe('updateGlobalNavigation', () => {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ config, capabilities, deepLinks, updater$ });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
@@ -167,7 +180,7 @@ describe('updateGlobalNavigation', () => {
       it('shows the slos deep link', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: true },
-          navLinks: { apm: true, logs: false, metrics: false, uptime: false },
+          navLinks: { apm: false, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
 
         const sloRoute = {
@@ -185,7 +198,12 @@ describe('updateGlobalNavigation', () => {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({
+          config: { unsafe: { ...config.unsafe, slo: { enabled: true } } },
+          capabilities,
+          deepLinks,
+          updater$,
+        });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
