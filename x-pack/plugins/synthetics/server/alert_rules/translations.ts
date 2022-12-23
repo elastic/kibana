@@ -6,12 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MonitorSummaryStatusRule } from './status_rule/types';
 
 export const STATUS_RULE_NAME = i18n.translate('xpack.synthetics.alertRules.monitorStatus', {
   defaultMessage: 'Synthetics monitor status',
 });
 
-export const commonMonitorStateI18 = [
+export const commonMonitorStateI18: Array<{
+  name: keyof MonitorSummaryStatusRule;
+  description: string;
+}> = [
   {
     name: 'monitorName',
     description: i18n.translate(
@@ -67,11 +71,20 @@ export const commonMonitorStateI18 = [
     ),
   },
   {
-    name: 'location',
+    name: 'locationName',
     description: i18n.translate(
-      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.location',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.locationName',
       {
-        defaultMessage: 'Location from which the check is performed.',
+        defaultMessage: 'Location name from which the check is performed.',
+      }
+    ),
+  },
+  {
+    name: 'locationId',
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.locationId',
+      {
+        defaultMessage: 'Location id from which the check is performed.',
       }
     ),
   },

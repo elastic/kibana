@@ -14,10 +14,12 @@ import { firstDownHit, firstUpHit } from '../alert_rules/sample_docs/sample_docs
 
 export class SyntheticsServices {
   kibanaUrl: string;
+  params: Record<string, any>;
   requester: KbnClient['requester'];
   constructor(params: Record<string, any>) {
     this.kibanaUrl = params.kibanaUrl;
     this.requester = params.getService('kibanaServer').requester;
+    this.params = params;
   }
 
   async enableMonitorManagedViaApi() {
@@ -95,16 +97,13 @@ export class SyntheticsServices {
     }
   }
 
-  async addTestSummaryDocument(
-    params: Record<string, any>,
-    {
-      isDown = false,
-      timestamp = new Date(Date.now()).toISOString(),
-      monitorId,
-      name,
-    }: { monitorId?: string; isDown?: boolean; timestamp?: string; name?: string } = {}
-  ) {
-    const getService = params.getService;
+  async addTestSummaryDocument({
+    isDown = false,
+    timestamp = new Date(Date.now()).toISOString(),
+    monitorId,
+    name,
+  }: { monitorId?: string; isDown?: boolean; timestamp?: string; name?: string } = {}) {
+    const getService = this.params.getService;
     const es: Client = getService('es');
     await es.index({
       index: 'synthetics-http-default',
@@ -115,8 +114,8 @@ export class SyntheticsServices {
     });
   }
 
-  async cleaUpAlerts(params: Record<string, any>) {
-    const getService = params.getService;
+  async cleaUpAlerts() {
+    const getService = this.params.getService;
     const es: Client = getService('es');
     const listOfIndices = await es.cat.indices({ format: 'json' });
     for (const index of listOfIndices) {
@@ -126,8 +125,39 @@ export class SyntheticsServices {
     }
   }
 
-  async cleanTestMonitors(params: Record<string, any>) {
-    const getService = params.getService;
+  async cleaUpRules() {
+    try {
+      const { data: response } = await this.requester.request({
+        description: 'get monitors by name',
+        path: `/internal/alerting/rules/_find`,
+        query: {
+          per_page: 10,
+          page: 1,
+        },
+        method: 'GET',
+      });
+      const { data = [] } = response as any;
+
+      if (data.length > 0) {
+        // eslint-disable-next-line no-console
+        console.log(`Deleting ${data.length} rules`);
+
+        await axios.patch(
+          this.kibanaUrl + '/internal/alerting/rules/_bulk_delete',
+          {
+            ids: data.map((rule: any) => rule.id),
+          },
+          { auth: { username: 'elastic', password: 'changeme' }, headers: { 'kbn-xsrf': 'true' } }
+        );
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log(e);
+    }
+  }
+
+  async cleanTestMonitors() {
+    const getService = this.params.getService;
     const server = getService('kibanaServer');
 
     try {

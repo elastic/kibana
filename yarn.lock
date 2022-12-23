@@ -4118,6 +4118,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/synthetics-field-names@link:packages/kbn-synthetics-field-names":
+  version "0.0.0"
+  uid ""
+
 "@kbn/telemetry-tools@link:packages/kbn-telemetry-tools":
   version "0.0.0"
   uid ""

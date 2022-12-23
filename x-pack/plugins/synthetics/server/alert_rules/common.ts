@@ -10,6 +10,7 @@ import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { i18n } from '@kbn/i18n';
 import {
   SyntheticsCommonState,
   SyntheticsCommonStateType,
@@ -99,9 +100,13 @@ export const setRecoveredAlertsContext = ({
       const { idWithLocation } = state;
       const downConfig = staleDownConfigs[idWithLocation];
       if (downConfig.isDeleted) {
-        recoveryReason = 'because Monitor was deleted';
+        recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.deleteMonitor', {
+          defaultMessage: `because Monitor was deleted`,
+        });
       } else if (downConfig.isLocationRemoved) {
-        recoveryReason = 'because Location was removed from monitor.';
+        recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.removedLocation', {
+          defaultMessage: `because Location was removed from monitor.`,
+        });
       }
     }
 

@@ -12,13 +12,13 @@ export const SyntheticsMonitorStatusTranslations = {
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultActionMessage',
     {
       defaultMessage:
-        'The monitor {monitorName} checking {monitorUrl} from {location} last ran at {checkedAt} and is {status}. The last error received is: {lastErrorMessage}.',
+        'The monitor {monitorName} checking {monitorUrl} from {locationName} last ran at {checkedAt} and is {status}. The last error received is: {lastErrorMessage}.',
       values: {
         monitorName: '{{context.monitorName}}',
         monitorUrl: '{{{context.monitorUrl}}}',
         status: '{{{context.status}}}',
         lastErrorMessage: '{{{context.lastErrorMessage}}}',
-        location: '{{context.location}}',
+        locationName: '{{context.locationName}}',
         checkedAt: '{{context.checkedAt}}',
       },
     }
@@ -37,11 +37,11 @@ export const SyntheticsMonitorStatusTranslations = {
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoveryMessage',
     {
       defaultMessage:
-        'Alert for monitor {monitorName} with url {monitorUrl} from {observerLocation} has recovered {recoveryReason}.',
+        'The alert for the monitor {monitorName} checking {monitorUrl} from {locationName} is no longer active: {recoveryReason}.',
       values: {
         monitorName: '{{context.monitorName}}',
         monitorUrl: '{{{context.monitorUrl}}}',
-        observerLocation: '{{context.observerLocation}}',
+        locationName: '{{context.locationName}}',
         recoveryReason: '{{context.recoveryReason}}',
       },
     }

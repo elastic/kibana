@@ -26,8 +26,9 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   let downCheckTime = new Date(Date.now()).toISOString();
 
   before(async () => {
-    await services.cleaUpAlerts(params);
-    await services.cleanTestMonitors(params);
+    await services.cleaUpRules();
+    await services.cleaUpAlerts();
+    await services.cleanTestMonitors();
     await services.enableMonitorManagedViaApi();
     await services.addTestMonitor('Test Monitor', {
       type: 'http',
@@ -37,12 +38,13 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
         { id: 'Test private location', label: 'Test private location', isServiceManaged: true },
       ],
     });
-    await services.addTestSummaryDocument(params, { timestamp: firstCheckTime });
+    await services.addTestSummaryDocument({ timestamp: firstCheckTime });
   });
 
   after(async () => {
-    await services.cleaUpAlerts(params);
-    await services.cleanTestMonitors(params);
+    await services.cleaUpRules();
+    await services.cleaUpAlerts();
+    await services.cleanTestMonitors();
   });
 
   step('Go to monitors page', async () => {
@@ -74,13 +76,13 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
   step('Disable default alert for monitor', async () => {
     await page.click('text=Disable status alert');
-    await page.waitForSelector('text=\'Alert for monitor "Test Monitor" disabled successfully.\'');
+    await page.waitForSelector(`text=Alerts are now disabled for the monitor "Test Monitor".`);
     await page.click('text=Enable status alert');
   });
 
   step('set the monitor status as down', async () => {
     downCheckTime = new Date(Date.now()).toISOString();
-    await services.addTestSummaryDocument(params, {
+    await services.addTestSummaryDocument({
       isDown: true,
       timestamp: downCheckTime,
     });
@@ -116,7 +118,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('set monitor status to up and verify that alert recovers', async () => {
-    await services.addTestSummaryDocument(params);
+    await services.addTestSummaryDocument();
 
     await retry.tryForTime(2 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
@@ -126,7 +128,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('set the status down again to generate another alert', async () => {
-    await services.addTestSummaryDocument(params, { isDown: true });
+    await services.addTestSummaryDocument({ isDown: true });
 
     await retry.tryForTime(2 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
@@ -149,7 +151,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
     downCheckTime = new Date(Date.now()).toISOString();
 
-    await services.addTestSummaryDocument(params, {
+    await services.addTestSummaryDocument({
       timestamp: downCheckTime,
       monitorId,
       isDown: true,

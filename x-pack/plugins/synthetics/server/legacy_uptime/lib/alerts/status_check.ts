@@ -139,9 +139,7 @@ export const formatFilterString = async (
 
 export const getMonitorSummary = (
   monitorInfo: Ping & { '@timestamp'?: string },
-  statusMessage: string,
-  locationId?: string,
-  configId?: string
+  statusMessage: string
 ) => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
@@ -149,8 +147,6 @@ export const getMonitorSummary = (
 
   const summary = {
     checkedAt,
-    ...(locationId ? { locationId } : {}),
-    ...(configId ? { configId } : {}),
     monitorUrl: monitorInfo.url?.full,
     monitorId: monitorInfo.monitor?.id,
     monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
@@ -185,7 +181,7 @@ export const getReasonMessage = ({
   const checkedAt = moment(timestamp).format('LLL');
 
   return i18n.translate('xpack.synthetics.alerts.monitorStatus.reasonMessage', {
-    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}.`,
+    defaultMessage: `Monitor "{name}" from {location} {status} Checked at {checkedAt}.`,
     values: {
       name,
       status,
@@ -204,8 +200,6 @@ export const getMonitorAlertDocument = (monitorSummary: Record<string, string | 
   'error.message': monitorSummary.latestErrorMessage,
   'agent.name': monitorSummary.observerHostname,
   [ALERT_REASON]: monitorSummary.reason,
-  'location.id': monitorSummary.locationId,
-  configId: monitorSummary.configId,
 });
 
 export const getStatusMessage = (

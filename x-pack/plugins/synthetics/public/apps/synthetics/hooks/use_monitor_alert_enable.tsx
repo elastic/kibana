@@ -62,7 +62,6 @@ export function useMonitorAlertEnable() {
 
   return { updateAlertEnabledState, alertStatus };
 }
-
 const enabledSuccessLabel = (name: string) =>
   i18n.translate('xpack.synthetics.overview.actions.enabledSuccessLabel.alert', {
     defaultMessage: 'Alerts are now enabled for the monitor "{name}".',
