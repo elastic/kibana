@@ -22,7 +22,7 @@ from a source (elastic-agent) to another (metricbeat), and have the same tests r
 against both datasets.
 
 Note that we don't have to install anything for the metricbeat data since the mappings
-are already installed by elasticseach at startup, and available at `.monitoring-<product>-8-mb`
+are already installed by elasticseach at startup, and available at `.monitoring-<component>-8-mb`
 patterns.
 
 ### Validating a new package version
@@ -33,4 +33,13 @@ patterns.
 - Create draft PR with the change to run against CI; or
 - Run the impacted test suite locally:
   - start test server: `node scripts/functional_tests_server --config x-pack/test/monitoring_api_integration/config`
-  - start test suite for the update server (eg Elasticsearch, Kibana..): `node scripts/functional_test_runner --config x-pack/test/monitoring_api_integration/config --grep "<Product>"`
+  - start test suite for the update server (eg Elasticsearch, Kibana..): `node scripts/functional_test_runner --config x-pack/test/monitoring_api_integration/config --grep "<Component>"`
+
+### Adding a new dataset
+- Generate elastic-agent data for the relevant integration and archive the data
+  with the kbn-es-archiver. Assuming the data is extracted from an elastic-package
+  stack: `node scripts/es_archiver.js save <output-dir> 'metrics-<component>.stack_monitoring.*' --es-url=https://elastic:changeme@localhost:9200 --es-ca=~/.elastic-package/profiles/default/certs/ca-cert.pem`
+  - <output-dir> should point to a subdirectory of the `./archives` dir for consistency
+    and since we're generating package data end with `package` dir. example `<kibana>/x-pack/test/monitoring_api_integration/archives/kibana/two-nodes/package`
+- <output-dir> will contain a `data.json.gz` and a `mappings.json` file. Remove the `mappings.json`
+- run the transform script to generate metricbeat data `ts-node utils/transform_archive.ts --src <output-dir>/data.json.gz`
