@@ -44,9 +44,9 @@ export class DashboardToDiscoverDrilldown
     return [APPLY_FILTER_TRIGGER];
   }
 
-  public readonly CollectConfig = ((props: CollectConfigProps) => (
+  public readonly CollectConfig = (props: CollectConfigProps) => (
     <CollectConfigContainer {...props} params={this.params} />
-  ));
+  );
 
   public readonly createConfig = () => ({
     customIndexPattern: false,

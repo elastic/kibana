@@ -36,11 +36,7 @@ export class DashboardHelloWorldDrilldown implements Drilldown<Config, ActionCon
     return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
   }
 
-  public readonly CollectConfig = ({
-    config,
-    onConfig,
-    context,
-  }: CollectConfigProps<Config>) => (
+  public readonly CollectConfig = ({ config, onConfig, context }: CollectConfigProps<Config>) => (
     <EuiFormRow label="Enter your name" fullWidth>
       <EuiFieldText
         fullWidth
