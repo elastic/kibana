@@ -43,11 +43,7 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
 };
 
 const onClick =
-  (
-    action: Action | ActionInternal,
-    context: ActionExecutionContext<object>,
-    close: () => void
-  ) =>
+  (action: Action | ActionInternal, context: ActionExecutionContext<object>, close: () => void) =>
   (event: React.MouseEvent) => {
     if (event.currentTarget instanceof HTMLAnchorElement) {
       // from react-router's <Link/>
