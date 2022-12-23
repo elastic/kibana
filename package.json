@@ -426,7 +426,6 @@
     "@kbn/shared-ux-storybook-mock": "link:packages/shared-ux/storybook/mock",
     "@kbn/shared-ux-utility": "link:packages/kbn-shared-ux-utility",
     "@kbn/std": "link:packages/kbn-std",
-    "@kbn/synthetics-field-names": "link:packages/kbn-synthetics-field-names",
     "@kbn/timelion-grammar": "link:packages/kbn-timelion-grammar",
     "@kbn/tinymath": "link:packages/kbn-tinymath",
     "@kbn/typed-react-router-config": "link:packages/kbn-typed-react-router-config",
