@@ -236,7 +236,8 @@ describe('Layer Data Panel', () => {
           ? { ...option, checked: 'on' }
           : { ...option, checked: undefined }
     );
-    return getIndexPatternPickerList(instance).prop('onChange')!(options, event);
+    const selectedOption = { label: selectedLabel };
+    return getIndexPatternPickerList(instance).prop('onChange')!(options, event, selectedOption);
   }
 
   function getIndexPatternPickerOptions(instance: ShallowWrapper) {

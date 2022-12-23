@@ -26,12 +26,12 @@ import type { Case } from '../../../../common';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { EditTagsSelectable } from './edit_tags_selectable';
 import * as i18n from './translations';
-import type { TagsSelectionState } from './types';
+import type { ItemsSelectionState } from '../types';
 
 interface Props {
   selectedCases: Case[];
   onClose: () => void;
-  onSaveTags: (args: TagsSelectionState) => void;
+  onSaveTags: (args: ItemsSelectionState) => void;
 }
 
 const fullHeight = css`
@@ -45,9 +45,9 @@ const fullHeight = css`
 const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSaveTags }) => {
   const { data: tags, isLoading } = useGetTags();
 
-  const [tagsSelection, setTagsSelection] = useState<TagsSelectionState>({
-    selectedTags: [],
-    unSelectedTags: [],
+  const [tagsSelection, setTagsSelection] = useState<ItemsSelectionState>({
+    selectedItems: [],
+    unSelectedItems: [],
   });
 
   const onSave = useCallback(() => onSaveTags(tagsSelection), [onSaveTags, tagsSelection]);
