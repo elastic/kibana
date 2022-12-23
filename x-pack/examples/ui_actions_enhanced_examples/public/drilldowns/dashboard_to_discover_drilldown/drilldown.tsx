@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
@@ -47,7 +46,7 @@ export class DashboardToDiscoverDrilldown
 
   public readonly CollectConfig = ((props: CollectConfigProps) => (
     <CollectConfigContainer {...props} params={this.params} />
-  )) as any;
+  ));
 
   public readonly createConfig = () => ({
     customIndexPattern: false,
