@@ -23,7 +23,14 @@ against both datasets.
 
 Note that we don't have to install anything for the metricbeat data since the mappings
 are already installed by elasticseach at startup, and available at `.monitoring-<component>-8-mb`
-patterns.
+patterns. So we are always running the metricbeat tests against the latest version of
+the mappings.
+We could have a similar approach for packages, for example by installing the latest
+packages versions from public EPR before the test suites. Besides the questionable
+reliance on remote services for running tests, this is also dangerous given that
+packages are released in a continuous model. This means that whenever the test suite
+would execute against the latest version of packages it would be too late, as in
+already available to users.
 
 ### Validating a new package version
 - Get the locally built package from `<integrations-repos>/build/packages/<package>-<version>.zip`; or
