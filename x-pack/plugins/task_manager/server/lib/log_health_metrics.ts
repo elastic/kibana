@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { isEmpty } from 'lodash';
 import { Logger } from '@kbn/core/server';
