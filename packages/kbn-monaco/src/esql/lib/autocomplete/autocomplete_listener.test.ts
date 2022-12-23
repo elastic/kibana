@@ -47,6 +47,9 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | where "field" >= ', ['FieldIdentifier']);
     testSuggestions('from a | where "field" >= "field1" ', ['or', 'and', '|']);
     testSuggestions('from a | where "field" >= "field1" and ', ['FieldIdentifier']);
+    /** @todo **/
+    // testSuggestions('from a | where "field" >= "field1" and  "field2 ', ['==', '!=', '<', '>', '<=', '>=']);
+    testSuggestions('from a | where "field" >= "field1" and  "field2 == ', ['FieldIdentifier']);
   });
 
   describe('sort', () => {
@@ -70,11 +73,11 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | stats a=b * ', ['FieldIdentifier']);
     testSuggestions('from a | stats a=b * c', ['|', 'by', '+', '-', '/', '*']);
     testSuggestions('from a | stats a=c by d', ['|']);
-    testSuggestions('from a | stats a=b, ', ['var1']);
+    testSuggestions('from a | stats a=b, ', ['var0']);
     testSuggestions('from a | stats a=min(', ['FieldIdentifier']);
     testSuggestions('from a | stats a=min(b) ', ['|', 'by']);
     testSuggestions('from a | stats a=min(b) by ', ['FieldIdentifier']);
-    testSuggestions('from a | stats a=min(b),', ['var1']);
+    testSuggestions('from a | stats a=min(b),', ['var0']);
     testSuggestions('from a | stats a=min(b), b=max(', ['FieldIdentifier']);
   });
 
@@ -83,10 +86,12 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | eval a ', ['=']);
     testSuggestions('from a | eval a=', ['round', 'avg', 'max', 'min', 'sum', 'FieldIdentifier']);
     testSuggestions('from a | eval a=b', ['|', '+', '-', '/', '*']);
-    testSuggestions('from a | eval a=b, ', ['var1']);
+    testSuggestions('from a | eval a=b, ', ['var0']);
     testSuggestions('from a | eval a=min(', ['FieldIdentifier']);
     testSuggestions('from a | eval a=min(b) ', ['|']);
-    testSuggestions('from a | eval a=min(b),', ['var1']);
+    testSuggestions('from a | eval a=min(b),', ['var0']);
     testSuggestions('from a | eval a=min(b), b=max(', ['FieldIdentifier']);
+    testSuggestions('from a | stats a=min(b), b=max(', ['FieldIdentifier']);
+    testSuggestions('from a | eval var0=min(b), var1=max(c) | stats ', ['var2']);
   });
 });

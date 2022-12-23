@@ -78,6 +78,19 @@ export class AutocompleteListener implements ESQLParserListener {
     return suggestions;
   }
 
+  private getNewVarName() {
+    const vars = this.tables.flat();
+    let index = 0;
+
+    while (true) {
+      const value = `var${index}`;
+      if (!vars.includes(value)) {
+        return value;
+      }
+      index++;
+    }
+  }
+
   getAutocompleteSuggestions() {
     return {
       suggestions: this.suggestions,
@@ -153,7 +166,7 @@ export class AutocompleteListener implements ESQLParserListener {
       if (hasAssign) {
         this.suggestions = [...aggregationFunctionsDefinitions, ...this.fields];
       } else {
-        this.suggestions = [buildNewVarDefinition(this.tables.at(-1)?.length ?? 0)];
+        this.suggestions = [buildNewVarDefinition(this.getNewVarName())];
       }
       return;
     }

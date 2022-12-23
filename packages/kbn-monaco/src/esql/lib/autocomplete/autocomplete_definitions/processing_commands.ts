@@ -11,19 +11,6 @@ import { buildDocumentation } from './utils';
 
 import type { AutocompleteCommandDefinition } from '../types';
 
-export const buildNewVarDefinition = (ind: number): AutocompleteCommandDefinition => {
-  const label = `var${ind}`;
-  return {
-    label,
-    insertText: label,
-    kind: 21,
-    detail: i18n.translate('monaco.esql.autocomplete.newVarDoc', {
-      defaultMessage: 'Define a new variable',
-    }),
-    sortText: 'D',
-  };
-};
-
 export const pipeDefinition: AutocompleteCommandDefinition = {
   label: '|',
   insertText: '|',

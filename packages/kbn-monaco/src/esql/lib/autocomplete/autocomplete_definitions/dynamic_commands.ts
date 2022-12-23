@@ -20,6 +20,18 @@ export const buildFieldsDefinitions = (fields: string[]): AutocompleteCommandDef
     sortText: 'D',
   }));
 
+export const buildNewVarDefinition = (label: string): AutocompleteCommandDefinition => {
+  return {
+    label,
+    insertText: label,
+    kind: 21,
+    detail: i18n.translate('monaco.esql.autocomplete.newVarDoc', {
+      defaultMessage: 'Define a new variable',
+    }),
+    sortText: 'D',
+  };
+};
+
 export const buildSourcesDefinitions = (sources: string[]): AutocompleteCommandDefinition[] =>
   sources.map((label) => ({
     label,

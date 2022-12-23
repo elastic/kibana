@@ -8,11 +8,7 @@
 
 export { aggregationFunctionsDefinitions } from './aggregation_functions';
 export { sourceCommandsDefinitions } from './source_commands';
-export {
-  processingCommandsDefinitions,
-  pipeDefinition,
-  buildNewVarDefinition,
-} from './processing_commands';
+export { processingCommandsDefinitions, pipeDefinition } from './processing_commands';
 
 export {
   comparisonCommandsDefinitions,
@@ -31,6 +27,7 @@ export {
 } from './ordering_commands';
 
 export {
+  buildNewVarDefinition,
   buildSourcesDefinitions,
   buildFieldsDefinitions,
   buildConstantsDefinitions,
