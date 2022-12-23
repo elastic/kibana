@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import { flatten } from 'lodash';
 import React, { FC, useState, useEffect } from 'react';
 
@@ -25,13 +26,17 @@ interface Props {
   searchString?: string | { [key: string]: any };
   searchQueryLanguage?: string;
   getAdditionalLinks?: GetAdditionalLinks;
+  compact?: boolean;
 }
+
+const ACTIONS_PANEL_WIDTH = '240px';
 
 export const ActionsPanel: FC<Props> = ({
   dataView,
   searchString,
   searchQueryLanguage,
   getAdditionalLinks,
+  compact,
 }) => {
   const [globalState] = useUrlState('_g');
 
@@ -113,23 +118,33 @@ export const ActionsPanel: FC<Props> = ({
     data.query,
     getAdditionalLinks,
   ]);
+  const showActionsPanel =
+    discoverLink || (Array.isArray(asyncHrefCards) && asyncHrefCards.length > 0);
 
   // Note we use display:none for the DataRecognizer section as it needs to be
   // passed the recognizerResults object, and then run the recognizer check which
   // controls whether the recognizer section is ultimately displayed.
-  return (
-    <div data-test-subj="dataVisualizerActionsPanel">
+  return showActionsPanel ? (
+    <div
+      data-test-subj="dataVisualizerActionsPanel"
+      css={
+        !compact &&
+        css`
+          width: ${ACTIONS_PANEL_WIDTH};
+        `
+      }
+    >
+      <EuiTitle size="s">
+        <h2>
+          <FormattedMessage
+            id="xpack.dataVisualizer.index.actionsPanel.exploreTitle"
+            defaultMessage="Explore your data"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       {discoverLink && (
         <>
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.dataVisualizer.index.actionsPanel.exploreTitle"
-                defaultMessage="Explore your data"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
           <LinkCard
             href={discoverLink}
             icon="discoverApp"
@@ -165,5 +180,5 @@ export const ActionsPanel: FC<Props> = ({
           </>
         ))}
     </div>
-  );
+  ) : null;
 };
