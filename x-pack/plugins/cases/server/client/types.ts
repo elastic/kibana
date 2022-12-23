@@ -54,7 +54,7 @@ export interface CasesClientArgs {
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   readonly securityStartPlugin: SecurityPluginStart;
   readonly spaceId: string;
-  readonly alertsClient: AlertsClient;
+  readonly alertsClient: PublicMethodsOf<AlertsClient>;
   readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
 }
 
