@@ -79,16 +79,15 @@ export type FilterLabelStatus =
 export const FILTER_EDITOR_WIDTH = 960;
 
 function FilterItemComponent(props: FilterItemProps) {
-  const { onCloseFilterPopover } = props;
+  const { onCloseFilterPopover, onLocalFilterCreate, onLocalFilterUpdate } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const [updatedFilter, setUpdatedFilter] = useState<Filter>();
 
   const [renderedComponent, setRenderedComponent] = useState('menu');
   const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
 
   const closePopover = useCallback(() => {
-    onCloseFilterPopover(filter, updatedFilter, [() => setIsPopoverOpen(false)]);
-  }, [filter, updatedFilter, onCloseFilterPopover]);
+    onCloseFilterPopover([() => setIsPopoverOpen(false)]);
+  }, [setIsPopoverOpen, onCloseFilterPopover]);
 
   const euiTheme = useEuiTheme();
 
@@ -388,7 +387,8 @@ function FilterItemComponent(props: FilterItemProps) {
                 filter={filter}
                 indexPatterns={indexPatterns}
                 onSubmit={onSubmit}
-                onLocalFilterUpdate={setUpdatedFilter}
+                onLocalFilterUpdate={onLocalFilterUpdate}
+                onLocalFilterCreate={onLocalFilterCreate}
                 onCancel={closePopover}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               />

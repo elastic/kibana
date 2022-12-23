@@ -91,10 +91,10 @@ function QueryBarMenuComponent({
   buttonProps,
   isDisabled,
   onCloseFilterPopover,
+  onLocalFilterCreate,
+  onLocalFilterUpdate,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
-  const [updatedFilter, setUpdatedFilter] = useState<Filter>();
-  const [originalFilter, setOriginalFilter] = useState<Filter>();
 
   const euiTheme = useEuiTheme();
 
@@ -110,8 +110,8 @@ function QueryBarMenuComponent({
   );
 
   const closePopover = useCallback(() => {
-    onCloseFilterPopover(originalFilter, updatedFilter, [plainClosePopover]);
-  }, [originalFilter, updatedFilter, onCloseFilterPopover, plainClosePopover]);
+    onCloseFilterPopover([plainClosePopover]);
+  }, [onCloseFilterPopover, plainClosePopover]);
 
   const normalContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'normalContextMenuPopover',
@@ -186,8 +186,8 @@ function QueryBarMenuComponent({
                 filters={filters!}
                 timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
                 onFiltersUpdated={onFiltersUpdated}
-                onLocalFilterUpdate={setUpdatedFilter}
-                onLocalFilterCreate={setOriginalFilter}
+                onLocalFilterUpdate={onLocalFilterUpdate}
+                onLocalFilterCreate={onLocalFilterCreate}
                 closePopoverOnAdd={plainClosePopover}
                 closePopoverOnCancel={closePopover}
               />,

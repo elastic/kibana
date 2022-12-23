@@ -17,6 +17,11 @@ import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item/filter_item';
 import { FilterEditor } from '../filter_bar/filter_editor';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 
+interface QueryDslFilter {
+  queryDsl: string;
+  customLabel: string | null;
+}
+
 interface FilterEditorWrapperProps {
   indexPatterns?: Array<DataView | string>;
   filters: Filter[];
@@ -24,8 +29,8 @@ interface FilterEditorWrapperProps {
   closePopoverOnAdd?: () => void;
   closePopoverOnCancel?: () => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
-  onLocalFilterUpdate?: (filter: Filter) => void;
-  onLocalFilterCreate?: (filter: Filter) => void;
+  onLocalFilterUpdate?: (filter: Filter | QueryDslFilter) => void;
+  onLocalFilterCreate?: (initialState: { filter: Filter; queryDslFilter: QueryDslFilter }) => void;
 }
 
 export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
@@ -63,8 +68,6 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
       const index = dataView && dataView.id;
       const emptyFilter = buildEmptyFilter(isPinned, index);
       setNewFilter(emptyFilter);
-      onLocalFilterCreate?.(emptyFilter);
-      onLocalFilterUpdate?.(emptyFilter);
     };
     if (indexPatterns) {
       fetchDataViews();
@@ -89,6 +92,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
           onSubmit={onAdd}
           onCancel={() => closePopoverOnCancel?.()}
           onLocalFilterUpdate={onLocalFilterUpdate}
+          onLocalFilterCreate={onLocalFilterCreate}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         />
       )}

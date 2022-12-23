@@ -6,19 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { compareFilters, Filter, FILTERS } from '@kbn/es-query';
+import { compareFilters, Filter } from '@kbn/es-query';
 import React, { FC, useCallback, useState } from 'react';
 import { CloseFilterEditorConfirmModal } from './close_confirm_modal';
 
+interface QueryDslFilter {
+  queryDsl: string;
+  customLabel: string | null;
+}
+
+interface OriginalFilter {
+  filter: Filter;
+  queryDslFilter: QueryDslFilter;
+}
+
+type ChangedFilter = Filter | QueryDslFilter;
+
 export interface WithCloseFilterEditorConfirmModalProps {
-  onCloseFilterPopover: (
-    current?: Filter | Filter[],
-    updated?: Filter | Filter[],
-    actions?: Action[]
-  ) => void;
+  onCloseFilterPopover: (actions?: Action[]) => void;
+  onLocalFilterCreate: (filter: OriginalFilter) => void;
+  onLocalFilterUpdate: (filter: ChangedFilter) => void;
 }
 
 type Action = () => void;
+
+const isQueryDslFilter = (filter: Filter | QueryDslFilter): filter is QueryDslFilter => {
+  return 'queryDsl' in filter && 'customLabel' in filter;
+};
+
+const isQueryDslFilterChanged = (original: QueryDslFilter, updated: QueryDslFilter) =>
+  original.queryDsl !== updated.queryDsl || original.customLabel !== updated.customLabel;
 
 export function withCloseFilterEditorConfirmModal<
   T extends WithCloseFilterEditorConfirmModalProps = WithCloseFilterEditorConfirmModalProps
@@ -26,6 +43,8 @@ export function withCloseFilterEditorConfirmModal<
   return function (props: Omit<T, keyof WithCloseFilterEditorConfirmModalProps>) {
     const [actionsOnClose, setActionsOnClose] = useState<Action[]>();
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [updatedFilter, setUpdatedFilter] = useState<ChangedFilter>();
+    const [originalFilter, setOriginalFilter] = useState<OriginalFilter>();
 
     const onCancelModal = useCallback(() => {
       setShowConfirmModal(false);
@@ -37,26 +56,35 @@ export function withCloseFilterEditorConfirmModal<
     }, [actionsOnClose, setShowConfirmModal]);
 
     const onCloseFilterPopover = useCallback(
-      (current: Filter, updated: Filter, actions?: Action[]) => {
-        if (
-          !compareFilters(current, updated, {
-            index: true,
-            alias: true,
-          }) ||
-          updated.meta.type === FILTERS.CUSTOM // show always if Query DSL mode is enabled
-        ) {
+      (actions?: Action[]) => {
+        const filtersAreNotEqual =
+          updatedFilter &&
+          originalFilter &&
+          ((isQueryDslFilter(updatedFilter) &&
+            isQueryDslFilterChanged(originalFilter.queryDslFilter, updatedFilter)) ||
+            (!isQueryDslFilter(updatedFilter) &&
+              !compareFilters(originalFilter.filter, updatedFilter, {
+                index: true,
+                alias: true,
+              })));
+        if (filtersAreNotEqual) {
           setShowConfirmModal(true);
           setActionsOnClose(actions);
         } else {
           actions?.map((action) => action());
         }
       },
-      [setShowConfirmModal, setActionsOnClose]
+      [originalFilter, updatedFilter, setShowConfirmModal, setActionsOnClose]
     );
 
     return (
       <>
-        <WrappedComponent {...(props as T)} onCloseFilterPopover={onCloseFilterPopover} />
+        <WrappedComponent
+          {...(props as T)}
+          onCloseFilterPopover={onCloseFilterPopover}
+          onLocalFilterCreate={setOriginalFilter}
+          onLocalFilterUpdate={setUpdatedFilter}
+        />
         {showConfirmModal && (
           <CloseFilterEditorConfirmModal onCancel={onCancelModal} onConfirm={onConfirmModal} />
         )}

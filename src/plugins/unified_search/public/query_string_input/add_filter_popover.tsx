@@ -46,14 +46,14 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   filters,
   timeRangeForSuggestionsOverride,
   onFiltersUpdated,
-  onCloseFilterPopover,
   buttonProps,
   isDisabled,
+  onCloseFilterPopover,
+  onLocalFilterUpdate,
+  onLocalFilterCreate,
 }: AddFilterPopoverProps) {
   const euiTheme = useEuiTheme();
   const [showAddFilterPopover, setShowAddFilterPopover] = useState(false);
-  const [updatedFilter, setUpdatedFilter] = useState<Filter>();
-  const [originalFilter, setOriginalFilter] = useState<Filter>();
 
   const button = (
     <EuiToolTip delay="long" content={strings.getAddFilterButtonLabel()}>
@@ -72,8 +72,8 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   );
 
   const closePopover = useCallback(() => {
-    onCloseFilterPopover(originalFilter, updatedFilter, [() => setShowAddFilterPopover(false)]);
-  }, [originalFilter, updatedFilter, setShowAddFilterPopover, onCloseFilterPopover]);
+    onCloseFilterPopover([() => setShowAddFilterPopover(false)]);
+  }, [setShowAddFilterPopover, onCloseFilterPopover]);
 
   return (
     <EuiFlexItem grow={false}>
@@ -97,8 +97,8 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
           filters={filters}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           onFiltersUpdated={onFiltersUpdated}
-          onLocalFilterUpdate={setUpdatedFilter}
-          onLocalFilterCreate={setOriginalFilter}
+          onLocalFilterUpdate={onLocalFilterUpdate}
+          onLocalFilterCreate={onLocalFilterCreate}
           closePopoverOnAdd={() => {
             setShowAddFilterPopover(false);
           }}
