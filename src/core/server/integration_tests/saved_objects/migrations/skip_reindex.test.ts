@@ -9,7 +9,7 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { Root } from '@kbn/core-root-server-internal';
 import {
   createRootWithCorePlugins,
