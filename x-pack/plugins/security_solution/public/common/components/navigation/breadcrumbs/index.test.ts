@@ -25,7 +25,6 @@ import { links } from '../../../links/app_links';
 import { updateAppLinks } from '../../../links';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { AlertDetailRouteType } from '../../../../detections/pages/alert_details/types';
-import { AllRulesTabs } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
 import { UsersTableType } from '../../../../explore/users/store/model';
 
 jest.mock('../../../hooks/use_selector');
@@ -101,16 +100,6 @@ const getMockObject = (
         tabName: AlertDetailRouteType.summary,
       };
 
-    case SecurityPageName.rules:
-      return {
-        detailName,
-        navTabs,
-        pageName,
-        pathName,
-        search: '',
-        tabName: AllRulesTabs.management,
-      };
-
     default:
       return {
         detailName,
@@ -118,7 +107,7 @@ const getMockObject = (
         pageName,
         pathName,
         search: '',
-      };
+      } as RouteSpyState & ObjectWithNavTabs;
   }
 };
 
@@ -349,6 +338,10 @@ describe('Navigation Breadcrumbs', () => {
           securityBreadCrumb,
           {
             text: 'Alerts',
+            href: 'securitySolutionUI/alerts',
+          },
+          {
+            text: 'Summary',
             href: '',
           },
         ]);
@@ -418,8 +411,8 @@ describe('Navigation Breadcrumbs', () => {
           securityBreadCrumb,
           rulesBReadcrumb,
           {
-            text: mockRuleName,
-            href: ``,
+            text: 'ALERT_RULE_NAME',
+            href: '',
           },
         ]);
       });
@@ -693,6 +686,10 @@ describe('Navigation Breadcrumbs', () => {
           securityBreadCrumb,
           {
             text: 'Alerts',
+            href: 'securitySolutionUI/alerts',
+          },
+          {
+            text: 'Summary',
             href: '',
           },
         ]);
