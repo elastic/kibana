@@ -24,6 +24,9 @@ import { TestProviders } from '../../mock/test_providers';
 import type { Props } from '.';
 import { AlertsTreemapPanel } from '.';
 import { mockAlertSearchResponse } from '../alerts_treemap/lib/mocks/mock_alert_search_response';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useInspectButton } from '../../../detections/components/alerts_kpis/common/hooks';
+import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
@@ -52,6 +55,21 @@ jest.mock('../../lib/kibana', () => {
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_query', () => ({
   useQueryAlerts: jest.fn(),
+}));
+
+jest.mock('../../hooks/use_experimental_features');
+jest.mock('../page/use_refetch_by_session');
+jest.mock('../visualization_actions/lens_embeddable');
+
+jest.mock('../page/use_refetch_by_session', () => ({
+  useRefetchByRestartingSession: jest.fn().mockReturnValue({
+    searchSessionId: 'mockSearchSessionId',
+    refetchByRestartingSession: jest.fn(),
+  }),
+}));
+jest.mock('../../../detections/components/alerts_kpis/common/hooks', () => ({
+  useInspectButton: jest.fn(),
+  useStackByFields: jest.fn(),
 }));
 
 const defaultProps: Props = {
@@ -143,6 +161,8 @@ describe('AlertsTreemapPanel', () => {
       request: '',
       refetch: () => {},
     });
+
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
   });
 
   it('renders the panel', async () => {
@@ -310,5 +330,72 @@ describe('AlertsTreemapPanel', () => {
     );
 
     await waitFor(() => expect(screen.getByTestId('treemap')).toBeInTheDocument());
+  });
+});
+
+describe('when isChartEmbeddablesEnabled = true', () => {
+  const mockSearchSessionId = 'mockSearchSessionId';
+  const mockRefetchByRestartingSession = jest.fn();
+  const mockRefetch = () => {};
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    (useRefetchByRestartingSession as jest.Mock).mockReturnValue({
+      searchSessionId: mockSearchSessionId,
+      refetchByRestartingSession: mockRefetchByRestartingSession,
+    });
+
+    (useLocation as jest.Mock).mockReturnValue([
+      { pageName: SecurityPageName.alerts, detailName: undefined },
+    ]);
+
+    (useQueryAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      data: mockAlertSearchResponse,
+      setQuery: () => {},
+      response: '',
+      request: '',
+      refetch: mockRefetch,
+    });
+
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+  });
+
+  it('refetch data by refetchByRestartingSession', async () => {
+    render(
+      <TestProviders>
+        <AlertsTreemapPanel {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect((useInspectButton as jest.Mock).mock.calls[0][0].refetch).toEqual(
+        mockRefetchByRestartingSession
+      );
+      expect((useInspectButton as jest.Mock).mock.calls[0][0].searchSessionId).toEqual(
+        mockSearchSessionId
+      );
+    });
+  });
+
+  it('renders LensEmbeddable', async () => {
+    render(
+      <TestProviders>
+        <AlertsTreemapPanel {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => expect(screen.getByTestId('lens-embeddable')).toBeInTheDocument());
+  });
+
+  it('should skip calling getAlertsRiskQuery', async () => {
+    render(
+      <TestProviders>
+        <AlertsTreemapPanel {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => expect((useQueryAlerts as jest.Mock).mock.calls[0][0].skip).toBeTruthy());
   });
 });

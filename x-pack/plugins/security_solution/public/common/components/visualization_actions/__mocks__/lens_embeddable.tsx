@@ -6,4 +6,4 @@
  */
 import React from 'react';
 
-export const LensEmbeddable = () => <div data-test-subj="embeddable-metric" />;
+export const LensEmbeddable = () => <div data-test-subj="lens-embeddable" />;

@@ -100,6 +100,21 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
 
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuid.v4()}`, []);
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const timerange = useMemo(() => ({ from, to }), [from, to]);
+  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+    inputId: InputsModelId.global,
+    queryId: uniqueQueryId,
+  });
+  const extraVisualizationOptions = useMemo(
+    () => ({
+      breakdownField: stackByField1,
+      showBuildingBlockAlerts,
+      showOnlyThreatIndicatorAlerts,
+      status,
+    }),
+    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, status, stackByField1]
+  );
 
   const additionalFilters = useMemo(() => {
     try {
@@ -132,7 +147,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
       stackByField1,
       to,
     }),
-    skip: !isPanelExpanded,
+    skip: !isPanelExpanded || isChartEmbeddablesEnabled,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.TREE_MAP,
   });
@@ -159,22 +174,6 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
     stackByField1,
     to,
   ]);
-
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
-  const timerange = useMemo(() => ({ from, to }), [from, to]);
-  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
-    inputId: InputsModelId.global,
-    queryId: uniqueQueryId,
-  });
-  const extraVisualizationOptions = useMemo(
-    () => ({
-      breakdownField: stackByField1,
-      showBuildingBlockAlerts,
-      showOnlyThreatIndicatorAlerts,
-      status,
-    }),
-    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, status, stackByField1]
-  );
 
   useInspectButton({
     deleteQuery,
@@ -231,7 +230,6 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
         {isPanelExpanded ? (
           isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
             <LensEmbeddable
-              data-test-subj="embeddable-matrix-histogram"
               extraActions={extraActions}
               extraOptions={extraVisualizationOptions}
               getLensAttributes={getLensAttributes}
