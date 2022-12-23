@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import { MlCoreSetup } from '../plugin';
