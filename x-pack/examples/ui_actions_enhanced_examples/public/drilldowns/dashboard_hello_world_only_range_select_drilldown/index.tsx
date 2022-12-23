@@ -34,10 +34,7 @@ export class DashboardHelloWorldOnlyRangeSelectDrilldown
     return [SELECT_RANGE_TRIGGER];
   }
 
-  public readonly CollectConfig = ({
-    config,
-    onConfig,
-  }: CollectConfigProps<Config>) => (
+  public readonly CollectConfig = ({ config, onConfig }: CollectConfigProps<Config>) => (
     <EuiFormRow label="Enter your name" fullWidth>
       <EuiFieldText
         fullWidth

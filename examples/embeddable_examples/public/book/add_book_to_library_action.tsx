@@ -18,31 +18,30 @@ interface ActionContext {
 
 export const ACTION_ADD_BOOK_TO_LIBRARY = 'ACTION_ADD_BOOK_TO_LIBRARY';
 
-export const createAddBookToLibraryAction = () =>
-  ({
-    getDisplayName: () =>
-      i18n.translate('embeddableExamples.book.addToLibrary', {
-        defaultMessage: 'Add Book To Library',
-      }),
-    id: ACTION_ADD_BOOK_TO_LIBRARY,
-    type: ACTION_ADD_BOOK_TO_LIBRARY,
-    order: 100,
-    getIconType: () => 'folderCheck',
-    isCompatible: async ({ embeddable }: ActionContext) => {
-      return (
-        embeddable.type === BOOK_EMBEDDABLE &&
-        embeddable.getInput().viewMode === ViewMode.EDIT &&
-        embeddable.getRoot().isContainer &&
-        embeddable.getRoot().type !== DASHBOARD_CONTAINER_TYPE &&
-        isReferenceOrValueEmbeddable(embeddable) &&
-        !embeddable.inputIsRefType(embeddable.getInput())
-      );
-    },
-    execute: async ({ embeddable }: ActionContext) => {
-      if (!isReferenceOrValueEmbeddable(embeddable)) {
-        throw new IncompatibleActionError();
-      }
-      const newInput = await embeddable.getInputAsRefType();
-      embeddable.updateInput(newInput);
-    },
-  });
+export const createAddBookToLibraryAction = () => ({
+  getDisplayName: () =>
+    i18n.translate('embeddableExamples.book.addToLibrary', {
+      defaultMessage: 'Add Book To Library',
+    }),
+  id: ACTION_ADD_BOOK_TO_LIBRARY,
+  type: ACTION_ADD_BOOK_TO_LIBRARY,
+  order: 100,
+  getIconType: () => 'folderCheck',
+  isCompatible: async ({ embeddable }: ActionContext) => {
+    return (
+      embeddable.type === BOOK_EMBEDDABLE &&
+      embeddable.getInput().viewMode === ViewMode.EDIT &&
+      embeddable.getRoot().isContainer &&
+      embeddable.getRoot().type !== DASHBOARD_CONTAINER_TYPE &&
+      isReferenceOrValueEmbeddable(embeddable) &&
+      !embeddable.inputIsRefType(embeddable.getInput())
+    );
+  },
+  execute: async ({ embeddable }: ActionContext) => {
+    if (!isReferenceOrValueEmbeddable(embeddable)) {
+      throw new IncompatibleActionError();
+    }
+    const newInput = await embeddable.getInputAsRefType();
+    embeddable.updateInput(newInput);
+  },
+});

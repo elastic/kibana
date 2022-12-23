@@ -47,11 +47,7 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
 
   private icon = 'folderCheck';
 
-  public readonly MenuItem = ({
-    context,
-  }: {
-    context: LibraryNotificationActionContext;
-  }) => {
+  public readonly MenuItem = ({ context }: { context: LibraryNotificationActionContext }) => {
     const { embeddable } = context;
     return (
       <KibanaThemeProvider theme$={this.theme$}>

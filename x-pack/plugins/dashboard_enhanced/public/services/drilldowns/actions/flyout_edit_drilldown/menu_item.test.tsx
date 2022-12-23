@@ -21,12 +21,8 @@ test('<MenuItem/>', () => {
       },
     } as unknown as EnhancedEmbeddable,
     trigger: {},
-  }
-  const { getByText, queryByText } = render(
-    <MenuItem
-      context={context}
-    />
-  );
+  };
+  const { getByText, queryByText } = render(<MenuItem context={context} />);
 
   expect(getByText(/manage drilldowns/i)).toBeInTheDocument();
   expect(queryByText('0')).not.toBeInTheDocument();

@@ -123,17 +123,12 @@ export class UiActionsService {
    * `addTriggerAction` is similar to `attachAction` as it attaches action to a
    * trigger, but it also registers the action, if it has not been registered, yet.
    */
-  public readonly addTriggerAction = (
-    triggerId: string,
-    action: ActionDefinition<any>
-  ): void => {
+  public readonly addTriggerAction = (triggerId: string, action: ActionDefinition<any>): void => {
     if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);
   };
 
-  public readonly getAction = (
-    id: string
-  ) => {
+  public readonly getAction = (id: string) => {
     if (!this.actions.has(id)) {
       throw new Error(`Action [action.id = ${id}] not registered.`);
     }
@@ -154,10 +149,7 @@ export class UiActionsService {
     return actions as Action[];
   };
 
-  public readonly getTriggerCompatibleActions = async (
-    triggerId: string,
-    context: object
-  ) => {
+  public readonly getTriggerCompatibleActions = async (triggerId: string, context: object) => {
     const actions = this.getTriggerActions!(triggerId);
     const isCompatibles = await Promise.all(
       actions.map((action) =>
