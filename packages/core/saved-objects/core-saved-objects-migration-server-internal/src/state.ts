@@ -201,7 +201,6 @@ export interface PrepareCompatibleMigration extends PostInitState {
   readonly controlState: 'PREPARE_COMPATIBLE_MIGRATION';
   /** Alias-level actions that prepare for this migration */
   readonly preTransformDocsActions: AliasAction[];
-  readonly sourceIndexMappings?: IndexMapping;
 }
 
 export interface FatalState extends BaseState {

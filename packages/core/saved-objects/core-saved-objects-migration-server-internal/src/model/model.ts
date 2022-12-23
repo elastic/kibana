@@ -177,7 +177,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'PREPARE_COMPATIBLE_MIGRATION',
           sourceIndex: Option.none,
           targetIndex,
-          sourceIndexMappings: sourceMappings,
           targetIndexRawMappings: sourceMappings,
           targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
@@ -321,8 +320,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
       };
     } else if (Either.isLeft(res)) {
-      // We assume that the alias was already deleted by another Kibana instance
+      // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
+      // it might happen that another Kibana instance has deleted this instance's version index.
+      // NIT to handle this in properly, we'd have to add a PREPARE_COMPATIBLE_MIGRATION_CONFLICT step,
+      // similar to MARK_VERSION_INDEX_READY_CONFLICT.
       if (isTypeof(res.left, 'alias_not_found_exception')) {
+        // We assume that the alias was already deleted by another Kibana instance
         return {
           ...stateP,
           controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',

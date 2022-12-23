@@ -268,7 +268,7 @@ describe('migrations v2 model', () => {
               settings: {},
             },
           });
-          const newState = model(initState, res);
+          const newState = model(initState, res) as OutdatedDocumentsSearchOpenPit;
 
           expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
           // This snapshot asserts that we merge the
@@ -295,6 +295,22 @@ describe('migrations v2 model', () => {
               },
             }
           `);
+          expect(newState.targetIndexRawMappings).toEqual({
+            _meta: {
+              migrationMappingPropertyHashes: {
+                disabled_saved_object_type: '7997cf5a56cc02bdc9c93361bde732b0',
+              },
+            },
+            properties: {
+              disabled_saved_object_type: {
+                properties: {
+                  value: {
+                    type: 'keyword',
+                  },
+                },
+              },
+            },
+          });
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
         });
@@ -501,6 +517,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(2000);
         });
       });
+
       describe('if waitForMigrationCompletion=false', () => {
         const initState = Object.assign({}, initBaseState, {
           waitForMigrationCompletion: false,
@@ -789,6 +806,67 @@ describe('migrations v2 model', () => {
           });
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
+        });
+
+        describe('when upgrading to a new stack version', () => {
+          const unchangedMappingsState: State = {
+            ...baseState,
+            controlState: 'INIT',
+            kibanaVersion: '7.12.0', // new version!
+            currentAlias: '.kibana',
+            versionAlias: '.kibana_7.12.0',
+            versionIndex: '.kibana_7.11.0_001',
+          };
+          it('INIT -> PREPARE_COMPATIBLE_MIGRATION when the mappings have not changed', () => {
+            const res: ResponseType<'INIT'> = Either.right({
+              '.kibana_7.11.0_001': {
+                aliases: {
+                  '.kibana': {},
+                  '.kibana_7.11.0': {},
+                },
+                mappings: indexMapping,
+                settings: {},
+              },
+            });
+            const newState = model(unchangedMappingsState, res) as PrepareCompatibleMigration;
+
+            expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
+            expect(newState.targetIndexRawMappings).toEqual({
+              _meta: {
+                migrationMappingPropertyHashes: {
+                  new_saved_object_type: '4a11183eee21e6fbad864f7a30b39ad0',
+                },
+              },
+              properties: {
+                new_saved_object_type: {
+                  properties: {
+                    value: {
+                      type: 'text',
+                    },
+                  },
+                },
+              },
+            });
+            expect(newState.versionAlias).toEqual('.kibana_7.12.0');
+            expect(newState.currentAlias).toEqual('.kibana');
+            // will point to
+            expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
+            expect(newState.preTransformDocsActions).toEqual([
+              {
+                add: {
+                  alias: '.kibana_7.12.0',
+                  index: '.kibana_7.11.0_001',
+                },
+              },
+              {
+                remove: {
+                  alias: '.kibana_7.11.0',
+                  index: '.kibana_7.11.0_001',
+                  must_exist: true,
+                },
+              },
+            ]);
+          });
         });
       });
     });
@@ -1896,6 +1974,45 @@ describe('migrations v2 model', () => {
       });
     });
 
+    describe('PREPARE_COMPATIBLE_MIGRATIONS', () => {
+      const someAliasAction: AliasAction = { add: { index: '.kibana', alias: '.kibana_8.7.0' } };
+      const state: PrepareCompatibleMigration = {
+        ...baseState,
+        controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+        preTransformDocsActions: [someAliasAction],
+      };
+
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeds', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATIONS'> = Either.right({});
+        const newState = model(state, res) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action fails because the alias is not found', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATIONS'> = Either.left({
+          type: 'alias_not_found',
+        });
+
+        const newState = model(state, res) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
+      it('throws an exception if action fails with an error other than a missing alias', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATIONS'> = Either.left({
+          type: 'index_not_found_exception',
+        });
+
+        expect(() => model(state, res)).toThrowErrorMatchingInlineSnapshot(
+          `"PREPARE_COMPATIBLE_MIGRATION received unexpected action response: {\\"type\\":\\"index_not_found_exception\\"}"`
+        );
+      });
+    });
+
     describe('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT', () => {
       const state: OutdatedDocumentsSearchOpenPit = {
         ...baseState,
@@ -2600,51 +2717,6 @@ describe('migrations v2 model', () => {
         );
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
-      });
-    });
-    describe('skipping reindex if not necessary', () => {
-      const unchangedMappingsState: State = {
-        ...baseState,
-        controlState: 'INIT',
-        kibanaVersion: '7.12.0', // new version!
-        currentAlias: '.kibana',
-        versionAlias: '.kibana_7.12.0',
-        versionIndex: '.kibana_7.11.0_001',
-      };
-      it('INIT -> PREPARE_COMPATIBLE_MIGRATION when desired mappings match current mappings', () => {
-        const res: ResponseType<'INIT'> = Either.right({
-          '.kibana_7.11.0_001': {
-            aliases: {
-              '.kibana': {},
-              '.kibana_7.11.0': {},
-            },
-            mappings: indexMapping,
-            settings: {},
-          },
-        });
-        const newState = model(unchangedMappingsState, res) as PrepareCompatibleMigration;
-
-        expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
-
-        expect(newState.versionAlias).toEqual('.kibana_7.12.0');
-        expect(newState.currentAlias).toEqual('.kibana');
-        // will point to
-        expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
-        expect(newState.preTransformDocsActions).toEqual([
-          {
-            add: {
-              alias: '.kibana_7.12.0',
-              index: '.kibana_7.11.0_001',
-            },
-          },
-          {
-            remove: {
-              alias: '.kibana_7.11.0',
-              index: '.kibana_7.11.0_001',
-              must_exist: true,
-            },
-          },
-        ]);
       });
     });
   });
