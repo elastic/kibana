@@ -11,8 +11,16 @@ export const DV_FROZEN_TIER_PREFERENCE = 'dataVisualizer.frozenDataTierPreferenc
 export const DV_RANDOM_SAMPLER_PREFERENCE = 'dataVisualizer.randomSamplerPreference';
 export const DV_RANDOM_SAMPLER_P_VALUE = 'dataVisualizer.randomSamplerPValue';
 
+export const FROZEN_TIER_PREFERENCE = {
+  EXCLUDE: 'exclude-frozen',
+  INCLUDE: 'include-frozen',
+} as const;
+
+export type FrozenTierPreference =
+  typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];
+
 export type DV = Partial<{
-  [DV_FROZEN_TIER_PREFERENCE]: 'exclude_frozen' | 'include_frozen';
+  [DV_FROZEN_TIER_PREFERENCE]: FrozenTierPreference;
   [DV_RANDOM_SAMPLER_PREFERENCE]: RandomSamplerOption;
   [DV_RANDOM_SAMPLER_P_VALUE]: number;
 }> | null;
@@ -20,7 +28,7 @@ export type DV = Partial<{
 export type DVKey = keyof Exclude<DV, null>;
 
 export type DVStorageMapped<T extends DVKey> = T extends typeof DV_FROZEN_TIER_PREFERENCE
-  ? 'exclude-frozen' | 'include-frozen' | undefined
+  ? FrozenTierPreference | undefined
   : T extends typeof DV_RANDOM_SAMPLER_PREFERENCE
   ? RandomSamplerOption | undefined
   : T extends typeof DV_RANDOM_SAMPLER_P_VALUE

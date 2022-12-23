@@ -26,7 +26,13 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useStorage } from '@kbn/ml-local-storage';
 import { setFullTimeRange } from './full_time_range_selector_service';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { DV_FROZEN_TIER_PREFERENCE, type DVKey, type DVStorageMapped } from '../../types/storage';
+import {
+  DV_FROZEN_TIER_PREFERENCE,
+  FROZEN_TIER_PREFERENCE,
+  type DVKey,
+  type DVStorageMapped,
+  type FrozenTierPreference,
+} from '../../types/storage';
 
 export const ML_FROZEN_TIER_PREFERENCE = 'ml.frozenDataTierPreference';
 
@@ -37,13 +43,6 @@ interface Props {
   query?: QueryDslQueryContainer;
   callback?: (a: any) => void;
 }
-
-const FROZEN_TIER_PREFERENCE = {
-  EXCLUDE: 'exclude-frozen',
-  INCLUDE: 'include-frozen',
-} as const;
-
-type FrozenTierPreference = typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];
 
 // Component for rendering a button which automatically sets the range of the time filter
 // to the time range of data in the index(es) mapped to the supplied Kibana data view or query.

@@ -14,6 +14,14 @@ export const ML_FROZEN_TIER_PREFERENCE = 'ml.frozenDataTierPreference';
 export const ML_ANOMALY_EXPLORER_PANELS = 'ml.anomalyExplorerPanels';
 export const ML_NOTIFICATIONS_LAST_CHECKED_AT = 'ml.notificationsLastCheckedAt';
 
+export const FROZEN_TIER_PREFERENCE = {
+  EXCLUDE: 'exclude-frozen',
+  INCLUDE: 'include-frozen',
+} as const;
+
+export type FrozenTierPreference =
+  typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];
+
 export type PartitionFieldConfig =
   | {
       /**
@@ -56,7 +64,7 @@ export interface MlStorageRecord {
   [ML_ENTITY_FIELDS_CONFIG]: PartitionFieldsConfig;
   [ML_APPLY_TIME_RANGE_CONFIG]: ApplyTimeRangeConfig;
   [ML_GETTING_STARTED_CALLOUT_DISMISSED]: boolean | undefined;
-  [ML_FROZEN_TIER_PREFERENCE]: 'exclude-frozen' | 'include-frozen';
+  [ML_FROZEN_TIER_PREFERENCE]: FrozenTierPreference;
   [ML_ANOMALY_EXPLORER_PANELS]: AnomalyExplorerPanelsState | undefined;
   [ML_NOTIFICATIONS_LAST_CHECKED_AT]: number | undefined;
 }
@@ -72,7 +80,7 @@ export type TMlStorageMapped<T extends MlStorageKey> = T extends typeof ML_ENTIT
   : T extends typeof ML_GETTING_STARTED_CALLOUT_DISMISSED
   ? boolean | undefined
   : T extends typeof ML_FROZEN_TIER_PREFERENCE
-  ? 'exclude-frozen' | 'include-frozen' | undefined
+  ? FrozenTierPreference | undefined
   : T extends typeof ML_ANOMALY_EXPLORER_PANELS
   ? AnomalyExplorerPanelsState | undefined
   : T extends typeof ML_NOTIFICATIONS_LAST_CHECKED_AT

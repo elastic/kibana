@@ -26,8 +26,10 @@ import { useStorage } from '@kbn/ml-local-storage';
 import { setFullTimeRange } from './full_time_range_selector_service';
 import {
   ML_FROZEN_TIER_PREFERENCE,
+  FROZEN_TIER_PREFERENCE,
   type MlStorageKey,
   type TMlStorageMapped,
+  type FrozenTierPreference,
 } from '../../../../common/types/storage';
 import { GetTimeFieldRangeResponse } from '../../services/ml_api_service';
 
@@ -37,13 +39,6 @@ interface Props {
   disabled: boolean;
   callback?: (a: GetTimeFieldRangeResponse) => void;
 }
-
-const FROZEN_TIER_PREFERENCE = {
-  EXCLUDE: 'exclude-frozen',
-  INCLUDE: 'include-frozen',
-} as const;
-
-type FrozenTierPreference = typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];
 
 // Component for rendering a button which automatically sets the range of the time filter
 // to the time range of data in the index(es) mapped to the supplied Kibana index pattern or query.
