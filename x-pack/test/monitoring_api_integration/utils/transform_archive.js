@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { createReadStream, createWriteStream } from 'fs';
-import { mkdir } from 'fs/promises';
-import path from 'path';
-import { Transform } from 'stream';
-import { createGzip } from 'zlib';
-import { createPromiseFromStreams } from '@kbn/utils';
+const { createReadStream, createWriteStream } = require('fs');
+const { mkdir } = require('fs/promises');
+const path = require('path');
+const { Transform } = require('stream');
+const { createGzip } = require('zlib');
+const { createPromiseFromStreams } = require('@kbn/utils');
 
-// eslint-disable-next-line @kbn/imports/uniform_imports
-import { createParseArchiveStreams } from '../../../../packages/kbn-es-archiver/src/lib/archives/parse';
+const {
+  createParseArchiveStreams,
+} = require('../../../../packages/kbn-es-archiver/src/lib/archives/parse'); // eslint-disable-line @kbn/imports/uniform_imports
 
 /**
  * generates .monitoring-* (metricbeat) archive from a metrics-* (package) archive
@@ -35,7 +36,6 @@ import { createParseArchiveStreams } from '../../../../packages/kbn-es-archiver/
     .join(path.sep);
   const targetFile = path.join(targetDir, 'data.json.gz');
 
-  // eslint-disable-next-line no-console
   console.info(`creating dir ${targetDir}`);
   await mkdir(targetDir, { recursive: true });
 
@@ -51,6 +51,7 @@ import { createParseArchiveStreams } from '../../../../packages/kbn-es-archiver/
 
         const source = item.value.source;
 
+        /* eslint-disable no-nested-ternary */
         const product = source.logstash
           ? 'logstash'
           : source.kibana
@@ -60,9 +61,9 @@ import { createParseArchiveStreams } from '../../../../packages/kbn-es-archiver/
           : source.elasticsearch
           ? 'elasticsearch'
           : null;
+        /* eslint-enable no-nested-ternary */
 
         if (!product) {
-          // eslint-disable-next-line no-console
           console.warn('could not detect source product of document:', source);
           return callback();
         }
@@ -75,6 +76,5 @@ import { createParseArchiveStreams } from '../../../../packages/kbn-es-archiver/
     createWriteStream(targetFile),
   ]);
 
-  // eslint-disable-next-line no-console
   console.info(`created metricbeat data at ${targetFile}`);
 })();
