@@ -101,11 +101,11 @@ export const setRecoveredAlertsContext = ({
       const downConfig = staleDownConfigs[idWithLocation];
       if (downConfig.isDeleted) {
         recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.deleteMonitor', {
-          defaultMessage: `because Monitor was deleted`,
+          defaultMessage: `Monitor has been deleted`,
         });
       } else if (downConfig.isLocationRemoved) {
         recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.removedLocation', {
-          defaultMessage: `because Location was removed from monitor.`,
+          defaultMessage: `Location has been removed from the monitor`,
         });
       }
     }

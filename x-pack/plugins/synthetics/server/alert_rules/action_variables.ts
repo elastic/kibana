@@ -27,7 +27,7 @@ export const getActionVariables = ({ plugins }: { plugins: UptimeCorePluginsSetu
       ACTION_VARIABLES[RECOVERY_REASON],
       ...commonMonitorStateI18,
     ],
-    state: [...commonMonitorStateI18, ...commonStateTranslations],
+    state: [...commonStateTranslations],
   };
 };
 
