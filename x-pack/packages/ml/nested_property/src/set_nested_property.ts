@@ -11,7 +11,7 @@ export const setNestedProperty = (obj: Record<string, any>, accessor: string, va
   const len = accessors.length;
   for (let i = 0; i < len - 1; i++) {
     const attribute = accessors[i];
-    if (ref[attribute] === undefined) {
+    if (typeof ref[attribute] !== 'object') {
       ref[attribute] = {};
     }
 
