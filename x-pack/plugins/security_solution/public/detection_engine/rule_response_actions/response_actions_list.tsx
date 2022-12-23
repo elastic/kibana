@@ -53,9 +53,9 @@ export const ResponseActionsList = React.memo(({ items, removeItem }: ResponseAc
         );
       })}
       <EuiSpacer size="m" />
-      {osqueryNoteQueries.length && (
+      {osqueryNoteQueries.length ? (
         <OsqueryInvestigationGuidePanel onClick={handleInvestigationGuideClick} />
-      )}
+      ) : null}
     </div>
   );
 });
