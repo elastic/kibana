@@ -19,16 +19,16 @@ import type {
   FlowTargetSourceDest,
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
-import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
-import { DefaultDraggable } from '../../../common/components/draggables';
-import { defaultToEmptyTag, getEmptyTagValue } from '../../../common/components/empty_value';
-import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
-import { Spacer } from '../../../common/components/page';
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import { Content } from '../draggables';
+import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
+import { FormattedRelativePreferenceDate } from '../formatted_date';
+import { HostDetailsLink, ReputationLink, WhoIsLink } from '../links';
+import { Spacer } from '../page';
 import * as i18n from '../../../explore/network/components/details/translations';
 import { SECURITY_SOLUTION_ACTION_TRIGGER } from '../../../../common/constants';
 
-const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
+const ContainerFlexGroup = styled(EuiFlexGroup)`
   flex-grow: unset;
 `;
 
@@ -39,9 +39,7 @@ export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
 export const locationRenderer = (
   fieldNames: string[],
-  data: NetworkDetailsStrategyResponse['networkDetails'],
-  contextID?: string,
-  isDraggable?: boolean
+  data: NetworkDetailsStrategyResponse['networkDetails']
 ): React.ReactElement =>
   fieldNames.length > 0 && fieldNames.every((fieldName) => getOr(null, fieldName, data)) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -51,16 +49,18 @@ export const locationRenderer = (
           <Fragment key={`${IpOverviewId}-${fieldName}`}>
             {index ? ',\u00A0' : ''}
             <EuiFlexItem grow={false}>
-              <DefaultDraggable
-                id={`location-renderer-default-draggable-${IpOverviewId}-${
-                  contextID ? `${contextID}-` : ''
-                }${fieldName}`}
-                isDraggable={isDraggable ?? false}
-                field={fieldName}
-                value={locationValue}
-                isAggregatable={true}
-                fieldType={'keyword'}
-              />
+              <CellActions
+                mode={CellActionsMode.HOVER_POPOVER}
+                visibleCellActions={5}
+                triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+                field={{
+                  type: 'keyword',
+                  name: fieldName,
+                  value: locationValue,
+                }}
+              >
+                <Content field={fieldName} value={locationValue} />
+              </CellActions>
             </EuiFlexItem>
           </Fragment>
         );
@@ -76,34 +76,38 @@ export const dateRenderer = (timestamp?: string | null): React.ReactElement => (
 
 export const autonomousSystemRenderer = (
   as: AutonomousSystem,
-  flowTarget: FlowTarget | FlowTargetSourceDest,
-  contextID?: string,
-  isDraggable?: boolean
+  flowTarget: FlowTarget | FlowTargetSourceDest
 ): React.ReactElement =>
   as && as.organization && as.organization.name && as.number ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <DefaultDraggable
-          id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${
-            contextID ? `${contextID}-` : ''
-          }${flowTarget}.as.organization.name`}
-          isDraggable={isDraggable ?? false}
-          field={`${flowTarget}.as.organization.name`}
-          value={as.organization.name}
-        />
+        <CellActions
+          mode={CellActionsMode.HOVER_POPOVER}
+          visibleCellActions={5}
+          triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+          field={{
+            type: 'keyword',
+            name: `${flowTarget}.as.organization.name`,
+            value: as.organization.name,
+          }}
+        >
+          <Content field={`${flowTarget}.as.organization.name`} value={as.organization.name} />
+        </CellActions>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{'/'}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <DefaultDraggable
-          id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${
-            contextID ? `${contextID}-` : ''
-          }${flowTarget}.as.number`}
-          isDraggable={false}
-          field={`${flowTarget}.as.number`}
-          value={`${as.number}`}
-          isAggregatable={true}
-          fieldType={'number'}
-        />
+        <CellActions
+          mode={CellActionsMode.HOVER_POPOVER}
+          visibleCellActions={5}
+          triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+          field={{
+            type: 'number',
+            name: `${flowTarget}.as.number`,
+            value: `${as.number}`,
+          }}
+        >
+          <Content field={`${flowTarget}.as.number`} value={`${as.number}`} />
+        </CellActions>
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
@@ -114,36 +118,35 @@ interface HostIdRendererTypes {
   contextID?: string;
   host: HostEcs;
   ipFilter?: string;
-  isDraggable?: boolean;
   noLink?: boolean;
 }
 
 export const hostIdRenderer = ({
-  contextID,
   host,
-  isDraggable = false,
   ipFilter,
   noLink,
 }: HostIdRendererTypes): React.ReactElement =>
   host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
       {host.name && host.name[0] != null ? (
-        <DefaultDraggable
-          id={`host-id-renderer-default-draggable-${IpOverviewId}-${
-            contextID ? `${contextID}-` : ''
-          }host-id`}
-          isDraggable={isDraggable}
-          field="host.id"
-          value={host.id[0]}
-          isAggregatable={true}
-          fieldType={'keyword'}
+        <CellActions
+          mode={CellActionsMode.HOVER_POPOVER}
+          visibleCellActions={5}
+          triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+          field={{
+            type: 'keyword',
+            name: 'host.id',
+            value: host.id[0],
+          }}
         >
-          {noLink ? (
-            <>{host.id}</>
-          ) : (
-            <HostDetailsLink hostName={host.name[0]}>{host.id}</HostDetailsLink>
-          )}
-        </DefaultDraggable>
+          <Content field={'host.id'} value={host.id[0]}>
+            {noLink ? (
+              <>{host.id}</>
+            ) : (
+              <HostDetailsLink hostName={host.name[0]}>{host.id}</HostDetailsLink>
+            )}
+          </Content>
+        </CellActions>
       ) : (
         <>{host.id}</>
       )}
@@ -152,31 +155,28 @@ export const hostIdRenderer = ({
     getEmptyTagValue()
   );
 
-export const hostNameRenderer = (
-  host?: HostEcs,
-  ipFilter?: string,
-  contextID?: string,
-  isDraggable?: boolean
-): React.ReactElement =>
+export const hostNameRenderer = (host?: HostEcs, ipFilter?: string): React.ReactElement =>
   host &&
   host.name &&
   host.name[0] &&
   host.ip &&
   (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
-    <DefaultDraggable
-      id={`host-name-renderer-default-draggable-${IpOverviewId}-${
-        contextID ? `${contextID}-` : ''
-      }host-name`}
-      isDraggable={isDraggable ?? false}
-      field={'host.name'}
-      value={host.name[0]}
-      isAggregatable={true}
-      fieldType={'keyword'}
+    <CellActions
+      mode={CellActionsMode.HOVER_POPOVER}
+      visibleCellActions={5}
+      triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+      field={{
+        type: 'keyword',
+        name: 'host.name',
+        value: host.name[0],
+      }}
     >
-      <HostDetailsLink hostName={host.name[0]}>
-        {host.name ? host.name : getEmptyTagValue()}
-      </HostDetailsLink>
-    </DefaultDraggable>
+      <Content field={'host.name'} value={host.name[0]}>
+        <HostDetailsLink hostName={host.name[0]}>
+          {host.name ? host.name : getEmptyTagValue()}
+        </HostDetailsLink>
+      </Content>
+    </CellActions>
   ) : (
     getEmptyTagValue()
   );
@@ -191,7 +191,6 @@ interface DefaultFieldRendererProps {
   attrName: string;
   displayCount?: number;
   idPrefix: string;
-  isDraggable?: boolean;
   moreMaxHeight?: string;
   render?: (item: string) => React.ReactNode;
   rowItems: string[] | null | undefined;
@@ -201,15 +200,14 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
   attrName,
   displayCount = 1,
   idPrefix,
-  isDraggable = false,
   moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
   render,
   rowItems,
 }) => {
   if (rowItems != null && rowItems.length > 0) {
-    const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
+    const visibleItems = rowItems.slice(0, displayCount).map((rowItem, index) => {
       const id = escapeDataProviderId(
-        `default-field-renderer-default-draggable-${idPrefix}-${attrName}-${rowItem}`
+        `default-field-renderer-default-${idPrefix}-${attrName}-${rowItem}`
       );
       return (
         <EuiFlexItem key={id} grow={false}>
@@ -220,42 +218,43 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             </>
           )}
           {typeof rowItem === 'string' && (
-            <DefaultDraggable
-              id={id}
-              isDraggable={isDraggable}
-              field={attrName}
-              value={rowItem}
-              isAggregatable={true}
-              fieldType={'keyword'}
+            <CellActions
+              mode={CellActionsMode.HOVER_POPOVER}
+              visibleCellActions={5}
+              triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+              field={{
+                type: 'keyword',
+                name: attrName,
+                value: rowItem,
+              }}
             >
               {render ? render(rowItem) : rowItem}
-            </DefaultDraggable>
+            </CellActions>
           )}
         </EuiFlexItem>
       );
     });
 
-    return draggables.length > 0 ? (
-      <DraggableContainerFlexGroup
+    return visibleItems.length > 0 ? (
+      <ContainerFlexGroup
         alignItems="center"
         gutterSize="none"
         component="span"
         data-test-subj="DefaultFieldRendererComponent"
       >
-        <EuiFlexItem grow={false}>{draggables} </EuiFlexItem>
+        <EuiFlexItem grow={false}>{visibleItems} </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <DefaultFieldRendererOverflow
             attrName={attrName}
             fieldType="keyword"
             idPrefix={idPrefix}
-            isAggregatable={true}
             moreMaxHeight={moreMaxHeight}
             overflowIndexStart={displayCount}
             render={render}
             rowItems={rowItems}
           />
         </EuiFlexItem>
-      </DraggableContainerFlexGroup>
+      </ContainerFlexGroup>
     ) : (
       getEmptyTagValue()
     );
@@ -273,7 +272,6 @@ interface DefaultFieldRendererOverflowProps {
   fieldType: string;
   rowItems: string[];
   idPrefix: string;
-  isAggregatable?: boolean;
   render?: (item: string) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
@@ -353,16 +351,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 MoreContainer.displayName = 'MoreContainer';
 
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
-  ({
-    attrName,
-    idPrefix,
-    moreMaxHeight,
-    overflowIndexStart = 5,
-    render,
-    rowItems,
-    fieldType,
-    isAggregatable,
-  }) => {
+  ({ attrName, idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems, fieldType }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
     const button = useMemo(

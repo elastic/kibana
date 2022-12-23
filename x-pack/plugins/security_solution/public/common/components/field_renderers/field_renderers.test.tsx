@@ -9,9 +9,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { TestProviders } from '../../../common/mock';
-import '../../../common/mock/match_media';
-import { getEmptyValue } from '../../../common/components/empty_value';
+import { TestProviders } from '../../mock';
+import '../../mock/match_media';
+import { getEmptyValue } from '../empty_value';
 
 import {
   autonomousSystemRenderer,
@@ -30,8 +30,8 @@ import type { AutonomousSystem } from '../../../../common/search_strategy';
 import { FlowTarget } from '../../../../common/search_strategy';
 import type { HostEcs } from '../../../../common/ecs/host';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/lib/kibana/kibana_react', () => {
+jest.mock('../../lib/kibana');
+jest.mock('../../lib/kibana/kibana_react', () => {
   return {
     useKibana: () => ({
       services: {
@@ -277,10 +277,10 @@ describe('Field Renderers', () => {
         <MoreContainer
           fieldType="keyword"
           idPrefix={idPrefix}
-          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
-          rowItems={rowItems}
+          values={rowItems}
+          fieldName={'fieldName'}
         />
       );
 
@@ -292,10 +292,10 @@ describe('Field Renderers', () => {
         <MoreContainer
           fieldType="keyword"
           idPrefix={idPrefix}
-          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={0}
-          rowItems={rowItems}
+          values={rowItems}
+          fieldName={'fieldName'}
         />
       );
 
@@ -309,10 +309,10 @@ describe('Field Renderers', () => {
         <MoreContainer
           fieldType="keyword"
           idPrefix={idPrefix}
-          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
-          rowItems={rowItems}
+          values={rowItems}
+          fieldName={'fieldName'}
         />
       );
 
@@ -324,10 +324,10 @@ describe('Field Renderers', () => {
         <MoreContainer
           fieldType="keyword"
           idPrefix={idPrefix}
-          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
-          rowItems={rowItems}
+          values={rowItems}
+          fieldName={'fieldName'}
         />
       );
 
@@ -341,11 +341,10 @@ describe('Field Renderers', () => {
         <MoreContainer
           fieldType="keyword"
           idPrefix={idPrefix}
-          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
-          rowItems={rowItems}
-          attrName="mock.attr"
+          values={rowItems}
+          fieldName="mock.attr"
         />
       );
 
@@ -359,13 +358,13 @@ describe('Field Renderers', () => {
 
       render(
         <MoreContainer
+          fieldName={'fieldName'}
           fieldType="keyword"
           idPrefix={idPrefix}
-          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
           render={renderFn}
-          rowItems={rowItems}
+          values={rowItems}
         />
       );
 
@@ -381,9 +380,9 @@ describe('Field Renderers', () => {
       render(
         <TestProviders>
           <DefaultFieldRendererOverflow
+            attrName="attrName"
             fieldType="keyword"
             idPrefix={idPrefix}
-            isAggregatable={true}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
             rowItems={rowItems}
@@ -401,9 +400,9 @@ describe('Field Renderers', () => {
       render(
         <TestProviders>
           <DefaultFieldRendererOverflow
+            attrName="attrName"
             fieldType="keyword"
             idPrefix={idPrefix}
-            isAggregatable={true}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
             rowItems={rowItems}

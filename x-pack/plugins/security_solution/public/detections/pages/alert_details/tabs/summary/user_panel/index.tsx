@@ -18,7 +18,7 @@ import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../../../common/components/first_last_seen';
-import { DefaultFieldRenderer } from '../../../../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../../../../common/components/field_renderers/field_renderers';
 import { NetworkDetailsLink, UserDetailsLink } from '../../../../../../common/components/links';
 import type { SelectedDataView } from '../../../../../../common/store/sourcerer/model';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';

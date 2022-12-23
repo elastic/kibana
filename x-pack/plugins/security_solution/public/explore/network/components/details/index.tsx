@@ -25,7 +25,7 @@ import {
   locationRenderer,
   reputationRenderer,
   whoisRenderer,
-} from '../../../../timelines/components/field_renderers/field_renderers';
+} from '../../../../common/components/field_renderers/field_renderers';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -84,9 +84,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
         title: i18n.LOCATION,
         description: locationRenderer(
           [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
-          data,
-          contextID,
-          isDraggable
+          data
         ),
       },
       {

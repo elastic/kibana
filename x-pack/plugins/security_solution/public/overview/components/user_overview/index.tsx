@@ -16,7 +16,7 @@ import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../common/components/field_renderers/field_renderers';
 import {
   FirstLastSeen,
   FirstLastSeenType,

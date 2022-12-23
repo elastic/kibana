@@ -21,7 +21,7 @@ import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../../../common/components/first_last_seen';
-import { DefaultFieldRenderer } from '../../../../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../../../../common/components/field_renderers/field_renderers';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../../../common/components/links';
 import type { SelectedDataView } from '../../../../../../common/store/sourcerer/model';
 import { getEnrichedFieldInfo } from '../../../../../../common/components/event_details/helpers';

@@ -20,7 +20,7 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import {
   DefaultFieldRenderer,
   hostIdRenderer,
-} from '../../../timelines/components/field_renderers/field_renderers';
+} from '../../../common/components/field_renderers/field_renderers';
 import {
   FirstLastSeen,
   FirstLastSeenType,

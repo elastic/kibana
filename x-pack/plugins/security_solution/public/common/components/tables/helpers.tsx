@@ -12,7 +12,7 @@ import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
-import { MoreContainer } from '../../../timelines/components/field_renderers/field_renderers';
+import { MoreContainer } from '../field_renderers/field_renderers';
 import { SECURITY_SOLUTION_ACTION_TRIGGER } from '../../../../common/constants';
 
 const Subtext = styled.div`
