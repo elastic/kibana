@@ -107,12 +107,6 @@ export const useSyncGlobalQueryString = () => {
   const previousGlobalUrlParams = usePrevious(globalUrlParam);
   const replaceUrlParams = useReplaceUrlParams();
 
-  // Url params that got deleted from GlobalUrlParams
-  const unregisteredKeys = useMemo(
-    () => difference(Object.keys(previousGlobalUrlParams ?? {}), Object.keys(globalUrlParam)),
-    [previousGlobalUrlParams, globalUrlParam]
-  );
-
   useEffect(() => {
     const linkInfo = getLinkInfo(pageName) ?? { skipUrlState: true };
     const paramsToUpdate = { ...globalUrlParam };
@@ -123,6 +117,12 @@ export const useSyncGlobalQueryString = () => {
       });
     }
 
+    // Url params that got deleted from GlobalUrlParams
+    const unregisteredKeys = difference(
+      Object.keys(previousGlobalUrlParams ?? {}),
+      Object.keys(globalUrlParam)
+    );
+
     // Delete unregistered Url params
     unregisteredKeys.forEach((key) => {
       paramsToUpdate[key] = null;
@@ -131,5 +131,5 @@ export const useSyncGlobalQueryString = () => {
     if (Object.keys(paramsToUpdate).length > 0) {
       replaceUrlParams(paramsToUpdate);
     }
-  }, [globalUrlParam, pageName, unregisteredKeys, replaceUrlParams]);
+  }, [previousGlobalUrlParams, globalUrlParam, pageName, replaceUrlParams]);
 };
