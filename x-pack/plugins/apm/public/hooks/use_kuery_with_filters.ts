@@ -26,12 +26,14 @@ export function useKueryWithFilters() {
   return useMemo(
     () =>
       [
-        ...[kuery],
+        kuery,
         ...paramQuery(DEVICE_MODEL_NAME, device),
         ...paramQuery(HOST_OS_VERSION, osVersion),
         ...paramQuery(SERVICE_VERSION, appVersion),
         ...paramQuery(NETWORK_CONNECTION_TYPE, netConnectionType),
-      ].join(' and '),
+      ]
+        .filter(Boolean)
+        .join(' and '),
     [device, osVersion, appVersion, netConnectionType, kuery]
   );
 }

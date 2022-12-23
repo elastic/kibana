@@ -134,7 +134,12 @@ export function MobileServiceOverview() {
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={5}>
                 <EuiPanel hasBorder={true}>
-                  <LatencyMap filters={filters} />
+                  <LatencyMap
+                    start={start}
+                    end={end}
+                    kuery={kueryWithFilters}
+                    filters={filters}
+                  />
                 </EuiPanel>
               </EuiFlexItem>
 

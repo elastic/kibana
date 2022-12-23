@@ -25,21 +25,24 @@ import { EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLayerList } from './get_layer_list';
-import { useApmParams } from '../../../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../../../hooks/use_time_range';
-
-function EmbeddedMapComponent({ filters }: { filters: Filter[] }) {
-  const {
-    query: { rangeFrom, rangeTo, kuery },
-  } = useApmParams('/mobile-services/{serviceName}/overview');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+function EmbeddedMapComponent({
+  start,
+  end,
+  kuery = '',
+  filters,
+}: {
+  start: string;
+  end: string;
+  kuery?: string;
+  filters: Filter[];
+}) {
   const [error, setError] = useState<boolean>();
 
   const [embeddable, setEmbeddable] = useState<
     MapEmbeddable | ErrorEmbeddable | undefined
   >();
 
+  console.log('kuery map', kuery);
   const embeddableRoot: React.RefObject<HTMLDivElement> =
     useRef<HTMLDivElement>(null);
 
