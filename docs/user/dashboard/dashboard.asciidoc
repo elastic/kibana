@@ -238,6 +238,36 @@ To save the panel to the dashboard:
 .. Enter the *Panel title*, then click *Save*.
 
 [float]
+[[add-image]]
+== Add image panels
+
+To personalize your dashboards, add your own logos and graphics. Use *Image* panel to upload images from your computer, select previously uploaded images or add images from an external link.
+
+. On the dashboard, click image:images/dashboard_createNewImageButton_8.7.0.png[Create New Image button in dashboard toolbar].
+. Use image editor to add an image.
+
+[role="screenshot"]
+image::images/dashboard_addImageEditor_8.7.0.png[Add image editor]
+
+For example, configured logo could look like this: 
+
+[role="screenshot"]
+image::images/dashboard_addImageEditorExample_8.7.0.png[Add image editor example]
+
+. Click *Save* to add the image panel to the dashboard.
+
+[NOTE]
+============================================================================
+The uploaded image files can be managed in *Stack Management > Kibana > Files*. 
+============================================================================
+
+[WARNING]
+============================================================================
+When exporting a dashboard, the uploaded image files are not exported. 
+When importing a dashboard with an image panel and the image file is not available, the image panel shows a "not found" image. Such panels have to be fixed manually.
+============================================================================
+
+[float]
 [[arrange-panels]]
 [[moving-containers]]
 [[resizing-containers]]
