@@ -22,7 +22,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
   return async function runTask(jobId, job, cancellationToken, stream) {
     const logger = parentLogger.get(`execute-job:${jobId}`);
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
-    const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId, logger);
+    const fakeRequest = reporting.getFakeRequest(headers, job.spaceId, logger);
     const uiSettings = await reporting.getUiSettingsClient(fakeRequest, logger);
     const dataPluginStart = await reporting.getDataService();
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
