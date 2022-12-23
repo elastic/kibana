@@ -24,8 +24,10 @@ import {
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import {
   ML_ENTITY_FIELDS_CONFIG,
-  PartitionFieldConfig,
-  PartitionFieldsConfig,
+  type PartitionFieldConfig,
+  type PartitionFieldsConfig,
+  type MlStorageKey,
+  type TMlStorageMapped,
 } from '../../../../../common/types/storage';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { FieldDefinition } from '../../../services/results_service/result_service_rx';
@@ -113,7 +115,10 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);
 
-  const [storageFieldsConfig, setStorageFieldsConfig] = useStorage(ML_ENTITY_FIELDS_CONFIG);
+  const [storageFieldsConfig, setStorageFieldsConfig] = useStorage<
+    MlStorageKey,
+    TMlStorageMapped<typeof ML_ENTITY_FIELDS_CONFIG>
+  >(ML_ENTITY_FIELDS_CONFIG);
 
   // Merge the default config with the one from the local storage
   const resultFieldsConfig = useMemo(() => {

@@ -23,20 +23,21 @@ interface StorageDefinition {
   [key: string]: unknown;
 }
 
-interface StorageAPI<TStorageDefinition extends StorageDefinition> {
-  value: Partial<TStorageDefinition> | null;
-  setValue: (
-    key: Extract<keyof TStorageDefinition, string>,
-    value: TStorageDefinition[keyof TStorageDefinition]
-  ) => void;
-  removeValue: (key: Extract<keyof TStorageDefinition, string>) => void;
+type TStorage = Partial<StorageDefinition> | null;
+type TStorageKey = keyof Exclude<TStorage, null>;
+type TStorageMapped<T extends TStorageKey> = T extends string ? unknown : null;
+
+interface StorageAPI {
+  value: TStorage;
+  setValue: <K extends TStorageKey, T extends TStorageMapped<K>>(key: K, value: T) => void;
+  removeValue: <K extends TStorageKey>(key: K) => void;
 }
 
-export function isStorageKey<T>(key: unknown, storageKeys: T[]): key is T {
+export function isStorageKey<T>(key: unknown, storageKeys: readonly T[]): key is T {
   return storageKeys.includes(key as T);
 }
 
-export const MlStorageContext = React.createContext<StorageAPI<StorageDefinition>>({
+export const MlStorageContext = React.createContext<StorageAPI>({
   value: null,
   setValue() {
     throw new Error('MlStorageContext set method is not implemented');
@@ -46,49 +47,41 @@ export const MlStorageContext = React.createContext<StorageAPI<StorageDefinition
   },
 });
 
-interface MlStorageContextProviderProps<
-  TStorageDefinition extends StorageDefinition = {},
-  TStorage extends Partial<TStorageDefinition> | null = null
-> {
+interface MlStorageContextProviderProps<K extends TStorageKey> {
   storage: Storage;
-  storageKeys: Array<keyof Exclude<TStorage, null>>;
+  storageKeys: readonly K[];
 }
 
-export function MlStorageContextProvider<TStorageDefinition extends StorageDefinition = {}>({
+export function MlStorageContextProvider<K extends TStorageKey, T extends TStorage>({
   children,
   storage,
   storageKeys,
-}: PropsWithChildren<MlStorageContextProviderProps<TStorageDefinition>>) {
+}: PropsWithChildren<MlStorageContextProviderProps<K>>) {
   const initialValue = useMemo(() => {
     return storageKeys.reduce((acc, curr) => {
-      acc[curr as keyof TStorageDefinition] = storage.get(curr as string);
+      acc[curr as K] = storage.get(curr as string);
       return acc;
-    }, {} as TStorageDefinition);
+    }, {} as Exclude<T, null>);
   }, [storage, storageKeys]);
 
-  const [state, setState] = useState<Partial<TStorageDefinition>>(initialValue);
+  const [state, setState] = useState<T>(initialValue);
 
-  const setStorageValue: StorageAPI<TStorageDefinition>['setValue'] = useCallback(
-    (key: keyof TStorageDefinition, value: TStorageDefinition[keyof TStorageDefinition]) => {
+  const setStorageValue = useCallback(
+    <TM extends TStorageMapped<K>>(key: K, value: TM) => {
       storage.set(key as string, value);
 
-      setState(
-        (prevState) =>
-          ({
-            ...prevState,
-            [key]: value,
-          } as Partial<TStorageDefinition>)
-      );
+      setState((prevState) => ({
+        ...prevState,
+        [key]: value,
+      }));
     },
     [storage]
   );
 
-  const removeStorageValue: StorageAPI<TStorageDefinition>['removeValue'] = useCallback(
-    (key: keyof TStorageDefinition) => {
+  const removeStorageValue = useCallback(
+    (key: K) => {
       storage.remove(key as string);
-      setState((prevState) =>
-        prevState === null ? prevState : (omit(prevState, key) as TStorageDefinition)
-      );
+      setState((prevState) => omit(prevState, key) as T);
     },
     [storage]
   );
@@ -102,14 +95,12 @@ export function MlStorageContextProvider<TStorageDefinition extends StorageDefin
           setState((prev) => {
             return {
               ...prev,
-              [event.key as keyof TStorageDefinition]:
+              [event.key as K]:
                 typeof event.newValue === 'string' ? JSON.parse(event.newValue) : event.newValue,
             };
           });
         } else {
-          setState((prev) => {
-            return omit(prev, event.key as keyof TStorageDefinition) as TStorageDefinition;
-          });
+          setState((prev) => omit(prev, event.key as K) as T);
         }
       };
 
@@ -126,12 +117,12 @@ export function MlStorageContextProvider<TStorageDefinition extends StorageDefin
     [storageKeys]
   );
 
-  const value: StorageAPI<TStorageDefinition> = useMemo(() => {
+  const value = useMemo(() => {
     return {
-      value: state as StorageAPI<TStorageDefinition>['value'],
+      value: state,
       setValue: setStorageValue,
       removeValue: removeStorageValue,
-    };
+    } as StorageAPI;
   }, [state, setStorageValue, removeStorageValue]);
 
   return <MlStorageContext.Provider value={value}>{children}</MlStorageContext.Provider>;
@@ -142,23 +133,25 @@ export function MlStorageContextProvider<TStorageDefinition extends StorageDefin
  * @param key
  * @param initValue
  */
-export function useStorage<TStorageDefinition extends StorageDefinition>(
-  key: keyof TStorageDefinition,
-  initValue?: TStorageDefinition[keyof TStorageDefinition] | null
+export function useStorage<K extends TStorageKey, T extends TStorageMapped<K>>(
+  key: K,
+  initValue?: T
 ): [
-  TStorageDefinition[keyof TStorageDefinition] | null | undefined,
-  (value: TStorageDefinition[keyof TStorageDefinition]) => void
+  typeof initValue extends undefined ? T | undefined : Exclude<T, undefined>,
+  (value: T) => void
 ] {
   const { value, setValue, removeValue } = useContext(MlStorageContext);
 
   const resultValue = useMemo(() => {
-    return value?.[key] ?? initValue;
+    return (value?.[key] ?? initValue) as typeof initValue extends undefined
+      ? T | undefined
+      : Exclude<T, undefined>;
   }, [value, key, initValue]);
 
   const setVal = useCallback(
-    (v: TStorageDefinition[keyof TStorageDefinition]) => {
+    (v: T) => {
       if (isDefined(v)) {
-        setValue(key, v as never);
+        setValue(key, v);
       } else {
         removeValue(key);
       }

@@ -86,8 +86,4 @@ export const ML_STORAGE_KEYS = [
   ML_FROZEN_TIER_PREFERENCE,
   ML_ANOMALY_EXPLORER_PANELS,
   ML_NOTIFICATIONS_LAST_CHECKED_AT,
-];
-
-export function isMlStorageKey(key: unknown): key is MlStorageKey {
-  return typeof key === 'string' && ML_STORAGE_KEYS.includes(key);
-}
+] as const;
