@@ -1320,9 +1320,9 @@
           " | undefined; name: string; }) => { data: ",
           {
             "pluginId": "@kbn/es-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnEsTypesPluginApi",
-            "section": "def-server.ESSearchResponse",
+            "section": "def-common.ESSearchResponse",
             "text": "ESSearchResponse"
           },
           "<DocumentSource, TParams, { restTotalHitsAsInt: false; }>; loading: boolean | undefined; }"
@@ -3645,9 +3645,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
@@ -3849,9 +3849,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ">): void; }"
@@ -6381,17 +6381,17 @@
           " | undefined; }; client: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
+            "section": "def-common.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
           "; logger: ",
           {
             "pluginId": "@kbn/logging",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.Logger",
+            "section": "def-common.Logger",
             "text": "Logger"
           },
           "; }) => Promise<void>"
@@ -7665,9 +7665,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/logging",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-server.Logger",
+                    "section": "def-common.Logger",
                     "text": "Logger"
                   }
                 ],
@@ -7694,17 +7694,17 @@
           "; client: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
+            "section": "def-common.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
           "; logger: ",
           {
             "pluginId": "@kbn/logging",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.Logger",
+            "section": "def-common.Logger",
             "text": "Logger"
           },
           "; }) => Promise<",
@@ -8950,9 +8950,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/logging",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-server.Logger",
+                    "section": "def-common.Logger",
                     "text": "Logger"
                   }
                 ],
@@ -8989,9 +8989,9 @@
           "; esResponse: any; kibanaRequest: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
+            "section": "def-common.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>; operationName: string; startTime: number; }) => ",
@@ -9091,9 +9091,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -9430,17 +9430,17 @@
               "{ start: () => Promise<",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ">; setup: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreSetup",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>; }"
@@ -9499,9 +9499,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -9520,9 +9520,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
+                "section": "def-common.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
               " & { licensing: Promise<",
@@ -9544,9 +9544,9 @@
               ">; core: Promise<",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.CoreRequestHandlerContext",
+                "section": "def-common.CoreRequestHandlerContext",
                 "text": "CoreRequestHandlerContext"
               },
               ">; }"
@@ -9565,9 +9565,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
+                "section": "def-common.Logger",
                 "text": "Logger"
               }
             ],
@@ -9592,17 +9592,17 @@
           "{ [x: string]: ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<string, ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.RouteParamsRT",
+            "section": "def-public.RouteParamsRT",
             "text": "RouteParamsRT"
           },
           " | undefined, any, any, Record<string, any>>; }"
@@ -9657,9 +9657,9 @@
           "{ \"GET /api/observability/slos\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /api/observability/slos\", ",
@@ -9705,9 +9705,9 @@
           "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"DELETE /api/observability/slos/{id}\", ",
@@ -9735,9 +9735,9 @@
           "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /api/observability/slos/{id}\", ",
@@ -9765,9 +9765,9 @@
           "> | undefined; \"PUT /api/observability/slos/{id}\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"PUT /api/observability/slos/{id}\", ",
@@ -9955,9 +9955,9 @@
           "> | undefined; \"POST /api/observability/slos\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /api/observability/slos\", ",
@@ -10145,9 +10145,9 @@
           "> | undefined; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", ",
@@ -10179,9 +10179,9 @@
           ">; }[TEndpoint] extends ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<any, any, any, infer TReturnType, ",
@@ -10219,9 +10219,9 @@
           "{ \"GET /api/observability/slos\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /api/observability/slos\", ",
@@ -10267,9 +10267,9 @@
           "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"DELETE /api/observability/slos/{id}\", ",
@@ -10297,9 +10297,9 @@
           "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /api/observability/slos/{id}\", ",
@@ -10327,9 +10327,9 @@
           "> | undefined; \"PUT /api/observability/slos/{id}\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"PUT /api/observability/slos/{id}\", ",
@@ -10517,9 +10517,9 @@
           "> | undefined; \"POST /api/observability/slos\"?: ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"POST /api/observability/slos\", ",
@@ -10707,9 +10707,9 @@
           "> | undefined; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
+            "section": "def-public.ServerRoute",
             "text": "ServerRoute"
           },
           "<\"GET /api/observability/rules/alerts/dynamic_index_pattern\", ",
@@ -10858,9 +10858,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<boolean>"
@@ -10962,9 +10962,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<boolean>"
@@ -11063,9 +11063,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<number>"
@@ -11153,9 +11153,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<boolean>"
@@ -11254,9 +11254,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<string>"
@@ -11350,9 +11350,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<",
@@ -11566,9 +11566,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<boolean>"
@@ -11709,9 +11709,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<number>"
@@ -11785,9 +11785,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<boolean>"
@@ -11917,9 +11917,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<boolean>"
@@ -12049,9 +12049,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<boolean>"
@@ -12181,9 +12181,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<boolean>"
@@ -12257,9 +12257,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<boolean>"
@@ -12389,9 +12389,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<boolean>"
@@ -12546,25 +12546,25 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.ObjectType",
+                    "section": "def-common.ObjectType",
                     "text": "ObjectType"
                   },
                   "<{ arm: ",
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<number>; x86_64: ",
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<number>; }>"
@@ -12635,9 +12635,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<number>"
@@ -12711,9 +12711,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<boolean>"
@@ -12795,9 +12795,9 @@
         "{ getAlertDetailsConfig(): Readonly<{} & { metrics: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
         {
           "pluginId": "@kbn/core-http-request-handler-context-server",
-          "scope": "server",
+          "scope": "common",
           "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-          "section": "def-server.RequestHandlerContext",
+          "section": "def-common.RequestHandlerContext",
           "text": "RequestHandlerContext"
         },
         " & { licensing: Promise<",
@@ -12811,9 +12811,9 @@
         ">; }, request: ",
         {
           "pluginId": "@kbn/core-http-server",
-          "scope": "server",
+          "scope": "common",
           "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-server.KibanaRequest",
+          "section": "def-common.KibanaRequest",
           "text": "KibanaRequest"
         },
         "<unknown, unknown, unknown, any>) => Promise<{ readonly index: string; create: (createParams: { annotation: { type: string; }; '@timestamp': string; message: string; } & { tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; }) => Promise<{ _id: string; _index: string; _source: ",
