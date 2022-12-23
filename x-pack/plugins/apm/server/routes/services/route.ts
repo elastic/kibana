@@ -1233,8 +1233,14 @@ const serviceAlertsRoute = createApmServerRoute({
     const { serviceName } = params.path;
 
     const apmAlertsClient = await getApmAlertsClient(resources);
+    const servicesAlerts = await getServicesAlerts({
+      serviceName,
+      apmAlertsClient,
+    });
 
-    return (await getServicesAlerts({ serviceName, apmAlertsClient }))[0];
+    return servicesAlerts.length > 0
+      ? servicesAlerts[0]
+      : { serviceName, alertsCount: 0 };
   },
 });
 
