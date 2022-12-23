@@ -40,7 +40,7 @@ export class DashboardHelloWorldDrilldown implements Drilldown<Config, ActionCon
     config,
     onConfig,
     context,
-  }: CollectConfigProps<Config, any>) => (
+  }: CollectConfigProps<Config>) => (
     <EuiFormRow label="Enter your name" fullWidth>
       <EuiFieldText
         fullWidth
