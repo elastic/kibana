@@ -6,4 +6,3 @@
  */
 
 export const TOGGLE_NAVIGATION_BTN = '[data-test-subj="toggleNavButton"]';
-export const OSQUERY_NAVIGATION_LINK = '[data-test-subj="collapsibleNavAppLink"] [title="Osquery"]';

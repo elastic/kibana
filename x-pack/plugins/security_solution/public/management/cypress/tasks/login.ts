@@ -10,7 +10,7 @@ import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 // eslint-disable-next-line import/no-nodejs-modules
 import Url from 'url';
-import type { ROLES } from '../test';
+import type { ROLE } from '../../../../../../test/security_solution_endpoint_api_int/services/roles_users';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -55,7 +55,7 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param role string role/user to log in with
  * @param route string route to visit
  */
-export const getUrlWithRoute = (role: ROLES, route: string) => {
+export const getUrlWithRoute = (role: ROLE, route: string) => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const theUrl = `${Url.format({
@@ -100,41 +100,6 @@ export const constructUrlWithUser = (user: User, route: string) => {
   return builtUrl.href;
 };
 
-export const getCurlScriptEnvVars = () => ({
-  ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
-  ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
-  ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
-  KIBANA_URL: Cypress.config().baseUrl,
-});
-
-export const postRoleAndUser = (role: ROLES) => {
-  const env = getCurlScriptEnvVars();
-  const detectionsRoleScriptPath = `./scripts/roles_users/${role}/post_role.sh`;
-  const detectionsRoleJsonPath = `./scripts/roles_users/${role}/role.json`;
-  const detectionsUserScriptPath = `./scripts/roles_users/${role}/post_user.sh`;
-  const detectionsUserJsonPath = `./scripts/roles_users/${role}/user.json`;
-
-  // post the role
-  cy.exec(`bash ${detectionsRoleScriptPath} ${detectionsRoleJsonPath}`, {
-    env,
-  });
-
-  // post the user associated with the role to elasticsearch
-  cy.exec(`bash ${detectionsUserScriptPath} ${detectionsUserJsonPath}`, {
-    env,
-  });
-};
-
-export const deleteRoleAndUser = (role: ROLES) => {
-  const env = getCurlScriptEnvVars();
-  const detectionsUserDeleteScriptPath = `./scripts/roles_users/${role}/delete_user.sh`;
-
-  // delete the role
-  cy.exec(`bash ${detectionsUserDeleteScriptPath}`, {
-    env,
-  });
-};
-
 export const loginWithUser = (user: User) => {
   const url = Cypress.config().baseUrl;
 
@@ -154,8 +119,8 @@ export const loginWithUser = (user: User) => {
   });
 };
 
-export const loginWithRole = async (role: ROLES) => {
-  postRoleAndUser(role);
+export const loginWithRole = async (role: ROLE) => {
+  // postRoleAndUser(role);
   const theUrl = Url.format({
     auth: `${role}:changeme`,
     username: role,
@@ -189,7 +154,7 @@ export const loginWithRole = async (role: ROLES) => {
  * To speed the execution of tests, prefer this non-interactive authentication,
  * which is faster than authentication via Kibana's interactive login page.
  */
-export const login = (role?: ROLES) => {
+export const login = (role?: ROLE) => {
   if (role != null) {
     loginWithRole(role);
   } else if (credentialsProvidedByEnvironment()) {

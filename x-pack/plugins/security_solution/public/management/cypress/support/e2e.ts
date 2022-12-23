@@ -27,7 +27,6 @@ export {};
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'cypress-react-selector';
-// import './coverage';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -42,6 +41,4 @@ Cypress.Commands.add('getBySel', (selector, ...args) =>
   cy.get(`[data-test-subj="${selector}"]`, ...args)
 );
 
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
 Cypress.on('uncaught:exception', () => false);

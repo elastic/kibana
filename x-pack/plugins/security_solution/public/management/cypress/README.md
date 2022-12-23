@@ -37,7 +37,7 @@ node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner
 cd x-pack/plugins/security_solution
-yarn cypress:run-as-ci
+yarn cypress:dw:run-as-ci
 ```
 #### FTR + Interactive
 
@@ -52,7 +52,7 @@ node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner
 cd x-pack/plugins/security_solution
-yarn cypress:open-as-ci
+yarn cypress:dw:open-as-ci
 ```
 
 Note that you can select the browser you want to use on the top right side of the interactive runner.
@@ -88,35 +88,12 @@ Each file inside the tasks folder represents a screen of our application.
 The data the tests need:
 
 - Is generated on the fly using our application APIs (preferred way)
-- Is ingested on the ELS instance using the `es_archive` utility
-
-### How to generate a new archive
-
-**Note:** As mentioned above, archives are only meant to contain external data, e.g. beats data. Due to the tendency for archived domain objects (rules, signals) to quickly become out of date, it is strongly suggested that you generate this data within the test, through interaction with either the UI or the API.
-
-We use es_archiver to manage the data that our Cypress tests need.
-
-1. Set up a clean instance of kibana and elasticsearch (if this is not possible, try to clean/minimize the data that you are going to archive).
-2. With the kibana and elasticsearch instance up and running, create the data that you need for your test.
-3. When you are sure that you have all the data you need run the following command from: `x-pack/plugins/osquery`
-
-```sh
-node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/osquery_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
-```
-
-Example:
-
-```sh
-node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/osquery_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
-```
-
-Note that the command will create the folder if it does not exist.
 
 ## Development Best Practices
 
 ### Clean up the state 
 
-Remember to clean up the state of the test after its execution, typically with the `cleanKibana` function. Be mindful of failure scenarios, as well: if your test fails, will it leave the environment in a recoverable state?
+Remember to clean up the state of the test after its execution. Be mindful of failure scenarios, as well: if your test fails, will it leave the environment in a recoverable state?
 
 ### Minimize the use of es_archive
 

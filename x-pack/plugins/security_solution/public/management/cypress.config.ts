@@ -23,7 +23,6 @@ export default defineConfig({
     '../../../target/kibana-security-solution/public/management/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
-  videosFolder: '../../../target/kibana-security-solution/public/management/cypress/videos',
   viewportHeight: 900,
   viewportWidth: 1440,
   experimentalStudio: true,
