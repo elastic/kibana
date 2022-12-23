@@ -17,6 +17,9 @@ export interface LogStreamQueryContextWithDataViews {
   dataViews: DataViewBase[];
 }
 
+export interface LogStreamQueryContextWithSavedQueryId {
+  savedQueryId: string;
+}
 export interface LogStreamQueryContextWithQuery {
   query: AnyQuery;
 }

@@ -31,11 +31,16 @@ export const StreamPage = () => {
   const {
     services: {
       data: {
-        query: { queryString: queryStringService, filterManager: filterManagerService },
+        query: {
+          queryString: queryStringService,
+          filterManager: filterManagerService,
+          savedQueries: savedQueriesService,
+        },
       },
       notifications: { toasts: toastsService },
     },
   } = useKibanaContextForPlugin();
+
   const kibanaQuerySettings = useKibanaQuerySettings();
   const urlStateStorage = useKbnUrlStateStorageFromRouterContext();
 
@@ -48,6 +53,7 @@ export const StreamPage = () => {
         toastsService={toastsService}
         filterManagerService={filterManagerService}
         urlStateStorage={urlStateStorage}
+        savedQueriesService={savedQueriesService}
       >
         <ConnectedStreamPageContentMemo />
       </LogStreamPageStateProvider>

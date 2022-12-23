@@ -7,7 +7,7 @@
 
 import { EsQueryConfig } from '@kbn/es-query';
 import { actions, ActorRefFrom, createMachine, SpecialTargets } from 'xstate';
-import { FilterManager, QueryStringContract } from '@kbn/data-plugin/public';
+import { FilterManager, QueryStart, QueryStringContract } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { OmitDeprecatedState, sendIfDefined } from '../../xstate_helpers';
@@ -28,6 +28,7 @@ import {
   updateQueryInUrl,
   updateFiltersInUrl,
   subscribeToUrlStateStorageChanges,
+  safeDefaultParsedQuery,
 } from './url_state_storage_service';
 import {
   subscribeToQuerySearchBarChanges,
@@ -35,6 +36,7 @@ import {
   updateQueryInSearchBar,
   updateFiltersInSearchBar,
 } from './search_bar_state_service';
+import { resolveSavedQueryId } from './saved_query_service';
 
 export const createPureLogStreamQueryStateMachine = (
   initialContext: LogStreamQueryContextWithDataViews
@@ -50,16 +52,35 @@ export const createPureLogStreamQueryStateMachine = (
       states: {
         uninitialized: {
           always: {
-            target: 'hasQuery',
-            actions: [
-              'initializeFromUrl',
-              'updateQueryInUrl',
-              'updateQueryInSearchBar',
-              'updateFiltersInSearchBar',
-            ],
+            target: 'initializingFromUrl',
           },
         },
+        initializingFromUrl: {
+          entry: ['initializeFromUrl'],
+          on: {
+            URL_INITIALIZED: {
+              target: 'hasQuery',
+            },
+            RESOLVING_SAVED_QUERY_ID: {
+              target: 'resolvingSavedQueryId',
+            },
+          },
+        },
+        resolvingSavedQueryId: {
+          invoke: {
+            src: 'resolveSavedQueryId',
+            onDone: {
+              target: 'hasQuery',
+              actions: ['storeResolvedSavedQuery'],
+            },
+            onError: {
+              target: 'failedResolvingSavedQueryId',
+            },
+          },
+        },
+        failedResolvingSavedQueryId: {}, // TODO: Add error handling, probably want to copy the behaviour of use_saved_query from the stateful search bar
         hasQuery: {
+          entry: ['updateQueryInUrl', 'updateQueryInSearchBar', 'updateFiltersInSearchBar'],
           invoke: [
             {
               src: 'subscribeToUrlStateStorageChanges',
@@ -125,15 +146,24 @@ export const createPureLogStreamQueryStateMachine = (
       actions: {
         notifyInvalidQueryChanged: actions.pure(() => undefined),
         notifyValidQueryChanged: actions.pure(() => undefined),
-        storeQuery: actions.assign((_context, event) =>
-          'query' in event ? ({ query: event.query } as LogStreamQueryContextWithQuery) : {}
-        ),
+        storeQuery: actions.assign((_context, event) => {
+          return 'query' in event ? ({ query: event.query } as LogStreamQueryContextWithQuery) : {};
+        }),
         storeFilters: actions.assign((_context, event) =>
           'filters' in event ? ({ filters: event.filters } as LogStreamQueryContextWithFilters) : {}
         ),
         storeDataViews: actions.assign((_context, event) =>
           'dataViews' in event
             ? ({ dataViews: event.dataViews } as LogStreamQueryContextWithDataViews)
+            : {}
+        ),
+        storeResolvedSavedQuery: actions.assign((_context, event) =>
+          'data' in event
+            ? {
+                query: event.data.query,
+                filters: event.data.filters,
+                parsedQuery: safeDefaultParsedQuery,
+              }
             : {}
         ),
         storeValidationError: actions.assign((_context, event) =>
@@ -172,6 +202,7 @@ export interface LogStreamQueryStateMachineDependencies {
   filterManagerService: FilterManager;
   urlStateStorage: IKbnUrlStateStorage;
   toastsService: IToasts;
+  savedQueriesService: QueryStart['savedQueries'];
 }
 
 export const createLogStreamQueryStateMachine = (
@@ -182,6 +213,7 @@ export const createLogStreamQueryStateMachine = (
     toastsService,
     filterManagerService,
     urlStateStorage,
+    savedQueriesService,
   }: LogStreamQueryStateMachineDependencies
 ) =>
   createPureLogStreamQueryStateMachine(initialContext).withConfig({
@@ -207,6 +239,7 @@ export const createLogStreamQueryStateMachine = (
         filterManagerService,
       }),
       subscribeToUrlStateStorageChanges: subscribeToUrlStateStorageChanges({ urlStateStorage }),
+      resolveSavedQueryId: resolveSavedQueryId({ savedQueriesService }),
     },
   });
 
