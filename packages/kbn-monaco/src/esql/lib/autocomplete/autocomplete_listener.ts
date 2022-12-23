@@ -122,6 +122,7 @@ export class AutocompleteListener implements ESQLParserListener {
 
   enterProcessingCommand(ctx: ProcessingCommandContext) {
     this.tables.push([]);
+    this.suggestions = [];
     this.parentContext = undefined;
   }
 
@@ -137,6 +138,13 @@ export class AutocompleteListener implements ESQLParserListener {
     this.parentContext = ESQLParser.STATS;
   }
 
+  exitStatsCommand(ctx: StatsCommandContext) {
+    const qn = ctx.qualifiedNames();
+    if (qn && qn.text) {
+      this.suggestions = this.getEndCommandSuggestions([byOperatorDefinition]);
+    }
+  }
+
   exitQualifiedName(ctx: QualifiedNameContext) {
     if (
       ctx
@@ -150,8 +158,6 @@ export class AutocompleteListener implements ESQLParserListener {
         )
     ) {
       this.suggestions = this.fields;
-    } else {
-      this.suggestions = this.getEndCommandSuggestions([byOperatorDefinition]);
     }
   }
 
@@ -267,6 +273,8 @@ export class AutocompleteListener implements ESQLParserListener {
 
     if (!this.isTerminalNodeExists(ctx.INTEGER_LITERAL())) {
       this.suggestions = buildConstantsDefinitions([DEFAULT_LIMIT_SIZE.toString()], '');
+    } else {
+      this.suggestions = this.getEndCommandSuggestions();
     }
   }
 }

@@ -47,8 +47,16 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | where "field" >= ', ['FieldIdentifier']);
     testSuggestions('from a | where "field" >= "field1" ', ['or', 'and', '|']);
     testSuggestions('from a | where "field" >= "field1" and ', ['FieldIdentifier']);
-    /** @todo **/
-    // testSuggestions('from a | where "field" >= "field1" and  "field2 ', ['==', '!=', '<', '>', '<=', '>=']);
+    testSuggestions('from a | where "field" >= "field1" and  "field2" ', [
+      '==',
+      '!=',
+      '<',
+      '>',
+      '<=',
+      '>=',
+    ]);
+    testSuggestions('from a | stats a=avg("field") | where a ', ['==', '!=', '<', '>', '<=', '>=']);
+    testSuggestions('from a | stats a=avg("b") | where "c" ', ['==', '!=', '<', '>', '<=', '>=']);
     testSuggestions('from a | where "field" >= "field1" and  "field2 == ', ['FieldIdentifier']);
   });
 
