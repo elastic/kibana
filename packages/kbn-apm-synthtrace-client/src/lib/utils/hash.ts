@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import fnv from 'fnv-plus';
+import { fast1a32 } from 'fnv-plus';
 import { Fields } from '../entity';
 
 export function hashKeysOf<T extends Fields>(source: T, keys: Array<keyof T>) {
@@ -18,5 +18,5 @@ export function hashKeysOf<T extends Fields>(source: T, keys: Array<keyof T>) {
 }
 
 export function appendHash(hash: string, value: string) {
-  return fnv.fast1a32(hash + ',' + value).toString();
+  return fast1a32(hash + ',' + value).toString();
 }

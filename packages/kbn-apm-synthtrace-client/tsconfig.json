@@ -4,7 +4,11 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
-    "types": ["jest"]
+    "types": ["jest"],
+    "lib": [
+      "ES2019"
+    ],
+    "esModuleInterop": true
   },
   "include": ["**/*.ts"]
 }

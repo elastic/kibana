@@ -84,16 +84,16 @@ export function getBreakdownMetrics(events: ApmFields[]): ApmFields[] {
 
     let selfTime = 0;
     let lastMeasurement = timeStart;
-    const changeTimestamps = [
-      ...new Set([
+    const changeTimestamps = Array.from(
+      new Set([
         timeStart,
         ...activities.flatMap((activity) => [activity.from, activity.to]),
         timeStart +
           (event['processor.event'] === 'transaction'
             ? event['transaction.duration.us']!
             : event['span.duration.us']!),
-      ]),
-    ];
+      ])
+    );
 
     for (const timestamp of changeTimestamps) {
       const hasActiveChildren = activities.some(

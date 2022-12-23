@@ -48,7 +48,7 @@ export function httpExitSpan({
   // host: 'opbeans-go:3000',
   // hostname: 'opbeans-go',
   // port: '3000',
-  const destination = new URL(destinationUrl);
+  const destination = new globalThis.URL(destinationUrl);
 
   const spanType = 'external';
   const spanSubtype = 'http';

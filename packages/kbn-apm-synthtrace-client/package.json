@@ -3,8 +3,5 @@
   "version": "0.1.0",
   "description": "Elastic APM trace data generator",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "private": true,
-  "types": "./target_types/index.d.ts",
-  "main": "./target_node/index.js",
-  "browser": "./target_web/index.js"
+  "private": true
 }
