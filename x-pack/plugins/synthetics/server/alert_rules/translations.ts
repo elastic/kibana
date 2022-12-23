@@ -15,7 +15,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'monitorName',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitor',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.monitor',
       {
         defaultMessage: 'Name of the monitor.',
       }
@@ -24,7 +24,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'monitorId',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitorId',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.monitorId',
       {
         defaultMessage: 'ID of the monitor.',
       }
@@ -33,7 +33,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'monitorUrl',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitorUrl',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.monitorUrl',
       {
         defaultMessage: 'URL of the monitor.',
       }
@@ -42,7 +42,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'monitorType',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.monitorType',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.monitorType',
       {
         defaultMessage: 'Type (e.g. HTTP/TCP) of the monitor.',
       }
@@ -51,7 +51,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'status',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.status',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.status',
       {
         defaultMessage: 'Monitor status (e.g "down").',
       }
@@ -60,7 +60,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'lastErrorMessage',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastErrorMessage',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.lastErrorMessage',
       {
         defaultMessage: 'Monitor last error message.',
       }
@@ -69,7 +69,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'location',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.location',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.location',
       {
         defaultMessage: 'Location from which the check is performed.',
       }
@@ -78,7 +78,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'hostName',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.observerHostname',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.observerHostname',
       {
         defaultMessage: 'Hostname of the location from which the check is performed.',
       }
@@ -87,7 +87,7 @@ export const commonMonitorStateI18 = [
   {
     name: 'checkedAt',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.checkedAt',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.checkedAt',
       {
         defaultMessage: 'Timestamp of the monitor run.',
       }
@@ -99,7 +99,7 @@ export const commonStateTranslations = [
   {
     name: 'firstCheckedAt',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.firstCheckedAt',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.firstCheckedAt',
       {
         defaultMessage: 'Timestamp indicating when the alert was first checked.',
       }
@@ -108,7 +108,7 @@ export const commonStateTranslations = [
   {
     name: 'firstTriggeredAt',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.firstTriggeredAt',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.firstTriggeredAt',
       {
         defaultMessage: 'Timestamp indicating when the alert first triggered.',
       }
@@ -117,7 +117,7 @@ export const commonStateTranslations = [
   {
     name: 'isTriggered',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.isTriggered',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.isTriggered',
       {
         defaultMessage: `Flag indicating if the alert is currently triggering.`,
       }
@@ -126,7 +126,7 @@ export const commonStateTranslations = [
   {
     name: 'lastCheckedAt',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastCheckedAt',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.lastCheckedAt',
       {
         defaultMessage: `Timestamp indicating the alert most recent check time.`,
       }
@@ -135,7 +135,7 @@ export const commonStateTranslations = [
   {
     name: 'lastResolvedAt',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastResolvedAt',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.lastResolvedAt',
       {
         defaultMessage: `Timestamp indicating the most recent resolution time for this alert.`,
       }
@@ -144,7 +144,7 @@ export const commonStateTranslations = [
   {
     name: 'lastTriggeredAt',
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.state.lastTriggeredAt',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.lastTriggeredAt',
       {
         defaultMessage: `Timestamp indicating the alert most recent trigger time.`,
       }

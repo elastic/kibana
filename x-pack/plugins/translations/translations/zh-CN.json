@@ -33162,7 +33162,6 @@
     "xpack.synthetics.alerts.monitorStatus": "运行时间监测状态",
     "xpack.synthetics.alerts.monitorStatus.actionVariables.context.alertDetailUrl.description": "Elastic 内视图的链接，显示与此告警相关的进一步详细信息和上下文",
     "xpack.synthetics.alerts.monitorStatus.actionVariables.context.alertReasonMessage.description": "告警原因的简洁描述",
-    "xpack.synthetics.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description": "生成的摘要，显示告警已检测为“关闭”的部分或所有监测",
     "xpack.synthetics.alerts.monitorStatus.actionVariables.context.message.description": "生成的消息，汇总当前关闭的监测",
     "xpack.synthetics.alerts.monitorStatus.actionVariables.context.viewInAppUrl.description": "Elastic 中可用于进一步调查告警及其上下文的视图或功能的链接",
     "xpack.synthetics.alerts.monitorStatus.actionVariables.state.currentTriggerStarted": "表示告警触发时当前触发状况开始的时间戳",

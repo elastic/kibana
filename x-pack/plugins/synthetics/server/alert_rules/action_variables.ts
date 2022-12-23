@@ -35,7 +35,7 @@ export const ACTION_VARIABLES = {
   [MESSAGE]: {
     name: MESSAGE,
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.message.description',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.message.description',
       {
         defaultMessage: 'A generated message summarizing the status of monitors currently down',
       }
@@ -44,7 +44,7 @@ export const ACTION_VARIABLES = {
   [ALERT_REASON_MSG]: {
     name: ALERT_REASON_MSG,
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.alertReasonMessage.description',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.alertReasonMessage.description',
       {
         defaultMessage: 'A concise description of the reason for the alert',
       }
@@ -53,7 +53,7 @@ export const ACTION_VARIABLES = {
   [ALERT_DETAILS_URL]: {
     name: ALERT_DETAILS_URL,
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.alertDetailUrl.description',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.alertDetailUrl.description',
       {
         defaultMessage: 'Link to a view showing further details and context on this alert',
       }
@@ -62,7 +62,7 @@ export const ACTION_VARIABLES = {
   [VIEW_IN_APP_URL]: {
     name: VIEW_IN_APP_URL,
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.viewInAppUrl.description',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.viewInAppUrl.description',
       {
         defaultMessage: 'Open alert details and context in Synthetics app.',
       }
@@ -71,7 +71,7 @@ export const ACTION_VARIABLES = {
   [RECOVERY_REASON]: {
     name: RECOVERY_REASON,
     description: i18n.translate(
-      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.recoveryReason.description',
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.context.recoveryReason.description',
       {
         defaultMessage: 'A concise description of the reason for the recovery',
       }

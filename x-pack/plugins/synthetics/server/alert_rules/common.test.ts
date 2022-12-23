@@ -24,7 +24,6 @@ describe('updateState', () => {
     expect(spy).toHaveBeenCalledTimes(1);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "currentTriggerStarted": undefined,
         "firstCheckedAt": "foo date string",
         "firstTriggeredAt": undefined,
         "isTriggered": false,
@@ -45,7 +44,6 @@ describe('updateState', () => {
     expect(spy).toHaveBeenCalledTimes(2);
     expect(firstState).toMatchInlineSnapshot(`
       Object {
-        "currentTriggerStarted": undefined,
         "firstCheckedAt": "first date string",
         "firstTriggeredAt": undefined,
         "isTriggered": false,
@@ -57,7 +55,6 @@ describe('updateState', () => {
     `);
     expect(secondState).toMatchInlineSnapshot(`
       Object {
-        "currentTriggerStarted": "second date string",
         "firstCheckedAt": "first date string",
         "firstTriggeredAt": "second date string",
         "isTriggered": true,
@@ -80,7 +77,6 @@ describe('updateState', () => {
     expect(spy).toHaveBeenCalledTimes(3);
     expect(firstState).toMatchInlineSnapshot(`
       Object {
-        "currentTriggerStarted": "first date string",
         "firstCheckedAt": "first date string",
         "firstTriggeredAt": "first date string",
         "isTriggered": true,
@@ -92,7 +88,6 @@ describe('updateState', () => {
     `);
     expect(secondState).toMatchInlineSnapshot(`
       Object {
-        "currentTriggerStarted": "first date string",
         "firstCheckedAt": "first date string",
         "firstTriggeredAt": "first date string",
         "isTriggered": true,
@@ -104,7 +99,6 @@ describe('updateState', () => {
     `);
     expect(thirdState).toMatchInlineSnapshot(`
       Object {
-        "currentTriggerStarted": undefined,
         "firstCheckedAt": "first date string",
         "firstTriggeredAt": "first date string",
         "isTriggered": false,
@@ -131,7 +125,6 @@ describe('updateState', () => {
     expect(spy).toHaveBeenCalledTimes(5);
     expect(firstState).toMatchInlineSnapshot(`
       Object {
-        "currentTriggerStarted": undefined,
         "firstCheckedAt": "first date string",
         "firstTriggeredAt": undefined,
         "isTriggered": false,
@@ -143,7 +136,6 @@ describe('updateState', () => {
     `);
     expect(secondState).toMatchInlineSnapshot(`
       Object {
-        "currentTriggerStarted": "second date string",
         "firstCheckedAt": "first date string",
         "firstTriggeredAt": "second date string",
         "isTriggered": true,
@@ -155,7 +147,6 @@ describe('updateState', () => {
     `);
     expect(thirdState).toMatchInlineSnapshot(`
       Object {
-        "currentTriggerStarted": undefined,
         "firstCheckedAt": "first date string",
         "firstTriggeredAt": "second date string",
         "isTriggered": false,
@@ -167,7 +158,6 @@ describe('updateState', () => {
     `);
     expect(fourthState).toMatchInlineSnapshot(`
       Object {
-        "currentTriggerStarted": "fourth date string",
         "firstCheckedAt": "first date string",
         "firstTriggeredAt": "second date string",
         "isTriggered": true,
@@ -179,7 +169,6 @@ describe('updateState', () => {
     `);
     expect(fifthState).toMatchInlineSnapshot(`
       Object {
-        "currentTriggerStarted": undefined,
         "firstCheckedAt": "first date string",
         "firstTriggeredAt": "second date string",
         "isTriggered": false,

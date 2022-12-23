@@ -184,7 +184,7 @@ export const getReasonMessage = ({
 }) => {
   const checkedAt = moment(timestamp).format('LLL');
 
-  return i18n.translate('xpack.uptime.alerts.monitorStatus.reasonMessage', {
+  return i18n.translate('xpack.synthetics.alerts.monitorStatus.reasonMessage', {
     defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}.`,
     values: {
       name,
