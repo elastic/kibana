@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+require('../../../../src/setup_node_env');
+
 const { createReadStream, createWriteStream } = require('fs');
 const { mkdir } = require('fs/promises');
 const path = require('path');
