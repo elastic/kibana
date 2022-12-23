@@ -23,20 +23,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { useStorage } from '@kbn/ml-local-storage';
 import { setFullTimeRange } from '../services/full_time_range_selector_service';
 import { useMlDatePickerContext } from '../hooks/use_ml_date_picker_context';
-import {
-  DV_FROZEN_TIER_PREFERENCE,
-  FROZEN_TIER_PREFERENCE,
-  type DVKey,
-  type DVStorageMapped,
-  type FrozenTierPreference,
-} from '../../types/storage';
+import { FROZEN_TIER_PREFERENCE, type FrozenTierPreference } from '../storage';
 
-export const ML_FROZEN_TIER_PREFERENCE = 'ml.frozenDataTierPreference';
-
-interface Props {
+interface MlFullTimeRangeSelectorProps {
+  frozenDataPreference: FrozenTierPreference;
+  setFrozenDataPreference: (value: FrozenTierPreference | undefined) => void;
   timefilter: TimefilterContract;
   dataView: DataView;
   disabled: boolean;
@@ -46,7 +39,9 @@ interface Props {
 
 // Component for rendering a button which automatically sets the range of the time filter
 // to the time range of data in the index(es) mapped to the supplied Kibana data view or query.
-export const FullTimeRangeSelector: FC<Props> = ({
+export const MlFullTimeRangeSelector: FC<MlFullTimeRangeSelectorProps> = ({
+  frozenDataPreference,
+  setFrozenDataPreference,
   timefilter,
   dataView,
   query,
@@ -80,15 +75,6 @@ export const FullTimeRangeSelector: FC<Props> = ({
   );
 
   const [isPopoverOpen, setPopover] = useState(false);
-
-  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
-    DVKey,
-    DVStorageMapped<typeof DV_FROZEN_TIER_PREFERENCE>
-  >(
-    DV_FROZEN_TIER_PREFERENCE,
-    // By default we will exclude frozen data tier
-    FROZEN_TIER_PREFERENCE.EXCLUDE
-  );
 
   const setPreference = useCallback(
     (id: string) => {

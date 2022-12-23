@@ -7,3 +7,5 @@
 
 export { MlDatePickerContextProvider } from './src/hooks/use_ml_date_picker_context';
 export { MlDatePickerWrapper } from './src/components/ml_date_picker_wrapper';
+export { MlFullTimeRangeSelector } from './src/components/ml_full_time_range_selector';
+export { type FrozenTierPreference, FROZEN_TIER_PREFERENCE } from './src/storage';

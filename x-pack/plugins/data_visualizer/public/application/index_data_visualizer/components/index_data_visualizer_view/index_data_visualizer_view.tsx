@@ -26,16 +26,21 @@ import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
-import { MlDatePickerContextProvider, MlDatePickerWrapper } from '@kbn/ml-date-picker';
+import {
+  MlDatePickerContextProvider,
+  MlDatePickerWrapper,
+  FROZEN_TIER_PREFERENCE,
+} from '@kbn/ml-date-picker';
 
 import { useStorage } from '@kbn/ml-local-storage';
+import { MlFullTimeRangeSelector } from '@kbn/ml-date-picker';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
+  DV_FROZEN_TIER_PREFERENCE,
   DV_RANDOM_SAMPLER_PREFERENCE,
   type DVKey,
   type DVStorageMapped,
 } from '../../types/storage';
-import { FullTimeRangeSelector } from '../full_time_range_selector';
 import {
   DataVisualizerTable,
   ItemIdToExpandedRowMap,
@@ -135,6 +140,15 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     DVKey,
     DVStorageMapped<typeof DV_RANDOM_SAMPLER_PREFERENCE>
   >(DV_RANDOM_SAMPLER_PREFERENCE, RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
+
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    DVKey,
+    DVStorageMapped<typeof DV_FROZEN_TIER_PREFERENCE>
+  >(
+    DV_FROZEN_TIER_PREFERENCE,
+    // By default we will exclude frozen data tier
+    FROZEN_TIER_PREFERENCE.EXCLUDE
+  );
 
   const restorableDefaults = useMemo(
     () =>
@@ -493,7 +507,9 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               >
                 {hasValidTimeField ? (
                   <EuiFlexItem grow={false}>
-                    <FullTimeRangeSelector
+                    <MlFullTimeRangeSelector
+                      frozenDataPreference={frozenDataPreference}
+                      setFrozenDataPreference={setFrozenDataPreference}
                       dataView={currentDataView}
                       query={undefined}
                       disabled={false}

@@ -75,7 +75,7 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
   dataVisualizerRefresh$.next({ lastRefresh: Date.now(), timeRange });
 }
 
-export const DatePickerWrapper: FC<{
+export const MlDatePickerWrapper: FC<{
   isAutoRefreshOnly?: boolean;
   showRefresh?: boolean;
   compact?: boolean;
