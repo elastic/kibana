@@ -11,7 +11,7 @@ import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Trigger } from '../triggers';
-import type { Action, ActionDefinition, ActionExecutionContext, ActionInternal } from '../actions';
+import type { Action, ActionExecutionContext, ActionInternal } from '../actions';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',
@@ -22,7 +22,7 @@ export const txtMore = i18n.translate('uiActions.actionPanel.more', {
 });
 
 interface ActionWithContext<Context extends object = object> {
-  action: Action<Context> | ActionInternal<ActionDefinition<Context>>;
+  action: Action<Context> | ActionInternal<Context>;
   context: Context;
 
   /**
@@ -44,7 +44,7 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
 
 const onClick =
   (
-    action: Action | ActionInternal<ActionDefinition>,
+    action: Action | ActionInternal,
     context: ActionExecutionContext<object>,
     close: () => void
   ) =>
