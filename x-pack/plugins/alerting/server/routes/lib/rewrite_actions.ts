@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { CamelToSnake, RewriteRequestCase } from './rewrite_request_case';
-import { RuleAction } from '../../types';
+import { RuleAction, RuleActionOptionalUuid } from '../../types';
 
-type ReqRuleAction = Omit<RuleAction, 'actionTypeId' | 'frequency'> & {
+type ReqRuleAction = Omit<RuleActionOptionalUuid, 'actionTypeId' | 'frequency'> & {
   frequency?: {
     [K in keyof NonNullable<RuleAction['frequency']> as CamelToSnake<K>]: NonNullable<
       RuleAction['frequency']

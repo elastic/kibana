@@ -44,6 +44,7 @@ describe('getRuleRoute', () => {
         params: {
           foo: true,
         },
+        uuid: '123-456',
       },
     ],
     consumer: 'bar',
@@ -85,6 +86,7 @@ describe('getRuleRoute', () => {
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
         connector_type_id: mockedAlert.actions[0].actionTypeId,
+        uuid: mockedAlert.actions[0].uuid,
       },
     ],
   };

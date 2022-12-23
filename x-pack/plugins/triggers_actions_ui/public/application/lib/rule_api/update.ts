@@ -22,7 +22,8 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
 }): any => ({
   ...res,
   notify_when: notifyWhen,
-  actions: actions.map(({ group, id, params }) => ({
+  actions: actions.map(({ group, id, params, uuid }) => ({
+    uuid,
     group,
     id,
     params,

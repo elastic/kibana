@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
+import { v4 } from 'uuid';
 import {
   PartialRule,
   RawRule,
@@ -32,7 +33,7 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     name: string;
     tags: string[];
     schedule: IntervalSchedule;
-    actions: NormalizedAlertAction[];
+    actions: Array<NormalizedAlertAction<string | undefined>>;
     params: Params;
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
@@ -98,7 +99,16 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
-  const updateResult = await updateAlert<Params>(context, { id, data }, alertSavedObject);
+  const actions = data.actions.map((action) => ({
+    ...action,
+    uuid: action.uuid || v4(),
+  }));
+
+  const updateResult = await updateAlert<Params>(
+    context,
+    { id, data: { ...data, actions } },
+    alertSavedObject
+  );
 
   await Promise.all([
     alertSavedObject.attributes.apiKey

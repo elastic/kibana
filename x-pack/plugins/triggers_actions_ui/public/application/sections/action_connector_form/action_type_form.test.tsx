@@ -91,6 +91,7 @@ describe('action_type_form', () => {
           group: 'group',
           class: 'test class',
         },
+        uuid: '123-456',
       })
     );
 
@@ -142,6 +143,7 @@ describe('action_type_form', () => {
             group: 'group',
             class: 'test class',
           },
+          uuid: '123-456',
         })}
       </I18nProvider>
     );
@@ -187,6 +189,7 @@ describe('action_type_form', () => {
           group: 'group',
           class: 'test class',
         },
+        uuid: '123-456',
       })
     );
 
@@ -236,6 +239,7 @@ describe('action_type_form', () => {
           group: 'group',
           class: 'test class',
         },
+        uuid: '123-456',
       })
     );
 
@@ -295,6 +299,7 @@ function getActionTypeForm(
       eventAction: 'trigger',
       summary: '2323',
     },
+    uuid: '123-456',
   };
 
   const connectorsDefault = [

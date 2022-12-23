@@ -153,6 +153,7 @@ describe('rule_edit', () => {
           group: 'threshold met',
           params: { message: 'Rule [{{ctx.metadata.name}}] has exceeded the threshold' },
           id: '917f5d41-fbc4-4056-a8ad-ac592f7dcee2',
+          uuid: '123-456',
         },
       ],
       tags: [],

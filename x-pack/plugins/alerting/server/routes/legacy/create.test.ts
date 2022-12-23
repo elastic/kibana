@@ -74,6 +74,7 @@ describe('createAlertRoute', () => {
       {
         ...mockedAlert.actions[0],
         actionTypeId: 'test',
+        uuid: '123-456',
       },
     ],
     executionStatus: {

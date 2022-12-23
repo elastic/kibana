@@ -56,7 +56,8 @@ export const rewriteRule = ({
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params, frequency }) => ({
+  actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid }) => ({
+    uuid,
     group,
     id,
     params,

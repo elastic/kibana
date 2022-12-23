@@ -100,6 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               'Monitor 0000-intermittent with url http://localhost:5678/pattern?r=200x5,500x1 has recovered with status Up',
           },
           id: 'my-slack1',
+          uuid: actions[0].uuid,
         },
         {
           actionTypeId: '.slack',
@@ -109,6 +110,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               'Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} {{{context.statusMessage}}} The latest error message is {{{context.latestErrorMessage}}}',
           },
           id: 'my-slack1',
+          uuid: actions[1].uuid,
         },
       ]);
       expect(alertTypeId).to.eql('xpack.uptime.alerts.monitorStatus');

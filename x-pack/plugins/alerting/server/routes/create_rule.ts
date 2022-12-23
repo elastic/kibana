@@ -15,7 +15,7 @@ import {
   handleDisabledApiKeysError,
   verifyAccessAndContext,
   countUsageOfPredefinedIds,
-  actionsSchema,
+  actionsSchemaCreate,
   rewriteRuleLastRun,
 } from './lib';
 import {
@@ -38,7 +38,7 @@ export const bodySchema = schema.object({
   schedule: schema.object({
     interval: schema.string({ validate: validateDurationSchema }),
   }),
-  actions: actionsSchema,
+  actions: actionsSchemaCreate,
   notify_when: schema.maybe(schema.nullable(schema.string({ validate: validateNotifyWhenType }))),
 });
 
@@ -87,7 +87,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     last_execution_date: lastExecutionDate,
     last_duration: lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params }) => ({
+  actions: actions.map(({ group, id, actionTypeId, params, uuid }) => ({
+    uuid,
     group,
     id,
     params,

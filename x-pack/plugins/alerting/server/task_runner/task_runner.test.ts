@@ -1257,6 +1257,7 @@ describe('Task Runner', () => {
             params: {
               foo: true,
             },
+            uuid: '111-111',
           },
           {
             group: recoveryActionGroup.id,
@@ -1265,6 +1266,7 @@ describe('Task Runner', () => {
             params: {
               isResolved: true,
             },
+            uuid: '222-222',
           },
         ],
       });
@@ -1360,6 +1362,7 @@ describe('Task Runner', () => {
             params: {
               foo: true,
             },
+            uuid: '111-111',
           },
         ],
       });
@@ -1435,6 +1438,7 @@ describe('Task Runner', () => {
             params: {
               foo: true,
             },
+            uuid: '111-111',
           },
         ],
       });

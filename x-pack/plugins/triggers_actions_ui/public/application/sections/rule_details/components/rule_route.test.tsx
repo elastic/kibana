@@ -66,6 +66,7 @@ describe('getRuleState useEffect handler', () => {
           id: uuid.v4(),
           actionTypeId: connectorType.id,
           params: {},
+          uuid: uuid.v4(),
         },
       ],
     });

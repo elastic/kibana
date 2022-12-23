@@ -109,6 +109,7 @@ describe('loadRule', () => {
             "params": Object {
               "message": "alert 37: {{context.message}}",
             },
+            "uuid": "123-456",
           },
         ],
         "alertTypeId": ".index-threshold",
@@ -278,6 +279,7 @@ function getApiRule() {
         },
         group: 'threshold met',
         id: '3619a0d0-582b-11ec-8995-2b1578a3bc5d',
+        uuid: '123-456',
       },
     ],
     params: { x: 42 },
@@ -319,6 +321,7 @@ function getRule(): Rule<{ x: number }> {
         },
         group: 'threshold met',
         id: '3619a0d0-582b-11ec-8995-2b1578a3bc5d',
+        uuid: '123-456',
       },
     ],
     params: { x: 42 },

@@ -15,6 +15,7 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { v4 } from 'uuid';
 import { BulkActionSkipResult } from '../../../common/bulk_edit';
 import {
   RawRule,
@@ -527,7 +528,16 @@ async function getUpdatedAttributesFromOperations(
 ) {
   let attributes = cloneDeep(rule.attributes);
   let ruleActions = {
-    actions: injectReferencesIntoActions(rule.id, rule.attributes.actions, rule.references || []),
+    actions: injectReferencesIntoActions(
+      rule.id,
+      rule.attributes.actions,
+      rule.references || []
+    ).map((action) => {
+      return {
+        ...action,
+        uuid: action.uuid || v4(),
+      };
+    }),
   };
 
   let hasUpdateApiKeyOperation = false;

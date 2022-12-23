@@ -16,7 +16,7 @@ import {
   RewriteRequestCase,
   handleDisabledApiKeysError,
   rewriteActions,
-  actionsSchema,
+  actionsSchemaUpdate,
   rewriteRuleLastRun,
 } from './lib';
 import {
@@ -39,7 +39,7 @@ const bodySchema = schema.object({
   }),
   throttle: schema.nullable(schema.maybe(schema.string({ validate: validateDurationSchema }))),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  actions: actionsSchema,
+  actions: actionsSchemaUpdate,
   notify_when: schema.maybe(schema.string({ validate: validateNotifyWhenType })),
 });
 
@@ -96,7 +96,8 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(actions
     ? {
-        actions: actions.map(({ group, id, actionTypeId, params }) => ({
+        actions: actions.map(({ group, id, actionTypeId, params, uuid }) => ({
+          uuid,
           group,
           id,
           params,

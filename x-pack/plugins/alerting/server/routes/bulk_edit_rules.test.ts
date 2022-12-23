@@ -41,6 +41,7 @@ describe('bulkEditInternalRulesRoute', () => {
         params: {
           foo: true,
         },
+        uuid: '123-456',
       },
     ],
     consumer: 'bar',
@@ -111,6 +112,7 @@ describe('bulkEditInternalRulesRoute', () => {
                 params: {
                   foo: true,
                 },
+                uuid: '123-456',
               },
             ],
           }),

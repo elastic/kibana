@@ -54,7 +54,8 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>>
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params }) => ({
+  actions: actions.map(({ group, id, actionTypeId, params, uuid }) => ({
+    uuid,
     group,
     id,
     params,

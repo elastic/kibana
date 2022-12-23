@@ -7,17 +7,17 @@
 import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import { v4 } from 'uuid';
 import { parseDuration } from '../../../common/parse_duration';
-import { RawRule, SanitizedRule, RuleTypeParams, RuleAction, Rule } from '../../types';
+import { RawRule, SanitizedRule, RuleTypeParams, Rule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { validateRuleTypeParams, getRuleNotifyWhenType, getDefaultMonitoring } from '../../lib';
 import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
 import { createRuleSavedObject, extractReferences, validateActions } from '../lib';
 import { generateAPIKeyName, getMappedParams, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { RulesClientContext } from '../types';
+import { NormalizedAlertAction, RulesClientContext } from '../types';
 
-type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
 interface SavedObjectOptions {
   id?: string;
   migrationVersion?: Record<string, string>;
@@ -41,7 +41,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'isSnoozedUntil'
     | 'lastRun'
     | 'nextRun'
-  > & { actions: NormalizedAlertAction[] };
+  > & { actions: Array<Omit<NormalizedAlertAction, 'uuid'>> };
   options?: SavedObjectOptions;
 }
 
@@ -86,7 +86,12 @@ export async function create<Params extends RuleTypeParams = never>(
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
   }
 
-  await validateActions(context, ruleType, data);
+  const actionsWithUuid = data.actions.map((action) => ({
+    ...action,
+    uuid: v4(),
+  }));
+
+  await validateActions(context, ruleType, { ...data, actions: actionsWithUuid });
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);
@@ -104,7 +109,7 @@ export async function create<Params extends RuleTypeParams = never>(
     references,
     params: updatedParams,
     actions,
-  } = await extractReferences(context, ruleType, data.actions, validatedAlertTypeParams);
+  } = await extractReferences(context, ruleType, actionsWithUuid, validatedAlertTypeParams);
 
   const createTime = Date.now();
   const lastRunTimestamp = new Date();

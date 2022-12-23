@@ -88,30 +88,35 @@ describe('Rule Actions', () => {
         group: 'metrics.inventory_threshold.fired',
         actionTypeId: '.server-log',
         params: {},
+        uuid: '111-111',
       },
       {
         id: '1',
         group: 'metrics.inventory_threshold.fired',
         actionTypeId: '.server-log',
         params: {},
+        uuid: '222-222',
       },
       {
         id: '2',
         group: 'metrics.inventory_threshold.fired',
         actionTypeId: '.server-log',
         params: {},
+        uuid: '333-333',
       },
       {
         id: '3',
         group: 'metrics.inventory_threshold.fired',
         actionTypeId: '.slack',
         params: {},
+        uuid: '444-444',
       },
       {
         id: '4',
         group: 'metrics.inventory_threshold.fired',
         actionTypeId: '.slack',
         params: {},
+        uuid: '555-555',
       },
     ];
 

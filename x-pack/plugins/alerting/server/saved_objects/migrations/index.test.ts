@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import uuid from 'uuid';
 import { getMigrations } from '.';
-import { RawRule } from '../../types';
+import { RawRule, RawRuleAction } from '../../types';
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
@@ -2887,7 +2887,7 @@ function getMockData(
           params: {
             foo: true,
           },
-        },
+        } as unknown as RawRuleAction,
       ],
       ...overwrites,
     },

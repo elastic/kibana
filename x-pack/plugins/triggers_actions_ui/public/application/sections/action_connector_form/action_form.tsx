@@ -210,7 +210,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
-      });
+      } as RuleAction);
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     }
     if (actionTypeConnectors.length === 0) {
@@ -221,7 +221,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
-      });
+      } as RuleAction);
       setActionIdByIndex(actions.length.toString(), actions.length - 1);
       setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
     }

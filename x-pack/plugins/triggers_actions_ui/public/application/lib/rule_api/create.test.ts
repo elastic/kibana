@@ -82,6 +82,7 @@ describe('createRule', () => {
               "alert '{{alertName}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
           },
           actionTypeId: '.server-log',
+          uuid: '123-456',
         },
       ],
       createdAt: new Date('2021-04-01T21:33:13.247Z'),

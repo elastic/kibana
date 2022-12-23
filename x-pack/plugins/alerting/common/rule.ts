@@ -71,6 +71,7 @@ export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
 export interface RuleAction {
+  uuid: string;
   group: string;
   id: string;
   actionTypeId: string;
@@ -81,6 +82,10 @@ export interface RuleAction {
     throttle: string | null;
   };
 }
+
+export type RuleActionOptionalUuid = Omit<RuleAction, 'uuid'> & {
+  uuid?: string;
+};
 
 export interface RuleAggregations {
   alertExecutionStatus: { [status: string]: number };
