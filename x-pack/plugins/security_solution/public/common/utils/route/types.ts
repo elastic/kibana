@@ -7,7 +7,6 @@
 
 import type * as H from 'history';
 import type React from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
 
 import type { AllRulesTabs } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
 import type { HostsTableType } from '../../../explore/hosts/store/model';
@@ -68,10 +67,7 @@ export type RouteSpyAction =
     }
   | {
       type: 'updateRouteWithOutSearch';
-      route: Pick<
-        RouteSpyState,
-        'pageName' & 'detailName' & 'tabName' & 'pathName' & 'history' & 'state'
-      >;
+      route: Omit<RouteSpyState, 'search'>;
     }
   | {
       type: 'updateRoute';
@@ -81,12 +77,3 @@ export type RouteSpyAction =
 export interface ManageRoutesSpyProps {
   children: React.ReactNode;
 }
-
-export type SpyRouteProps = RouteComponentProps<{
-  detailName: string | undefined;
-  tabName: HostsTableType | undefined;
-  search: string;
-  flowTarget: FlowTarget | undefined;
-}> & {
-  state?: Record<string, string | undefined>;
-};
