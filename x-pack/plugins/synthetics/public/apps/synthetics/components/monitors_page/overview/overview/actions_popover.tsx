@@ -296,14 +296,14 @@ const disableMonitorLabel = i18n.translate(
 const disableAlertLabel = i18n.translate(
   'xpack.synthetics.overview.actions.disableLabelDisableAlert',
   {
-    defaultMessage: 'Disable status alert',
+    defaultMessage: 'Disable status alerts',
   }
 );
 
 const enableMonitorAlertLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelDisableAlert',
   {
-    defaultMessage: 'Enable status alert',
+    defaultMessage: 'Enable status alerts',
   }
 );
 

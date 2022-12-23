@@ -53,13 +53,13 @@ export const EDIT_LABEL = i18n.translate('xpack.synthetics.management.editLabel'
 });
 
 export const ENABLE_STATUS_ALERT = i18n.translate('xpack.synthetics.management.enableStatusAlert', {
-  defaultMessage: 'Enable status alert',
+  defaultMessage: 'Enable status alerts',
 });
 
 export const DISABLE_STATUS_ALERT = i18n.translate(
   'xpack.synthetics.management.disableStatusAlert',
   {
-    defaultMessage: 'Disable status alert',
+    defaultMessage: 'Disable status alerts',
   }
 );
 

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const ToggleFlyoutTranslations = {
   toggleButtonAriaLabel: i18n.translate('xpack.synthetics.alertsPopover.toggleButton.ariaLabel', {
-    defaultMessage: 'Open alerts and rules context menu',
+    defaultMessage: 'Open alerts and rules menu',
   }),
 
   toggleMonitorStatusAriaLabel: i18n.translate('xpack.synthetics.toggleAlertFlyout.ariaLabel', {

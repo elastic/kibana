@@ -77,6 +77,6 @@ const disabledSuccessLabel = (name: string) =>
 
 const enabledFailLabel = (name: string) =>
   i18n.translate('xpack.synthetics.overview.actions.enabledFailLabel.alert', {
-    defaultMessage: 'Unable to enable status alert for monitor "{name}".',
+    defaultMessage: 'Unable to enable status alerts for monitor "{name}".',
     values: { name },
   });
