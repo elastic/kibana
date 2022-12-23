@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getPluginApiDocId } from '../utils';
 import { extractImportReferences } from './extract_import_refs';
