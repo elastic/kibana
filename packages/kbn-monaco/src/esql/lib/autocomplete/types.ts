@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '@kbn/monaco';
+import { monaco } from '../../../..';
 
 /** @public **/
 export interface ESQLCustomAutocompleteCallbacks {
