@@ -27,7 +27,10 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
     private deps: {
       getImageDownloadHref: (fileId: string) => string;
       validateUrl: ReturnType<typeof createValidateUrl>;
-      executeTriggerActions: (triggerId: string, context: ImageClickContext) => void;
+      actions: {
+        executeTriggerActions: (triggerId: string, context: ImageClickContext) => void;
+        hasTriggerActions: (triggerId: string, context: ImageClickContext) => Promise<boolean>;
+      };
     },
     initialInput: ImageEmbeddableInput,
     parent?: IContainer
@@ -58,6 +61,23 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
       import('./image_embeddable_lazy');
     }, []);
 
+    const [hasTriggerActions, setHasTriggerActions] = React.useState(false);
+    React.useEffect(() => {
+      let cancel = false;
+
+      // hack: timeout to give a chance for a drilldown action to be registered just after it is created by user
+      setTimeout(() => {
+        if (cancel) return;
+        this.deps.actions
+          .hasTriggerActions(imageClickTrigger.id, { embeddable: this })
+          .catch(() => false)
+          .then((hasActions) => !cancel && setHasTriggerActions(hasActions));
+      }, 0);
+      return () => {
+        cancel = true;
+      };
+    });
+
     return (
       <ImageViewerContext.Provider
         value={{
@@ -74,11 +94,16 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
           onError={() => {
             this.renderComplete.dispatchError();
           }}
-          onClick={() => {
-            this.deps.executeTriggerActions(imageClickTrigger.id, {
-              embeddable: this,
-            });
-          }}
+          onClick={
+            // note: passing onClick enables the cursor pointer style, so we only pass it if there are compatible actions
+            hasTriggerActions
+              ? () => {
+                  this.deps.actions.executeTriggerActions(imageClickTrigger.id, {
+                    embeddable: this,
+                  });
+                }
+              : undefined
+          }
         />
       </ImageViewerContext.Provider>
     );
