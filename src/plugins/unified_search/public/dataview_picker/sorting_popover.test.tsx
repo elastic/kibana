@@ -31,10 +31,34 @@ describe('SortingPopover', () => {
   });
 
   it('should render EuiPopover', () => {
+    const onChange = jest.fn();
+
     const wrapper = mount(
-      <SortingPopover sortingService={sortingService} handleSortingChange={jest.fn()} />
+      <SortingPopover sortingService={sortingService} handleSortingChange={onChange} />
     );
     expect(wrapper).toMatchSnapshot();
+  });
+
+  it('should open SortingPopover', () => {
+    const onChange = jest.fn();
+
+    const wrapper = mount(
+      <SortingPopover sortingService={sortingService} handleSortingChange={onChange} />
+    );
+
+    expect(wrapper.find('EuiPopover')).toHaveLength(0);
+
+    wrapper.find(`[data-test-subj="openPopoverButton"]`).last().simulate('click');
+
+    expect(wrapper.find('EuiSelectable')).toHaveLength(2);
+  });
+
+  it('should show options after opening popover', () => {
+    const onChange = jest.fn();
+
+    const wrapper = mount(
+      <SortingPopover sortingService={sortingService} handleSortingChange={onChange} />
+    );
 
     wrapper.find(`[data-test-subj="openPopoverButton"]`).last().simulate('click');
 
@@ -52,5 +76,18 @@ describe('SortingPopover', () => {
       expect.objectContaining({ data: { key: 'asc' }, checked: 'on', label: 'Ascending' }),
       expect.objectContaining({ data: { key: 'desc' }, checked: undefined, label: 'Descending' }),
     ]);
+  });
+
+  it('should call handleSortingChange after changing the option', () => {
+    const onChange = jest.fn();
+
+    const wrapper = mount(
+      <SortingPopover sortingService={sortingService} handleSortingChange={onChange} />
+    );
+
+    wrapper.find(`[data-test-subj="openPopoverButton"]`).last().simulate('click');
+
+    wrapper.find('EuiSelectable').find('EuiSelectableListItem').last().simulate('click');
+    expect(onChange).toHaveBeenCalled();
   });
 });
