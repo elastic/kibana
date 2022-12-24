@@ -14,7 +14,7 @@ import del from 'del';
 import { some } from 'lodash';
 import { Readable } from 'stream';
 
-export async function setupNodeEvents(
+export function setupNodeEvents(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ) {
