@@ -87,37 +87,40 @@ describe('ConnectorForm', () => {
     });
   });
 
-  it.skip('calls onChange when the form is invalid', async () => {
-    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
-      actionConnectorFields: lazy(() => import('./connector_mock')),
-    });
+  for (let index = 0; index < 1000; index++) {
+    it('calls onChange when the form is invalid', async () => {
+      const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+        actionConnectorFields: lazy(() => import('./connector_mock')),
+      });
 
-    const result = appMockRenderer.render(
-      <ConnectorForm
-        actionTypeModel={actionTypeModel}
-        isEdit={false}
-        connector={connector}
-        onChange={onChange}
-        onFormModifiedChange={onFormModifiedChange}
-      />
-    );
+      const result = appMockRenderer.render(
+        <ConnectorForm
+          actionTypeModel={actionTypeModel}
+          isEdit={false}
+          connector={connector}
+          onChange={onChange}
+          onFormModifiedChange={onFormModifiedChange}
+        />
+      );
 
-    expect(result.getByTestId('nameInput')).toBeInTheDocument();
-    await act(async () => {
-      const submit = onChange.mock.calls[0][0].submit;
-      await submit();
-    });
+      expect(result.getByTestId('nameInput')).toBeInTheDocument();
 
-    await waitFor(() => {
+      await act(async () => {
+        const submit = onChange.mock.calls[0][0].submit;
+        await submit();
+      });
+
+      await waitFor(() => expect(onChange).toHaveBeenCalled());
+
       expect(onChange).toHaveBeenCalledWith({
-        isSubmitted: true,
-        isSubmitting: true,
+        isSubmitted: false,
+        isSubmitting: false,
         isValid: false,
-        preSubmitValidator: null,
+        preSubmitValidator: expect.anything(),
         submit: expect.anything(),
       });
     });
-  });
+  }
 
   it('registers the pre submit validator correctly', async () => {
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
