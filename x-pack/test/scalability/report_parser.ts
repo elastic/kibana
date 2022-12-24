@@ -173,6 +173,7 @@ export function getCapacityMetrics(
     warmupAvgResponseTime,
     rpsAtWarmup,
     warmupDuration,
+    rpsMax,
     responseTimeMetric: metricName,
     threshold1ResponseTime: thresholds.threshold1,
     rpsAtThreshold1,

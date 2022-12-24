@@ -21,6 +21,7 @@ export interface CapacityMetrics {
   warmupAvgResponseTime: number;
   rpsAtWarmup: number;
   warmupDuration: number;
+  rpsMax: number;
   responseTimeMetric: string;
   threshold1ResponseTime: number;
   rpsAtThreshold1: number;
