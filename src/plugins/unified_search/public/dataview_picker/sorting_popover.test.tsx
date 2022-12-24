@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
@@ -29,109 +29,28 @@ describe('SortingPopover', () => {
       storage
     );
   });
-  it('should render `EuiPopover`', () => {
-    const wrapper = shallow(
+
+  it('should render EuiPopover', () => {
+    const wrapper = mount(
       <SortingPopover sortingService={sortingService} handleSortingChange={jest.fn()} />
     );
-    expect(wrapper).toMatchInlineSnapshot(`
-    <EuiPopover
-      anchorPosition="downCenter"
-      aria-labelledby="optionsList_sortingOptions"
-      button={
-        <EuiButtonIcon
-          aria-label="Define the sort order"
-          iconType="sortable"
-          onClick={[Function]}
-        />
-      }
-      closePopover={[Function]}
-      display="inline-block"
-      hasArrow={true}
-      isOpen={false}
-      ownFocus={true}
-      panelPaddingSize="none"
-    >
-      <EuiPopoverTitle
-        paddingSize="s"
-      >
-        Sort by
-      </EuiPopoverTitle>
-      <EuiSelectable
-        aria-label="Define the sort order"
-        isPreFiltered={false}
-        listProps={
-          Object {
-            "bordered": false,
-          }
-        }
-        onChange={[Function]}
-        options={
-          Array [
-            Object {
-              "checked": "on",
-              "data": Object {
-                "key": "alphabetically",
-              },
-              "label": "Alphabetically",
-            },
-          ]
-        }
-        searchable={false}
-        singleSelection="always"
-        style={
-          Object {
-            "width": 208,
-          }
-        }
-      >
-        <Component />
-      </EuiSelectable>
-      <EuiHorizontalRule
-        margin="none"
-      />
-      <EuiPopoverTitle
-        paddingSize="s"
-      >
-        Order
-      </EuiPopoverTitle>
-      <EuiSelectable
-        aria-label="Define the sort order"
-        isPreFiltered={false}
-        listProps={
-          Object {
-            "bordered": false,
-          }
-        }
-        onChange={[Function]}
-        options={
-          Array [
-            Object {
-              "checked": "on",
-              "data": Object {
-                "key": "asc",
-              },
-              "label": "Ascending",
-            },
-            Object {
-              "checked": undefined,
-              "data": Object {
-                "key": "desc",
-              },
-              "label": "Descending",
-            },
-          ]
-        }
-        searchable={false}
-        singleSelection="always"
-        style={
-          Object {
-            "width": 208,
-          }
-        }
-      >
-        <Component />
-      </EuiSelectable>
-    </EuiPopover>
-    `);
+    expect(wrapper).toMatchSnapshot();
+
+    wrapper.find(`[data-test-subj="openPopoverButton"]`).last().simulate('click');
+
+    const euiSelectable = wrapper.find('EuiSelectable');
+
+    expect(euiSelectable.first().prop('options')).toEqual([
+      expect.objectContaining({
+        checked: 'on',
+        data: { key: 'alphabetically' },
+        label: 'Alphabetically',
+      }),
+    ]);
+
+    expect(euiSelectable.last().prop('options')).toEqual([
+      expect.objectContaining({ data: { key: 'asc' }, checked: 'on', label: 'Ascending' }),
+      expect.objectContaining({ data: { key: 'desc' }, checked: undefined, label: 'Descending' }),
+    ]);
   });
 });
