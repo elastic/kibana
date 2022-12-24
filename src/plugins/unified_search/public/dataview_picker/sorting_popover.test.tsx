@@ -46,7 +46,7 @@ describe('SortingPopover', () => {
       <SortingPopover sortingService={sortingService} handleSortingChange={onChange} />
     );
 
-    expect(wrapper.find('EuiPopover')).toHaveLength(0);
+    expect(wrapper.find('EuiSelectable')).toHaveLength(0);
 
     wrapper.find(`[data-test-subj="openPopoverButton"]`).last().simulate('click');
 
