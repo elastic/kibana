@@ -130,7 +130,7 @@ describe('global query string', () => {
       expect(mockDispatch).toBeCalledWith(
         globalUrlParamActions.registerUrlParam({
           key: urlParamKey,
-          initialValue: initialValue,
+          initialValue,
         })
       );
     });
