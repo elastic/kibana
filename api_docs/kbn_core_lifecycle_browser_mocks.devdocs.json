@@ -93,9 +93,9 @@
               ">; chrome: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.DeeplyMockedKeys",
+                "section": "def-common.DeeplyMockedKeys",
                 "text": "DeeplyMockedKeys"
               },
               "<",
@@ -135,9 +135,9 @@
               ">; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.MockedKeys",
+                "section": "def-common.MockedKeys",
                 "text": "MockedKeys"
               },
               "<",
@@ -151,9 +151,9 @@
               ">; overlays: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.DeeplyMockedKeys",
+                "section": "def-common.DeeplyMockedKeys",
                 "text": "DeeplyMockedKeys"
               },
               "<",
@@ -212,7 +212,7 @@
                 "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
               },
-              ">; injectedMetadata: { getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]> & ((name: string, defaultValue?: any) => unknown); }; fatalErrors: jest.Mocked<",
+              ">; fatalErrors: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
                 "scope": "common",
@@ -231,9 +231,9 @@
               "; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.MockedKeys",
+                "section": "def-common.MockedKeys",
                 "text": "MockedKeys"
               },
               "<",
@@ -268,7 +268,7 @@
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
-              ">; }; deprecations: undefined; injectedMetadata: { getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]> & ((name: string, defaultValue?: any) => unknown); }; theme: jest.Mocked<",
+              ">; }; deprecations: undefined; theme: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-theme-browser",
                 "scope": "common",
@@ -326,9 +326,9 @@
               ">; chrome: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.DeeplyMockedKeys",
+                "section": "def-common.DeeplyMockedKeys",
                 "text": "DeeplyMockedKeys"
               },
               "<",
@@ -368,9 +368,9 @@
               ">; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.MockedKeys",
+                "section": "def-common.MockedKeys",
                 "text": "MockedKeys"
               },
               "<",
@@ -384,9 +384,9 @@
               ">; overlays: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.DeeplyMockedKeys",
+                "section": "def-common.DeeplyMockedKeys",
                 "text": "DeeplyMockedKeys"
               },
               "<",
@@ -445,7 +445,7 @@
                 "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
               },
-              ">; injectedMetadata: { getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]> & ((name: string, defaultValue?: any) => unknown); }; fatalErrors: jest.Mocked<",
+              ">; fatalErrors: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
                 "scope": "common",
