@@ -84,8 +84,14 @@ export const useGlobalQueryString = (): string => {
     }
 
     Object.keys(globalUrlParam).forEach((paramName) => {
+      const value = globalUrlParam[paramName];
+
+      if (isEmpty(value)) {
+        return;
+      }
+
       try {
-        encodedGlobalUrlParam[paramName] = encode(globalUrlParam[paramName]);
+        encodedGlobalUrlParam[paramName] = encode(value);
       } catch {
         // Just ignore parameters which unable to encode
       }
