@@ -55,6 +55,18 @@ describe('create CSP rules with post package create callback', () => {
   it('should create stateful rules based on rule template', async () => {
     const mockPackagePolicy = createPackagePolicyMock();
     mockPackagePolicy.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+
+    mockSoClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'index-pattern',
+          title: 'cloud_security_posture-41308bcdaaf665761478bb6f0d745a5c',
+          namespaces: ['default'],
+        },
+      ],
+      pit_id: undefined,
+    } as unknown as SavedObjectsFindResponse);
+
     mockSoClient.find.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -67,7 +79,8 @@ describe('create CSP rules with post package create callback', () => {
     } as unknown as SavedObjectsFindResponse);
 
     await onPackagePolicyPostCreateCallback(logger, mockPackagePolicy, mockSoClient);
-
+    console.log(mockSoClient.bulkCreate.mock.calls[0]);
+    console.log(mockSoClient.bulkCreate.mock.calls[0][0]);
     expect(mockSoClient.bulkCreate.mock.calls[0][0]).toMatchObject([
       {
         type: 'csp_rule',
@@ -86,6 +99,17 @@ describe('create CSP rules with post package create callback', () => {
     mockSoClient.find.mockResolvedValueOnce({
       saved_objects: [
         {
+          type: 'index-pattern',
+          title: 'cloud_security_posture-41308bcdaaf665761478bb6f0d745a5c',
+          namespaces: ['default'],
+        },
+      ],
+      pit_id: undefined,
+    } as unknown as SavedObjectsFindResponse);
+
+    mockSoClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
           type: 'csp-rule-template',
           id: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
           attributes: { ...ruleAttributes },
@@ -93,10 +117,57 @@ describe('create CSP rules with post package create callback', () => {
       ],
       pit_id: undefined,
     } as unknown as SavedObjectsFindResponse);
+
     await onPackagePolicyPostCreateCallback(logger, mockPackagePolicy, mockSoClient);
 
-    expect(mockSoClient.find.mock.calls[0][0]).toMatchObject({ perPage: 10000 });
+    expect(mockSoClient.find.mock.calls[1][0]).toMatchObject({ perPage: 10000 });
   });
+
+  it.each([
+    ['cloud_security_posture-41308bcdaaf665761478bb6f0d55555', ['default']],
+    ['cloud_security_posture-41308bcdaaf665761478bb6f0d88888', ['foo']],
+  ])(
+    'validate that all index pattern are available cross spaces',
+    async (id: string, namespaces: string[]) => {
+      const mockPackagePolicy = createPackagePolicyMock();
+      mockPackagePolicy.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+      mockSoClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            type: 'index-pattern',
+            id,
+            namespaces,
+          },
+        ],
+        pit_id: undefined,
+      } as unknown as SavedObjectsFindResponse);
+
+      mockSoClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            type: 'csp-rule-template',
+            title: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
+            attributes: { ...ruleAttributes },
+          },
+        ],
+        pit_id: undefined,
+      } as unknown as SavedObjectsFindResponse);
+
+      await onPackagePolicyPostCreateCallback(logger, mockPackagePolicy, mockSoClient);
+
+      expect(mockSoClient.updateObjectsSpaces).toHaveBeenCalled();
+      expect(mockSoClient.updateObjectsSpaces).lastCalledWith(
+        [
+          {
+            id,
+            type: 'index-pattern',
+          },
+        ],
+        ['*'],
+        []
+      );
+    }
+  );
 
   it('validate that all rules templates are deleted', async () => {
     savedObjectRepositoryMock = savedObjectsRepositoryMock.create();

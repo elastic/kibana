@@ -55,8 +55,8 @@ export const onPackagePolicyPostCreateCallback = async (
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
   addDataViewToAllSpaces(savedObjectsClient);
-  const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
 
+  const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
   // Create csp-rules from the generic asset
   const existingRuleTemplates: SavedObjectsFindResponse<CspRuleTemplate> =
     await savedObjectsClient.find({
@@ -95,6 +95,7 @@ async function addDataViewToAllSpaces(savedObjectsClient: SavedObjectsClientCont
   });
 
   cspmDataViews.saved_objects.forEach((dataView) => {
+    console.log({ dataView });
     savedObjectsClient.updateObjectsSpaces([{ id: dataView.id, type: 'index-pattern' }], ['*'], []);
   });
 }
