@@ -1684,9 +1684,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ">, triggers: string[]) => Promise<void>"
@@ -1715,9 +1715,9 @@
                   "<",
                   {
                     "pluginId": "@kbn/utility-types",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
+                    "section": "def-common.SerializableRecord",
                     "text": "SerializableRecord"
                   },
                   ">"
@@ -1768,9 +1768,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ">, triggers: string[]) => Promise<void>"
@@ -1816,9 +1816,9 @@
                   "<",
                   {
                     "pluginId": "@kbn/utility-types",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
+                    "section": "def-common.SerializableRecord",
                     "text": "SerializableRecord"
                   },
                   ">"
@@ -2012,9 +2012,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ">; }[]>"
@@ -3350,9 +3350,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ", object, ",
@@ -3509,9 +3509,9 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           }
         ],
@@ -3594,9 +3594,9 @@
           "<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">; }"
@@ -3760,9 +3760,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -3836,9 +3836,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreSetup",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, { embeddable }: SetupDependencies) => { registerActionFactory: (definition: ",
@@ -3873,9 +3873,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -4105,9 +4105,9 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           }
         ],
@@ -4175,9 +4175,9 @@
           "<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">; }"
@@ -4300,9 +4300,9 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           }
         ],
@@ -4370,9 +4370,9 @@
           "<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">; }"

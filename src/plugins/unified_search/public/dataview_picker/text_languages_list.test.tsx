@@ -31,7 +31,8 @@ function selectTextLanguagePickerOption(instance: ShallowWrapper, selectedLabel:
       ? { ...option, checked: 'on' }
       : { ...option, checked: undefined }
   );
-  return getTextLanguagesPickerList(instance).prop('onChange')!(options, event);
+  const selectedOption = { label: selectedLabel };
+  return getTextLanguagesPickerList(instance).prop('onChange')!(options, event, selectedOption);
 }
 
 describe('Text based languages list component', () => {
