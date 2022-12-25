@@ -27,6 +27,7 @@ import {
 } from '../../common/constants';
 import type { CspRule, CspRuleTemplate } from '../../common/schemas';
 import type { BenchmarkId } from '../../common/types';
+import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 
 const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
   `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
@@ -53,6 +54,7 @@ export const onPackagePolicyPostCreateCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
+  addDataViewToAllSpaces(savedObjectsClient);
   const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
 
   // Create csp-rules from the generic asset
@@ -82,6 +84,31 @@ export const onPackagePolicyPostCreateCallback = async (
     logger.error(e);
   }
 };
+
+async function addDataViewToAllSpaces(savedObjectsClient: SavedObjectsClientContract) {
+  const cspmDataViews = await savedObjectsClient.find<DataViewSavedObjectAttrs>({
+    type: 'index-pattern',
+    fields: ['title'],
+    search: CLOUD_SECURITY_POSTURE_PACKAGE_NAME + '*',
+    searchFields: ['title'],
+    perPage: 100,
+  });
+
+  cspmDataViews.saved_objects.forEach((dataView) => {
+    // data views registers with `namespaceType: 'agnostic'` and thus the namespaces attributes exists.
+    // src/plugins/data_views/server/saved_objects/data_views.ts
+    const currentSpaces = dataView.namespaces!;
+
+    // if the data view is not shared with all spaces, update it to be shared with all spaces
+    if (!currentSpaces.includes('*')) {
+      savedObjectsClient.updateObjectsSpaces(
+        [{ id: dataView.id, type: 'index-pattern' }],
+        ['*'],
+        []
+      );
+    }
+  });
+}
 
 /**
  * Callback to handle deletion of PackagePolicies in Fleet
