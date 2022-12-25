@@ -66,9 +66,6 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS AWS',
         }),
         icon: 'logoAWS',
-        tooltip: i18n.translate('xpack.csp.cspmIntegration.awsOption.tooltipContent', {
-          defaultMessage: 'Only AWS available for now',
-        }),
       },
       {
         type: CLOUDBEAT_GCP,
