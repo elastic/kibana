@@ -59,16 +59,6 @@ interface PackageManifestBaseFields {
    */
   owner: string[];
   /**
-   * Packages which are required for the source code in the package to be type-
-   * checked. This list is updated automatically by the package linter
-   */
-  typeDeps: string[];
-  /**
-   * Packages which are required for the source code of the package to run. This
-   * list is updated automatically by the package linter.
-   */
-  runtimeDeps: string[];
-  /**
    * A devOnly package can be used by other devOnly packages (and only
    * other devOnly packages) and will never be included in the distributable
    */

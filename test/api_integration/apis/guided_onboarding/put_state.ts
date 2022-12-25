@@ -136,7 +136,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
         .send({
           guide: {
             ...testGuideStep1ActiveState,
-            guideId: 'observability',
+            guideId: 'kubernetes',
           },
         })
         .expect(200);
@@ -154,11 +154,11 @@ export default function testPutState({ getService }: FtrProviderContext) {
       });
       expect(searchGuideSO.attributes.isActive).to.eql(false);
 
-      const observabilityGuide = await kibanaServer.savedObjects.get({
+      const kubernetesGuide = await kibanaServer.savedObjects.get({
         type: guideStateSavedObjectsType,
-        id: 'observability',
+        id: 'kubernetes',
       });
-      expect(observabilityGuide.attributes.isActive).to.eql(true);
+      expect(kubernetesGuide.attributes.isActive).to.eql(true);
     });
   });
 }

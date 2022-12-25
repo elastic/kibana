@@ -25,9 +25,18 @@ interface Props {
   onChange: (value: string) => void;
   value: string;
   placeholder?: string;
+  height?: string;
 }
 
-export const CodeEditor = ({ ariaLabel, id, languageId, onChange, value, placeholder }: Props) => {
+export const CodeEditor = ({
+  ariaLabel,
+  id,
+  languageId,
+  onChange,
+  value,
+  placeholder,
+  height = '250px',
+}: Props) => {
   return (
     <CodeEditorContainer borderRadius="none" hasShadow={false} hasBorder={true}>
       <MonacoCodeContainer
@@ -38,7 +47,7 @@ export const CodeEditor = ({ ariaLabel, id, languageId, onChange, value, placeho
         <MonacoCodeEditor
           languageId={languageId}
           width="100%"
-          height="250px"
+          height={height}
           value={value}
           onChange={onChange}
           options={{

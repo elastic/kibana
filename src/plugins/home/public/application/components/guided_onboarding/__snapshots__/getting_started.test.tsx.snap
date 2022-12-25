@@ -61,34 +61,34 @@ exports[`getting started should render getting started component 1`] = `
         />
       </EuiFlexItem>
       <EuiFlexItem
-        key="guideCard-observability"
+        key="guideCard-kubernetes"
       >
         <GuideCard
           activateGuide={[Function]}
           addBasePath={[Function]}
           guides={Array []}
           isDarkTheme={false}
-          useCase="observability"
+          useCase="kubernetes"
         />
       </EuiFlexItem>
       <EuiFlexItem
-        key="linkCard-observabilityLink"
+        key="linkCard-infrastructure"
       >
-        <ObservabilityLinkCard
+        <InfrastructureLinkCard
           addBasePath={[Function]}
           isDarkTheme={false}
           navigateToApp={[MockFunction]}
         />
       </EuiFlexItem>
       <EuiFlexItem
-        key="guideCard-security"
+        key="guideCard-siem"
       >
         <GuideCard
           activateGuide={[Function]}
           addBasePath={[Function]}
           guides={Array []}
           isDarkTheme={false}
-          useCase="security"
+          useCase="siem"
         />
       </EuiFlexItem>
     </EuiFlexGrid>
