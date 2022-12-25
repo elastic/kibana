@@ -11,8 +11,7 @@ import { TestProvider } from '../../test/test_provider';
 import { getMockPolicyAWS, getMockPolicyEKS, getMockPolicyK8s } from './mocks';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import userEvent from '@testing-library/user-event';
-import { getUpdatedPosturePolicy } from './utils';
-import type { PostureInput } from '../../../common/constants';
+import { getPosturePolicy } from './utils';
 
 describe('<CspPolicyTemplateForm />', () => {
   const onChange = jest.fn();
@@ -111,20 +110,54 @@ describe('<CspPolicyTemplateForm />', () => {
     expect(option1).toBeChecked();
   });
 
+  it('selects default KSPM input selector', () => {
+    const policy = getMockPolicyK8s();
+    // enable all inputs of a policy template, same as fleet does
+    policy.inputs = policy.inputs.map((input) => ({
+      ...input,
+      enabled: input.policy_template === 'kspm',
+    }));
+
+    render(<WrappedComponent newPolicy={policy} />);
+
+    // 1st call happens on mount and selects the default policy template enabled input
+    expect(onChange).toHaveBeenNthCalledWith(1, {
+      isValid: true,
+      updatedPolicy: getMockPolicyK8s(),
+    });
+  });
+
+  it('selects default CSPM input selector', () => {
+    const policy = getMockPolicyAWS();
+    // enable all inputs of a policy template, same as fleet does
+    policy.inputs = policy.inputs.map((input) => ({
+      ...input,
+      enabled: input.policy_template === 'cspm',
+    }));
+
+    render(<WrappedComponent newPolicy={policy} />);
+
+    // 1st call happens on mount and selects the default policy template enabled input
+    expect(onChange).toHaveBeenNthCalledWith(1, {
+      isValid: true,
+      updatedPolicy: getMockPolicyAWS(),
+    });
+  });
+
   /**
    * AWS Credentials input fields tests for KSPM/CSPM integrations
    */
-  const inputs = {
+  const awsInputs = {
     'cloudbeat/cis_eks': getMockPolicyEKS,
-    // 'cloudbeat/cis_aws': getMockPolicyAWS,
+    'cloudbeat/cis_aws': getMockPolicyAWS,
   };
 
-  for (const [inputKey, getPolicy] of Object.entries(inputs) as Array<
-    [PostureInput, () => NewPackagePolicy]
+  for (const [inputKey, getPolicy] of Object.entries(awsInputs) as Array<
+    [keyof typeof awsInputs, typeof awsInputs[keyof typeof awsInputs]]
   >) {
     it(`renders ${inputKey} Assume Role fields`, () => {
       let policy = getPolicy();
-      policy = getUpdatedPosturePolicy(policy, inputKey, {
+      policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'assume_role' },
       });
 
@@ -137,13 +170,13 @@ describe('<CspPolicyTemplateForm />', () => {
 
     it(`updates ${inputKey} Assume Role fields`, () => {
       let policy = getPolicy();
-      policy = getUpdatedPosturePolicy(policy, inputKey, {
+      policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'assume_role' },
       });
       const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
 
       userEvent.type(getByLabelText('Role ARN'), 'a');
-      policy = getUpdatedPosturePolicy(policy, inputKey, { role_arn: { value: 'a' } });
+      policy = getPosturePolicy(policy, inputKey, { role_arn: { value: 'a' } });
 
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenNthCalledWith(2, {
@@ -154,7 +187,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     it(`renders ${inputKey} Direct Access Keys fields`, () => {
       let policy: NewPackagePolicy = getPolicy();
-      policy = getUpdatedPosturePolicy(policy, inputKey, {
+      policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'direct_access_keys' },
       });
 
@@ -168,13 +201,13 @@ describe('<CspPolicyTemplateForm />', () => {
 
     it(`updates ${inputKey} Direct Access Keys fields`, () => {
       let policy = getPolicy();
-      policy = getUpdatedPosturePolicy(policy, inputKey, {
+      policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'direct_access_keys' },
       });
       const { getByLabelText, rerender } = render(<WrappedComponent newPolicy={policy} />);
 
       userEvent.type(getByLabelText('Access Key ID'), 'a');
-      policy = getUpdatedPosturePolicy(policy, inputKey, { access_key_id: { value: 'a' } });
+      policy = getPosturePolicy(policy, inputKey, { access_key_id: { value: 'a' } });
 
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenNthCalledWith(2, {
@@ -185,7 +218,7 @@ describe('<CspPolicyTemplateForm />', () => {
       rerender(<WrappedComponent newPolicy={policy} />);
 
       userEvent.type(getByLabelText('Secret Access Key'), 'b');
-      policy = getUpdatedPosturePolicy(policy, inputKey, { secret_access_key: { value: 'b' } });
+      policy = getPosturePolicy(policy, inputKey, { secret_access_key: { value: 'b' } });
 
       expect(onChange).toHaveBeenNthCalledWith(3, {
         isValid: true,
@@ -195,7 +228,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     it(`renders ${inputKey} Temporary Keys fields`, () => {
       let policy: NewPackagePolicy = getPolicy();
-      policy = getUpdatedPosturePolicy(policy, inputKey, {
+      policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'temporary_keys' },
       });
 
@@ -210,13 +243,13 @@ describe('<CspPolicyTemplateForm />', () => {
 
     it(`updates ${inputKey} Temporary Keys fields`, () => {
       let policy = getPolicy();
-      policy = getUpdatedPosturePolicy(policy, inputKey, {
+      policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'temporary_keys' },
       });
       const { getByLabelText, rerender } = render(<WrappedComponent newPolicy={policy} />);
 
       userEvent.type(getByLabelText('Access Key ID'), 'a');
-      policy = getUpdatedPosturePolicy(policy, inputKey, { access_key_id: { value: 'a' } });
+      policy = getPosturePolicy(policy, inputKey, { access_key_id: { value: 'a' } });
 
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenNthCalledWith(2, {
@@ -227,7 +260,7 @@ describe('<CspPolicyTemplateForm />', () => {
       rerender(<WrappedComponent newPolicy={policy} />);
 
       userEvent.type(getByLabelText('Secret Access Key'), 'b');
-      policy = getUpdatedPosturePolicy(policy, inputKey, { secret_access_key: { value: 'b' } });
+      policy = getPosturePolicy(policy, inputKey, { secret_access_key: { value: 'b' } });
 
       expect(onChange).toHaveBeenNthCalledWith(3, {
         isValid: true,
@@ -237,7 +270,7 @@ describe('<CspPolicyTemplateForm />', () => {
       rerender(<WrappedComponent newPolicy={policy} />);
 
       userEvent.type(getByLabelText('Session Token'), 'a');
-      policy = getUpdatedPosturePolicy(policy, inputKey, { session_token: { value: 'a' } });
+      policy = getPosturePolicy(policy, inputKey, { session_token: { value: 'a' } });
 
       expect(onChange).toHaveBeenNthCalledWith(4, {
         isValid: true,
@@ -247,7 +280,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     it(`renders ${inputKey} Shared Credentials fields`, () => {
       let policy: NewPackagePolicy = getPolicy();
-      policy = getUpdatedPosturePolicy(policy, inputKey, {
+      policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'shared_credentials' },
       });
 
@@ -261,13 +294,13 @@ describe('<CspPolicyTemplateForm />', () => {
 
     it(`updates ${inputKey} Shared Credentials fields`, () => {
       let policy = getPolicy();
-      policy = getUpdatedPosturePolicy(policy, inputKey, {
+      policy = getPosturePolicy(policy, inputKey, {
         'aws.credentials.type': { value: 'shared_credentials' },
       });
       const { getByLabelText, rerender } = render(<WrappedComponent newPolicy={policy} />);
 
       userEvent.type(getByLabelText('Shared Credential File'), 'a');
-      policy = getUpdatedPosturePolicy(policy, inputKey, {
+      policy = getPosturePolicy(policy, inputKey, {
         shared_credential_file: { value: 'a' },
       });
 
@@ -280,7 +313,7 @@ describe('<CspPolicyTemplateForm />', () => {
       rerender(<WrappedComponent newPolicy={policy} />);
 
       userEvent.type(getByLabelText('Credential Profile Name'), 'b');
-      policy = getUpdatedPosturePolicy(policy, inputKey, {
+      policy = getPosturePolicy(policy, inputKey, {
         credential_profile_name: { value: 'b' },
       });
 

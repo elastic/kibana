@@ -99,11 +99,11 @@ type StreamWithRequiredVars = Array<
 // Extend NewPackagePolicyInput with known string literals for input type, policy template and streams
 export type NewPackagePolicyPostureInput = NewPackagePolicyInput &
   (
-    | { type: 'cloudbeat/cis_aws'; policy_template: 'cspm'; streams: StreamWithRequiredVars }
-    | { type: 'cloudbeat/cis_gcp'; policy_template: 'cspm' }
     | { type: 'cloudbeat/cis_azure'; policy_template: 'cspm' }
-    | { type: 'cloudbeat/cis_eks'; policy_template: 'kspm'; streams: StreamWithRequiredVars }
+    | { type: 'cloudbeat/cis_gcp'; policy_template: 'cspm' }
     | { type: 'cloudbeat/cis_k8s'; policy_template: 'kspm' }
+    | { type: 'cloudbeat/cis_aws'; policy_template: 'cspm'; streams: StreamWithRequiredVars }
+    | { type: 'cloudbeat/cis_eks'; policy_template: 'kspm'; streams: StreamWithRequiredVars }
   );
 
 export const isPostureInput = (
@@ -112,10 +112,10 @@ export const isPostureInput = (
   SUPPORTED_POLICY_TEMPLATES.includes(input.policy_template as PosturePolicyTemplate) &&
   SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as PostureInput);
 
-const getInputTypePolicyTemplate = (inputs: NewPackagePolicyInput[], inputType: PostureInput) =>
+const getInputPolicyTemplate = (inputs: NewPackagePolicyInput[], inputType: PostureInput) =>
   inputs.filter(isPostureInput).find((i) => i.type === inputType)!.policy_template;
 
-const getUpdatedPostureInput = (
+const getPostureInput = (
   input: NewPackagePolicyInput,
   inputType: PostureInput,
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
@@ -139,18 +139,18 @@ const getUpdatedPostureInput = (
 /**
  * Get a new object with the updated policy input and vars
  */
-export const getUpdatedPosturePolicy = (
+export const getPosturePolicy = (
   newPolicy: NewPackagePolicy,
   inputType: PostureInput,
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
   ...newPolicy,
   // Enable new policy input and disable all others
-  inputs: newPolicy.inputs.map((item) => getUpdatedPostureInput(item, inputType, inputVars)),
+  inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
   // Set hidden policy vars
   vars: merge({}, newPolicy.vars, {
     deployment: { value: inputType },
-    posture: { value: getInputTypePolicyTemplate(newPolicy.inputs, inputType) },
+    posture: { value: getInputPolicyTemplate(newPolicy.inputs, inputType) },
   }),
 });
 
@@ -164,7 +164,7 @@ export const getPolicyTemplateInputOptions = (policyTemplate: PosturePolicyTempl
     disabled: o.disabled,
   }));
 
-export const getPostureInput = (policy: NewPackagePolicy) => {
+export const getEnabledPostureInput = (policy: NewPackagePolicy) => {
   // Take first enabled input
   const input = policy.inputs.find((i) => i.enabled);
 

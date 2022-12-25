@@ -20,15 +20,11 @@ import type { PostureInput } from '../../../common/constants';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { InlineRadioGroup } from './inline_radio_group';
 
-type Props = { input: NewPackagePolicyPostureInput } & (
-  | { disabled: true }
-  | {
-      disabled?: false;
-      updatePolicyInput(id: string): void;
-    }
-);
-
-const noop = () => {};
+interface Props {
+  disabled: boolean;
+  input: NewPackagePolicyPostureInput;
+  setInput: (inputType: PostureInput) => void;
+}
 
 const RadioLabel = ({
   label,
@@ -56,20 +52,21 @@ const RadioLabel = ({
   </EuiToolTip>
 );
 
-export const PolicyInputSelector = ({ input, ...rest }: Props) => {
+export const PolicyInputSelector = ({ input, disabled, setInput }: Props) => {
   const baseOptions = getPolicyTemplateInputOptions(input.policy_template);
   const options = baseOptions.map((option) => ({
     ...option,
-    disabled: option.disabled || rest.disabled,
+    disabled: option.disabled || disabled,
     label: <RadioLabel {...option} />,
   }));
 
   return (
     <div>
       <InlineRadioGroup
+        disabled={disabled}
         idSelected={input.type}
         options={options}
-        onChange={rest.disabled ? noop : rest.updatePolicyInput}
+        onChange={(inputType) => setInput(inputType as PostureInput)}
         size="m"
       />
       <PolicyInputInfo type={input.type} />

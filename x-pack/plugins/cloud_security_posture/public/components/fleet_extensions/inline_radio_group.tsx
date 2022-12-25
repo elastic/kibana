@@ -9,17 +9,18 @@ import React from 'react';
 import { useEuiTheme, EuiRadioGroup, type EuiRadioGroupProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-type RadioGroupProps = Pick<EuiRadioGroupProps, 'onChange' | 'options' | 'idSelected'>;
+type RadioGroupProps = Pick<EuiRadioGroupProps, 'onChange' | 'options' | 'idSelected' | 'disabled'>;
 
 type Props = RadioGroupProps & {
   size?: 's' | 'm';
 };
 
-export const InlineRadioGroup = ({ idSelected, size, options, onChange }: Props) => {
+export const InlineRadioGroup = ({ idSelected, size, options, disabled, onChange }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiRadioGroup
+      disabled={disabled}
       idSelected={idSelected}
       options={options.map((o) => ({
         id: o.id,

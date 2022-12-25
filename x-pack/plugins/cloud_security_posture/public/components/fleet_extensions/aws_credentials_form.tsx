@@ -18,7 +18,7 @@ import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { InlineRadioGroup } from './inline_radio_group';
-import { getUpdatedPosturePolicy, NewPackagePolicyPostureInput } from './utils';
+import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 
 const DocsLink = (
   <EuiText color={'subdued'} size="s">
@@ -212,7 +212,7 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
         type={awsCredentialsType}
         onChange={(optionId) =>
           updatePolicy(
-            getUpdatedPosturePolicy(newPolicy, input.type, {
+            getPosturePolicy(newPolicy, input.type, {
               'aws.credentials.type': { value: optionId },
             })
           )
@@ -225,7 +225,7 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
       <AwsInputVarFields
         fields={fields}
         onChange={(key, value) =>
-          updatePolicy(getUpdatedPosturePolicy(newPolicy, input.type, { [key]: { value } }))
+          updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
         }
       />
       <EuiSpacer />

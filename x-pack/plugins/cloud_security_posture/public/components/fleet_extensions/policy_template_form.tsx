@@ -12,9 +12,9 @@ import type {
 } from '@kbn/fleet-plugin/public';
 import { CLOUDBEAT_AWS, CLOUDBEAT_VANILLA, PostureInput } from '../../../common/constants';
 import {
-  getUpdatedPosturePolicy,
+  getPosturePolicy,
   INPUTS_WITH_AWS_VARS,
-  getPostureInput,
+  getEnabledPostureInput,
   type NewPackagePolicyPostureInput,
 } from './utils';
 import { AwsCredentialsForm, type AwsCredentialsType } from './aws_credentials_form';
@@ -48,7 +48,7 @@ const PolicyVarsForm = ({ input, ...props }: PolicyVarsFormProps) => {
 };
 
 export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit }) => {
-  const input = getPostureInput(newPolicy);
+  const input = getEnabledPostureInput(newPolicy);
 
   const updatePolicy = (updatedPolicy: NewPackagePolicy) =>
     onChange({
@@ -60,9 +60,9 @@ export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit })
    * - Updates policy inputs by user selection
    * - Updates hidden policy vars
    */
-  const updatePolicyInput = (inputType: PostureInput) =>
+  const setEnabledPolicyInput = (inputType: PostureInput) =>
     updatePolicy(
-      getUpdatedPosturePolicy(
+      getPosturePolicy(
         newPolicy,
         inputType,
         INPUTS_WITH_AWS_VARS.includes(inputType)
@@ -74,7 +74,7 @@ export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit })
   useEffect(() => {
     // Pick default input type for policy template.
     // Only 1 enabled input is supported when all inputs are initially enabled.
-    if (!edit) updatePolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+    if (!edit) setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
 
     // Required for mount only to ensure a single input type is selected
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,7 +82,7 @@ export const CspPolicyTemplateForm = memo<Props>(({ newPolicy, onChange, edit })
 
   return (
     <div>
-      <PolicyInputSelector input={input} updatePolicyInput={updatePolicyInput} disabled={edit} />
+      <PolicyInputSelector input={input} setInput={setEnabledPolicyInput} disabled={!!edit} />
       <PolicyVarsForm input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
       <EuiSpacer />
     </div>
