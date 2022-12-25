@@ -18,6 +18,7 @@ import {
   PackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
 import { DeepReadonly } from 'utility-types';
+import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../common/utils/helpers';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -27,7 +28,6 @@ import {
 } from '../../common/constants';
 import type { CspRule, CspRuleTemplate } from '../../common/schemas';
 import type { BenchmarkId } from '../../common/types';
-import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 
 const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
   `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
