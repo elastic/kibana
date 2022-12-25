@@ -95,18 +95,7 @@ async function addDataViewToAllSpaces(savedObjectsClient: SavedObjectsClientCont
   });
 
   cspmDataViews.saved_objects.forEach((dataView) => {
-    // data views registers with `namespaceType: 'agnostic'` and thus the namespaces attributes exists.
-    // src/plugins/data_views/server/saved_objects/data_views.ts
-    const currentSpaces = dataView.namespaces!;
-
-    // if the data view is not shared with all spaces, update it to be shared with all spaces
-    if (!currentSpaces.includes('*')) {
-      savedObjectsClient.updateObjectsSpaces(
-        [{ id: dataView.id, type: 'index-pattern' }],
-        ['*'],
-        []
-      );
-    }
+    savedObjectsClient.updateObjectsSpaces([{ id: dataView.id, type: 'index-pattern' }], ['*'], []);
   });
 }
 
