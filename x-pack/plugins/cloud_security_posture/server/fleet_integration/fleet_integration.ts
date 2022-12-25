@@ -95,7 +95,6 @@ async function addDataViewToAllSpaces(savedObjectsClient: SavedObjectsClientCont
   });
 
   cspmDataViews.saved_objects.forEach((dataView) => {
-    console.log({ dataView });
     savedObjectsClient.updateObjectsSpaces([{ id: dataView.id, type: 'index-pattern' }], ['*'], []);
   });
 }
