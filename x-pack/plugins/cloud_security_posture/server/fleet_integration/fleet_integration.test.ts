@@ -79,8 +79,7 @@ describe('create CSP rules with post package create callback', () => {
     } as unknown as SavedObjectsFindResponse);
 
     await onPackagePolicyPostCreateCallback(logger, mockPackagePolicy, mockSoClient);
-    console.log(mockSoClient.bulkCreate.mock.calls[0]);
-    console.log(mockSoClient.bulkCreate.mock.calls[0][0]);
+
     expect(mockSoClient.bulkCreate.mock.calls[0][0]).toMatchObject([
       {
         type: 'csp_rule',
