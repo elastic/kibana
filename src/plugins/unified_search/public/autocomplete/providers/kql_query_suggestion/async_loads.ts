@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { QueryStart } from '@kbn/data-plugin/public';
-
-export const clearStateFromSavedQuery = (queryService: QueryStart) => {
-  queryService.filterManager.removeAll();
-  queryService.queryString.clearQuery();
-};
+export { setupGetFieldSuggestions } from './field';
+export { setupGetValueSuggestions } from './value';
+export { setupGetOperatorSuggestions } from './operator';
+export { setupGetConjunctionSuggestions } from './conjunction';
