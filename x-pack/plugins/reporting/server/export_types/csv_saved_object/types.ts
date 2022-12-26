@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export {
+export type {
   CsvSavedSearchExportParamsType,
   CsvSavedSearchExportBodyType,
 } from '../../routes/generate/generate_from_savedobject';

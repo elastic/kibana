@@ -6,7 +6,9 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import assert from 'assert';
 import { SavedObject } from 'kibana/server';
+import moment from 'moment';
 import { wrapError } from '..';
 import { ReportingCore } from '../..';
 import {
@@ -22,13 +24,17 @@ const CsvSavedSearchExportParamsSchema = schema.object({
   savedObjectId: schema.string({ minLength: 2 }),
 });
 
-const CsvSavedSearchExportBodySchema = schema.object({
-  timerange: schema.object({
-    timezone: schema.string({ defaultValue: 'UTC' }),
-    min: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
-    max: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
-  }),
-});
+const CsvSavedSearchExportBodySchema = schema.maybe(
+  schema.object({
+    timerange: schema.maybe(
+      schema.object({
+        timezone: schema.maybe(schema.string({ defaultValue: 'UTC' })),
+        min: schema.maybe(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
+        max: schema.maybe(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
+      })
+    ),
+  })
+);
 
 /**
  * Register an API Endpoint for queuing report jobs
@@ -49,6 +55,20 @@ export function registerGenerateFromSavedObject(reporting: ReportingCore, logger
       },
     },
     authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+      // Validate the timerange
+      let minTime: moment.Moment | undefined;
+      let maxTime: moment.Moment | undefined;
+      if (req.body?.timerange?.min || req.body?.timerange?.max) {
+        try {
+          minTime = req.body?.timerange?.min ? moment(req.body?.timerange?.min) : minTime;
+          maxTime = req.body?.timerange?.max ? moment(req.body?.timerange?.max) : maxTime;
+          if (minTime) assert(minTime.isValid(), `Min time is not valid`);
+          if (maxTime) assert(maxTime.isValid(), `Max time is not valid`);
+        } catch (err) {
+          return res.badRequest(wrapError(err));
+        }
+      }
+
       // 1. Read the saved object to guard against 404 and get the title
       try {
         const searchObject: SavedObject<{ title?: string }> =
@@ -58,8 +78,8 @@ export function registerGenerateFromSavedObject(reporting: ReportingCore, logger
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
 
         const jobParams: JobParamsCsvFromSavedObject = {
-          browserTimezone: req.body.timerange.timezone,
-          timerange: req.body.timerange,
+          browserTimezone: req.body?.timerange?.timezone ?? 'UTC',
+          timerange: { min: minTime?.toISOString(), max: maxTime?.toISOString() },
           savedObjectId: req.params.savedObjectId,
           title: searchObject.attributes.title ?? 'Unknown search',
           objectType: 'saved search',

@@ -72,10 +72,10 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFnType> = (reporting, _lo
 
     // Form the Saved Search attributes and SearchSource into a config that's compatible with CsvGenerator
     const { columns, searchSource } = await getSharingData(
+      { uiSettings },
       await searchSourceStart.create(searchSourceFieldsWithRefs),
       savedSearch,
-      job.timerange,
-      { uiSettings }
+      job.timerange
     );
 
     const jobParamsCsv: JobParamsCSV = { ...job, columns, searchSource };

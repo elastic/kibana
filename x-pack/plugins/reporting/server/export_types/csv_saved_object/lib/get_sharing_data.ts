@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { Filter } from '@kbn/es-query';
 import type { IUiSettingsClient, SavedObject } from 'kibana/server';
-import type { Filter, ISearchSource } from 'src/plugins/data/common';
+import moment from 'moment';
+import type { ISearchSource } from 'src/plugins/data/common';
 import type { VisualizationSavedObjectAttributes } from 'src/plugins/visualizations/common';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -24,10 +26,10 @@ type SavedSearchObjectType = SavedObject<
  */
 
 export async function getSharingData(
+  services: { uiSettings: IUiSettingsClient },
   currentSearchSource: ISearchSource,
   savedSearch: SavedSearchObjectType,
-  timeRange: { min: string | number | null; max: string | number | null } | undefined,
-  services: { uiSettings: IUiSettingsClient }
+  timeRange?: { min?: string | number; max?: string | number }
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index');
@@ -35,7 +37,7 @@ export async function getSharingData(
     throw new Error(`Search Source is missing the "index" field`);
   }
 
-  const existingFilter = searchSource.getField('filter');
+  const savedSearchFilter = searchSource.getField('filter');
 
   searchSource.removeField('filter');
   searchSource.removeField('highlight');
@@ -73,30 +75,57 @@ export async function getSharingData(
   }
 
   // Combine the job's time filter into the SearchSource instance
-  if (timeFieldName) {
-    const timeFilter = {
-      meta: { field: timeFieldName, index: index.id },
+  let timeFilterFromRequest: Filter | undefined;
+  if (timeFieldName && (timeRange?.min || timeRange?.max)) {
+    let minTime: moment.Moment | undefined;
+    let maxTime: moment.Moment | undefined;
+    if (timeRange?.min) minTime = moment(timeRange.min);
+    if (timeRange?.max) maxTime = moment(timeRange.max);
+    timeFilterFromRequest = {
+      meta: { index: index.id },
       query: {
         range: {
           [timeFieldName]: {
             format: 'strict_date_optional_time',
-            gte: timeRange?.min,
-            lte: timeRange?.max,
+            gte: minTime,
+            lte: maxTime,
           },
         },
       },
     };
-    if (existingFilter && timeRange) {
-      searchSource.setField(
-        'filter',
-        Array.isArray(existingFilter)
-          ? [timeFilter, ...existingFilter]
-          : ([timeFilter, existingFilter] as Filter[])
-      );
+  }
+
+  let combinedFilters: Filter[] | undefined;
+
+  // Combine the time range filter from the job request body
+  // with any filters that have been saved into the saved search object
+  // NOTE: if the filters that were saved into the search are NOT an array, it may be a function. Function
+  // filters are not supported in this API.
+  if (savedSearchFilter && Array.isArray(savedSearchFilter)) {
+    if (timeFilterFromRequest) {
+      combinedFilters = [timeFilterFromRequest, ...savedSearchFilter];
     } else {
-      const filter = timeFilter || existingFilter;
-      searchSource.setField('filter', filter);
+      combinedFilters = savedSearchFilter;
     }
+  } else if (savedSearchFilter && typeof savedSearchFilter !== 'function') {
+    if (timeFilterFromRequest) {
+      combinedFilters = [timeFilterFromRequest, savedSearchFilter];
+    } else {
+      combinedFilters = [savedSearchFilter];
+    }
+  } else if (timeFilterFromRequest) {
+    if (savedSearchFilter && typeof savedSearchFilter !== 'function') {
+      combinedFilters = [timeFilterFromRequest, savedSearchFilter];
+    } else {
+      combinedFilters = [timeFilterFromRequest];
+    }
+  } else if (savedSearchFilter) {
+    // Getting here means the saved search's filter is a function.
+    // This is not supported, as it could be recursive.
+  }
+
+  if (combinedFilters) {
+    searchSource.setField('filter', combinedFilters);
   }
 
   // Inject sort
