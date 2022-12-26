@@ -172,7 +172,7 @@ async function generateLink(
     version: undefined,
     id: undefined,
   });
-  const updatedFilters = updateFilterReferences(prevFilters, dataViewToUpdate.id!, newDataView.id);
+  const updatedFilters = updateFilterReferences(prevFilters, dataViewToUpdate.id!, newDataView.id!);
 
   const redirectUrlParams: DiscoverAppLocatorParams = {
     dataViewSpec: newDataView.toSpec(false),
