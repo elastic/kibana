@@ -75,7 +75,7 @@ export const RULES_TABLE = '[data-test-subj="rules-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 
-export const RULES_MONITORING_TABLE = '[data-test-subj="allRulesTableTab-monitoring"]';
+export const RULES_MONITORING_TABLE = '[role="tablist"] > [data-test-subj="navigation-monitoring"]';
 
 export const SEVERITY = '[data-test-subj="severity"]';
 
