@@ -24,9 +24,9 @@ import {
   getAgentStatusesByAgentPolicies,
   getCspAgentPolicies,
   getCspPackagePolicies,
+  getInstalledPolicyTemplates,
 } from '../../lib/fleet_util';
 import { checkIndexStatus } from '../../lib/check_index_status';
-import { getInstalledPolicyTemplates } from '../../fleet_integration/fleet_integration';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
 
@@ -116,7 +116,7 @@ const getCspStatus = async ({
     getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
       per_page: 10000,
     }),
-    getInstalledPolicyTemplates(packagePolicyService, soClient, logger),
+    getInstalledPolicyTemplates(packagePolicyService, soClient),
   ]);
 
   const healthyAgents = await getHealthyAgents(
@@ -158,22 +158,21 @@ const getCspStatus = async ({
 
   if (status === 'not-installed')
     return {
-      installedPolicyTemplates,
-      latestCspPackage,
       status,
       indicesDetails,
       latestPackageVersion: latestCspPackageVersion,
+      installedPolicyTemplates,
       healthyAgents,
       installedPackagePolicies: installedPackagePoliciesTotal,
       isPluginInitialized: isPluginInitialized(),
     };
 
   const response = {
-    installedPolicyTemplates,
     status,
     indicesDetails,
     latestPackageVersion: latestCspPackageVersion,
     healthyAgents,
+    installedPolicyTemplates,
     installedPackagePolicies: installedPackagePoliciesTotal,
     installedPackageVersion: installation?.install_version,
     isPluginInitialized: isPluginInitialized(),

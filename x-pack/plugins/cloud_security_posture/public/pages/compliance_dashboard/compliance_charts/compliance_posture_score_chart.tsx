@@ -35,7 +35,7 @@ import { CompactFormattedNumber } from '../../../components/compact_formatted_nu
 import type { Evaluation, PostureTrend, Stats } from '../../../../common/types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
-interface CloudPostureScoreChartProps {
+interface CompliancePostureScoreChartProps {
   compact?: boolean;
   trend: PostureTrend[];
   data: Stats;
@@ -48,7 +48,9 @@ const getPostureScorePercentage = (postureScore: number): string => `${Math.roun
 const PercentageInfo = ({
   compact,
   postureScore,
-}: CloudPostureScoreChartProps['data'] & { compact?: CloudPostureScoreChartProps['compact'] }) => {
+}: CompliancePostureScoreChartProps['data'] & {
+  compact?: CompliancePostureScoreChartProps['compact'];
+}) => {
   const { euiTheme } = useEuiTheme();
   const percentage = getPostureScorePercentage(postureScore);
 
@@ -134,12 +136,12 @@ const CounterLink = ({
   );
 };
 
-export const CloudPostureScoreChart = ({
+export const CompliancePostureScoreChart = ({
   data,
   trend,
   onEvalCounterClick,
   compact,
-}: CloudPostureScoreChartProps) => {
+}: CompliancePostureScoreChartProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -167,7 +169,7 @@ export const CloudPostureScoreChart = ({
                 color={statusColors.passed}
                 onClick={() => onEvalCounterClick(RULE_PASSED)}
                 tooltipContent={i18n.translate(
-                  'xpack.csp.cloudPostureScoreChart.counterLink.passedFindingsTooltip',
+                  'xpack.csp.compliancePostureScoreChart.counterLink.passedFindingsTooltip',
                   { defaultMessage: 'Passed findings' }
                 )}
               />
@@ -178,7 +180,7 @@ export const CloudPostureScoreChart = ({
                 color={statusColors.failed}
                 onClick={() => onEvalCounterClick(RULE_FAILED)}
                 tooltipContent={i18n.translate(
-                  'xpack.csp.cloudPostureScoreChart.counterLink.failedFindingsTooltip',
+                  'xpack.csp.compliancePostureScoreChart.counterLink.failedFindingsTooltip',
                   { defaultMessage: 'Failed findings' }
                 )}
               />

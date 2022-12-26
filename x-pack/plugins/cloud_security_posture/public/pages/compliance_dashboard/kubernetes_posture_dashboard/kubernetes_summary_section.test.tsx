@@ -9,22 +9,22 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { expectIdsInDoc } from '../../../test/utils';
 import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
-import { CloudSummarySection } from './cloud_summary_section';
+import { KubernetesSummarySection } from './kubernetes_summary_section';
 import { mockDashboardData } from '../compliance_dashboard.test';
 import { TestProvider } from '../../../test/test_provider';
 import { screen } from '@testing-library/react';
 
-describe('<CloudSummarySection />', () => {
-  const renderCloudSummarySection = (alterMockData = {}) => {
+describe('<KubernetesSummarySection />', () => {
+  const renderKubernetesSummarySection = (alterMockData = {}) => {
     render(
       <TestProvider>
-        <CloudSummarySection complianceData={{ ...mockDashboardData, ...alterMockData }} />
+        <KubernetesSummarySection complianceData={{ ...mockDashboardData, ...alterMockData }} />
       </TestProvider>
     );
   };
 
   it('renders all counter cards', () => {
-    renderCloudSummarySection();
+    renderKubernetesSummarySection();
 
     expectIdsInDoc({
       be: [
@@ -36,7 +36,7 @@ describe('<CloudSummarySection />', () => {
   });
 
   it('renders counters content according to mock', async () => {
-    renderCloudSummarySection();
+    renderKubernetesSummarySection();
 
     expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.CLUSTERS_EVALUATED)).toHaveTextContent('1');
     expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED)).toHaveTextContent(
@@ -46,7 +46,7 @@ describe('<CloudSummarySection />', () => {
   });
 
   it('renders counters value in compact abbreviation if its above one million', () => {
-    renderCloudSummarySection({ stats: { resourcesEvaluated: 999999, totalFailed: 1000000 } });
+    renderKubernetesSummarySection({ stats: { resourcesEvaluated: 999999, totalFailed: 1000000 } });
 
     expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.RESOURCES_EVALUATED)).toHaveTextContent(
       '999,999'
@@ -55,7 +55,7 @@ describe('<CloudSummarySection />', () => {
   });
 
   it('renders 0 as empty state', () => {
-    renderCloudSummarySection({ stats: { totalFailed: undefined } });
+    renderKubernetesSummarySection({ stats: { totalFailed: undefined } });
 
     expect(screen.getByTestId(DASHBOARD_COUNTER_CARDS.FAILING_FINDINGS)).toHaveTextContent('0');
   });

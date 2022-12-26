@@ -75,6 +75,7 @@ interface BaseCspSetupStatus {
   installedPackagePolicies: number;
   healthyAgents: number;
   isPluginInitialized: boolean;
+  installedPolicyTemplates: Array<'cspm' | 'kspm'>;
 }
 
 interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {

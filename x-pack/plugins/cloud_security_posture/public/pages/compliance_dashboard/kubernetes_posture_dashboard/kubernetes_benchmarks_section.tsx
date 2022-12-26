@@ -9,15 +9,15 @@ import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
+import { CompliancePostureScoreChart } from '../compliance_charts/compliance_posture_score_chart';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
 import { RULE_FAILED } from '../../../../common/constants';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { ClusterDetailsBox } from './cluster_details_box';
-import { dashboardColumnsGrow } from './cloud_summary_section';
+import { dashboardColumnsGrow } from './kubernetes_summary_section';
 
-export const CloudBenchmarksSection = ({
+export const KubernetesBenchmarksSection = ({
   complianceData,
 }: {
   complianceData: ComplianceDashboardData;
@@ -57,7 +57,7 @@ export const CloudBenchmarksSection = ({
           <EuiTitle size="xxs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
             <h5>
               <FormattedMessage
-                id="xpack.csp.dashboard.cloudBenchmarkSection.columnsHeader.clusterNameTitle"
+                id="xpack.csp.dashboard.kubernetesBenchmarkSection.columnsHeader.clusterNameTitle"
                 defaultMessage="Cluster Name"
               />
             </h5>
@@ -70,7 +70,7 @@ export const CloudBenchmarksSection = ({
           >
             <h5>
               <FormattedMessage
-                id="xpack.csp.dashboard.cloudBenchmarkSection.columnsHeader.complianceScoreTitle"
+                id="xpack.csp.dashboard.kubernetesBenchmarkSection.columnsHeader.complianceScoreTitle"
                 defaultMessage="Compliance Score"
               />
             </h5>
@@ -83,7 +83,7 @@ export const CloudBenchmarksSection = ({
           >
             <h5>
               <FormattedMessage
-                id="xpack.csp.dashboard.cloudBenchmarkSection.columnsHeader.complianceByCisSectionTitle"
+                id="xpack.csp.dashboard.kubernetesBenchmarkSection.columnsHeader.complianceByCisSectionTitle"
                 defaultMessage="Compliance by CIS Section"
               />
             </h5>
@@ -107,7 +107,7 @@ export const CloudBenchmarksSection = ({
                 height: '100%',
               }}
             >
-              <CloudPostureScoreChart
+              <CompliancePostureScoreChart
                 compact
                 id={`${cluster.meta.clusterId}_score_chart`}
                 data={cluster.stats}

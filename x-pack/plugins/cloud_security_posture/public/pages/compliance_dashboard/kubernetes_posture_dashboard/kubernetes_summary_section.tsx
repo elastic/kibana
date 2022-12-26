@@ -13,7 +13,7 @@ import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
 import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import { ChartPanel } from '../../../components/chart_panel';
-import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
+import { CompliancePostureScoreChart } from '../compliance_charts/compliance_posture_score_chart';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
 import {
@@ -28,7 +28,7 @@ export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   third: 8,
 };
 
-export const CloudSummarySection = ({
+export const KubernetesSummarySection = ({
   complianceData,
 }: {
   complianceData: ComplianceDashboardData;
@@ -107,11 +107,11 @@ export const CloudSummarySection = ({
       </EuiFlexItem>
       <EuiFlexItem grow={dashboardColumnsGrow.second}>
         <ChartPanel
-          title={i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {
-            defaultMessage: 'Cloud Posture Score',
+          title={i18n.translate('xpack.csp.dashboard.summarySection.complianceScorePanelTitle', {
+            defaultMessage: 'Compliance Score',
           })}
         >
-          <CloudPostureScoreChart
+          <CompliancePostureScoreChart
             id="cloud_posture_score_chart"
             data={complianceData.stats}
             trend={complianceData.trend}
