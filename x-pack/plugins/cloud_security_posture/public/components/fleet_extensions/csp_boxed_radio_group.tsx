@@ -20,7 +20,6 @@ export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Pr
 
   return (
     <EuiRadioGroup
-      className="__extendedRadioGroup"
       disabled={disabled}
       idSelected={idSelected}
       options={options.map((o) => ({
