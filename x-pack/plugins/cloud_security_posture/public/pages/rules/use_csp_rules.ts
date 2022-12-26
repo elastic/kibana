@@ -9,8 +9,8 @@ import { FunctionKeys } from 'utility-types';
 import type { SavedObjectsFindOptions, SimpleSavedObject } from '@kbn/core/public';
 import { NewPackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import {
-  extractBenchmarkFromPackagePolicy,
-  getBenchmarkTypeFilterFromBenchmarkId,
+  getBenchmarkFromPackagePolicy,
+  getBenchmarkTypeFilter,
 } from '../../../common/utils/helpers';
 import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { CspRuleTemplate } from '../../../common/schemas';
@@ -36,7 +36,7 @@ export const useFindCspRules = (
     savedObjects.client
       .get<NewPackagePolicy>(PACKAGE_POLICY_SAVED_OBJECT_TYPE, packagePolicyId)
       .then((res) => {
-        const benchmarkId = extractBenchmarkFromPackagePolicy(res.attributes.inputs);
+        const benchmarkId = getBenchmarkFromPackagePolicy(res.attributes.inputs);
 
         return savedObjects.client.find<CspRuleTemplate>({
           type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
@@ -45,7 +45,7 @@ export const useFindCspRules = (
           page: 1,
           sortField: 'metadata.name',
           perPage,
-          filter: getBenchmarkTypeFilterFromBenchmarkId(benchmarkId),
+          filter: getBenchmarkTypeFilter(benchmarkId),
         });
       })
   );

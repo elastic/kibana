@@ -9,6 +9,7 @@ import { Truthy } from 'lodash';
 import {
   NewPackagePolicy,
   NewPackagePolicyInput,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PackagePolicy,
   PackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
@@ -36,16 +37,16 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
   return defaultMessage; // TODO: i18n
 };
 
-export const getBenchmarkTypeFilterFromBenchmarkId = (type: BenchmarkId): string =>
+export const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
   `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
 
 export const isEnabledBenchmarkInputType = (input: PackagePolicyInput | NewPackagePolicyInput) =>
-  !!input.type && input.enabled;
+  input.enabled;
 
 export const isCspPackage = (packageName?: string) =>
   packageName === CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
 
-export const extractBenchmarkFromPackagePolicy = (
+export const getBenchmarkFromPackagePolicy = (
   inputs: PackagePolicy['inputs'] | NewPackagePolicy['inputs']
 ): BenchmarkId => {
   const enabledInputs = inputs.filter(isEnabledBenchmarkInputType);
@@ -63,3 +64,4 @@ const getInputType = (inputType: string): string => {
   // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>
   return inputType.split('/')[1];
 };
+export const getCSPKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`;

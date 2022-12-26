@@ -6,9 +6,8 @@
  */
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
+import { getCSPKuery } from '../../common/utils/helpers';
 
 export const isCspPackagePolicyInstalled = async (
   packagePolicyClient: PackagePolicyClient,
@@ -17,7 +16,7 @@ export const isCspPackagePolicyInstalled = async (
 ): Promise<boolean> => {
   try {
     const { total } = await packagePolicyClient.list(soClient, {
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`,
+      kuery: getCSPKuery,
       page: 1,
     });
 

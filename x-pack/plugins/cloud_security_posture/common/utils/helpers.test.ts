@@ -6,10 +6,7 @@
  */
 
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import {
-  extractBenchmarkFromPackagePolicy,
-  getBenchmarkTypeFilterFromBenchmarkId,
-} from './helpers';
+import { getBenchmarkFromPackagePolicy, getBenchmarkTypeFilter } from './helpers';
 
 describe('test helper methods', () => {
   it('get default integration type from inputs with multiple enabled types', () => {
@@ -20,7 +17,7 @@ describe('test helper methods', () => {
       { type: 'cloudbeat/cis_k8s', enabled: true, streams: [] },
       { type: 'cloudbeat/cis_eks', enabled: true, streams: [] },
     ];
-    const type = extractBenchmarkFromPackagePolicy(mockPackagePolicy.inputs);
+    const type = getBenchmarkFromPackagePolicy(mockPackagePolicy.inputs);
     expect(type).toMatch('cis_k8s');
   });
 
@@ -32,7 +29,7 @@ describe('test helper methods', () => {
       { type: 'cloudbeat/cis_k8s', enabled: false, streams: [] },
       { type: 'cloudbeat/cis_eks', enabled: false, streams: [] },
     ];
-    const type = extractBenchmarkFromPackagePolicy(mockPackagePolicy.inputs);
+    const type = getBenchmarkFromPackagePolicy(mockPackagePolicy.inputs);
     expect(type).toMatch('cis_k8s');
   });
 
@@ -44,7 +41,7 @@ describe('test helper methods', () => {
       { type: 'cloudbeat/cis_eks', enabled: true, streams: [] },
       { type: 'cloudbeat/cis_k8s', enabled: false, streams: [] },
     ];
-    const typeEks = extractBenchmarkFromPackagePolicy(mockPackagePolicy.inputs);
+    const typeEks = getBenchmarkFromPackagePolicy(mockPackagePolicy.inputs);
     expect(typeEks).toMatch('cis_eks');
   });
 
@@ -56,11 +53,11 @@ describe('test helper methods', () => {
       { type: 'cloudbeat/cis_eks', enabled: false, streams: [] },
       { type: 'cloudbeat/cis_k8s', enabled: true, streams: [] },
     ];
-    const typeK8s = extractBenchmarkFromPackagePolicy(mockPackagePolicy.inputs);
+    const typeK8s = getBenchmarkFromPackagePolicy(mockPackagePolicy.inputs);
     expect(typeK8s).toMatch('cis_k8s');
   });
   it('get benchmark type filter based on a benchmark id', () => {
-    const typeFilter = getBenchmarkTypeFilterFromBenchmarkId('cis_eks');
+    const typeFilter = getBenchmarkTypeFilter('cis_eks');
     expect(typeFilter).toMatch('csp-rule-template.attributes.metadata.benchmark.id: "cis_eks"');
   });
 });

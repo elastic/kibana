@@ -95,7 +95,7 @@ export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: num
 export interface Benchmark {
   package_policy: PackagePolicy;
   agent_policy: AgentPolicyStatus;
-  number_of_rules: number;
+  rules_count: number;
 }
 
 export type BenchmarkId = CspRuleMetadata['benchmark']['id'];

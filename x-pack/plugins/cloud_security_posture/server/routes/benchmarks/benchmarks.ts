@@ -16,8 +16,8 @@ import {
 import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
 import type { Benchmark } from '../../../common/types';
 import {
-  extractBenchmarkFromPackagePolicy,
-  getBenchmarkTypeFilterFromBenchmarkId,
+  getBenchmarkFromPackagePolicy,
+  getBenchmarkTypeFilter,
   isNonNullable,
 } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
@@ -33,11 +33,11 @@ export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
 export const getRulesCountForPolicy = async (
   soClient: SavedObjectsClientContract,
-  benchmarkName: BenchmarkId
+  benchmarkId: BenchmarkId
 ): Promise<number> => {
   const rules = await soClient.find<CspRuleTemplate>({
     type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-    filter: getBenchmarkTypeFilterFromBenchmarkId(benchmarkName),
+    filter: getBenchmarkTypeFilter(benchmarkId),
     perPage: 0,
   });
 
@@ -64,7 +64,7 @@ const createBenchmarks = (
           .filter(isNonNullable) ?? [];
 
       const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
-        const benchmarkId = extractBenchmarkFromPackagePolicy(cspPackage.inputs);
+        const benchmarkId = getBenchmarkFromPackagePolicy(cspPackage.inputs);
         const rulesCount = await getRulesCountForPolicy(soClient, benchmarkId);
         const agentPolicyStatus = {
           id: agentPolicy.id,
@@ -74,7 +74,7 @@ const createBenchmarks = (
         return {
           package_policy: cspPackage,
           agent_policy: agentPolicyStatus,
-          number_of_rules: rulesCount,
+          rules_count: rulesCount,
         };
       });
 
