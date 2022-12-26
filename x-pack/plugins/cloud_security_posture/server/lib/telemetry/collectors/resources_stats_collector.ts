@@ -7,8 +7,8 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 import type { CspmResourcesStats } from './types';
+import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
 interface ResourcesStats {
   accounts: {
@@ -44,38 +44,6 @@ interface EvaluationStats {
   key: string; // passed / failed
   doc_count: number;
 }
-
-const getEvaluationStats = (resourceSubType: ResourceSubType) => {
-  const passed =
-    resourceSubType.evaluation.buckets.find((evaluation) => evaluation.key === 'passed')
-      ?.doc_count || 0;
-  const failed =
-    resourceSubType.evaluation.buckets.find((evaluation) => evaluation.key === 'failed')
-      ?.doc_count || 0;
-  return { passed_findings_count: passed, failed_findings_count: failed };
-};
-
-const getCspmResourcesStats = (aggregatedResourcesStats: ResourcesStats): CspmResourcesStats[] => {
-  const accounts = aggregatedResourcesStats.accounts.buckets;
-
-  const resourcesStats = accounts.map((account) => {
-    const accountId = account.key;
-    return account.resource_type.buckets.map((resourceType) => {
-      return resourceType.resource_sub_type.buckets.map((resourceSubType) => {
-        const evaluation = getEvaluationStats(resourceSubType);
-        return {
-          account_id: accountId,
-          resource_type: resourceType.key,
-          resource_type_doc_count: resourceType.doc_count,
-          resource_sub_type: resourceSubType.key,
-          resource_sub_type_doc_count: resourceSubType.doc_count,
-          ...evaluation,
-        };
-      });
-    });
-  });
-  return resourcesStats.flat(2);
-};
 
 const getResourcesStatsQuery = (index: string): SearchRequest => ({
   index,
@@ -131,6 +99,38 @@ const getResourcesStatsQuery = (index: string): SearchRequest => ({
   size: 0,
   _source: false,
 });
+
+const getEvaluationStats = (resourceSubType: ResourceSubType) => {
+  const passed =
+    resourceSubType.evaluation.buckets.find((evaluation) => evaluation.key === 'passed')
+      ?.doc_count || 0;
+  const failed =
+    resourceSubType.evaluation.buckets.find((evaluation) => evaluation.key === 'failed')
+      ?.doc_count || 0;
+  return { passed_findings_count: passed, failed_findings_count: failed };
+};
+
+const getCspmResourcesStats = (aggregatedResourcesStats: ResourcesStats): CspmResourcesStats[] => {
+  const accounts = aggregatedResourcesStats.accounts.buckets;
+
+  const resourcesStats = accounts.map((account) => {
+    const accountId = account.key;
+    return account.resource_type.buckets.map((resourceType) => {
+      return resourceType.resource_sub_type.buckets.map((resourceSubType) => {
+        const evaluation = getEvaluationStats(resourceSubType);
+        return {
+          account_id: accountId,
+          resource_type: resourceType.key,
+          resource_type_doc_count: resourceType.doc_count,
+          resource_sub_type: resourceSubType.key,
+          resource_sub_type_doc_count: resourceSubType.doc_count,
+          ...evaluation,
+        };
+      });
+    });
+  });
+  return resourcesStats.flat(2);
+};
 
 export const getResourcesStats = async (
   esClient: ElasticsearchClient,
