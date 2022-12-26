@@ -18,6 +18,7 @@ import {
   PackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
 import { DeepReadonly } from 'utility-types';
+import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../common/utils/helpers';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -53,8 +54,9 @@ export const onPackagePolicyPostCreateCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
+  addDataViewToAllSpaces(savedObjectsClient);
 
+  const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
   // Create csp-rules from the generic asset
   const existingRuleTemplates: SavedObjectsFindResponse<CspRuleTemplate> =
     await savedObjectsClient.find({
@@ -82,6 +84,20 @@ export const onPackagePolicyPostCreateCallback = async (
     logger.error(e);
   }
 };
+
+async function addDataViewToAllSpaces(savedObjectsClient: SavedObjectsClientContract) {
+  const cspmDataViews = await savedObjectsClient.find<DataViewSavedObjectAttrs>({
+    type: 'index-pattern',
+    fields: ['title'],
+    search: CLOUD_SECURITY_POSTURE_PACKAGE_NAME + '*',
+    searchFields: ['title'],
+    perPage: 100,
+  });
+
+  cspmDataViews.saved_objects.forEach((dataView) => {
+    savedObjectsClient.updateObjectsSpaces([{ id: dataView.id, type: 'index-pattern' }], ['*'], []);
+  });
+}
 
 /**
  * Callback to handle deletion of PackagePolicies in Fleet
