@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { KubernetesBenchmarksSection } from './kubernetes_benchmarks_section';
-import { CloudSummarySection } from './kubernetes_summary_section';
+import { KubernetesSummarySection } from './kubernetes_summary_section';
 import { useCspSetupStatusApi } from '../../../common/api/use_setup_status_api';
 import { useComplianceDashboardDataApi } from '../../../common/api';
 
@@ -21,7 +21,7 @@ export const KubernetesPostureDashboard = () => {
 
   return (
     <>
-      <CloudSummarySection complianceData={getDashboardData.data!} />
+      <KubernetesSummarySection complianceData={getDashboardData.data!} />
       <EuiSpacer />
       <KubernetesBenchmarksSection complianceData={getDashboardData.data!} />
       <EuiSpacer />

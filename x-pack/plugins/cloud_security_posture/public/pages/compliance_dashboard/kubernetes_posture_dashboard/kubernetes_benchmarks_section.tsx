@@ -41,6 +41,8 @@ export const KubernetesBenchmarksSection = ({
     navToFindings({ cluster_id: clusterId, 'result.evaluation': RULE_FAILED });
   };
 
+  return <PostureCardsTable cardsData={complianceData.clusters} />;
+
   return (
     <>
       <EuiFlexGroup
@@ -137,6 +139,130 @@ export const KubernetesBenchmarksSection = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
+    </>
+  );
+};
+
+const PostureCardsTable = ({ cardsData }) => {
+  const { euiTheme } = useEuiTheme();
+  const navToFindings = useNavigateFindings();
+
+  const handleEvalCounterClick = (clusterId: string, evaluation: Evaluation) => {
+    navToFindings({ cluster_id: clusterId, 'result.evaluation': evaluation });
+  };
+
+  const handleCellClick = (clusterId: string, ruleSection: string) => {
+    navToFindings({
+      cluster_id: clusterId,
+      'rule.section': ruleSection,
+      'result.evaluation': RULE_FAILED,
+    });
+  };
+
+  const handleViewAllClick = (clusterId: string) => {
+    navToFindings({ cluster_id: clusterId, 'result.evaluation': RULE_FAILED });
+  };
+
+  const columns = [
+    {
+      label: i18n.translate(
+        'xpack.csp.dashboard.kubernetesBenchmarkSection.columnsHeader.clusterNameTitle',
+        { defaultMessage: 'Cluster Name' }
+      ),
+      render: (data) => <ClusterDetailsBox cluster={data} />,
+    },
+    {
+      label: i18n.translate(
+        'xpack.csp.dashboard.kubernetesBenchmarkSection.columnsHeader.complianceScoreTitle',
+        { defaultMessage: 'Compliance Score' }
+      ),
+      render: (data) => (
+        <CompliancePostureScoreChart
+          compact
+          id={`${data.meta.clusterId}_score_chart`}
+          data={data.stats}
+          trend={data.trend}
+          onEvalCounterClick={(evaluation) =>
+            handleEvalCounterClick(data.meta.clusterId, evaluation)
+          }
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'xpack.csp.dashboard.kubernetesBenchmarkSection.columnsHeader.complianceByCisSectionTitle',
+        { defaultMessage: 'Compliance By CIS Section' }
+      ),
+      render: (data) => (
+        <RisksTable
+          compact
+          data={data.groupedFindingsEvaluation}
+          maxItems={3}
+          onCellClick={(resourceTypeName) => handleCellClick(data.meta.clusterId, resourceTypeName)}
+          viewAllButtonTitle={i18n.translate(
+            'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
+            { defaultMessage: 'View all failed findings for this cluster' }
+          )}
+          onViewAllClick={() => handleViewAllClick(data.meta.clusterId)}
+        />
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <EuiFlexGroup
+        alignItems="flexStart"
+        gutterSize="none"
+        style={{
+          borderBottom: euiTheme.border.thick,
+          borderBottomColor: euiTheme.colors.text,
+          marginBottom: euiTheme.size.m,
+          paddingBottom: euiTheme.size.s,
+        }}
+      >
+        {columns.map((c, i) => (
+          <EuiFlexItem grow={dashboardColumnsGrow.first}>
+            <EuiTitle
+              size="xxs"
+              css={{
+                fontWeight: euiTheme.font.weight.semiBold,
+              }}
+            >
+              <h5>{c.label}</h5>
+            </EuiTitle>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+      {cardsData.map((cluster) => {
+        return (
+          <EuiFlexGroup
+            key={cluster.meta.clusterId}
+            gutterSize="l"
+            style={{ borderBottom: euiTheme.border.thin }}
+          >
+            <EuiFlexItem grow={dashboardColumnsGrow.first}>
+              {columns[0].render(cluster)}
+            </EuiFlexItem>
+            <EuiFlexItem grow={dashboardColumnsGrow.second}>
+              <div
+                style={{
+                  paddingLeft: euiTheme.size.base,
+                  paddingRight: euiTheme.size.base,
+                  height: '100%',
+                }}
+              >
+                {columns[1].render(cluster)}
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem grow={dashboardColumnsGrow.third}>
+              <div style={{ paddingLeft: euiTheme.size.base, paddingRight: euiTheme.size.base }}>
+                {columns[2].render(cluster)}
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      })}
     </>
   );
 };
