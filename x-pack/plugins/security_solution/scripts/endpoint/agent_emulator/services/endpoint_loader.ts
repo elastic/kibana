@@ -13,7 +13,7 @@ import pMap from 'p-map';
 import type { CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type seedrandom from 'seedrandom';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { indexAlerts } from '../../../../common/endpoint/data_loaders/index_alerts';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { fetchEndpointMetadataList } from '../../common/endpoint_metadata_services';
