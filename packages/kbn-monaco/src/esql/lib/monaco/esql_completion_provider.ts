@@ -20,6 +20,11 @@ import type {
 } from '../autocomplete/types';
 import type { ESQLWorker } from '../../worker/esql_worker';
 
+const emptyCompletionList: monaco.languages.CompletionList = {
+  incomplete: false,
+  suggestions: [],
+};
+
 export class ESQLCompletionAdapter implements monaco.languages.CompletionItemProvider {
   constructor(
     private worker: (...uris: monaco.Uri[]) => Promise<ESQLWorker>,
@@ -65,6 +70,15 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
     model: monaco.editor.IReadOnlyModel,
     position: monaco.Position
   ): Promise<monaco.languages.CompletionList> {
+    const lines = model.getLineCount();
+
+    if (
+      lines !== position.lineNumber ||
+      model.getLineContent(position.lineNumber).trimEnd().length >= position.column
+    ) {
+      return emptyCompletionList;
+    }
+
     const worker = await this.worker(model.uri);
     const wordInfo = model.getWordUntilPosition(position);
 
