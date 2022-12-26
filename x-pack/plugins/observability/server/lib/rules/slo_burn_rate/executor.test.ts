@@ -24,15 +24,18 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import {
-  FIRED_ACTION,
-  getRuleExecutor,
-} from './executor';
+import { FIRED_ACTION, getRuleExecutor } from './executor';
 import { aStoredSLO, createSLO } from '../../../services/slo/fixtures/slo';
 import { SLO } from '../../../domain/models';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { BurnRateAlertState, BurnRateAlertContext, BurnRateAllowedActionGroups, BurnRateRuleParams, AlertStates } from './types';
+import {
+  BurnRateAlertState,
+  BurnRateAlertContext,
+  BurnRateAllowedActionGroups,
+  BurnRateRuleParams,
+  AlertStates,
+} from './types';
 
 const commonEsResponse = {
   took: 100,
