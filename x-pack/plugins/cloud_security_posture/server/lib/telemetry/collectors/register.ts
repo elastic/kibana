@@ -26,8 +26,11 @@ export function registerCspmUsageCollector(
     type: 'cloud_security_posture',
     isReady: () => true,
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
-      const indicesStats = await getIndicesStats(collectorFetchContext.esClient, logger);
-      const resourcesStats = await getResourcesStats(collectorFetchContext.esClient, logger);
+      const [indicesStats, resourcesStats] = await Promise.all([
+        getIndicesStats(collectorFetchContext.esClient, logger),
+        await getResourcesStats(collectorFetchContext.esClient, logger),
+      ]);
+
       return {
         indices: indicesStats,
         resources_stats: resourcesStats,

@@ -61,8 +61,8 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       resource_type_doc_count: { type: 'long' },
       resource_sub_type: { type: 'keyword' },
       resource_sub_type_doc_count: { type: 'long' },
-      passed: { type: 'long' },
-      failed: { type: 'long' },
+      passed_findings_count: { type: 'long' },
+      failed_findings_count: { type: 'long' },
     },
   },
 };

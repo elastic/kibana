@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 import type { CspmResourcesStats } from './types';
 
@@ -45,43 +45,20 @@ interface EvaluationStats {
   doc_count: number;
 }
 
-export const getResourcesStats = async (
-  esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<CspmResourcesStats[]> => {
-  try {
-    const isIndexExists = await esClient.indices.exists({
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
-    });
-
-    if (isIndexExists) {
-      return await getResourceStats(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS);
-    }
-
-    return [];
-  } catch (e) {
-    logger.error(`Failed to get resources stats ${e}`);
-    return [];
-  }
+const getEvaluationStats = (resourceSubType: ResourceSubType) => {
+  const passed =
+    resourceSubType.evaluation.buckets.find((evaluation) => evaluation.key === 'passed')
+      ?.doc_count || 0;
+  const failed =
+    resourceSubType.evaluation.buckets.find((evaluation) => evaluation.key === 'failed')
+      ?.doc_count || 0;
+  return { passed_findings_count: passed, failed_findings_count: failed };
 };
 
-const getResourceStats = async (
-  esClient: ElasticsearchClient,
-  index: string
-): Promise<CspmResourcesStats[]> => {
-  const resourcesStatsResponse = await esClient.search<unknown, ResourcesStats>(
-    getResourcesStatsQuery(index)
-  );
-  const resourcesStats = resourcesStatsResponse.aggregations
-    ? parseResourcesStatsQueryResponse(resourcesStatsResponse.aggregations)
-    : [];
-  return resourcesStats;
-};
+const getCspmResourcesStats = (aggregatedResourcesStats: ResourcesStats): CspmResourcesStats[] => {
+  const accounts = aggregatedResourcesStats.accounts.buckets;
 
-const parseResourcesStatsQueryResponse = (resourcesStats: ResourcesStats): CspmResourcesStats[] => {
-  const accounts = resourcesStats.accounts.buckets;
-
-  const parsedResourcesStats = accounts.map((account) => {
+  const resourcesStats = accounts.map((account) => {
     const accountId = account.key;
     return account.resource_type.buckets.map((resourceType) => {
       return resourceType.resource_sub_type.buckets.map((resourceSubType) => {
@@ -97,17 +74,7 @@ const parseResourcesStatsQueryResponse = (resourcesStats: ResourcesStats): CspmR
       });
     });
   });
-  return parsedResourcesStats.flat(2);
-};
-
-const getEvaluationStats = (resourceSubType: ResourceSubType) => {
-  const passed =
-    resourceSubType.evaluation.buckets.find((evaluation) => evaluation.key === 'passed')
-      ?.doc_count ?? 0;
-  const failed =
-    resourceSubType.evaluation.buckets.find((evaluation) => evaluation.key === 'failed')
-      ?.doc_count ?? 0;
-  return { passed, failed };
+  return resourcesStats.flat(2);
 };
 
 const getResourcesStatsQuery = (index: string): SearchRequest => ({
@@ -131,7 +98,7 @@ const getResourcesStatsQuery = (index: string): SearchRequest => ({
             order: {
               _count: 'desc',
             },
-            size: 98,
+            size: 100,
           },
           aggs: {
             resource_sub_type: {
@@ -164,3 +131,31 @@ const getResourcesStatsQuery = (index: string): SearchRequest => ({
   size: 0,
   _source: false,
 });
+
+export const getResourcesStats = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<CspmResourcesStats[]> => {
+  try {
+    const isIndexExists = await esClient.indices.exists({
+      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    });
+
+    if (isIndexExists) {
+      const resourcesStatsResponse = await esClient.search<unknown, ResourcesStats>(
+        getResourcesStatsQuery(LATEST_FINDINGS_INDEX_DEFAULT_NS)
+      );
+
+      const cspmResourcesStats = resourcesStatsResponse.aggregations
+        ? getCspmResourcesStats(resourcesStatsResponse.aggregations)
+        : [];
+
+      return cspmResourcesStats;
+    }
+
+    return [];
+  } catch (e) {
+    logger.error(`Failed to get resources stats ${e}`);
+    return [];
+  }
+};

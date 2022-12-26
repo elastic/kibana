@@ -23,15 +23,12 @@ export interface IndexStats {
   last_doc_timestamp: string | null;
 }
 
-export interface ResourceStats {
-  [key: string]: { doc_count: number; passed: number; failed: number };
-}
 export interface CspmResourcesStats {
   account_id: string;
   resource_type: string;
   resource_type_doc_count: number;
   resource_sub_type: string;
   resource_sub_type_doc_count: number;
-  passed: number;
-  failed: number;
+  passed_findings_count: number;
+  failed_findings_count: number;
 }
