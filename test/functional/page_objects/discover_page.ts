@@ -810,7 +810,7 @@ export class DiscoverPageObject extends FtrService {
   public async getCurrentDataViewId() {
     const validationResult = await this.validateDataViewReffsEquality();
     if (validationResult.valid) {
-      return validationResult.result;
+      return validationResult.result!;
     } else {
       throw new Error(validationResult.message);
     }
