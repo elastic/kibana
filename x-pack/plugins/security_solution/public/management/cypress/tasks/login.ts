@@ -10,7 +10,6 @@ import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 // eslint-disable-next-line import/no-nodejs-modules
 import Url from 'url';
-import type { ROLE } from '../../../../../../test/security_solution_endpoint_api_int/services/roles_users';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -55,7 +54,7 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param role string role/user to log in with
  * @param route string route to visit
  */
-export const getUrlWithRoute = (role: ROLE, route: string) => {
+export const getUrlWithRoute = (role: string, route: string) => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const theUrl = `${Url.format({
@@ -119,7 +118,7 @@ export const loginWithUser = (user: User) => {
   });
 };
 
-export const loginWithRole = async (role: ROLE) => {
+export const loginWithRole = async (role: string) => {
   // postRoleAndUser(role);
   const theUrl = Url.format({
     auth: `${role}:changeme`,
@@ -154,7 +153,7 @@ export const loginWithRole = async (role: ROLE) => {
  * To speed the execution of tests, prefer this non-interactive authentication,
  * which is faster than authentication via Kibana's interactive login page.
  */
-export const login = (role?: ROLE) => {
+export const login = (role?: string) => {
   if (role != null) {
     loginWithRole(role);
   } else if (credentialsProvidedByEnvironment()) {

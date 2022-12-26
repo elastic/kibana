@@ -7,12 +7,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-
-import {
-  createEndpointDockerConfig,
-  getRegistryUrlAsArray,
-} from '../security_solution_endpoint_api_int/registry';
-import { services } from '../security_solution_endpoint_api_int/services';
+import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -25,7 +20,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...kibanaCommonTestsConfig.getAll(),
 
-    dockerServers: createEndpointDockerConfig(),
     services,
 
     esTestCluster: {
@@ -46,8 +40,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        // if you return an empty string here the kibana server will not start properly but an empty array works
-        ...getRegistryUrlAsArray(),
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
