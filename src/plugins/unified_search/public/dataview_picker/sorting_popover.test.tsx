@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
@@ -19,6 +19,10 @@ import { SortingPopover } from './sorting_popover';
 describe('SortingPopover', () => {
   let storage: IStorageWrapper;
   let sortingService: SortingService<DataViewListItemEnhanced>;
+
+  const openPopover = (wrapper: ReactWrapper) => {
+    wrapper.find(`[data-test-subj="openPopoverButton"]`).last().simulate('click');
+  };
 
   beforeEach(() => {
     storage = new Storage(new StubBrowserStorage());
@@ -48,7 +52,7 @@ describe('SortingPopover', () => {
 
     expect(wrapper.find('EuiSelectable')).toHaveLength(0);
 
-    wrapper.find(`[data-test-subj="openPopoverButton"]`).last().simulate('click');
+    openPopover(wrapper);
 
     expect(wrapper.find('EuiSelectable')).toHaveLength(2);
   });
@@ -60,7 +64,7 @@ describe('SortingPopover', () => {
       <SortingPopover sortingService={sortingService} handleSortingChange={onChange} />
     );
 
-    wrapper.find(`[data-test-subj="openPopoverButton"]`).last().simulate('click');
+    openPopover(wrapper);
 
     const euiSelectable = wrapper.find('EuiSelectable');
 
@@ -85,7 +89,7 @@ describe('SortingPopover', () => {
       <SortingPopover sortingService={sortingService} handleSortingChange={onChange} />
     );
 
-    wrapper.find(`[data-test-subj="openPopoverButton"]`).last().simulate('click');
+    openPopover(wrapper);
 
     wrapper.find('EuiSelectable').find('EuiSelectableListItem').last().simulate('click');
     expect(onChange).toHaveBeenCalled();
