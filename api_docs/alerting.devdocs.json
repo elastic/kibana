@@ -27,9 +27,9 @@
           "<never>) => string | ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.JsonObject",
+            "section": "def-common.JsonObject",
             "text": "JsonObject"
           }
         ],
@@ -567,9 +567,9 @@
               ") => Promise<{ filter?: ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
+                "section": "def-common.JsonObject",
                 "text": "JsonObject"
               },
               " | ",
@@ -662,9 +662,9 @@
               ") => Promise<{ filter?: ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
+                "section": "def-common.JsonObject",
                 "text": "JsonObject"
               },
               " | ",
@@ -1241,7 +1241,8 @@
             "label": "paramsModifier",
             "description": [],
             "signature": [
-              "RuleParamsModifier<Params> | undefined"
+              "RuleParamsModifier",
+              "<Params> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
             "deprecated": false,
@@ -1314,7 +1315,8 @@
             "label": "paramsModifier",
             "description": [],
             "signature": [
-              "RuleParamsModifier<Params> | undefined"
+              "RuleParamsModifier",
+              "<Params> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
             "deprecated": false,
@@ -1528,6 +1530,20 @@
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.GetSummarizedAlertsFnOpts.excludedAlertInstanceIds",
+            "type": "Array",
+            "tags": [],
+            "label": "excludedAlertInstanceIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1738,9 +1754,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -1760,9 +1776,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -1786,17 +1802,17 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.PublicMethodsOf",
+                "section": "def-common.PublicMethodsOf",
                 "text": "PublicMethodsOf"
               },
               "<",
@@ -1823,9 +1839,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
+                    "section": "def-common.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -1907,9 +1923,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
+                "section": "def-common.Logger",
                 "text": "Logger"
               }
             ],
@@ -2095,9 +2111,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
+                "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               }
             ],
@@ -2115,9 +2131,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
+                "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
@@ -2135,9 +2151,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.IScopedClusterClient",
+                "section": "def-common.IScopedClusterClient",
                 "text": "IScopedClusterClient"
               }
             ],
@@ -2201,7 +2217,22 @@
             "label": "ruleMonitoringService",
             "description": [],
             "signature": [
-              "PublicRuleMonitoringService",
+              "PublicMetricsSetters",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.ruleResultService",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleResultService",
+            "description": [],
+            "signature": [
+              "PublicLastRunSetters",
               " | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
@@ -3116,7 +3147,15 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<Params>[]; errors: ",
+          "<Params>[]; skipped: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.BulkActionSkipResult",
+            "text": "BulkActionSkipResult"
+          },
+          "[]; errors: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -4091,6 +4130,59 @@
               }
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.BulkActionSkipResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkActionSkipResult",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.BulkActionSkipResult.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.BulkActionSkipResult.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.BulkActionSkipResult.skip_reason",
+            "type": "string",
+            "tags": [],
+            "label": "skip_reason",
+            "description": [],
+            "signature": [
+              "\"RULE_NOT_MODIFIED\""
+            ],
+            "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5626,7 +5718,7 @@
             "label": "outcomeMsg",
             "description": [],
             "signature": [
-              "string | null | undefined"
+              "string[] | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -6147,9 +6239,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
+                "section": "def-common.JsonObject",
                 "text": "JsonObject"
               }
             ],
@@ -6609,6 +6701,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.BulkEditSkipReason",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkEditSkipReason",
+        "description": [],
+        "signature": [
+          "\"RULE_NOT_MODIFIED\""
+        ],
+        "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.DefaultActionGroupId",
         "type": "Type",
         "tags": [],
@@ -6804,9 +6911,9 @@
           "<Params> & Omit<",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsResolveResponse",
+            "section": "def-common.SavedObjectsResolveResponse",
             "text": "SavedObjectsResolveResponse"
           },
           "<unknown>, \"saved_object\">"

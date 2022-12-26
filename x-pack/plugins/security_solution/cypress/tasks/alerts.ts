@@ -46,15 +46,14 @@ import {
   USER_DETAILS_LINK,
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
+import { LOADING_SPINNER } from '../screens/common/page';
 
 export const addExceptionFromFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
-  cy.root()
-    .pipe(($el) => {
-      $el.find(ADD_EXCEPTION_BTN).trigger('click');
-      return $el.find(FIELD_INPUT);
-    })
-    .should('be.visible');
+  expandFirstAlertActions();
+  cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).should('be.visible');
+  cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).first().click();
+  cy.get(LOADING_SPINNER).should('exist');
+  cy.get(LOADING_SPINNER).should('not.exist');
 };
 
 export const openAddEndpointExceptionFromFirstAlert = () => {
@@ -108,8 +107,8 @@ export const closeAlerts = () => {
 };
 
 export const expandFirstAlertActions = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.visible');
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+  cy.get(TIMELINE_CONTEXT_MENU_BTN, { timeout: 10000 }).should('be.visible');
+  cy.get(TIMELINE_CONTEXT_MENU_BTN, { timeout: 10000 }).first().click({ force: true });
 };
 
 export const expandFirstAlert = () => {
