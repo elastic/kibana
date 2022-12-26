@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'cypress';
 
-// eslint-disable-next-line import/no-default-export
 export default defineConfig({
   defaultCommandTimeout: 60000,
   execTimeout: 120000,
