@@ -31,7 +31,7 @@ export async function getSharingData(
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index');
 
-  searchSource.setField('sort', getSortForSearchSource(savedSearch.attributes.sort));
+  searchSource.setField('sort', getSortForSearchSource(savedSearch.attributes.sort, index));
 
   // 5. Combine the job's time filter into the SearchSource instance
   // TODO
