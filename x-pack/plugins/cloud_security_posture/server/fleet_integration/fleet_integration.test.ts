@@ -18,13 +18,12 @@ describe('is Csp package installed tests', () => {
   const packagePolicyService = createPackagePolicyServiceMock();
 
   beforeEach(() => jest.clearAllMocks());
-  it.each`
-    total | items                          | expectedCspPolicyResponse
-    ${1}  | ${[createPackagePolicyMock()]} | ${true}
-    ${0}  | ${[]}                          | ${false}
-  `(
+  it.each([
+    [1, [createPackagePolicyMock()], true],
+    [0, [], false],
+  ])(
     'isCspPackagePolicyInstalled should return true when other packages exist',
-    async ({ total, items, expectedCspPolicyResponse }) => {
+    async (total, items, expectedCspPolicyResponse) => {
       packagePolicyService.list.mockImplementationOnce(
         async (): Promise<ListResult<PackagePolicy>> => {
           return {

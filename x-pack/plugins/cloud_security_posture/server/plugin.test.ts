@@ -259,13 +259,12 @@ describe('Cloud Security Posture Plugin', () => {
       expect(fleetMock.packagePolicyService.update).toHaveBeenCalledTimes(0);
     });
 
-    it.each`
-      total | items                          | expectedNumberOfCallsToUninstallResources
-      ${1}  | ${[createPackagePolicyMock()]} | ${0}
-      ${0}  | ${[]}                          | ${1}
-    `(
+    it.each([
+      [1, [createPackagePolicyMock()], 0],
+      [0, [], 1],
+    ])(
       'should uninstall resources when package is removed',
-      async ({ total, items, expectedNumberOfCallsToUninstallResources }) => {
+      async (total, items, expectedNumberOfCallsToUninstallResources) => {
         fleetMock.packagePolicyService.list.mockImplementationOnce(
           async (): Promise<ListResult<PackagePolicy>> => {
             return {

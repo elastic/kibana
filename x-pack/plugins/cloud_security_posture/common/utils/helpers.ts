@@ -71,14 +71,3 @@ export function assert(condition: any, msg?: string): asserts condition {
     throw new Error(msg);
   }
 }
-
-export const createCspRuleSearchFilterByPackagePolicy = ({
-  packagePolicyId,
-  policyId,
-}: {
-  packagePolicyId: string;
-  policyId?: string;
-}): string =>
-  `${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.package_policy_id: "${packagePolicyId}"${
-    policyId ? ` AND ${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.policy_id: "${policyId}"` : ''
-  }`;
