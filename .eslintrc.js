@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
+require('@kbn/babel-register').install();
+
 const Path = require('path');
 const Fs = require('fs');
 
 const normalizePath = require('normalize-path');
 const { discoverPackageManifestPaths, Jsonc } = require('@kbn/bazel-packages');
-const { REPO_ROOT } = require('@kbn/utils');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -137,6 +139,7 @@ const DEV_DIRECTORIES = [
   '__mocks__',
   '__stories__',
   'e2e',
+  'cypress',
   'fixtures',
   'ftr_e2e',
   'integration_tests',
@@ -165,7 +168,7 @@ const DEV_FILE_PATTERNS = [
   'mock.{js,ts,tsx}',
   '_stubs.{js,ts,tsx}',
   '{testHelpers,test_helper,test_utils}.{js,ts,tsx}',
-  '{postcss,webpack}.config.js',
+  '{postcss,webpack,cypress}.config.{js,ts}',
 ];
 
 /** Glob patterns which describe dev-only code. */
@@ -175,10 +178,10 @@ const DEV_PATTERNS = [
   ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
   'packages/kbn-interpreter/tasks/**/*',
   'src/dev/**/*',
-  'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
-  'x-pack/plugins/*/server/scripts/**/*',
-  'x-pack/plugins/fleet/cypress',
+  'x-pack/{dev-tools,tasks,test,build_chromium}/**/*',
   'x-pack/performance/**/*',
+  'src/setup_node_env/index.js',
+  'src/cli/dev.js',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -599,6 +602,7 @@ module.exports = {
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
         'x-pack/test/performance/**/*.ts',
+        '**/cypress.config.{js,ts}',
       ],
       rules: {
         'import/no-default-export': 'off',

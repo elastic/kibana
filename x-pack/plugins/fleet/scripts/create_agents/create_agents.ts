@@ -31,14 +31,18 @@ const DEFAULT_KIBANA_URL = 'http://localhost:5601';
 const DEFAULT_KIBANA_USERNAME = 'elastic';
 const DEFAULT_KIBANA_PASSWORD = 'changeme';
 
+const DEFAULT_UNENROLL_TIMEOUT = 300; // 5 minutes
 const ES_URL = 'http://localhost:9200';
 const ES_SUPERUSER = 'fleet_superuser';
 const ES_PASSWORD = 'password';
+
+const DEFAULT_AGENT_COUNT = 50000;
 
 const INDEX_BULK_OP = '{ "index":{ } }\n';
 
 const {
   delete: deleteAgentsFirst = false,
+  inactivityTimeout: inactivityTimeoutArg,
   status: statusArg = 'online',
   count: countArg,
   kibana: kibanaUrl = DEFAULT_KIBANA_URL,
@@ -52,7 +56,10 @@ const {
 } = yargs(process.argv.slice(2)).argv;
 
 const statusesArg = (statusArg as string).split(',') as AgentStatus[];
-const count = countArg ? Number(countArg).valueOf() : 50000;
+const inactivityTimeout = inactivityTimeoutArg
+  ? Number(inactivityTimeoutArg).valueOf()
+  : DEFAULT_UNENROLL_TIMEOUT;
+const count = countArg ? Number(countArg).valueOf() : DEFAULT_AGENT_COUNT;
 const kbnAuth = 'Basic ' + Buffer.from(kbnUsername + ':' + kbnPassword).toString('base64');
 
 const logger = new ToolingLog({
@@ -63,7 +70,7 @@ const logger = new ToolingLog({
 function setAgentStatus(agent: any, status: AgentStatus) {
   switch (status) {
     case 'inactive':
-      agent.active = false;
+      agent.last_checkin = new Date(new Date().getTime() - inactivityTimeout * 1000).toISOString();
       break;
     case 'enrolling':
       agent.last_checkin = null;
@@ -77,6 +84,10 @@ function setAgentStatus(agent: any, status: AgentStatus) {
       break;
     case 'unenrolling':
       agent.unenrollment_started_at = new Date().toISOString();
+      break;
+    case 'unenrolled':
+      agent.unenrolled_at = new Date().toISOString();
+      agent.active = false;
       break;
     case 'error':
       agent.last_checkin_status = 'ERROR';
@@ -141,7 +152,7 @@ function createAgentWithStatus({
     user_provided_metadata: {},
     enrolled_at: new Date().toISOString(),
     last_checkin: new Date().toISOString(),
-    tags: ['script_create_agents'],
+    tags: ['script_create_agents', status],
   };
 
   return setAgentStatus(baseAgent, status);
@@ -248,6 +259,7 @@ async function createAgentPolicy(id: string) {
       namespace: 'default',
       description: '',
       monitoring_enabled: ['logs'],
+      inactivity_timeout: inactivityTimeout,
     }),
     headers: {
       Authorization: kbnAuth,
@@ -304,7 +316,7 @@ export async function run() {
 
   logger.info('Creating agent policy');
 
-  const agentPolicyId = uuid();
+  const agentPolicyId = 'script-create-agent-' + uuid();
   const agentPolicy = await createAgentPolicy(agentPolicyId);
   logger.info(`Created agent policy ${agentPolicy.item.id}`);
 

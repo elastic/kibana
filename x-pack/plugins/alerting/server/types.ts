@@ -88,6 +88,7 @@ export interface RuleExecutorServices<
   ruleMonitoringService?: PublicRuleMonitoringService;
   share: SharePluginStart;
   dataViews: DataViewsContract;
+  ruleResultService?: PublicRuleResultService;
 }
 
 export interface RuleExecutorOptions<
@@ -318,13 +319,23 @@ export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
-export interface PublicRuleMonitoringService {
+export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
   setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
   setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
   setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
   setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
 }
+
+export interface PublicLastRunSetters {
+  addLastRunError: (outcome: string) => void;
+  addLastRunWarning: (outcomeMsg: string) => void;
+  setLastRunOutcomeMessage: (warning: string) => void;
+}
+
+export type PublicRuleMonitoringService = PublicMetricsSetters;
+
+export type PublicRuleResultService = PublicLastRunSetters;
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
