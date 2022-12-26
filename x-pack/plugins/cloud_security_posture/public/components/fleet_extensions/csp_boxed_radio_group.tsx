@@ -15,11 +15,12 @@ type Props = RadioGroupProps & {
   size?: 's' | 'm';
 };
 
-export const InlineRadioGroup = ({ idSelected, size, options, disabled, onChange }: Props) => {
+export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiRadioGroup
+      className="__extendedRadioGroup"
       disabled={disabled}
       idSelected={idSelected}
       options={options.map((o) => ({
@@ -33,16 +34,30 @@ export const InlineRadioGroup = ({ idSelected, size, options, disabled, onChange
       onChange={onChange}
       css={css`
         display: grid;
-        grid-template-columns: repeat(${options.length}, 1fr);
-        grid-template-rows: ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl};
-        column-gap: ${euiTheme.size.s};
         align-items: center;
+
+        // Show columns for m+ screens (above 768px)
+        @media only screen and (min-width: ${euiTheme.breakpoint.m}px) {
+          grid-template-columns: repeat(${options.length}, 1fr);
+          grid-template-rows: ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl};
+          column-gap: ${euiTheme.size.s};
+        }
+
+        // Show rows for m- screens (below 768px)
+        @media only screen and (max-width: ${euiTheme.breakpoint.m}px) {
+          grid-template-rows: repeat(
+            ${options.length},
+            ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl}
+          );
+          grid-template-columns: 1fr;
+          row-gap: ${euiTheme.size.s};
+        }
 
         > .__extendedRadioOption {
           margin-top: 0;
           height: 100%;
-          padding-left: ${euiTheme.size.m};
-          padding-right: ${euiTheme.size.m};
+          padding-left: ${size === 's' ? euiTheme.size.s : euiTheme.size.m};
+          padding-right: ${size === 's' ? euiTheme.size.s : euiTheme.size.m};
 
           display: grid;
           grid-template-columns: auto 1fr;

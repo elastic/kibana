@@ -17,7 +17,7 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { InlineRadioGroup } from './inline_radio_group';
+import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 
 const DocsLink = (
@@ -197,11 +197,11 @@ const getInputVarsFields = (
       } as const;
     });
 
-const getDefaultAwsType = (input: Props['input']): AwsCredentialsType =>
-  input.streams[0].vars['aws.credentials.type'].value;
+const getAwsCredentialsType = (input: Props['input']): AwsCredentialsType | undefined =>
+  input.streams[0].vars?.['aws.credentials.type'].value;
 
 export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
-  const awsCredentialsType = getDefaultAwsType(input);
+  const awsCredentialsType = getAwsCredentialsType(input) || AWS_CREDENTIALS_OPTIONS[0].id;
   const group = options[awsCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
 
@@ -240,7 +240,7 @@ const AwsCredentialTypeSelector = ({
   onChange(type: AwsCredentialsType): void;
   type: AwsCredentialsType;
 }) => (
-  <InlineRadioGroup
+  <RadioGroup
     size="s"
     options={[...AWS_CREDENTIALS_OPTIONS]}
     idSelected={type}

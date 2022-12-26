@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { PostureInput } from '../../../common/constants';
+import type { PostureInput } from '../../../common/types';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
-import { InlineRadioGroup } from './inline_radio_group';
+import { RadioGroup } from './csp_boxed_radio_group';
 
 interface Props {
   disabled: boolean;
@@ -33,7 +33,7 @@ const RadioLabel = ({
   tooltip,
 }: ReturnType<typeof getPolicyTemplateInputOptions>[number]) => (
   <EuiToolTip content={tooltip} anchorProps={{ style: { width: '100%' } }}>
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
+    <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={true}>{label}</EuiFlexItem>
       {icon && (
         <EuiFlexItem grow={false}>
@@ -62,7 +62,7 @@ export const PolicyInputSelector = ({ input, disabled, setInput }: Props) => {
 
   return (
     <div>
-      <InlineRadioGroup
+      <RadioGroup
         disabled={disabled}
         idSelected={input.type}
         options={options}
