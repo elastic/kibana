@@ -229,6 +229,8 @@ export default ({ getService }: FtrProviderContext) => {
           .send(updatedRule)
           .expect(200);
 
+        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
+
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
         outputRule.version = 2;
@@ -241,10 +243,11 @@ export default ({ getService }: FtrProviderContext) => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            uuid: bodyToCompare.actions![0].uuid,
           },
         ];
         outputRule.throttle = '1d';
-        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
+
         expect(bodyToCompare).to.eql(outputRule);
       });
 

@@ -17,9 +17,9 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
-import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
+import type { RuleAction } from '@kbn/alerting-plugin/common/rule';
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';

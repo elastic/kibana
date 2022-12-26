@@ -269,12 +269,14 @@ describe('Rule actions normalization', () => {
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
+          uuid: '123-456',
         },
         {
           id: 'id_2',
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
+          uuid: '123-456',
         },
       ];
 
@@ -285,12 +287,14 @@ describe('Rule actions normalization', () => {
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
+          uuid: '123-456',
         },
         {
           id: 'id_2',
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
+          uuid: '123-456',
         },
       ]);
     });
@@ -302,12 +306,14 @@ describe('Rule actions normalization', () => {
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
+          uuid: '123-456',
         },
         {
           id: 'id_2',
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
+          uuid: '123-456',
         },
       ];
       const legacyRuleActions: LegacyRuleActions = {
@@ -330,12 +336,14 @@ describe('Rule actions normalization', () => {
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
+          uuid: '123-456',
         },
         {
           id: 'id_2',
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
+          uuid: '123-456',
         },
       ]);
     });
@@ -363,7 +371,7 @@ describe('Rule actions normalization', () => {
           action_type_id: 'actionTypeId',
           params: {},
         },
-      ]);
+      ] as RuleResponse['actions']);
     });
 
     test('It will transform the legacyRuleActions if the alertAction is undefined', () => {
@@ -388,7 +396,7 @@ describe('Rule actions normalization', () => {
           action_type_id: 'actionTypeId',
           params: {},
         },
-      ]);
+      ] as RuleResponse['actions']);
     });
   });
 });

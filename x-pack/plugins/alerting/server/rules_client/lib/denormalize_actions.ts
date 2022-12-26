@@ -6,14 +6,13 @@
  */
 
 import { SavedObjectReference } from '@kbn/core/server';
-import { RawRule } from '../../types';
+import { RawRule, RawRuleAction } from '../../types';
 import { preconfiguredConnectorActionRefPrefix } from '../common/constants';
-import { RulesClientContext } from '../types';
-import { NormalizedAlertAction } from '../types';
+import { NormalizedAlertActionOptionalUuid, RulesClientContext } from '../types';
 
 export async function denormalizeActions(
   context: RulesClientContext,
-  alertActions: NormalizedAlertAction[]
+  alertActions: NormalizedAlertActionOptionalUuid[]
 ): Promise<{ actions: RawRule['actions']; references: SavedObjectReference[] }> {
   const references: SavedObjectReference[] = [];
   const actions: RawRule['actions'] = [];
@@ -34,7 +33,7 @@ export async function denormalizeActions(
             ...alertAction,
             actionRef: `${preconfiguredConnectorActionRefPrefix}${id}`,
             actionTypeId: actionResultValue.actionTypeId,
-          });
+          } as RawRuleAction);
         } else {
           const actionRef = `action_${i}`;
           references.push({
@@ -46,14 +45,14 @@ export async function denormalizeActions(
             ...alertAction,
             actionRef,
             actionTypeId: actionResultValue.actionTypeId,
-          });
+          } as RawRuleAction);
         }
       } else {
         actions.push({
           ...alertAction,
           actionRef: '',
           actionTypeId: '',
-        });
+        } as RawRuleAction);
       }
     });
   }

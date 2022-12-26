@@ -831,6 +831,7 @@ describe('helpers', () => {
             id: 'id',
             actionTypeId: 'actionTypeId',
             params: {},
+            uuid: '123-456',
           },
         ],
       };
@@ -842,6 +843,7 @@ describe('helpers', () => {
             id: mockStepData.actions[0].id,
             action_type_id: mockStepData.actions[0].actionTypeId,
             params: mockStepData.actions[0].params,
+            uuid: mockStepData.actions[0].uuid,
           },
         ],
         enabled: false,
@@ -864,6 +866,7 @@ describe('helpers', () => {
             id: 'id',
             actionTypeId: 'actionTypeId',
             params: {},
+            uuid: '123-456',
           },
         ],
       };
@@ -875,6 +878,7 @@ describe('helpers', () => {
             id: mockStepData.actions[0].id,
             action_type_id: mockStepData.actions[0].actionTypeId,
             params: mockStepData.actions[0].params,
+            uuid: mockStepData.actions[0].uuid,
           },
         ],
         enabled: false,
@@ -893,6 +897,7 @@ describe('helpers', () => {
         id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
         params: { message: 'ML Rule generated {{state.signals_count}} alerts' },
         actionTypeId: '.slack',
+        uuid: '123-456',
       };
 
       const mockStepData: ActionsStepRule = {
@@ -907,6 +912,7 @@ describe('helpers', () => {
             id: mockAction.id,
             params: mockAction.params,
             action_type_id: mockAction.actionTypeId,
+            uuid: mockAction.uuid,
           },
         ],
         enabled: false,

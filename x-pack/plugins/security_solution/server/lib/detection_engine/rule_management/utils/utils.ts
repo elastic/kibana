@@ -244,9 +244,10 @@ export const migrateLegacyActionsIds = async (
     rules,
     async (rule) => {
       if (isImportRule(rule)) {
-        // can we swap the pre 8.0 action connector(s) id with the new,
-        // post-8.0 action id (swap the originId for the new _id?)
         const newActions: Array<RuleAction | Error> = await pMap(
+          // can we swap the pre 8.0 action connector(s) id with the new,
+          // post-8.0 action id (swap the originId for the new _id?)
+          // @ts-ignore
           rule.actions ?? [],
           (action: RuleAction) => swapActionIds(action, savedObjectsClient),
           { concurrency: MAX_CONCURRENT_SEARCHES }

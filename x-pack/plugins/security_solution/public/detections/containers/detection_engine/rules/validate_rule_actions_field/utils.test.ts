@@ -63,6 +63,7 @@ describe('stepRuleActions utils', () => {
             params: {
               message: 'Message',
             },
+            uuid: '123-456',
           },
           actionTypeRegistry
         )
@@ -81,6 +82,7 @@ describe('stepRuleActions utils', () => {
             group: 'default',
             actionTypeId: '.slack',
             params: {},
+            uuid: '123-456',
           },
           actionTypeRegistry
         )
@@ -103,6 +105,7 @@ describe('stepRuleActions utils', () => {
             group: 'default',
             actionTypeId: '.slack',
             params: {},
+            uuid: '123-456',
           },
           actionTypeRegistry
         )
@@ -121,6 +124,7 @@ describe('stepRuleActions utils', () => {
             group: 'default',
             actionTypeId: '.slack',
             params: {},
+            uuid: '123-456',
           },
           actionTypeRegistry
         )

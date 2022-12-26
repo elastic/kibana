@@ -66,8 +66,10 @@ export const legacyCreateLegacyNotificationRoute = (
           id: undefined,
           ruleAlertId,
         });
+        let res;
+
         if (notification != null) {
-          await rulesClient.update<LegacyRuleNotificationAlertTypeParams>({
+          res = await rulesClient.update<LegacyRuleNotificationAlertTypeParams>({
             id: notification.id,
             data: {
               tags: [],
@@ -84,7 +86,7 @@ export const legacyCreateLegacyNotificationRoute = (
             },
           });
         } else {
-          await legacyCreateNotifications({
+          res = await legacyCreateNotifications({
             rulesClient,
             actions,
             enabled: true,
@@ -96,7 +98,7 @@ export const legacyCreateLegacyNotificationRoute = (
         await legacyUpdateOrCreateRuleActionsSavedObject({
           ruleAlertId,
           savedObjectsClient,
-          actions,
+          actions: res.actions,
           throttle: interval,
           logger,
         });

@@ -29,6 +29,7 @@ const legacyRuleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     actions: {
+      dynamic: false,
       properties: {
         actionRef: {
           type: 'keyword',

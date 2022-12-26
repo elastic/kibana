@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { Rule, RawRule, RuleTypeParams } from '../../types';
+import { RawRule, RuleActionOptionalUuid, RuleTypeParams } from '../../types';
 import {
   preconfiguredConnectorActionRefPrefix,
   extractedSavedObjectParamReferenceNamePrefix,
@@ -19,7 +19,7 @@ export function injectReferencesIntoActions(
   alertId: string,
   actions: RawRule['actions'],
   references: SavedObjectReference[]
-) {
+): RuleActionOptionalUuid[] {
   return actions.map((action) => {
     if (action.actionRef.startsWith(preconfiguredConnectorActionRefPrefix)) {
       return {
@@ -36,7 +36,7 @@ export function injectReferencesIntoActions(
       ...omit(action, 'actionRef'),
       id: reference.id,
     };
-  }) as Rule['actions'];
+  }) as RuleActionOptionalUuid[];
 }
 
 export function injectReferencesIntoParams<

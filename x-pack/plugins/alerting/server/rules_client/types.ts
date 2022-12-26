@@ -72,6 +72,9 @@ export interface RulesClientContext {
 }
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
+export type NormalizedAlertActionOptionalUuid = Omit<RuleAction, 'actionTypeId' | 'uuid'> & {
+  uuid?: string;
+};
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];

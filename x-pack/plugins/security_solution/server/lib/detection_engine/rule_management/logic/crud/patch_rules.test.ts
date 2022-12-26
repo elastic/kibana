@@ -143,6 +143,7 @@ describe('patchRules', () => {
             message: 'Rule {{context.rule.name}} generated {{state.signals_count}} signals',
           },
           group: 'default',
+          uuid: '123-456',
         },
       ];
       rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
@@ -158,6 +159,7 @@ describe('patchRules', () => {
                   message: 'Rule {{context.rule.name}} generated {{state.signals_count}} signals',
                 },
                 group: 'default',
+                uuid: '123-456',
               },
             ],
           }),

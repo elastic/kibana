@@ -14,6 +14,7 @@ import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeState,
+  SanitizedRuleConfig,
 } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
@@ -225,7 +226,7 @@ export const previewRulesRoute = async (
             ruleTypeName,
             updatedAt: new Date(),
             updatedBy: username ?? 'preview-updated-by',
-          };
+          } as unknown as SanitizedRuleConfig;
 
           let invocationStartTime;
 

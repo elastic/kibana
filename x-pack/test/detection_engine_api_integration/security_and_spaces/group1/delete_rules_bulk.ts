@@ -307,6 +307,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            uuid: body[0].actions[0].uuid,
           },
         ]);
       });
@@ -355,6 +356,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            uuid: body[0].actions[0].uuid,
           },
         ]);
         expect(body[1].actions).to.eql([
@@ -366,6 +368,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            uuid: body[1].actions[0].uuid,
           },
         ]);
       });

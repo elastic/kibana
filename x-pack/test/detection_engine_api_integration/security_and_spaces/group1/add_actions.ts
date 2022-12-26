@@ -57,7 +57,10 @@ export default ({ getService }: FtrProviderContext) => {
         const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
         const bodyToCompare = removeServerGeneratedProperties(rule);
         expect(bodyToCompare).to.eql(
-          getSimpleRuleOutputWithWebHookAction(`${bodyToCompare?.actions?.[0].id}`)
+          getSimpleRuleOutputWithWebHookAction(
+            `${bodyToCompare?.actions?.[0].id}`,
+            `${bodyToCompare?.actions?.[0].uuid}`
+          )
         );
       });
 

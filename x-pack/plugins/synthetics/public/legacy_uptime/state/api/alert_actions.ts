@@ -58,7 +58,7 @@ export function populateAlertActions({
       id: aId.id,
       group: MONITOR_STATUS.id,
       params: {},
-    };
+    } as RuleAction;
 
     const recoveredAction: RuleAction = {
       id: aId.id,
@@ -66,7 +66,7 @@ export function populateAlertActions({
       params: {
         message: getRecoveryMessage(selectedMonitor),
       },
-    };
+    } as unknown as RuleAction;
 
     switch (aId.actionTypeId) {
       case PAGER_DUTY_ACTION_ID:

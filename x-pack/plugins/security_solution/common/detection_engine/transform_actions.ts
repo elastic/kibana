@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction, RuleActionOptionalUuid } from '@kbn/alerting-plugin/common';
 import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
 import type { RuleAlertAction } from './types';
 
@@ -14,11 +14,15 @@ export const transformRuleToAlertAction = ({
   id,
   action_type_id, // eslint-disable-line @typescript-eslint/naming-convention
   params,
-}: RuleAlertAction): RuleAction => ({
+  uuid,
+}: Omit<RuleAlertAction, 'uuid'> & {
+  uuid?: string;
+}): RuleActionOptionalUuid => ({
   group,
   id,
   params,
   actionTypeId: action_type_id,
+  ...(uuid && { uuid }),
 });
 
 export const transformAlertToRuleAction = ({
@@ -26,11 +30,13 @@ export const transformAlertToRuleAction = ({
   id,
   actionTypeId,
   params,
+  uuid,
 }: RuleAction): RuleAlertAction => ({
   group,
   id,
   params,
   action_type_id: actionTypeId,
+  uuid,
 });
 
 export const transformRuleToAlertResponseAction = ({

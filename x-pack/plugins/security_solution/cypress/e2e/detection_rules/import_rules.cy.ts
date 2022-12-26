@@ -28,7 +28,7 @@ describe('Import rules', () => {
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
   });
 
-  it('Imports a custom rule with exceptions', function () {
+  it.skip('Imports a custom rule with exceptions', function () {
     const expectedNumberOfRules = 1;
     const expectedImportedRuleName = 'Test Custom Rule';
 

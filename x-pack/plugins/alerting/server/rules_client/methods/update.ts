@@ -23,7 +23,7 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getMappedParams } from '../common/mapped_params_utils';
-import { NormalizedAlertAction, RulesClientContext } from '../types';
+import { NormalizedAlertActionOptionalUuid, RulesClientContext } from '../types';
 import { validateActions, extractReferences, updateMeta, getPartialRuleFromRaw } from '../lib';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 
@@ -33,7 +33,7 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     name: string;
     tags: string[];
     schedule: IntervalSchedule;
-    actions: Array<NormalizedAlertAction<string | undefined>>;
+    actions: NormalizedAlertActionOptionalUuid[];
     params: Params;
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;

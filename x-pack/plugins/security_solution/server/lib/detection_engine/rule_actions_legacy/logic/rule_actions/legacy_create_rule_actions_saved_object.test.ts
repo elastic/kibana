@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 // eslint-disable-next-line no-restricted-imports
@@ -55,7 +56,7 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com',
           },
-        },
+        } as unknown as RuleAction,
       ],
       throttle: '1d',
     });
@@ -111,7 +112,7 @@ describe('legacy_create_rule_actions_saved_object', () => {
             kibana_siem_app_url: 'www.example.com/2',
           },
         },
-      ],
+      ] as unknown as RuleAction[],
       throttle: '1d',
     });
     const [[, arg2, arg3]] = savedObjectsClient.create.mock.calls;

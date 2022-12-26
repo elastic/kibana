@@ -56,7 +56,7 @@ export const legacyGetRuleActionsFromSavedObject = (
             group,
             params,
             action_type_id,
-          },
+          } as LegacyRuleAlertAction,
         ];
       } else {
         // We cannot find it so we return no actions. This line should not be reached.
@@ -113,12 +113,14 @@ export const legacyGetActionReference = (id: string, index: number) => ({
 export const legacyTransformActionToReference = (
   alertAction: RuleAction,
   index: number
-): LegacyRuleAlertSavedObjectAction => ({
-  actionRef: `action_${index}`,
-  group: alertAction.group,
-  params: alertAction.params,
-  action_type_id: alertAction.actionTypeId,
-});
+): LegacyRuleAlertSavedObjectAction =>
+  ({
+    actionRef: `action_${index}`,
+    group: alertAction.group,
+    params: alertAction.params,
+    action_type_id: alertAction.actionTypeId,
+    uuid: alertAction.uuid,
+  } as unknown as LegacyRuleAlertSavedObjectAction);
 
 /**
  * Given an alertAction this returns a transformed legacy action as a reference.

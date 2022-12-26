@@ -31,6 +31,7 @@ import {
   SanitizedRule as AlertingSanitizedRule,
   ResolvedSanitizedRule,
   RuleAction,
+  RuleActionOptionalUuid,
   RuleAggregations as AlertingRuleAggregations,
   RuleTaskState,
   AlertSummary as RuleSummary,
@@ -95,6 +96,7 @@ type RuleAggregations = Omit<AlertingRuleAggregations, 'alertExecutionStatus'> &
 export type {
   Rule,
   RuleAction,
+  RuleActionOptionalUuid,
   RuleAggregations,
   RuleTaskState,
   RuleSummary,

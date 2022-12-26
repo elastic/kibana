@@ -26,6 +26,7 @@ describe('validate_rule_actions_field', () => {
             group: 'default',
             actionTypeId: '.slack',
             params: {},
+            uuid: '123-456',
           },
           actionTypeRegistry
         )
@@ -44,6 +45,7 @@ describe('validate_rule_actions_field', () => {
           params: {
             message: '{{{mustache}}',
           },
+          uuid: '123-456',
         },
         actionTypeRegistry
       );
@@ -62,6 +64,7 @@ describe('validate_rule_actions_field', () => {
           group: 'default',
           actionTypeId: '.slack',
           params: {},
+          uuid: '123-456',
         },
         actionTypeRegistry
       );

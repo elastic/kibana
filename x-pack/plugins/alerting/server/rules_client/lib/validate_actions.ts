@@ -10,13 +10,13 @@ import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { RawRule } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { NormalizedAlertAction } from '../types';
+import { NormalizedAlertActionOptionalUuid } from '../types';
 import { RulesClientContext } from '../types';
 
 export async function validateActions(
   context: RulesClientContext,
   alertType: UntypedNormalizedRuleType,
-  data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: NormalizedAlertAction[] }
+  data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: NormalizedAlertActionOptionalUuid[] }
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
   const hasNotifyWhen = typeof notifyWhen !== 'undefined';

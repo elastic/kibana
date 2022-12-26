@@ -57,11 +57,11 @@ import {
 import { getMappedParams } from '../common/mapped_params_utils';
 import { getAlertFromRaw, extractReferences, validateActions, updateMeta } from '../lib';
 import {
-  NormalizedAlertAction,
   BulkOperationError,
   RuleBulkOperationAggregation,
   RulesClientContext,
   CreateAPIKeyResult,
+  NormalizedAlertActionOptionalUuid,
 } from '../types';
 
 export type BulkEditFields = keyof Pick<
@@ -78,7 +78,7 @@ export type BulkEditOperation =
   | {
       operation: 'add' | 'set';
       field: Extract<BulkEditFields, 'actions'>;
-      value: NormalizedAlertAction[];
+      value: NormalizedAlertActionOptionalUuid[];
     }
   | {
       operation: 'set';
@@ -528,16 +528,7 @@ async function getUpdatedAttributesFromOperations(
 ) {
   let attributes = cloneDeep(rule.attributes);
   let ruleActions = {
-    actions: injectReferencesIntoActions(
-      rule.id,
-      rule.attributes.actions,
-      rule.references || []
-    ).map((action) => {
-      return {
-        ...action,
-        uuid: action.uuid || v4(),
-      };
-    }),
+    actions: injectReferencesIntoActions(rule.id, rule.attributes.actions, rule.references || []),
   };
 
   let hasUpdateApiKeyOperation = false;
@@ -622,9 +613,17 @@ async function getUpdatedAttributesFromOperations(
       }
     }
   }
+
   return {
     attributes,
-    ruleActions,
+    ruleActions: {
+      actions: ruleActions.actions.map((action) => {
+        return {
+          ...action,
+          uuid: action.uuid || v4(),
+        };
+      }),
+    },
     hasUpdateApiKeyOperation,
     isAttributesUpdateSkipped,
   };
