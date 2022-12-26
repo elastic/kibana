@@ -187,6 +187,8 @@ describe('global query string', () => {
           globalUrlParam: {
             testNumber: 123,
             testObject: { testKey: 321 },
+            testEmptyObject: {},
+            testEmptyArray: [],
             testNull: null,
             testEmptyString: '',
           },
@@ -201,9 +203,7 @@ describe('global query string', () => {
 
       const { result } = renderHook(() => useGlobalQueryString(), { wrapper });
 
-      expect(result.current).toEqual(
-        `testNumber=123&testObject=(testKey:321)&testNull=!n&testEmptyString=''`
-      );
+      expect(result.current).toEqual(`testNumber=123&testObject=(testKey:321)`);
     });
   });
 

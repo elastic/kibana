@@ -86,7 +86,7 @@ export const useGlobalQueryString = (): string => {
     Object.keys(globalUrlParam).forEach((paramName) => {
       const value = globalUrlParam[paramName];
 
-      if (isEmpty(value)) {
+      if (!value || (typeof value === 'object' && isEmpty(value))) {
         return;
       }
 
