@@ -19,7 +19,6 @@ jest.mock('react-router-dom', () => {
     useLocation: jest.fn(),
   };
 });
-// jest.mock('@kbn/rison');
 jest.mock('../lib/kibana');
 jest.mock('./use_selector');
 jest.mock('../../timelines/store/timeline', () => ({
