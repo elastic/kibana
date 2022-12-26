@@ -93,7 +93,7 @@ describe('queryTimelineByIdOnUrlChange', () => {
       mockUseLocation.mockReturnValue({ search: oldTimelineRisonSearchString });
 
       const { rerender } = renderHook(() => useQueryTimelineByIdOnUrlChange());
-      mockUseLocation.mockReturnValue({ search: '?timeline=!invalid' });
+      mockUseLocation.mockReturnValue({ search: '?foo=bar' });
 
       rerender();
 
