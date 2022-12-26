@@ -59,6 +59,7 @@ export function registerGenerateFromSavedObject(reporting: ReportingCore, logger
 
         const jobParams: JobParamsCsvFromSavedObject = {
           browserTimezone: req.body.timerange.timezone,
+          timerange: req.body.timerange,
           savedObjectId: req.params.savedObjectId,
           title: searchObject.attributes.title ?? 'Unknown search',
           objectType: 'saved search',

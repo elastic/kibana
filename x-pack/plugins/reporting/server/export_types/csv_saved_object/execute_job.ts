@@ -74,6 +74,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFnType> = (reporting, _lo
     const { columns, searchSource } = await getSharingData(
       await searchSourceStart.create(searchSourceFieldsWithRefs),
       savedSearch,
+      job.timerange,
       { uiSettings }
     );
 

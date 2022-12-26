@@ -9,11 +9,18 @@ import type { BaseParams, BasePayload } from '../base';
 
 export interface JobParamsCsvFromSavedObject extends BaseParams {
   objectType: 'saved search';
-  browserTimezone: string;
+  timerange?: {
+    min: string | number | null;
+    max: string | number | null;
+  };
   savedObjectId: string;
 }
 
 export interface TaskPayloadCsvFromSavedObject extends BasePayload {
-  browserTimezone: string;
+  objectType: 'saved search';
+  timerange?: {
+    min: string | number | null;
+    max: string | number | null;
+  };
   savedObjectId: string;
 }

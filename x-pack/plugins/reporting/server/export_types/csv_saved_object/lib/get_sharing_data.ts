@@ -6,7 +6,7 @@
  */
 
 import type { IUiSettingsClient, SavedObject } from 'kibana/server';
-import type { ISearchSource } from 'src/plugins/data/common';
+import type { Filter, ISearchSource } from 'src/plugins/data/common';
 import type { VisualizationSavedObjectAttributes } from 'src/plugins/visualizations/common';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -26,24 +26,31 @@ type SavedSearchObjectType = SavedObject<
 export async function getSharingData(
   currentSearchSource: ISearchSource,
   savedSearch: SavedSearchObjectType,
+  timeRange: { min: string | number | null; max: string | number | null } | undefined,
   services: { uiSettings: IUiSettingsClient }
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index');
+  if (!index) {
+    throw new Error(`Search Source is missing the "index" field`);
+  }
 
-  searchSource.setField('sort', getSortForSearchSource(savedSearch.attributes.sort, index));
+  const existingFilter = searchSource.getField('filter');
 
-  // 5. Combine the job's time filter into the SearchSource instance
-  // TODO
+  searchSource.removeField('filter');
+  searchSource.removeField('highlight');
+  searchSource.removeField('highlightAll');
+  searchSource.removeField('aggs');
+  searchSource.removeField('size');
 
-  // 6. Add columns from the saved search attributes
+  // Add columns from the saved search attributes
+  let timeFieldName: string | undefined;
   let columns: string[] | undefined;
   const columnsTemp = savedSearch.attributes.columns;
   if (typeof columnsTemp !== 'undefined' && isStringArray(columnsTemp)) {
     columns = columnsTemp;
 
     // conditionally add the time field column:
-    let timeFieldName: string | undefined;
     const hideTimeColumn = await services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
 
     if (!hideTimeColumn && index && index.timeFieldName) {
@@ -64,6 +71,36 @@ export async function getSharingData(
       searchSource.setField('fields', columns);
     }
   }
+
+  // Combine the job's time filter into the SearchSource instance
+  if (timeFieldName) {
+    const timeFilter = {
+      meta: { field: timeFieldName, index: index.id },
+      query: {
+        range: {
+          [timeFieldName]: {
+            format: 'strict_date_optional_time',
+            gte: timeRange?.min,
+            lte: timeRange?.max,
+          },
+        },
+      },
+    };
+    if (existingFilter && timeRange) {
+      searchSource.setField(
+        'filter',
+        Array.isArray(existingFilter)
+          ? [timeFilter, ...existingFilter]
+          : ([timeFilter, existingFilter] as Filter[])
+      );
+    } else {
+      const filter = timeFilter || existingFilter;
+      searchSource.setField('filter', filter);
+    }
+  }
+
+  // Inject sort
+  searchSource.setField('sort', getSortForSearchSource(savedSearch.attributes.sort, index));
 
   return {
     columns,
