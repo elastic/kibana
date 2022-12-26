@@ -5135,10 +5135,10 @@
               "resource_sub_type_doc_count": {
                 "type": "long"
               },
-              "passed": {
+              "passed_findings_count": {
                 "type": "long"
               },
-              "failed": {
+              "failed_findings_count": {
                 "type": "long"
               }
             }
