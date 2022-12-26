@@ -6,7 +6,7 @@
  */
 
 import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
-import { CspRuleMetadata } from './schemas';
+import type { CspRuleMetadata } from './schemas/csp_rule_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 /** number between 1-100 */
