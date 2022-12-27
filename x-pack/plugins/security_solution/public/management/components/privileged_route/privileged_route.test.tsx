@@ -64,7 +64,6 @@ describe('PrivilegedRoute', () => {
       render();
 
       expect(renderResult.getByTestId(componentTestId)).toBeTruthy();
-      expect(renderResult.queryByTestId(noPermissionsPageTestId)).toBeNull();
       expect(renderResult.queryByTestId(noPrivilegesPageTestId)).toBeNull();
     });
 
@@ -74,7 +73,6 @@ describe('PrivilegedRoute', () => {
       render();
 
       expect(renderResult.queryByTestId(componentTestId)).toBeNull();
-      expect(renderResult.queryByTestId(noPermissionsPageTestId)).toBeNull();
       expect(renderResult.queryByTestId(noPrivilegesPageTestId)).toBeNull();
     });
   };
