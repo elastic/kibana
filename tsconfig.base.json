@@ -1086,6 +1086,8 @@
       "@kbn/shared-ux-storybook-mock/*": ["packages/shared-ux/storybook/mock/*"],
       "@kbn/shared-ux-utility": ["packages/kbn-shared-ux-utility"],
       "@kbn/shared-ux-utility/*": ["packages/kbn-shared-ux-utility/*"],
+      "@kbn/slo-schema": ["packages/kbn-slo-schema"],
+      "@kbn/slo-schema/*": ["packages/kbn-slo-schema/*"],
       "@kbn/snapshot-restore-plugin": ["x-pack/plugins/snapshot_restore"],
       "@kbn/snapshot-restore-plugin/*": ["x-pack/plugins/snapshot_restore/*"],
       "@kbn/some-dev-log": ["packages/kbn-some-dev-log"],

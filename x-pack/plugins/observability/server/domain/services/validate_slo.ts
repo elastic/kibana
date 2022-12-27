@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { timeslicesBudgetingMethodSchema, Duration, DurationUnit } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../errors';
 import { SLO } from '../models';
-import { Duration, DurationUnit } from '../models/duration';
-import { timeslicesBudgetingMethodSchema } from '../../types/schema';
 
 /**
  * Asserts the SLO is valid from a business invariants point of view.

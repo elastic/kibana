@@ -991,6 +991,7 @@ packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/apm-ui
 packages/kbn-shared-svg @elastic/apm-ui
 packages/kbn-shared-ux-utility @elastic/kibana-global-experience
+packages/kbn-slo-schema @elastic/actionable-observability
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-spec-to-console @elastic/platform-deployment-management

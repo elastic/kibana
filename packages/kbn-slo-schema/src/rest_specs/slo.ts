@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as t from 'io-ts';
@@ -63,7 +64,7 @@ const findSLOParamsSchema = t.partial({
   }),
 });
 
-const getSLOResponseSchema = t.type({
+const SLOResponseSchema = t.type({
   id: t.string,
   name: t.string,
   description: t.string,
@@ -71,12 +72,18 @@ const getSLOResponseSchema = t.type({
   time_window: timeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
-  settings: settingsSchema,
-  summary: summarySchema,
   revision: t.number,
+  settings: settingsSchema,
   created_at: dateType,
   updated_at: dateType,
 });
+
+const SLOWithSummaryResponseSchema = t.intersection([
+  SLOResponseSchema,
+  t.type({ summary: summarySchema }),
+]);
+
+const getSLOResponseSchema = SLOWithSummaryResponseSchema;
 
 const updateSLOParamsSchema = t.type({
   path: t.type({
@@ -93,50 +100,31 @@ const updateSLOParamsSchema = t.type({
   }),
 });
 
-const updateSLOResponseSchema = t.type({
-  id: t.string,
-  name: t.string,
-  description: t.string,
-  indicator: indicatorSchema,
-  time_window: timeWindowSchema,
-  budgeting_method: budgetingMethodSchema,
-  objective: objectiveSchema,
-  settings: settingsSchema,
-  created_at: dateType,
-  updated_at: dateType,
-});
+const updateSLOResponseSchema = SLOResponseSchema;
 
 const findSLOResponseSchema = t.type({
   page: t.number,
   per_page: t.number,
   total: t.number,
-  results: t.array(
-    t.type({
-      id: t.string,
-      name: t.string,
-      description: t.string,
-      indicator: indicatorSchema,
-      time_window: timeWindowSchema,
-      budgeting_method: budgetingMethodSchema,
-      objective: objectiveSchema,
-      summary: summarySchema,
-      settings: settingsSchema,
-      revision: t.number,
-      created_at: dateType,
-      updated_at: dateType,
-    })
-  ),
+  results: t.array(SLOWithSummaryResponseSchema),
 });
+
+type SLOResponse = t.OutputOf<typeof SLOResponseSchema>;
+type SLOWithSummaryResponse = t.OutputOf<typeof SLOWithSummaryResponseSchema>;
 
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
+
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
+
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
+
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
 export {
+  SLOResponseSchema,
   createSLOParamsSchema,
   deleteSLOParamsSchema,
   getSLOParamsSchema,
@@ -147,6 +135,8 @@ export {
   findSLOResponseSchema,
 };
 export type {
+  SLOResponse,
+  SLOWithSummaryResponse,
   CreateSLOParams,
   CreateSLOResponse,
   GetSLOResponse,

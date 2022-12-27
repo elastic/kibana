@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
 import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
 import { computeErrorBudget, computeSLI } from '../../domain/services';
-import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '../../types/rest_specs';
 import { SLIClient } from './sli_client';
 import {
   Criteria,

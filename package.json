@@ -425,6 +425,7 @@
     "@kbn/shared-ux-storybook": "link:packages/kbn-shared-ux-storybook",
     "@kbn/shared-ux-storybook-mock": "link:packages/shared-ux/storybook/mock",
     "@kbn/shared-ux-utility": "link:packages/kbn-shared-ux-utility",
+    "@kbn/slo-schema": "link:packages/kbn-slo-schema",
     "@kbn/std": "link:packages/kbn-std",
     "@kbn/timelion-grammar": "link:packages/kbn-timelion-grammar",
     "@kbn/tinymath": "link:packages/kbn-tinymath",
