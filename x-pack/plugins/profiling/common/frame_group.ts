@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { last } from 'lodash';
+import { takeRight } from 'lodash';
 import { StackFrameMetadata } from './profiling';
 
 export type FrameGroupID = string;
 
 function stripLeadingSubdirs(sourceFileName: string) {
-  return last(sourceFileName.split('/'));
+  return takeRight(sourceFileName.split('/'), 2).join('/');
 }
 
 // createFrameGroupID is the "standard" way of grouping frames, by commonly
