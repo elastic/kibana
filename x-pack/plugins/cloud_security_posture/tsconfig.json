@@ -45,6 +45,7 @@
     "@kbn/es-types",
     "@kbn/core-elasticsearch-server",
     "@kbn/ecs",
+    "@kbn/core-saved-objects-api-server",
   ],
   "exclude": [
     "target/**/*",
