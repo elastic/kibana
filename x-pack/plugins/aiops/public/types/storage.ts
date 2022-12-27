@@ -24,3 +24,5 @@ export type AiOpsKey = keyof Exclude<AiOps, null>;
 export type AiOpsStorageMapped<T extends AiOpsKey> = T extends typeof AIOPS_FROZEN_TIER_PREFERENCE
   ? FrozenTierPreference | undefined
   : null;
+
+export const AIOPS_STORAGE_KEYS = [AIOPS_FROZEN_TIER_PREFERENCE] as const;
