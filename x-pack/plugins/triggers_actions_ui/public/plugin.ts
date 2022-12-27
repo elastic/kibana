@@ -345,7 +345,6 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
-          // getDefaultActionParams: getDefaultsForActionParams,
         });
       },
       getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {

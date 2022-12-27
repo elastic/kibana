@@ -46,22 +46,14 @@ export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 // secrets definition
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
-  token: schema.nullable(schema.string()),
+  token: schema.string(),
 };
-const SecretsSchema = schema.object(secretSchemaProps, {
-  validate: (secrets) => {
-    if (!secrets.token) {
-      return i18n.translate('xpack.stackConnectors.torq.secrets.tokenRequiredErrorMessage', {
-        defaultMessage: 'token is required',
-      });
-    }
-  },
-});
+const SecretsSchema = schema.object(secretSchemaProps);
 
 // params definition
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
-  body: schema.maybe(schema.string()),
+  body: schema.string(),
 });
 
 export const ActionTypeId = '.torq';
@@ -159,6 +151,13 @@ export async function executor(
   const secrets: ActionTypeSecretsType = execOptions.secrets;
   const token = secrets.token;
 
+  let body;
+  try {
+    body = JSON.parse(data || 'null');
+  } catch (err) {
+    return errorInvalidBody(actionId, execOptions.logger, err);
+  }
+
   const axiosInstance = axios.create();
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
@@ -169,7 +168,7 @@ export async function executor(
         'X-Torq-Token': token || '',
         'Content-Type': 'application/json',
       },
-      data: JSON.parse(data || 'null'),
+      data: body,
       configurationUtilities,
       logger: execOptions.logger,
       validateStatus: (status: number) => status >= 200 && status < 300,
@@ -246,9 +245,25 @@ async function handleExecutionError(
   return errorResultUnexpectedError(actionId);
 }
 
-// Action Executor Result w/ internationalisation
 function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
   return { status: 'ok', data, actionId };
+}
+
+function errorInvalidBody(
+  actionId: string,
+  logger: Logger,
+  err: Error
+): ActionTypeExecutorResult<void> {
+  const errMessage = i18n.translate('xpack.stackConnectors.torq.invalidBodyErrorMessage', {
+    defaultMessage: 'error triggering Torq workflow, invalid body',
+  });
+  logger.error(`error on ${actionId} Torq event: ${errMessage}: ${err.message}`);
+  return {
+    status: 'error',
+    message: errMessage,
+    actionId,
+    serviceMessage: err.message,
+  };
 }
 
 function errorResultInvalid(
