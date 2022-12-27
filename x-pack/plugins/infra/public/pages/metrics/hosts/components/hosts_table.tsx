@@ -15,7 +15,6 @@ import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { useHostsViewContext } from '../hooks/use_host_view';
 import { useTableProperties } from '../hooks/use_table_properties_url_state';
-import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { useSnapshot } from '../../inventory_view/hooks/use_snaphot';
 import { useHostTable } from '../hooks/use_host_table';
 
@@ -29,7 +28,6 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
 ];
 
 export const HostsTable = () => {
-  const { panelFilters } = useUnifiedSearchContext();
   const { baseRequest, fetch$, setHostViewState } = useHostsViewContext();
   const [properties, setProperties] = useTableProperties();
 
@@ -85,7 +83,7 @@ export const HostsTable = () => {
 
   const noData = items.length === 0;
 
-  if (loading || !panelFilters) {
+  if (loading) {
     return (
       <InfraLoadingPanel
         height="100%"
