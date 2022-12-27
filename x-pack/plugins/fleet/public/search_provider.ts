@@ -41,6 +41,20 @@ export const toSearchResult = (
   application: ApplicationStart,
   basePath: IBasePath
 ): GlobalSearchProviderResult[] => {
+  const packageResult = {
+    id: pkg.name,
+    type: packageType,
+    title: pkg.title,
+    score: 80,
+    icon: getEuiIconType(pkg, basePath),
+    url: {
+      path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}${
+        pagePathGetters.integration_details_overview({ pkgkey: pkg.name })[1]
+      }`,
+      prependBasePath: false,
+    },
+  };
+
   const policyTemplateResults = pkg.policy_templates?.map<GlobalSearchProviderResult>(
     (policyTemplate) => ({
       id: policyTemplate.name,
@@ -61,20 +75,8 @@ export const toSearchResult = (
   );
 
   return [
-    {
-      id: pkg.name,
-      type: packageType,
-      title: pkg.title,
-      score: 80,
-      icon: getEuiIconType(pkg, basePath),
-      url: {
-        path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}${
-          pagePathGetters.integration_details_overview({ pkgkey: pkg.name })[1]
-        }`,
-        prependBasePath: false,
-      },
-    },
-    ...(policyTemplateResults || []),
+    packageResult,
+    ...(policyTemplateResults && policyTemplateResults.length > 1 ? policyTemplateResults : []),
   ];
 };
 
