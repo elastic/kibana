@@ -43,6 +43,7 @@ describe('UpdateSLO', () => {
       );
       expect(response.name).toBe(newName);
       expect(response.updated_at).not.toBe(slo.updated_at);
+      expect(response.revision).toBe(slo.revision);
     });
   });
 
