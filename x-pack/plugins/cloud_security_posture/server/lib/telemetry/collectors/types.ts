@@ -8,6 +8,7 @@
 export interface CspmUsage {
   indices: CspmIndicesStats;
   resources_stats: CspmResourcesStats[];
+  accounts_stats: CspmAccountsStats[];
 }
 
 export interface CspmIndicesStats {
@@ -31,4 +32,16 @@ export interface CspmResourcesStats {
   resource_sub_type_doc_count: number;
   passed_findings_count: number;
   failed_findings_count: number;
+}
+export interface CspmAccountsStats {
+  account_id: string;
+  posture_score: number;
+  passed_findings_count: number;
+  failed_findings_count: number;
+  latest_findings_doc_count: number;
+  benchmark_id: string;
+  benchmark_name: string;
+  benchmark_version: string;
+  agents_count: number;
+  nodes_count: number;
 }
