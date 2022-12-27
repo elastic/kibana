@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getNestedProperty } from './object_utils';
+import { getNestedProperty } from './get_nested_property';
 
 describe('object_utils', () => {
   test('getNestedProperty()', () => {

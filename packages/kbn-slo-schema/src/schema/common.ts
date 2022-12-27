@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { either } from 'fp-ts/lib/Either';
@@ -27,10 +28,10 @@ const errorBudgetSchema = t.type({
   initial: t.number,
   consumed: t.number,
   remaining: t.number,
-  is_estimated: t.boolean,
+  isEstimated: t.boolean,
 });
 
-const summarySchema = t.type({ sli_value: t.number, error_budget: errorBudgetSchema });
+const summarySchema = t.type({ sliValue: t.number, errorBudget: errorBudgetSchema });
 
 const dateRangeSchema = t.type({ from: dateType, to: dateType });
 

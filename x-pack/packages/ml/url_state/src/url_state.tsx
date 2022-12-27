@@ -11,23 +11,25 @@ import React, {
   useCallback,
   useContext,
   useMemo,
-  FC,
   useRef,
   useEffect,
+  type FC,
 } from 'react';
-import { isEqual } from 'lodash';
-import { decode, encode } from '@kbn/rison';
 import { useHistory, useLocation } from 'react-router-dom';
+import { isEqual } from 'lodash';
+
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import { decode, encode } from '@kbn/rison';
 
 import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { Dictionary } from '../../../common/types/common';
 
-import { getNestedProperty } from './object_utils';
-import { MlPages } from '../../../common/constants/locator';
+export interface Dictionary<TValue> {
+  [id: string]: TValue;
+}
 
-type Accessor = '_a' | '_g';
+export type Accessor = '_a' | '_g';
 export type SetUrlState = (
   accessor: Accessor,
   attribute: string | Dictionary<any>,
@@ -48,7 +50,7 @@ const risonSerializedParams = new Set(['_a', '_g']);
  * Checks if the URL query parameter requires rison serialization.
  * @param queryParam
  */
-function isRisonSerializationRequired(queryParam: string): boolean {
+export function isRisonSerializationRequired(queryParam: string): boolean {
   return risonSerializedParams.has(queryParam);
 }
 
@@ -86,7 +88,7 @@ export const urlStateStore = createContext<UrlState>({
   setUrlState: () => {},
 });
 
-const { Provider } = urlStateStore;
+export const { Provider } = urlStateStore;
 
 export const UrlStateProvider: FC = ({ children }) => {
   const history = useHistory();
@@ -183,15 +185,6 @@ export const useUrlState = (
   return [urlState, setUrlState];
 };
 
-type LegacyUrlKeys = 'mlExplorerSwimlane';
-
-export type AppStateKey =
-  | 'mlSelectSeverity'
-  | 'mlSelectInterval'
-  | 'mlAnomaliesTable'
-  | MlPages
-  | LegacyUrlKeys;
-
 /**
  * Service for managing URL state of particular page.
  */
@@ -235,16 +228,21 @@ export class PageUrlStateService<T> {
   }
 }
 
+interface PageUrlState {
+  pageKey: string;
+  pageUrlState: object;
+}
+
 /**
  * Hook for managing the URL state of the page.
  */
-export const usePageUrlState = <PageUrlState extends object>(
-  pageKey: AppStateKey,
-  defaultState?: PageUrlState
+export const usePageUrlState = <T extends PageUrlState>(
+  pageKey: T['pageKey'],
+  defaultState?: T['pageUrlState']
 ): [
-  PageUrlState,
-  (update: Partial<PageUrlState>, replaceState?: boolean) => void,
-  PageUrlStateService<PageUrlState>
+  T['pageUrlState'],
+  (update: Partial<T['pageUrlState']>, replaceState?: boolean) => void,
+  PageUrlStateService<T['pageUrlState']>
 ] => {
   const [appState, setAppState] = useUrlState('_a');
   const pageState = appState?.[pageKey];
@@ -255,9 +253,9 @@ export const usePageUrlState = <PageUrlState extends object>(
     setCallback.current = setAppState;
   }, [setAppState]);
 
-  const prevPageState = useRef<PageUrlState | undefined>();
+  const prevPageState = useRef<T['pageUrlState'] | undefined>();
 
-  const resultPageState: PageUrlState = useMemo(() => {
+  const resultPageState: T['pageUrlState'] = useMemo(() => {
     const result = {
       ...(defaultState ?? {}),
       ...(pageState ?? {}),
@@ -283,7 +281,7 @@ export const usePageUrlState = <PageUrlState extends object>(
   }, [pageState]);
 
   const onStateUpdate = useCallback(
-    (update: Partial<PageUrlState>, replaceState?: boolean) => {
+    (update: Partial<T['pageUrlState']>, replaceState?: boolean) => {
       if (!setCallback?.current) {
         throw new Error('Callback for URL state update has not been initialized.');
       }
@@ -300,7 +298,7 @@ export const usePageUrlState = <PageUrlState extends object>(
     [pageKey, resultPageState]
   );
 
-  const pageUrlStateService = useMemo(() => new PageUrlStateService<PageUrlState>(), []);
+  const pageUrlStateService = useMemo(() => new PageUrlStateService<T['pageUrlState']>(), []);
 
   useEffect(
     function updatePageUrlService() {

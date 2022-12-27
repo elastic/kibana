@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './slo';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/nested_property'],
+};

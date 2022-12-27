@@ -10,9 +10,9 @@ import React, { FC, useMemo } from 'react';
 import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { useUrlState } from '@kbn/ml-url-state';
 
 import type { ExplorerJob } from '../../explorer/explorer_utils';
-import { useUrlState } from '../../util/url_state';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { ML_PAGES } from '../../../../common/constants/locator';
 
