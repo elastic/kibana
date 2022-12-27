@@ -30,28 +30,26 @@ function computeOperationMatrix(
   filterOperations: (operation: OperationMetadata) => boolean
 ): OperationSupportMatrix {
   return operationsByMetadata
-    .filter((operation) => filterOperations(operation.operationMetaData))
+    .reduce<OperationFieldTuple[]>((opsFieldTuples, { operationMetaData, operations }) => {
+      return filterOperations(operationMetaData)
+        ? [...opsFieldTuples, ...operations]
+        : opsFieldTuples;
+    }, [])
     .reduce<OperationSupportMatrix>(
-      (matrix, { operations }) => {
-        operations.forEach((operation) => {
-          if (operation.type === 'field') {
-            const fieldOps = matrix.operationByField.get(operation.field) ?? new Set();
-            fieldOps.add(operation.operationType);
-            matrix.operationByField.set(operation.field, fieldOps);
-            const opFields = matrix.fieldByOperation.get(operation.operationType) ?? new Set();
-            opFields.add(operation.field);
-            matrix.fieldByOperation.set(operation.operationType, opFields);
-          } else {
-            matrix.operationWithoutField.add(operation.operationType);
-          }
-        });
+      (matrix, operation) => {
+        if (operation.type === 'field') {
+          const fieldOps = matrix.operationByField.get(operation.field) ?? new Set();
+          fieldOps.add(operation.operationType);
+          matrix.operationByField.set(operation.field, fieldOps);
+          const opFields = matrix.fieldByOperation.get(operation.operationType) ?? new Set();
+          opFields.add(operation.field);
+          matrix.fieldByOperation.set(operation.operationType, opFields);
+        } else {
+          matrix.operationWithoutField.add(operation.operationType);
+        }
         return matrix;
       },
-      {
-        operationByField: new Map(),
-        operationWithoutField: new Set(),
-        fieldByOperation: new Map(),
-      }
+      { operationByField: new Map(), operationWithoutField: new Set(), fieldByOperation: new Map() }
     );
 }
 
