@@ -118,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
               'process_operations_all',
               'read',
               'trusted_applications_all',
-              'trusted_applications_read'
+              'trusted_applications_read',
             ],
             uptime: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],
