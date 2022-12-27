@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+/* eslint-disable import/no-nodejs-modules */
+
 import * as yaml from 'js-yaml';
-// eslint-disable-next-line import/no-nodejs-modules
 import type { UrlObject } from 'url';
-// eslint-disable-next-line import/no-nodejs-modules
 import Url from 'url';
+import type { ROLE } from '../../../../../../test/security_solution_endpoint_api_int/services/roles_users';
+import { rolesMapping } from '../../../../../../test/security_solution_endpoint_api_int/services/roles_users';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -54,7 +56,7 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param role string role/user to log in with
  * @param route string route to visit
  */
-export const getUrlWithRoute = (role: string, route: string) => {
+export const getUrlWithRoute = (role: ROLE, route: string) => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const theUrl = `${Url.format({
@@ -99,6 +101,76 @@ export const constructUrlWithUser = (user: User, route: string) => {
   return builtUrl.href;
 };
 
+export const getCurlScriptEnvVars = () => ({
+  ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
+  ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
+  ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
+  KIBANA_URL: Cypress.config().baseUrl,
+});
+
+export const postRoleAndUser = (role: ROLE) => {
+  const env = getCurlScriptEnvVars();
+
+  // post the role
+  cy.request({
+    method: 'PUT',
+    url: `${env.KIBANA_URL}/api/security/role/${role}`,
+    body: rolesMapping[role],
+    headers: {
+      'kbn-xsrf': 'cypress',
+    },
+    auth: {
+      user: 'elastic',
+      pass: 'changeme',
+    },
+  });
+
+  // post the user associated with the role to elasticsearch
+  cy.request({
+    method: 'POST',
+    url: `${env.KIBANA_URL}/internal/security/users/${role}`,
+    headers: {
+      'kbn-xsrf': 'cypress',
+    },
+    body: {
+      username: role,
+      password: 'changeme',
+      roles: [role],
+    },
+    auth: {
+      user: 'elastic',
+      pass: 'changeme',
+    },
+  });
+};
+
+export const deleteRoleAndUser = (role: ROLE) => {
+  const env = getCurlScriptEnvVars();
+
+  cy.request({
+    method: 'DELETE',
+    auth: {
+      user: 'elastic',
+      pass: 'changeme',
+    },
+    headers: {
+      'kbn-xsrf': 'cypress',
+    },
+    url: `${env.KIBANA_URL}/api/security/role/${role}`,
+  });
+  cy.request({
+    method: 'DELETE',
+    auth: {
+      user: 'elastic',
+      pass: 'changeme',
+    },
+    headers: {
+      'kbn-xsrf': 'cypress',
+    },
+    url: `${env.KIBANA_URL}/internal/security/users/${role}`,
+  });
+};
+
 export const loginWithUser = (user: User) => {
   const url = Cypress.config().baseUrl;
 
@@ -118,8 +190,8 @@ export const loginWithUser = (user: User) => {
   });
 };
 
-export const loginWithRole = async (role: string) => {
-  // postRoleAndUser(role);
+export const loginWithRole = async (role: ROLE) => {
+  postRoleAndUser(role);
   const theUrl = Url.format({
     auth: `${role}:changeme`,
     username: role,
@@ -153,7 +225,7 @@ export const loginWithRole = async (role: string) => {
  * To speed the execution of tests, prefer this non-interactive authentication,
  * which is faster than authentication via Kibana's interactive login page.
  */
-export const login = (role?: string) => {
+export const login = (role?: ROLE) => {
   if (role != null) {
     loginWithRole(role);
   } else if (credentialsProvidedByEnvironment()) {

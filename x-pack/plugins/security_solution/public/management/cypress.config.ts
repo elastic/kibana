@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { defineConfig } from 'cypress';
+import { defineCypressConfig } from '@kbn/cypress-config';
 
-export default defineConfig({
+export default defineCypressConfig({
   defaultCommandTimeout: 60000,
   execTimeout: 120000,
   pageLoadTimeout: 12000,
@@ -38,8 +38,5 @@ export default defineConfig({
     experimentalSessionAndOrigin: true,
     testIsolation: 'on',
     experimentalRunAllSpecs: true,
-    setupNodeEvents(on, config) {
-      // implement node event listeners here
-    },
   },
 });
