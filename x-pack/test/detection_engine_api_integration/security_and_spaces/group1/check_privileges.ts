@@ -52,10 +52,10 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('should set status to partial failure when user has no access', () => {
       const indexTestCases = [
-        ['host_alias'],
-        ['host_alias', 'auditbeat-8.0.0'],
+        // ['host_alias'],
+        // ['host_alias', 'auditbeat-8.0.0'],
         ['host_alias*'],
-        ['host_alias*', 'auditbeat-*'],
+        // ['host_alias*', 'auditbeat-*'],
       ];
       indexTestCases.forEach((index) => {
         it(`for KQL rule with index param: ${index}`, async () => {
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
           await deleteUserAndRole(getService, ROLES.detections_admin);
         });
 
-        it(`for threshold rule with index param: ${index}`, async () => {
+        it.only(`for threshold rule with index param: ${index}`, async () => {
           const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(index),
             threshold: {
@@ -98,18 +98,20 @@ export default ({ getService }: FtrProviderContext) => {
             user: ROLES.detections_admin,
             pass: 'changeme',
           });
+
           await waitForRuleSuccessOrStatus(
             supertest,
             log,
             id,
             RuleExecutionStatus['partial failure']
           );
+
           const { body } = await supertest
             .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
             .query({ id })
             .expect(200);
-
+          // expect(body).to.eql({});
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.eql(
             `This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]`
