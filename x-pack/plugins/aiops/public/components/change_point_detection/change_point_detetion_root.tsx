@@ -45,7 +45,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
             <ChangePointDetectionContextProvider>
               <ChangePointDetectionPage />
             </ChangePointDetectionContextProvider>
-          </MlStorageContextProvider>{' '}
+          </MlStorageContextProvider>
         </DataSourceContext.Provider>
       </UrlStateProvider>
     </AiopsAppContext.Provider>
