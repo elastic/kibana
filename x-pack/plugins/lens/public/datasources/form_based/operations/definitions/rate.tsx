@@ -133,18 +133,6 @@ export const rateOperation: OperationDefinition<RateIndexPatternColumn, 'field',
         ]),
       }).toAst();
     }
-
-    // if we are already wrapped in timeseries (user defined a breakdown)
-    // this is optimization, we get the results running above code as well but is more resource intensive
-    return buildExpressionFunction<AggFunctionsMapping['aggRate']>('aggRate', {
-      id: columnId,
-      enabled: true,
-      schema: 'metric',
-      field: column.sourceField,
-      // time shift is added to wrapping aggFilteredMetric if filter is set
-      timeShift: column.filter ? undefined : column.timeShift,
-      unit: 'hour',
-    }).toAst();
   },
   onFieldChange: (oldColumn, field) => {
     return {
