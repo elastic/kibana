@@ -9,8 +9,7 @@
 import url from 'url';
 import { BaseSpan } from './base_span';
 import { generateShortId } from '../utils/generate_id';
-import { ApmFields } from './apm_fields';
-import { SpanParams } from './instance';
+import { ApmFields, SpanParams } from './apm_fields';
 
 export class Span extends BaseSpan {
   constructor(fields: ApmFields) {

@@ -130,7 +130,8 @@ export const links: LinkItem = {
       id: SecurityPageName.exceptions,
       title: EXCEPTIONS,
       description: i18n.translate('xpack.securitySolution.appLinks.exceptionsDescription', {
-        defaultMessage: 'Create and manage exceptions to prevent the creation of unwanted alerts.',
+        defaultMessage:
+          'Create and manage shared exception lists to prevent the creation of unwanted alerts.',
       }),
       landingIcon: IconExceptionLists,
       path: EXCEPTIONS_PATH,
@@ -278,6 +279,7 @@ export const getManagementFilteredLinks = async (
     canReadEndpointList,
     canReadTrustedApplications,
     canReadEventFilters,
+    canReadBlocklist,
     canReadPolicyManagement,
   } = fleetAuthz
     ? calculateEndpointAuthz(
@@ -312,6 +314,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadEventFilters) {
     linksToExclude.push(SecurityPageName.eventFilters);
+  }
+
+  if (!canReadBlocklist) {
+    linksToExclude.push(SecurityPageName.blocklist);
   }
 
   return excludeLinks(linksToExclude);

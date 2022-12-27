@@ -144,6 +144,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     savedObjectsTagging: {},
     dataViews: dataPlugin.dataViews,
     timefilter: dataPlugin.query.timefilter.timefilter,
+    lens: { EmbeddableComponent: jest.fn(() => null) },
     locator: {
       useUrl: jest.fn(() => ''),
       navigate: jest.fn(),

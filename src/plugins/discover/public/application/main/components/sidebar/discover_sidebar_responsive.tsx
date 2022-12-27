@@ -168,6 +168,16 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             },
           });
           break;
+        case FetchStatus.ERROR:
+          dispatchSidebarStateAction({
+            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+            payload: {
+              dataView: selectedDataViewRef.current,
+              fieldCounts: {},
+              isPlainRecord: isPlainRecordType,
+            },
+          });
+          break;
         default:
           break;
       }

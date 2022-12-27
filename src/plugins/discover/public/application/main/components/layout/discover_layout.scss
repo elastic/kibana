@@ -1,4 +1,4 @@
-@import 'src/core/public/mixins';
+@import '../../../../../../../core/public/mixins';
 
 discover-app {
   flex-grow: 1;
@@ -45,11 +45,9 @@ discover-app {
 }
 
 .dscPageContent {
+  position: relative;
+  overflow: hidden;
   border: $euiBorderThin;
-}
-
-.dscPageContent,
-.dscPageContent__inner {
   height: 100%;
 }
 

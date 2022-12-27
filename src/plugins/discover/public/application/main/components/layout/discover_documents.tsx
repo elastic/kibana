@@ -37,6 +37,7 @@ import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/docu
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { DataTableRecord } from '../../../../types';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
+import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -216,6 +217,7 @@ function DiscoverDocumentsComponent({
               onUpdateRowsPerPage={onUpdateRowsPerPage}
               onFieldEdited={onFieldEdited}
               savedSearchId={savedSearch.id}
+              DocumentView={DiscoverGridFlyout}
             />
           </div>
         </>

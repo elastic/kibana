@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-// global setup for supported languages
 import './src/register_globals';
 
 export { monaco } from './src/monaco_imports';
 export { XJsonLang } from './src/xjson';
-export { EsqlLang } from './src/esql';
+export { SQLLang } from './src/sql';
+export { ESQL_LANG_ID, ESQL_THEME_ID } from './src/esql';
+
 export * from './src/painless';
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';

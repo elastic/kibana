@@ -21,6 +21,7 @@ import { AlertingPages } from '../config';
 import { AlertDetails } from '../pages/alert_details';
 import { DatePickerContextProvider } from '../context/date_picker_context';
 import { SlosPage } from '../pages/slos';
+import { SloDetailsPage } from '../pages/slo_details';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -133,6 +134,13 @@ export const routes = {
   '/slos': {
     handler: () => {
       return <SlosPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/:sloId': {
+    handler: () => {
+      return <SloDetailsPage />;
     },
     params: {},
     exact: true,

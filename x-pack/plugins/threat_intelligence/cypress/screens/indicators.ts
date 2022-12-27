@@ -198,3 +198,5 @@ export const INSPECTOR_BUTTON = '[data-test-subj="tiIndicatorsGridInspect"]';
 export const INSPECTOR_PANEL = '[data-test-subj="inspectorPanel"]';
 
 export const ADD_INTEGRATIONS_BUTTON = '[data-test-subj="add-data"]';
+
+export const REFRESH_BUTTON = '[data-test-subj="querySubmitButton"]';

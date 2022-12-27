@@ -102,6 +102,7 @@ const getSavedObjectTypes = (
         is_default_fleet_server: { type: 'boolean' },
         status: { type: 'keyword' },
         unenroll_timeout: { type: 'integer' },
+        inactivity_timeout: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
@@ -261,6 +262,7 @@ const getSavedObjectTypes = (
           properties: {
             id: { type: 'keyword' },
             type: { type: 'keyword' },
+            version: { type: 'keyword' },
           },
         },
         installed_kibana: {
