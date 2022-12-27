@@ -24,9 +24,9 @@ import {
 } from '../../application/utils/search_utils';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { SpikeAnalysisTableRowStateProvider } from '../spike_analysis_table/spike_analysis_table_row_provider';
-import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { ExplainLogRateSpikesPage } from './explain_log_rate_spikes_page';
 
