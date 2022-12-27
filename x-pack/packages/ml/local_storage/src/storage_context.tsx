@@ -16,8 +16,7 @@ import React, {
 import { omit } from 'lodash';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-
-import { isDefined } from './is_defined';
+import { isDefined } from '@kbn/ml-is-defined';
 
 interface StorageDefinition {
   [key: string]: unknown;

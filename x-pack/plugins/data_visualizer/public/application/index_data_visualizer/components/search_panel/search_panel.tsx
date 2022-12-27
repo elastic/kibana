@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Query, Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { isDefined } from '../../../common/util/is_defined';
+import { isDefined } from '@kbn/ml-is-defined';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
 import { SupportedFieldType } from '../../../../../common/types';

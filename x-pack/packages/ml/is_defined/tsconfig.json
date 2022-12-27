@@ -13,10 +13,7 @@
       "**/*.tsx",
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/kibana-utils-plugin",
-    "@kbn/ml-is-defined",
-  ]
+  "kbn_references": []
 }

@@ -69,6 +69,7 @@
     "@kbn/ml-url-state",
     "@kbn/ml-nested-property",
     "@kbn/ml-local-storage",
+    "@kbn/ml-is-defined",
   ],
   "exclude": [
     "target/**/*",

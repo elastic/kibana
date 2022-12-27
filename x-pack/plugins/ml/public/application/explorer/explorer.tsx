@@ -32,6 +32,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
+import { isDefined } from '@kbn/ml-is-defined';
 import { HelpPopover } from '../components/help_popover';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 // @ts-ignore
@@ -70,7 +71,6 @@ import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { AnomaliesMap } from './anomalies_map';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { AnomalyContextMenu } from './anomaly_context_menu';
-import { isDefined } from '../../../common/types/guards';
 import type { JobSelectorProps } from '../components/job_selector/job_selector';
 import type { ExplorerState } from './reducers';
 import type { TimeBuckets } from '../util/time_buckets';

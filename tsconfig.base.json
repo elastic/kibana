@@ -814,6 +814,8 @@
       "@kbn/maps-plugin/*": ["x-pack/plugins/maps/*"],
       "@kbn/ml-agg-utils": ["x-pack/packages/ml/agg_utils"],
       "@kbn/ml-agg-utils/*": ["x-pack/packages/ml/agg_utils/*"],
+      "@kbn/ml-is-defined": ["x-pack/packages/ml/is_defined"],
+      "@kbn/ml-is-defined/*": ["x-pack/packages/ml/is_defined/*"],
       "@kbn/ml-is-populated-object": ["x-pack/packages/ml/is_populated_object"],
       "@kbn/ml-is-populated-object/*": ["x-pack/packages/ml/is_populated_object/*"],
       "@kbn/ml-local-storage": ["x-pack/packages/ml/local_storage"],
