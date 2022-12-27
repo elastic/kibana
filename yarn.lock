@@ -3741,11 +3741,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-is-populated-object@link:x-pack/packages/ml/is_populated_object":
+"@kbn/ml-nested-property@link:x-pack/packages/ml/nested_property":
   version "0.0.0"
   uid ""
 
 "@kbn/ml-string-hash@link:x-pack/packages/ml/string_hash":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-url-state@link:x-pack/packages/ml/url_state":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-is-populated-object@link:x-pack/packages/ml/is_populated_object":
   version "0.0.0"
   uid ""
 
