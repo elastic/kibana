@@ -12,7 +12,7 @@ import globby from 'globby';
 import loadJsonFile from 'load-json-file';
 
 import { getPluginSearchPaths, simpleKibanaPlatformPluginDiscovery } from '@kbn/plugin-discovery';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ApiScope, PluginOrPackage } from './types';
 
 export function findPlugins(): PluginOrPackage[] {
