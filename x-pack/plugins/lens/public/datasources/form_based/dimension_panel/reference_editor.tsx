@@ -50,7 +50,7 @@ const getFunctionOptions = (
       (column &&
         hasField(column) &&
         def.input === 'field' &&
-        operationSupportMatrix.fieldByOperation[operationType]?.has(column.sourceField)) ||
+        operationSupportMatrix.fieldByOperation.get(operationType)?.has(column.sourceField)) ||
       (column && !hasField(column) && def.input !== 'field');
 
     return {
@@ -130,8 +130,8 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
   } = useMemo(() => {
     const operationTypes: Set<OperationType> = new Set();
     const operationWithoutField: Set<OperationType> = new Set();
-    const operationByField: Partial<Record<string, Set<OperationType>>> = {};
-    const fieldByOperation: Partial<Record<OperationType, Set<string>>> = {};
+    const operationByField: Map<string, Set<OperationType>> = new Map();
+    const fieldByOperation: Map<OperationType, Set<string>> = new Map();
     Object.values(operationDefinitionMap)
       .filter(({ hidden, allowAsReference }) => !hidden && allowAsReference)
       .sort((op1, op2) => {
@@ -149,12 +149,11 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
           );
           if (allFields.length) {
             operationTypes.add(op.type);
-            fieldByOperation[op.type] = new Set(allFields.map(({ name }) => name));
+            fieldByOperation.set(op.type, new Set(allFields.map(({ name }) => name)));
             allFields.forEach((field) => {
-              if (!operationByField[field.name]) {
-                operationByField[field.name] = new Set();
-              }
-              operationByField[field.name]?.add(op.type);
+              const fieldOps = operationByField.get(field.name) ?? new Set<OperationType>();
+              fieldOps.add(op.type);
+              operationByField.set(field.name, fieldOps);
             });
           }
         } else if (
@@ -265,7 +264,8 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                 if (column?.operationType === operationType) {
                   return;
                 }
-                const possibleFieldNames = operationSupportMatrix.fieldByOperation[operationType];
+                const possibleFieldNames =
+                  operationSupportMatrix.fieldByOperation.get(operationType);
 
                 const field =
                   column && 'sourceField' in column && possibleFieldNames?.has(column.sourceField)
