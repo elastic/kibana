@@ -34,3 +34,9 @@ export type DVStorageMapped<T extends DVKey> = T extends typeof DV_FROZEN_TIER_P
   : T extends typeof DV_RANDOM_SAMPLER_P_VALUE
   ? number | undefined
   : null;
+
+export const DV_STORAGE_KEYS = [
+  DV_FROZEN_TIER_PREFERENCE,
+  DV_RANDOM_SAMPLER_PREFERENCE,
+  DV_RANDOM_SAMPLER_P_VALUE,
+] as const;

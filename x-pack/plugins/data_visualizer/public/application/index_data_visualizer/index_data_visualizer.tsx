@@ -13,7 +13,9 @@ import { EuiResizeObserver } from '@elastic/eui';
 import { encode } from '@kbn/rison';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { MlStorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import {
@@ -34,6 +36,9 @@ import { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
+import { DV_STORAGE_KEYS } from './types/storage';
+
+const localStorage = new Storage(window.localStorage);
 
 export interface DataVisualizerStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
@@ -316,10 +321,12 @@ export const IndexDataVisualizer: FC<{
   return (
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
       <KibanaContextProvider services={{ ...services }}>
-        <DataVisualizerStateContextProvider
-          IndexDataVisualizerComponent={IndexDataVisualizerView}
-          getAdditionalLinks={getAdditionalLinks}
-        />
+        <MlStorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
+          <DataVisualizerStateContextProvider
+            IndexDataVisualizerComponent={IndexDataVisualizerView}
+            getAdditionalLinks={getAdditionalLinks}
+          />
+        </MlStorageContextProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );
