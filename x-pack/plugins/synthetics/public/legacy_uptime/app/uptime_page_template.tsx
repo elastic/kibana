@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiPageHeaderProps, EuiPageTemplateProps, useIsWithinMaxBreakpoint } from '@elastic/eui';
+import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE } from '../../../common/constants';
