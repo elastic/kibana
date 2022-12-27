@@ -29,7 +29,7 @@ export async function getSharingData(
   services: { uiSettings: IUiSettingsClient },
   currentSearchSource: ISearchSource,
   savedSearch: SavedSearchObjectType,
-  timeRange?: { min?: string | number; max?: string | number }
+  jobParamsTimeRange?: { min?: string | number; max?: string | number }
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index');
@@ -37,28 +37,24 @@ export async function getSharingData(
     throw new Error(`Search Source is missing the "index" field`);
   }
 
-  const savedSearchFilter = searchSource.getField('filter');
-
-  searchSource.removeField('filter');
+  // Remove the fields that are not suitable for export and paging
   searchSource.removeField('highlight');
   searchSource.removeField('highlightAll');
   searchSource.removeField('aggs');
   searchSource.removeField('size');
 
-  // Add columns from the saved search attributes
-  let timeFieldName: string | undefined;
+  // Add/adjust columns from the saved search attributes and UI Settings
   let columns: string[] | undefined;
-  const columnsTemp = savedSearch.attributes.columns;
+  let timeFieldName: string | undefined;
+  const columnsTemp = savedSearch.attributes?.columns;
   if (typeof columnsTemp !== 'undefined' && isStringArray(columnsTemp)) {
     columns = columnsTemp;
 
     // conditionally add the time field column:
     const hideTimeColumn = await services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
-
-    if (!hideTimeColumn && index && index.timeFieldName) {
+    if (index?.timeFieldName && !hideTimeColumn) {
       timeFieldName = index.timeFieldName;
     }
-
     if (timeFieldName && !columnsTemp.includes(timeFieldName)) {
       columns = [timeFieldName, ...columns];
     }
@@ -75,13 +71,13 @@ export async function getSharingData(
   }
 
   // Combine the job's time filter into the SearchSource instance
-  let timeFilterFromRequest: Filter | undefined;
-  if (timeFieldName && (timeRange?.min || timeRange?.max)) {
+  let jobParamsFilter: Filter | undefined;
+  if ((jobParamsTimeRange?.min || jobParamsTimeRange?.max) && timeFieldName) {
     let minTime: moment.Moment | undefined;
     let maxTime: moment.Moment | undefined;
-    if (timeRange?.min) minTime = moment(timeRange.min);
-    if (timeRange?.max) maxTime = moment(timeRange.max);
-    timeFilterFromRequest = {
+    if (jobParamsTimeRange?.min) minTime = moment(jobParamsTimeRange.min);
+    if (jobParamsTimeRange?.max) maxTime = moment(jobParamsTimeRange.max);
+    jobParamsFilter = {
       meta: { index: index.id },
       query: {
         range: {
@@ -95,33 +91,27 @@ export async function getSharingData(
     };
   }
 
-  let combinedFilters: Filter[] | undefined;
-
-  // Combine the time range filter from the job request body
-  // with any filters that have been saved into the saved search object
+  // Combine the time range filter from the job request body with any filters that have been saved into the saved search object
   // NOTE: if the filters that were saved into the search are NOT an array, it may be a function. Function
   // filters are not supported in this API.
-  if (savedSearchFilter && Array.isArray(savedSearchFilter)) {
-    if (timeFilterFromRequest) {
-      combinedFilters = [timeFilterFromRequest, ...savedSearchFilter];
-    } else {
-      combinedFilters = savedSearchFilter;
-    }
-  } else if (savedSearchFilter && typeof savedSearchFilter !== 'function') {
-    if (timeFilterFromRequest) {
-      combinedFilters = [timeFilterFromRequest, savedSearchFilter];
-    } else {
-      combinedFilters = [savedSearchFilter];
-    }
-  } else if (timeFilterFromRequest) {
-    if (savedSearchFilter && typeof savedSearchFilter !== 'function') {
-      combinedFilters = [timeFilterFromRequest, savedSearchFilter];
-    } else {
-      combinedFilters = [timeFilterFromRequest];
-    }
+  const savedSearchFilterTmp = searchSource.getField('filter');
+  searchSource.removeField('filter');
+
+  let combinedFilters: Filter[] | undefined;
+  let savedSearchFilter: Filter[] | undefined;
+  if (savedSearchFilterTmp && Array.isArray(savedSearchFilterTmp)) {
+    // can not include functions: could be recursive
+    savedSearchFilter = [...savedSearchFilterTmp.filter((f) => typeof f !== 'function')];
+  } else if (savedSearchFilterTmp && typeof savedSearchFilterTmp !== 'function') {
+    savedSearchFilter = [savedSearchFilterTmp];
+  }
+
+  if (savedSearchFilter && jobParamsFilter) {
+    combinedFilters = [jobParamsFilter, ...savedSearchFilter];
   } else if (savedSearchFilter) {
-    // Getting here means the saved search's filter is a function.
-    // This is not supported, as it could be recursive.
+    combinedFilters = [...savedSearchFilter];
+  } else if (jobParamsFilter) {
+    combinedFilters = [jobParamsFilter];
   }
 
   if (combinedFilters) {
