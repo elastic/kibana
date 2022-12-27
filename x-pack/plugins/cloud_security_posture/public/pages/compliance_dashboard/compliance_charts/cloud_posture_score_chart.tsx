@@ -186,7 +186,7 @@ export const CloudPostureScoreChart = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={compact ? 8 : 6}>
+      <EuiFlexItem grow={6}>
         <ComplianceTrendChart trend={trend} />
       </EuiFlexItem>
     </EuiFlexGroup>

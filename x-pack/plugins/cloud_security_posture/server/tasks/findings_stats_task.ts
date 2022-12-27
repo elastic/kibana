@@ -109,6 +109,61 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
   };
 }
 
+const getScoreQuery = (): SearchRequest => ({
+  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  size: 0,
+  query: {
+    match_all: {},
+  },
+  aggs: {
+    total_findings: {
+      value_count: {
+        field: 'result.evaluation',
+      },
+    },
+    passed_findings: {
+      filter: {
+        term: {
+          'result.evaluation': 'passed',
+        },
+      },
+    },
+    failed_findings: {
+      filter: {
+        term: {
+          'result.evaluation': 'failed',
+        },
+      },
+    },
+    score_by_cluster_id: {
+      terms: {
+        field: 'cluster_id',
+      },
+      aggregations: {
+        total_findings: {
+          value_count: {
+            field: 'result.evaluation',
+          },
+        },
+        passed_findings: {
+          filter: {
+            term: {
+              'result.evaluation': 'passed',
+            },
+          },
+        },
+        failed_findings: {
+          filter: {
+            term: {
+              'result.evaluation': 'failed',
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
 const aggregateLatestFindings = async (
   esClient: ElasticsearchClient,
   stateRuns: number,
@@ -176,58 +231,3 @@ const aggregateLatestFindings = async (
     return 'error';
   }
 };
-
-const getScoreQuery = (): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  size: 0,
-  query: {
-    match_all: {},
-  },
-  aggs: {
-    total_findings: {
-      value_count: {
-        field: 'result.evaluation',
-      },
-    },
-    passed_findings: {
-      filter: {
-        term: {
-          'result.evaluation': 'passed',
-        },
-      },
-    },
-    failed_findings: {
-      filter: {
-        term: {
-          'result.evaluation': 'failed',
-        },
-      },
-    },
-    score_by_cluster_id: {
-      terms: {
-        field: 'cluster_id',
-      },
-      aggregations: {
-        total_findings: {
-          value_count: {
-            field: 'result.evaluation',
-          },
-        },
-        passed_findings: {
-          filter: {
-            term: {
-              'result.evaluation': 'passed',
-            },
-          },
-        },
-        failed_findings: {
-          filter: {
-            term: {
-              'result.evaluation': 'failed',
-            },
-          },
-        },
-      },
-    },
-  },
-});

@@ -5,25 +5,55 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiSpacer, EuiPageHeader } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { CloudSummarySection } from './dashboard_sections/cloud_summary_section';
+import { ComplianceDashboardData } from '../../../common/types';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { DASHBOARD_CONTAINER } from './test_subjects';
 import { useComplianceDashboardDataApi } from '../../common/api';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
+import { CloudSummarySection } from './dashboard_sections/cloud_summary_section';
 import { CloudBenchmarksSection } from './dashboard_sections/cloud_benchmarks_section';
 
+const PostureDashboard = ({ complianceData }: { complianceData: ComplianceDashboardData }) => (
+  <>
+    <CloudSummarySection complianceData={complianceData} />
+    <EuiSpacer />
+    <CloudBenchmarksSection complianceData={complianceData} />
+    <EuiSpacer />
+  </>
+);
+
 export const ComplianceDashboard = () => {
+  const [selectedTab, setSelectedTab] = useState('kspm');
+
   const getSetupStatus = useCspSetupStatusApi();
   const hasFindings = getSetupStatus.data?.status === 'indexed';
   const getDashboardData = useComplianceDashboardDataApi({
     enabled: hasFindings,
   });
+
+  const tabs = useMemo(
+    () => [
+      {
+        label: 'Cloud',
+        isSelected: selectedTab === 'cspm',
+        onClick: () => setSelectedTab('cspm'),
+        content: <PostureDashboard complianceData={getDashboardData.data!} />,
+      },
+      {
+        label: 'Kubernetes',
+        isSelected: selectedTab === 'kspm',
+        onClick: () => setSelectedTab('kspm'),
+        content: <PostureDashboard complianceData={getDashboardData.data!} />,
+      },
+    ],
+    [getDashboardData.data, selectedTab]
+  );
 
   if (!hasFindings) return <NoFindingsStates />;
 
@@ -38,22 +68,18 @@ export const ComplianceDashboard = () => {
             })}
           />
         }
+        tabs={tabs.map(({ content, ...rest }) => rest)}
       />
       <EuiSpacer />
       <div
         data-test-subj={DASHBOARD_CONTAINER}
         css={css`
-          max-width: 1440px;
+          max-width: 1600px;
           margin-left: auto;
           margin-right: auto;
         `}
       >
-        <>
-          <CloudSummarySection complianceData={getDashboardData.data!} />
-          <EuiSpacer />
-          <CloudBenchmarksSection complianceData={getDashboardData.data!} />
-          <EuiSpacer />
-        </>
+        {tabs.find((t) => t.isSelected)?.content}
       </div>
     </CloudPosturePage>
   );

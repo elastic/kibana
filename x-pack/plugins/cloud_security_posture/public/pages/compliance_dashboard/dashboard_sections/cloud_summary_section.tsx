@@ -35,6 +35,7 @@ export const CloudSummarySection = ({
 }) => {
   const navToFindings = useNavigateFindings();
   const navToFindingsByResource = useNavigateFindingsByResource();
+  console.log(complianceData);
 
   const handleEvalCounterClick = (evaluation: Evaluation) => {
     navToFindings({ 'result.evaluation': evaluation });

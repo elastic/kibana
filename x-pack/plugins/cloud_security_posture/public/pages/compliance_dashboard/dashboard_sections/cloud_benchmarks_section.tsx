@@ -49,7 +49,6 @@ export const CloudBenchmarksSection = ({
         style={{
           borderBottom: euiTheme.border.thick,
           borderBottomColor: euiTheme.colors.text,
-          marginBottom: euiTheme.size.m,
           paddingBottom: euiTheme.size.s,
         }}
       >
@@ -90,53 +89,57 @@ export const CloudBenchmarksSection = ({
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {complianceData.clusters.map((cluster) => (
-        <EuiFlexGroup
-          key={cluster.meta.clusterId}
-          gutterSize="l"
-          style={{ borderBottom: euiTheme.border.thin }}
-        >
-          <EuiFlexItem grow={dashboardColumnsGrow.first}>
-            <ClusterDetailsBox cluster={cluster} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={dashboardColumnsGrow.second}>
-            <div
-              style={{
-                paddingLeft: euiTheme.size.base,
-                paddingRight: euiTheme.size.base,
-                height: '100%',
-              }}
+      {complianceData.clusters
+        .flatMap((i) => [i, i, i])
+        .map((cluster) => (
+          <>
+            <EuiFlexGroup
+              key={cluster.meta.clusterId}
+              style={{ borderBottom: euiTheme.border.thin, padding: '16px 0' }}
             >
-              <CloudPostureScoreChart
-                compact
-                id={`${cluster.meta.clusterId}_score_chart`}
-                data={cluster.stats}
-                trend={cluster.trend}
-                onEvalCounterClick={(evaluation) =>
-                  handleEvalCounterClick(cluster.meta.clusterId, evaluation)
-                }
-              />
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem grow={dashboardColumnsGrow.third}>
-            <div style={{ paddingLeft: euiTheme.size.base, paddingRight: euiTheme.size.base }}>
-              <RisksTable
-                compact
-                data={cluster.groupedFindingsEvaluation}
-                maxItems={3}
-                onCellClick={(resourceTypeName) =>
-                  handleCellClick(cluster.meta.clusterId, resourceTypeName)
-                }
-                viewAllButtonTitle={i18n.translate(
-                  'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
-                  { defaultMessage: 'View all failed findings for this cluster' }
-                )}
-                onViewAllClick={() => handleViewAllClick(cluster.meta.clusterId)}
-              />
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
+              <EuiFlexItem grow={dashboardColumnsGrow.first}>
+                <ClusterDetailsBox cluster={cluster} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={dashboardColumnsGrow.second}>
+                <div
+                  style={{
+                    paddingLeft: euiTheme.size.base,
+                    paddingRight: euiTheme.size.base,
+                    height: '100%',
+                  }}
+                >
+                  <CloudPostureScoreChart
+                    compact
+                    id={`${cluster.meta.clusterId}_score_chart`}
+                    data={cluster.stats}
+                    trend={cluster.trend}
+                    onEvalCounterClick={(evaluation) =>
+                      handleEvalCounterClick(cluster.meta.clusterId, evaluation)
+                    }
+                  />
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={dashboardColumnsGrow.third}>
+                <div style={{ paddingLeft: euiTheme.size.base, paddingRight: euiTheme.size.base }}>
+                  <RisksTable
+                    compact
+                    data={cluster.groupedFindingsEvaluation}
+                    maxItems={3}
+                    onCellClick={(resourceTypeName) =>
+                      handleCellClick(cluster.meta.clusterId, resourceTypeName)
+                    }
+                    viewAllButtonTitle={i18n.translate(
+                      'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
+                      { defaultMessage: 'View all failed findings for this cluster' }
+                    )}
+                    onViewAllClick={() => handleViewAllClick(cluster.meta.clusterId)}
+                  />
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {/* <EuiSpacer size="m" />*/}
+          </>
+        ))}
     </>
   );
 };

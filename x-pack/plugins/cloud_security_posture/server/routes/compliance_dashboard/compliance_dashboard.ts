@@ -53,7 +53,9 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
         });
 
         const query: QueryDslQueryContainer = {
-          match_all: {},
+          bool: {
+            filter: [{ term: { 'rule.benchmark.id': 'cis_k8s' } }],
+          },
         };
 
         const [stats, groupedFindingsEvaluation, clustersWithoutTrends, trends] = await Promise.all(
@@ -61,7 +63,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
             getStats(esClient, query, pitId),
             getGroupedFindingsEvaluation(esClient, query, pitId),
             getClusters(esClient, query, pitId),
-            getTrends(esClient),
+            getTrends(esClient, query),
           ]
         );
 
