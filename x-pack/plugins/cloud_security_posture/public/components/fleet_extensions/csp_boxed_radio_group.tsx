@@ -6,99 +6,83 @@
  */
 
 import React from 'react';
-import { useEuiTheme, EuiRadioGroup, type EuiRadioGroupProps } from '@elastic/eui';
+import { useEuiTheme, EuiButton, EuiRadio } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-type RadioGroupProps = Pick<EuiRadioGroupProps, 'onChange' | 'options' | 'idSelected' | 'disabled'>;
-
-type Props = RadioGroupProps & {
+interface Props {
+  disabled?: boolean;
+  options: RadioOption[];
+  onChange(id: string): void;
+  idSelected: string;
   size?: 's' | 'm';
-};
+}
+
+interface RadioOption {
+  disabled?: boolean;
+  id: string;
+  label: string;
+  icon?: string;
+  tooltip?: string;
+}
 
 export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiRadioGroup
-      disabled={disabled}
-      idSelected={idSelected}
-      options={options.map((o) => ({
-        id: o.id,
-        label: o.label,
-        disabled: o.disabled,
-        ['data-enabled']: idSelected === o.id,
-        ['data-disabled']: o.disabled,
-        className: '__extendedRadioOption',
-        onClick: () => onChange(o.id), // Used for clicks on the option wrapper
-      }))}
-      onChange={onChange}
+    <div
       css={css`
-        display: grid;
-        align-items: center;
-
-        // Show columns for m+ screens (above 768px)
-        @media only screen and (min-width: ${euiTheme.breakpoint.m}px) {
-          grid-template-columns: repeat(${options.length}, 1fr);
-          grid-template-rows: ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl};
-          column-gap: ${euiTheme.size.s};
-        }
+        display: flex;
+        flex-flow: row wrap;
+        gap: ${euiTheme.size.s};
 
         // Show rows for m- screens (below 768px)
         @media only screen and (max-width: ${euiTheme.breakpoint.m}px) {
-          grid-template-rows: repeat(
-            ${options.length},
-            ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl}
-          );
-          grid-template-columns: 1fr;
-          row-gap: ${euiTheme.size.s};
-        }
-
-        > .__extendedRadioOption {
-          margin-top: 0;
-          height: 100%;
-          padding-left: ${size === 's' ? euiTheme.size.s : euiTheme.size.m};
-          padding-right: ${size === 's' ? euiTheme.size.s : euiTheme.size.m};
-
-          display: grid;
-          grid-template-columns: auto 1fr;
-          column-gap: ${euiTheme.size.s};
-          align-items: center;
-
-          border: 1px solid ${euiTheme.colors.lightShade};
-          border-radius: ${euiTheme.border.radius.medium};
-          background: ${euiTheme.colors.emptyShade};
-          cursor: pointer;
-
-          &[data-enabled='true'] {
-            border-color: ${euiTheme.colors.primary};
-            background: ${euiTheme.colors.lightestShade};
-          }
-
-          &[data-disabled='true'] {
-            border-color: ${euiTheme.colors.disabled};
-            background: ${euiTheme.colors.emptyShade};
-            cursor: not-allowed;
-          }
-
-          &.__extendedRadioOption {
-            // Remove absolute position from EuiRadio's input[type=radio] and custom circle
-            // Stack both on top of each other with grid
-            & > *:not(label),
-            input[type='radio'] {
-              position: inherit;
-              top: 0;
-              left: 0;
-
-              grid-row: 1;
-              grid-column: 1;
-            }
-
-            & > label {
-              padding-left: 0; // Remove default padding
-            }
+          button {
+            min-width: 100%;
           }
         }
       `}
-    />
+    >
+      {options.map((option) => {
+        const isChecked = option.id === idSelected;
+        return (
+          <EuiButton
+            disabled={option.disabled || disabled}
+            style={{
+              flex: 1,
+              border: `1px solid ${
+                isChecked ? euiTheme.colors.primary : euiTheme.colors.lightShade
+              }`,
+            }}
+            // Use empty string to fallback to no color
+            // @ts-ignore
+            color={isChecked ? 'primary' : ''}
+            onClick={() => onChange(option.id)}
+            iconType={option.icon}
+            iconSide="right"
+            contentProps={{
+              style: {
+                justifyContent: 'flex-start',
+              },
+            }}
+            css={css`
+              height: ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl};
+              svg,
+              img {
+                margin-left: auto;
+              }
+
+              &&,
+              &&:hover {
+                text-decoration: none;
+              }
+            `}
+          >
+            <EuiRadio id={option.id} checked={isChecked} onChange={() => {}} />
+            {option.label}
+          </EuiButton>
+        );
+      })}
+    </div>
   );
 };

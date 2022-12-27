@@ -5,17 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiToolTip,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import type { PostureInput } from '../../../common/types';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
@@ -26,38 +17,13 @@ interface Props {
   setInput: (inputType: PostureInput) => void;
 }
 
-const RadioLabel = ({
-  label,
-  icon,
-  disabled,
-  tooltip,
-}: ReturnType<typeof getPolicyTemplateInputOptions>[number]) => (
-  <EuiToolTip content={tooltip} anchorProps={{ style: { width: '100%' } }}>
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
-      <EuiFlexItem grow={true}>{label}</EuiFlexItem>
-      {icon && (
-        <EuiFlexItem grow={false}>
-          <EuiIcon
-            type={icon}
-            css={
-              disabled &&
-              css`
-                filter: grayscale(1);
-              `
-            }
-          />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  </EuiToolTip>
-);
-
 export const PolicyInputSelector = ({ input, disabled, setInput }: Props) => {
   const baseOptions = getPolicyTemplateInputOptions(input.policy_template);
   const options = baseOptions.map((option) => ({
     ...option,
     disabled: option.disabled || disabled,
-    label: <RadioLabel {...option} />,
+    label: option.label,
+    icon: option.icon,
   }));
 
   return (
