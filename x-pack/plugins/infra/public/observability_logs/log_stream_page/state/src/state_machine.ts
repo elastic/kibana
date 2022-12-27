@@ -166,6 +166,10 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
     }
   );
 
+export type LogStreamPageStateMachine = ReturnType<typeof createPureLogStreamPageStateMachine>;
+export type LogStreamPageActorRef = OmitDeprecatedState<ActorRefFrom<LogStreamPageStateMachine>>;
+export type LogStreamPageState = EmittedFrom<LogStreamPageActorRef>;
+
 export type LogStreamPageStateMachineDependencies = {
   logViewStateNotifications: LogViewNotificationChannel;
 } & LogStreamQueryStateMachineDependencies;
@@ -204,7 +208,3 @@ export const createLogStreamPageStateMachine = ({
       waitForInitialParameters: waitForInitialParameters(),
     },
   });
-
-export type LogStreamPageStateMachine = ReturnType<typeof createLogStreamPageStateMachine>;
-export type LogStreamPageActorRef = OmitDeprecatedState<ActorRefFrom<LogStreamPageStateMachine>>;
-export type LogStreamPageState = EmittedFrom<LogStreamPageActorRef>;

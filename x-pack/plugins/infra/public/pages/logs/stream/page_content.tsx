@@ -10,13 +10,11 @@ import React from 'react';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import {
   LogStreamPageState,
-  selectLogStreamQueryChildService,
   useLogStreamPageStateContext,
 } from '../../../observability_logs/log_stream_page/state';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 import { StreamPageLogsContentForState } from './page_logs_content';
 import { StreamPageMissingIndicesContent } from './page_missing_indices_content';
-import { LogStreamPageContentProviders } from './page_providers';
 
 export const ConnectedStreamPageContent: React.FC = () => {
   const logStreamPageStateService = useLogStreamPageStateContext();
@@ -36,13 +34,7 @@ export const StreamPageContentForState: React.FC<{ logStreamPageState: LogStream
   } else if (logStreamPageState.matches('missingLogViewIndices')) {
     return <StreamPageMissingIndicesContent />;
   } else if (logStreamPageState.matches({ hasLogViewIndices: 'initialized' })) {
-    const logStreamQueryService = selectLogStreamQueryChildService(logStreamPageState); // TODO: why doesn't this typecheck?
-    return (
-      // TODO: find a clean way to deal with theoretically undefined getSnapshot() result
-      <LogStreamPageContentProviders logStreamQueryState={logStreamQueryService.getSnapshot()}>
-        <StreamPageLogsContentForState logStreamPageState={logStreamPageState} />
-      </LogStreamPageContentProviders>
-    );
+    return <StreamPageLogsContentForState logStreamPageState={logStreamPageState} />;
   } else {
     return null;
   }

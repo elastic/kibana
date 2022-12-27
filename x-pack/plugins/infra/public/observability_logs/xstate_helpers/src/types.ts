@@ -32,7 +32,9 @@ export type MatchedState<
       TStateSchema,
       TTypestate,
       TResolvedTypesMeta
-    >
+    > & {
+      value: TStateValue;
+    }
   : never;
 
 export type MatchedStateFromActor<

@@ -15,10 +15,10 @@ export const useLogStreamQueryChildService = (
 ): LogStreamQueryActorRef =>
   useSelector(logStreamPageStateService, (state) => state.children.logStreamQuery);
 
-type LogStreamPageStateWithLogViewIndices = MatchedStateFromActor<
-  LogStreamPageActorRef,
-  'hasLogViewIndices' | { hasLogViewIndices: 'uninitialized' }
->;
+type LogStreamPageStateWithLogViewIndices =
+  | MatchedStateFromActor<LogStreamPageActorRef, 'hasLogViewIndices'>
+  | MatchedStateFromActor<LogStreamPageActorRef, { hasLogViewIndices: 'initialized' }>
+  | MatchedStateFromActor<LogStreamPageActorRef, { hasLogViewIndices: 'uninitialized' }>;
 
 export const selectLogStreamQueryChildService = (
   state: LogStreamPageStateWithLogViewIndices

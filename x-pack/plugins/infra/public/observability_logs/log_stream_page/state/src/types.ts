@@ -49,7 +49,11 @@ export type LogStreamPageTypestate =
       context: LogStreamPageContextWithLogViewError;
     }
   | {
-      value: 'hasLogViewIndices' | { hasLogViewIndices: 'uninitialized' };
+      value: 'hasLogViewIndices';
+      context: LogStreamPageContextWithLogView;
+    }
+  | {
+      value: { hasLogViewIndices: 'uninitialized' };
       context: LogStreamPageContextWithLogView;
     }
   | {
