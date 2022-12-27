@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import createContainer from 'constate';
-import { BehaviorSubject } from 'rxjs';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import type { SnapshotTimerangeInput } from '../../../../../common/http_api';
 import type { UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
 import { useUnifiedSearchContext } from './use_unified_search';
+import type { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
 
 export interface HostViewState {
   totalHits: number;
@@ -28,23 +27,15 @@ export const INITAL_VALUE = {
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
   const { buildQuery, dateRangeTimestamp, fetch$ } = useUnifiedSearchContext();
-  const stateRef = useRef<BehaviorSubject<HostViewState> | null>(null);
-
-  const getStateSubject$ = useCallback(() => {
-    if (!stateRef.current) {
-      stateRef.current = new BehaviorSubject<HostViewState>(INITAL_VALUE);
-    }
-    return stateRef.current;
-  }, []);
-
-  const timeRange: SnapshotTimerangeInput = {
-    from: dateRangeTimestamp.from,
-    to: dateRangeTimestamp.to,
-    lookbackSize: 'maxFixed',
-  };
+  const [hostViewState, setHostViewState] = useState<HostViewState>(INITAL_VALUE);
 
   const esQuery = buildQuery();
-
+  const timeRange: InfraTimerangeInput = {
+    interval: '1m',
+    from: dateRangeTimestamp.from,
+    to: dateRangeTimestamp.to,
+    ignoreLookback: true,
+  };
   const baseRequest: UseSnapshotRequest = {
     filterQuery: esQuery ? JSON.stringify(esQuery) : null,
     metrics: [],
@@ -61,7 +52,7 @@ export const useHostsView = () => {
     fetch$.next('load');
   }, [fetch$]);
 
-  return { baseRequest, fetch$, state$: getStateSubject$() };
+  return { baseRequest, fetch$, hostViewState, setHostViewState };
 };
 
 export const HostsView = createContainer(useHostsView);

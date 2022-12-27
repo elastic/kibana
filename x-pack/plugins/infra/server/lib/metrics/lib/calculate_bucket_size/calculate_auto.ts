@@ -8,55 +8,35 @@
 import moment, { isDuration, Duration } from 'moment';
 const d = moment.duration;
 
-export const roundingRules = [
-  { interval: [d(500, 'ms'), d(100, 'ms')], maxBuckets: 100 },
-  { interval: [d(5, 'second'), d(1, 'second')], maxBuckets: 100 },
-  { interval: [d(7.5, 'second'), d(5, 'second')], maxBuckets: 100 },
-  { interval: [d(15, 'second'), d(10, 'second')], maxBuckets: 100 },
-  { interval: [d(45, 'second'), d(30, 'second')], maxBuckets: 100 },
-  { interval: [d(3, 'minute'), d(1, 'minute')], maxBuckets: 100 },
-  { interval: [d(9, 'minute'), d(5, 'minute')], maxBuckets: 100 },
-  { interval: [d(20, 'minute'), d(10, 'minute')], maxBuckets: 100 },
-  { interval: [d(45, 'minute'), d(30, 'minute')], maxBuckets: 100 },
-  { interval: [d(2, 'hour'), d(1, 'hour')], maxBuckets: 100 },
-  { interval: [d(6, 'hour'), d(3, 'hour')], maxBuckets: 100 },
-  { interval: [d(24, 'hour'), d(7, 'hour')], maxBuckets: 100 },
-  { interval: [d(1, 'week'), d(2, 'd')], maxBuckets: 100 },
-  { interval: [d(3, 'week'), d(1, 'week')], maxBuckets: 100 },
-  { interval: [d(1, 'year'), d(3, 'month')], maxBuckets: 7 },
-  { interval: [d(Infinity), d(1, 'year')], maxBuckets: 4 },
+const roundingRules = [
+  [d(500, 'ms'), d(100, 'ms')],
+  [d(5, 'second'), d(1, 'second')],
+  [d(7.5, 'second'), d(5, 'second')],
+  [d(15, 'second'), d(10, 'second')],
+  [d(45, 'second'), d(30, 'second')],
+  [d(3, 'minute'), d(1, 'minute')],
+  [d(9, 'minute'), d(5, 'minute')],
+  [d(20, 'minute'), d(10, 'minute')],
+  [d(45, 'minute'), d(30, 'minute')],
+  [d(2, 'hour'), d(1, 'hour')],
+  [d(6, 'hour'), d(3, 'hour')],
+  [d(24, 'hour'), d(12, 'hour')],
+  [d(1, 'week'), d(1, 'd')],
+  [d(3, 'week'), d(1, 'week')],
+  [d(1, 'year'), d(1, 'month')],
+  [d(Infinity, 'year'), d(1, 'year')],
 ];
 
-const reverseRoundingRules = roundingRules.map((p) => p.interval).reverse();
-
+const reverseRoundingRules = [...roundingRules].reverse();
 type CheckFunction = (bound: Duration, interval: Duration, target: number) => Duration | undefined;
-
-function FindFixedBucketsRule(rules: typeof roundingRules, check: CheckFunction) {
-  function pickInterval(duration: Duration) {
-    for (const { interval, maxBuckets } of rules) {
-      const result = check(interval[0], interval[1], duration.asMilliseconds());
-
-      if (result) {
-        return moment.duration(Math.floor(duration.asMilliseconds() / maxBuckets), 'ms');
-      }
-    }
-
-    return d(1, 'minute');
-  }
-
-  return (duration: Duration) => {
-    const interval = pickInterval(duration);
-    if (isDuration(interval)) return interval;
-  };
-}
 
 function findRule(rules: Duration[][], check: CheckFunction, last?: boolean) {
   function pickInterval(buckets: number, duration: Duration) {
     const target = duration.asMilliseconds() / buckets;
     let lastResult = null;
 
-    for (const rule of rules) {
-      const result = check(rule[0], rule[1], target);
+    for (const [end, start] of rules) {
+      const result = check(end, start, target);
 
       if (result == null) {
         if (!last) continue;
@@ -79,25 +59,24 @@ function findRule(rules: Duration[][], check: CheckFunction, last?: boolean) {
   };
 }
 
-const getNearInterval = (bound: Duration, interval: Duration, target: number) => {
-  if (isDuration(bound) && bound.asMilliseconds() > target) return interval;
-};
-
-const getLessThan = (_bound: Duration, interval: Duration, target: number) => {
-  if (interval.asMilliseconds() < target) return interval;
-};
-
-const getAtLeast = (_bound: Duration, interval: Duration, target: number) => {
-  if (interval.asMilliseconds() <= target) return interval;
-};
-
-const getGreaterOrEqualThan = (bound: Duration, interval: Duration, target: number) => {
-  if (isDuration(bound) && bound.asMilliseconds() >= target) return interval;
-};
-
 export const calculateAuto = {
-  near: findRule(reverseRoundingRules, getNearInterval, true),
-  lessThan: findRule(reverseRoundingRules, getLessThan),
-  atLeast: findRule(reverseRoundingRules, getAtLeast),
-  fixedBuckets: FindFixedBucketsRule(roundingRules, getGreaterOrEqualThan),
+  near: findRule(
+    reverseRoundingRules,
+    function near(bound, interval, target) {
+      if (isDuration(bound) && bound.asMilliseconds() > target) return interval;
+    },
+    true
+  ),
+  lessThan: findRule(
+    reverseRoundingRules,
+    function lessThan(_bound: Duration, interval: Duration, target: number) {
+      if (interval.asMilliseconds() < target) return interval;
+    }
+  ),
+  atLeast: findRule(
+    reverseRoundingRules,
+    function atLeast(_bound: Duration, interval: Duration, target: number) {
+      if (interval.asMilliseconds() <= target) return interval;
+    }
+  ),
 };

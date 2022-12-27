@@ -4,29 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-import { type HostViewState, useHostsViewContext } from '../../hooks/use_host_view';
+import { useHostsViewContext } from '../../hooks/use_host_view';
 import { type ChartBaseProps, MetricsChart } from './metrics_chart';
 
-export const MetricsHostsTile = ({ type, ...props }: ChartBaseProps) => {
-  const { state$, fetch$ } = useHostsViewContext();
-  const [hostView, setHostView] = useState<HostViewState>(state$.getValue());
-
-  useEffect(() => {
-    const subscribe = state$.subscribe(setHostView);
-    return () => {
-      subscribe.unsubscribe();
-    };
-  }, [fetch$, state$]);
+export const HostsTile = ({ type, ...props }: ChartBaseProps) => {
+  const { hostViewState } = useHostsViewContext();
 
   return (
     <MetricsChart
       id={`$metric-${type}`}
       type={type}
       nodes={[]}
-      loading={hostView.loading}
-      overrideValue={hostView?.totalHits}
+      loading={hostViewState.loading}
+      overrideValue={hostViewState?.totalHits}
       {...props}
     />
   );

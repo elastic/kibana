@@ -12,9 +12,9 @@ import { useEffect } from 'react';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
+  InfraTimerangeInput,
   SnapshotNodeResponseRT,
   SnapshotRequest,
-  SnapshotTimerangeInput,
 } from '../../../../../common/http_api/snapshot_api';
 
 export interface UseSnapshotRequest
@@ -23,7 +23,7 @@ export interface UseSnapshotRequest
   currentTime: number;
   sendRequestImmediately?: boolean;
   includeTimeseries?: boolean;
-  timerange?: SnapshotTimerangeInput;
+  timerange?: InfraTimerangeInput;
 }
 export function useSnapshot({
   timerange,
@@ -48,6 +48,7 @@ export function useSnapshot({
     region,
     groupBy,
     timerange: timerange ?? {
+      interval: '1m',
       to: currentTime,
       from: currentTime - 1200 * 1000,
       lookbackSize: 5,

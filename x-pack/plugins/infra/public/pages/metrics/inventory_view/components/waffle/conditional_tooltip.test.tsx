@@ -9,6 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ConditionalToolTip } from './conditional_tooltip';
+import { SnapshotNodeResponse } from '../../../../../../common/http_api';
 import { InfraWaffleMapNode } from '../../../../../lib/lib';
 
 jest.mock('../../../../../containers/metrics_source', () => ({
@@ -67,7 +68,7 @@ describe('ConditionalToolTip', () => {
       error: null,
       loading: false,
       interval: '60s',
-      reload: jest.fn(() => Promise.resolve<any>()),
+      reload: jest.fn(() => Promise.resolve({} as SnapshotNodeResponse)),
     });
     mockedUseWaffleOptionsContext.mockReturnValue(mockedUseWaffleOptionsContexReturnValue);
     const expectedQuery = JSON.stringify({

@@ -14,7 +14,7 @@ import { type ChartBaseProps, MetricsChart } from './metrics_chart';
 interface Props extends Omit<ChartBaseProps, 'type'> {
   type: SnapshotMetricType;
 }
-export const MetricsTile = ({ type, ...props }: Props) => {
+export const Tile = ({ type, ...props }: Props) => {
   const { baseRequest, fetch$ } = useHostsViewContext();
 
   const { nodes, loading, reload } = useSnapshot({

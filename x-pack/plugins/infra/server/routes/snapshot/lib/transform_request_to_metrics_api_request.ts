@@ -69,7 +69,6 @@ export const transformRequestToMetricsAPIRequest = async ({
   }
 
   const inventoryFields = findInventoryFields(snapshotRequest.nodeType);
-
   if (snapshotRequest.groupBy) {
     const groupBy = snapshotRequest.groupBy.map((g) => g.field).filter(Boolean) as string[];
     metricsApiRequest.groupBy = [...groupBy, inventoryFields.id];

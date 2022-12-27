@@ -16,8 +16,8 @@ import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
   SnapshotNodeResponseRT,
   SnapshotNodeResponse,
-  type SnapshotRequest,
-  type SnapshotTimerangeInput,
+  SnapshotRequest,
+  InfraTimerangeInput,
 } from '../../../../../common/http_api/snapshot_api';
 import type {
   InventoryItemType,
@@ -84,7 +84,7 @@ export function useTimeline(
 
   const endTime = currentTime + intervalInSeconds * 1000;
   const startTime = currentTime - timeLength * 1000;
-  const timerange: SnapshotTimerangeInput = {
+  const timerange: InfraTimerangeInput = {
     interval: displayInterval ?? '',
     to: endTime,
     from: startTime,

@@ -44,6 +44,8 @@ interface Props extends ChartBaseProps {
   overrideValue?: number;
 }
 
+const MIN_HEIGHT = 150;
+
 export const MetricsChart = ({
   color,
   extra,
@@ -108,7 +110,7 @@ export const MetricsChart = ({
   return (
     <EuiPanel paddingSize="none">
       {loading ? (
-        <EuiFlexGroup style={{ minHeight: 150 }} justifyContent="center" alignItems="center">
+        <EuiFlexGroup style={{ minHeight: MIN_HEIGHT }} justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiLoadingChart />
           </EuiFlexItem>
@@ -120,7 +122,7 @@ export const MetricsChart = ({
           content={toolTip}
           anchorClassName="eui-fullWidth"
         >
-          <ChartStyled size={{ height: 150 }}>
+          <ChartStyled size={{ height: MIN_HEIGHT }}>
             <Metric id={id} data={[[metricData]]} />
           </ChartStyled>
         </EuiToolTip>

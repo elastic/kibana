@@ -10,8 +10,7 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
-import { SnapshotNodeMetric } from '../../../../../common/http_api';
-import { HostMetics, HostsTableColumns } from './hosts_table_columns';
+import { HostsTableColumns } from './hosts_table_columns';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { useHostsViewContext } from '../hooks/use_host_view';
@@ -19,8 +18,6 @@ import { useTableProperties } from '../hooks/use_table_properties_url_state';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { useSnapshot } from '../../inventory_view/hooks/use_snaphot';
 import { useHostTable } from '../hooks/use_host_table';
-
-type MappedMetrics = Record<keyof HostMetics, SnapshotNodeMetric>;
 
 const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
   { type: 'rx' },
@@ -33,7 +30,7 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
 
 export const HostsTable = () => {
   const { panelFilters } = useUnifiedSearchContext();
-  const { baseRequest, fetch$, state$ } = useHostsViewContext();
+  const { baseRequest, fetch$, setHostViewState } = useHostsViewContext();
   const [properties, setProperties] = useTableProperties();
 
   // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
@@ -47,26 +44,26 @@ export const HostsTable = () => {
   const items = useHostTable(nodes);
 
   const onReload = () => {
-    fetch$.next('reload');
+    fetch$.next('load');
   };
 
   useEffect(() => {
-    state$.next({
+    setHostViewState({
       loading,
       totalHits: nodes.length,
       error,
     });
-  }, [error, loading, nodes.length, state$]);
+  }, [error, loading, nodes.length, setHostViewState]);
 
   useEffect(() => {
     const refetch = fetch$.subscribe(() => {
       reload();
-      state$.next({ loading: true, totalHits: 0, error: null });
+      setHostViewState({ loading: true, totalHits: 0, error: null });
     });
     return () => {
       refetch.unsubscribe();
     };
-  }, [reload, fetch$, state$]);
+  }, [reload, fetch$, setHostViewState]);
 
   const onTableChange = useCallback(
     ({ page = {}, sort = {} }) => {

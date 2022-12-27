@@ -18,7 +18,7 @@ export const SnapshotNodePathRT = rt.intersection([
   rt.partial({
     ip: rt.union([rt.string, rt.null]),
     os: rt.union([rt.string, rt.null]),
-    cloudProvider: rt.string,
+    cloudProvider: rt.union([rt.string, rt.null]),
   }),
 ]);
 
@@ -50,26 +50,16 @@ export const SnapshotNodeResponseRT = rt.intersection([
   rt.partial({ interval: rt.string }),
 ]);
 
-export const InfraTimerangeInputRT = rt.type({
-  to: rt.number,
-  from: rt.number,
-  interval: rt.string,
-});
-
-export const SnapshotTimerangeInputRT = rt.intersection([
+export const InfraTimerangeInputRT = rt.intersection([
   rt.type({
     to: rt.number,
     from: rt.number,
+    interval: rt.string,
   }),
   rt.partial({
-    interval: rt.string,
     forceInterval: rt.boolean,
-    lookbackSize: rt.union([
-      rt.number,
-      rt.literal('modules'),
-      rt.literal('auto'),
-      rt.literal('maxFixed'),
-    ]),
+    ignoreLookback: rt.boolean,
+    lookbackSize: rt.number,
   }),
 ]);
 
@@ -114,7 +104,7 @@ export const SnapshotMetricInputRT = rt.union([
 export const SnapshotRequestRT = rt.exact(
   rt.intersection([
     rt.type({
-      timerange: SnapshotTimerangeInputRT,
+      timerange: InfraTimerangeInputRT,
       metrics: rt.array(SnapshotMetricInputRT),
       groupBy: rt.union([SnapshotGroupByRT, rt.null]),
       nodeType: ItemTypeRT,
@@ -130,11 +120,10 @@ export const SnapshotRequestRT = rt.exact(
   ])
 );
 
-export type InfraTimerangeInput = rt.TypeOf<typeof InfraTimerangeInputRT>;
 export type SnapshotNodePath = rt.TypeOf<typeof SnapshotNodePathRT>;
 export type SnapshotMetricInput = rt.TypeOf<typeof SnapshotMetricInputRT>;
 export type SnapshotCustomMetricInput = rt.TypeOf<typeof SnapshotCustomMetricInputRT>;
-export type SnapshotTimerangeInput = rt.TypeOf<typeof SnapshotTimerangeInputRT>;
+export type InfraTimerangeInput = rt.TypeOf<typeof InfraTimerangeInputRT>;
 export type SnapshotNodeMetric = rt.TypeOf<typeof SnapshotNodeMetricRT>;
 export type SnapshotGroupBy = rt.TypeOf<typeof SnapshotGroupByRT>;
 export type SnapshotRequest = rt.TypeOf<typeof SnapshotRequestRT>;

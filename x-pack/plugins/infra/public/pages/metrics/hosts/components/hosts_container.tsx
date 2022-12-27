@@ -13,7 +13,7 @@ import { useMetricsDataViewContext } from '../hooks/use_data_view';
 import { UnifiedSearchBar } from './unified_search_bar';
 import { HostsTable } from './hosts_table';
 import { HostsViewProvider } from '../hooks/use_host_view';
-import { MetricsTrend } from './metrics_trend/metrics_trends';
+import { MetricsTrend } from './metrics_trend/metrics_trend';
 
 export const HostContainer = () => {
   const { metricsDataView, isDataViewLoading, hasFailedLoadingDataView } =

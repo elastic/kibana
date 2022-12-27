@@ -64,10 +64,7 @@ const calculateBucketData = (intervalString: string) => {
 
 const calculateBucketSizeForAutoInterval = (timerange: MetricsAPITimerange): number | undefined => {
   const duration = moment.duration(timerange.to - timerange.from, 'ms');
-  const bucketSizeDuration =
-    timerange.bucketCalculationMode === 'maxFixed'
-      ? calculateAuto.fixedBuckets(duration)
-      : calculateAuto.near(BUCKET_SIZE, duration);
+  const bucketSizeDuration = calculateAuto.near(BUCKET_SIZE, duration);
 
   if (bucketSizeDuration) {
     return bucketSizeDuration.asSeconds();

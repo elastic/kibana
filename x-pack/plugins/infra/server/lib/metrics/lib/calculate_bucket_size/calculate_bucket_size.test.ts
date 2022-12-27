@@ -17,8 +17,8 @@ const timerange = {
 
 describe('calculateBucketSize(timerange, intervalString)', () => {
   test('returns auto calculated buckets', () => {
-    const result = calculateBucketSize({ ...timerange, interval: '' });
-    expect(result).toHaveProperty('bucketSize', 30);
+    const result = calculateBucketSize({ ...timerange, interval: 'auto' });
+    expect(result).toHaveProperty('buckeptSize', 30);
     expect(result).toHaveProperty('intervalString', '30s');
   });
 

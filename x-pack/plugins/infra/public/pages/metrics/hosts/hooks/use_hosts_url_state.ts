@@ -71,7 +71,7 @@ const reducer = (state: HostsState, action: Action): HostsState => {
 };
 
 export const useHostsUrlState = () => {
-  const fetch$ = useMemo(() => new Subject<string>(), []);
+  const fetch$ = useMemo(() => new Subject<'load'>(), []);
   const [urlState, setUrlState] = useUrlState<HostsState>({
     defaultState: INITIAL_HOSTS_STATE,
     decodeUrlState,
@@ -97,7 +97,7 @@ export const useHostsUrlState = () => {
     if (!deepEqual(state, urlState)) {
       setUrlState(state);
     } else {
-      fetch$.next('reload');
+      fetch$.next('load');
     }
   }, [setUrlState, state, urlState, fetch$]);
 

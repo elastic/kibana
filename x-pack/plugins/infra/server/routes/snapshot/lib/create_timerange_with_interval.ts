@@ -40,23 +40,18 @@ export const createTimeRangeWithInterval = async (
   options: InfraSnapshotRequestOptions
 ): Promise<MetricsAPITimerange> => {
   const { timerange } = options;
-  if (timerange.interval && timerange.forceInterval) {
+  if (timerange.interval) {
     return {
       interval: timerange.interval,
       from: timerange.from,
       to: timerange.to,
     };
   }
-  if (
-    timerange.lookbackSize === 'auto' ||
-    timerange.lookbackSize === 'maxFixed' ||
-    timerange.lookbackSize === 'modules'
-  ) {
+  if (timerange.ignoreLookback) {
     return {
-      interval: '',
+      interval: 'modules',
       from: timerange.from,
       to: timerange.to,
-      bucketCalculationMode: timerange.lookbackSize,
     };
   }
 
