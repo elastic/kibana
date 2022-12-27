@@ -28,7 +28,7 @@ const CsvSavedSearchExportBodySchema = schema.maybe(
   schema.object({
     timerange: schema.maybe(
       schema.object({
-        timezone: schema.maybe(schema.string({ defaultValue: 'UTC' })),
+        timezone: schema.maybe(schema.string()),
         min: schema.maybe(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
         max: schema.maybe(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
       })
