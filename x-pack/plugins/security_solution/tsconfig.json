@@ -125,6 +125,7 @@
     "@kbn/core-status-common-internal",
     "@kbn/repo-info",
     "@kbn/storybook",
+    "@kbn/cypress-config",
   ],
   "exclude": [
     "target/**/*",
