@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
+import { flatten } from 'lodash';
 import React, { FC, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { flatten } from 'lodash';
+import { useUrlState } from '@kbn/ml-url-state';
+
 import { LinkCardProps } from '../../../common/components/link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { useUrlState } from '../../../common/util/url_state';
 import { LinkCard } from '../../../common/components/link_card';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { isDefined } from '../../../common/util/is_defined';
@@ -24,13 +26,17 @@ interface Props {
   searchString?: string | { [key: string]: any };
   searchQueryLanguage?: string;
   getAdditionalLinks?: GetAdditionalLinks;
+  compact?: boolean;
 }
+
+const ACTIONS_PANEL_WIDTH = '240px';
 
 export const ActionsPanel: FC<Props> = ({
   dataView,
   searchString,
   searchQueryLanguage,
   getAdditionalLinks,
+  compact,
 }) => {
   const [globalState] = useUrlState('_g');
 
@@ -112,23 +118,33 @@ export const ActionsPanel: FC<Props> = ({
     data.query,
     getAdditionalLinks,
   ]);
+  const showActionsPanel =
+    discoverLink || (Array.isArray(asyncHrefCards) && asyncHrefCards.length > 0);
 
   // Note we use display:none for the DataRecognizer section as it needs to be
   // passed the recognizerResults object, and then run the recognizer check which
   // controls whether the recognizer section is ultimately displayed.
-  return (
-    <div data-test-subj="dataVisualizerActionsPanel">
+  return showActionsPanel ? (
+    <div
+      data-test-subj="dataVisualizerActionsPanel"
+      css={
+        !compact &&
+        css`
+          width: ${ACTIONS_PANEL_WIDTH};
+        `
+      }
+    >
+      <EuiTitle size="s">
+        <h2>
+          <FormattedMessage
+            id="xpack.dataVisualizer.index.actionsPanel.exploreTitle"
+            defaultMessage="Explore your data"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       {discoverLink && (
         <>
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.dataVisualizer.index.actionsPanel.exploreTitle"
-                defaultMessage="Explore your data"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
           <LinkCard
             href={discoverLink}
             icon="discoverApp"
@@ -164,5 +180,5 @@ export const ActionsPanel: FC<Props> = ({
           </>
         ))}
     </div>
-  );
+  ) : null;
 };

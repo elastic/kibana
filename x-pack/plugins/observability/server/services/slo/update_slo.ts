@@ -7,13 +7,9 @@
 
 import deepEqual from 'fast-deep-equal';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
 
 import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
-import {
-  UpdateSLOParams,
-  UpdateSLOResponse,
-  updateSLOResponseSchema,
-} from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 import { SLO } from '../../domain/models';
@@ -92,6 +88,7 @@ export class UpdateSLO {
       time_window: slo.time_window,
       objective: slo.objective,
       settings: slo.settings,
+      revision: slo.revision,
       created_at: slo.created_at,
       updated_at: slo.updated_at,
     });

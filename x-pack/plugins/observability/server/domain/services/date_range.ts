@@ -7,10 +7,10 @@
 
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
+import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '@kbn/slo-schema';
 import { DateRange, toMomentUnitOfTime } from '../models';
 
 import type { TimeWindow } from '../models/time_window';
-import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '../../types/schema';
 
 export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date()): DateRange => {
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {

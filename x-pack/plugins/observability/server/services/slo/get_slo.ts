@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
 import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
-import { GetSLOResponse, getSLOResponseSchema } from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
 import { SLIClient } from './sli_client';
 import { computeSLI, computeErrorBudget } from '../../domain/services';
