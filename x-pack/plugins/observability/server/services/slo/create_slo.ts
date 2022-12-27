@@ -7,11 +7,12 @@
 
 import uuid from 'uuid';
 
+import { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+
 import { Duration, DurationUnit, SLO } from '../../domain/models';
 import { ResourceInstaller } from './resource_installer';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
-import { CreateSLOParams, CreateSLOResponse } from '../../types/rest_specs';
 import { validateSLO } from '../../domain/services';
 
 export class CreateSLO {

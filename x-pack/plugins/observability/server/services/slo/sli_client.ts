@@ -14,14 +14,11 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { assertNever } from '@kbn/std';
+import { occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
 import { DateRange, Duration, IndicatorData, SLO, SLOId } from '../../domain/models';
-import {
-  occurrencesBudgetingMethodSchema,
-  timeslicesBudgetingMethodSchema,
-} from '../../types/schema';
 
 export interface SLIClient {
   fetchCurrentSLIData(sloList: SLO[]): Promise<Record<SLOId, IndicatorData>>;
