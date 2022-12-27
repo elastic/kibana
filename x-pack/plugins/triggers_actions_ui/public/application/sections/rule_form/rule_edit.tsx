@@ -58,7 +58,8 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
       ? {
           summary: false,
           notifyWhen: initialRule.notifyWhen as RuleNotifyWhenType,
-          throttle: null,
+          throttle:
+            initialRule.notifyWhen === RuleNotifyWhen.THROTTLE ? initialRule.throttle! : null,
         }
       : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
     clonedRule.actions = clonedRule.actions.map((action) => ({

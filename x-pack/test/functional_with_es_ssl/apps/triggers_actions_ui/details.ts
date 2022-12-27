@@ -599,14 +599,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Edit rule with legacy global notify values', function () {
+    describe('Edit rule with legacy rule-level notify values', function () {
       const testRunUuid = uuid.v4();
 
       afterEach(async () => {
         await objectRemover.removeAll();
       });
 
-      it('should convert global params to action-level params and save the alert successfully', async () => {
+      it('should convert rule-level params to action-level params and save the alert successfully', async () => {
         const connectors = await createConnectors(testRunUuid);
         await pageObjects.common.navigateToApp('triggersActions');
         const rule = await createAlwaysFiringRule({
@@ -615,7 +615,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             interval: '1s',
           },
           notify_when: RuleNotifyWhen.THROTTLE,
-          throttle: '1m',
+          throttle: '2d',
           actions: connectors.map((connector) => ({
             id: connector.id,
             group: 'default',
@@ -642,7 +642,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await editButton.click();
         const notifyWhenSelect = await testSubjects.find('notifyWhenSelect');
         expect(await notifyWhenSelect.getVisibleText()).to.eql('On custom action intervals');
-
+        const throttleInput = await testSubjects.find('throttleInput');
+        const throttleUnitInput = await testSubjects.find('throttleUnitInput');
+        expect(await throttleInput.getAttribute('value')).to.be('2');
+        expect(await throttleUnitInput.getAttribute('value')).to.be('d');
         await testSubjects.setValue('ruleNameInput', updatedRuleName, {
           clearWithKeyboard: true,
         });
