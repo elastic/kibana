@@ -29,6 +29,7 @@ export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Pr
         ['data-enabled']: idSelected === o.id,
         ['data-disabled']: o.disabled,
         className: '__extendedRadioOption',
+        onClick: () => onChange(o.id), // Used for clicks on the option wrapper
       }))}
       onChange={onChange}
       css={css`
@@ -66,6 +67,7 @@ export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Pr
           border: 1px solid ${euiTheme.colors.lightShade};
           border-radius: ${euiTheme.border.radius.medium};
           background: ${euiTheme.colors.emptyShade};
+          cursor: pointer;
 
           &[data-enabled='true'] {
             border-color: ${euiTheme.colors.primary};
@@ -75,19 +77,24 @@ export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Pr
           &[data-disabled='true'] {
             border-color: ${euiTheme.colors.disabled};
             background: ${euiTheme.colors.emptyShade};
+            cursor: not-allowed;
           }
 
-          // EuiRadio shows an absolute positioned div as a circle instead of input[type=radio] which is hidden
-          // removing the absolute position to make it part of document flow, set by css grid
           &.__extendedRadioOption {
-            & > *:not(label):not(input) {
+            // Remove absolute position from EuiRadio's input[type=radio] and custom circle
+            // Stack both on top of each other with grid
+            & > *:not(label),
+            input[type='radio'] {
               position: inherit;
               top: 0;
               left: 0;
+
+              grid-row: 1;
+              grid-column: 1;
             }
 
             & > label {
-              padding-left: 0;
+              padding-left: 0; // Remove default padding
             }
           }
         }
