@@ -38,10 +38,11 @@ function computeOperationMatrix(
     .reduce<OperationSupportMatrix>(
       (matrix, operation) => {
         if (operation.type === 'field') {
-          const fieldOps = matrix.operationByField.get(operation.field) ?? new Set();
+          const fieldOps = matrix.operationByField.get(operation.field) ?? new Set<OperationType>();
           fieldOps.add(operation.operationType);
           matrix.operationByField.set(operation.field, fieldOps);
-          const opFields = matrix.fieldByOperation.get(operation.operationType) ?? new Set();
+          const opFields =
+            matrix.fieldByOperation.get(operation.operationType) ?? new Set<string>();
           opFields.add(operation.field);
           matrix.fieldByOperation.set(operation.operationType, opFields);
         } else {

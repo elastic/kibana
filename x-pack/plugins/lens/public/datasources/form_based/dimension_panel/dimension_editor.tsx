@@ -500,7 +500,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             setStateWrapper(newLayer);
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
-            const possibleFields = fieldByOperation.get(operationType) ?? new Set();
+            const possibleFields = fieldByOperation.get(operationType) ?? new Set<string>();
 
             let newLayer: FormBasedLayer;
             if (possibleFields.size === 1) {
