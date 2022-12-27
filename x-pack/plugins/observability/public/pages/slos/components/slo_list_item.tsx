@@ -21,10 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../utils/kibana_react';
 import { SloSummaryStats } from './slo_summary_stats';
 import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
-import { SloStatusBadge } from './slo_status_badge';
+import { SloBadges } from './slo_badges';
 import { paths } from '../../../config';
 import { SLO } from '../../../typings';
-import { SloForecastedBadge } from './slo_forecasted_badge';
 
 export interface SloListItemProps {
   slo: SLO;
@@ -82,15 +81,7 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
                 <EuiFlexItem>
                   <EuiLink onClick={handleNavigate}>{slo.name}</EuiLink>
                 </EuiFlexItem>
-
-                <EuiFlexGroup direction="row" responsive={false} gutterSize="m">
-                  <EuiFlexItem grow={false}>
-                    <SloStatusBadge slo={slo} />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <SloForecastedBadge slo={slo} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <SloBadges slo={slo} />
               </EuiFlexGroup>
             </EuiFlexItem>
 

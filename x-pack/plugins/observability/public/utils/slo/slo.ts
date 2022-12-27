@@ -32,13 +32,13 @@ export function toSLO(result: any): SLO {
 }
 
 function toStatus(result: any): Status {
-  if (result.summary.sli_value === -1) {
+  if (result.summary.sliValue === -1) {
     return STATUS.NoData;
   }
 
-  if (result.objective.target <= result.summary.sli_value) {
+  if (result.objective.target <= result.summary.sliValue) {
     return STATUS.Healthy;
   } else {
-    return result.summary.error_budget.remaining > 0 ? STATUS.Degrading : STATUS.Violated;
+    return result.summary.errorBudget.remaining > 0 ? STATUS.Degrading : STATUS.Violated;
   }
 }
