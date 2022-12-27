@@ -78,8 +78,7 @@ export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Pr
               }
             `}
           >
-            <EuiRadio id={option.id} checked={isChecked} onChange={() => {}} />
-            {option.label}
+            <EuiRadio label={option.label} id={option.id} checked={isChecked} onChange={() => {}} />
           </EuiButton>
         );
       })}
