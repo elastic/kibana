@@ -24,20 +24,7 @@ export class GetSLO {
   }
 
   private toResponse(slo: SLOWithSummary): GetSLOResponse {
-    return getSLOResponseSchema.encode({
-      id: slo.id,
-      name: slo.name,
-      description: slo.description,
-      indicator: slo.indicator,
-      time_window: slo.time_window,
-      budgeting_method: slo.budgeting_method,
-      objective: slo.objective,
-      settings: slo.settings,
-      summary: slo.summary,
-      revision: slo.revision,
-      created_at: slo.created_at,
-      updated_at: slo.updated_at,
-    });
+    return getSLOResponseSchema.encode(slo);
   }
 }
 
@@ -47,5 +34,5 @@ function computeSloWithSummary(
 ): SLOWithSummary {
   const sliValue = computeSLI(indicatorDataBySlo[slo.id]);
   const errorBudget = computeErrorBudget(slo, indicatorDataBySlo[slo.id]);
-  return { ...slo, summary: { sli_value: sliValue, error_budget: errorBudget } };
+  return { ...slo, summary: { sliValue, errorBudget } };
 }
