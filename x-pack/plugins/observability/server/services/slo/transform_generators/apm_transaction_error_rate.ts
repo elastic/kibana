@@ -6,8 +6,9 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_VALUE, apmTransactionErrorRateIndicatorSchema } from '@kbn/slo-schema';
+
 import { InvalidTransformError } from '../../../errors';
-import { ALL_VALUE, apmTransactionErrorRateIndicatorSchema } from '../../../types/schema';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { TransformGenerator } from '.';
 import {

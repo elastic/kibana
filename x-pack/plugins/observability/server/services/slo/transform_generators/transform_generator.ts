@@ -10,12 +10,13 @@ import {
   AggregationsCalendarInterval,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
 import {
   calendarAlignedTimeWindowSchema,
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
-} from '../../../types/schema';
+} from '@kbn/slo-schema';
+
+import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO } from '../../../domain/models';
 
 export abstract class TransformGenerator {
