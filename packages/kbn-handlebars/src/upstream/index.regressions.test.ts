@@ -5,6 +5,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
+import Handlebars from '../..';
 import { expectTemplate } from '../__jest__/test_bench';
 
 describe('Regressions', () => {
@@ -237,7 +238,7 @@ describe('Regressions', () => {
     )
       .withInput({ array: [1], name: 'John' })
       .withHelpers({
-        myif(conditional, options) {
+        myif(conditional, options: Handlebars.HelperOptions) {
           if (conditional) {
             return options.fn(this);
           } else {
@@ -261,7 +262,7 @@ describe('Regressions', () => {
     expectTemplate('{{helpa length="foo"}}')
       .withInput({ array: [1], name: 'John' })
       .withHelpers({
-        helpa(options) {
+        helpa(options: Handlebars.HelperOptions) {
           return options.hash.length;
         },
       })
