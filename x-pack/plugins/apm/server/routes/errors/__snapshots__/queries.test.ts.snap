@@ -1,63 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`error queries fetches a single error group 1`] = `
-Object {
-  "apm": Object {
-    "events": Array [
-      "error",
-    ],
-  },
-  "body": Object {
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "term": Object {
-              "service.name": "serviceName",
-            },
-          },
-          Object {
-            "term": Object {
-              "error.grouping_key": "groupId",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 0,
-                "lte": 50000,
-              },
-            },
-          },
-        ],
-        "should": Array [
-          Object {
-            "term": Object {
-              "transaction.sampled": true,
-            },
-          },
-        ],
-      },
-    },
-    "size": 1,
-    "sort": Array [
-      Object {
-        "_score": Object {
-          "order": "desc",
-        },
-      },
-      Object {
-        "@timestamp": Object {
-          "order": "desc",
-        },
-      },
-    ],
-    "track_total_hits": true,
-  },
-}
-`;
-
 exports[`error queries fetches multiple error groups 1`] = `
 Object {
   "apm": Object {
@@ -186,6 +128,125 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": false,
+  },
+}
+`;
+
+exports[`error queries fetches the error group samples by the groupId 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+    ],
+  },
+  "body": Object {
+    "_source": Array [
+      "error.id",
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "serviceName",
+            },
+          },
+          Object {
+            "term": Object {
+              "error.grouping_key": "groupId",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+        ],
+        "should": Array [
+          Object {
+            "term": Object {
+              "transaction.sampled": true,
+            },
+          },
+        ],
+      },
+    },
+    "size": 10000,
+    "sort": Array [
+      Object {
+        "_score": Object {
+          "order": "desc",
+        },
+      },
+      Object {
+        "@timestamp": Object {
+          "order": "desc",
+        },
+      },
+    ],
+    "track_total_hits": 10000,
+  },
+}
+`;
+
+exports[`error queries fetches the error sample by errorId 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+    ],
+  },
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "serviceName",
+            },
+          },
+          Object {
+            "term": Object {
+              "error.id": "errorId",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+        ],
+        "should": Array [
+          Object {
+            "term": Object {
+              "transaction.sampled": true,
+            },
+          },
+        ],
+      },
+    },
+    "size": 1,
+    "sort": Array [
+      Object {
+        "_score": Object {
+          "order": "desc",
+        },
+      },
+      Object {
+        "@timestamp": Object {
+          "order": "desc",
+        },
+      },
+    ],
     "track_total_hits": false,
   },
 }

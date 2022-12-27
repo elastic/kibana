@@ -139,31 +139,6 @@ export function ErrorGroupDetails() {
     ]
   );
 
-  const { data: errorGroupData, status: errorGroupDataStatus } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/errors/{groupId}',
-          {
-            params: {
-              path: {
-                serviceName,
-                groupId,
-              },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-              },
-            },
-          }
-        );
-      }
-    },
-    [environment, kuery, serviceName, start, end, groupId]
-  );
-
   const { data: errorSamplesData, status: errorSamplesFetchStatus } =
     useFetcher(
       (callApmApi) => {
@@ -217,15 +192,10 @@ export function ErrorGroupDetails() {
     }
   }, [history, errorId, errorSamplesData, errorSamplesFetchStatus]);
 
-  const loadingErrorGroupData = isPending(errorGroupDataStatus);
   const loadingDistributionData = isPending(errorDistributionStatus);
   const loadingErrorSamplesData = isPending(errorSamplesFetchStatus);
 
-  if (
-    loadingErrorGroupData &&
-    loadingDistributionData &&
-    loadingErrorSamplesData
-  ) {
+  if (loadingDistributionData && loadingErrorSamplesData) {
     return (
       <div style={{ textAlign: 'center' }}>
         <EuiLoadingSpinner size="xl" />
@@ -233,12 +203,12 @@ export function ErrorGroupDetails() {
     );
   }
 
-  if (!errorGroupData || !errorDistributionData || !errorSamplesData) {
+  if (!errorDistributionData || !errorSamplesData) {
     return <ErrorGroupHeader groupId={groupId} />;
   }
 
   // If there are 0 occurrences, show only charts w. empty message
-  const showDetails = errorSamplesData.errorSamples.length !== 0;
+  const showDetails = errorSamplesData.occurrencesCount !== 0;
 
   return (
     <>
@@ -246,7 +216,7 @@ export function ErrorGroupDetails() {
 
       <ErrorGroupHeader
         groupId={groupId}
-        occurrencesCount={errorSamplesData.errorSamples.length}
+        occurrencesCount={errorSamplesData.occurrencesCount}
       />
 
       <EuiSpacer size={'m'} />
@@ -276,7 +246,7 @@ export function ErrorGroupDetails() {
         <ErrorSampler
           errorSamples={errorSamplesData.errorSamples}
           errorSamplesFetchStatus={errorSamplesFetchStatus}
-          occurrencesCount={errorGroupData.occurrencesCount}
+          occurrencesCount={errorSamplesData.occurrencesCount}
         />
       )}
     </>

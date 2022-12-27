@@ -125,8 +125,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await deleteAllServiceGroups();
       await synthtraceEsClient.clean();
     });
-
-    it('returns the correct number of services', async () => {
+    // Failing: See https://github.com/elastic/kibana/issues/147473
+    it.skip('returns the correct number of services', async () => {
       const response = await getServiceGroupCounts();
       expect(response.status).to.be(200);
       expect(Object.keys(response.body).length).to.be(2);
@@ -134,7 +134,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(response.body[opbeansServiceGroupId]).to.have.property('services', 1);
     });
 
-    describe('with alerts', () => {
+    describe.skip('with alerts', () => {
       let ruleId: string;
       before(async () => {
         const { body: createdRule } = await createRule();

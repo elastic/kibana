@@ -68,5 +68,6 @@ export async function getErrorGroupSamples({
 
   return {
     errorSamples,
+    occurrencesCount: resp.hits.total.value,
   };
 }

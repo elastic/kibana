@@ -29,13 +29,15 @@ export function SampleSummary({ error }: Props) {
   return (
     <>
       {isUnhandled && (
-        <EuiBadge color="warning">
-          {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
-            defaultMessage: 'Unhandled',
-          })}
-        </EuiBadge>
+        <>
+          <EuiBadge color="warning">
+            {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
+              defaultMessage: 'Unhandled',
+            })}
+          </EuiBadge>
+          <EuiSpacer />
+        </>
       )}
-      <EuiSpacer size="xs" />
       {logMessage && (
         <>
           <EuiText size="s">
@@ -47,6 +49,7 @@ export function SampleSummary({ error }: Props) {
           </EuiText>
           <EuiSpacer size="xs" />
           <EuiCodeBlock isCopyable>{logMessage}</EuiCodeBlock>
+          <EuiSpacer />
         </>
       )}
       <EuiText size="s">

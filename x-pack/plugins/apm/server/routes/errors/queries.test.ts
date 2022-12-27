@@ -11,7 +11,8 @@ import {
 } from '../../utils/test_helpers';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
-import { getErrorGroupSample } from './get_error_groups/get_error_group_summary';
+import { getErrorGroupSamples } from './get_error_groups/get_error_group_samples';
+import { getErrorGroupSampleDetails } from './get_error_groups/get_error_group_sample_details';
 
 describe('error queries', () => {
   let mock: SearchParamsMock;
@@ -20,10 +21,26 @@ describe('error queries', () => {
     mock.teardown();
   });
 
-  it('fetches a single error group', async () => {
+  it('fetches the error group samples by the groupId', async () => {
     mock = await inspectSearchParams(({ mockApmEventClient }) =>
-      getErrorGroupSample({
+      getErrorGroupSamples({
         groupId: 'groupId',
+        serviceName: 'serviceName',
+        apmEventClient: mockApmEventClient,
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
+        start: 0,
+        end: 50000,
+      })
+    );
+
+    expect(mock.params).toMatchSnapshot();
+  });
+
+  it('fetches the error sample by errorId', async () => {
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
+      getErrorGroupSampleDetails({
+        errorId: 'errorId',
         serviceName: 'serviceName',
         apmEventClient: mockApmEventClient,
         environment: ENVIRONMENT_ALL.value,
