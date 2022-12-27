@@ -16,10 +16,9 @@ import { mergeMap, reduce } from 'rxjs/operators';
 import { supportsColor } from 'chalk';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-import { PROJECTS } from '../typescript/projects';
-import { Project } from '../typescript/project';
+import { PROJECTS, Project } from '@kbn/ts-projects';
 
 export function runEslintWithTypes() {
   run(
@@ -42,7 +41,7 @@ export function runEslintWithTypes() {
           return false;
         }
 
-        if (projectFilter && project.tsConfigPath !== projectFilter) {
+        if (projectFilter && project.path !== projectFilter) {
           log.verbose(`[${project.name}] skipping because it doesn't match --project`);
           return false;
         }
@@ -79,8 +78,10 @@ export function runEslintWithTypes() {
               process.execPath,
               [
                 Path.relative(project.directory, eslintPath),
-                ...project.getIncludePatterns().map((p) => (p.endsWith('*') ? `${p}.{ts,tsx}` : p)),
-                ...project.getExcludePatterns().flatMap((p) => ['--ignore-pattern', p]),
+                ...(project.config.include ?? []).map((p) =>
+                  p.endsWith('*') ? `${p}.{ts,tsx}` : p
+                ),
+                ...(project.config.exclude ?? []).flatMap((p) => ['--ignore-pattern', p]),
                 ...['--ignore-pattern', '**/*.json'],
                 ...['--ext', '.ts,.tsx'],
                 '--no-error-on-unmatched-pattern',
@@ -145,13 +146,7 @@ export function runEslintWithTypes() {
           } projects failed, run the following commands locally to try auto-fixing them:
 
             ${failures
-              .map(
-                (p) =>
-                  `node scripts/eslint_with_types --fix --project ${Path.relative(
-                    REPO_ROOT,
-                    p.tsConfigPath
-                  )}`
-              )
+              .map((p) => `node scripts/eslint_with_types --fix --project ${p.repoRel}`)
               .join('\n            ')}
         `
       );

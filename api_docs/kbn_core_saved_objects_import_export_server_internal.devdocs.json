@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-        "id": "def-server.SavedObjectsExportError",
+        "id": "def-common.SavedObjectsExportError",
         "type": "Class",
         "tags": [],
         "label": "SavedObjectsExportError",
@@ -20,9 +28,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-            "section": "def-server.SavedObjectsExportError",
+            "section": "def-common.SavedObjectsExportError",
             "text": "SavedObjectsExportError"
           },
           " extends Error"
@@ -33,7 +41,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "id": "def-server.SavedObjectsExportError.Unnamed",
+            "id": "def-common.SavedObjectsExportError.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -47,7 +55,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsExportError.Unnamed.$1",
+                "id": "def-common.SavedObjectsExportError.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -62,7 +70,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsExportError.Unnamed.$2",
+                "id": "def-common.SavedObjectsExportError.Unnamed.$2",
                 "type": "string",
                 "tags": [],
                 "label": "message",
@@ -77,7 +85,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsExportError.Unnamed.$3",
+                "id": "def-common.SavedObjectsExportError.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "attributes",
@@ -95,7 +103,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "id": "def-server.SavedObjectsExportError.exportSizeExceeded",
+            "id": "def-common.SavedObjectsExportError.exportSizeExceeded",
             "type": "Function",
             "tags": [],
             "label": "exportSizeExceeded",
@@ -104,9 +112,9 @@
               "(limit: number) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsExportError",
+                "section": "def-common.SavedObjectsExportError",
                 "text": "SavedObjectsExportError"
               }
             ],
@@ -116,7 +124,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsExportError.exportSizeExceeded.$1",
+                "id": "def-common.SavedObjectsExportError.exportSizeExceeded.$1",
                 "type": "number",
                 "tags": [],
                 "label": "limit",
@@ -134,7 +142,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "id": "def-server.SavedObjectsExportError.objectFetchError",
+            "id": "def-common.SavedObjectsExportError.objectFetchError",
             "type": "Function",
             "tags": [],
             "label": "objectFetchError",
@@ -151,9 +159,9 @@
               "<unknown>[]) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsExportError",
+                "section": "def-common.SavedObjectsExportError",
                 "text": "SavedObjectsExportError"
               }
             ],
@@ -163,7 +171,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsExportError.objectFetchError.$1",
+                "id": "def-common.SavedObjectsExportError.objectFetchError.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
@@ -188,7 +196,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "id": "def-server.SavedObjectsExportError.objectTransformError",
+            "id": "def-common.SavedObjectsExportError.objectTransformError",
             "type": "Function",
             "tags": [],
             "label": "objectTransformError",
@@ -207,9 +215,9 @@
               "<unknown>[], cause: Error) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsExportError",
+                "section": "def-common.SavedObjectsExportError",
                 "text": "SavedObjectsExportError"
               }
             ],
@@ -219,7 +227,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsExportError.objectTransformError.$1",
+                "id": "def-common.SavedObjectsExportError.objectTransformError.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
@@ -241,7 +249,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsExportError.objectTransformError.$2",
+                "id": "def-common.SavedObjectsExportError.objectTransformError.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "cause",
@@ -259,7 +267,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "id": "def-server.SavedObjectsExportError.invalidTransformError",
+            "id": "def-common.SavedObjectsExportError.invalidTransformError",
             "type": "Function",
             "tags": [],
             "label": "invalidTransformError",
@@ -270,9 +278,9 @@
               "(objectKeys: string[]) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsExportError",
+                "section": "def-common.SavedObjectsExportError",
                 "text": "SavedObjectsExportError"
               }
             ],
@@ -282,7 +290,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsExportError.invalidTransformError.$1",
+                "id": "def-common.SavedObjectsExportError.invalidTransformError.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "objectKeys",
@@ -303,7 +311,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-        "id": "def-server.SavedObjectsImportError",
+        "id": "def-common.SavedObjectsImportError",
         "type": "Class",
         "tags": [],
         "label": "SavedObjectsImportError",
@@ -311,9 +319,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-            "section": "def-server.SavedObjectsImportError",
+            "section": "def-common.SavedObjectsImportError",
             "text": "SavedObjectsImportError"
           },
           " extends Error"
@@ -324,7 +332,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "id": "def-server.SavedObjectsImportError.importSizeExceeded",
+            "id": "def-common.SavedObjectsImportError.importSizeExceeded",
             "type": "Function",
             "tags": [],
             "label": "importSizeExceeded",
@@ -333,9 +341,9 @@
               "(limit: number) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsImportError",
+                "section": "def-common.SavedObjectsImportError",
                 "text": "SavedObjectsImportError"
               }
             ],
@@ -345,7 +353,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsImportError.importSizeExceeded.$1",
+                "id": "def-common.SavedObjectsImportError.importSizeExceeded.$1",
                 "type": "number",
                 "tags": [],
                 "label": "limit",
@@ -363,7 +371,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "id": "def-server.SavedObjectsImportError.nonUniqueImportObjects",
+            "id": "def-common.SavedObjectsImportError.nonUniqueImportObjects",
             "type": "Function",
             "tags": [],
             "label": "nonUniqueImportObjects",
@@ -372,9 +380,9 @@
               "(nonUniqueEntries: string[]) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsImportError",
+                "section": "def-common.SavedObjectsImportError",
                 "text": "SavedObjectsImportError"
               }
             ],
@@ -384,7 +392,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsImportError.nonUniqueImportObjects.$1",
+                "id": "def-common.SavedObjectsImportError.nonUniqueImportObjects.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "nonUniqueEntries",
@@ -402,7 +410,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "id": "def-server.SavedObjectsImportError.nonUniqueRetryObjects",
+            "id": "def-common.SavedObjectsImportError.nonUniqueRetryObjects",
             "type": "Function",
             "tags": [],
             "label": "nonUniqueRetryObjects",
@@ -411,9 +419,9 @@
               "(nonUniqueRetryObjects: string[]) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsImportError",
+                "section": "def-common.SavedObjectsImportError",
                 "text": "SavedObjectsImportError"
               }
             ],
@@ -423,7 +431,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsImportError.nonUniqueRetryObjects.$1",
+                "id": "def-common.SavedObjectsImportError.nonUniqueRetryObjects.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "nonUniqueRetryObjects",
@@ -441,7 +449,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "id": "def-server.SavedObjectsImportError.nonUniqueRetryDestinations",
+            "id": "def-common.SavedObjectsImportError.nonUniqueRetryDestinations",
             "type": "Function",
             "tags": [],
             "label": "nonUniqueRetryDestinations",
@@ -450,9 +458,9 @@
               "(nonUniqueRetryDestinations: string[]) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsImportError",
+                "section": "def-common.SavedObjectsImportError",
                 "text": "SavedObjectsImportError"
               }
             ],
@@ -462,7 +470,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsImportError.nonUniqueRetryDestinations.$1",
+                "id": "def-common.SavedObjectsImportError.nonUniqueRetryDestinations.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "nonUniqueRetryDestinations",
@@ -480,7 +488,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "id": "def-server.SavedObjectsImportError.referencesFetchError",
+            "id": "def-common.SavedObjectsImportError.referencesFetchError",
             "type": "Function",
             "tags": [],
             "label": "referencesFetchError",
@@ -497,9 +505,9 @@
               "<unknown>[]) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsImportError",
+                "section": "def-common.SavedObjectsImportError",
                 "text": "SavedObjectsImportError"
               }
             ],
@@ -509,7 +517,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "id": "def-server.SavedObjectsImportError.referencesFetchError.$1",
+                "id": "def-common.SavedObjectsImportError.referencesFetchError.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
@@ -536,14 +544,6 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

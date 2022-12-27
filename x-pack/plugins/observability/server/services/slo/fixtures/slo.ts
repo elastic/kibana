@@ -8,9 +8,9 @@
 import { cloneDeep } from 'lodash';
 import uuid from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common';
+import { sloSchema, CreateSLOParams } from '@kbn/slo-schema';
 
 import { SO_SLO_TYPE } from '../../../saved_objects';
-import { sloSchema } from '../../../types/schema';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -21,7 +21,6 @@ import {
   SLO,
   StoredSLO,
 } from '../../../domain/models';
-import { CreateSLOParams } from '../../../types/rest_specs';
 import { Paginated } from '../slo_repository';
 import { sevenDays } from './duration';
 import { sevenDaysRolling } from './time_window';

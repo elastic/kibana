@@ -11,6 +11,7 @@ import {
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { sloSchema } from '@kbn/slo-schema';
 
 import { SLO, StoredSLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
@@ -23,7 +24,6 @@ import {
 } from './slo_repository';
 import { createAPMTransactionDurationIndicator, createSLO, aStoredSLO } from './fixtures/slo';
 import { SLONotFound } from '../../errors';
-import { sloSchema } from '../../types/schema';
 
 const SOME_SLO = createSLO({ indicator: createAPMTransactionDurationIndicator() });
 
