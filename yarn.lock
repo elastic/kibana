@@ -3741,11 +3741,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-is-populated-object@link:x-pack/packages/ml/is_populated_object":
+"@kbn/ml-nested-property@link:x-pack/packages/ml/nested_property":
   version "0.0.0"
   uid ""
 
 "@kbn/ml-string-hash@link:x-pack/packages/ml/string_hash":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-url-state@link:x-pack/packages/ml/url_state":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-is-populated-object@link:x-pack/packages/ml/is_populated_object":
   version "0.0.0"
   uid ""
 
@@ -4086,6 +4094,10 @@
   uid ""
 
 "@kbn/shared-ux-utility@link:packages/kbn-shared-ux-utility":
+  version "0.0.0"
+  uid ""
+
+"@kbn/slo-schema@link:packages/kbn-slo-schema":
   version "0.0.0"
   uid ""
 
@@ -22819,10 +22831,10 @@ react-grid-layout@^1.3.4:
     react-draggable "^4.0.0"
     react-resizable "^3.0.4"
 
-react-hook-form@^7.40.0:
-  version "7.40.0"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.40.0.tgz#62bc939dddca88522cd7f5135b6603192ccf7e17"
-  integrity sha512-0rokdxMPJs0k9bvFtY6dbcSydyNhnZNXCR49jgDr/aR03FDHFOK6gfh8ccqB3fl696Mk7lqh04xdm+agqWXKSw==
+react-hook-form@^7.41.0:
+  version "7.41.0"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.41.0.tgz#cc0871f4784e7233ac8466300da557d622154414"
+  integrity sha512-u1cHOXujr+AsNBoeCtcCuRwPh87mXAgKtXqd3qTCBgNFYzVZLXjYgLcynORpAgqhe24r5scucR8+6gfWaXBtHQ==
 
 react-input-autosize@^3.0.0:
   version "3.0.0"
@@ -28405,10 +28417,10 @@ xpath@0.0.32:
   resolved "https://registry.yarnpkg.com/xpath/-/xpath-0.0.32.tgz#1b73d3351af736e17ec078d6da4b8175405c48af"
   integrity sha512-rxMJhSIoiO8vXcWvSifKqhvV96GjiD5wYb8/QHdoRyQvraTpp4IEv944nhGausZZ3u7dhQXteZuZbaqfpB7uYw==
 
-xstate@^4.35.0:
-  version "4.35.0"
-  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.35.0.tgz#cccd4af2b233c47c661bab4f51bfa02266e41b5a"
-  integrity sha512-MSc3MCn2SDB/ShI0KHXpWGIDMo6i+qwJPKgBdyi1AClJm37k4oHJ7lr79qdTrTvirKuC2ZP+63lhsvvYrl0URQ==
+xstate@^4.35.1:
+  version "4.35.1"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.35.1.tgz#f2ea205e6e47cca285336a8f44ef2c154c9629a5"
+  integrity sha512-imxk6+76HJRt7qHrUnWnAjaHHhAsUKoVa+PXkyaPd3Gll0VjZsy6/L+FkatIJnjI5Kpwp0R8k63KfIFnzVLskQ==
 
 "xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@^4.0.2, xtend@~4.0.0, xtend@~4.0.1:
   version "4.0.2"

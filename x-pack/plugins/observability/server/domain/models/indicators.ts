@@ -13,7 +13,7 @@ import {
   indicatorSchema,
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
-} from '../../types/schema';
+} from '@kbn/slo-schema';
 
 type APMTransactionErrorRateIndicator = t.TypeOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;

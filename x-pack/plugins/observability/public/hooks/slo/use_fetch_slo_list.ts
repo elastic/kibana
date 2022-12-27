@@ -109,7 +109,7 @@ function toSLOList(response: Record<string, unknown>): SLOList {
   return {
     results: response.results.map(toSLO),
     page: Number(response.page),
-    perPage: Number(response.per_page),
+    perPage: Number(response.perPage),
     total: Number(response.total),
   };
 }
