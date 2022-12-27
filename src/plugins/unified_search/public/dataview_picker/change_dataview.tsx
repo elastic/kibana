@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
-import type { DataViewPickerPropsExtended } from '.';
+import type { DataViewPickerPropsExtended } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
 import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
@@ -116,15 +116,13 @@ export function ChangeDataView({
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews, isTextBasedLangSelected]);
 
   useEffect(() => {
-    if (trigger.label) {
-      if (textBasedLanguage) {
-        setTriggerLabel(textBasedLanguage.toUpperCase());
-      } else {
-        setTriggerLabel(trigger.label);
-      }
+    if (textBasedLanguage) {
+      setTriggerLabel(textBasedLanguage.toUpperCase());
+    } else {
+      setTriggerLabel(trigger.label);
     }
   }, [textBasedLanguage, trigger.label]);
 
@@ -157,7 +155,8 @@ export function ChangeDataView({
         {...rest}
       >
         <>
-          {isAdHocSelected && (
+          {/* we don't want to display the adHoc icon on text based mode */}
+          {isAdHocSelected && !isTextBasedLangSelected && (
             <EuiIcon
               type={adhoc}
               color="primary"
@@ -303,8 +302,8 @@ export function ChangeDataView({
           isTextBasedLangSelected={isTextBasedLangSelected}
           setPopoverIsOpen={setPopoverIsOpen}
           onChangeDataView={async (newId) => {
-            const dataView = await data.dataViews.get(newId);
-            await data.dataViews.refreshFields(dataView);
+            // refreshing the field list
+            await dataViews.get(newId, undefined, true);
             setSelectedDataViewId(newId);
             setPopoverIsOpen(false);
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {

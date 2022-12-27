@@ -435,9 +435,9 @@
               ") => void | ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.MaybePromise",
+                "section": "def-common.MaybePromise",
                 "text": "MaybePromise"
               },
               "<Partial<",
@@ -532,9 +532,9 @@
               ") => void | ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.MaybePromise",
+                "section": "def-common.MaybePromise",
                 "text": "MaybePromise"
               },
               "<Partial<",
@@ -629,9 +629,9 @@
               ") => void | ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.MaybePromise",
+                "section": "def-common.MaybePromise",
                 "text": "MaybePromise"
               },
               "<",
@@ -727,9 +727,9 @@
               ") => void | ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.MaybePromise",
+                "section": "def-common.MaybePromise",
                 "text": "MaybePromise"
               },
               "<",

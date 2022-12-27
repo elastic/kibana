@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import React from 'react';
 
 const cloudIcons: Record<string, string> = {
   gcp: 'logoGCP',

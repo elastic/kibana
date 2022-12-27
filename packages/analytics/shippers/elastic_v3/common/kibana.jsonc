@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/analytics-shippers-elastic-v3-common",
-  "owner": "@elastic/kibana-core",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/kibana-core"
 }
