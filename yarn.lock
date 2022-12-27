@@ -1527,10 +1527,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@71.0.0":
-  version "71.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-71.0.0.tgz#0d77ca3e513ebd59fee0be49abd7acf4b04206aa"
-  integrity sha512-5iHvGSJCJjin/VPHBT0RdHVKUCClH5PqXnygsr6LCkyQzj+frKiK0w28dK5EBReDp5+SRoF+VYSVse4Ia2DkLQ==
+"@elastic/eui@72.0.0":
+  version "72.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-72.0.0.tgz#ba001d694c0c944143b11e5e2b756476c6a6a924"
+  integrity sha512-XMIyARp5tI5PymDT1OeYoNnto+d0NtrnRCwHUIOtwDAQamkqmfyNNt+bMzj2ii+HBA/BII5+NKCmb6HNCUBq1A==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1562,7 +1562,7 @@
     rehype-stringify "^8.0.0"
     remark-breaks "^2.0.2"
     remark-emoji "^2.1.0"
-    remark-parse "^8.0.3"
+    remark-parse-no-trim "^8.0.4"
     remark-rehype "^8.0.0"
     tabbable "^5.2.1"
     text-diff "^1.0.1"
@@ -2689,135 +2689,143 @@
   resolved "https://registry.yarnpkg.com/@jsdevtools/ono/-/ono-7.1.3.tgz#9df03bbd7c696a5c58885c34aa06da41c8543796"
   integrity sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==
 
-"@kbn/ace@link:bazel-bin/packages/kbn-ace":
+"@kbn/ace@link:packages/kbn-ace":
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-components@link:bazel-bin/x-pack/packages/ml/aiops_components":
+"@kbn/aiops-components@link:x-pack/packages/ml/aiops_components":
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-utils@link:bazel-bin/x-pack/packages/ml/aiops_utils":
+"@kbn/aiops-utils@link:x-pack/packages/ml/aiops_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/alerts@link:bazel-bin/packages/kbn-alerts":
+"@kbn/alerts@link:packages/kbn-alerts":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-common-types@link:bazel-bin/packages/kbn-ambient-common-types":
+"@kbn/ambient-common-types@link:packages/kbn-ambient-common-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-ftr-types@link:bazel-bin/packages/kbn-ambient-ftr-types":
+"@kbn/ambient-ftr-types@link:packages/kbn-ambient-ftr-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-storybook-types@link:bazel-bin/packages/kbn-ambient-storybook-types":
+"@kbn/ambient-storybook-types@link:packages/kbn-ambient-storybook-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-ui-types@link:bazel-bin/packages/kbn-ambient-ui-types":
+"@kbn/ambient-ui-types@link:packages/kbn-ambient-ui-types":
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-client@link:bazel-bin/packages/analytics/client":
+"@kbn/analytics-client@link:packages/analytics/client":
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser":
+"@kbn/analytics-shippers-elastic-v3-browser@link:packages/analytics/shippers/elastic_v3/browser":
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-shippers-elastic-v3-common@link:bazel-bin/packages/analytics/shippers/elastic_v3/common":
+"@kbn/analytics-shippers-elastic-v3-common@link:packages/analytics/shippers/elastic_v3/common":
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-shippers-elastic-v3-server@link:bazel-bin/packages/analytics/shippers/elastic_v3/server":
+"@kbn/analytics-shippers-elastic-v3-server@link:packages/analytics/shippers/elastic_v3/server":
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-shippers-fullstory@link:bazel-bin/packages/analytics/shippers/fullstory":
+"@kbn/analytics-shippers-fullstory@link:packages/analytics/shippers/fullstory":
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-shippers-gainsight@link:bazel-bin/packages/analytics/shippers/gainsight":
+"@kbn/analytics-shippers-gainsight@link:packages/analytics/shippers/gainsight":
   version "0.0.0"
   uid ""
 
-"@kbn/analytics@link:bazel-bin/packages/kbn-analytics":
+"@kbn/analytics@link:packages/kbn-analytics":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-config-loader@link:bazel-bin/packages/kbn-apm-config-loader":
+"@kbn/apm-config-loader@link:packages/kbn-apm-config-loader":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-synthtrace@link:bazel-bin/packages/kbn-apm-synthtrace":
+"@kbn/apm-synthtrace@link:packages/kbn-apm-synthtrace":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-utils@link:bazel-bin/packages/kbn-apm-utils":
+"@kbn/apm-utils@link:packages/kbn-apm-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/axe-config@link:bazel-bin/packages/kbn-axe-config":
+"@kbn/axe-config@link:packages/kbn-axe-config":
   version "0.0.0"
   uid ""
 
-"@kbn/babel-plugin-synthetic-packages@link:bazel-bin/packages/kbn-babel-plugin-synthetic-packages":
+"@kbn/babel-plugin-package-imports@link:packages/kbn-babel-plugin-package-imports":
   version "0.0.0"
   uid ""
 
-"@kbn/babel-preset@link:bazel-bin/packages/kbn-babel-preset":
+"@kbn/babel-preset@link:packages/kbn-babel-preset":
   version "0.0.0"
   uid ""
 
-"@kbn/bazel-packages@link:bazel-bin/packages/kbn-bazel-packages":
+"@kbn/babel-register@link:packages/kbn-babel-register":
   version "0.0.0"
   uid ""
 
-"@kbn/bazel-runner@link:bazel-bin/packages/kbn-bazel-runner":
+"@kbn/babel-transform@link:packages/kbn-babel-transform":
   version "0.0.0"
   uid ""
 
-"@kbn/cases-components@link:bazel-bin/packages/kbn-cases-components":
+"@kbn/bazel-packages@link:packages/kbn-bazel-packages":
   version "0.0.0"
   uid ""
 
-"@kbn/chart-icons@link:bazel-bin/packages/kbn-chart-icons":
+"@kbn/bazel-runner@link:packages/kbn-bazel-runner":
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-core@link:bazel-bin/packages/kbn-ci-stats-core":
+"@kbn/cases-components@link:packages/kbn-cases-components":
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-performance-metrics@link:bazel-bin/packages/kbn-ci-stats-performance-metrics":
+"@kbn/chart-icons@link:packages/kbn-chart-icons":
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-reporter@link:bazel-bin/packages/kbn-ci-stats-reporter":
+"@kbn/ci-stats-core@link:packages/kbn-ci-stats-core":
   version "0.0.0"
   uid ""
 
-"@kbn/cli-dev-mode@link:bazel-bin/packages/kbn-cli-dev-mode":
+"@kbn/ci-stats-performance-metrics@link:packages/kbn-ci-stats-performance-metrics":
   version "0.0.0"
   uid ""
 
-"@kbn/coloring@link:bazel-bin/packages/kbn-coloring":
+"@kbn/ci-stats-reporter@link:packages/kbn-ci-stats-reporter":
   version "0.0.0"
   uid ""
 
-"@kbn/config-mocks@link:bazel-bin/packages/kbn-config-mocks":
+"@kbn/cli-dev-mode@link:packages/kbn-cli-dev-mode":
   version "0.0.0"
   uid ""
 
-"@kbn/config-schema@link:bazel-bin/packages/kbn-config-schema":
+"@kbn/coloring@link:packages/kbn-coloring":
   version "0.0.0"
   uid ""
 
-"@kbn/config@link:bazel-bin/packages/kbn-config":
+"@kbn/config-mocks@link:packages/kbn-config-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/config-schema@link:packages/kbn-config-schema":
+  version "0.0.0"
+  uid ""
+
+"@kbn/config@link:packages/kbn-config":
   version "0.0.0"
   uid ""
 
@@ -2829,1347 +2837,1367 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-browser-internal@link:bazel-bin/packages/core/analytics/core-analytics-browser-internal":
+"@kbn/core-analytics-browser-internal@link:packages/core/analytics/core-analytics-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-browser-mocks@link:bazel-bin/packages/core/analytics/core-analytics-browser-mocks":
+"@kbn/core-analytics-browser-mocks@link:packages/core/analytics/core-analytics-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-browser@link:bazel-bin/packages/core/analytics/core-analytics-browser":
+"@kbn/core-analytics-browser@link:packages/core/analytics/core-analytics-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-server-internal@link:bazel-bin/packages/core/analytics/core-analytics-server-internal":
+"@kbn/core-analytics-server-internal@link:packages/core/analytics/core-analytics-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-server-mocks@link:bazel-bin/packages/core/analytics/core-analytics-server-mocks":
+"@kbn/core-analytics-server-mocks@link:packages/core/analytics/core-analytics-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-server@link:bazel-bin/packages/core/analytics/core-analytics-server":
+"@kbn/core-analytics-server@link:packages/core/analytics/core-analytics-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-browser-internal@link:bazel-bin/packages/core/application/core-application-browser-internal":
+"@kbn/core-application-browser-internal@link:packages/core/application/core-application-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-browser-mocks@link:bazel-bin/packages/core/application/core-application-browser-mocks":
+"@kbn/core-application-browser-mocks@link:packages/core/application/core-application-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-browser@link:bazel-bin/packages/core/application/core-application-browser":
+"@kbn/core-application-browser@link:packages/core/application/core-application-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-application-common@link:bazel-bin/packages/core/application/core-application-common":
+"@kbn/core-application-common@link:packages/core/application/core-application-common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-browser-internal@link:bazel-bin/packages/core/apps/core-apps-browser-internal":
+"@kbn/core-apps-browser-internal@link:packages/core/apps/core-apps-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-browser-mocks@link:bazel-bin/packages/core/apps/core-apps-browser-mocks":
+"@kbn/core-apps-browser-mocks@link:packages/core/apps/core-apps-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-server-internal@link:bazel-bin/packages/core/apps/core-apps-server-internal":
+"@kbn/core-apps-server-internal@link:packages/core/apps/core-apps-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal":
+"@kbn/core-base-browser-internal@link:packages/core/base/core-base-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-browser-mocks@link:bazel-bin/packages/core/base/core-base-browser-mocks":
+"@kbn/core-base-browser-mocks@link:packages/core/base/core-base-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-common-internal@link:bazel-bin/packages/core/base/core-base-common-internal":
+"@kbn/core-base-common-internal@link:packages/core/base/core-base-common-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-common@link:bazel-bin/packages/core/base/core-base-common":
+"@kbn/core-base-common@link:packages/core/base/core-base-common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-server-internal@link:bazel-bin/packages/core/base/core-base-server-internal":
+"@kbn/core-base-server-internal@link:packages/core/base/core-base-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-server-mocks@link:bazel-bin/packages/core/base/core-base-server-mocks":
+"@kbn/core-base-server-mocks@link:packages/core/base/core-base-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-browser-internal@link:bazel-bin/packages/core/capabilities/core-capabilities-browser-internal":
+"@kbn/core-capabilities-browser-internal@link:packages/core/capabilities/core-capabilities-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-browser-mocks@link:bazel-bin/packages/core/capabilities/core-capabilities-browser-mocks":
+"@kbn/core-capabilities-browser-mocks@link:packages/core/capabilities/core-capabilities-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-common@link:bazel-bin/packages/core/capabilities/core-capabilities-common":
+"@kbn/core-capabilities-common@link:packages/core/capabilities/core-capabilities-common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-server-internal@link:bazel-bin/packages/core/capabilities/core-capabilities-server-internal":
+"@kbn/core-capabilities-server-internal@link:packages/core/capabilities/core-capabilities-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-server-mocks@link:bazel-bin/packages/core/capabilities/core-capabilities-server-mocks":
+"@kbn/core-capabilities-server-mocks@link:packages/core/capabilities/core-capabilities-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-server@link:bazel-bin/packages/core/capabilities/core-capabilities-server":
+"@kbn/core-capabilities-server@link:packages/core/capabilities/core-capabilities-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-browser-internal@link:bazel-bin/packages/core/chrome/core-chrome-browser-internal":
+"@kbn/core-chrome-browser-internal@link:packages/core/chrome/core-chrome-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-browser-mocks@link:bazel-bin/packages/core/chrome/core-chrome-browser-mocks":
+"@kbn/core-chrome-browser-mocks@link:packages/core/chrome/core-chrome-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-browser@link:bazel-bin/packages/core/chrome/core-chrome-browser":
+"@kbn/core-chrome-browser@link:packages/core/chrome/core-chrome-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-config-server-internal@link:bazel-bin/packages/core/config/core-config-server-internal":
+"@kbn/core-config-server-internal@link:packages/core/config/core-config-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-config-server-mocks@link:bazel-bin/packages/core/config/core-config-server-mocks":
+"@kbn/core-config-server-mocks@link:packages/core/config/core-config-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-browser-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-browser-internal":
+"@kbn/core-deprecations-browser-internal@link:packages/core/deprecations/core-deprecations-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-browser-mocks@link:bazel-bin/packages/core/deprecations/core-deprecations-browser-mocks":
+"@kbn/core-deprecations-browser-mocks@link:packages/core/deprecations/core-deprecations-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-browser@link:bazel-bin/packages/core/deprecations/core-deprecations-browser":
+"@kbn/core-deprecations-browser@link:packages/core/deprecations/core-deprecations-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-common@link:bazel-bin/packages/core/deprecations/core-deprecations-common":
+"@kbn/core-deprecations-common@link:packages/core/deprecations/core-deprecations-common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-server-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-server-internal":
+"@kbn/core-deprecations-server-internal@link:packages/core/deprecations/core-deprecations-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-server-mocks@link:bazel-bin/packages/core/deprecations/core-deprecations-server-mocks":
+"@kbn/core-deprecations-server-mocks@link:packages/core/deprecations/core-deprecations-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-server@link:bazel-bin/packages/core/deprecations/core-deprecations-server":
+"@kbn/core-deprecations-server@link:packages/core/deprecations/core-deprecations-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-browser-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-internal":
+"@kbn/core-doc-links-browser-internal@link:packages/core/doc-links/core-doc-links-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-browser-mocks@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-mocks":
+"@kbn/core-doc-links-browser-mocks@link:packages/core/doc-links/core-doc-links-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-browser@link:bazel-bin/packages/core/doc-links/core-doc-links-browser":
+"@kbn/core-doc-links-browser@link:packages/core/doc-links/core-doc-links-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-server-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-server-internal":
+"@kbn/core-doc-links-server-internal@link:packages/core/doc-links/core-doc-links-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-server-mocks@link:bazel-bin/packages/core/doc-links/core-doc-links-server-mocks":
+"@kbn/core-doc-links-server-mocks@link:packages/core/doc-links/core-doc-links-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-server@link:bazel-bin/packages/core/doc-links/core-doc-links-server":
+"@kbn/core-doc-links-server@link:packages/core/doc-links/core-doc-links-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-client-server-internal@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-client-server-internal":
+"@kbn/core-elasticsearch-client-server-internal@link:packages/core/elasticsearch/core-elasticsearch-client-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-client-server-mocks@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-client-server-mocks":
+"@kbn/core-elasticsearch-client-server-mocks@link:packages/core/elasticsearch/core-elasticsearch-client-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-client-server@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-client-server":
+"@kbn/core-elasticsearch-client-server@link:packages/core/elasticsearch/core-elasticsearch-client-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-server-internal@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-server-internal":
+"@kbn/core-elasticsearch-server-internal@link:packages/core/elasticsearch/core-elasticsearch-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-server-mocks@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-server-mocks":
+"@kbn/core-elasticsearch-server-mocks@link:packages/core/elasticsearch/core-elasticsearch-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-server@link:bazel-bin/packages/core/elasticsearch/core-elasticsearch-server":
+"@kbn/core-elasticsearch-server@link:packages/core/elasticsearch/core-elasticsearch-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-environment-server-internal@link:bazel-bin/packages/core/environment/core-environment-server-internal":
+"@kbn/core-environment-server-internal@link:packages/core/environment/core-environment-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-environment-server-mocks@link:bazel-bin/packages/core/environment/core-environment-server-mocks":
+"@kbn/core-environment-server-mocks@link:packages/core/environment/core-environment-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-browser-internal@link:bazel-bin/packages/core/execution-context/core-execution-context-browser-internal":
+"@kbn/core-execution-context-browser-internal@link:packages/core/execution-context/core-execution-context-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-browser-mocks@link:bazel-bin/packages/core/execution-context/core-execution-context-browser-mocks":
+"@kbn/core-execution-context-browser-mocks@link:packages/core/execution-context/core-execution-context-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-browser@link:bazel-bin/packages/core/execution-context/core-execution-context-browser":
+"@kbn/core-execution-context-browser@link:packages/core/execution-context/core-execution-context-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-common@link:bazel-bin/packages/core/execution-context/core-execution-context-common":
+"@kbn/core-execution-context-common@link:packages/core/execution-context/core-execution-context-common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-server-internal@link:bazel-bin/packages/core/execution-context/core-execution-context-server-internal":
+"@kbn/core-execution-context-server-internal@link:packages/core/execution-context/core-execution-context-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-server-mocks@link:bazel-bin/packages/core/execution-context/core-execution-context-server-mocks":
+"@kbn/core-execution-context-server-mocks@link:packages/core/execution-context/core-execution-context-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-server@link:bazel-bin/packages/core/execution-context/core-execution-context-server":
+"@kbn/core-execution-context-server@link:packages/core/execution-context/core-execution-context-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-fatal-errors-browser-internal@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-internal":
+"@kbn/core-fatal-errors-browser-internal@link:packages/core/fatal-errors/core-fatal-errors-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-fatal-errors-browser-mocks@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-mocks":
+"@kbn/core-fatal-errors-browser-mocks@link:packages/core/fatal-errors/core-fatal-errors-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-fatal-errors-browser@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser":
+"@kbn/core-fatal-errors-browser@link:packages/core/fatal-errors/core-fatal-errors-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-browser-internal@link:bazel-bin/packages/core/http/core-http-browser-internal":
+"@kbn/core-http-browser-internal@link:packages/core/http/core-http-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-browser-mocks@link:bazel-bin/packages/core/http/core-http-browser-mocks":
+"@kbn/core-http-browser-mocks@link:packages/core/http/core-http-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-browser@link:bazel-bin/packages/core/http/core-http-browser":
+"@kbn/core-http-browser@link:packages/core/http/core-http-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-common@link:bazel-bin/packages/core/http/core-http-common":
+"@kbn/core-http-common@link:packages/core/http/core-http-common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-context-server-internal@link:bazel-bin/packages/core/http/core-http-context-server-internal":
+"@kbn/core-http-context-server-internal@link:packages/core/http/core-http-context-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-context-server-mocks@link:bazel-bin/packages/core/http/core-http-context-server-mocks":
+"@kbn/core-http-context-server-mocks@link:packages/core/http/core-http-context-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-request-handler-context-server-internal@link:bazel-bin/packages/core/http/core-http-request-handler-context-server-internal":
+"@kbn/core-http-request-handler-context-server-internal@link:packages/core/http/core-http-request-handler-context-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-request-handler-context-server@link:bazel-bin/packages/core/http/core-http-request-handler-context-server":
+"@kbn/core-http-request-handler-context-server@link:packages/core/http/core-http-request-handler-context-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-resources-server-internal@link:bazel-bin/packages/core/http/core-http-resources-server-internal":
+"@kbn/core-http-resources-server-internal@link:packages/core/http/core-http-resources-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-resources-server-mocks@link:bazel-bin/packages/core/http/core-http-resources-server-mocks":
+"@kbn/core-http-resources-server-mocks@link:packages/core/http/core-http-resources-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-resources-server@link:bazel-bin/packages/core/http/core-http-resources-server":
+"@kbn/core-http-resources-server@link:packages/core/http/core-http-resources-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-router-server-internal@link:bazel-bin/packages/core/http/core-http-router-server-internal":
+"@kbn/core-http-router-server-internal@link:packages/core/http/core-http-router-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-router-server-mocks@link:bazel-bin/packages/core/http/core-http-router-server-mocks":
+"@kbn/core-http-router-server-mocks@link:packages/core/http/core-http-router-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-server-internal@link:bazel-bin/packages/core/http/core-http-server-internal":
+"@kbn/core-http-server-internal@link:packages/core/http/core-http-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-server-mocks@link:bazel-bin/packages/core/http/core-http-server-mocks":
+"@kbn/core-http-server-mocks@link:packages/core/http/core-http-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-server@link:bazel-bin/packages/core/http/core-http-server":
+"@kbn/core-http-server@link:packages/core/http/core-http-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal":
+"@kbn/core-i18n-browser-internal@link:packages/core/i18n/core-i18n-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-browser-mocks@link:bazel-bin/packages/core/i18n/core-i18n-browser-mocks":
+"@kbn/core-i18n-browser-mocks@link:packages/core/i18n/core-i18n-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-browser@link:bazel-bin/packages/core/i18n/core-i18n-browser":
+"@kbn/core-i18n-browser@link:packages/core/i18n/core-i18n-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-server-internal@link:bazel-bin/packages/core/i18n/core-i18n-server-internal":
+"@kbn/core-i18n-server-internal@link:packages/core/i18n/core-i18n-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-server-mocks@link:bazel-bin/packages/core/i18n/core-i18n-server-mocks":
+"@kbn/core-i18n-server-mocks@link:packages/core/i18n/core-i18n-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-server@link:bazel-bin/packages/core/i18n/core-i18n-server":
+"@kbn/core-i18n-server@link:packages/core/i18n/core-i18n-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal":
+"@kbn/core-injected-metadata-browser-internal@link:packages/core/injected-metadata/core-injected-metadata-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-browser-mocks@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-mocks":
+"@kbn/core-injected-metadata-browser-mocks@link:packages/core/injected-metadata/core-injected-metadata-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal":
+"@kbn/core-injected-metadata-common-internal@link:packages/core/injected-metadata/core-injected-metadata-common-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-integrations-browser-internal@link:bazel-bin/packages/core/integrations/core-integrations-browser-internal":
+"@kbn/core-integrations-browser-internal@link:packages/core/integrations/core-integrations-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-integrations-browser-mocks@link:bazel-bin/packages/core/integrations/core-integrations-browser-mocks":
+"@kbn/core-integrations-browser-mocks@link:packages/core/integrations/core-integrations-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-browser-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-internal":
+"@kbn/core-lifecycle-browser-internal@link:packages/core/lifecycle/core-lifecycle-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-browser-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser-mocks":
+"@kbn/core-lifecycle-browser-mocks@link:packages/core/lifecycle/core-lifecycle-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-browser@link:bazel-bin/packages/core/lifecycle/core-lifecycle-browser":
+"@kbn/core-lifecycle-browser@link:packages/core/lifecycle/core-lifecycle-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-server-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-internal":
+"@kbn/core-lifecycle-server-internal@link:packages/core/lifecycle/core-lifecycle-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-server-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-mocks":
+"@kbn/core-lifecycle-server-mocks@link:packages/core/lifecycle/core-lifecycle-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-server@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server":
+"@kbn/core-lifecycle-server@link:packages/core/lifecycle/core-lifecycle-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-browser-internal@link:bazel-bin/packages/core/logging/core-logging-browser-internal":
+"@kbn/core-logging-browser-internal@link:packages/core/logging/core-logging-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-browser-mocks@link:bazel-bin/packages/core/logging/core-logging-browser-mocks":
+"@kbn/core-logging-browser-mocks@link:packages/core/logging/core-logging-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-common-internal@link:bazel-bin/packages/core/logging/core-logging-common-internal":
+"@kbn/core-logging-common-internal@link:packages/core/logging/core-logging-common-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
+"@kbn/core-logging-server-internal@link:packages/core/logging/core-logging-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-server-mocks@link:bazel-bin/packages/core/logging/core-logging-server-mocks":
+"@kbn/core-logging-server-mocks@link:packages/core/logging/core-logging-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server":
+"@kbn/core-logging-server@link:packages/core/logging/core-logging-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-collectors-server-internal@link:bazel-bin/packages/core/metrics/core-metrics-collectors-server-internal":
+"@kbn/core-metrics-collectors-server-internal@link:packages/core/metrics/core-metrics-collectors-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-collectors-server-mocks@link:bazel-bin/packages/core/metrics/core-metrics-collectors-server-mocks":
+"@kbn/core-metrics-collectors-server-mocks@link:packages/core/metrics/core-metrics-collectors-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-server-internal@link:bazel-bin/packages/core/metrics/core-metrics-server-internal":
+"@kbn/core-metrics-server-internal@link:packages/core/metrics/core-metrics-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-server-mocks@link:bazel-bin/packages/core/metrics/core-metrics-server-mocks":
+"@kbn/core-metrics-server-mocks@link:packages/core/metrics/core-metrics-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-server@link:bazel-bin/packages/core/metrics/core-metrics-server":
+"@kbn/core-metrics-server@link:packages/core/metrics/core-metrics-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-mount-utils-browser-internal@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser-internal":
+"@kbn/core-mount-utils-browser-internal@link:packages/core/mount-utils/core-mount-utils-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-mount-utils-browser@link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser":
+"@kbn/core-mount-utils-browser@link:packages/core/mount-utils/core-mount-utils-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-node-server-internal@link:bazel-bin/packages/core/node/core-node-server-internal":
+"@kbn/core-node-server-internal@link:packages/core/node/core-node-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-node-server-mocks@link:bazel-bin/packages/core/node/core-node-server-mocks":
+"@kbn/core-node-server-mocks@link:packages/core/node/core-node-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-node-server@link:bazel-bin/packages/core/node/core-node-server":
+"@kbn/core-node-server@link:packages/core/node/core-node-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-notifications-browser-internal@link:bazel-bin/packages/core/notifications/core-notifications-browser-internal":
+"@kbn/core-notifications-browser-internal@link:packages/core/notifications/core-notifications-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-notifications-browser-mocks@link:bazel-bin/packages/core/notifications/core-notifications-browser-mocks":
+"@kbn/core-notifications-browser-mocks@link:packages/core/notifications/core-notifications-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-notifications-browser@link:bazel-bin/packages/core/notifications/core-notifications-browser":
+"@kbn/core-notifications-browser@link:packages/core/notifications/core-notifications-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-overlays-browser-internal@link:bazel-bin/packages/core/overlays/core-overlays-browser-internal":
+"@kbn/core-overlays-browser-internal@link:packages/core/overlays/core-overlays-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-overlays-browser-mocks@link:bazel-bin/packages/core/overlays/core-overlays-browser-mocks":
+"@kbn/core-overlays-browser-mocks@link:packages/core/overlays/core-overlays-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-overlays-browser@link:bazel-bin/packages/core/overlays/core-overlays-browser":
+"@kbn/core-overlays-browser@link:packages/core/overlays/core-overlays-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-base-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-base-server-internal":
+"@kbn/core-plugins-base-server-internal@link:packages/core/plugins/core-plugins-base-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-browser-internal@link:bazel-bin/packages/core/plugins/core-plugins-browser-internal":
+"@kbn/core-plugins-browser-internal@link:packages/core/plugins/core-plugins-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-browser-mocks@link:bazel-bin/packages/core/plugins/core-plugins-browser-mocks":
+"@kbn/core-plugins-browser-mocks@link:packages/core/plugins/core-plugins-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser":
+"@kbn/core-plugins-browser@link:packages/core/plugins/core-plugins-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-server-internal":
+"@kbn/core-plugins-server-internal@link:packages/core/plugins/core-plugins-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-server-mocks@link:bazel-bin/packages/core/plugins/core-plugins-server-mocks":
+"@kbn/core-plugins-server-mocks@link:packages/core/plugins/core-plugins-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-server@link:bazel-bin/packages/core/plugins/core-plugins-server":
+"@kbn/core-plugins-server@link:packages/core/plugins/core-plugins-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-preboot-server-internal@link:bazel-bin/packages/core/preboot/core-preboot-server-internal":
+"@kbn/core-preboot-server-internal@link:packages/core/preboot/core-preboot-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-preboot-server-mocks@link:bazel-bin/packages/core/preboot/core-preboot-server-mocks":
+"@kbn/core-preboot-server-mocks@link:packages/core/preboot/core-preboot-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-preboot-server@link:bazel-bin/packages/core/preboot/core-preboot-server":
+"@kbn/core-preboot-server@link:packages/core/preboot/core-preboot-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-browser-internal@link:bazel-bin/packages/core/rendering/core-rendering-browser-internal":
+"@kbn/core-rendering-browser-internal@link:packages/core/rendering/core-rendering-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-browser-mocks@link:bazel-bin/packages/core/rendering/core-rendering-browser-mocks":
+"@kbn/core-rendering-browser-mocks@link:packages/core/rendering/core-rendering-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-server-internal@link:bazel-bin/packages/core/rendering/core-rendering-server-internal":
+"@kbn/core-rendering-server-internal@link:packages/core/rendering/core-rendering-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-server-mocks@link:bazel-bin/packages/core/rendering/core-rendering-server-mocks":
+"@kbn/core-rendering-server-mocks@link:packages/core/rendering/core-rendering-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-root-browser-internal@link:bazel-bin/packages/core/root/core-root-browser-internal":
+"@kbn/core-root-browser-internal@link:packages/core/root/core-root-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-root-server-internal@link:bazel-bin/packages/core/root/core-root-server-internal":
+"@kbn/core-root-server-internal@link:packages/core/root/core-root-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-api-browser@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-browser":
+"@kbn/core-saved-objects-api-browser@link:packages/core/saved-objects/core-saved-objects-api-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-api-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server-internal":
+"@kbn/core-saved-objects-api-server-internal@link:packages/core/saved-objects/core-saved-objects-api-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-api-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server-mocks":
+"@kbn/core-saved-objects-api-server-mocks@link:packages/core/saved-objects/core-saved-objects-api-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-api-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-server":
+"@kbn/core-saved-objects-api-server@link:packages/core/saved-objects/core-saved-objects-api-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-base-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-base-server-internal":
+"@kbn/core-saved-objects-base-server-internal@link:packages/core/saved-objects/core-saved-objects-base-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-base-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-base-server-mocks":
+"@kbn/core-saved-objects-base-server-mocks@link:packages/core/saved-objects/core-saved-objects-base-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-browser-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-browser-internal":
+"@kbn/core-saved-objects-browser-internal@link:packages/core/saved-objects/core-saved-objects-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-browser-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-browser-mocks":
+"@kbn/core-saved-objects-browser-mocks@link:packages/core/saved-objects/core-saved-objects-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-browser@link:bazel-bin/packages/core/saved-objects/core-saved-objects-browser":
+"@kbn/core-saved-objects-browser@link:packages/core/saved-objects/core-saved-objects-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-common@link:bazel-bin/packages/core/saved-objects/core-saved-objects-common":
+"@kbn/core-saved-objects-common@link:packages/core/saved-objects/core-saved-objects-common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-import-export-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-import-export-server-internal":
+"@kbn/core-saved-objects-import-export-server-internal@link:packages/core/saved-objects/core-saved-objects-import-export-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-import-export-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-import-export-server-mocks":
+"@kbn/core-saved-objects-import-export-server-mocks@link:packages/core/saved-objects/core-saved-objects-import-export-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-migration-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-migration-server-internal":
+"@kbn/core-saved-objects-migration-server-internal@link:packages/core/saved-objects/core-saved-objects-migration-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-migration-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-migration-server-mocks":
+"@kbn/core-saved-objects-migration-server-mocks@link:packages/core/saved-objects/core-saved-objects-migration-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-server-internal@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server-internal":
+"@kbn/core-saved-objects-server-internal@link:packages/core/saved-objects/core-saved-objects-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-server-mocks@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server-mocks":
+"@kbn/core-saved-objects-server-mocks@link:packages/core/saved-objects/core-saved-objects-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-server":
+"@kbn/core-saved-objects-server@link:packages/core/saved-objects/core-saved-objects-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-utils-server@link:bazel-bin/packages/core/saved-objects/core-saved-objects-utils-server":
+"@kbn/core-saved-objects-utils-server@link:packages/core/saved-objects/core-saved-objects-utils-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-common-internal@link:bazel-bin/packages/core/status/core-status-common-internal":
+"@kbn/core-status-common-internal@link:packages/core/status/core-status-common-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-common@link:bazel-bin/packages/core/status/core-status-common":
+"@kbn/core-status-common@link:packages/core/status/core-status-common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-server-internal@link:bazel-bin/packages/core/status/core-status-server-internal":
+"@kbn/core-status-server-internal@link:packages/core/status/core-status-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-server-mocks@link:bazel-bin/packages/core/status/core-status-server-mocks":
+"@kbn/core-status-server-mocks@link:packages/core/status/core-status-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-status-server@link:bazel-bin/packages/core/status/core-status-server":
+"@kbn/core-status-server@link:packages/core/status/core-status-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-deprecations-getters@link:bazel-bin/packages/core/test-helpers/core-test-helpers-deprecations-getters":
+"@kbn/core-test-helpers-deprecations-getters@link:packages/core/test-helpers/core-test-helpers-deprecations-getters":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-http-setup-browser@link:bazel-bin/packages/core/test-helpers/core-test-helpers-http-setup-browser":
+"@kbn/core-test-helpers-http-setup-browser@link:packages/core/test-helpers/core-test-helpers-http-setup-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-kbn-server@link:bazel-bin/packages/core/test-helpers/core-test-helpers-kbn-server":
+"@kbn/core-test-helpers-kbn-server@link:packages/core/test-helpers/core-test-helpers-kbn-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-so-type-serializer@link:bazel-bin/packages/core/test-helpers/core-test-helpers-so-type-serializer":
+"@kbn/core-test-helpers-so-type-serializer@link:packages/core/test-helpers/core-test-helpers-so-type-serializer":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-test-utils@link:bazel-bin/packages/core/test-helpers/core-test-helpers-test-utils":
+"@kbn/core-test-helpers-test-utils@link:packages/core/test-helpers/core-test-helpers-test-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal":
+"@kbn/core-theme-browser-internal@link:packages/core/theme/core-theme-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-theme-browser-mocks@link:bazel-bin/packages/core/theme/core-theme-browser-mocks":
+"@kbn/core-theme-browser-mocks@link:packages/core/theme/core-theme-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser":
+"@kbn/core-theme-browser@link:packages/core/theme/core-theme-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-browser-internal@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser-internal":
+"@kbn/core-ui-settings-browser-internal@link:packages/core/ui-settings/core-ui-settings-browser-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-browser-mocks@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser-mocks":
+"@kbn/core-ui-settings-browser-mocks@link:packages/core/ui-settings/core-ui-settings-browser-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-browser@link:bazel-bin/packages/core/ui-settings/core-ui-settings-browser":
+"@kbn/core-ui-settings-browser@link:packages/core/ui-settings/core-ui-settings-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-common@link:bazel-bin/packages/core/ui-settings/core-ui-settings-common":
+"@kbn/core-ui-settings-common@link:packages/core/ui-settings/core-ui-settings-common":
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-server-internal@link:bazel-bin/packages/core/ui-settings/core-ui-settings-server-internal":
+"@kbn/core-ui-settings-server-internal@link:packages/core/ui-settings/core-ui-settings-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-server-mocks@link:bazel-bin/packages/core/ui-settings/core-ui-settings-server-mocks":
+"@kbn/core-ui-settings-server-mocks@link:packages/core/ui-settings/core-ui-settings-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-server@link:bazel-bin/packages/core/ui-settings/core-ui-settings-server":
+"@kbn/core-ui-settings-server@link:packages/core/ui-settings/core-ui-settings-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-usage-data-base-server-internal@link:bazel-bin/packages/core/usage-data/core-usage-data-base-server-internal":
+"@kbn/core-usage-data-base-server-internal@link:packages/core/usage-data/core-usage-data-base-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-usage-data-server-internal@link:bazel-bin/packages/core/usage-data/core-usage-data-server-internal":
+"@kbn/core-usage-data-server-internal@link:packages/core/usage-data/core-usage-data-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-usage-data-server-mocks@link:bazel-bin/packages/core/usage-data/core-usage-data-server-mocks":
+"@kbn/core-usage-data-server-mocks@link:packages/core/usage-data/core-usage-data-server-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/core-usage-data-server@link:bazel-bin/packages/core/usage-data/core-usage-data-server":
+"@kbn/core-usage-data-server@link:packages/core/usage-data/core-usage-data-server":
   version "0.0.0"
   uid ""
 
-"@kbn/crypto-browser@link:bazel-bin/packages/kbn-crypto-browser":
+"@kbn/crypto-browser@link:packages/kbn-crypto-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/crypto@link:bazel-bin/packages/kbn-crypto":
+"@kbn/crypto@link:packages/kbn-crypto":
   version "0.0.0"
   uid ""
 
-"@kbn/datemath@link:bazel-bin/packages/kbn-datemath":
+"@kbn/cypress-config@link:packages/kbn-cypress-config":
   version "0.0.0"
   uid ""
 
-"@kbn/dev-cli-errors@link:bazel-bin/packages/kbn-dev-cli-errors":
+"@kbn/datemath@link:packages/kbn-datemath":
   version "0.0.0"
   uid ""
 
-"@kbn/dev-cli-runner@link:bazel-bin/packages/kbn-dev-cli-runner":
+"@kbn/dev-cli-errors@link:packages/kbn-dev-cli-errors":
   version "0.0.0"
   uid ""
 
-"@kbn/dev-proc-runner@link:bazel-bin/packages/kbn-dev-proc-runner":
+"@kbn/dev-cli-runner@link:packages/kbn-dev-cli-runner":
   version "0.0.0"
   uid ""
 
-"@kbn/dev-utils@link:bazel-bin/packages/kbn-dev-utils":
+"@kbn/dev-proc-runner@link:packages/kbn-dev-proc-runner":
   version "0.0.0"
   uid ""
 
-"@kbn/doc-links@link:bazel-bin/packages/kbn-doc-links":
+"@kbn/dev-utils@link:packages/kbn-dev-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/docs-utils@link:bazel-bin/packages/kbn-docs-utils":
+"@kbn/doc-links@link:packages/kbn-doc-links":
   version "0.0.0"
   uid ""
 
-"@kbn/ebt-tools@link:bazel-bin/packages/kbn-ebt-tools":
+"@kbn/docs-utils@link:packages/kbn-docs-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ecs@link:bazel-bin/packages/kbn-ecs":
+"@kbn/ebt-tools@link:packages/kbn-ebt-tools":
   version "0.0.0"
   uid ""
 
-"@kbn/es-archiver@link:bazel-bin/packages/kbn-es-archiver":
+"@kbn/ecs@link:packages/kbn-ecs":
   version "0.0.0"
   uid ""
 
-"@kbn/es-errors@link:bazel-bin/packages/kbn-es-errors":
+"@kbn/es-archiver@link:packages/kbn-es-archiver":
   version "0.0.0"
   uid ""
 
-"@kbn/es-query@link:bazel-bin/packages/kbn-es-query":
+"@kbn/es-errors@link:packages/kbn-es-errors":
   version "0.0.0"
   uid ""
 
-"@kbn/es-types@link:bazel-bin/packages/kbn-es-types":
+"@kbn/es-query@link:packages/kbn-es-query":
   version "0.0.0"
   uid ""
 
-"@kbn/es@link:bazel-bin/packages/kbn-es":
+"@kbn/es-types@link:packages/kbn-es-types":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-config@link:bazel-bin/packages/kbn-eslint-config":
+"@kbn/es@link:packages/kbn-es":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-disable@link:bazel-bin/packages/kbn-eslint-plugin-disable":
+"@kbn/eslint-config@link:packages/kbn-eslint-config":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-eslint@link:bazel-bin/packages/kbn-eslint-plugin-eslint":
+"@kbn/eslint-plugin-disable@link:packages/kbn-eslint-plugin-disable":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-imports@link:bazel-bin/packages/kbn-eslint-plugin-imports":
+"@kbn/eslint-plugin-eslint@link:packages/kbn-eslint-plugin-eslint":
   version "0.0.0"
   uid ""
 
-"@kbn/expect@link:bazel-bin/packages/kbn-expect":
+"@kbn/eslint-plugin-imports@link:packages/kbn-eslint-plugin-imports":
   version "0.0.0"
   uid ""
 
-"@kbn/failed-test-reporter-cli@link:bazel-bin/packages/kbn-failed-test-reporter-cli":
+"@kbn/expect@link:packages/kbn-expect":
   version "0.0.0"
   uid ""
 
-"@kbn/field-types@link:bazel-bin/packages/kbn-field-types":
+"@kbn/failed-test-reporter-cli@link:packages/kbn-failed-test-reporter-cli":
   version "0.0.0"
   uid ""
 
-"@kbn/find-used-node-modules@link:bazel-bin/packages/kbn-find-used-node-modules":
+"@kbn/field-types@link:packages/kbn-field-types":
   version "0.0.0"
   uid ""
 
-"@kbn/flot-charts@link:bazel-bin/packages/kbn-flot-charts":
+"@kbn/find-used-node-modules@link:packages/kbn-find-used-node-modules":
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-common-functional-services@link:bazel-bin/packages/kbn-ftr-common-functional-services":
+"@kbn/flot-charts@link:packages/kbn-flot-charts":
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-screenshot-filename@link:bazel-bin/packages/kbn-ftr-screenshot-filename":
+"@kbn/ftr-common-functional-services@link:packages/kbn-ftr-common-functional-services":
   version "0.0.0"
   uid ""
 
-"@kbn/generate@link:bazel-bin/packages/kbn-generate":
+"@kbn/ftr-screenshot-filename@link:packages/kbn-ftr-screenshot-filename":
   version "0.0.0"
   uid ""
 
-"@kbn/get-repo-files@link:bazel-bin/packages/kbn-get-repo-files":
+"@kbn/generate@link:packages/kbn-generate":
   version "0.0.0"
   uid ""
 
-"@kbn/guided-onboarding@link:bazel-bin/packages/kbn-guided-onboarding":
+"@kbn/get-repo-files@link:packages/kbn-get-repo-files":
   version "0.0.0"
   uid ""
 
-"@kbn/handlebars@link:bazel-bin/packages/kbn-handlebars":
+"@kbn/guided-onboarding@link:packages/kbn-guided-onboarding":
   version "0.0.0"
   uid ""
 
-"@kbn/hapi-mocks@link:bazel-bin/packages/kbn-hapi-mocks":
+"@kbn/handlebars@link:packages/kbn-handlebars":
   version "0.0.0"
   uid ""
 
-"@kbn/health-gateway-server@link:bazel-bin/packages/kbn-health-gateway-server":
+"@kbn/hapi-mocks@link:packages/kbn-hapi-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/home-sample-data-card@link:bazel-bin/packages/home/sample_data_card":
+"@kbn/health-gateway-server@link:packages/kbn-health-gateway-server":
   version "0.0.0"
   uid ""
 
-"@kbn/home-sample-data-tab@link:bazel-bin/packages/home/sample_data_tab":
+"@kbn/home-sample-data-card@link:packages/home/sample_data_card":
   version "0.0.0"
   uid ""
 
-"@kbn/home-sample-data-types@link:bazel-bin/packages/home/sample_data_types":
+"@kbn/home-sample-data-tab@link:packages/home/sample_data_tab":
   version "0.0.0"
   uid ""
 
-"@kbn/i18n-react@link:bazel-bin/packages/kbn-i18n-react":
+"@kbn/home-sample-data-types@link:packages/home/sample_data_types":
   version "0.0.0"
   uid ""
 
-"@kbn/i18n@link:bazel-bin/packages/kbn-i18n":
+"@kbn/i18n-react@link:packages/kbn-i18n-react":
   version "0.0.0"
   uid ""
 
-"@kbn/import-resolver@link:bazel-bin/packages/kbn-import-resolver":
+"@kbn/i18n@link:packages/kbn-i18n":
   version "0.0.0"
   uid ""
 
-"@kbn/interpreter@link:bazel-bin/packages/kbn-interpreter":
+"@kbn/import-resolver@link:packages/kbn-import-resolver":
   version "0.0.0"
   uid ""
 
-"@kbn/io-ts-utils@link:bazel-bin/packages/kbn-io-ts-utils":
+"@kbn/interpreter@link:packages/kbn-interpreter":
   version "0.0.0"
   uid ""
 
-"@kbn/jest-serializers@link:bazel-bin/packages/kbn-jest-serializers":
+"@kbn/io-ts-utils@link:packages/kbn-io-ts-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/journeys@link:bazel-bin/packages/kbn-journeys":
+"@kbn/jest-serializers@link:packages/kbn-jest-serializers":
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-manifest-schema@link:bazel-bin/packages/kbn-kibana-manifest-schema":
+"@kbn/journeys@link:packages/kbn-journeys":
   version "0.0.0"
   uid ""
 
-"@kbn/language-documentation-popover@link:bazel-bin/packages/kbn-language-documentation-popover":
+"@kbn/kibana-manifest-schema@link:packages/kbn-kibana-manifest-schema":
   version "0.0.0"
   uid ""
 
-"@kbn/logging-mocks@link:bazel-bin/packages/kbn-logging-mocks":
+"@kbn/language-documentation-popover@link:packages/kbn-language-documentation-popover":
   version "0.0.0"
   uid ""
 
-"@kbn/logging@link:bazel-bin/packages/kbn-logging":
+"@kbn/logging-mocks@link:packages/kbn-logging-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/managed-vscode-config-cli@link:bazel-bin/packages/kbn-managed-vscode-config-cli":
+"@kbn/logging@link:packages/kbn-logging":
   version "0.0.0"
   uid ""
 
-"@kbn/managed-vscode-config@link:bazel-bin/packages/kbn-managed-vscode-config":
+"@kbn/managed-vscode-config-cli@link:packages/kbn-managed-vscode-config-cli":
   version "0.0.0"
   uid ""
 
-"@kbn/mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl":
+"@kbn/managed-vscode-config@link:packages/kbn-managed-vscode-config":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-agg-utils@link:bazel-bin/x-pack/packages/ml/agg_utils":
+"@kbn/mapbox-gl@link:packages/kbn-mapbox-gl":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-is-populated-object@link:bazel-bin/x-pack/packages/ml/is_populated_object":
+"@kbn/ml-agg-utils@link:x-pack/packages/ml/agg_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-string-hash@link:bazel-bin/x-pack/packages/ml/string_hash":
+"@kbn/ml-is-populated-object@link:x-pack/packages/ml/is_populated_object":
   version "0.0.0"
   uid ""
 
-"@kbn/monaco@link:bazel-bin/packages/kbn-monaco":
+"@kbn/ml-string-hash@link:x-pack/packages/ml/string_hash":
   version "0.0.0"
   uid ""
 
-"@kbn/optimizer-webpack-helpers@link:bazel-bin/packages/kbn-optimizer-webpack-helpers":
+"@kbn/monaco@link:packages/kbn-monaco":
   version "0.0.0"
   uid ""
 
-"@kbn/optimizer@link:bazel-bin/packages/kbn-optimizer":
+"@kbn/optimizer-webpack-helpers@link:packages/kbn-optimizer-webpack-helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/osquery-io-ts-types@link:bazel-bin/packages/kbn-osquery-io-ts-types":
+"@kbn/optimizer@link:packages/kbn-optimizer":
   version "0.0.0"
   uid ""
 
-"@kbn/peggy-loader@link:bazel-bin/packages/kbn-peggy-loader":
+"@kbn/osquery-io-ts-types@link:packages/kbn-osquery-io-ts-types":
   version "0.0.0"
   uid ""
 
-"@kbn/peggy@link:bazel-bin/packages/kbn-peggy":
+"@kbn/package-map@link:packages/kbn-package-map":
   version "0.0.0"
   uid ""
 
-"@kbn/performance-testing-dataset-extractor@link:bazel-bin/packages/kbn-performance-testing-dataset-extractor":
+"@kbn/peggy-loader@link:packages/kbn-peggy-loader":
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-discovery@link:bazel-bin/packages/kbn-plugin-discovery":
+"@kbn/peggy@link:packages/kbn-peggy":
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-generator@link:bazel-bin/packages/kbn-plugin-generator":
+"@kbn/performance-testing-dataset-extractor@link:packages/kbn-performance-testing-dataset-extractor":
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-helpers@link:bazel-bin/packages/kbn-plugin-helpers":
+"@kbn/plugin-discovery@link:packages/kbn-plugin-discovery":
   version "0.0.0"
   uid ""
 
-"@kbn/react-field@link:bazel-bin/packages/kbn-react-field":
+"@kbn/plugin-generator@link:packages/kbn-plugin-generator":
   version "0.0.0"
   uid ""
 
-"@kbn/repo-source-classifier-cli@link:bazel-bin/packages/kbn-repo-source-classifier-cli":
+"@kbn/plugin-helpers@link:packages/kbn-plugin-helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/repo-source-classifier@link:bazel-bin/packages/kbn-repo-source-classifier":
+"@kbn/react-field@link:packages/kbn-react-field":
   version "0.0.0"
   uid ""
 
-"@kbn/rison@link:bazel-bin/packages/kbn-rison":
+"@kbn/repo-info@link:packages/kbn-repo-info":
   version "0.0.0"
   uid ""
 
-"@kbn/rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils":
+"@kbn/repo-path@link:packages/kbn-repo-path":
   version "0.0.0"
   uid ""
 
-"@kbn/safer-lodash-set@link:bazel-bin/packages/kbn-safer-lodash-set":
+"@kbn/repo-source-classifier-cli@link:packages/kbn-repo-source-classifier-cli":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-autocomplete@link:bazel-bin/packages/kbn-securitysolution-autocomplete":
+"@kbn/repo-source-classifier@link:packages/kbn-repo-source-classifier":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-es-utils@link:bazel-bin/packages/kbn-securitysolution-es-utils":
+"@kbn/rison@link:packages/kbn-rison":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-exception-list-components@link:bazel-bin/packages/kbn-securitysolution-exception-list-components":
+"@kbn/rule-data-utils@link:packages/kbn-rule-data-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-hook-utils@link:bazel-bin/packages/kbn-securitysolution-hook-utils":
+"@kbn/safer-lodash-set@link:packages/kbn-safer-lodash-set":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-alerting-types@link:bazel-bin/packages/kbn-securitysolution-io-ts-alerting-types":
+"@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-list-types@link:bazel-bin/packages/kbn-securitysolution-io-ts-list-types":
+"@kbn/securitysolution-es-utils@link:packages/kbn-securitysolution-es-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-types@link:bazel-bin/packages/kbn-securitysolution-io-ts-types":
+"@kbn/securitysolution-exception-list-components@link:packages/kbn-securitysolution-exception-list-components":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-utils@link:bazel-bin/packages/kbn-securitysolution-io-ts-utils":
+"@kbn/securitysolution-hook-utils@link:packages/kbn-securitysolution-hook-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-api@link:bazel-bin/packages/kbn-securitysolution-list-api":
+"@kbn/securitysolution-io-ts-alerting-types@link:packages/kbn-securitysolution-io-ts-alerting-types":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-constants@link:bazel-bin/packages/kbn-securitysolution-list-constants":
+"@kbn/securitysolution-io-ts-list-types@link:packages/kbn-securitysolution-io-ts-list-types":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-hooks@link:bazel-bin/packages/kbn-securitysolution-list-hooks":
+"@kbn/securitysolution-io-ts-types@link:packages/kbn-securitysolution-io-ts-types":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-utils@link:bazel-bin/packages/kbn-securitysolution-list-utils":
+"@kbn/securitysolution-io-ts-utils@link:packages/kbn-securitysolution-io-ts-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-rules@link:bazel-bin/packages/kbn-securitysolution-rules":
+"@kbn/securitysolution-list-api@link:packages/kbn-securitysolution-list-api":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-t-grid@link:bazel-bin/packages/kbn-securitysolution-t-grid":
+"@kbn/securitysolution-list-constants@link:packages/kbn-securitysolution-list-constants":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-utils@link:bazel-bin/packages/kbn-securitysolution-utils":
+"@kbn/securitysolution-list-hooks@link:packages/kbn-securitysolution-list-hooks":
   version "0.0.0"
   uid ""
 
-"@kbn/server-http-tools@link:bazel-bin/packages/kbn-server-http-tools":
+"@kbn/securitysolution-list-utils@link:packages/kbn-securitysolution-list-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/server-route-repository@link:bazel-bin/packages/kbn-server-route-repository":
+"@kbn/securitysolution-rules@link:packages/kbn-securitysolution-rules":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-svg@link:bazel-bin/packages/kbn-shared-svg":
+"@kbn/securitysolution-t-grid@link:packages/kbn-securitysolution-t-grid":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-avatar-solution@link:bazel-bin/packages/shared-ux/avatar/solution":
+"@kbn/securitysolution-utils@link:packages/kbn-securitysolution-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-avatar-user-profile-components@link:bazel-bin/packages/shared-ux/avatar/user_profile/impl":
+"@kbn/server-http-tools@link:packages/kbn-server-http-tools":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-exit-full-screen-mocks@link:bazel-bin/packages/shared-ux/button/exit_full_screen/mocks":
+"@kbn/server-route-repository@link:packages/kbn-server-route-repository":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-exit-full-screen-types@link:bazel-bin/packages/shared-ux/button/exit_full_screen/types":
+"@kbn/shared-svg@link:packages/kbn-shared-svg":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen/impl":
+"@kbn/shared-ux-avatar-solution@link:packages/shared-ux/avatar/solution":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-toolbar@link:bazel-bin/packages/shared-ux/button_toolbar":
+"@kbn/shared-ux-avatar-user-profile-components@link:packages/shared-ux/avatar/user_profile/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-card-no-data-mocks@link:bazel-bin/packages/shared-ux/card/no_data/mocks":
+"@kbn/shared-ux-button-exit-full-screen-mocks@link:packages/shared-ux/button/exit_full_screen/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-card-no-data-types@link:bazel-bin/packages/shared-ux/card/no_data/types":
+"@kbn/shared-ux-button-exit-full-screen-types@link:packages/shared-ux/button/exit_full_screen/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/impl":
+"@kbn/shared-ux-button-exit-full-screen@link:packages/shared-ux/button/exit_full_screen/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-context@link:bazel-bin/packages/shared-ux/file/context":
+"@kbn/shared-ux-button-toolbar@link:packages/shared-ux/button_toolbar":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-image-mocks@link:bazel-bin/packages/shared-ux/file/image/mocks":
+"@kbn/shared-ux-card-no-data-mocks@link:packages/shared-ux/card/no_data/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-image@link:bazel-bin/packages/shared-ux/file/image/impl":
+"@kbn/shared-ux-card-no-data-types@link:packages/shared-ux/card/no_data/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-mocks@link:bazel-bin/packages/shared-ux/file/mocks":
+"@kbn/shared-ux-card-no-data@link:packages/shared-ux/card/no_data/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-picker@link:bazel-bin/packages/shared-ux/file/file_picker/impl":
+"@kbn/shared-ux-file-context@link:packages/shared-ux/file/context":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-types@link:bazel-bin/packages/shared-ux/file/types":
+"@kbn/shared-ux-file-image-mocks@link:packages/shared-ux/file/image/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-upload@link:bazel-bin/packages/shared-ux/file/file_upload/impl":
+"@kbn/shared-ux-file-image@link:packages/shared-ux/file/image/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-util@link:bazel-bin/packages/shared-ux/file/util":
+"@kbn/shared-ux-file-mocks@link:packages/shared-ux/file/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-link-redirect-app-mocks@link:bazel-bin/packages/shared-ux/link/redirect_app/mocks":
+"@kbn/shared-ux-file-picker@link:packages/shared-ux/file/file_picker/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-link-redirect-app-types@link:bazel-bin/packages/shared-ux/link/redirect_app/types":
+"@kbn/shared-ux-file-types@link:packages/shared-ux/file/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/impl":
+"@kbn/shared-ux-file-upload@link:packages/shared-ux/file/file_upload/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-markdown-mocks@link:bazel-bin/packages/shared-ux/markdown/mocks":
+"@kbn/shared-ux-file-util@link:packages/shared-ux/file/util":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-markdown-types@link:bazel-bin/packages/shared-ux/markdown/types":
+"@kbn/shared-ux-link-redirect-app-mocks@link:packages/shared-ux/link/redirect_app/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-markdown@link:bazel-bin/packages/shared-ux/markdown/impl":
+"@kbn/shared-ux-link-redirect-app-types@link:packages/shared-ux/link/redirect_app/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data-mocks@link:bazel-bin/packages/shared-ux/page/analytics_no_data/mocks":
+"@kbn/shared-ux-link-redirect-app@link:packages/shared-ux/link/redirect_app/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data-types@link:bazel-bin/packages/shared-ux/page/analytics_no_data/types":
+"@kbn/shared-ux-markdown-mocks@link:packages/shared-ux/markdown/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/impl":
+"@kbn/shared-ux-markdown-types@link:packages/shared-ux/markdown/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-no-data-mocks@link:bazel-bin/packages/shared-ux/page/kibana_no_data/mocks":
+"@kbn/shared-ux-markdown@link:packages/shared-ux/markdown/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-no-data-types@link:bazel-bin/packages/shared-ux/page/kibana_no_data/types":
+"@kbn/shared-ux-page-analytics-no-data-mocks@link:packages/shared-ux/page/analytics_no_data/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-no-data@link:bazel-bin/packages/shared-ux/page/kibana_no_data/impl":
+"@kbn/shared-ux-page-analytics-no-data-types@link:packages/shared-ux/page/analytics_no_data/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-template-mocks@link:bazel-bin/packages/shared-ux/page/kibana_template/mocks":
+"@kbn/shared-ux-page-analytics-no-data@link:packages/shared-ux/page/analytics_no_data/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-template-types@link:bazel-bin/packages/shared-ux/page/kibana_template/types":
+"@kbn/shared-ux-page-kibana-no-data-mocks@link:packages/shared-ux/page/kibana_no_data/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-template@link:bazel-bin/packages/shared-ux/page/kibana_template/impl":
+"@kbn/shared-ux-page-kibana-no-data-types@link:packages/shared-ux/page/kibana_no_data/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-config-mocks@link:bazel-bin/packages/shared-ux/page/no_data_config/mocks":
+"@kbn/shared-ux-page-kibana-no-data@link:packages/shared-ux/page/kibana_no_data/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-config-types@link:bazel-bin/packages/shared-ux/page/no_data_config/types":
+"@kbn/shared-ux-page-kibana-template-mocks@link:packages/shared-ux/page/kibana_template/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-config@link:bazel-bin/packages/shared-ux/page/no_data_config/impl":
+"@kbn/shared-ux-page-kibana-template-types@link:packages/shared-ux/page/kibana_template/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-mocks@link:bazel-bin/packages/shared-ux/page/no_data/mocks":
+"@kbn/shared-ux-page-kibana-template@link:packages/shared-ux/page/kibana_template/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-types@link:bazel-bin/packages/shared-ux/page/no_data/types":
+"@kbn/shared-ux-page-no-data-config-mocks@link:packages/shared-ux/page/no_data_config/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data@link:bazel-bin/packages/shared-ux/page/no_data/impl":
+"@kbn/shared-ux-page-no-data-config-types@link:packages/shared-ux/page/no_data_config/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-solution-nav@link:bazel-bin/packages/shared-ux/page/solution_nav":
+"@kbn/shared-ux-page-no-data-config@link:packages/shared-ux/page/no_data_config/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-no-data-views-mocks@link:bazel-bin/packages/shared-ux/prompt/no_data_views/mocks":
+"@kbn/shared-ux-page-no-data-mocks@link:packages/shared-ux/page/no_data/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-no-data-views-types@link:bazel-bin/packages/shared-ux/prompt/no_data_views/types":
+"@kbn/shared-ux-page-no-data-types@link:packages/shared-ux/page/no_data/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/impl":
+"@kbn/shared-ux-page-no-data@link:packages/shared-ux/page/no_data/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-not-found@link:bazel-bin/packages/shared-ux/prompt/not_found":
+"@kbn/shared-ux-page-solution-nav@link:packages/shared-ux/page/solution_nav":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-router-mocks@link:bazel-bin/packages/shared-ux/router/mocks":
+"@kbn/shared-ux-prompt-no-data-views-mocks@link:packages/shared-ux/prompt/no_data_views/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services":
+"@kbn/shared-ux-prompt-no-data-views-types@link:packages/shared-ux/prompt/no_data_views/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-storybook-mock@link:bazel-bin/packages/shared-ux/storybook/mock":
+"@kbn/shared-ux-prompt-no-data-views@link:packages/shared-ux/prompt/no_data_views/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-storybook@link:bazel-bin/packages/kbn-shared-ux-storybook":
+"@kbn/shared-ux-prompt-not-found@link:packages/shared-ux/prompt/not_found":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-utility@link:bazel-bin/packages/kbn-shared-ux-utility":
+"@kbn/shared-ux-router-mocks@link:packages/shared-ux/router/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/some-dev-log@link:bazel-bin/packages/kbn-some-dev-log":
+"@kbn/shared-ux-services@link:packages/kbn-shared-ux-services":
   version "0.0.0"
   uid ""
 
-"@kbn/sort-package-json@link:bazel-bin/packages/kbn-sort-package-json":
+"@kbn/shared-ux-storybook-mock@link:packages/shared-ux/storybook/mock":
   version "0.0.0"
   uid ""
 
-"@kbn/spec-to-console@link:bazel-bin/packages/kbn-spec-to-console":
+"@kbn/shared-ux-storybook@link:packages/kbn-shared-ux-storybook":
   version "0.0.0"
   uid ""
 
-"@kbn/std@link:bazel-bin/packages/kbn-std":
+"@kbn/shared-ux-utility@link:packages/kbn-shared-ux-utility":
   version "0.0.0"
   uid ""
 
-"@kbn/stdio-dev-helpers@link:bazel-bin/packages/kbn-stdio-dev-helpers":
+"@kbn/some-dev-log@link:packages/kbn-some-dev-log":
   version "0.0.0"
   uid ""
 
-"@kbn/storybook@link:bazel-bin/packages/kbn-storybook":
+"@kbn/sort-package-json@link:packages/kbn-sort-package-json":
   version "0.0.0"
   uid ""
 
-"@kbn/synthetic-package-map@link:bazel-bin/packages/kbn-synthetic-package-map":
+"@kbn/spec-to-console@link:packages/kbn-spec-to-console":
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-tools@link:bazel-bin/packages/kbn-telemetry-tools":
+"@kbn/std@link:packages/kbn-std":
   version "0.0.0"
   uid ""
 
-"@kbn/test-jest-helpers@link:bazel-bin/packages/kbn-test-jest-helpers":
+"@kbn/stdio-dev-helpers@link:packages/kbn-stdio-dev-helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/test-subj-selector@link:bazel-bin/packages/kbn-test-subj-selector":
+"@kbn/storybook@link:packages/kbn-storybook":
   version "0.0.0"
   uid ""
 
-"@kbn/test@link:bazel-bin/packages/kbn-test":
+"@kbn/telemetry-tools@link:packages/kbn-telemetry-tools":
   version "0.0.0"
   uid ""
 
-"@kbn/timelion-grammar@link:bazel-bin/packages/kbn-timelion-grammar":
+"@kbn/test-jest-helpers@link:packages/kbn-test-jest-helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/tinymath@link:bazel-bin/packages/kbn-tinymath":
+"@kbn/test-subj-selector@link:packages/kbn-test-subj-selector":
   version "0.0.0"
   uid ""
 
-"@kbn/tooling-log@link:bazel-bin/packages/kbn-tooling-log":
+"@kbn/test@link:packages/kbn-test":
   version "0.0.0"
   uid ""
 
-"@kbn/type-summarizer-cli@link:bazel-bin/packages/kbn-type-summarizer-cli":
+"@kbn/timelion-grammar@link:packages/kbn-timelion-grammar":
   version "0.0.0"
   uid ""
 
-"@kbn/type-summarizer-core@link:bazel-bin/packages/kbn-type-summarizer-core":
+"@kbn/tinymath@link:packages/kbn-tinymath":
   version "0.0.0"
   uid ""
 
-"@kbn/type-summarizer@link:bazel-bin/packages/kbn-type-summarizer":
+"@kbn/tooling-log@link:packages/kbn-tooling-log":
   version "0.0.0"
   uid ""
 
-"@kbn/typed-react-router-config@link:bazel-bin/packages/kbn-typed-react-router-config":
+"@kbn/ts-project-linter-cli@link:packages/kbn-ts-project-linter-cli":
   version "0.0.0"
   uid ""
 
-"@kbn/ui-framework@link:bazel-bin/packages/kbn-ui-framework":
+"@kbn/ts-project-linter@link:packages/kbn-ts-project-linter":
   version "0.0.0"
   uid ""
 
-"@kbn/ui-shared-deps-npm@link:bazel-bin/packages/kbn-ui-shared-deps-npm":
+"@kbn/ts-projects@link:packages/kbn-ts-projects":
   version "0.0.0"
   uid ""
 
-"@kbn/ui-shared-deps-src@link:bazel-bin/packages/kbn-ui-shared-deps-src":
+"@kbn/ts-type-check-cli@link:packages/kbn-ts-type-check-cli":
   version "0.0.0"
   uid ""
 
-"@kbn/ui-theme@link:bazel-bin/packages/kbn-ui-theme":
+"@kbn/typed-react-router-config@link:packages/kbn-typed-react-router-config":
   version "0.0.0"
   uid ""
 
-"@kbn/user-profile-components@link:bazel-bin/packages/kbn-user-profile-components":
+"@kbn/ui-framework@link:packages/kbn-ui-framework":
   version "0.0.0"
   uid ""
 
-"@kbn/utility-types-jest@link:bazel-bin/packages/kbn-utility-types-jest":
+"@kbn/ui-shared-deps-npm@link:packages/kbn-ui-shared-deps-npm":
   version "0.0.0"
   uid ""
 
-"@kbn/utility-types@link:bazel-bin/packages/kbn-utility-types":
+"@kbn/ui-shared-deps-src@link:packages/kbn-ui-shared-deps-src":
   version "0.0.0"
   uid ""
 
-"@kbn/utils@link:bazel-bin/packages/kbn-utils":
+"@kbn/ui-theme@link:packages/kbn-ui-theme":
   version "0.0.0"
   uid ""
 
-"@kbn/yarn-lock-validator@link:bazel-bin/packages/kbn-yarn-lock-validator":
+"@kbn/user-profile-components@link:packages/kbn-user-profile-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/utility-types-jest@link:packages/kbn-utility-types-jest":
+  version "0.0.0"
+  uid ""
+
+"@kbn/utility-types@link:packages/kbn-utility-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/utils@link:packages/kbn-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/web-worker-stub@link:packages/kbn-web-worker-stub":
+  version "0.0.0"
+  uid ""
+
+"@kbn/yarn-lock-validator@link:packages/kbn-yarn-lock-validator":
   version "0.0.0"
   uid ""
 
@@ -7614,6 +7642,11 @@
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.4.tgz#43d7168fec6fa0988bb1a513a697b29296721afb"
   integrity sha512-+nVsLKlcUCeMzD2ufHEYuJ9a2ovstb6Dp52A5VsoKxDXgvE051XgHI/33I1EymwkRGQkwnA0LkhnUzituGs4EQ==
 
+"@types/semver@^7.3.12":
+  version "7.3.12"
+  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.12.tgz#920447fdd78d76b19de0438b7f60df3c4a80bf1c"
+  integrity sha512-WwA1MW0++RfXmCr12xeYOOC5baSC9mSb0ZqCquFzKhcoF4TvHu5MKOuXsncgZcpVFhB1pXd5hZmM0ryAoCp12A==
+
 "@types/serve-index@^1.9.1":
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/@types/serve-index/-/serve-index-1.9.1.tgz#1b5e85370a192c01ec6cec4735cf2917337a6278"
@@ -7951,18 +7984,18 @@
   integrity sha512-te5lMAWii1uEJ4FwLjzdlbw3+n0FZNOvFXHxQDKeT0dilh7HOzdMzV2TrJVUzq8ep7J4Na8OUYPRLSQkJHAlrg==
 
 "@typescript-eslint/eslint-plugin@^5.20.0":
-  version "5.20.0"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-5.20.0.tgz#022531a639640ff3faafaf251d1ce00a2ef000a1"
-  integrity sha512-fapGzoxilCn3sBtC6NtXZX6+P/Hef7VDbyfGqTTpzYydwhlkevB+0vE0EnmHPVTVSy68GUncyJ/2PcrFBeCo5Q==
+  version "5.45.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-5.45.1.tgz#ee5b51405f6c9ee7e60e4006d68c69450d3b4536"
+  integrity sha512-cOizjPlKEh0bXdFrBLTrI/J6B/QMlhwE9auOov53tgB+qMukH6/h8YAK/qw+QJGct/PTbdh2lytGyipxCcEtAw==
   dependencies:
-    "@typescript-eslint/scope-manager" "5.20.0"
-    "@typescript-eslint/type-utils" "5.20.0"
-    "@typescript-eslint/utils" "5.20.0"
-    debug "^4.3.2"
-    functional-red-black-tree "^1.0.1"
-    ignore "^5.1.8"
+    "@typescript-eslint/scope-manager" "5.45.1"
+    "@typescript-eslint/type-utils" "5.45.1"
+    "@typescript-eslint/utils" "5.45.1"
+    debug "^4.3.4"
+    ignore "^5.2.0"
+    natural-compare-lite "^1.4.0"
     regexpp "^3.2.0"
-    semver "^7.3.5"
+    semver "^7.3.7"
     tsutils "^3.21.0"
 
 "@typescript-eslint/experimental-utils@^4.0.1":
@@ -7978,14 +8011,14 @@
     eslint-utils "^3.0.0"
 
 "@typescript-eslint/parser@^5.20.0":
-  version "5.20.0"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/parser/-/parser-5.20.0.tgz#4991c4ee0344315c2afc2a62f156565f689c8d0b"
-  integrity sha512-UWKibrCZQCYvobmu3/N8TWbEeo/EPQbS41Ux1F9XqPzGuV7pfg6n50ZrFo6hryynD8qOTTfLHtHjjdQtxJ0h/w==
+  version "5.45.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/parser/-/parser-5.45.1.tgz#6440ec283fa1373a12652d4e2fef4cb6e7b7e8c6"
+  integrity sha512-JQ3Ep8bEOXu16q0ztsatp/iQfDCtvap7sp/DKo7DWltUquj5AfCOpX2zSzJ8YkAVnrQNqQ5R62PBz2UtrfmCkA==
   dependencies:
-    "@typescript-eslint/scope-manager" "5.20.0"
-    "@typescript-eslint/types" "5.20.0"
-    "@typescript-eslint/typescript-estree" "5.20.0"
-    debug "^4.3.2"
+    "@typescript-eslint/scope-manager" "5.45.1"
+    "@typescript-eslint/types" "5.45.1"
+    "@typescript-eslint/typescript-estree" "5.45.1"
+    debug "^4.3.4"
 
 "@typescript-eslint/scope-manager@4.31.2":
   version "4.31.2"
@@ -7995,21 +8028,22 @@
     "@typescript-eslint/types" "4.31.2"
     "@typescript-eslint/visitor-keys" "4.31.2"
 
-"@typescript-eslint/scope-manager@5.20.0":
-  version "5.20.0"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/scope-manager/-/scope-manager-5.20.0.tgz#79c7fb8598d2942e45b3c881ced95319818c7980"
-  integrity sha512-h9KtuPZ4D/JuX7rpp1iKg3zOH0WNEa+ZIXwpW/KWmEFDxlA/HSfCMhiyF1HS/drTICjIbpA6OqkAhrP/zkCStg==
+"@typescript-eslint/scope-manager@5.45.1":
+  version "5.45.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/scope-manager/-/scope-manager-5.45.1.tgz#5b87d025eec7035d879b99c260f03be5c247883c"
+  integrity sha512-D6fCileR6Iai7E35Eb4Kp+k0iW7F1wxXYrOhX/3dywsOJpJAQ20Fwgcf+P/TDtvQ7zcsWsrJaglaQWDhOMsspQ==
   dependencies:
-    "@typescript-eslint/types" "5.20.0"
-    "@typescript-eslint/visitor-keys" "5.20.0"
+    "@typescript-eslint/types" "5.45.1"
+    "@typescript-eslint/visitor-keys" "5.45.1"
 
-"@typescript-eslint/type-utils@5.20.0":
-  version "5.20.0"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/type-utils/-/type-utils-5.20.0.tgz#151c21cbe9a378a34685735036e5ddfc00223be3"
-  integrity sha512-WxNrCwYB3N/m8ceyoGCgbLmuZwupvzN0rE8NBuwnl7APgjv24ZJIjkNzoFBXPRCGzLNkoU/WfanW0exvp/+3Iw==
+"@typescript-eslint/type-utils@5.45.1":
+  version "5.45.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/type-utils/-/type-utils-5.45.1.tgz#cb7d300c3c95802cea9f87c7f8be363cf8f8538c"
+  integrity sha512-aosxFa+0CoYgYEl3aptLe1svP910DJq68nwEJzyQcrtRhC4BN0tJAvZGAe+D0tzjJmFXe+h4leSsiZhwBa2vrA==
   dependencies:
-    "@typescript-eslint/utils" "5.20.0"
-    debug "^4.3.2"
+    "@typescript-eslint/typescript-estree" "5.45.1"
+    "@typescript-eslint/utils" "5.45.1"
+    debug "^4.3.4"
     tsutils "^3.21.0"
 
 "@typescript-eslint/types@4.31.2":
@@ -8017,10 +8051,10 @@
   resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-4.31.2.tgz#2aea7177d6d744521a168ed4668eddbd912dfadf"
   integrity sha512-kWiTTBCTKEdBGrZKwFvOlGNcAsKGJSBc8xLvSjSppFO88AqGxGNYtF36EuEYG6XZ9vT0xX8RNiHbQUKglbSi1w==
 
-"@typescript-eslint/types@5.20.0":
-  version "5.20.0"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-5.20.0.tgz#fa39c3c2aa786568302318f1cb51fcf64258c20c"
-  integrity sha512-+d8wprF9GyvPwtoB4CxBAR/s0rpP25XKgnOvMf/gMXYDvlUC3rPFHupdTQ/ow9vn7UDe5rX02ovGYQbv/IUCbg==
+"@typescript-eslint/types@5.45.1":
+  version "5.45.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-5.45.1.tgz#8e1883041cee23f1bb7e1343b0139f97f6a17c14"
+  integrity sha512-HEW3U0E5dLjUT+nk7b4lLbOherS1U4ap+b9pfu2oGsW3oPu7genRaY9dDv3nMczC1rbnRY2W/D7SN05wYoGImg==
 
 "@typescript-eslint/typescript-estree@4.31.2":
   version "4.31.2"
@@ -8035,30 +8069,32 @@
     semver "^7.3.5"
     tsutils "^3.21.0"
 
-"@typescript-eslint/typescript-estree@5.20.0", "@typescript-eslint/typescript-estree@^5.20.0":
-  version "5.20.0"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/typescript-estree/-/typescript-estree-5.20.0.tgz#ab73686ab18c8781bbf249c9459a55dc9417d6b0"
-  integrity sha512-36xLjP/+bXusLMrT9fMMYy1KJAGgHhlER2TqpUVDYUQg4w0q/NW/sg4UGAgVwAqb8V4zYg43KMUpM8vV2lve6w==
+"@typescript-eslint/typescript-estree@5.45.1", "@typescript-eslint/typescript-estree@^5.20.0":
+  version "5.45.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/typescript-estree/-/typescript-estree-5.45.1.tgz#b3dc37f0c4f0fe73e09917fc735e6f96eabf9ba4"
+  integrity sha512-76NZpmpCzWVrrb0XmYEpbwOz/FENBi+5W7ipVXAsG3OoFrQKJMiaqsBMbvGRyLtPotGqUfcY7Ur8j0dksDJDng==
   dependencies:
-    "@typescript-eslint/types" "5.20.0"
-    "@typescript-eslint/visitor-keys" "5.20.0"
-    debug "^4.3.2"
-    globby "^11.0.4"
+    "@typescript-eslint/types" "5.45.1"
+    "@typescript-eslint/visitor-keys" "5.45.1"
+    debug "^4.3.4"
+    globby "^11.1.0"
     is-glob "^4.0.3"
-    semver "^7.3.5"
+    semver "^7.3.7"
     tsutils "^3.21.0"
 
-"@typescript-eslint/utils@5.20.0":
-  version "5.20.0"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/utils/-/utils-5.20.0.tgz#b8e959ed11eca1b2d5414e12417fd94cae3517a5"
-  integrity sha512-lHONGJL1LIO12Ujyx8L8xKbwWSkoUKFSO+0wDAqGXiudWB2EO7WEUT+YZLtVbmOmSllAjLb9tpoIPwpRe5Tn6w==
+"@typescript-eslint/utils@5.45.1":
+  version "5.45.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/utils/-/utils-5.45.1.tgz#39610c98bde82c4792f2a858b29b7d0053448be2"
+  integrity sha512-rlbC5VZz68+yjAzQBc4I7KDYVzWG2X/OrqoZrMahYq3u8FFtmQYc+9rovo/7wlJH5kugJ+jQXV5pJMnofGmPRw==
   dependencies:
     "@types/json-schema" "^7.0.9"
-    "@typescript-eslint/scope-manager" "5.20.0"
-    "@typescript-eslint/types" "5.20.0"
-    "@typescript-eslint/typescript-estree" "5.20.0"
+    "@types/semver" "^7.3.12"
+    "@typescript-eslint/scope-manager" "5.45.1"
+    "@typescript-eslint/types" "5.45.1"
+    "@typescript-eslint/typescript-estree" "5.45.1"
     eslint-scope "^5.1.1"
     eslint-utils "^3.0.0"
+    semver "^7.3.7"
 
 "@typescript-eslint/visitor-keys@4.31.2":
   version "4.31.2"
@@ -8068,13 +8104,13 @@
     "@typescript-eslint/types" "4.31.2"
     eslint-visitor-keys "^2.0.0"
 
-"@typescript-eslint/visitor-keys@5.20.0":
-  version "5.20.0"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/visitor-keys/-/visitor-keys-5.20.0.tgz#70236b5c6b67fbaf8b2f58bf3414b76c1e826c2a"
-  integrity sha512-1flRpNF+0CAQkMNlTJ6L/Z5jiODG/e5+7mk6XwtPOUS3UrTz3UOiAg9jG2VtKsWI6rZQfy4C6a232QNRZTRGlg==
+"@typescript-eslint/visitor-keys@5.45.1":
+  version "5.45.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/visitor-keys/-/visitor-keys-5.45.1.tgz#204428430ad6a830d24c5ac87c71366a1cfe1948"
+  integrity sha512-cy9ln+6rmthYWjH9fmx+5FU/JDpjQb586++x2FZlveq7GdGuLLW9a2Jcst2TGekH82bXpfmRNSwP9tyEs6RjvQ==
   dependencies:
-    "@typescript-eslint/types" "5.20.0"
-    eslint-visitor-keys "^3.0.0"
+    "@typescript-eslint/types" "5.45.1"
+    eslint-visitor-keys "^3.3.0"
 
 "@webassemblyjs/ast@1.11.1":
   version "1.11.1"
@@ -13070,7 +13106,7 @@ endent@^2.0.1:
     fast-json-parse "^1.0.3"
     objectorarray "^1.0.4"
 
-enhanced-resolve@^4.0.0, enhanced-resolve@^4.5.0:
+enhanced-resolve@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-4.5.0.tgz#2f3cfd84dbe3b487f18f2db2ef1e064a571ca5ec"
   integrity sha512-Nv9m36S/vxpsI+Hc4/ZGRs0n9mXqSWGGq49zxb/cJfPAQMbUtttJAlNPS4AQzaBdw/pKskw5bMbekT/Y7W/Wlg==
@@ -13773,10 +13809,10 @@ eslint-visitor-keys@^2.0.0, eslint-visitor-keys@^2.1.0:
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-2.1.0.tgz#f65328259305927392c938ed44eb0a5c9b2bd303"
   integrity sha512-0rSmRBzXgDzIsD6mGdJgevzgezI534Cer5L/vyMX0kHzT/jiB43jRhd9YUlMGYLQy2zprNmoT8qasCGtY+QaKw==
 
-eslint-visitor-keys@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-3.0.0.tgz#e32e99c6cdc2eb063f204eda5db67bfe58bb4186"
-  integrity sha512-mJOZa35trBTb3IyRmo8xmKBZlxf+N7OnUl4+ZhJHs/r+0770Wh/LEACE2pqMGMe27G/4y8P2bYGk4J70IC5k1Q==
+eslint-visitor-keys@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-3.3.0.tgz#f6480fa6b1f30efe2d1968aa8ac745b862469826"
+  integrity sha512-mQ+suqKJVyeuwGYHAdjMFqjCyfl8+Ldnxuyp3ldiMBFKkvytrXUZWaiPCEav8qDHKty44bD+qV1IP4T+w+xXRA==
 
 eslint@^7.32.0:
   version "7.32.0"
@@ -14224,10 +14260,21 @@ fast-glob@^2.2.6:
     merge2 "^1.2.3"
     micromatch "^3.1.10"
 
-fast-glob@^3.0.3, fast-glob@^3.1.1, fast-glob@^3.2.11, fast-glob@^3.2.2, fast-glob@^3.2.7, fast-glob@^3.2.9:
+fast-glob@^3.0.3, fast-glob@^3.1.1, fast-glob@^3.2.11, fast-glob@^3.2.2, fast-glob@^3.2.9:
   version "3.2.11"
   resolved "https://registry.yarnpkg.com/fast-glob/-/fast-glob-3.2.11.tgz#a1172ad95ceb8a16e20caa5c5e56480e5129c1d9"
   integrity sha512-xrO3+1bxSo3ZVHAnqzyuewYT6aMFHRAd4Kcs92MAonjwQZLsK9d0SF1IyQ3k5PoirxTW0Oe/RqFgMQ6TcNE5Ew==
+  dependencies:
+    "@nodelib/fs.stat" "^2.0.2"
+    "@nodelib/fs.walk" "^1.2.3"
+    glob-parent "^5.1.2"
+    merge2 "^1.3.0"
+    micromatch "^4.0.4"
+
+fast-glob@^3.2.7:
+  version "3.2.12"
+  resolved "https://registry.yarnpkg.com/fast-glob/-/fast-glob-3.2.12.tgz#7f39ec99c2e6ab030337142da9e0c18f37afae80"
+  integrity sha512-DVj4CQIYYow0BlaelwK1pHl5n5cRSJfM60UA0zK891sVInoPri2Ekj7+e1CT3/3qxXenpI+nBBmQAcJPJgaj4w==
   dependencies:
     "@nodelib/fs.stat" "^2.0.2"
     "@nodelib/fs.walk" "^1.2.3"
@@ -15299,7 +15346,7 @@ globby@^10.0.1:
     merge2 "^1.2.3"
     slash "^3.0.0"
 
-globby@^11.0.1, globby@^11.0.2, globby@^11.0.3, globby@^11.0.4, globby@^11.1.0:
+globby@^11.0.1, globby@^11.0.2, globby@^11.0.3, globby@^11.1.0:
   version "11.1.0"
   resolved "https://registry.yarnpkg.com/globby/-/globby-11.1.0.tgz#bd4be98bb042f83d796f7e3811991fbe82a0d34b"
   integrity sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==
@@ -16176,7 +16223,7 @@ ignore@^4.0.3, ignore@^4.0.6:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-4.0.6.tgz#750e3db5862087b4737ebac8207ffd1ef27b25fc"
   integrity sha512-cyFDKrqc/YdcWFniJhzI42+AzS+gNwmUzOSFcRCQYwySuBBBy/KjuxWLZ/FHEH6Moq1NizMOBWyTcv8O4OZIMg==
 
-ignore@^5.0.5, ignore@^5.1.1, ignore@^5.1.4, ignore@^5.1.8, ignore@^5.2.0:
+ignore@^5.0.5, ignore@^5.1.1, ignore@^5.1.4, ignore@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.2.0.tgz#6d3bac8fa7fe0d45d9f9be7bac2fc279577e345a"
   integrity sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==
@@ -18688,7 +18735,7 @@ loader-runner@^4.2.0:
   resolved "https://registry.yarnpkg.com/loader-runner/-/loader-runner-4.3.0.tgz#c1b4a163b99f614830353b16755e7149ac2314e1"
   integrity sha512-3R/1M+yS3j5ou80Me59j7F9IMs4PXs3VqRrm0TU3AbKPxlmpoY1TNscJV/oGJXo8qCatFGTfDbY6W6ipGOYXfg==
 
-loader-utils@^1.0.0, loader-utils@^1.0.2, loader-utils@^1.1.0, loader-utils@^1.2.3:
+loader-utils@^1.0.0, loader-utils@^1.1.0, loader-utils@^1.2.3:
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/loader-utils/-/loader-utils-1.4.2.tgz#29a957f3a63973883eb684f10ffd3d151fec01a3"
   integrity sha512-I5d00Pd/jwMD2QCduo657+YM/6L3KZu++pmX9VFncxaxvHcru9jx1lBaFft+r4Mt2jK0Yhp41XlRAihzPxHNCg==
@@ -19623,7 +19670,7 @@ micromatch@^3.1.10, micromatch@^3.1.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.2"
 
-micromatch@^4.0.0, micromatch@^4.0.2, micromatch@^4.0.4, micromatch@^4.0.5:
+micromatch@^4.0.2, micromatch@^4.0.4, micromatch@^4.0.5:
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/micromatch/-/micromatch-4.0.5.tgz#bc8999a7cbbf77cdc89f132f6e467051b49090c6"
   integrity sha512-DMy+ERcEW2q8Z2Po+WNXuw3c5YaUSFjAO5GsJqfEl7UjvtIuFKO6ZrKvcItdy98dwFI2N1tg3zNIdKaQT+aNdA==
@@ -20150,6 +20197,11 @@ napi-build-utils@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/napi-build-utils/-/napi-build-utils-1.0.2.tgz#b1fddc0b2c46e380a0b7a76f984dd47c41a13806"
   integrity sha512-ONmRUqK7zj7DWX0D9ADe03wbwOBZxNAfF20PlGfCWQcD3+/MakShIHrMqx9YwPTfxDdF1zLeL+RGZiR9kGMLdg==
+
+natural-compare-lite@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/natural-compare-lite/-/natural-compare-lite-1.4.0.tgz#17b09581988979fddafe0201e931ba933c96cbb4"
+  integrity sha512-Tj+HTDSJJKaZnfiuw+iaF9skdPpTo2GtEly5JHnWV/hfv2Qj/9RKsGISQtLh2ox3l5EAGw487hnBee0sIJ6v2g==
 
 natural-compare@^1.4.0:
   version "1.4.0"
@@ -22767,10 +22819,10 @@ react-grid-layout@^1.3.4:
     react-draggable "^4.0.0"
     react-resizable "^3.0.4"
 
-react-hook-form@^7.40.0:
-  version "7.40.0"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.40.0.tgz#62bc939dddca88522cd7f5135b6603192ccf7e17"
-  integrity sha512-0rokdxMPJs0k9bvFtY6dbcSydyNhnZNXCR49jgDr/aR03FDHFOK6gfh8ccqB3fl696Mk7lqh04xdm+agqWXKSw==
+react-hook-form@^7.41.0:
+  version "7.41.0"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.41.0.tgz#cc0871f4784e7233ac8466300da557d622154414"
+  integrity sha512-u1cHOXujr+AsNBoeCtcCuRwPh87mXAgKtXqd3qTCBgNFYzVZLXjYgLcynORpAgqhe24r5scucR8+6gfWaXBtHQ==
 
 react-input-autosize@^3.0.0:
   version "3.0.0"
@@ -23635,6 +23687,27 @@ remark-mdx@1.6.22:
     is-alphabetical "1.0.4"
     remark-parse "8.0.3"
     unified "9.2.0"
+
+remark-parse-no-trim@^8.0.4:
+  version "8.0.4"
+  resolved "https://registry.yarnpkg.com/remark-parse-no-trim/-/remark-parse-no-trim-8.0.4.tgz#f5c9531644284071d4a57a49e19a42ad4e8040bd"
+  integrity sha512-WtqeHNTZ0LSdyemmY1/G6y9WoEFblTtgckfKF5/NUnri919/0/dEu8RCDfvXtJvu96soMvT+mLWWgYVUaiHoag==
+  dependencies:
+    ccount "^1.0.0"
+    collapse-white-space "^1.0.2"
+    is-alphabetical "^1.0.0"
+    is-decimal "^1.0.0"
+    is-whitespace-character "^1.0.0"
+    is-word-character "^1.0.0"
+    markdown-escapes "^1.0.0"
+    parse-entities "^2.0.0"
+    repeat-string "^1.5.4"
+    state-toggle "^1.0.0"
+    trim-trailing-lines "^1.0.0"
+    unherit "^1.0.4"
+    unist-util-remove-position "^2.0.0"
+    vfile-location "^3.0.0"
+    xtend "^4.0.1"
 
 remark-parse@8.0.3, remark-parse@^8.0.3:
   version "8.0.3"
@@ -26336,17 +26409,6 @@ ts-easing@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/ts-easing/-/ts-easing-0.2.0.tgz#c8a8a35025105566588d87dbda05dd7fbfa5a4ec"
   integrity sha512-Z86EW+fFFh/IFB1fqQ3/+7Zpf9t2ebOAxNI/V6Wo7r5gqiqtxmgTlQ1qbqQcjLKYeSHPTsEmvlJUDg/EuL0uHQ==
-
-ts-loader@^7.0.5:
-  version "7.0.5"
-  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-7.0.5.tgz#789338fb01cb5dc0a33c54e50558b34a73c9c4c5"
-  integrity sha512-zXypEIT6k3oTc+OZNx/cqElrsbBtYqDknf48OZos0NQ3RTt045fBIU8RRSu+suObBzYB355aIPGOe/3kj9h7Ig==
-  dependencies:
-    chalk "^2.3.0"
-    enhanced-resolve "^4.0.0"
-    loader-utils "^1.0.2"
-    micromatch "^4.0.0"
-    semver "^6.0.0"
 
 ts-morph@^13.0.2:
   version "13.0.2"

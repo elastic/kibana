@@ -90,18 +90,12 @@ interface CspSetupInstalledStatus extends BaseCspSetupStatus {
 
 export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;
 
-export interface CspRulesStatus {
-  all: number;
-  enabled: number;
-  disabled: number;
-}
-
 export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
 
 export interface Benchmark {
   package_policy: PackagePolicy;
   agent_policy: AgentPolicyStatus;
-  rules: CspRulesStatus;
+  rules_count: number;
 }
 
 export type BenchmarkId = CspRuleMetadata['benchmark']['id'];
