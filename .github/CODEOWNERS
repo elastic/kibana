@@ -1072,9 +1072,11 @@ packages/shared-ux/storybook/mock @elastic/kibana-global-experience
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
 x-pack/packages/ml/aiops_utils @elastic/ml-ui
+x-pack/packages/ml/date_picker @elastic/ml-ui
 x-pack/packages/ml/is_defined @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
 x-pack/packages/ml/local_storage @elastic/ml-ui
 x-pack/packages/ml/nested_property @elastic/ml-ui
+x-pack/packages/ml/query_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui

@@ -153,13 +153,10 @@ export const MlDatePickerWrapper: FC<{
       if (!isTooShort || refreshInterval.pause) return;
 
       toasts.addWarning({
-        title: i18n.translate(
-          'xpack.dataVisualizer.index.datePicker.shortRefreshIntervalURLWarningMessage',
-          {
-            defaultMessage:
-              'The refresh interval in the URL is shorter than the minimum supported by Machine Learning.',
-          }
-        ),
+        title: i18n.translate('xpack.ml.datePicker.shortRefreshIntervalURLWarningMessage', {
+          defaultMessage:
+            'The refresh interval in the URL is shorter than the minimum supported by Machine Learning.',
+        }),
         text: toMountPoint(
           wrapWithTheme(
             <EuiButton
@@ -169,7 +166,7 @@ export const MlDatePickerWrapper: FC<{
               })}
             >
               <FormattedMessage
-                id="xpack.dataVisualizer.index.pageRefreshResetButton"
+                id="xpack.ml.datePicker.pageRefreshResetButton"
                 defaultMessage="Set to {defaultInterval}"
                 values={{
                   defaultInterval: `${DEFAULT_REFRESH_INTERVAL_MS / 1000}s`,
@@ -288,12 +285,9 @@ export const MlDatePickerWrapper: FC<{
             color="primary"
             iconType={'refresh'}
             onClick={() => updateLastRefresh()}
-            data-test-subj="dataVisualizerRefreshPageButton"
+            data-test-subj="mlDatePickerRefreshPageButton"
           >
-            <FormattedMessage
-              id="xpack.dataVisualizer.index.pageRefreshButton"
-              defaultMessage="Refresh"
-            />
+            <FormattedMessage id="xpack.ml.datePicker.pageRefreshButton" defaultMessage="Refresh" />
           </EuiButton>
         </EuiFlexItem>
       ) : null}
