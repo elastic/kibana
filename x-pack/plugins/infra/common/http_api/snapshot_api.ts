@@ -52,14 +52,14 @@ export const SnapshotNodeResponseRT = rt.intersection([
 
 export const InfraTimerangeInputRT = rt.intersection([
   rt.type({
+    interval: rt.string,
     to: rt.number,
     from: rt.number,
-    interval: rt.string,
   }),
   rt.partial({
-    forceInterval: rt.boolean,
-    ignoreLookback: rt.boolean,
     lookbackSize: rt.number,
+    ignoreLookback: rt.boolean,
+    forceInterval: rt.boolean,
   }),
 ]);
 
@@ -101,24 +101,22 @@ export const SnapshotMetricInputRT = rt.union([
   SnapshotCustomMetricInputRT,
 ]);
 
-export const SnapshotRequestRT = rt.exact(
-  rt.intersection([
-    rt.type({
-      timerange: InfraTimerangeInputRT,
-      metrics: rt.array(SnapshotMetricInputRT),
-      groupBy: rt.union([SnapshotGroupByRT, rt.null]),
-      nodeType: ItemTypeRT,
-      sourceId: rt.string,
-      includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(true)]),
-    }),
-    rt.partial({
-      accountId: rt.string,
-      region: rt.string,
-      filterQuery: rt.union([rt.string, rt.null]),
-      overrideCompositeSize: rt.number,
-    }),
-  ])
-);
+export const SnapshotRequestRT = rt.intersection([
+  rt.type({
+    timerange: InfraTimerangeInputRT,
+    metrics: rt.array(SnapshotMetricInputRT),
+    groupBy: rt.union([SnapshotGroupByRT, rt.null]),
+    nodeType: ItemTypeRT,
+    sourceId: rt.string,
+    includeTimeseries: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(true)]),
+  }),
+  rt.partial({
+    accountId: rt.string,
+    region: rt.string,
+    filterQuery: rt.union([rt.string, rt.null]),
+    overrideCompositeSize: rt.number,
+  }),
+]);
 
 export type SnapshotNodePath = rt.TypeOf<typeof SnapshotNodePathRT>;
 export type SnapshotMetricInput = rt.TypeOf<typeof SnapshotMetricInputRT>;

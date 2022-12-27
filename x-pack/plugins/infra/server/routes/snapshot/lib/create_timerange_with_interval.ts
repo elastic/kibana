@@ -40,7 +40,7 @@ export const createTimeRangeWithInterval = async (
   options: InfraSnapshotRequestOptions
 ): Promise<MetricsAPITimerange> => {
   const { timerange } = options;
-  if (timerange.interval) {
+  if (timerange.forceInterval) {
     return {
       interval: timerange.interval,
       from: timerange.from,

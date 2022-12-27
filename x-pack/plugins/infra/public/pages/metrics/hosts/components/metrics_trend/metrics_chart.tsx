@@ -35,6 +35,7 @@ export interface ChartBaseProps
   type: AcceptedType;
   toolTip: string;
   metricType: MetricType;
+  ['data-test-subj']?: string;
 }
 
 interface Props extends ChartBaseProps {
@@ -60,6 +61,7 @@ export const MetricsChart = ({
   trendA11yDescription,
   trendA11yTitle,
   type,
+  ...props
 }: Props) => {
   const metrics = useMemo(() => (nodes ?? [])[0]?.metrics ?? [], [nodes]);
 
@@ -108,7 +110,7 @@ export const MetricsChart = ({
   };
 
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel paddingSize="none" {...props}>
       {loading ? (
         <EuiFlexGroup style={{ minHeight: MIN_HEIGHT }} justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>

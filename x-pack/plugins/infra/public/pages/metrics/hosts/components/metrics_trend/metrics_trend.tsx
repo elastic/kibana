@@ -15,7 +15,12 @@ import { HostsTile } from './hosts_tile';
 
 export const MetricsTrend = () => {
   return (
-    <EuiFlexGroup direction="row" gutterSize="s" style={{ flexGrow: 0 }}>
+    <EuiFlexGroup
+      direction="row"
+      gutterSize="s"
+      style={{ flexGrow: 0 }}
+      data-test-subj="hostsView-metricsTrend"
+    >
       <EuiFlexItem>
         <HostsTile
           type="hostsCount"
@@ -33,6 +38,7 @@ export const MetricsTrend = () => {
           toolTip={i18n.translate('xpack.infra.hostsTable.metricTrend.hostCount.tooltip', {
             defaultMessage: 'The number of hosts returned by your current search criteria.',
           })}
+          data-test-subj="hostsView-metricsTrend-hosts"
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -59,6 +65,7 @@ export const MetricsTrend = () => {
             defaultMessage:
               'Average of percentage of CPU time spent in states other than Idle and IOWait, normalized by the number of CPU cores. Includes both time spent on user space and kernel space. 100% means all CPUs of the host are busy.',
           })}
+          data-test-subj="hostsView-metricsTrend-cpu"
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -85,6 +92,7 @@ export const MetricsTrend = () => {
             defaultMessage:
               "Average of percentage of main memory usage excluding page cache. This includes resident memory for all processes plus memory used by the kernel structures and code apart the page cache. A high level indicates a situation of memory saturation for a host. 100% means the main memory is entirely filled with memory that can't be reclaimed, except by swapping out.",
           })}
+          data-test-subj="hostsView-metricsTrend-memory"
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -111,6 +119,7 @@ export const MetricsTrend = () => {
             defaultMessage:
               'Number of bytes which have been received per second on the public interfaces of the hosts.',
           })}
+          data-test-subj="hostsView-metricsTrend-rx"
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -137,6 +146,7 @@ export const MetricsTrend = () => {
             defaultMessage:
               'Number of bytes which have been sent per second on the public interfaces of the hosts',
           })}
+          data-test-subj="hostsView-metricsTrend-tx"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

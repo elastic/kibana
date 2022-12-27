@@ -83,7 +83,7 @@ export const HostsTable = () => {
     [setProperties, properties.pagination, properties.sorting]
   );
 
-  const noData = !!error || items.length === 0;
+  const noData = items.length === 0;
 
   if (loading || !panelFilters) {
     return (
@@ -117,10 +117,14 @@ export const HostsTable = () => {
 
   return (
     <EuiInMemoryTable
+      data-test-subj="hostsView-table"
       pagination={properties.pagination}
       sorting={
         typeof properties.sorting === 'boolean' ? properties.sorting : { sort: properties.sorting }
       }
+      rowProps={{
+        'data-test-subj': 'hostsView-tableRow',
+      }}
       items={items}
       columns={HostsTableColumns}
       onTableChange={onTableChange}
