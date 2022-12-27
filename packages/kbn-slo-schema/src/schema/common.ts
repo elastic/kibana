@@ -28,10 +28,10 @@ const errorBudgetSchema = t.type({
   initial: t.number,
   consumed: t.number,
   remaining: t.number,
-  is_estimated: t.boolean,
+  isEstimated: t.boolean,
 });
 
-const summarySchema = t.type({ sli_value: t.number, error_budget: errorBudgetSchema });
+const summarySchema = t.type({ sliValue: t.number, errorBudget: errorBudgetSchema });
 
 const dateRangeSchema = t.type({ from: dateType, to: dateType });
 

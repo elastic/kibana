@@ -16,8 +16,8 @@ const apmTransactionDurationIndicatorSchema = t.type({
     t.type({
       environment: allOrAnyString,
       service: allOrAnyString,
-      transaction_type: allOrAnyString,
-      transaction_name: allOrAnyString,
+      transactionType: allOrAnyString,
+      transactionName: allOrAnyString,
       'threshold.us': t.number,
     }),
     t.partial({
@@ -33,11 +33,11 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
     t.type({
       environment: allOrAnyString,
       service: allOrAnyString,
-      transaction_type: allOrAnyString,
-      transaction_name: allOrAnyString,
+      transactionType: allOrAnyString,
+      transactionName: allOrAnyString,
     }),
     t.partial({
-      good_status_codes: t.array(
+      goodStatusCodes: t.array(
         t.union([t.literal('2xx'), t.literal('3xx'), t.literal('4xx'), t.literal('5xx')])
       ),
       index: t.string,
@@ -57,7 +57,7 @@ const kqlCustomIndicatorSchema = t.type({
 });
 
 const indicatorDataSchema = t.type({
-  date_range: dateRangeSchema,
+  dateRange: dateRangeSchema,
   good: t.number,
   total: t.number,
 });
