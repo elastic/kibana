@@ -45,7 +45,7 @@ export abstract class TransformGenerator {
       'slo._internal.budgeting_method': {
         type: 'keyword' as MappingRuntimeFieldType,
         script: {
-          source: `emit('${slo.budgeting_method}')`,
+          source: `emit('${slo.budgetingMethod}')`,
         },
       },
       'slo._internal.objective.target': {
@@ -54,27 +54,27 @@ export abstract class TransformGenerator {
           source: `emit(${slo.objective.target})`,
         },
       },
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgeting_method) && {
+      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
         'slo._internal.objective.timeslice_target': {
           type: 'double' as MappingRuntimeFieldType,
           script: {
-            source: `emit(${slo.objective.timeslice_target})`,
+            source: `emit(${slo.objective.timesliceTarget})`,
           },
         },
         'slo._internal.objective.timeslice_window': {
           type: 'keyword' as MappingRuntimeFieldType,
           script: {
-            source: `emit('${slo.objective.timeslice_window?.format()}')`,
+            source: `emit('${slo.objective.timesliceWindow?.format()}')`,
           },
         },
       }),
       'slo._internal.time_window.duration': {
         type: 'keyword' as MappingRuntimeFieldType,
         script: {
-          source: `emit('${slo.time_window.duration.format()}')`,
+          source: `emit('${slo.timeWindow.duration.format()}')`,
         },
       },
-      ...(calendarAlignedTimeWindowSchema.is(slo.time_window) && {
+      ...(calendarAlignedTimeWindowSchema.is(slo.timeWindow) && {
         'slo._internal.time_window.is_rolling': {
           type: 'boolean' as MappingRuntimeFieldType,
           script: {
@@ -82,7 +82,7 @@ export abstract class TransformGenerator {
           },
         },
       }),
-      ...(rollingTimeWindowSchema.is(slo.time_window) && {
+      ...(rollingTimeWindowSchema.is(slo.timeWindow) && {
         'slo._internal.time_window.is_rolling': {
           type: 'boolean' as MappingRuntimeFieldType,
           script: {
@@ -130,7 +130,7 @@ export abstract class TransformGenerator {
           field: 'slo._internal.time_window.is_rolling',
         },
       },
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgeting_method) && {
+      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
         'slo._internal.objective.timeslice_target': {
           terms: {
             field: 'slo._internal.objective.timeslice_target',
@@ -145,7 +145,7 @@ export abstract class TransformGenerator {
       // Field used in the destination index, using @timestamp as per mapping definition
       '@timestamp': {
         date_histogram: {
-          field: slo.settings.timestamp_field,
+          field: slo.settings.timestampField,
           calendar_interval: '1m' as AggregationsCalendarInterval,
         },
       },
@@ -155,8 +155,8 @@ export abstract class TransformGenerator {
   public buildSettings(slo: SLO): TransformSettings {
     return {
       frequency: slo.settings.frequency.format(),
-      sync_field: slo.settings.timestamp_field,
-      sync_delay: slo.settings.sync_delay.format(),
+      sync_field: slo.settings.timestampField,
+      sync_delay: slo.settings.syncDelay.format(),
     };
   }
 }

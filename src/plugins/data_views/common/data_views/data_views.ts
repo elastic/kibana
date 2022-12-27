@@ -1057,13 +1057,13 @@ export class DataViewsService {
       .update(DATA_VIEW_SAVED_OBJECT_TYPE, indexPattern.id, body, {
         version: indexPattern.version,
       })
-      .then((resp) => {
-        indexPattern.id = resp.id;
-        indexPattern.version = resp.version;
+      .then((response) => {
+        indexPattern.id = response.id;
+        indexPattern.version = response.version;
         return indexPattern;
       })
       .catch(async (err) => {
-        if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
+        if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
           const samePattern = await this.get(indexPattern.id as string, displayErrors);
           // What keys changed from now and what the server returned
           const updatedBody = samePattern.getAsSavedObjectBody();

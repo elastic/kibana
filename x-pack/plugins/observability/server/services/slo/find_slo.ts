@@ -47,7 +47,7 @@ export class FindSLO {
   ): FindSLOResponse {
     return findSLOResponseSchema.encode({
       page: resultMeta.page,
-      per_page: resultMeta.perPage,
+      perPage: resultMeta.perPage,
       total: resultMeta.total,
       results: sloList,
     });
@@ -64,7 +64,7 @@ function computeSloWithSummary(
     const errorBudget = computeErrorBudget(slo, indicatorDataBySlo[slo.id]);
     sloListWithSummary.push({
       ...slo,
-      summary: { sli_value: sliValue, error_budget: errorBudget },
+      summary: { sliValue, errorBudget },
     });
   }
   return sloListWithSummary;
