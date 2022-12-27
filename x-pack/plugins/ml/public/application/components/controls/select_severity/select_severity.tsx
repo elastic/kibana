@@ -39,6 +39,11 @@ const optionsMap = {
   [criticalLabel]: ANOMALY_THRESHOLD.CRITICAL,
 };
 
+export interface TableSeverityPageUrlState {
+  pageKey: 'mlSelectSeverity';
+  pageUrlState: TableSeverity;
+}
+
 export interface TableSeverity {
   val: number;
   display: string;
@@ -83,7 +88,7 @@ export function optionValueToThreshold(value: number) {
 const TABLE_SEVERITY_DEFAULT = SEVERITY_OPTIONS[0];
 
 export const useTableSeverity = () => {
-  return usePageUrlState<TableSeverity>('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
+  return usePageUrlState<TableSeverityPageUrlState>('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
 };
 
 export const getSeverityOptions = () =>

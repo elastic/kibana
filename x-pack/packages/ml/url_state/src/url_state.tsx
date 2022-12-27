@@ -228,16 +228,21 @@ export class PageUrlStateService<T> {
   }
 }
 
+interface PageUrlState {
+  pageKey: string;
+  pageUrlState: object;
+}
+
 /**
  * Hook for managing the URL state of the page.
  */
-export const usePageUrlState = <PageUrlState extends object>(
-  pageKey: string,
-  defaultState?: PageUrlState
+export const usePageUrlState = <T extends PageUrlState>(
+  pageKey: T['pageKey'],
+  defaultState?: T['pageUrlState']
 ): [
-  PageUrlState,
-  (update: Partial<PageUrlState>, replaceState?: boolean) => void,
-  PageUrlStateService<PageUrlState>
+  T['pageUrlState'],
+  (update: Partial<T['pageUrlState']>, replaceState?: boolean) => void,
+  PageUrlStateService<T['pageUrlState']>
 ] => {
   const [appState, setAppState] = useUrlState('_a');
   const pageState = appState?.[pageKey];
@@ -248,9 +253,9 @@ export const usePageUrlState = <PageUrlState extends object>(
     setCallback.current = setAppState;
   }, [setAppState]);
 
-  const prevPageState = useRef<PageUrlState | undefined>();
+  const prevPageState = useRef<T['pageUrlState'] | undefined>();
 
-  const resultPageState: PageUrlState = useMemo(() => {
+  const resultPageState: T['pageUrlState'] = useMemo(() => {
     const result = {
       ...(defaultState ?? {}),
       ...(pageState ?? {}),
@@ -276,7 +281,7 @@ export const usePageUrlState = <PageUrlState extends object>(
   }, [pageState]);
 
   const onStateUpdate = useCallback(
-    (update: Partial<PageUrlState>, replaceState?: boolean) => {
+    (update: Partial<T['pageUrlState']>, replaceState?: boolean) => {
       if (!setCallback?.current) {
         throw new Error('Callback for URL state update has not been initialized.');
       }
@@ -293,7 +298,7 @@ export const usePageUrlState = <PageUrlState extends object>(
     [pageKey, resultPageState]
   );
 
-  const pageUrlStateService = useMemo(() => new PageUrlStateService<PageUrlState>(), []);
+  const pageUrlStateService = useMemo(() => new PageUrlStateService<T['pageUrlState']>(), []);
 
   useEffect(
     function updatePageUrlService() {

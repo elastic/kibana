@@ -59,6 +59,11 @@ export type ModelItem = TrainedModelConfigResponse & {
 
 export type ModelItemFull = Required<ModelItem>;
 
+interface PageUrlState {
+  pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
+  pageUrlState: ListingPageUrlState;
+}
+
 export const getDefaultModelsListState = (): ListingPageUrlState => ({
   pageIndex: 0,
   pageSize: 10,
@@ -88,7 +93,7 @@ export const ModelsList: FC<Props> = ({
   // allow for an internally controlled page state which stores the state in the URL
   // or an external page state, which is passed in as a prop.
   // external page state is used on the management page.
-  const [pageStateInternal, updatePageStateInternal] = usePageUrlState(
+  const [pageStateInternal, updatePageStateInternal] = usePageUrlState<PageUrlState>(
     ML_PAGES.TRAINED_MODELS_MANAGE,
     getDefaultModelsListState()
   );

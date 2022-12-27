@@ -32,6 +32,11 @@ import { useRefresh } from '../../routing/use_refresh';
 
 export type NodeItem = NodeDeploymentStatsResponse;
 
+interface PageUrlState {
+  pageKey: typeof ML_PAGES.TRAINED_MODELS_NODES;
+  pageUrlState: ListingPageUrlState;
+}
+
 export const getDefaultNodesListState = (): ListingPageUrlState => ({
   pageIndex: 0,
   pageSize: 10,
@@ -55,7 +60,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-  const [pageState, updatePageState] = usePageUrlState(
+  const [pageState, updatePageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.TRAINED_MODELS_NODES,
     getDefaultNodesListState()
   );

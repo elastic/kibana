@@ -41,6 +41,11 @@ const defaultSearchQuery = {
   match_all: {},
 };
 
+export interface AiOpsPageUrlState {
+  pageKey: 'AIOPS_INDEX_VIEWER';
+  pageUrlState: AiOpsIndexBasedAppState;
+}
+
 export interface AiOpsIndexBasedAppState {
   searchString?: Query['query'];
   searchQuery?: Query['query'];

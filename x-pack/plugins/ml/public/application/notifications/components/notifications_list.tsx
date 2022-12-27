@@ -47,6 +47,11 @@ const levelBadgeMap: Record<MlNotificationMessageLevel, IconColor> = {
   [ML_NOTIFICATIONS_MESSAGE_LEVEL.INFO]: 'default',
 };
 
+interface PageUrlState {
+  pageKey: typeof ML_PAGES.NOTIFICATIONS;
+  pageUrlState: ListingPageUrlState;
+}
+
 export const getDefaultNotificationsListState = (): ListingPageUrlState => ({
   pageIndex: 0,
   pageSize: 25,
@@ -81,7 +86,7 @@ export const NotificationsList: FC = () => {
 
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
-  const [pageState, updatePageState] = usePageUrlState(
+  const [pageState, updatePageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.NOTIFICATIONS,
     getDefaultNotificationsListState()
   );

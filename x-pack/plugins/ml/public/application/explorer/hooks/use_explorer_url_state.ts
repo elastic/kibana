@@ -11,15 +11,24 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 
 export type AnomalyExplorerUrlStateService = PageUrlStateService<ExplorerAppState>;
 
+interface LegacyExplorerPageUrlState {
+  pageKey: 'mlExplorerSwimlane';
+  pageUrlState: ExplorerAppState['mlExplorerSwimlane'];
+}
+
+interface ExplorerPageUrlState {
+  pageKey: typeof ML_PAGES.ANOMALY_EXPLORER;
+  pageUrlState: ExplorerAppState;
+}
+
 export function useExplorerUrlState() {
   /**
    * Originally `mlExplorerSwimlane` resided directly in the app URL state (`_a` URL state key).
    * With current URL structure it has been moved under the `explorer` key of the app state (_a).
    */
-  const [legacyExplorerState] =
-    usePageUrlState<ExplorerAppState['mlExplorerSwimlane']>('mlExplorerSwimlane');
+  const [legacyExplorerState] = usePageUrlState<LegacyExplorerPageUrlState>('mlExplorerSwimlane');
 
-  return usePageUrlState<ExplorerAppState>(ML_PAGES.ANOMALY_EXPLORER, {
+  return usePageUrlState<ExplorerPageUrlState>(ML_PAGES.ANOMALY_EXPLORER, {
     mlExplorerSwimlane: legacyExplorerState,
     mlExplorerFilter: {},
   });

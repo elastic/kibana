@@ -24,6 +24,11 @@ import { useMlKibana } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
 
+interface PageUrlState {
+  pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE;
+  pageUrlState: ListingPageUrlState;
+}
+
 export const getDefaultDFAListState = (): ListingPageUrlState => ({
   pageIndex: 0,
   pageSize: 10,
@@ -35,7 +40,7 @@ export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [globalState] = useUrlState('_g');
 
-  const [dfaPageState, setDfaPageState] = usePageUrlState(
+  const [dfaPageState, setDfaPageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
     getDefaultDFAListState()
   );

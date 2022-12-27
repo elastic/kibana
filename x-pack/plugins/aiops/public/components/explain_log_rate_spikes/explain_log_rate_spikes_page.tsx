@@ -36,7 +36,7 @@ import { DocumentCountContent } from '../document_count_content/document_count_c
 import { DatePickerWrapper } from '../date_picker_wrapper';
 import { SearchPanel } from '../search_panel';
 
-import { restorableDefaults } from './explain_log_rate_spikes_app_state';
+import { restorableDefaults, type AiOpsPageUrlState } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
 import type { GroupTableItem } from '../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
@@ -79,7 +79,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     setSelectedGroup,
   } = useSpikeAnalysisTableRowContext();
 
-  const [aiopsListState, setAiopsListState] = usePageUrlState(
+  const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
     'AIOPS_INDEX_VIEWER',
     restorableDefaults
   );

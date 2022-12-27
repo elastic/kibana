@@ -39,7 +39,10 @@ import type { TotalFieldsStats } from '../../../common/components/stats_table/co
 import { OverallStats } from '../../types/overall_stats';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
-import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
+import {
+  DataVisualizerIndexBasedAppState,
+  DataVisualizerIndexBasedPageUrlState,
+} from '../../types/index_data_visualizer_state';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
 import { SupportedFieldType, SavedSearchSavedObject } from '../../../../../common/types';
 import { useDataVisualizerKibana } from '../../../kibana_context';
@@ -143,10 +146,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const { notifications, uiSettings, data } = services;
   const { toasts } = notifications;
 
-  const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(
-    DATA_VISUALIZER_INDEX_VIEWER,
-    restorableDefaults
-  );
+  const [dataVisualizerListState, setDataVisualizerListState] =
+    usePageUrlState<DataVisualizerIndexBasedPageUrlState>(
+      DATA_VISUALIZER_INDEX_VIEWER,
+      restorableDefaults
+    );
   const [globalState, setGlobalState] = useUrlState('_g');
 
   const [currentSavedSearch, setCurrentSavedSearch] = useState(

@@ -30,6 +30,11 @@ import { type TimeBuckets, TimeBucketsInterval } from '../../../common/time_buck
 import { useDataSource } from '../../hooks/use_data_source';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 
+export interface ChangePointDetectionPageUrlState {
+  pageKey: 'changePoint';
+  pageUrlState: ChangePointDetectionRequestParams;
+}
+
 export interface ChangePointDetectionRequestParams {
   fn: string;
   splitField: string;
@@ -157,7 +162,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   }, [dataView]);
 
   const [requestParamsFromUrl, updateRequestParams] =
-    usePageUrlState<ChangePointDetectionRequestParams>('changePoint');
+    usePageUrlState<ChangePointDetectionPageUrlState>('changePoint');
 
   const resultQuery = useMemo<Query>(() => {
     return (
