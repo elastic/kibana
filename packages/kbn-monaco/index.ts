@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// global setup for supported languages
 import './src/register_globals';
 
 export { monaco } from './src/monaco_imports';

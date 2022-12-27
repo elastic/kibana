@@ -6,8 +6,8 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_VALUE, apmTransactionDurationIndicatorSchema } from '@kbn/slo-schema';
 import { InvalidTransformError } from '../../../errors';
-import { ALL_VALUE, apmTransactionDurationIndicatorSchema } from '../../../types/schema';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,

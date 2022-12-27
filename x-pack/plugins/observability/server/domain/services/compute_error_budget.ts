@@ -6,13 +6,13 @@
  */
 
 import moment from 'moment';
-import { ErrorBudget, IndicatorData, SLO, toMomentUnitOfTime } from '../models';
 import {
   calendarAlignedTimeWindowSchema,
   occurrencesBudgetingMethodSchema,
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
-} from '../../types/schema';
+} from '@kbn/slo-schema';
+import { ErrorBudget, IndicatorData, SLO, toMomentUnitOfTime } from '../models';
 import { toHighPrecision } from '../../utils/number';
 
 // More details about calculus: https://github.com/elastic/kibana/issues/143980
