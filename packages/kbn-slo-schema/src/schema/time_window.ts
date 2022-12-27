@@ -12,12 +12,12 @@ import { durationType } from './duration';
 
 const rollingTimeWindowSchema = t.type({
   duration: durationType,
-  is_rolling: t.literal<boolean>(true),
+  isRolling: t.literal<boolean>(true),
 });
 
 const calendarAlignedTimeWindowSchema = t.type({
   duration: durationType,
-  calendar: t.type({ start_time: dateType }),
+  calendar: t.type({ startTime: dateType }),
 });
 
 const timeWindowSchema = t.union([rollingTimeWindowSchema, calendarAlignedTimeWindowSchema]);
