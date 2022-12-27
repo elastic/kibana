@@ -7,7 +7,7 @@
 
 import { Filter } from '@kbn/es-query';
 import type { IUiSettingsClient, SavedObject } from 'kibana/server';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import type { ISearchSource } from 'src/plugins/data/common';
 import type { VisualizationSavedObjectAttributes } from 'src/plugins/visualizations/common';
 import {
@@ -29,7 +29,7 @@ export async function getSharingData(
   services: { uiSettings: IUiSettingsClient },
   currentSearchSource: ISearchSource,
   savedSearch: SavedSearchObjectType,
-  jobParamsTimeRange?: { min?: string | number; max?: string | number }
+  jobParamsTimeRange?: { min?: string | number; max?: string | number; timezone?: string }
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index');
@@ -71,13 +71,13 @@ export async function getSharingData(
   }
 
   // Combine the job's time filter into the SearchSource instance
-  let jobParamsFilter: Filter | undefined;
+  let jobParamsTimeRangeFilter: Filter | undefined;
   if ((jobParamsTimeRange?.min || jobParamsTimeRange?.max) && timeFieldName) {
-    let minTime: moment.Moment | undefined;
-    let maxTime: moment.Moment | undefined;
-    if (jobParamsTimeRange?.min) minTime = moment(jobParamsTimeRange.min);
-    if (jobParamsTimeRange?.max) maxTime = moment(jobParamsTimeRange.max);
-    jobParamsFilter = {
+    const { min, max } = jobParamsTimeRange;
+    const timezone = jobParamsTimeRange.timezone ?? 'UTC';
+    const minTime = min ? moment.tz(min, timezone) : undefined;
+    const maxTime = max ? moment.tz(max, timezone) : undefined;
+    jobParamsTimeRangeFilter = {
       meta: { index: index.id },
       query: {
         range: {
@@ -106,12 +106,12 @@ export async function getSharingData(
     savedSearchFilter = [savedSearchFilterTmp];
   }
 
-  if (savedSearchFilter && jobParamsFilter) {
-    combinedFilters = [jobParamsFilter, ...savedSearchFilter];
+  if (savedSearchFilter && jobParamsTimeRangeFilter) {
+    combinedFilters = [jobParamsTimeRangeFilter, ...savedSearchFilter];
   } else if (savedSearchFilter) {
     combinedFilters = [...savedSearchFilter];
-  } else if (jobParamsFilter) {
-    combinedFilters = [jobParamsFilter];
+  } else if (jobParamsTimeRangeFilter) {
+    combinedFilters = [jobParamsTimeRangeFilter];
   }
 
   if (combinedFilters) {

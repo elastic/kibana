@@ -6,38 +6,35 @@
  */
 
 import expect from '@kbn/expect';
-import supertest from 'supertest';
 import { DeepPartial } from 'utility-types';
 import type { CsvSavedSearchExportBodyType } from '../../../../x-pack/plugins/reporting/server/export_types/csv_saved_object/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const LOGS_SAVED_SEARCH_ID = '9747bd90-8581-11ed-97c5-596122858f69'; // "A Saved Search"
 const LOGS_SAVED_FILTERED_SEARCH_ID = 'd7a79750-3edd-11e9-99cc-4d80163ee9e7'; // "A Saved Search With a DATE FILTER"
+const ECOM_SAVED_SEARCH_ID = '6091ead0-1c6d-11ea-a100-8589bb9d7c6b';
 
 const getMockRequestBody = (
   obj: Partial<CsvSavedSearchExportBodyType>
 ): CsvSavedSearchExportBodyType => {
   return {
-    timerange: {
-      timezone: 'UTC',
-      ...obj?.timerange,
-    },
+    timerange: { ...obj?.timerange },
   };
 };
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
-  const supertestSvc = getService('supertest');
+  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
 
   const requestCsvFromSavedSearch = async (
     savedSearchId: string,
     obj: DeepPartial<CsvSavedSearchExportBodyType> = {}
-  ): Promise<supertest.Response> => {
+  ) => {
     const body = getMockRequestBody(obj);
-    return await supertestSvc
+    return await supertest
       .post(`/api/reporting/v1/generate/csv/saved-object/search:${savedSearchId}`)
       .set('kbn-xsrf', 'xxx')
       .send(body);
@@ -48,32 +45,29 @@ export default ({ getService }: FtrProviderContext) => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': false,
         'dateFormat:tz': 'UTC',
+        dateFormat: 'YYYY-MM-DD HH:mm:ss.SSS',
       });
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs'
       );
     });
-    after(async () => {
-      // FIXME
-      // await esArchiver.unload('x-pack/test/functional/es_archives/reporting/sales');
-      // await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
-      // await reportingAPI.deleteAllReports();
-    });
 
-    describe('Exports CSV with all fields', () => {
+    describe('export with no saved filters and no job post params', () => {
       let job: any;
       let path: string;
       let csvFile: string;
 
       before(async () => {
-        const { text, status } = await requestCsvFromSavedSearch(LOGS_SAVED_SEARCH_ID, {});
+        const { text, status } = await requestCsvFromSavedSearch(LOGS_SAVED_SEARCH_ID);
         expect(status).to.eql(200);
-
         const { payload } = JSON.parse(text);
         job = payload.job;
         path = payload.path;
+        await reportingAPI.waitForJobToFinish(path);
+      });
 
+      it('job response data is correct', () => {
         expect(path).to.be.a('string');
         expect(job).to.be.an('object');
         expect(job.attempts).equal(0);
@@ -82,8 +76,23 @@ export default ({ getService }: FtrProviderContext) => {
         expect(job.payload.objectType).equal('saved search');
         expect(job.payload.title).equal('A Saved Search');
         expect(job.payload.version).equal('7.17');
+      });
 
-        // wait for the the pending job to complete
+      it('csv file matches', async () => {
+        csvFile = (await reportingAPI.getCompletedJobOutput(path)) as string;
+        expectSnapshot(csvFile).toMatch();
+      });
+    });
+
+    describe('export with saved filters and no job post params', () => {
+      let path: string;
+      let csvFile: string;
+
+      before(async () => {
+        const { text, status } = await requestCsvFromSavedSearch(LOGS_SAVED_FILTERED_SEARCH_ID);
+        expect(status).to.eql(200);
+        const { payload } = JSON.parse(text);
+        path = payload.path;
         await reportingAPI.waitForJobToFinish(path);
       });
 
@@ -93,30 +102,73 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Exports CSV with time filter saved into the search', () => {
-      let job: any;
+    describe('export with saved filters and job post params', () => {
       let path: string;
       let csvFile: string;
 
       before(async () => {
-        const { text, status } = await requestCsvFromSavedSearch(LOGS_SAVED_FILTERED_SEARCH_ID);
+        const { text, status } = await requestCsvFromSavedSearch(LOGS_SAVED_FILTERED_SEARCH_ID, {
+          timerange: {
+            min: '2015-09-20 10:23:36.052',
+            max: '2015-09-20 10:25:55.744',
+          },
+        });
         expect(status).to.eql(200);
-
         const { payload } = JSON.parse(text);
-        job = payload.job;
         path = payload.path;
-
-        expect(path).to.be.a('string');
-        expect(job).to.be.an('object');
-        expect(job.attempts).equal(0);
-        expect(job.created_by).equal('elastic');
-        expect(job.jobtype).equal('csv_saved_object');
-        expect(job.payload.objectType).equal('saved search');
-        expect(job.payload.title).equal('A Saved Search With a DATE FILTER');
-        expect(job.payload.version).equal('7.17');
-
-        // wait for the the pending job to complete
         await reportingAPI.waitForJobToFinish(path);
+      });
+
+      it('csv file matches', async () => {
+        csvFile = (await reportingAPI.getCompletedJobOutput(path)) as string;
+        expectSnapshot(csvFile).toMatch();
+      });
+    });
+
+    describe('export with no saved filters and job post params', () => {
+      let path: string;
+      let csvFile: string;
+
+      before(async () => {
+        const { text, status } = await requestCsvFromSavedSearch(LOGS_SAVED_SEARCH_ID, {
+          timerange: {
+            min: '2015-09-20 10:23:07.001',
+            max: '2015-09-20 10:25:44.979',
+          },
+        });
+        expect(status).to.eql(200);
+        const { payload } = JSON.parse(text);
+        path = payload.path;
+        await reportingAPI.waitForJobToFinish(path);
+      });
+
+      it('csv file matches', async () => {
+        csvFile = (await reportingAPI.getCompletedJobOutput(path)) as string;
+        expectSnapshot(csvFile).toMatch();
+      });
+    });
+
+    describe('export with no saved filters and job post params with custom time zone', () => {
+      let path: string;
+      let csvFile: string;
+
+      before(async () => {
+        await reportingAPI.initEcommerce();
+        const { text, status } = await requestCsvFromSavedSearch(ECOM_SAVED_SEARCH_ID, {
+          timerange: {
+            timezone: 'US/Alaska',
+            min: '2019-07-11 00:00:00.000',
+            max: '2019-07-12 00:00:00.000',
+          },
+        });
+        expect(status).to.eql(200);
+        const { payload } = JSON.parse(text);
+        path = payload.path;
+        await reportingAPI.waitForJobToFinish(path);
+      });
+
+      after(async () => {
+        await reportingAPI.teardownEcommerce();
       });
 
       it('csv file matches', async () => {
@@ -126,7 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('validation', () => {
-      it('Return a 404', async () => {
+      it('with saved search 404', async () => {
         const { body } = await requestCsvFromSavedSearch('gobbledygook', {});
         const expectedBody = {
           error: 'Not Found',
@@ -136,7 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).to.eql(expectedBody);
       });
 
-      it('Invalid min time range', async () => {
+      it('with invalid min time range', async () => {
         const { body } = await requestCsvFromSavedSearch(LOGS_SAVED_SEARCH_ID, {
           timerange: { min: `shmurble` },
         });
@@ -148,7 +200,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).to.eql(expectedBody);
       });
 
-      it('Invalid max time range', async () => {
+      it('with invalid max time range', async () => {
         const { body } = await requestCsvFromSavedSearch(LOGS_SAVED_SEARCH_ID, {
           timerange: { max: `shmurble` },
         });
