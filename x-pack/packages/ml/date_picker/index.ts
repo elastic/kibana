@@ -11,4 +11,8 @@ export {
   MlFullTimeRangeSelector,
   type MlFullTimeRangeSelectorProps,
 } from './src/components/ml_full_time_range_selector';
+export {
+  getTimeFilterRange,
+  type GetTimeFieldRangeResponse,
+} from './src/services/full_time_range_selector_service';
 export { type FrozenTierPreference, FROZEN_TIER_PREFERENCE } from './src/storage';

@@ -35,28 +35,41 @@ export async function setFullTimeRange(
   query?: QueryDslQueryContainer,
   excludeFrozenData?: boolean
 ): Promise<GetTimeFieldRangeResponse> {
-  const runtimeMappings = dataView.getRuntimeMappings();
-  const resp = await getTimeFieldRange({
-    index: dataView.getIndexPattern(),
-    timeFieldName: dataView.timeFieldName,
-    query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
-    ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
-    http,
-  });
+  try {
+    const runtimeMappings = dataView.getRuntimeMappings();
+    const resp = await getTimeFieldRange({
+      index: dataView.getIndexPattern(),
+      timeFieldName: dataView.timeFieldName,
+      query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
+      ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
+      http,
+    });
 
-  if (resp.start.epoch && resp.end.epoch) {
-    timefilter.setTime({
-      from: moment(resp.start.epoch).toISOString(),
-      to: moment(resp.end.epoch).toISOString(),
-    });
-  } else {
-    toasts.addWarning({
-      title: i18n.translate('xpack.ml.datePicker.fullTimeRangeSelector.noResults', {
-        defaultMessage: 'No results match your search criteria',
-      }),
-    });
+    if (resp.start.epoch && resp.end.epoch) {
+      timefilter.setTime({
+        from: moment(resp.start.epoch).toISOString(),
+        to: moment(resp.end.epoch).toISOString(),
+      });
+    } else {
+      toasts.addWarning({
+        title: i18n.translate('xpack.ml.datePicker.fullTimeRangeSelector.noResults', {
+          defaultMessage: 'No results match your search criteria',
+        }),
+      });
+    }
+
+    return resp;
+  } catch (resp) {
+    toasts.addDanger(
+      i18n.translate(
+        'xpack.ml.datePicker.fullTimeRangeSelector.errorSettingTimeRangeNotification',
+        {
+          defaultMessage: 'An error occurred setting the time range.',
+        }
+      )
+    );
+    return resp;
   }
-  return resp;
 }
 
 export function getTimeFilterRange(timefilter: TimefilterContract): TimeRange {
