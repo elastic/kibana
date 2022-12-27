@@ -49,7 +49,7 @@ export const allowedExperimentalValues = Object.freeze({
    * - We add a Kibana Advanced Setting that controls this behavior (on/off and log level).
    * - We show a table with plain execution logs on the Rule Details page.
    */
-  extendedRuleExecutionLoggingEnabled: true,
+  extendedRuleExecutionLoggingEnabled: false,
 
   /**
    * Enables the SOC trends timerange and stats on D&R page

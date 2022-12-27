@@ -195,7 +195,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     sortOrder: sortDirection,
   });
   const items = events?.events ?? [];
-  debugger;
   const maxEvents = events?.total ?? 0;
 
   // Cache UUID field from data view as it can be expensive to iterate all data view fields

@@ -171,11 +171,11 @@ export const createClientForExecutors = (
     } = metrics ?? {};
 
     if (newStatus === RuleExecutionStatus.failed) {
-      ruleResultService?.addLastRunError(message);
+      ruleResultService?.addLastRunError(`ERROR: ${message}`);
     } else if (newStatus === RuleExecutionStatus['partial failure']) {
-      ruleResultService?.addLastRunWarning(message);
+      ruleResultService?.addLastRunWarning(`WARNING: ${message}`);
     } else {
-      ruleResultService?.setLastRunOutcomeMessage(message);
+      ruleResultService?.setLastRunOutcomeMessage(`INFO: ${message}`);
     }
 
     if (totalSearchDurationMs) {

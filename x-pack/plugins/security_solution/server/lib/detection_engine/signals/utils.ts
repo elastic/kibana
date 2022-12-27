@@ -241,9 +241,8 @@ export const getExceptions = async ({
   client: ExceptionListClient;
   lists: ListArray;
 }): Promise<ExceptionListItemSchema[]> => {
-  if (true) {
+  if (lists.length > 0) {
     try {
-      throw new Error('no exception lists found');
       const listIds = lists.map(({ list_id: listId }) => listId);
       const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
 
