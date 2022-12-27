@@ -21,6 +21,13 @@ import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './dif
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
 }
+function getPanelDescription(input: EmbeddableInput, output: EmbeddableOutput) {
+  return input.hidePanelTitles
+    ? ''
+    : input.description === undefined
+    ? output.defaultDescription
+    : input.description;
+}
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
@@ -61,6 +68,7 @@ export abstract class Embeddable<
 
     this.output = {
       title: getPanelTitle(input, output),
+      description: getPanelDescription(input, output),
       ...(this.reportsEmbeddableLoad()
         ? {}
         : {
@@ -187,6 +195,10 @@ export abstract class Embeddable<
     return this.output.title || '';
   }
 
+  public getDescription(): string {
+    return this.output.description || '';
+  }
+
   /**
    * Returns the top most parent embeddable, or itself if this embeddable
    * is not within a parent.
@@ -283,6 +295,7 @@ export abstract class Embeddable<
       this.inputSubject.next(newInput);
       this.updateOutput({
         title: getPanelTitle(this.input, this.output),
+        description: getPanelDescription(this.input, this.output),
       } as Partial<TEmbeddableOutput>);
       if (oldLastReloadRequestTime !== newInput.lastReloadRequestTime) {
         this.reload();

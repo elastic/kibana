@@ -131,6 +131,7 @@ export class SavedSearchEmbeddable
       initialInput,
       {
         defaultTitle: savedSearch.title,
+        defaultDescription: savedSearch.description,
         editUrl,
         editPath,
         editApp: 'discover',
@@ -593,10 +594,6 @@ export class SavedSearchEmbeddable
 
   public getInspectorAdapters() {
     return this.inspectorAdapters;
-  }
-
-  public getDescription() {
-    return this.savedSearch.description;
   }
 
   /**

@@ -8,7 +8,7 @@
 
 import { Container, isErrorEmbeddable } from '../../../..';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { CustomizePanelTitleAction } from './customize_panel_action';
+import { CustomizePanelAction } from './customize_panel_action';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
@@ -55,7 +55,7 @@ beforeEach(async () => {
 
 test('Updates the embeddable title when given', async () => {
   const getUserData = () => Promise.resolve({ title: 'What is up?' });
-  const customizePanelAction = new CustomizePanelTitleAction(getUserData);
+  const customizePanelAction = new CustomizePanelAction(getUserData);
   expect(embeddable.getInput().title).toBeUndefined();
   expect(embeddable.getTitle()).toBe('Hello Robert Baratheon');
   await customizePanelAction.execute({ embeddable });

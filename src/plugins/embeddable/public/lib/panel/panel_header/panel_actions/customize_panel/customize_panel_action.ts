@@ -15,13 +15,13 @@ export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
 
 type GetUserData = (
   context: ActionContext
-) => Promise<{ title: string | undefined; hideTitle?: boolean }>;
+) => Promise<{ title: string | undefined; description?: string | undefined; hideTitle?: boolean }>;
 
 interface ActionContext {
   embeddable: IEmbeddable;
 }
 
-export class CustomizePanelTitleAction implements Action<ActionContext> {
+export class CustomizePanelAction implements Action<ActionContext> {
   public readonly type = ACTION_CUSTOMIZE_PANEL;
   public id = ACTION_CUSTOMIZE_PANEL;
   public order = 40;
@@ -30,7 +30,7 @@ export class CustomizePanelTitleAction implements Action<ActionContext> {
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.customizePanel.action.displayName', {
-      defaultMessage: 'Edit panel title',
+      defaultMessage: 'Edit panel settings',
     });
   }
 
@@ -44,7 +44,7 @@ export class CustomizePanelTitleAction implements Action<ActionContext> {
 
   public async execute({ embeddable }: ActionContext) {
     const data = await this.getDataFromUser({ embeddable });
-    const { title, hideTitle } = data;
-    embeddable.updateInput({ title, hidePanelTitles: hideTitle });
+    const { title, description, hideTitle } = data;
+    embeddable.updateInput({ title, description, hidePanelTitles: hideTitle });
   }
 }

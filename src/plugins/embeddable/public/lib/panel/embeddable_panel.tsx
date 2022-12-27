@@ -43,11 +43,11 @@ import { ViewMode } from '../types';
 import { EmbeddablePanelError } from './embeddable_panel_error';
 import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
-import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
+import { CustomizePanelAction } from './panel_header/panel_actions/customize_panel/customize_panel_action';
 import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
 import { EditPanelAction } from '../actions';
-import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
+import { CustomizePanelEditor } from './panel_header/panel_actions/customize_panel/customize_panel_editor';
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableStateTransfer, isSelfStyledEmbeddable } from '..';
 
@@ -121,7 +121,7 @@ interface InspectorPanelAction {
 }
 
 interface BasePanelActions {
-  customizePanelTitle: CustomizePanelTitleAction;
+  customizePanel: CustomizePanelAction;
   addPanel: AddPanelAction;
   inspectPanel: InspectPanelAction;
   removePanel: RemovePanelAction;
@@ -271,6 +271,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.state.error) contentAttrs['data-error'] = true;
 
     const title = this.props.embeddable.getTitle();
+    const description = this.props.embeddable.getDescription();
     const headerId = this.generateId();
 
     const selfStyledOptions = isSelfStyledEmbeddable(this.props.embeddable)
@@ -292,13 +293,14 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             getActionContextMenuPanel={this.getActionContextMenuPanel}
             hidePanelTitle={this.state.hidePanelTitle || !!selfStyledOptions?.hideTitle}
             isViewMode={viewOnlyMode}
-            customizeTitle={
-              'customizePanelTitle' in this.state.universalActions
-                ? this.state.universalActions.customizePanelTitle
+            customizePanel={
+              'customizePanel' in this.state.universalActions
+                ? this.state.universalActions.customizePanel
                 : undefined
             }
             closeContextMenu={this.state.closeContextMenu}
             title={title}
+            description={description}
             index={this.props.index}
             badges={this.state.badges}
             notifications={this.state.notifications}
@@ -389,16 +391,20 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     }
     const createGetUserData = (overlays: OverlayStart, theme: ThemeServiceStart) =>
       async function getUserData(context: { embeddable: IEmbeddable }) {
-        return new Promise<{ title: string | undefined; hideTitle?: boolean }>((resolve) => {
-          const session = overlays.openModal(
+        return new Promise<{
+          title: string | undefined;
+          description: string | undefined;
+          hideTitle?: boolean;
+        }>((resolve) => {
+          const flyoutInstance = overlays.openFlyout(
             toMountPoint(
-              <CustomizePanelModal
+              <CustomizePanelEditor
                 embeddable={context.embeddable}
-                updateTitle={(title, hideTitle) => {
-                  session.close();
-                  resolve({ title, hideTitle });
+                updateInput={({ title, description, hidePanelTitles }) => {
+                  flyoutInstance.close();
+                  resolve({ title, description, hideTitle: hidePanelTitles });
                 }}
-                cancel={() => session.close()}
+                cancel={() => flyoutInstance.close()}
               />,
               { theme$: theme.theme$ }
             ),
@@ -413,7 +419,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     // registry.
     return {
       ...actions,
-      customizePanelTitle: new CustomizePanelTitleAction(
+      customizePanel: new CustomizePanelAction(
         createGetUserData(this.props.overlays, this.props.theme)
       ),
       addPanel: new AddPanelAction(
