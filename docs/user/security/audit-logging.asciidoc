@@ -313,7 +313,11 @@ Possible values:
 `deletion`
 
 | [[field-event-outcome]] `event.outcome`
-| Denotes whether the event represents a success or failure. 
+a| Denotes whether the event represents a success or failure: 
+
+* Any actions that the user is not authorized to perform are logged with outcome:  `failure`
+* Authorized read operations are only logged after successfully fetching the data from {es} with outcome: `success`
+* Authorized create, update, or delete operations are logged before attempting the operation in {es} with outcome: `unknown`
 
 Possible values:
 `success`,
