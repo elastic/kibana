@@ -11,8 +11,50 @@
   },
   "references": [],
   "type": "index-pattern",
-  "updated_at": "2022-12-28T00:46:18.617Z",
-  "version": "WzEzLDFd"
+  "updated_at": "2022-12-28T19:02:39.715Z",
+  "version": "WzI4MCwxXQ=="
+}
+
+{
+  "attributes": {
+    "columns": [
+      "clientip",
+      "extension"
+    ],
+    "description": "",
+    "grid": {},
+    "hideChart": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"meta\":{\"alias\":null,\"negate\":false,\"disabled\":false,\"type\":\"phrase\",\"key\":\"extension.raw\",\"params\":{\"query\":\"gif\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match_phrase\":{\"extension.raw\":\"gif\"}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "title": "A Saved Search with a terms filter"
+  },
+  "coreMigrationVersion": "7.17.9",
+  "id": "339d7a10-86e3-11ed-a42f-1b290a5e335d",
+  "migrationVersion": {
+    "search": "7.9.3"
+  },
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2022-12-28T19:09:50.004Z",
+  "version": "WzI4NSwxXQ=="
 }
 
 {
@@ -58,8 +100,8 @@
     }
   ],
   "type": "search",
-  "updated_at": "2022-12-28T00:48:20.329Z",
-  "version": "Wzk3LDFd"
+  "updated_at": "2022-12-28T19:02:39.715Z",
+  "version": "WzI4MSwxXQ=="
 }
 
 {
@@ -95,8 +137,8 @@
     }
   ],
   "type": "search",
-  "updated_at": "2022-12-28T00:46:18.617Z",
-  "version": "WzE0LDFd"
+  "updated_at": "2022-12-28T19:02:39.715Z",
+  "version": "WzI4MiwxXQ=="
 }
 
 {
@@ -118,7 +160,7 @@
         "desc"
       ]
     ],
-    "title": "A Saved Search with date filter",
+    "title": "A Saved Search with a date filter",
     "version": 1
   },
   "coreMigrationVersion": "7.17.9",
@@ -139,6 +181,6 @@
     }
   ],
   "type": "search",
-  "updated_at": "2022-12-28T00:48:34.902Z",
-  "version": "WzEyNSwxXQ=="
+  "updated_at": "2022-12-28T19:10:04.195Z",
+  "version": "WzI4NCwxXQ=="
 }
