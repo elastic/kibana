@@ -6,8 +6,8 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_VALUE, apmTransactionDurationIndicatorSchema } from '@kbn/slo-schema';
 import { InvalidTransformError } from '../../../errors';
-import { ALL_VALUE, apmTransactionDurationIndicatorSchema } from '../../../types/schema';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
@@ -56,18 +56,18 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       });
     }
 
-    if (indicator.params.transaction_name !== ALL_VALUE) {
+    if (indicator.params.transactionName !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.name': indicator.params.transaction_name,
+          'transaction.name': indicator.params.transactionName,
         },
       });
     }
 
-    if (indicator.params.transaction_type !== ALL_VALUE) {
+    if (indicator.params.transactionType !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.type': indicator.params.transaction_type,
+          'transaction.type': indicator.params.transactionType,
         },
       });
     }

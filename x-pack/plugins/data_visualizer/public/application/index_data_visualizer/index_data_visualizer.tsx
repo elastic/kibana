@@ -9,26 +9,26 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual, throttle } from 'lodash';
+import { EuiResizeObserver } from '@elastic/eui';
 import { encode } from '@kbn/rison';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { EuiResizeObserver } from '@elastic/eui';
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import {
+  Provider as UrlStateContextProvider,
+  parseUrlState,
+  isRisonSerializationRequired,
+  type Accessor,
+  type Dictionary,
+  type SetUrlState,
+} from '@kbn/ml-url-state';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
 } from './components/index_data_visualizer_view';
-import {
-  Accessor,
-  Provider as UrlStateContextProvider,
-  Dictionary,
-  parseUrlState,
-  SetUrlState,
-  getNestedProperty,
-  isRisonSerializationRequired,
-} from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
