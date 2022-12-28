@@ -185,10 +185,13 @@ const getAccountsStatsQuery = (index: string): SearchRequest => ({
   _source: false,
 });
 
-const getCspmAccountsStats = (aggregatedResourcesStats: AccountsStats): CspmAccountsStats[] => {
+const getCspmAccountsStats = (
+  aggregatedResourcesStats: AccountsStats,
+  logger: Logger
+): CspmAccountsStats[] => {
   const accounts = aggregatedResourcesStats.accounts.buckets;
 
-  const accountsStats = accounts.map((account) => {
+  const cspmAccountsStats = accounts.map((account) => {
     return {
       account_id: account.key,
       latest_findings_doc_count: account.doc_count,
@@ -206,8 +209,9 @@ const getCspmAccountsStats = (aggregatedResourcesStats: AccountsStats): CspmAcco
       pods_count: account.resources.pods_count.value,
     };
   });
+  logger.info('CSPM telemetry: accounts stats was sent');
 
-  return accountsStats;
+  return cspmAccountsStats;
 };
 
 export const getAccountsStats = async (
@@ -225,7 +229,7 @@ export const getAccountsStats = async (
       );
 
       const cspmAccountsStats = accountsStatsResponse.aggregations
-        ? getCspmAccountsStats(accountsStatsResponse.aggregations)
+        ? getCspmAccountsStats(accountsStatsResponse.aggregations, logger)
         : [];
 
       return cspmAccountsStats;
