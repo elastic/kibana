@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Control, Controller } from 'react-hook-form';
 
 import { useFetchIndices } from '../../../hooks/use_fetch_indices';
-import type { CreateSLOParamsForFE } from '../../../../server/types/rest_specs';
+import type { CreateSLOParamsForFE } from '../../../typings';
 
 interface SloEditFormDefinitionCustomKqlProps {
   control: Control<CreateSLOParamsForFE>;

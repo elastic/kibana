@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { Control, Controller, UseFormWatch } from 'react-hook-form';
 
 import { SloEditFormObjectivesTimeslices } from './slo_edit_form_objectives_timeslices';
-import type { CreateSLOParamsForFE } from '../../../../server/types/rest_specs';
+import type { CreateSLOParamsForFE } from '../../../typings';
 
 export const BUDGETING_METHOD_OPTIONS = [
   { value: 'occurrences', text: 'Occurences' },
@@ -54,7 +54,7 @@ export function SloEditFormObjectives({ control, watch }: SloEditFormObjectivesP
           </EuiFormLabel>
 
           <Controller
-            name="budgeting_method"
+            name="budgetingMethod"
             shouldUnregister
             control={control}
             rules={{ required: true }}
@@ -72,7 +72,7 @@ export function SloEditFormObjectives({ control, watch }: SloEditFormObjectivesP
           </EuiFormLabel>
 
           <Controller
-            name="time_window.duration"
+            name="timeWindow.duration"
             shouldUnregister
             control={control}
             rules={{ required: true }}
@@ -112,7 +112,7 @@ export function SloEditFormObjectives({ control, watch }: SloEditFormObjectivesP
         </EuiFlexItem>
       </EuiFlexGrid>
 
-      {watch('budgeting_method') === 'timeslices' ? (
+      {watch('budgetingMethod') === 'timeslices' ? (
         <>
           <EuiSpacer size="xl" />
           <SloEditFormObjectivesTimeslices control={control} />

@@ -113,7 +113,6 @@ type SLOResponse = t.OutputOf<typeof SLOResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof SLOWithSummaryResponseSchema>;
 
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
-type CreateSLOParamsForFE = t.OutputOf<typeof createSLOParamsSchema.props.body>;
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
 
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
@@ -123,7 +122,6 @@ type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
-type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
 
 export {
   SLOResponseSchema,
@@ -140,12 +138,10 @@ export type {
   SLOResponse,
   SLOWithSummaryResponse,
   CreateSLOParams,
-  CreateSLOParamsForFE,
   CreateSLOResponse,
   GetSLOResponse,
   UpdateSLOParams,
   UpdateSLOResponse,
   FindSLOParams,
   FindSLOResponse,
-  BudgetingMethod,
 };

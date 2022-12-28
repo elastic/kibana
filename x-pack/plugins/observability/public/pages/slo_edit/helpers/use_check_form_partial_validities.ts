@@ -6,7 +6,7 @@
  */
 
 import { FormState, UseFormGetFieldState } from 'react-hook-form';
-import type { CreateSLOParamsForFE } from '../../../../server/types/rest_specs';
+import type { CreateSLOParamsForFE } from '../../../typings';
 
 interface UseCheckFormPartialValiditiesProps {
   getFieldState: UseFormGetFieldState<CreateSLOParamsForFE>;
@@ -27,7 +27,7 @@ export function useCheckFormPartialValidities({
   ).every((field) => getFieldState(field, formState).error === undefined);
 
   const isObjectiveValid = (
-    ['budgeting_method', 'time_window.duration', 'objective.target'] as const
+    ['budgetingMethod', 'timeWindow.duration', 'objective.target'] as const
   ).every((field) => getFieldState(field, formState).error === undefined);
 
   const isDescriptionValid = (['name'] as const).every(

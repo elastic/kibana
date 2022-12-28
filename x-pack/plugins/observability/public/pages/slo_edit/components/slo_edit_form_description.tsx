@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Control, Controller } from 'react-hook-form';
-import type { CreateSLOParamsForFE } from '../../../../server/types/rest_specs';
+import type { CreateSLOParamsForFE } from '../../../typings';
 
 interface SloEditFormDescriptionProps {
   control: Control<CreateSLOParamsForFE>;

@@ -10,7 +10,7 @@ import { EuiFieldNumber, EuiFlexGrid, EuiFlexItem, EuiFormLabel } from '@elastic
 import { i18n } from '@kbn/i18n';
 import { Control, Controller } from 'react-hook-form';
 
-import type { CreateSLOParamsForFE } from '../../../../server/types/rest_specs';
+import type { CreateSLOParamsForFE } from '../../../typings';
 
 interface SloEditFormObjectivesTimeslicesProps {
   control: Control<CreateSLOParamsForFE>;
@@ -26,7 +26,7 @@ export function SloEditFormObjectivesTimeslices({ control }: SloEditFormObjectiv
           })}
         </EuiFormLabel>
         <Controller
-          name="objective.timeslice_target"
+          name="objective.timesliceTarget"
           shouldUnregister
           control={control}
           rules={{
@@ -54,7 +54,7 @@ export function SloEditFormObjectivesTimeslices({ control }: SloEditFormObjectiv
         </EuiFormLabel>
 
         <Controller
-          name="objective.timeslice_window"
+          name="objective.timesliceWindow"
           shouldUnregister
           control={control}
           rules={{ required: true, min: 1, max: 120 }}

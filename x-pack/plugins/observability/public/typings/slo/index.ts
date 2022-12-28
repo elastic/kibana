@@ -5,31 +5,34 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import type { CreateSLOParamsForFE } from '../../../server/types/rest_specs';
+import { budgetingMethodSchema, createSLOParamsSchema } from '@kbn/slo-schema';
 
-type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
+export type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
 
-interface Duration {
+export interface Duration {
   value: number;
   unit: DurationUnit;
 }
 
-type SLO = { id: string } & CreateSLOParamsForFE;
+export type CreateSLOParamsForFE = t.OutputOf<typeof createSLOParamsSchema.props.body>;
 
-interface SLOList {
+export type SLO = { id: string } & CreateSLOParamsForFE;
+
+export type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
+
+export interface SLOList {
   results: SLO[];
   page: number;
   perPage: number;
   total: number;
 }
 
-interface BurnRateRuleParams extends RuleTypeParams {
+export interface BurnRateRuleParams extends RuleTypeParams {
   sloId: string;
   burnRateThreshold: number;
   maxBurnRateThreshold: number;
   longWindow: Duration;
   shortWindow: Duration;
 }
-
-export type { BurnRateRuleParams, Duration, DurationUnit, SLO, SLOList };

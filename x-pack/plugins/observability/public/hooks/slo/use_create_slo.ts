@@ -7,7 +7,7 @@
 
 import { useCallback, useState } from 'react';
 import { useKibana } from '../../utils/kibana_react';
-import type { CreateSLOParamsForFE } from '../../../server/types/rest_specs';
+import type { CreateSLOParamsForFE } from '../../typings';
 
 interface UseCreateSlo {
   loading: boolean;
