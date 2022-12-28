@@ -41,7 +41,7 @@ import { resolveSavedQueryId } from './saved_query_service';
 export const createPureLogStreamQueryStateMachine = (
   initialContext: LogStreamQueryContextWithDataViews
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QEUCuYBOBPAdKgdgJZEAuhAhgDaEBekAxANoAMAuoqAA4D2shZ3fBxAAPRAFoATAE5JOAIySALM0XSAbEukBmZgFZ1AGhBYJ8gOxKcey82nTL5+QA512yQF8PxtJlzF+CmoaYigAMQxuAFsAVQxKehiAJQAZAH0ASQA5DIAVDIBBFIyALQBRABEWdiQQHj4BIVqxBHE9PRx1LvVzc2d5eWZ1Z37jU1bzdRxmPvV5bU0lSX6ldS8fdGwcALIqWlCI6LiEpLKAZQB5FIA1bIBxNLOC68q05BiypIBNTKq2YXqgUEwha4m0rhwzj0+j0kjhdnUsKMJkQ7hwkjs5mW83MOhs8nWIF8WwwcG4lAAbqEzuQKZBiVgMhB6BBBGBtvgKdwANbshk4UmwclU-BQGl0iAMpkIYhcgDG5Ea1WqAN4QKaoFBzm0Cnk0mczCUemkM2G7TGiEUOpk-UGBvk6n0PUJ-MFwuptPpm0ZzMwkQwOE4lEVADNuBgojhXWTKR6JVKIDLOdwFUq2CraoDGiCJAsrNoBlo+tIlC43BaEMpnOjLNqZBZnLY9C7vTgABbkWAM+hnXIFXJlNJhJIXACyaWS6QA0mUfgBhAASBSyd0qGa4auzzUQGisLj0C00Bjmkgryxw7iNuOUunBkixLb87c73fenx+w7HjzKBSSi7SABCv5pIuy6rn8NQbg0hDAtulZKDq2jmOCAx6FCRZYhWehWL0vS6BiCG9O0j5bB2XbevQYQZCkA5JGcQ4juOZw-n+C6AcBoErmu-yZpuMEaqIiDGtI6IOgMzj3r06jSFhOG4fhhpIeYNhrN4RKtmR3YVP2BRpLcZQAOr0Zx4HrnUfGwZqlr3iJMzMAiUJwtC8gVsM0yGss7TaAWEl9CRuCaa2FJ7BAiqhPQ1xFBk2n5BcWRDgU1HcZB5nQZZgkILuNYqMpKySPMehnrI6LaLCzCSNoKiyN55j+c+5FPsF1ChWQooRVFMUZHFjwxHOc5lJUyWqmlAktOCUzmEM2FLCMeiKIVKKVsVFVlRVVUVUhXhqfg3AQHAwgMsN6o5q0CFWFCMJwhiGhIhWYLKDgUklsa3mDIidUEDsQS0JAR1blZrQFuYOD2AMvR4loaF3RVwP3tJSjKe4ynSIodVfXsISiocsTxH9-EnWCxo4Fo4l6iaPTKQt4ziPY1h9GhJaTHYyi1Wp0ZCrGoril6fhMnj6Wgkh1Yk2WzCXswjYVoo8jTMoiIGo62ig9odUhuQhCUJASQxiKYqepK3p87xI0Eyh0zyKscKInCyGnotlXMJCdhKBJDhdDo0h1YFfj86NlrSB0SEofIaHYQ4mGLVICwKMppYh84AfuDoXsvkFIW+ydCzVnqjb3ro1UVksIm2hLDrIY6sIpw1WyyunxvHXBsiOzIykh3M+h2IXMiQgMpc9As+ieGzGmp41IVhaKGdwdJ2flR7eq9A6Shnt3b0WMMyiSAeW9bR4QA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QEUCuYBOBPAdKgdgJZEAuhAhgDaEBekAxANoAMAuoqAA4D2shZ3fBxAAPRAFoALAE5JOAMzMATM1kAOAKzLJANjUAaEFgkBGHQHYcJ+Sek6T5nfIvnzkgL7vDaTLmL8KahpiKAAxDG4AWwBVDEp6ACUAUQBlAHkAGQA1AEkAOQBxAH0UgEEspIARIuRopISATSKcypZ2JBAePgEhDrEEcQ01aRxlNSdJE2YdJTUTDUNjBHkRnQ0TcfslE0ld+U9vdGwcfzIqWhDwqNj4-JyAFRzSjJyALSqi0IS0gFki6ISGTawi6AUEwn64nkSnkOCGzkkGm25nkrgWRlMzDkQ2kQymKOk0wsBxAPmOGDg3EoADcQilyNTIGSsDkIPQIIIwCd8NTuABrLnMnAU2BU2n4KD0xkQZmshDEXkAY3IPTawI6oJ6EIksw0OCU0nManGkkczDUkgti0Q1mYODc2jURvWOyUOhJQpFYrpDKZRxZbMwEQwOE4lBVADNuBhIjhPZSaT7pbKIPKedxlaq2OquLwwb1QJCNDodDhLbjzIbK1o3daEEoNHrzGZDapmNY1G6PF5Sf6cAALciwZn0FL3Ur3JKfb5-AEZIoAaSSTQAwgAJUqFKo5zp5rV9RB2SyEnSSeQaXZqZwzOsrMtOo0zDaKEzzD19wfD-30Wr1JpfX4SiSUoEnXIoACEQKKddNwKbc2BBPdCHBA961NUZ1DUZgNFcBslDrNYcFkVRUQcOxJCxfYeyFT8R1CHIMknBIUmnQCUmA0C1wgqCYK3VoEI1JCUMLRAdGUIjSKdN1cRheQCL1YjpFIytTyxd1qI-IcR0qCdSiKXIkgAdRY3i4P49pc26ZCC1EG1ZiUe1pFfNYLQorFJDrSsrAsGQG3NXZi3Uw5fAHLS+wpalzggFUQnoLJnhaCccjSPJPlKBj4Is3crOE2yECPIjcR2S1sKPcxb2YWEVgtEizA2GYNHfELaPCsBIuoaKyAlOKEp0x4UpKaIVxXJIqkyxCcps-oVjtSQlEcaxZmUEtXAqqrpBqpS6vGBsmuOdrCE62L4pePrktSlIhpGsbzIm-NtQGawFPMN0NlsSYZJ0OtdhMe1TXMIY5pmLDpD23ADqO7qTsS-rUtCdKMnGwTJoekwGz+hsLEbJzhlPAjmEseY9Ao+btkbTwe3wbgIDgYRmTu-cRIGJxLDGCYpmB+Y6yhBwFHkU0nMcS03RLMG8CIUhAloSAGesh7BhUbzpAbDaVDmfCMQGJQDRwK8StxXytAvMXTil4IJSuGI4ll3Ki1PfU6pWN1oVfbnlasBFTw0RQZHPMWvUTCUpT9XxWRtqaJCGO0S2VixBZemQ6zRtQyxWuxKMJXCxYjchCEoSAEgTcVJV9GV-TD5H7tQwYrysZXzCxb2AeGdEln5lOGzMFR05UXaNOasLfHD1HpBGVRLSwnCXqRbnbDHtHtavZXdGmNQxZakKIeH1DSKI2wVMUVQLTkzXdjtQ05uNU8r7mdfB+OBUou3pnl9GDZAbE7WnA1pYz6ItxZgmhviYO+X4QoRSijFCUz88oN1+p2NycxhimmmHWJQFF9Q6CUleSsRV7BUWCvtSBXUoAwKLLCd6WDlZKRLBRNYbsHLWFPHoJ8Z52yNQpkAA */
   createMachine<LogStreamQueryContext, LogStreamQueryEvent, LogStreamQueryTypestate>(
     {
       context: initialContext,
@@ -55,17 +55,23 @@ export const createPureLogStreamQueryStateMachine = (
             target: 'initializingFromUrl',
           },
         },
+
         initializingFromUrl: {
-          entry: ['initializeFromUrl'],
           on: {
-            URL_INITIALIZED: {
-              target: 'hasQuery',
-            },
             RESOLVING_SAVED_QUERY_ID: {
               target: 'resolvingSavedQueryId',
             },
+            INITIALIZED_FROM_URL: {
+              target: 'validating',
+              actions: ['storeQuery', 'storeFilters'],
+            },
+          },
+
+          invoke: {
+            src: 'initializeFromUrl',
           },
         },
+
         resolvingSavedQueryId: {
           invoke: {
             src: 'resolveSavedQueryId',
@@ -78,21 +84,24 @@ export const createPureLogStreamQueryStateMachine = (
             },
           },
         },
-        failedResolvingSavedQueryId: {}, // TODO: Add error handling, probably want to copy the behaviour of use_saved_query from the stateful search bar
+
+        // TODO: Add error handling, probably want to copy the behaviour of use_saved_query from the stateful search bar
+        failedResolvingSavedQueryId: {},
+
         hasQuery: {
           entry: ['updateQueryInUrl', 'updateQueryInSearchBar', 'updateFiltersInSearchBar'],
           invoke: [
-            {
-              src: 'subscribeToUrlStateStorageChanges',
-            },
             {
               src: 'subscribeToQuerySearchBarChanges',
             },
             {
               src: 'subscribeToFilterSearchBarChanges',
             },
+            {
+              src: 'subscribeToUrlStateStorageChanges',
+            },
           ],
-          initial: 'validating',
+          initial: 'revalidating',
           states: {
             valid: {
               entry: 'notifyValidQueryChanged',
@@ -100,14 +109,14 @@ export const createPureLogStreamQueryStateMachine = (
             invalid: {
               entry: 'notifyInvalidQueryChanged',
             },
-            validating: {
+            revalidating: {
               invoke: {
                 src: 'validateQuery',
               },
               on: {
                 VALIDATION_FAILED: {
                   target: 'invalid',
-                  actions: ['clearParsedQuery', 'storeValidationError'],
+                  actions: ['storeValidationError'],
                 },
                 VALIDATION_SUCCEEDED: {
                   target: 'valid',
@@ -118,7 +127,7 @@ export const createPureLogStreamQueryStateMachine = (
           },
           on: {
             STATE_FROM_URL_KEY_CHANGED: {
-              target: '.validating',
+              target: '.revalidating',
               actions: [
                 'storeQuery',
                 'storeFilters',
@@ -127,16 +136,34 @@ export const createPureLogStreamQueryStateMachine = (
               ],
             },
             QUERY_FROM_SEARCH_BAR_CHANGED: {
-              target: '.validating',
+              target: '.revalidating',
               actions: ['storeQuery', 'updateQueryInUrl'],
             },
             FILTERS_FROM_SEARCH_BAR_CHANGED: {
-              target: '.validating',
+              target: '.revalidating',
               actions: ['storeFilters', 'updateFiltersInUrl'],
             },
             DATA_VIEWS_CHANGED: {
-              target: '.validating',
+              target: '.revalidating',
               actions: 'storeDataViews',
+            },
+          },
+        },
+
+        validating: {
+          invoke: {
+            src: 'validateQuery',
+          },
+
+          on: {
+            VALIDATION_SUCCEEDED: {
+              target: 'hasQuery.valid',
+              actions: 'storeParsedQuery',
+            },
+
+            VALIDATION_FAILED: {
+              target: 'hasQuery.invalid',
+              actions: ['storeValidationError', 'storeDefaultParsedQuery'],
             },
           },
         },
@@ -173,6 +200,10 @@ export const createPureLogStreamQueryStateMachine = (
               } as LogStreamQueryContextWithQuery & LogStreamQueryContextWithValidationError)
             : {}
         ),
+        storeDefaultParsedQuery: actions.assign(
+          (_context, _event) =>
+            ({ parsedQuery: safeDefaultParsedQuery } as LogStreamQueryContextWithParsedQuery)
+        ),
         storeParsedQuery: actions.assign((_context, event) =>
           'parsedQuery' in event
             ? ({ parsedQuery: event.parsedQuery } as LogStreamQueryContextWithParsedQuery)
@@ -183,13 +214,6 @@ export const createPureLogStreamQueryStateMachine = (
             ({ validationError: undefined } as Omit<
               LogStreamQueryContextWithValidationError,
               'validationError'
-            >)
-        ),
-        clearParsedQuery: actions.assign(
-          (_context, _event) =>
-            ({ parsedQuery: undefined } as Omit<
-              LogStreamQueryContextWithParsedQuery,
-              'parsedQuery'
             >)
         ),
       },
@@ -218,19 +242,19 @@ export const createLogStreamQueryStateMachine = (
 ) =>
   createPureLogStreamQueryStateMachine(initialContext).withConfig({
     actions: {
-      initializeFromUrl: initializeFromUrl({ toastsService, urlStateStorage }),
       notifyInvalidQueryChanged: sendIfDefined(SpecialTargets.Parent)(
         logStreamQueryNotificationEventSelectors.invalidQueryChanged
       ),
       notifyValidQueryChanged: sendIfDefined(SpecialTargets.Parent)(
         logStreamQueryNotificationEventSelectors.validQueryChanged
       ),
-      updateQueryInUrl: updateQueryInUrl({ urlStateStorage }),
+      updateQueryInUrl: updateQueryInUrl({ toastsService, urlStateStorage }),
       updateQueryInSearchBar: updateQueryInSearchBar({ queryStringService }),
-      updateFiltersInUrl: updateFiltersInUrl({ urlStateStorage }),
+      updateFiltersInUrl: updateFiltersInUrl({ toastsService, urlStateStorage }),
       updateFiltersInSearchBar: updateFiltersInSearchBar({ filterManagerService }),
     },
     services: {
+      initializeFromUrl: initializeFromUrl({ toastsService, urlStateStorage }),
       validateQuery: validateQuery({ kibanaQuerySettings }),
       subscribeToQuerySearchBarChanges: subscribeToQuerySearchBarChanges({
         queryStringService,
@@ -238,7 +262,10 @@ export const createLogStreamQueryStateMachine = (
       subscribeToFilterSearchBarChanges: subscribeToFilterSearchBarChanges({
         filterManagerService,
       }),
-      subscribeToUrlStateStorageChanges: subscribeToUrlStateStorageChanges({ urlStateStorage }),
+      subscribeToUrlStateStorageChanges: subscribeToUrlStateStorageChanges({
+        toastsService,
+        urlStateStorage,
+      }),
       resolveSavedQueryId: resolveSavedQueryId({ savedQueriesService }),
     },
   });

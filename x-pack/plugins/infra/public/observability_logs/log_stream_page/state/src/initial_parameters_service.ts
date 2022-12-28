@@ -6,7 +6,7 @@
  */
 
 import { InvokeCreator, Receiver } from 'xstate';
-import { ParsedQuery, safeDefaultParsedQuery } from '../../../log_stream_query_state';
+import { ParsedQuery } from '../../../log_stream_query_state';
 import { LogStreamPageContext, LogStreamPageEvent } from './types';
 
 export const waitForInitialParameters =
@@ -20,10 +20,8 @@ export const waitForInitialParameters =
       switch (event.type) {
         // event types that deliver the parameters
         case 'VALID_QUERY_CHANGED':
-          latestValidQuery = event.parsedQuery;
-          break;
         case 'INVALID_QUERY_CHANGED':
-          latestValidQuery = safeDefaultParsedQuery;
+          latestValidQuery = event.parsedQuery;
           break;
       }
 

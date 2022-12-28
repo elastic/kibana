@@ -14,6 +14,7 @@ export type LogStreamQueryNotificationEvent =
     }
   | {
       type: 'INVALID_QUERY_CHANGED';
+      parsedQuery: ParsedQuery;
       error: Error;
     };
 
@@ -29,6 +30,7 @@ export const logStreamQueryNotificationEventSelectors = {
     'validationError' in context
       ? ({
           type: 'INVALID_QUERY_CHANGED',
+          parsedQuery: context.parsedQuery,
           error: context.validationError,
         } as LogStreamQueryNotificationEvent)
       : undefined,

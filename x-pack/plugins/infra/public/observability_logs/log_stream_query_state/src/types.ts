@@ -44,20 +44,21 @@ export type LogStreamQueryTypestate =
   | {
       value: 'hasQuery' | { hasQuery: 'validating' };
       context: LogStreamQueryContextWithDataViews &
-        LogStreamQueryContextWithQuery &
         LogStreamQueryContextWithParsedQuery &
+        LogStreamQueryContextWithQuery &
         LogStreamQueryContextWithFilters;
     }
   | {
       value: { hasQuery: 'valid' };
       context: LogStreamQueryContextWithDataViews &
-        LogStreamQueryContextWithQuery &
         LogStreamQueryContextWithParsedQuery &
+        LogStreamQueryContextWithQuery &
         LogStreamQueryContextWithFilters;
     }
   | {
       value: { hasQuery: 'invalid' };
       context: LogStreamQueryContextWithDataViews &
+        LogStreamQueryContextWithParsedQuery &
         LogStreamQueryContextWithQuery &
         LogStreamQueryContextWithFilters &
         LogStreamQueryContextWithValidationError;
@@ -89,7 +90,16 @@ export type LogStreamQueryEvent =
       error: Error;
     }
   | {
-      type: 'STATE_FROM_URL_KEY_CHANGED';
+      type: 'INITIALIZED_FROM_URL';
       query: AnyQuery;
       filters: Filter[];
+    }
+  | {
+      type: 'RESOLVING_SAVED_QUERY_ID'; // placeholder
+      data: any;
+    }
+  | {
+      type: 'STATE_FROM_URL_KEY_CHANGED';
+      query?: AnyQuery;
+      filters?: Filter[];
     };
