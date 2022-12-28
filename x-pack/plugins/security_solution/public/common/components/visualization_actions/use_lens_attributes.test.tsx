@@ -30,7 +30,7 @@ describe('useLensAttributes', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       dataViewId: 'security-solution-default',
       indicesExist: true,
-      selectedPatterns: ['signal-index'],
+      selectedPatterns: ['auditbeat-*'],
     });
   });
 

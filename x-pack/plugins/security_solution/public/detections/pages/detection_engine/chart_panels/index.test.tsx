@@ -18,8 +18,15 @@ import { TestProviders } from '../../../../common/mock';
 import { ChartPanels } from '.';
 
 jest.mock('./alerts_local_storage');
-
 jest.mock('../../../../common/containers/sourcerer');
+
+jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
+jest.mock('../../../../common/components/page/use_refetch_by_session', () => ({
+  useRefetchByRestartingSession: jest.fn().mockReturnValue({
+    searchSessionId: 'mockSearchSessionId',
+    refetchByRestartingSession: jest.fn(),
+  }),
+}));
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
