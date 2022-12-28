@@ -622,7 +622,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
           this.onSubmit(this.props.query);
         }
       }
-    }, 250);
+    }, 150);
   };
 
   private onInputBlur = () => {
