@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { statusSchema } from '@kbn/slo-schema';
+
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
 
 interface Duration {
   value: number;
   unit: DurationUnit;
 }
+
+type Status = t.OutputOf<typeof statusSchema>;
 
 interface SLO {
   id: string;
@@ -22,9 +28,11 @@ interface SLO {
     target: number;
   };
   summary: {
+    status: Status;
     sliValue: number;
     errorBudget: {
       remaining: number;
+      isEstimated: boolean;
     };
   };
 }
@@ -36,4 +44,12 @@ interface SLOList {
   total: number;
 }
 
-export type { Duration, DurationUnit, SLO, SLOList };
+interface BurnRateRuleParams extends RuleTypeParams {
+  sloId: string;
+  burnRateThreshold: number;
+  maxBurnRateThreshold: number;
+  longWindow: Duration;
+  shortWindow: Duration;
+}
+
+export type { BurnRateRuleParams, Duration, DurationUnit, SLO, SLOList, Status };

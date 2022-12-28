@@ -8,6 +8,7 @@
 import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { getIndicesStats } from './indices_stats_collector';
+import { getResourcesStats } from './resources_stats_collector';
 import { cspmUsageSchema } from './schema';
 import { CspmUsage } from './types';
 
@@ -25,9 +26,14 @@ export function registerCspmUsageCollector(
     type: 'cloud_security_posture',
     isReady: () => true,
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
-      const indicesStats = await getIndicesStats(collectorFetchContext.esClient, logger);
+      const [indicesStats, resourcesStats] = await Promise.all([
+        getIndicesStats(collectorFetchContext.esClient, logger),
+        await getResourcesStats(collectorFetchContext.esClient, logger),
+      ]);
+
       return {
         indices: indicesStats,
+        resources_stats: resourcesStats,
       };
     },
     schema: cspmUsageSchema,

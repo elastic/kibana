@@ -36,6 +36,7 @@ export function page({
     showKueryBar?: boolean;
     showTransactionTypeSelector?: boolean;
     showTimeComparison?: boolean;
+    showMobileFilters?: boolean;
     hidden?: boolean;
   };
 }): {
@@ -106,6 +107,7 @@ export const mobileServiceDetail = {
           searchBarOptions: {
             showTransactionTypeSelector: true,
             showTimeComparison: true,
+            showMobileFilters: true,
           },
         }),
         params: t.partial({
@@ -139,6 +141,10 @@ export const mobileServiceDetail = {
             pageSize: toNumberRt,
             sortField: t.string,
             sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+            device: t.string,
+            osVersion: t.string,
+            appVersion: t.string,
+            netConnectionType: t.string,
           }),
         }),
         children: {
@@ -154,6 +160,7 @@ export const mobileServiceDetail = {
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,
+                  flyoutDetailTab: t.string,
                 }),
                 offsetRt,
               ]),
