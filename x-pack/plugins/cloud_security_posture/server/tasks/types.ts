@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { KeyDocCount } from '../routes/compliance_dashboard/compliance_dashboard';
+
 export interface AggregatedFindings {
   passed_findings: { doc_count: number };
   failed_findings: { doc_count: number };
   total_findings: { value: number };
+  benchmarkId: {
+    buckets: KeyDocCount[];
+  };
 }
 
 export interface AggregatedFindingsByCluster extends AggregatedFindings {

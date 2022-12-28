@@ -116,46 +116,53 @@ const getScoreQuery = (): SearchRequest => ({
     match_all: {},
   },
   aggs: {
-    total_findings: {
-      value_count: {
-        field: 'result.evaluation',
-      },
-    },
-    passed_findings: {
+    score_by_policy_template: {
       filter: {
-        term: {
-          'result.evaluation': 'passed',
+        terms: {
+          field: 'rule.benchmark.id',
         },
       },
-    },
-    failed_findings: {
-      filter: {
-        term: {
-          'result.evaluation': 'failed',
+      total_findings: {
+        value_count: {
+          field: 'result.evaluation',
         },
       },
-    },
-    score_by_cluster_id: {
-      terms: {
-        field: 'cluster_id',
-      },
-      aggregations: {
-        total_findings: {
-          value_count: {
-            field: 'result.evaluation',
+      passed_findings: {
+        filter: {
+          term: {
+            'result.evaluation': 'passed',
           },
         },
-        passed_findings: {
-          filter: {
-            term: {
-              'result.evaluation': 'passed',
+      },
+      failed_findings: {
+        filter: {
+          term: {
+            'result.evaluation': 'failed',
+          },
+        },
+      },
+      score_by_cluster_id: {
+        terms: {
+          field: 'cluster_id',
+        },
+        aggregations: {
+          total_findings: {
+            value_count: {
+              field: 'result.evaluation',
             },
           },
-        },
-        failed_findings: {
-          filter: {
-            term: {
-              'result.evaluation': 'failed',
+          passed_findings: {
+            filter: {
+              term: {
+                'result.evaluation': 'passed',
+              },
+            },
+          },
+          failed_findings: {
+            filter: {
+              term: {
+                'result.evaluation': 'failed',
+              },
             },
           },
         },
@@ -164,7 +171,7 @@ const getScoreQuery = (): SearchRequest => ({
   },
 });
 
-const aggregateLatestFindings = async (
+export const aggregateLatestFindings = async (
   esClient: ElasticsearchClient,
   stateRuns: number,
   logger: Logger
@@ -172,7 +179,6 @@ const aggregateLatestFindings = async (
   try {
     const startAggTime = performance.now();
     const evaluationsQueryResult = await esClient.search<unknown, ScoreBucket>(getScoreQuery());
-
     if (!evaluationsQueryResult.aggregations) {
       logger.warn(`No data found in latest findings index`);
       return 'warning';
@@ -191,6 +197,7 @@ const aggregateLatestFindings = async (
           return [
             clusterStats.key,
             {
+              benchmarkId: clusterStats.benchmarkId?.buckets[0].key,
               total_findings: clusterStats.total_findings.value,
               passed_findings: clusterStats.passed_findings.doc_count,
               failed_findings: clusterStats.failed_findings.doc_count,

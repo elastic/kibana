@@ -39,7 +39,7 @@ export const getTrendsQuery = (query: QueryDslQueryContainer) => ({
   sort: '@timestamp:desc',
   query: {
     bool: {
-      ...query.bool,
+      // ...query.bool,
       must: {
         range: {
           '@timestamp': {
