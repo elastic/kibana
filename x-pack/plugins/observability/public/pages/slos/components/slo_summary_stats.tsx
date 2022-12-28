@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { asPercentWithTwoDecimals } from '../../../../common/utils/formatters';
-import { SLO, STATUS } from '../../../typings';
+import { SLO } from '../../../typings';
 import { getSloDifference } from '../helpers/get_slo_difference';
 
 export interface SloSummaryStatsProps {
@@ -18,7 +18,7 @@ export interface SloSummaryStatsProps {
 }
 
 export function SloSummaryStats({ slo }: SloSummaryStatsProps) {
-  const titleColor = slo.summary.status === STATUS.Violated ? 'danger' : '';
+  const titleColor = slo.summary.status === 'VIOLATED' ? 'danger' : '';
   const { label } = getSloDifference(slo);
 
   return (
@@ -31,7 +31,7 @@ export function SloSummaryStats({ slo }: SloSummaryStatsProps) {
                 defaultMessage: 'Observed value',
               })}
               title={
-                slo.summary.status === STATUS.NoData
+                slo.summary.status === 'NO_DATA'
                   ? NOT_AVAILABLE_LABEL
                   : asPercentWithTwoDecimals(slo.summary.sliValue, 1)
               }

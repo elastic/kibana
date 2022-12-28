@@ -6,8 +6,6 @@
  */
 
 import type { SLO, Status } from '../../typings';
-import { STATUS } from '../../typings';
-
 import { toDuration } from './duration';
 
 export function toSLO(result: any): SLO {
@@ -21,7 +19,7 @@ export function toSLO(result: any): SLO {
       duration,
     },
     summary: {
-      status: toStatus(result),
+      status: result.summary.status as Status,
       sliValue: Number(result.summary.sliValue),
       errorBudget: {
         remaining: Number(result.summary.errorBudget.remaining),
@@ -29,16 +27,4 @@ export function toSLO(result: any): SLO {
       },
     },
   };
-}
-
-function toStatus(result: any): Status {
-  if (result.summary.sliValue === -1) {
-    return STATUS.NoData;
-  }
-
-  if (result.objective.target <= result.summary.sliValue) {
-    return STATUS.Healthy;
-  } else {
-    return result.summary.errorBudget.remaining > 0 ? STATUS.Degrading : STATUS.Violated;
-  }
 }

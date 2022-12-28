@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import type { SLO } from '../../../typings';
-import { STATUS } from '../../../typings';
 
 export interface SloStatusProps {
   slo: SLO;
@@ -20,7 +19,7 @@ export interface SloStatusProps {
 export function SloStatusBadge({ slo }: SloStatusProps) {
   return (
     <div>
-      {slo.summary.status === STATUS.NoData && (
+      {slo.summary.status === 'NO_DATA' && (
         <EuiBadge color={euiLightVars.euiColorDisabled}>
           {i18n.translate('xpack.observability.slos.slo.state.noData', {
             defaultMessage: 'No data',
@@ -28,7 +27,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
         </EuiBadge>
       )}
 
-      {slo.summary.status === STATUS.Healthy && (
+      {slo.summary.status === 'HEALTHY' && (
         <EuiBadge color={euiLightVars.euiColorSuccess}>
           {i18n.translate('xpack.observability.slos.slo.state.healthy', {
             defaultMessage: 'Healthy',
@@ -36,7 +35,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
         </EuiBadge>
       )}
 
-      {slo.summary.status === STATUS.Degrading && (
+      {slo.summary.status === 'DEGRADING' && (
         <EuiBadge color={euiLightVars.euiColorWarning}>
           {i18n.translate('xpack.observability.slos.slo.state.degrading', {
             defaultMessage: 'Degrading',
@@ -44,7 +43,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
         </EuiBadge>
       )}
 
-      {slo.summary.status === STATUS.Violated && (
+      {slo.summary.status === 'VIOLATED' && (
         <EuiBadge color={euiLightVars.euiColorDanger}>
           {i18n.translate('xpack.observability.slos.slo.state.violated', {
             defaultMessage: 'Violated',

@@ -6,7 +6,6 @@
  */
 
 import type { SLO, SLOList } from '../typings';
-import { STATUS } from '../typings';
 
 export const emptySloList: SLOList = {
   results: [],
@@ -25,7 +24,7 @@ export const sloList: SLOList = {
       },
       objective: { target: 0.98 },
       summary: {
-        status: STATUS.Healthy,
+        status: 'HEALTHY',
         sliValue: 0.99872,
         errorBudget: {
           remaining: 0.936,
@@ -41,7 +40,7 @@ export const sloList: SLOList = {
       },
       objective: { target: 0.98 },
       summary: {
-        status: STATUS.Violated,
+        status: 'VIOLATED',
         sliValue: 0.97,
         errorBudget: {
           remaining: 0,
@@ -57,7 +56,7 @@ export const sloList: SLOList = {
       },
       objective: { target: 0.98 },
       summary: {
-        status: STATUS.NoData,
+        status: 'NO_DATA',
         sliValue: -1,
         errorBudget: {
           remaining: 1,
@@ -73,7 +72,7 @@ export const sloList: SLOList = {
       },
       objective: { target: 0.98 },
       summary: {
-        status: STATUS.Degrading,
+        status: 'DEGRADING',
         sliValue: 0.97,
         errorBudget: {
           remaining: 0.12,
@@ -97,7 +96,7 @@ export const anSLO: SLO = {
     target: 0.98,
   },
   summary: {
-    status: STATUS.Healthy,
+    status: 'HEALTHY',
     sliValue: 0.990097,
     errorBudget: {
       remaining: 0.504831,
@@ -116,7 +115,7 @@ export const aForecastedSLO: SLO = {
     target: 0.98,
   },
   summary: {
-    status: STATUS.Healthy,
+    status: 'HEALTHY',
     sliValue: 0.990097,
     errorBudget: {
       remaining: 0.504831,

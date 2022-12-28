@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { statusSchema } from '@kbn/slo-schema';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
 
@@ -14,14 +16,7 @@ interface Duration {
   unit: DurationUnit;
 }
 
-export const STATUS = {
-  Healthy: 'healthy',
-  NoData: 'no_data',
-  Violated: 'violated',
-  Degrading: 'degrading',
-} as const;
-
-export type Status = typeof STATUS[keyof typeof STATUS];
+type Status = t.OutputOf<typeof statusSchema>;
 
 interface SLO {
   id: string;
@@ -57,4 +52,4 @@ interface BurnRateRuleParams extends RuleTypeParams {
   shortWindow: Duration;
 }
 
-export type { BurnRateRuleParams, Duration, DurationUnit, SLO, SLOList };
+export type { BurnRateRuleParams, Duration, DurationUnit, SLO, SLOList, Status };

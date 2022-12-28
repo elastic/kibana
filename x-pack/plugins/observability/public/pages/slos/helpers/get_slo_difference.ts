@@ -7,10 +7,9 @@
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { asPercent } from '../../../../common/utils/formatters';
 import type { SLO } from '../../../typings';
-import { STATUS } from '../../../typings';
 
 export function getSloDifference(slo: SLO) {
-  if (slo.summary.status === STATUS.NoData) {
+  if (slo.summary.status === 'NO_DATA') {
     return {
       value: Number.NaN,
       label: NOT_AVAILABLE_LABEL,
