@@ -51,7 +51,7 @@ interface TimeseriesChartProps extends TimeseriesChartWithContextProps {
   comparisonEnabled: boolean;
   offset?: string;
   timeZone: string;
-  rectsAndAnnotations?: Array<
+  alertDetailsAdditionalData?: Array<
     ReactElement<typeof RectAnnotation | typeof LineAnnotation>
   >;
 }
@@ -70,7 +70,7 @@ export function TimeseriesChart({
   comparisonEnabled,
   offset,
   timeZone,
-  rectsAndAnnotations,
+  alertDetailsAdditionalData,
 }: TimeseriesChartProps) {
   const history = useHistory();
   const { annotations } = useAnnotationsContext();
@@ -223,7 +223,7 @@ export function TimeseriesChart({
           tickFormat={yTickFormat ? yTickFormat : yLabelFormat}
           labelFormat={yLabelFormat}
         />
-        {rectsAndAnnotations}
+        {alertDetailsAdditionalData}
         {showAnnotations && (
           <LineAnnotation
             id="annotations"

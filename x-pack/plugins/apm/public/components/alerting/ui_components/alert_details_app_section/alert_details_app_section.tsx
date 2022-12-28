@@ -302,7 +302,7 @@ export function AlertDetailsAppSection({
   ];
   /* Error Rate */
 
-  const getRectsAndAnnotationsLatencyChart = () => {
+  const getLatencyChartAdditionalData = () => {
     if (isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID])) {
       return [
         <AlertThresholdRect
@@ -339,7 +339,7 @@ export function AlertDetailsAppSection({
             </EuiFlexGroup>
             <TimeseriesChart
               id="latencyChart"
-              rectsAndAnnotations={getRectsAndAnnotationsLatencyChart()}
+              alertDetailsAdditionalData={getLatencyChartAdditionalData()}
               height={200}
               comparisonEnabled={comparisonEnabled}
               offset={offset}
