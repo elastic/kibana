@@ -130,7 +130,7 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
                   }
 
                   return toSearchResult(pkg, coreStart.application, coreStart.http.basePath).filter(
-                    (res) => res.title.toLowerCase().includes(term)
+                    (res) => term && res.title.toLowerCase().includes(term)
                   );
                 }
           )
