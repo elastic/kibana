@@ -12,6 +12,7 @@ import {
   LogStreamPageState,
   useLogStreamPageStateContext,
 } from '../../../observability_logs/log_stream_page/state';
+import { InvalidStateCallout } from '../../../observability_logs/xstate_helpers';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 import { StreamPageLogsContentForState } from './page_logs_content';
 import { StreamPageMissingIndicesContent } from './page_missing_indices_content';
@@ -41,6 +42,6 @@ export const StreamPageContentForState: React.FC<{ logStreamPageState: LogStream
       </LogStreamPageContentProviders>
     );
   } else {
-    return null;
+    return <InvalidStateCallout state={logStreamPageState} />;
   }
 };
