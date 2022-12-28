@@ -46,6 +46,7 @@ import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
 import { HeaderExtension } from './header_extension';
 import { HeaderTopBanner } from './header_top_banner';
+import { ButtonThing, HeaderMenuButton } from './header_menu_button';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -184,7 +185,7 @@ export function Header({
                   }}
                   customNavLink$={observables.customNavLink$}
                   button={
-                    <EuiHeaderSectionItemButton
+                    <HeaderMenuButton
                       data-test-subj="toggleNavButton"
                       aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
                         defaultMessage: 'Toggle primary navigation',
@@ -193,10 +194,8 @@ export function Header({
                       aria-expanded={isNavOpen}
                       aria-pressed={isNavOpen}
                       aria-controls={navId}
-                      ref={toggleCollapsibleNavRef}
-                    >
-                      <EuiIcon type="menu" size="m" />
-                    </EuiHeaderSectionItemButton>
+                      forwardRef={toggleCollapsibleNavRef}
+                    />
                   }
                 />
               </EuiHeaderSectionItem>
