@@ -13,9 +13,10 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 const LOGSTASH_DATA_ARCHIVE = 'test/functional/fixtures/es_archiver/logstash_functional';
 const LOGSTASH_SAVED_OBJECTS = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
-const LOGS_SAVED_SEARCH_ID = '9747bd90-8581-11ed-97c5-596122858f69'; // "A Saved Search"
-const LOGS_SAVED_FILTERED_SEARCH_ID = 'd7a79750-3edd-11e9-99cc-4d80163ee9e7'; // "A Saved Search With a DATE FILTER"
-const ECOM_SAVED_SEARCH_ID = '6091ead0-1c6d-11ea-a100-8589bb9d7c6b'; // "Ecommerce Data"
+const LOGS_SAVED_SEARCH_ID = '9747bd90-8581-11ed-97c5-596122858f69';
+const LOGS_SAVED_SEARCH_DATE_FILTER_ID = 'd7a79750-3edd-11e9-99cc-4d80163ee9e7';
+const LOGS_SAVED_SEARCH_TERMS_FILTER_ID = '53193950-8649-11ed-9cfd-b9cddf37f461';
+const ECOM_SAVED_SEARCH_ID = '6091ead0-1c6d-11ea-a100-8589bb9d7c6b';
 
 const getMockRequestBody = (
   obj: Partial<CsvSavedSearchExportBodyType>
@@ -91,13 +92,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('export with saved filters and no job post params', () => {
+    describe('export with saved date filter and no job post params', () => {
       let job: ReportApiJSON;
       let path: string;
       let csvFile: string;
 
       before(async () => {
-        const { text, status } = await requestCsvFromSavedSearch(LOGS_SAVED_FILTERED_SEARCH_ID);
+        const { text, status } = await requestCsvFromSavedSearch(LOGS_SAVED_SEARCH_DATE_FILTER_ID);
         expect(status).to.eql(200);
         const { payload } = JSON.parse(text);
         job = payload.job;
@@ -112,7 +113,38 @@ export default ({ getService }: FtrProviderContext) => {
         expect(job.created_by).equal('elastic');
         expect(job.jobtype).equal('csv_saved_object');
         expect(job.payload.objectType).equal('saved search');
-        expect(job.payload.title).equal('A Saved Search With a DATE FILTER');
+        expect(job.payload.title).equal('A Saved Search with date filter');
+        expect(job.payload.version).equal('7.17');
+      });
+
+      it('csv file matches', async () => {
+        csvFile = (await reportingAPI.getCompletedJobOutput(path)) as string;
+        expectSnapshot(csvFile).toMatch();
+      });
+    });
+
+    describe('export with saved date and terms filters and no job post params', () => {
+      let job: ReportApiJSON;
+      let path: string;
+      let csvFile: string;
+
+      before(async () => {
+        const { text, status } = await requestCsvFromSavedSearch(LOGS_SAVED_SEARCH_TERMS_FILTER_ID);
+        expect(status).to.eql(200);
+        const { payload } = JSON.parse(text);
+        job = payload.job;
+        path = payload.path;
+        await reportingAPI.waitForJobToFinish(path);
+      });
+
+      it('job response data is correct', () => {
+        expect(path).to.be.a('string');
+        expect(job).to.be.an('object');
+        expect(job.attempts).equal(0);
+        expect(job.created_by).equal('elastic');
+        expect(job.jobtype).equal('csv_saved_object');
+        expect(job.payload.objectType).equal('saved search');
+        expect(job.payload.title).equal('A Saved Search with date and terms filters');
         expect(job.payload.version).equal('7.17');
       });
 
@@ -128,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
       let csvFile: string;
 
       before(async () => {
-        const { text, status } = await requestCsvFromSavedSearch(LOGS_SAVED_FILTERED_SEARCH_ID, {
+        const { text, status } = await requestCsvFromSavedSearch(LOGS_SAVED_SEARCH_DATE_FILTER_ID, {
           timerange: {
             min: '2015-09-20 10:23:36.052',
             max: '2015-09-20 10:25:55.744',
@@ -148,7 +180,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(job.created_by).equal('elastic');
         expect(job.jobtype).equal('csv_saved_object');
         expect(job.payload.objectType).equal('saved search');
-        expect(job.payload.title).equal('A Saved Search With a DATE FILTER');
+        expect(job.payload.title).equal('A Saved Search with date filter');
         expect(job.payload.version).equal('7.17');
       });
 
