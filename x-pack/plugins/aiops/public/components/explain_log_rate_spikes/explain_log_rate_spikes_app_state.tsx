@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { pick } from 'lodash';
 
 import { EuiCallOut } from '@elastic/eui';
 
@@ -16,6 +17,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { MlDatePickerContextProvider } from '@kbn/ml-date-picker';
 
 import {
   SEARCH_QUERY_LANGUAGE,
@@ -102,7 +104,17 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
           <SpikeAnalysisTableRowStateProvider>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-              <ExplainLogRateSpikesPage />
+              <MlDatePickerContextProvider
+                deps={pick(appDependencies, [
+                  'data',
+                  'http',
+                  'notifications',
+                  'theme',
+                  'uiSettings',
+                ])}
+              >
+                <ExplainLogRateSpikesPage />
+              </MlDatePickerContextProvider>
             </StorageContextProvider>
           </SpikeAnalysisTableRowStateProvider>
         </DataSourceContext.Provider>

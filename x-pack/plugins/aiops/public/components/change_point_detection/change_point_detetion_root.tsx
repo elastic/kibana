@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { pick } from 'lodash';
 
 import { EuiSpacer } from '@elastic/eui';
 
@@ -14,6 +15,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { MlDatePickerContextProvider } from '@kbn/ml-date-picker';
 
 import { DataSourceContext } from '../../hooks/use_data_source';
 import { SavedSearchSavedObject } from '../../application/utils/search_utils';
@@ -43,11 +45,15 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
           <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-            <PageHeader />
-            <EuiSpacer />
-            <ChangePointDetectionContextProvider>
-              <ChangePointDetectionPage />
-            </ChangePointDetectionContextProvider>
+            <MlDatePickerContextProvider
+              deps={pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings'])}
+            >
+              <PageHeader />
+              <EuiSpacer />
+              <ChangePointDetectionContextProvider>
+                <ChangePointDetectionPage />
+              </ChangePointDetectionContextProvider>
+            </MlDatePickerContextProvider>
           </StorageContextProvider>
         </DataSourceContext.Provider>
       </UrlStateProvider>

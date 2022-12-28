@@ -26,7 +26,7 @@ export const useMlDatePickerContext = (): MlDatePickerDependencies => {
 
   // if `undefined`, throw an error
   if (mlDatePickerContext === undefined) {
-    throw new Error('mlDatePickerContext was used outside of its Provider');
+    throw new Error('MlDatePickerContext was used outside of its Provider');
   }
 
   return mlDatePickerContext;

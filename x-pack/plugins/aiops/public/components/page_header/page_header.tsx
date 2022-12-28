@@ -20,7 +20,6 @@ import { useUrlState } from '@kbn/ml-url-state';
 import { useStorage } from '@kbn/ml-local-storage';
 import {
   useTimefilter,
-  MlDatePickerContextProvider,
   MlDatePickerWrapper,
   MlFullTimeRangeSelector,
   type MlFullTimeRangeSelectorProps,
@@ -30,7 +29,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 import { useCss } from '../../hooks/use_css';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import {
   AIOPS_FROZEN_TIER_PREFERENCE,
@@ -44,7 +42,6 @@ interface PageHeaderProps {
 
 export const PageHeader: FC<PageHeaderProps> = ({ compact }) => {
   const { aiopsPageHeader, dataViewTitleHeader } = useCss();
-  const { http, notifications, uiSettings, theme, data: dataService } = useAiopsAppContext();
 
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
@@ -93,40 +90,36 @@ export const PageHeader: FC<PageHeaderProps> = ({ compact }) => {
           </EuiPageContentHeaderSection>
 
           {compact ? <EuiSpacer size="m" /> : null}
-          <MlDatePickerContextProvider
-            deps={{ data: dataService, http, notifications, theme, uiSettings }}
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="s"
+            data-test-subj="aiopsTimeRangeSelectorSection"
           >
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="s"
-              data-test-subj="aiopsTimeRangeSelectorSection"
-            >
-              {hasValidTimeField ? (
-                <EuiFlexItem grow={false}>
-                  <MlFullTimeRangeSelector
-                    frozenDataPreference={frozenDataPreference}
-                    setFrozenDataPreference={setFrozenDataPreference}
-                    dataView={dataView}
-                    query={undefined}
-                    disabled={false}
-                    timefilter={timefilter}
-                    callback={updateTimeState}
-                  />
-                </EuiFlexItem>
-              ) : null}
+            {hasValidTimeField ? (
               <EuiFlexItem grow={false}>
-                <MlDatePickerWrapper
-                  uiSettingsKeys={UI_SETTINGS}
-                  wrapWithTheme={wrapWithTheme}
-                  toMountPoint={toMountPoint}
-                  isAutoRefreshOnly={!hasValidTimeField}
-                  showRefresh={!hasValidTimeField}
-                  compact={compact}
+                <MlFullTimeRangeSelector
+                  frozenDataPreference={frozenDataPreference}
+                  setFrozenDataPreference={setFrozenDataPreference}
+                  dataView={dataView}
+                  query={undefined}
+                  disabled={false}
+                  timefilter={timefilter}
+                  callback={updateTimeState}
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </MlDatePickerContextProvider>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <MlDatePickerWrapper
+                uiSettingsKeys={UI_SETTINGS}
+                wrapWithTheme={wrapWithTheme}
+                toMountPoint={toMountPoint}
+                isAutoRefreshOnly={!hasValidTimeField}
+                showRefresh={!hasValidTimeField}
+                compact={compact}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPageContentHeader>
       </EuiFlexItem>
     </EuiFlexGroup>
