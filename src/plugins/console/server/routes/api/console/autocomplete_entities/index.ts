@@ -26,7 +26,7 @@ const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
 
 const getMappings = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.fields) {
-    const path = settings.fieldsIndices ? `/${settings.fieldsIndices}/_mapping` : '/mapping';
+    const path = settings.fieldsIndices ? `/${settings.fieldsIndices}/_mapping` : '/_mapping';
     const mappings = await getEntity(path, config);
     return mappings;
   }
