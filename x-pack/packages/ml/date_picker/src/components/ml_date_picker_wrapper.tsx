@@ -28,7 +28,7 @@ import { useUrlState } from '@kbn/ml-url-state';
 
 import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../hooks/use_time_filter';
 import { useMlDatePickerContext } from '../hooks/use_ml_date_picker_context';
-import { mlDatePickerRefresh$ } from '../services/timefilter_refresh_service';
+import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5000;
 const DATE_PICKER_MAX_WIDTH = 540;
@@ -63,11 +63,12 @@ function getRecentlyUsedRangesFactory(timeHistory: TimeHistoryContract) {
 }
 
 function updateLastRefresh(timeRange?: OnRefreshProps) {
-  mlDatePickerRefresh$.next({ lastRefresh: Date.now(), timeRange });
+  mlTimefilterRefresh$.next({ lastRefresh: Date.now(), ...(timeRange ? { timeRange } : {}) });
 }
 
 interface MlDatePickerWrapperProps {
   isAutoRefreshOnly?: boolean;
+  isLoading?: boolean;
   showRefresh?: boolean;
   compact?: boolean;
   uiSettingsKeys: typeof UI_SETTINGS;
@@ -77,6 +78,7 @@ interface MlDatePickerWrapperProps {
 
 export const MlDatePickerWrapper: FC<MlDatePickerWrapperProps> = ({
   isAutoRefreshOnly,
+  isLoading = false,
   showRefresh,
   compact = false,
   uiSettingsKeys,
@@ -252,6 +254,9 @@ export const MlDatePickerWrapper: FC<MlDatePickerWrapperProps> = ({
     isPaused: boolean;
     refreshInterval: number;
   }) {
+    if (pause === false && value <= 0) {
+      setRefreshInterval({ pause, value: 5000 });
+    }
     setRefreshInterval({ pause, value });
   }
 
@@ -268,6 +273,7 @@ export const MlDatePickerWrapper: FC<MlDatePickerWrapperProps> = ({
         }
       >
         <EuiSuperDatePicker
+          isLoading={isLoading}
           start={time.from}
           end={time.to}
           isPaused={refreshInterval.pause}
@@ -290,7 +296,8 @@ export const MlDatePickerWrapper: FC<MlDatePickerWrapperProps> = ({
             color="primary"
             iconType={'refresh'}
             onClick={() => updateLastRefresh()}
-            data-test-subj="mlDatePickerRefreshPageButton"
+            data-test-subj={`mlDatePickerRefreshPageButton${isLoading ? ' loading' : ' loaded'}`}
+            isLoading={isLoading}
           >
             <FormattedMessage id="xpack.ml.datePicker.pageRefreshButton" defaultMessage="Refresh" />
           </EuiButton>

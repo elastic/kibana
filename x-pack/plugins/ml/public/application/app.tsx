@@ -8,10 +8,12 @@
 import React, { FC } from 'react';
 import './_index.scss';
 import ReactDOM from 'react-dom';
+import { pick } from 'lodash';
 
 import { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { MlDatePickerContextProvider } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -113,7 +115,11 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
             }}
           >
             <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
-              <MlRouter pageDeps={pageDeps} />
+              <MlDatePickerContextProvider
+                deps={pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings'])}
+              >
+                <MlRouter pageDeps={pageDeps} />
+              </MlDatePickerContextProvider>
             </StorageContextProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>

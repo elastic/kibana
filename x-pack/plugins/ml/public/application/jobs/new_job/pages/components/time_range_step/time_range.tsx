@@ -10,11 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import moment from 'moment';
-import {
-  MlFullTimeRangeSelector,
-  MlDatePickerContextProvider,
-  FROZEN_TIER_PREFERENCE,
-} from '@kbn/ml-date-picker';
+import { MlFullTimeRangeSelector, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
 import type { GetTimeFieldRangeResponse } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 import { WizardNav } from '../wizard_nav';
@@ -35,7 +31,6 @@ import {
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const timefilter = useTimefilter();
   const { services } = useMlKibana();
-  const { data, http, notifications, theme, uiSettings } = services;
   const mlContext = useMlContext();
 
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, chartLoader, chartInterval } =
@@ -127,44 +122,42 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     <Fragment>
       {isCurrentStep && (
         <Fragment>
-          <MlDatePickerContextProvider deps={{ data, http, notifications, theme, uiSettings }}>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <TimeRangePicker setTimeRange={setTimeRange} timeRange={timeRange} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <MlFullTimeRangeSelector
-                  frozenDataPreference={frozenDataPreference}
-                  setFrozenDataPreference={setFrozenDataPreference}
-                  dataView={mlContext.currentDataView}
-                  query={mlContext.combinedQuery}
-                  disabled={false}
-                  callback={fullTimeRangeCallback}
-                  timefilter={timefilter}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem />
-            </EuiFlexGroup>
-            <EuiSpacer />
-            <EventRateChart
-              eventRateChartData={eventRateChartData}
-              height="300px"
-              width="100%"
-              showAxis={true}
-              loading={loadingData}
-            />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <TimeRangePicker setTimeRange={setTimeRange} timeRange={timeRange} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <MlFullTimeRangeSelector
+                frozenDataPreference={frozenDataPreference}
+                setFrozenDataPreference={setFrozenDataPreference}
+                dataView={mlContext.currentDataView}
+                query={mlContext.combinedQuery}
+                disabled={false}
+                callback={fullTimeRangeCallback}
+                timefilter={timefilter}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem />
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EventRateChart
+            eventRateChartData={eventRateChartData}
+            height="300px"
+            width="100%"
+            showAxis={true}
+            loading={loadingData}
+          />
 
-            <WizardNav
-              next={() =>
-                setCurrentStep(
-                  jobCreator.type === JOB_TYPE.ADVANCED
-                    ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
-                    : WIZARD_STEPS.PICK_FIELDS
-                )
-              }
-              nextActive={true}
-            />
-          </MlDatePickerContextProvider>
+          <WizardNav
+            next={() =>
+              setCurrentStep(
+                jobCreator.type === JOB_TYPE.ADVANCED
+                  ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
+                  : WIZARD_STEPS.PICK_FIELDS
+              )
+            }
+            nextActive={true}
+          />
         </Fragment>
       )}
     </Fragment>
