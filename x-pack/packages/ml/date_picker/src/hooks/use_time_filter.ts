@@ -9,7 +9,7 @@ import { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { isEqual } from 'lodash';
-import { useMlDatePickerContext } from './use_ml_date_picker_context';
+import { useDatePickerContext } from './use_date_picker_context';
 
 interface UseTimefilterOptions {
   timeRangeSelector?: boolean;
@@ -26,7 +26,7 @@ export const useTimefilter = ({
         timefilter: { timefilter },
       },
     },
-  } = useMlDatePickerContext();
+  } = useDatePickerContext();
 
   useEffect(() => {
     if (timeRangeSelector === true && !timefilter.isTimeRangeSelectorEnabled()) {

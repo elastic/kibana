@@ -13,7 +13,7 @@ import { pick } from 'lodash';
 import { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { MlDatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -115,11 +115,11 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
             }}
           >
             <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
-              <MlDatePickerContextProvider
+              <DatePickerContextProvider
                 deps={pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings'])}
               >
                 <MlRouter pageDeps={pageDeps} />
-              </MlDatePickerContextProvider>
+              </DatePickerContextProvider>
             </StorageContextProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>

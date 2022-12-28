@@ -14,10 +14,10 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 import { useUrlState } from '@kbn/ml-url-state';
 import type { UI_SETTINGS } from '@kbn/data-plugin/common';
 
-import { useMlDatePickerContext } from '../hooks/use_ml_date_picker_context';
+import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
-import { MlDatePickerWrapper } from './ml_date_picker_wrapper';
+import { DatePickerWrapper } from './date_picker_wrapper';
 
 jest.mock('@elastic/eui', () => {
   const EuiSuperDatePickerMock = jest.fn(() => {
@@ -58,7 +58,7 @@ jest.mock('../hooks/use_time_filter', () => ({
   }),
 }));
 
-jest.mock('../hooks/use_ml_date_picker_context');
+jest.mock('../hooks/use_date_picker_context');
 
 const mockContextFactory = (addWarning: jest.Mock<void, []>) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -130,18 +130,16 @@ describe('<MlDatePickerWrapper />', () => {
 
     const displayWarningSpy = jest.fn(() => {});
 
-    (useMlDatePickerContext as jest.Mock).mockReturnValueOnce(
-      mockContextFactory(displayWarningSpy)
-    );
+    (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory(displayWarningSpy));
 
     const wrapper = mount(
-      <MlDatePickerWrapper
+      <DatePickerWrapper
         uiSettingsKeys={mockedUiSettingsKeys}
         toMountPoint={mockedToMountPoint}
         wrapWithTheme={mockedWrapWithTheme}
       />
     );
-    expect(wrapper.find(MlDatePickerWrapper)).toHaveLength(1);
+    expect(wrapper.find(DatePickerWrapper)).toHaveLength(1);
     expect(refreshListener).toBeCalledTimes(0);
 
     refreshSubscription.unsubscribe();
@@ -153,13 +151,11 @@ describe('<MlDatePickerWrapper />', () => {
 
     const displayWarningSpy = jest.fn(() => {});
 
-    (useMlDatePickerContext as jest.Mock).mockReturnValueOnce(
-      mockContextFactory(displayWarningSpy)
-    );
+    (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory(displayWarningSpy));
 
     // act
     render(
-      <MlDatePickerWrapper
+      <DatePickerWrapper
         uiSettingsKeys={mockedUiSettingsKeys}
         toMountPoint={mockedToMountPoint}
         wrapWithTheme={mockedWrapWithTheme}
@@ -180,13 +176,11 @@ describe('<MlDatePickerWrapper />', () => {
 
     const displayWarningSpy = jest.fn(() => {});
 
-    (useMlDatePickerContext as jest.Mock).mockReturnValueOnce(
-      mockContextFactory(displayWarningSpy)
-    );
+    (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory(displayWarningSpy));
 
     // act
     render(
-      <MlDatePickerWrapper
+      <DatePickerWrapper
         uiSettingsKeys={mockedUiSettingsKeys}
         toMountPoint={mockedToMountPoint}
         wrapWithTheme={mockedWrapWithTheme}

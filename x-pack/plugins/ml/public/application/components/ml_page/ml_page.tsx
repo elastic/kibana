@@ -13,7 +13,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { createHtmlPortalNode, HtmlPortalNode } from 'react-reverse-portal';
-import { MlDatePickerWrapper } from '@kbn/ml-date-picker';
+import { DatePickerWrapper } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { MlPageHeaderRenderer } from '../page_header/page_header';
@@ -84,7 +84,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
     return [
       ...(activeRoute.enableDatePicker
         ? [
-            <MlDatePickerWrapper
+            <DatePickerWrapper
               isLoading={isLoading}
               uiSettingsKeys={UI_SETTINGS}
               wrapWithTheme={wrapWithTheme}

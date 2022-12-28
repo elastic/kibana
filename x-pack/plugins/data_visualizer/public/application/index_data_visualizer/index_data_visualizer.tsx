@@ -19,7 +19,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
-import { MlDatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import {
   Provider as UrlStateContextProvider,
   parseUrlState,
@@ -324,14 +324,14 @@ export const IndexDataVisualizer: FC<{
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
       <KibanaContextProvider services={{ ...services }}>
         <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
-          <MlDatePickerContextProvider
+          <DatePickerContextProvider
             deps={pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings'])}
           >
             <DataVisualizerStateContextProvider
               IndexDataVisualizerComponent={IndexDataVisualizerView}
               getAdditionalLinks={getAdditionalLinks}
             />
-          </MlDatePickerContextProvider>
+          </DatePickerContextProvider>
         </StorageContextProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>

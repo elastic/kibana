@@ -25,14 +25,14 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useMlDatePickerContext } from '../hooks/use_ml_date_picker_context';
+import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import {
   setFullTimeRange,
   type GetTimeFieldRangeResponse,
 } from '../services/full_time_range_selector_service';
 import { FROZEN_TIER_PREFERENCE, type FrozenTierPreference } from '../storage';
 
-export interface MlFullTimeRangeSelectorProps {
+export interface FullTimeRangeSelectorProps {
   frozenDataPreference: FrozenTierPreference;
   setFrozenDataPreference: (value: FrozenTierPreference | undefined) => void;
   timefilter: TimefilterContract;
@@ -44,7 +44,7 @@ export interface MlFullTimeRangeSelectorProps {
 
 // Component for rendering a button which automatically sets the range of the time filter
 // to the time range of data in the index(es) mapped to the supplied Kibana data view or query.
-export const MlFullTimeRangeSelector: FC<MlFullTimeRangeSelectorProps> = ({
+export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = ({
   frozenDataPreference,
   setFrozenDataPreference,
   timefilter,
@@ -56,7 +56,7 @@ export const MlFullTimeRangeSelector: FC<MlFullTimeRangeSelectorProps> = ({
   const {
     http,
     notifications: { toasts },
-  } = useMlDatePickerContext();
+  } = useDatePickerContext();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   const setRange = useCallback(

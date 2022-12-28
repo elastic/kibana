@@ -24,7 +24,7 @@ import {
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { Query } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { MlDatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 import { SamplingOption } from '../../../../../common/types/field_stats';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
@@ -223,7 +223,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
       <I18nContext>
         <KibanaThemeProvider theme$={this.services[0].theme.theme$}>
           <KibanaContextProvider services={services}>
-            <MlDatePickerContextProvider
+            <DatePickerContextProvider
               deps={pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings'])}
             >
               <Suspense fallback={<EmbeddableLoading />}>
@@ -234,7 +234,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
                   onOutputChange={(output) => this.updateOutput(output)}
                 />
               </Suspense>
-            </MlDatePickerContextProvider>
+            </DatePickerContextProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </I18nContext>,

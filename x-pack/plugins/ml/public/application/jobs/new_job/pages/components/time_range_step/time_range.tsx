@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import moment from 'moment';
-import { MlFullTimeRangeSelector, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
+import { FullTimeRangeSelector, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
 import type { GetTimeFieldRangeResponse } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 import { WizardNav } from '../wizard_nav';
@@ -127,7 +127,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
               <TimeRangePicker setTimeRange={setTimeRange} timeRange={timeRange} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <MlFullTimeRangeSelector
+              <FullTimeRangeSelector
                 frozenDataPreference={frozenDataPreference}
                 setFrozenDataPreference={setFrozenDataPreference}
                 dataView={mlContext.currentDataView}

@@ -28,9 +28,12 @@ import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
-import { MlDatePickerWrapper, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
+import {
+  DatePickerWrapper,
+  FullTimeRangeSelector,
+  FROZEN_TIER_PREFERENCE,
+} from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
-import { MlFullTimeRangeSelector } from '@kbn/ml-date-picker';
 
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
@@ -505,7 +508,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             >
               {hasValidTimeField ? (
                 <EuiFlexItem grow={false}>
-                  <MlFullTimeRangeSelector
+                  <FullTimeRangeSelector
                     frozenDataPreference={frozenDataPreference}
                     setFrozenDataPreference={setFrozenDataPreference}
                     dataView={currentDataView}
@@ -516,7 +519,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 </EuiFlexItem>
               ) : null}
               <EuiFlexItem grow={false}>
-                <MlDatePickerWrapper
+                <DatePickerWrapper
                   uiSettingsKeys={UI_SETTINGS}
                   wrapWithTheme={wrapWithTheme}
                   toMountPoint={toMountPoint}

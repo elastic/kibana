@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-export { MlDatePickerContextProvider } from './src/hooks/use_ml_date_picker_context';
+export { DatePickerContextProvider } from './src/hooks/use_date_picker_context';
 export { useTimefilter, useTimeRangeUpdates } from './src/hooks/use_time_filter';
-export { MlDatePickerWrapper } from './src/components/ml_date_picker_wrapper';
+export { DatePickerWrapper } from './src/components/date_picker_wrapper';
 export {
-  MlFullTimeRangeSelector,
-  type MlFullTimeRangeSelectorProps,
-} from './src/components/ml_full_time_range_selector';
+  FullTimeRangeSelector,
+  type FullTimeRangeSelectorProps,
+} from './src/components/full_time_range_selector';
 export {
   getTimeFilterRange,
   type GetTimeFieldRangeResponse,

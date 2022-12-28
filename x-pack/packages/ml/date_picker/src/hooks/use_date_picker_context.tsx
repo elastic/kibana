@@ -11,7 +11,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreSetup, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import type { HttpStart } from '@kbn/core/public';
 
-export interface MlDatePickerDependencies {
+export interface DatePickerDependencies {
   data: DataPublicPluginStart;
   http: HttpStart;
   notifications: CoreSetup['notifications'];
@@ -19,22 +19,22 @@ export interface MlDatePickerDependencies {
   uiSettings: IUiSettingsClient;
 }
 
-export const MlDatePickerContext = createContext<MlDatePickerDependencies | undefined>(undefined);
+export const DatePickerContext = createContext<DatePickerDependencies | undefined>(undefined);
 
-export const useMlDatePickerContext = (): MlDatePickerDependencies => {
-  const mlDatePickerContext = useContext(MlDatePickerContext);
+export const useDatePickerContext = (): DatePickerDependencies => {
+  const datePickerContext = useContext(DatePickerContext);
 
   // if `undefined`, throw an error
-  if (mlDatePickerContext === undefined) {
-    throw new Error('MlDatePickerContext was used outside of its Provider');
+  if (datePickerContext === undefined) {
+    throw new Error('datePickerContext was used outside of its Provider');
   }
 
-  return mlDatePickerContext;
+  return datePickerContext;
 };
 
-export const MlDatePickerContextProvider: FC<{ deps: MlDatePickerDependencies }> = ({
+export const DatePickerContextProvider: FC<{ deps: DatePickerDependencies }> = ({
   children,
   deps,
 }) => {
-  return <MlDatePickerContext.Provider value={deps}>{children}</MlDatePickerContext.Provider>;
+  return <DatePickerContext.Provider value={deps}>{children}</DatePickerContext.Provider>;
 };

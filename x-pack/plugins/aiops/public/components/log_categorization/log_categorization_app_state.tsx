@@ -12,7 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { MlDatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 
 import { DataSourceContext } from '../../hooks/use_data_source';
 import { SavedSearchSavedObject } from '../../application/utils/search_utils';
@@ -40,11 +40,11 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
           <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-            <MlDatePickerContextProvider
+            <DatePickerContextProvider
               deps={pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings'])}
             >
               <LogCategorizationPage />
-            </MlDatePickerContextProvider>
+            </DatePickerContextProvider>
           </StorageContextProvider>
         </DataSourceContext.Provider>
       </UrlStateProvider>

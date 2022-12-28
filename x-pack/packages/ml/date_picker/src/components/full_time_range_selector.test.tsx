@@ -14,16 +14,16 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import {
-  MlDatePickerContextProvider,
-  type MlDatePickerDependencies,
-} from '../hooks/use_ml_date_picker_context';
+  DatePickerContextProvider,
+  type DatePickerDependencies,
+} from '../hooks/use_date_picker_context';
 import { FROZEN_TIER_PREFERENCE } from '../storage';
 
-import { MlFullTimeRangeSelector } from './ml_full_time_range_selector';
+import { FullTimeRangeSelector } from './full_time_range_selector';
 
 const mockDependencies = {
   notifications: {},
-} as MlDatePickerDependencies;
+} as DatePickerDependencies;
 
 // Create a mock for the setFullTimeRange function in the service.
 // The mock is hoisted to the top, so need to prefix the mock function
@@ -69,9 +69,9 @@ describe('FullTimeRangeSelector', () => {
 
     const { getByText } = render(
       <IntlProvider locale="en">
-        <MlDatePickerContextProvider deps={mockDependencies}>
-          <MlFullTimeRangeSelector {...props} />
-        </MlDatePickerContextProvider>
+        <DatePickerContextProvider deps={mockDependencies}>
+          <FullTimeRangeSelector {...props} />
+        </DatePickerContextProvider>
       </IntlProvider>
     );
 

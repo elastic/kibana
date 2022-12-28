@@ -20,9 +20,9 @@ import { useUrlState } from '@kbn/ml-url-state';
 import { useStorage } from '@kbn/ml-local-storage';
 import {
   useTimefilter,
-  MlDatePickerWrapper,
-  MlFullTimeRangeSelector,
-  type MlFullTimeRangeSelectorProps,
+  DatePickerWrapper,
+  FullTimeRangeSelector,
+  type FullTimeRangeSelectorProps,
   FROZEN_TIER_PREFERENCE,
 } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -60,7 +60,7 @@ export const PageHeader: FC<PageHeaderProps> = ({ compact }) => {
     autoRefreshSelector: true,
   });
 
-  const updateTimeState: MlFullTimeRangeSelectorProps['callback'] = useCallback(
+  const updateTimeState: FullTimeRangeSelectorProps['callback'] = useCallback(
     (update) => {
       setGlobalState({ time: { from: update.start.string, to: update.end.string } });
     },
@@ -98,7 +98,7 @@ export const PageHeader: FC<PageHeaderProps> = ({ compact }) => {
           >
             {hasValidTimeField ? (
               <EuiFlexItem grow={false}>
-                <MlFullTimeRangeSelector
+                <FullTimeRangeSelector
                   frozenDataPreference={frozenDataPreference}
                   setFrozenDataPreference={setFrozenDataPreference}
                   dataView={dataView}
@@ -110,7 +110,7 @@ export const PageHeader: FC<PageHeaderProps> = ({ compact }) => {
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>
-              <MlDatePickerWrapper
+              <DatePickerWrapper
                 uiSettingsKeys={UI_SETTINGS}
                 wrapWithTheme={wrapWithTheme}
                 toMountPoint={toMountPoint}

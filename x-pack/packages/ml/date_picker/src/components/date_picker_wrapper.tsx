@@ -27,7 +27,7 @@ import type { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/publi
 import { useUrlState } from '@kbn/ml-url-state';
 
 import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../hooks/use_time_filter';
-import { useMlDatePickerContext } from '../hooks/use_ml_date_picker_context';
+import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5000;
@@ -66,7 +66,7 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
   mlTimefilterRefresh$.next({ lastRefresh: Date.now(), ...(timeRange ? { timeRange } : {}) });
 }
 
-interface MlDatePickerWrapperProps {
+interface DatePickerWrapperProps {
   isAutoRefreshOnly?: boolean;
   isLoading?: boolean;
   showRefresh?: boolean;
@@ -76,7 +76,7 @@ interface MlDatePickerWrapperProps {
   toMountPoint: typeof toMountPoint;
 }
 
-export const MlDatePickerWrapper: FC<MlDatePickerWrapperProps> = ({
+export const DatePickerWrapper: FC<DatePickerWrapperProps> = ({
   isAutoRefreshOnly,
   isLoading = false,
   showRefresh,
@@ -90,7 +90,7 @@ export const MlDatePickerWrapper: FC<MlDatePickerWrapperProps> = ({
     notifications: { toasts },
     theme: { theme$ },
     uiSettings: config,
-  } = useMlDatePickerContext();
+  } = useDatePickerContext();
 
   const { timefilter, history } = data.query.timefilter;
 
