@@ -48,7 +48,7 @@ import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 
 import './overwrite.scss';
-import { IUnifiedSearchPluginServices } from '../../types';
+import type { IUnifiedSearchPluginServices } from '../../types';
 
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;

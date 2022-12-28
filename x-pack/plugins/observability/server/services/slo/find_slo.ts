@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
 import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
 import { computeErrorBudget, computeSLI } from '../../domain/services';
-import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '../../types/rest_specs';
 import { SLIClient } from './sli_client';
 import {
   Criteria,
@@ -47,7 +47,7 @@ export class FindSLO {
   ): FindSLOResponse {
     return findSLOResponseSchema.encode({
       page: resultMeta.page,
-      per_page: resultMeta.perPage,
+      perPage: resultMeta.perPage,
       total: resultMeta.total,
       results: sloList,
     });
@@ -64,7 +64,7 @@ function computeSloWithSummary(
     const errorBudget = computeErrorBudget(slo, indicatorDataBySlo[slo.id]);
     sloListWithSummary.push({
       ...slo,
-      summary: { sli_value: sliValue, error_budget: errorBudget },
+      summary: { sliValue, errorBudget },
     });
   }
   return sloListWithSummary;
