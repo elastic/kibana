@@ -41,6 +41,7 @@ export class AutocompleteInfo {
 
   public setup(http: HttpSetup) {
     this.http = http;
+    this.mapping.setup(http);
   }
 
   public getEntityProvider(
@@ -97,7 +98,6 @@ export class AutocompleteInfo {
   }
 
   private load(data: AutoCompleteEntitiesApiResponse) {
-    this.mapping.loadMappings(data.mappings);
     const collaborator = this.mapping;
     this.alias.loadAliases(data.aliases, collaborator);
     this.indexTemplate.loadTemplates(data.indexTemplates);

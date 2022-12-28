@@ -10,9 +10,11 @@ import _ from 'lodash';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { Subject } from 'rxjs';
+import { API_BASE_PATH } from '../../../common/constants';
 import type { ResultTerm, AutoCompleteContext } from '../autocomplete/types';
 import { expandAliases } from './expand_aliases';
 import type { Field, FieldMapping } from './types';
+import { type AutoCompleteEntitiesApiResponse } from './types';
 
 function getFieldNamesFromProperties(properties: Record<string, FieldMapping> = {}) {
   const fieldList = Object.entries(properties).flatMap(([fieldName, fieldMapping]) => {
@@ -98,68 +100,34 @@ export interface BaseMapping {
 export class Mapping implements BaseMapping {
   private http!: HttpSetup;
 
+  /**
+   * Map of the mappings of actual ES indices.
+   */
   public perIndexTypes: Record<string, object> = {};
+
+  /**
+   * Map of the currently loading mappings for index patterns specified by a user.
+   * @private
+   */
+  private loadingState: Record<string, boolean> = {};
 
   public setup(http: HttpSetup) {
     this.http = http;
   }
 
   /**
-   * TODO: Replace mock with the proxy endpoint
+   * Fetches mappings of the requested indices.
    * @param index
    */
   async fetchMappings(index: string): Promise<IndicesGetMappingResponse> {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve({
-          'cloudwatch-2019.10.28': {
-            mappings: {
-              properties: {
-                '@timestamp': {
-                  type: 'date',
-                },
-                CPUUtilization: {
-                  type: 'double',
-                },
-                DiskReadBytes: {
-                  type: 'double',
-                },
-                DiskReadOps: {
-                  type: 'double',
-                },
-                DiskWriteBytes: {
-                  type: 'double',
-                },
-                DiskWriteOps: {
-                  type: 'double',
-                },
-                NetworkIn: {
-                  type: 'double',
-                },
-                NetworkOut: {
-                  type: 'double',
-                },
-                instance: {
-                  type: 'keyword',
-                },
-                region: {
-                  type: 'keyword',
-                },
-                sourcetype: {
-                  type: 'text',
-                  fields: {
-                    keyword: {
-                      type: 'keyword',
-                      ignore_above: 256,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        });
-      }, 2000);
-    });
+    const response = await this.http.get<AutoCompleteEntitiesApiResponse>(
+      `${API_BASE_PATH}/autocomplete_entities`,
+      {
+        query: { fields: true, fieldsIndices: index },
+      }
+    );
+
+    return response.mappings;
   }
 
   getMappings = (
@@ -175,6 +143,11 @@ export class Mapping implements BaseMapping {
       const typeDict = this.perIndexTypes[indices] as Record<string, unknown>;
 
       if (!typeDict) {
+        // Mappings fetching for the index is already in progress
+        if (this.loadingState[indices]) return [];
+
+        this.loadingState[indices] = true;
+
         if (!autoCompleteContext.asyncResultsState) {
           autoCompleteContext.asyncResultsState = {} as AutoCompleteContext['asyncResultsState'];
         }
