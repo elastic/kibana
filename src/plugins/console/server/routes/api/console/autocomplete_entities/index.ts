@@ -9,27 +9,30 @@
 import http from 'http';
 import https from 'https';
 import { Buffer } from 'buffer';
-import { parse } from 'query-string';
 import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SemVer } from 'semver';
+import { autoCompleteEntitiesValidationConfig, type SettingsToRetrieve } from './validation_config';
 import type { RouteDependencies } from '../../..';
 import { sanitizeHostname } from '../../../../lib/utils';
 import type { ESConfigForProxy } from '../../../../types';
 import { getRequestConfig } from '../proxy/create_handler';
-
-interface SettingsToRetrieve {
-  indices: boolean;
-  fields: boolean;
-  templates: boolean;
-  dataStreams: boolean;
-}
 
 type Config = ESConfigForProxy & { headers: KibanaRequest['headers'] } & { kibanaVersion: SemVer };
 
 const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
 // Limit the response size to 10MB, because the response can be very large and sending it to the client
 // can cause the browser to hang.
+
+const getMappings = async (settings: SettingsToRetrieve, config: Config) => {
+  if (settings.fields) {
+    const path = settings.fieldsIndices ? `/${settings.fieldsIndices}/_mapping` : '/mapping';
+    const mappings = await getEntity(path, config);
+    return mappings;
+  }
+  // If the user doesn't want autocomplete suggestions, then clear any that exist.
+  return {};
+};
 
 const getAliases = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.indices) {
@@ -147,19 +150,10 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
       options: {
         tags: ['access:console'],
       },
-      validate: false,
+      validate: autoCompleteEntitiesValidationConfig,
     },
     async (context, request, response) => {
-      const settings = parse(request.url.search, {
-        parseBooleans: true,
-      }) as unknown as SettingsToRetrieve;
-
-      // If no settings are specified, then return 400.
-      if (Object.keys(settings).length === 0) {
-        return response.badRequest({
-          body: 'Request must contain at least one of the following parameters: indices, fields, templates, dataStreams',
-        });
-      }
+      const settings = request.query;
 
       const legacyConfig = await deps.proxy.readLegacyESConfig();
       const configWithHeaders = {
@@ -170,6 +164,7 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
 
       // Wait for all requests to complete, in case one of them fails return the successfull ones
       const results = await Promise.allSettled([
+        getMappings(settings, configWithHeaders),
         getAliases(settings, configWithHeaders),
         getDataStreams(settings, configWithHeaders),
         getLegacyTemplates(settings, configWithHeaders),
@@ -177,7 +172,7 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
         getComponentTemplates(settings, configWithHeaders),
       ]);
 
-      const [aliases, dataStreams, legacyTemplates, indexTemplates, componentTemplates] =
+      const [mappings, aliases, dataStreams, legacyTemplates, indexTemplates, componentTemplates] =
         results.map((result) => {
           // If the request was successful, return the result
           if (result.status === 'fulfilled') {
@@ -194,6 +189,7 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
 
       return response.ok({
         body: {
+          mappings,
           aliases,
           dataStreams,
           legacyTemplates,
