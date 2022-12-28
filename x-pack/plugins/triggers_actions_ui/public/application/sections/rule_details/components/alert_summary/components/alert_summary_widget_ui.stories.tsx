@@ -11,11 +11,6 @@ import { AlertsSummaryWidgetUI as Component } from './alert_summary_widget_ui';
 export default {
   component: Component,
   title: 'app/AlertsSummaryWidgetUI',
-  parameters: {
-    viewport: {
-      defaultViewport: 'mobile1',
-    },
-  },
 };
 
 export const Overview = {
