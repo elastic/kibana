@@ -126,6 +126,10 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.find('apiKeysRoleDescriptorsSwitch');
     },
 
+    async getFlyout() {
+      return await find.byClassName('euiFlyout');
+    },
+
     async getFlyoutTitleText() {
       const header = await find.byClassName('euiFlyoutHeader');
       return header.getVisibleText();
