@@ -18,6 +18,8 @@ import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 import {
   SEARCH_QUERY_LANGUAGE,
@@ -98,21 +100,20 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
     );
   }
 
+  const datePickerDeps = {
+    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
+  };
+
   return (
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
           <SpikeAnalysisTableRowStateProvider>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-              <DatePickerContextProvider
-                deps={pick(appDependencies, [
-                  'data',
-                  'http',
-                  'notifications',
-                  'theme',
-                  'uiSettings',
-                ])}
-              >
+              <DatePickerContextProvider deps={datePickerDeps}>
                 <ExplainLogRateSpikesPage />
               </DatePickerContextProvider>
             </StorageContextProvider>

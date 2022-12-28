@@ -14,8 +14,6 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { createHtmlPortalNode, HtmlPortalNode } from 'react-reverse-portal';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { MlPageHeaderRenderer } from '../page_header/page_header';
 import { useSideNavItems } from './side_nav';
 import * as routes from '../../routing/routes';
@@ -81,18 +79,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
   const activeRoute = useActiveRoute(routeList);
 
   const rightSideItems = useMemo(() => {
-    return [
-      ...(activeRoute.enableDatePicker
-        ? [
-            <DatePickerWrapper
-              isLoading={isLoading}
-              uiSettingsKeys={UI_SETTINGS}
-              wrapWithTheme={wrapWithTheme}
-              toMountPoint={toMountPoint}
-            />,
-          ]
-        : []),
-    ];
+    return [...(activeRoute.enableDatePicker ? [<DatePickerWrapper isLoading={isLoading} />] : [])];
   }, [activeRoute.enableDatePicker, isLoading]);
 
   useDocTitle(activeRoute);

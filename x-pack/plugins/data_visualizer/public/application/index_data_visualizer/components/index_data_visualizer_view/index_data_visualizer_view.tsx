@@ -21,8 +21,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -520,9 +518,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               ) : null}
               <EuiFlexItem grow={false}>
                 <DatePickerWrapper
-                  uiSettingsKeys={UI_SETTINGS}
-                  wrapWithTheme={wrapWithTheme}
-                  toMountPoint={toMountPoint}
                   isAutoRefreshOnly={!hasValidTimeField}
                   showRefresh={!hasValidTimeField}
                   compact={compact}

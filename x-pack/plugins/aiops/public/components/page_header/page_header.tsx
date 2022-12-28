@@ -25,8 +25,6 @@ import {
   type FullTimeRangeSelectorProps,
   FROZEN_TIER_PREFERENCE,
 } from '@kbn/ml-date-picker';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 import { useCss } from '../../hooks/use_css';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -111,9 +109,6 @@ export const PageHeader: FC<PageHeaderProps> = ({ compact }) => {
             ) : null}
             <EuiFlexItem grow={false}>
               <DatePickerWrapper
-                uiSettingsKeys={UI_SETTINGS}
-                wrapWithTheme={wrapWithTheme}
-                toMountPoint={toMountPoint}
                 isAutoRefreshOnly={!hasValidTimeField}
                 showRefresh={!hasValidTimeField}
                 compact={compact}

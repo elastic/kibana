@@ -15,11 +15,17 @@ import { encode } from '@kbn/rison';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  toMountPoint,
+  wrapWithTheme,
+} from '@kbn/kibana-react-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import {
   Provider as UrlStateContextProvider,
   parseUrlState,
@@ -319,14 +325,18 @@ export const IndexDataVisualizer: FC<{
     unifiedSearch,
     ...coreStart,
   };
+  const datePickerDeps = {
+    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
+  };
 
   return (
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
       <KibanaContextProvider services={{ ...services }}>
         <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
-          <DatePickerContextProvider
-            deps={pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings'])}
-          >
+          <DatePickerContextProvider deps={datePickerDeps}>
             <DataVisualizerStateContextProvider
               IndexDataVisualizerComponent={IndexDataVisualizerView}
               getAdditionalLinks={getAdditionalLinks}

@@ -7,9 +7,11 @@
 
 import React, { createContext, useContext, type FC } from 'react';
 
+import type { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreSetup, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import type { HttpStart } from '@kbn/core/public';
+import type { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 export interface DatePickerDependencies {
   data: DataPublicPluginStart;
@@ -17,6 +19,9 @@ export interface DatePickerDependencies {
   notifications: CoreSetup['notifications'];
   theme: ThemeServiceStart;
   uiSettings: IUiSettingsClient;
+  uiSettingsKeys: typeof UI_SETTINGS;
+  wrapWithTheme: typeof wrapWithTheme;
+  toMountPoint: typeof toMountPoint;
 }
 
 export const DatePickerContext = createContext<DatePickerDependencies | undefined>(undefined);

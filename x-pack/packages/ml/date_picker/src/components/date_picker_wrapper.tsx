@@ -22,8 +22,6 @@ import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeHistoryContract } from '@kbn/data-plugin/public';
-import type { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { useUrlState } from '@kbn/ml-url-state';
 
 import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../hooks/use_time_filter';
@@ -71,9 +69,6 @@ interface DatePickerWrapperProps {
   isLoading?: boolean;
   showRefresh?: boolean;
   compact?: boolean;
-  uiSettingsKeys: typeof UI_SETTINGS;
-  wrapWithTheme: typeof wrapWithTheme;
-  toMountPoint: typeof toMountPoint;
 }
 
 export const DatePickerWrapper: FC<DatePickerWrapperProps> = ({
@@ -81,15 +76,15 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = ({
   isLoading = false,
   showRefresh,
   compact = false,
-  uiSettingsKeys,
-  wrapWithTheme,
-  toMountPoint,
 }) => {
   const {
     data,
     notifications: { toasts },
     theme: { theme$ },
     uiSettings: config,
+    uiSettingsKeys,
+    wrapWithTheme,
+    toMountPoint,
   } = useDatePickerContext();
 
   const { timefilter, history } = data.query.timefilter;

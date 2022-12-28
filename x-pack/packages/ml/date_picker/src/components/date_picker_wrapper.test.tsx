@@ -103,6 +103,9 @@ const mockContextFactory = (addWarning: jest.Mock<void, []>) => {
     theme: {
       theme$: of(),
     },
+    uiSettingsKeys: mockedUiSettingsKeys,
+    toMountPoint: mockedToMountPoint,
+    wrapWithTheme: mockedWrapWithTheme,
   };
 };
 
@@ -132,13 +135,7 @@ describe('<MlDatePickerWrapper />', () => {
 
     (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory(displayWarningSpy));
 
-    const wrapper = mount(
-      <DatePickerWrapper
-        uiSettingsKeys={mockedUiSettingsKeys}
-        toMountPoint={mockedToMountPoint}
-        wrapWithTheme={mockedWrapWithTheme}
-      />
-    );
+    const wrapper = mount(<DatePickerWrapper />);
     expect(wrapper.find(DatePickerWrapper)).toHaveLength(1);
     expect(refreshListener).toBeCalledTimes(0);
 
@@ -154,13 +151,7 @@ describe('<MlDatePickerWrapper />', () => {
     (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory(displayWarningSpy));
 
     // act
-    render(
-      <DatePickerWrapper
-        uiSettingsKeys={mockedUiSettingsKeys}
-        toMountPoint={mockedToMountPoint}
-        wrapWithTheme={mockedWrapWithTheme}
-      />
-    );
+    render(<DatePickerWrapper />);
 
     // assert
     // Show warning that the interval set is too short
@@ -179,13 +170,7 @@ describe('<MlDatePickerWrapper />', () => {
     (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory(displayWarningSpy));
 
     // act
-    render(
-      <DatePickerWrapper
-        uiSettingsKeys={mockedUiSettingsKeys}
-        toMountPoint={mockedToMountPoint}
-        wrapWithTheme={mockedWrapWithTheme}
-      />
-    );
+    render(<DatePickerWrapper />);
 
     // assert
     expect(displayWarningSpy).toHaveBeenCalled();
