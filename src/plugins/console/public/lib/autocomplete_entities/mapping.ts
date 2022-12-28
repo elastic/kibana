@@ -9,7 +9,6 @@
 import _ from 'lodash';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { Subject } from 'rxjs';
 import { API_BASE_PATH } from '../../../common/constants';
 import type { ResultTerm, AutoCompleteContext } from '../autocomplete/types';
 import { expandAliases } from './expand_aliases';
@@ -154,24 +153,24 @@ export class Mapping implements BaseMapping {
 
         autoCompleteContext.asyncResultsState!.isLoading = true;
 
-        const subj$ = new Subject<ResultTerm[]>();
+        autoCompleteContext.asyncResultsState!.results = new Promise<ResultTerm[]>(
+          (resolve, reject) => {
+            this.fetchMappings(indices as string)
+              .then((mapping) => {
+                autoCompleteContext.asyncResultsState!.isLoading = false;
+                autoCompleteContext.asyncResultsState!.lastFetched = Date.now();
 
-        autoCompleteContext.asyncResultsState!.results$ = subj$.asObservable();
+                // cache mappings
+                this.loadMappings(mapping);
 
-        this.fetchMappings(indices)
-          .then((mapping) => {
-            autoCompleteContext.asyncResultsState!.isLoading = false;
-            autoCompleteContext.asyncResultsState!.lastFetched = Date.now();
-
-            // cache mappings
-            this.loadMappings(mapping);
-
-            subj$.next(this.getMappings(autoCompleteContext, indices, types));
-          })
-          .catch((error) => {
-            // eslint-disable-next-line no-console
-            console.error(error);
-          });
+                resolve(this.getMappings(autoCompleteContext, indices, types));
+              })
+              .catch((error) => {
+                // eslint-disable-next-line no-console
+                console.error(error);
+              });
+          }
+        );
 
         return [];
       }

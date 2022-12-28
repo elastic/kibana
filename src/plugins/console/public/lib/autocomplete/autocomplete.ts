@@ -1219,9 +1219,8 @@ export default function ({
 
         if (context.asyncResultsState) {
           // TODO indicate mappings fetching is in progress
-          context.asyncResultsState.results$.subscribe((r) => {
+          context.asyncResultsState.results.then((r) => {
             const asyncSuggestions = getSuggestions(getTerms(context, r));
-
             callback(null, asyncSuggestions);
           });
         }

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import { CoreEditor, Range, Token } from '../../types';
 
 export interface ResultTerm {
@@ -33,7 +32,7 @@ export interface AutoCompleteContext {
   asyncResultsState?: {
     isLoading: boolean;
     lastFetched: number | null;
-    results$: Observable<ResultTerm[]>;
+    results: Promise<ResultTerm[]>;
   };
   endpoint?: null | {
     paramsAutocomplete: {
