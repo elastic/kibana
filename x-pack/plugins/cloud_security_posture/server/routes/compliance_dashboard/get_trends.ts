@@ -6,8 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
+import { BENCHMARK_SCORE_INDEX_DEFAULT_NS, POLICY_TEMPLATE } from '../../../common/constants';
 import { Stats } from '../../../common/types';
 import { calculatePostureScore } from './get_stats';
 
@@ -32,14 +31,20 @@ export type Trends = Array<{
   clusters: Record<string, Stats>;
 }>;
 
-export const getTrendsQuery = (query: QueryDslQueryContainer) => ({
+export const getTrendsQuery = (policyTemplate: POLICY_TEMPLATE) => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   // large number that should be sufficient for 24 hours considering we write to the score index every 5 minutes
   size: 999,
   sort: '@timestamp:desc',
-  query: {
-    bool: {
-      // ...query.bool,
+  bool: {
+    query: {
+      filter: [
+        {
+          term: {
+            policy_template: policyTemplate,
+          },
+        },
+      ],
       must: {
         range: {
           '@timestamp': {
@@ -76,9 +81,9 @@ export const getTrendsFromQueryResult = (scoreTrendDocs: ScoreTrendDoc[]): Trend
 
 export const getTrends = async (
   esClient: ElasticsearchClient,
-  query: QueryDslQueryContainer
+  policyTemplate: POLICY_TEMPLATE
 ): Promise<Trends> => {
-  const trendsQueryResult = await esClient.search<ScoreTrendDoc>(getTrendsQuery(query));
+  const trendsQueryResult = await esClient.search<ScoreTrendDoc>(getTrendsQuery(policyTemplate));
 
   if (!trendsQueryResult.hits.hits) throw new Error('missing trend results from score index');
 

@@ -15,6 +15,7 @@ import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
 import { getTrends, Trends } from './get_trends';
+import { POLICY_TEMPLATE } from '../../../common/constants';
 
 export interface KeyDocCount<TKey = string> {
   key: TKey;
@@ -53,9 +54,11 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
           keep_alive: '30s',
         });
 
+        const policyTemplate = 'cis_k8s' as POLICY_TEMPLATE;
+
         const query: QueryDslQueryContainer = {
           bool: {
-            filter: [{ term: { 'rule.benchmark.id': 'cis_k8s' } }],
+            filter: [{ term: { 'rule.benchmark.id': policyTemplate } }],
           },
         };
 
@@ -66,7 +69,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
             getStats(esClient, query, pitId),
             getGroupedFindingsEvaluation(esClient, query, pitId),
             getClusters(esClient, query, pitId),
-            getTrends(esClient, query),
+            getTrends(esClient, policyTemplate),
           ]
         );
 
