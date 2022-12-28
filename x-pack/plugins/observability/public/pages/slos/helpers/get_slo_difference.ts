@@ -8,7 +8,7 @@ import { asPercent } from '../../../../common/utils/formatters';
 import { SLO } from '../../../typings';
 
 export function getSloDifference(slo: SLO) {
-  const difference = slo.summary.sli_value - slo.objective.target;
+  const difference = slo.summary.sliValue - slo.objective.target;
 
   return {
     value: difference,

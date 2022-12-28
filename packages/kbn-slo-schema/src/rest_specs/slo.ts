@@ -51,16 +51,16 @@ const getSLOParamsSchema = t.type({
 });
 
 const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
-const sortBySchema = t.union([t.literal('name'), t.literal('indicator_type')]);
+const sortBySchema = t.union([t.literal('name'), t.literal('indicatorType')]);
 
 const findSLOParamsSchema = t.partial({
   query: t.partial({
     name: t.string,
-    indicator_types: indicatorTypesArraySchema,
+    indicatorTypes: indicatorTypesArraySchema,
     page: t.string,
-    per_page: t.string,
-    sort_by: sortBySchema,
-    sort_direction: sortDirectionSchema,
+    perPage: t.string,
+    sortBy: sortBySchema,
+    sortDirection: sortDirectionSchema,
   }),
 });
 

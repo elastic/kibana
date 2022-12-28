@@ -65,7 +65,7 @@ export function BurnRateRuleEditor(props: Props) {
 
   useEffect(() => {
     if (selectedSlo) {
-      const sloDurationInMinutes = toMinutes(selectedSlo.time_window.duration);
+      const sloDurationInMinutes = toMinutes(selectedSlo.timeWindow.duration);
       const longWindowDurationInMinutes = toMinutes(longWindowDuration);
       const maxBurnRateThreshold = Math.floor(sloDurationInMinutes / longWindowDurationInMinutes);
       setMaxBurnRate(maxBurnRateThreshold);
@@ -86,7 +86,7 @@ export function BurnRateRuleEditor(props: Props) {
     if (selectedSlo && longWindowDuration?.value > 0 && burnRate >= 1) {
       return numeral(
         longWindowDuration.value /
-          ((burnRate * toMinutes(longWindowDuration)) / toMinutes(selectedSlo.time_window.duration))
+          ((burnRate * toMinutes(longWindowDuration)) / toMinutes(selectedSlo.timeWindow.duration))
       ).format('0a');
     }
 
