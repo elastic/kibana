@@ -15,7 +15,7 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import seedrandom from 'seedrandom';
 import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
 import type { Dictionary } from '@kbn/ml-url-state';
-import { mlDatePickerRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../kibana_context';
@@ -312,7 +312,7 @@ export const useDataVisualizerGridData = (
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
-      mlDatePickerRefresh$
+      mlTimefilterRefresh$
     ).subscribe(() => {
       if (onUpdate) {
         onUpdate({

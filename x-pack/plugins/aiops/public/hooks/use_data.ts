@@ -12,7 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { Dictionary } from '@kbn/ml-url-state';
-import { mlDatePickerRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
@@ -151,7 +151,7 @@ export const useData = (
     const timeUpdateSubscription = merge(
       timefilter.getAutoRefreshFetch$(),
       timefilter.getTimeUpdate$(),
-      mlDatePickerRefresh$
+      mlTimefilterRefresh$
     ).subscribe(() => {
       if (onUpdate) {
         onUpdate({

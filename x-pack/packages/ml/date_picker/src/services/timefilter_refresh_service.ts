@@ -12,4 +12,4 @@ export interface Refresh {
   timeRange?: { start: string; end: string };
 }
 
-export const mlDatePickerRefresh$ = new Subject<Refresh>();
+export const mlTimefilterRefresh$ = new Subject<Refresh>();

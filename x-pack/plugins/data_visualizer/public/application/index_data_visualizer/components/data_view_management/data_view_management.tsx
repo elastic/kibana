@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { mlDatePickerRefresh$, Refresh } from '@kbn/ml-date-picker';
+import { mlTimefilterRefresh$, Refresh } from '@kbn/ml-date-picker';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 export interface DataVisualizerDataViewManagementProps {
@@ -56,7 +56,7 @@ export function DataVisualizerDataViewManagement(props: DataVisualizerDataViewMa
         const refresh: Refresh = {
           lastRefresh: Date.now(),
         };
-        mlDatePickerRefresh$.next(refresh);
+        mlTimefilterRefresh$.next(refresh);
       },
     });
   };
