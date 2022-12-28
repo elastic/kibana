@@ -28,15 +28,18 @@ const getMockRequestBody = (
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
-  const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
+  const log = getService('log');
 
   const requestCsvFromSavedSearch = async (
     savedSearchId: string,
     obj: DeepPartial<CsvSavedSearchExportBodyType> = {}
   ) => {
+    log.info(`sending request for saved search: ${savedSearchId}`);
     const body = getMockRequestBody(obj);
     return await supertest
       .post(`/api/reporting/v1/generate/csv/saved-object/search:${savedSearchId}`)
@@ -44,13 +47,37 @@ export default ({ getService }: FtrProviderContext) => {
       .send(body);
   };
 
+  const cleanupLogstash = async () => {
+    const logstashIndices = await es.indices.get({
+      index: 'logstash-*',
+      allow_no_indices: true,
+      expand_wildcards: 'all',
+      ignore_unavailable: true,
+    });
+    await Promise.all(
+      Object.keys(logstashIndices.body).map(async (logstashIndex) => {
+        log.info(`deleting ${logstashIndex}`);
+        await es.indices.delete({
+          index: logstashIndex,
+        });
+      })
+    );
+  };
+
   describe('CSV Generation from Saved Search ID', () => {
     before(async () => {
+      // explicitly delete all pre-existing logstash indices, since we have exports with no time filter
+      log.info(`deleting logstash indices`);
+      await cleanupLogstash();
+
+      log.info(`updating Advanced Settings`);
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': false,
         'dateFormat:tz': 'UTC',
         dateFormat: 'YYYY-MM-DD HH:mm:ss.SSS',
       });
+
+      log.info(`loading archives and fixtures`);
       await esArchiver.load(LOGSTASH_DATA_ARCHIVE);
       await kibanaServer.importExport.load(LOGSTASH_SAVED_OBJECTS);
     });
