@@ -16585,7 +16585,6 @@
     "xpack.infra.hostsTable.nameColumnHeader": "名称",
     "xpack.infra.hostsTable.numberOfCpusColumnHeader": "# 个 CPU",
     "xpack.infra.hostsTable.operatingSystemColumnHeader": "操作系统",
-    "xpack.infra.hostsTable.servicesOnHostColumnHeader": "主机上的服务",
     "xpack.infra.infra.nodeDetails.apmTabLabel": "APM",
     "xpack.infra.infra.nodeDetails.createAlertLink": "创建库存规则",
     "xpack.infra.infra.nodeDetails.openAsPage": "以页面形式打开",
