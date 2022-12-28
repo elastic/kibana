@@ -10,8 +10,8 @@ import { computeSLI } from './compute_sli';
 
 const DATE_RANGE: DateRange = { from: new Date(), to: new Date() };
 describe('computeSLI', () => {
-  it('returns 0 when no total events', () => {
-    expect(computeSLI({ good: 100, total: 0, dateRange: DATE_RANGE })).toEqual(0);
+  it('returns -1 when no total events', () => {
+    expect(computeSLI({ good: 100, total: 0, dateRange: DATE_RANGE })).toEqual(-1);
   });
 
   it('returns the sli value', () => {
