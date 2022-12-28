@@ -11,44 +11,12 @@ import type { CspmAccountsStats, CspmResourcesStats } from './types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 import { calculatePostureScore } from '@kbn/cloud-security-posture-plugin/server/routes/compliance_dashboard/get_stats';
 
-interface AccountsStats {
-  accounts: {
-    buckets: AccountEntity[];
-  };
+interface Value {
+  value: number;
 }
 
-export interface AccountEntity {
-  key: string; // account_id
-
-  doc_count: number; // latest findings doc count
-
-  nodes_count: {
-    value: number;
-  };
-
-  resources: {
-    pods_count: {
-      value: number;
-    };
-  };
-
-  agents_count: {
-    value: number;
-  };
-
-  passed_findings_count: {
-    doc_count: number;
-  };
-
-  failed_findings_count: {
-    doc_count: number;
-  };
-
-  benchmark_name: { top: BenchmarkName[] };
-
-  benchmark_id: { top: BenchmarkId[] };
-
-  benchmark_version: { top: BenchmarkVersion[] };
+interface DocCount {
+  doc_count: number;
 }
 
 interface BenchmarkName {
@@ -61,6 +29,27 @@ interface BenchmarkId {
 
 interface BenchmarkVersion {
   metrics: { 'rule.benchmark.version': string };
+}
+
+interface AccountsStats {
+  accounts: {
+    buckets: AccountEntity[];
+  };
+}
+interface AccountEntity {
+  key: string; // account_id
+  doc_count: number; // latest findings doc count
+  passed_findings_count: DocCount;
+  failed_findings_count: DocCount;
+  benchmark_name: { top: BenchmarkName[] };
+  benchmark_id: { top: BenchmarkId[] };
+  benchmark_version: { top: BenchmarkVersion[] };
+  agents_count: Value;
+  nodes_count: Value;
+  pods_count: Value;
+  resources: {
+    pods_count: Value;
+  };
 }
 
 const getAccountsStatsQuery = (index: string): SearchRequest => ({
@@ -161,7 +150,6 @@ const getAccountsStatsQuery = (index: string): SearchRequest => ({
             },
           },
         },
-
         resources: {
           filter: {
             bool: {
@@ -201,31 +189,23 @@ const getCspmAccountsStats = (aggregatedResourcesStats: AccountsStats): CspmAcco
   const accounts = aggregatedResourcesStats.accounts.buckets;
 
   const accountsStats = accounts.map((account) => {
-    const nodesCount = account.nodes_count.value;
-    const agentsCount = account.agents_count.value;
-    const passedFindingsCount = account.passed_findings_count.doc_count;
-    const failedFindingsCount = account.failed_findings_count.doc_count;
-    const benchmarkName = account.benchmark_name.top[0].metrics['rule.benchmark.name'];
-    const benchmarkId = account.benchmark_id.top[0].metrics['rule.benchmark.id'];
-    const benchmarkVersion = account.benchmark_version.top[0].metrics['rule.benchmark.version'];
-    const podsCount = account.resources.pods_count.value;
-    const latestFindingsDocsCount = account.doc_count;
     return {
       account_id: account.key,
-      posture_score: calculatePostureScore(passedFindingsCount, failedFindingsCount),
-      passed_findings_count: passedFindingsCount,
-      failed_findings_count: failedFindingsCount,
-      latest_findings_doc_count: latestFindingsDocsCount,
-      agents_count: agentsCount,
-      nodes_count: nodesCount,
-      pods_count: podsCount,
-      benchmark_name: benchmarkName,
-      benchmark_id: benchmarkId,
-      benchmark_version: benchmarkVersion,
+      latest_findings_doc_count: account.doc_count,
+      posture_score: calculatePostureScore(
+        account.passed_findings_count.doc_count,
+        account.failed_findings_count.doc_count
+      ),
+      passed_findings_count: account.passed_findings_count.doc_count,
+      failed_findings_count: account.failed_findings_count.doc_count,
+      benchmark_name: account.benchmark_name.top[0].metrics['rule.benchmark.name'],
+      benchmark_id: account.benchmark_id.top[0].metrics['rule.benchmark.id'],
+      benchmark_version: account.benchmark_version.top[0].metrics['rule.benchmark.version'],
+      agents_count: account.agents_count.value,
+      nodes_count: account.nodes_count.value,
+      pods_count: account.resources.pods_count.value,
     };
   });
-
-  console.log({ accountsStats });
 
   return accountsStats;
 };

@@ -36,12 +36,13 @@ export interface CspmResourcesStats {
 export interface CspmAccountsStats {
   account_id: string;
   posture_score: number;
-  passed_findings_count: number;
-  failed_findings_count: number;
   latest_findings_doc_count: number;
   benchmark_id: string;
   benchmark_name: string;
   benchmark_version: string;
+  passed_findings_count: number;
+  failed_findings_count: number;
   agents_count: number;
   nodes_count: number;
+  pods_count: number;
 }

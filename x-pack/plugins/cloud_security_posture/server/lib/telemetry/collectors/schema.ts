@@ -74,8 +74,11 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       benchmark_id: { type: 'keyword' },
       benchmark_name: { type: 'keyword' },
       benchmark_version: { type: 'keyword' },
+      passed_findings_count: { type: 'long' },
+      failed_findings_count: { type: 'long' },
       agents_count: { type: 'short' },
       nodes_count: { type: 'short' },
+      pods_count: { type: 'short' },
     },
   },
 };
