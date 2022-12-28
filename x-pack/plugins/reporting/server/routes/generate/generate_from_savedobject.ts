@@ -24,7 +24,7 @@ const CsvSavedSearchExportParamsSchema = schema.object({
   savedObjectId: schema.string({ minLength: 2 }),
 });
 
-const CsvSavedSearchExportBodySchema = schema.maybe(
+const CsvSavedSearchExportBodySchema = schema.nullable(
   schema.object({
     timerange: schema.maybe(
       schema.object({
