@@ -216,7 +216,7 @@ export const aggregateLatestFindings = async (
       return await esClient.index({
         index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
         document: {
-          policyTemplate: policyTemplateTrend.key,
+          policy_template: policyTemplateTrend.key,
           passed_findings: policyTemplateTrend.passed_findings.doc_count,
           failed_findings: policyTemplateTrend.failed_findings.doc_count,
           total_findings: policyTemplateTrend.total_findings.value,
