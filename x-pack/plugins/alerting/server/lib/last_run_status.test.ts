@@ -71,7 +71,7 @@ describe('lastRunFromState', () => {
     );
 
     expect(result.lastRun.outcome).toEqual('warning');
-    expect(result.lastRun.outcomeMsg).toEqual(['Rule execution reported a warning']);
+    expect(result.lastRun.outcomeMsg).toEqual(['MOCK_WARNING', 'Rule execution reported a warning']);
     expect(result.lastRun.warning).toEqual(null);
 
     expect(result.lastRun.alertsCount).toEqual({
@@ -136,12 +136,13 @@ describe('lastRunFromState', () => {
       },
       getRuleResultService({
         warnings: ['MOCK_WARNING'],
-        outcomeMessage: 'Rule execution reported a warning',
+        outcomeMessage: ruleExecutionOutcomeMessage,
       })
     );
 
     expect(result.lastRun.outcome).toEqual('warning');
     expect(result.lastRun.outcomeMsg).toEqual([
+      'MOCK_WARNING',
       frameworkOutcomeMessage,
       ruleExecutionOutcomeMessage,
     ]);
@@ -171,6 +172,7 @@ describe('lastRunFromState', () => {
 
     expect(result.lastRun.outcome).toEqual('warning');
     expect(result.lastRun.outcomeMsg).toEqual([
+      'MOCK_WARNING',
       frameworkOutcomeMessage,
       ruleExecutionOutcomeMessage,
     ]);
@@ -197,6 +199,7 @@ describe('lastRunFromState', () => {
 
     expect(result.lastRun.outcome).toEqual('failed');
     expect(result.lastRun.outcomeMsg).toEqual([
+      'MOCK_ERROR',
       'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed',
       'Rule execution reported an error',
     ]);
