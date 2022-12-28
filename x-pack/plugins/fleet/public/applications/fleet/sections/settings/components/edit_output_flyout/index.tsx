@@ -183,6 +183,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 }
               )}
               {...inputs.elasticsearchUrlInput.props}
+              isUrl
             />
           )}
           {isLogstashOutput && (
