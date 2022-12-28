@@ -485,8 +485,12 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     }
 
     const newIndex = index || this.props.indexPatterns[0].id!;
-    const body = JSON.parse(queryDsl);
-    return buildCustomFilter(newIndex, body, disabled, negate, customLabel || null, $state.store);
+    try {
+      const body = JSON.parse(queryDsl);
+      return buildCustomFilter(newIndex, body, disabled, negate, customLabel || null, $state.store);
+    } catch {
+      return null;
+    }
   };
 
   private onLocalFilterChange = (updatedFilters: Filter[]) => {
