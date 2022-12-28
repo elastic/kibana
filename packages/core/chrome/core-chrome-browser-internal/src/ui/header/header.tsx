@@ -11,9 +11,7 @@ import {
   EuiHeader,
   EuiHeaderSection,
   EuiHeaderSectionItem,
-  EuiHeaderSectionItemButton,
   EuiHideFor,
-  EuiIcon,
   EuiShowFor,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -46,7 +44,7 @@ import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
 import { HeaderExtension } from './header_extension';
 import { HeaderTopBanner } from './header_top_banner';
-import { ButtonThing, HeaderMenuButton } from './header_menu_button';
+import { HeaderMenuButton } from './header_menu_button';
 
 export interface HeaderProps {
   kibanaVersion: string;
