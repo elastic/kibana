@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
-import { euiLightVars } from '@kbn/ui-theme';
+import React, { MouseEvent, useMemo } from 'react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import {
+  EUI_CHARTS_THEME_DARK,
+  EUI_CHARTS_THEME_LIGHT,
+  EUI_SPARKLINE_THEME_PARTIAL,
+} from '@elastic/eui/dist/eui_charts_theme';
+import { LineSeries, Chart, CurveType, ScaleType, Settings } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,16 +22,20 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { MouseEvent } from 'react';
+import { euiLightVars } from '@kbn/ui-theme';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertsSummaryWidgetUIProps } from './types';
 
 export const AlertsSummaryWidgetUI = ({
-  active,
-  recovered,
+  activeAlertCount,
+  activeAlerts,
+  recoveredAlertCount,
+  recoveredAlerts,
   timeRangeTitle,
   onClick,
 }: AlertsSummaryWidgetUIProps) => {
+  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const handleClick = (
     event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
     status?: AlertStatus
@@ -36,6 +46,22 @@ export const AlertsSummaryWidgetUI = ({
     onClick(status);
   };
 
+  const theme = useMemo(
+    () => [
+      EUI_SPARKLINE_THEME_PARTIAL,
+      {
+        ...(isDarkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme),
+        chartMargins: {
+          left: 10,
+          right: 10,
+          top: 10,
+          bottom: 10,
+        },
+      },
+    ],
+    [isDarkMode]
+  );
+
   return (
     <EuiPanel
       element="div"
@@ -45,79 +71,105 @@ export const AlertsSummaryWidgetUI = ({
       onClick={handleClick}
     >
       <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title"
-                    defaultMessage="Alerts"
-                  />
-                </h5>
-              </EuiTitle>
-              {!!timeRangeTitle && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiText size="s" color="subdued" data-test-subj="timeRangeTitle">
-                    {timeRangeTitle}
-                  </EuiText>
-                </>
-              )}
-            </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5 data-test-subj="totalAlertsCount">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title"
+                defaultMessage="Alerts"
+              />
+              &nbsp;({activeAlertCount + recoveredAlertCount})
+            </h5>
+          </EuiTitle>
+          {!!timeRangeTitle && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued" data-test-subj="timeRangeTitle">
+                {timeRangeTitle}
+              </EuiText>
+            </>
+          )}
+        </EuiFlexItem>
 
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            {/* Active */}
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-                <EuiFlexItem>
-                  <EuiLink onClick={handleClick}>
+              <EuiLink
+                onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
+                  handleClick(event, ALERT_STATUS_ACTIVE)
+                }
+              >
+                <EuiFlexGroup alignItems={'center'} responsive={false}>
+                  <EuiFlexItem grow={1} style={{ minWidth: '70px' }}>
                     <EuiText color={euiLightVars.euiTextColor}>
-                      <h3 data-test-subj="totalAlertsCount">{active + recovered}</h3>
+                      <h3 data-test-subj="activeAlertsCount">{activeAlertCount}</h3>
                     </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel"
-                        defaultMessage="All"
-                      />
-                    </EuiText>
-                  </EuiLink>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiLink
-                    onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
-                      handleClick(event, ALERT_STATUS_ACTIVE)
-                    }
-                  >
-                    <EuiText color={euiLightVars.euiColorDangerText}>
-                      <h3 data-test-subj="activeAlertsCount">{active}</h3>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
+                    <EuiText size="s" color="subdued">
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel"
-                        defaultMessage="Currently active"
+                        defaultMessage="Active"
                       />
                     </EuiText>
-                  </EuiLink>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiLink
-                    onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
-                      handleClick(event, ALERT_STATUS_RECOVERED)
-                    }
-                  >
-                    <EuiFlexItem>
-                      <EuiText color={euiLightVars.euiColorSuccessText}>
-                        <h3 data-test-subj="recoveredAlertsCount">{recovered}</h3>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiText size="xs" color="subdued">
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={3}>
+                    <Chart size={{ height: 50 }}>
+                      <Settings theme={theme} tooltip={{ type: 'none' }} />
+                      <LineSeries
+                        id="active"
+                        xScaleType={ScaleType.Time}
+                        yScaleType={ScaleType.Linear}
+                        xAccessor="key"
+                        yAccessors={['doc_count']}
+                        data={activeAlerts}
+                        lineSeriesStyle={{
+                          line: {
+                            strokeWidth: 2,
+                            stroke: '#E7664C',
+                          },
+                        }}
+                        curve={CurveType.CURVE_MONOTONE_X}
+                      />
+                    </Chart>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiLink>
+            </EuiFlexItem>
+            {/* Recovered */}
+            <EuiFlexItem>
+              <EuiLink
+                onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
+                  handleClick(event, ALERT_STATUS_RECOVERED)
+                }
+              >
+                <EuiFlexGroup alignItems={'center'} responsive={false}>
+                  <EuiFlexItem grow={1} style={{ minWidth: '70px' }}>
+                    <EuiText color={euiLightVars.euiTextColor}>
+                      <h3 data-test-subj="recoveredAlertsCount">{recoveredAlertCount}</h3>
+                    </EuiText>
+                    <EuiText size="s" color="subdued">
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.recoveredLabel"
                         defaultMessage="Recovered"
                       />
                     </EuiText>
-                  </EuiLink>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={3}>
+                    <Chart size={{ height: 50 }}>
+                      <Settings theme={theme} tooltip={{ type: 'none' }} />
+                      <LineSeries
+                        id="recovered"
+                        xScaleType={ScaleType.Time}
+                        yScaleType={ScaleType.Linear}
+                        xAccessor="key"
+                        yAccessors={['doc_count']}
+                        data={recoveredAlerts}
+                        curve={CurveType.CURVE_MONOTONE_X}
+                      />
+                    </Chart>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
