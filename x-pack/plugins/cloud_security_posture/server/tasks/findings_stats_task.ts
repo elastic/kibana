@@ -14,12 +14,7 @@ import {
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import {
-  AggregatedFindingsByCluster,
-  ScoreBucket,
-  FindingsStatsTaskResult,
-  TaskHealthStatus,
-} from './types';
+import { FindingsStatsTaskResult, TaskHealthStatus, ScoreByPolicyTemplateBucket } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -117,51 +112,52 @@ const getScoreQuery = (): SearchRequest => ({
   },
   aggs: {
     score_by_policy_template: {
-      filter: {
-        terms: {
-          field: 'rule.benchmark.id',
-        },
+      terms: {
+        // TODO: replace with policy_template when available
+        field: 'rule.benchmark.id',
       },
-      total_findings: {
-        value_count: {
-          field: 'result.evaluation',
-        },
-      },
-      passed_findings: {
-        filter: {
-          term: {
-            'result.evaluation': 'passed',
+      aggs: {
+        total_findings: {
+          value_count: {
+            field: 'result.evaluation',
           },
         },
-      },
-      failed_findings: {
-        filter: {
-          term: {
-            'result.evaluation': 'failed',
-          },
-        },
-      },
-      score_by_cluster_id: {
-        terms: {
-          field: 'cluster_id',
-        },
-        aggregations: {
-          total_findings: {
-            value_count: {
-              field: 'result.evaluation',
+        passed_findings: {
+          filter: {
+            term: {
+              'result.evaluation': 'passed',
             },
           },
-          passed_findings: {
-            filter: {
-              term: {
-                'result.evaluation': 'passed',
+        },
+        failed_findings: {
+          filter: {
+            term: {
+              'result.evaluation': 'failed',
+            },
+          },
+        },
+        score_by_cluster_id: {
+          terms: {
+            field: 'cluster_id',
+          },
+          aggregations: {
+            total_findings: {
+              value_count: {
+                field: 'result.evaluation',
               },
             },
-          },
-          failed_findings: {
-            filter: {
-              term: {
-                'result.evaluation': 'failed',
+            passed_findings: {
+              filter: {
+                term: {
+                  'result.evaluation': 'passed',
+                },
+              },
+            },
+            failed_findings: {
+              filter: {
+                term: {
+                  'result.evaluation': 'failed',
+                },
               },
             },
           },
@@ -178,8 +174,11 @@ export const aggregateLatestFindings = async (
 ): Promise<TaskHealthStatus> => {
   try {
     const startAggTime = performance.now();
-    const evaluationsQueryResult = await esClient.search<unknown, ScoreBucket>(getScoreQuery());
-    if (!evaluationsQueryResult.aggregations) {
+    const scoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
+      getScoreQuery()
+    );
+
+    if (!scoreIndexQueryResult.aggregations) {
       logger.warn(`No data found in latest findings index`);
       return 'warning';
     }
@@ -191,32 +190,45 @@ export const aggregateLatestFindings = async (
       ).toFixed(2)}ms]`
     );
 
-    const clustersStats = Object.fromEntries(
-      evaluationsQueryResult.aggregations.score_by_cluster_id.buckets.map(
-        (clusterStats: AggregatedFindingsByCluster) => {
+    // getting score per policy template buckets
+    const scoresByPolicyTemplatesBuckets =
+      scoreIndexQueryResult.aggregations.score_by_policy_template.buckets;
+
+    // iterating over the buckets and return promises which will index a modified document into the scores index
+    const docIndexingPromises = scoresByPolicyTemplatesBuckets.map(async (policyTemplateTrend) => {
+      // creating score per cluster id objects
+      const clustersStats = Object.fromEntries(
+        policyTemplateTrend.score_by_cluster_id.buckets.map((clusterStats) => {
+          const clusterId = clusterStats.key;
+
           return [
-            clusterStats.key,
+            clusterId,
             {
-              benchmarkId: clusterStats.benchmarkId?.buckets[0].key,
               total_findings: clusterStats.total_findings.value,
               passed_findings: clusterStats.passed_findings.doc_count,
               failed_findings: clusterStats.failed_findings.doc_count,
             },
           ];
-        }
-      )
-    );
+        })
+      );
+
+      // each document contains the policy template and its scores
+      return await esClient.index({
+        index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+        document: {
+          policyTemplate: policyTemplateTrend.key,
+          passed_findings: policyTemplateTrend.passed_findings.doc_count,
+          failed_findings: policyTemplateTrend.failed_findings.doc_count,
+          total_findings: policyTemplateTrend.total_findings.value,
+          score_by_cluster_id: clustersStats,
+        },
+      });
+    });
 
     const startIndexTime = performance.now();
-    await esClient.index({
-      index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-      document: {
-        passed_findings: evaluationsQueryResult.aggregations.passed_findings.doc_count,
-        failed_findings: evaluationsQueryResult.aggregations.failed_findings.doc_count,
-        total_findings: evaluationsQueryResult.aggregations.total_findings.value,
-        score_by_cluster_id: clustersStats,
-      },
-    });
+
+    // executing indexing commands
+    await Promise.all(docIndexingPromises);
 
     const totalIndexTime = Number(performance.now() - startIndexTime).toFixed(2);
     logger.debug(
