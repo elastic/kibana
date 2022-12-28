@@ -5,6 +5,7 @@
  * 2.0.
  */
 import '../_index.scss';
+import { pick } from 'lodash';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
@@ -18,6 +19,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
+import { MlDatePickerContextProvider } from '@kbn/ml-date-picker';
 import {
   Provider as UrlStateContextProvider,
   parseUrlState,
@@ -322,10 +324,14 @@ export const IndexDataVisualizer: FC<{
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
       <KibanaContextProvider services={{ ...services }}>
         <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
-          <DataVisualizerStateContextProvider
-            IndexDataVisualizerComponent={IndexDataVisualizerView}
-            getAdditionalLinks={getAdditionalLinks}
-          />
+          <MlDatePickerContextProvider
+            deps={pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings'])}
+          >
+            <DataVisualizerStateContextProvider
+              IndexDataVisualizerComponent={IndexDataVisualizerView}
+              getAdditionalLinks={getAdditionalLinks}
+            />
+          </MlDatePickerContextProvider>
         </StorageContextProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>
