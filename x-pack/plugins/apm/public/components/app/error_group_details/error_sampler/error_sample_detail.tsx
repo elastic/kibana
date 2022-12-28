@@ -19,6 +19,7 @@ import {
   EuiEmptyPrompt,
   EuiPagination,
   EuiLoadingContent,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
@@ -73,7 +74,7 @@ function getCurrentTab(
   currentTabKey: string | undefined
 ): ErrorTab | {} {
   const selectedTab = tabs.find(({ key }) => key === currentTabKey);
-  return selectedTab ? selectedTab : first(tabs) || {};
+  return selectedTab ?? (first(tabs) || {});
 }
 
 export function ErrorSampleDetails({
@@ -86,8 +87,9 @@ export function ErrorSampleDetails({
 }: Props) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
   const history = useHistory();
-  const { urlParams } = useLegacyUrlParams();
-  const { detailTab, offset, comparisonEnabled } = urlParams;
+  const {
+    urlParams: { detailTab, offset, comparisonEnabled },
+  } = useLegacyUrlParams();
 
   const router = useApmRouter();
 
@@ -141,6 +143,8 @@ export function ErrorSampleDetails({
   const errorUrl = error.error.page?.url || error.url?.full;
   const method = error.http?.request?.method;
   const status = error.http?.response?.status_code;
+  const environment = error.service.environment;
+  const serviceVersion = error.service.version;
 
   const traceExplorerLink = router.link('/traces/explorer/waterfall', {
     query: {
@@ -162,7 +166,7 @@ export function ErrorSampleDetails({
           <EuiTitle size="s">
             <h3>
               {i18n.translate(
-                'xpack.apm.errorGroupDetails.errorOccurrenceTitle',
+                'xpack.apm.errorSampleDetails.errorOccurrenceTitle',
                 {
                   defaultMessage: 'Error sample',
                 }
@@ -189,7 +193,7 @@ export function ErrorSampleDetails({
                 </EuiFlexItem>
                 <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
                   {i18n.translate(
-                    'xpack.apm.errorGroupDetails.viewOccurrencesInTraceExplorer',
+                    'xpack.apm.errorSampleDetails.viewOccurrencesInTraceExplorer',
                     {
                       defaultMessage: 'Explore traces with this error',
                     }
@@ -207,7 +211,7 @@ export function ErrorSampleDetails({
               </EuiFlexItem>
               <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
                 {i18n.translate(
-                  'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
+                  'xpack.apm.errorSampleDetails.viewOccurrencesInDiscoverButtonLabel',
                   {
                     defaultMessage:
                       'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover',
@@ -244,7 +248,7 @@ export function ErrorSampleDetails({
             transaction && (
               <EuiToolTip
                 content={i18n.translate(
-                  'xpack.apm.errorGroupDetails.relatedTransactionSample',
+                  'xpack.apm.errorSampleDetails.relatedTransactionSample',
                   {
                     defaultMessage: 'Related transaction sample',
                   }
@@ -266,6 +270,30 @@ export function ErrorSampleDetails({
                 </TransactionDetailLink>
               </EuiToolTip>
             ),
+            environment ? (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.errorSampleDetails.serviceEnvironment',
+                  {
+                    defaultMessage: 'Environment',
+                  }
+                )}
+              >
+                <EuiBadge color="hollow">{environment}</EuiBadge>
+              </EuiToolTip>
+            ) : null,
+            serviceVersion ? (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.errorSampleDetails.serviceVersion',
+                  {
+                    defaultMessage: 'Service version',
+                  }
+                )}
+              >
+                <EuiBadge color="hollow">{serviceVersion}</EuiBadge>
+              </EuiToolTip>
+            ) : null,
           ]}
         />
       )}

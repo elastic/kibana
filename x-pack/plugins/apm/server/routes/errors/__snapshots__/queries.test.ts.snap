@@ -225,28 +225,9 @@ Object {
             },
           },
         ],
-        "should": Array [
-          Object {
-            "term": Object {
-              "transaction.sampled": true,
-            },
-          },
-        ],
       },
     },
     "size": 1,
-    "sort": Array [
-      Object {
-        "_score": Object {
-          "order": "desc",
-        },
-      },
-      Object {
-        "@timestamp": Object {
-          "order": "desc",
-        },
-      },
-    ],
     "track_total_hits": false,
   },
 }

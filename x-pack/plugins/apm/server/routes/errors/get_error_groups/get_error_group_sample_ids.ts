@@ -63,7 +63,10 @@ export async function getErrorGroupSampleIds({
     },
   };
 
-  const resp = await apmEventClient.search('get_error_group_samples', params);
+  const resp = await apmEventClient.search(
+    'get_error_group_sample_ids',
+    params
+  );
   const errorSamples = resp.hits.hits.map((item) => item._source.error.id);
 
   return {

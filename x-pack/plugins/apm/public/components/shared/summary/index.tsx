@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Maybe } from '../../../../typings/common';
 
 interface Props {
@@ -17,18 +17,12 @@ function Summary({ items }: Props) {
   const filteredItems = items.filter(Boolean) as React.ReactElement[];
 
   return (
-    <EuiFlexGroup gutterSize="s" direction="row">
+    <EuiFlexGroup gutterSize="s" direction="row" wrap>
       {filteredItems.map((item, index) => (
-        <>
-          {index > 0 && (
-            <EuiFlexItem key={index} grow={false}>
-              |
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem key={index} grow={false}>
-            {item}
-          </EuiFlexItem>
-        </>
+        <Fragment key={index}>
+          {index > 0 && <EuiFlexItem grow={false}>|</EuiFlexItem>}
+          <EuiFlexItem grow={false}>{item}</EuiFlexItem>
+        </Fragment>
       ))}
     </EuiFlexGroup>
   );

@@ -35,7 +35,7 @@ export const metadataTab: ErrorTab = {
   }),
 };
 
-export function getTabs(error?: APMError) {
+export function getTabs(error: APMError) {
   const hasLogStacktrace = !isEmpty(error?.error.log?.stacktrace);
   return [
     ...(hasLogStacktrace ? [logStacktraceTab] : []),

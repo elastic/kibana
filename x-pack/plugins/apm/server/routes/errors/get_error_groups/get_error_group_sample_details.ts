@@ -50,7 +50,10 @@ export async function getErrorGroupSampleDetails({
     },
   };
 
-  const resp = await apmEventClient.search('get_error_group_sample', params);
+  const resp = await apmEventClient.search(
+    'get_error_group_sample_details',
+    params
+  );
   const error = resp.hits.hits[0]?._source;
   const transactionId = error?.transaction?.id;
   const traceId = error?.trace?.id;
