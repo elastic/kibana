@@ -69,19 +69,17 @@ export const mockRule = (): Rule => {
   };
 };
 
-export const mockAlertSummaryResponse = () => {
-  return {
-    activeAlertCount: 1,
-    recoveredAlertCount: 1,
-    activeAlerts: [
-      { key: 1671321600000, doc_count: 0 },
-      { key: 1671408000000, doc_count: 2 },
-    ],
-    recoveredAlerts: [
-      { key: 1671321600000, doc_count: 0 },
-      { key: 1671408000000, doc_count: 1 },
-    ],
-  };
+export const mockAlertSummaryResponse = {
+  activeAlertCount: 1,
+  recoveredAlertCount: 1,
+  activeAlerts: [
+    { key: 1671321600000, doc_count: 0 },
+    { key: 1671408000000, doc_count: 2 },
+  ],
+  recoveredAlerts: [
+    { key: 1671321600000, doc_count: 0 },
+    { key: 1671408000000, doc_count: 1 },
+  ],
 };
 
 export const mockAlertSummaryTimeRange: AlertSummaryTimeRange = {
