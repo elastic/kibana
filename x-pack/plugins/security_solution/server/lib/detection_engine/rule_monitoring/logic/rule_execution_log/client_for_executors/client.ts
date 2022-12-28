@@ -170,14 +170,6 @@ export const createClientForExecutors = (
       execution_gap_duration_s: executionGapDurationS,
     } = metrics ?? {};
 
-    if (newStatus === RuleExecutionStatus.failed) {
-      ruleResultService?.addLastRunError(`ERROR: ${message}`);
-    } else if (newStatus === RuleExecutionStatus['partial failure']) {
-      ruleResultService?.addLastRunWarning(`WARNING: ${message}`);
-    } else {
-      ruleResultService?.setLastRunOutcomeMessage(`INFO: ${message}`);
-    }
-
     if (totalSearchDurationMs) {
       ruleMonitoringService?.setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs);
     }
@@ -188,6 +180,18 @@ export const createClientForExecutors = (
 
     if (executionGapDurationS) {
       ruleMonitoringService?.setLastRunMetricsGapDurationS(executionGapDurationS);
+    }
+
+    if (!message) {
+      return;
+    }
+
+    if (newStatus === RuleExecutionStatus.failed) {
+      ruleResultService?.addLastRunError(`ERROR: ${message}`);
+    } else if (newStatus === RuleExecutionStatus['partial failure']) {
+      ruleResultService?.addLastRunWarning(`WARNING: ${message}`);
+    } else {
+      ruleResultService?.setLastRunOutcomeMessage(`INFO: ${message}`);
     }
   };
 
