@@ -12,6 +12,7 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
+import { useUrlState } from '@kbn/ml-url-state';
 import { getViewableDetectors } from '../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
 import { NavigateToPath, useNotifications } from '../../contexts/kibana';
 import { useMlContext } from '../../contexts/ml';
@@ -31,7 +32,6 @@ import {
 } from '../../timeseriesexplorer/timeseriesexplorer_utils';
 import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
 import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
-import { useUrlState } from '../../util/url_state';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 
