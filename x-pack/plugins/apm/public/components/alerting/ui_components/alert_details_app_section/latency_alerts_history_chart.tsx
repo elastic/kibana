@@ -13,6 +13,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
+import { useFetchTriggeredAlertsHistory } from '@kbn/observability-plugin/public';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -32,6 +33,7 @@ interface LatencyAlertsHistoryChartProps {
   latencyAggregationType: LatencyAggregationType;
   environment: string;
   timeZone: string;
+  ruleId: string;
 }
 export function LatencyAlertsHistoryChart({
   serviceName,
@@ -41,6 +43,7 @@ export function LatencyAlertsHistoryChart({
   latencyAggregationType,
   environment,
   timeZone,
+  ruleId,
 }: LatencyAlertsHistoryChartProps) {
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -94,7 +97,10 @@ export function LatencyAlertsHistoryChart({
   const timeseriesLatency = [currentPeriod, previousPeriod].filter(filterNil);
   const latencyMaxY = getMaxY(timeseriesLatency);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
-
+  const { triggeredAlertsData } = useFetchTriggeredAlertsHistory({
+    features: 'apm',
+    ruleId,
+  });
   return (
     <EuiPanel hasBorder={true}>
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -123,7 +129,7 @@ export function LatencyAlertsHistoryChart({
             <EuiFlexItem grow={false}>
               <EuiText color="danger">
                 <EuiTitle size="s">
-                  <h3>28</h3>
+                  <h3>{triggeredAlertsData?.totalTriggeredAlerts}</h3>
                 </EuiTitle>
               </EuiText>
             </EuiFlexItem>

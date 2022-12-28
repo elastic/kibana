@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
-import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION,
+  ALERT_END,
+  ALERT_RULE_UUID,
+} from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
@@ -413,6 +417,7 @@ export function AlertDetailsAppSection({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LatencyAlertsHistoryChart
+            ruleId={alert.fields[ALERT_RULE_UUID]}
             serviceName={serviceName}
             start={start}
             end={end}

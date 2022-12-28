@@ -29,7 +29,7 @@ interface FetchTriggeredAlertsHistory {
 interface TriggeredAlertsHistory {
   isLoadingTriggeredAlertHistory: boolean;
   errorTriggeredAlertHistory?: string;
-  data?: FetchTriggeredAlertsHistory;
+  triggeredAlertsData?: FetchTriggeredAlertsHistory;
 }
 export function useFetchTriggeredAlertsHistory({
   features,
@@ -65,7 +65,7 @@ export function useFetchTriggeredAlertsHistory({
       if (!isCancelledRef.current) {
         setTriggeredAlertsHistory((oldState: TriggeredAlertsHistory) => ({
           ...oldState,
-          data: { totalTriggeredAlerts, histogramTriggeredAlerts },
+          triggeredAlertsData: { totalTriggeredAlerts, histogramTriggeredAlerts },
           isLoadingRuleAlertsAggs: false,
         }));
       }
@@ -76,7 +76,7 @@ export function useFetchTriggeredAlertsHistory({
             ...oldState,
             isLoadingRuleAlertsAggs: false,
             errorTriggeredAlertHistory: error,
-            data: undefined,
+            triggeredAlertsData: undefined,
           }));
         }
       }
