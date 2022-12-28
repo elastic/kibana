@@ -11,7 +11,55 @@
   },
   "references": [],
   "type": "index-pattern",
-  "version": "WzIsMl0="
+  "updated_at": "2022-12-28T00:46:18.617Z",
+  "version": "WzEzLDFd"
+}
+
+{
+  "attributes": {
+    "columns": [
+      "clientip",
+      "extension"
+    ],
+    "description": "",
+    "grid": {},
+    "hideChart": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"meta\":{\"alias\":\"datefilter🥜\",\"negate\":false,\"type\":\"range\",\"key\":\"@timestamp\",\"params\":{\"gte\":\"2015-09-20T10:19:40.307Z\",\"lt\":\"2015-09-20T10:26:56.221Z\"},\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"$state\":{\"store\":\"appState\"},\"query\":{\"range\":{\"@timestamp\":{\"gte\":\"2015-09-20T10:19:40.307Z\",\"lt\":\"2015-09-20T10:26:56.221Z\"}}}},{\"meta\":{\"alias\":null,\"negate\":false,\"disabled\":false,\"type\":\"phrase\",\"key\":\"extension.raw\",\"params\":{\"query\":\"gif\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index\"},\"query\":{\"match_phrase\":{\"extension.raw\":\"gif\"}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "title": "A Saved Search with date and terms filters"
+  },
+  "coreMigrationVersion": "7.17.9",
+  "id": "53193950-8649-11ed-9cfd-b9cddf37f461",
+  "migrationVersion": {
+    "search": "7.9.3"
+  },
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2022-12-28T00:48:20.329Z",
+  "version": "Wzk3LDFd"
 }
 
 {
@@ -47,8 +95,8 @@
     }
   ],
   "type": "search",
-  "updated_at": "2022-12-27T00:58:35.372Z",
-  "version": "WzYwLDJd"
+  "updated_at": "2022-12-28T00:46:18.617Z",
+  "version": "WzE0LDFd"
 }
 
 {
@@ -58,9 +106,11 @@
       "extension"
     ],
     "description": "",
+    "grid": {},
+    "hideChart": false,
     "hits": 0,
     "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[{\"meta\":{\"alias\":\"datefilter🥜\",\"negate\":false,\"type\":\"range\",\"key\":\"@timestamp\",\"value\":\"Sep 20, 2015 @ 03:19:40.307 to Sep 20, 2015 @ 03:26:56.221\",\"params\":{\"gte\":\"2015-09-20T10:19:40.307Z\",\"lt\":\"2015-09-20T10:26:56.221Z\"},\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"range\":{\"@timestamp\":{\"gte\":\"2015-09-20T10:19:40.307Z\",\"lt\":\"2015-09-20T10:26:56.221Z\"}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"meta\":{\"alias\":\"datefilter🥜\",\"negate\":false,\"type\":\"range\",\"key\":\"@timestamp\",\"params\":{\"gte\":\"2015-09-20T10:19:40.307Z\",\"lt\":\"2015-09-20T10:26:56.221Z\"},\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"$state\":{\"store\":\"appState\"},\"query\":{\"range\":{\"@timestamp\":{\"gte\":\"2015-09-20T10:19:40.307Z\",\"lt\":\"2015-09-20T10:26:56.221Z\"}}}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
     },
     "sort": [
       [
@@ -68,7 +118,7 @@
         "desc"
       ]
     ],
-    "title": "A Saved Search With a DATE FILTER",
+    "title": "A Saved Search with date filter",
     "version": 1
   },
   "coreMigrationVersion": "7.17.9",
@@ -89,6 +139,6 @@
     }
   ],
   "type": "search",
-  "updated_at": "2019-03-05T00:34:28.706Z",
-  "version": "WzMsMl0="
+  "updated_at": "2022-12-28T00:48:34.902Z",
+  "version": "WzEyNSwxXQ=="
 }
