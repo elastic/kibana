@@ -163,7 +163,7 @@ export async function installKibanaAssetsAndReferences({
     kibanaAssets
   );
 
-  await installKibanaAssets({
+  const importedAssets = await installKibanaAssets({
     logger,
     savedObjectsImporter,
     pkgName,
@@ -177,6 +177,7 @@ export async function installKibanaAssetsAndReferences({
       pkgTitle,
       pkgName,
       spaceId,
+      importedAssets,
     })
   );
 
@@ -292,7 +293,6 @@ export async function installKibanaSavedObjects({
         overwrite: true,
         readStream: createListStream(toBeSavedObjects),
         createNewCopies: false,
-        refresh: false,
       })
     );
 

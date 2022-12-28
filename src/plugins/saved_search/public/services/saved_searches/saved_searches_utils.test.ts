@@ -28,6 +28,7 @@ describe('saved_searches_utils', () => {
         grid: {},
         hideChart: true,
         isTextBasedQuery: false,
+        usesAdHocDataView: false,
       };
 
       expect(
@@ -81,6 +82,7 @@ describe('saved_searches_utils', () => {
           "timeRange": undefined,
           "timeRestore": undefined,
           "title": "saved search",
+          "usesAdHocDataView": false,
           "viewMode": undefined,
         }
       `);
@@ -121,6 +123,7 @@ describe('saved_searches_utils', () => {
         grid: {},
         hideChart: true,
         isTextBasedQuery: true,
+        usesAdHocDataView: false,
       };
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
@@ -149,6 +152,7 @@ describe('saved_searches_utils', () => {
           "timeRange": undefined,
           "timeRestore": false,
           "title": "title",
+          "usesAdHocDataView": false,
           "viewMode": undefined,
         }
       `);

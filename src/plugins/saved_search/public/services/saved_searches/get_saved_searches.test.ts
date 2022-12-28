@@ -154,6 +154,7 @@ describe('getSavedSearch', () => {
         "timeRange": undefined,
         "timeRestore": undefined,
         "title": "test1",
+        "usesAdHocDataView": undefined,
         "viewMode": undefined,
       }
     `);
@@ -251,6 +252,7 @@ describe('getSavedSearch', () => {
         "timeRange": undefined,
         "timeRestore": undefined,
         "title": "test2",
+        "usesAdHocDataView": undefined,
         "viewMode": undefined,
       }
     `);

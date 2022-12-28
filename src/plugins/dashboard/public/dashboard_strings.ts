@@ -191,7 +191,7 @@ export const dashboardReplacePanelAction = {
     }),
 };
 
-export const dashboardFilterNotificationBadge = {
+export const dashboardFilterNotificationAction = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.filters', {
       defaultMessage: 'Panel filters',

@@ -381,7 +381,7 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Tests',
             command: getRequiredEnv('JEST_UNIT_SCRIPT'),
             parallelism: unit.count,
-            timeout_in_minutes: 90,
+            timeout_in_minutes: 60,
             key: 'jest',
             agents: {
               queue: 'n2-4-spot',
@@ -401,7 +401,7 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Integration Tests',
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
             parallelism: integration.count,
-            timeout_in_minutes: 120,
+            timeout_in_minutes: 60,
             key: 'jest-integration',
             agents: {
               queue: 'n2-4-spot',
@@ -438,7 +438,7 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 150,
+                  timeout_in_minutes: 60,
                   agents: {
                     queue,
                   },

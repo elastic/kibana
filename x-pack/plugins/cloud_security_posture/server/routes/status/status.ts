@@ -10,15 +10,21 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
 import moment from 'moment';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME, STATUS_ROUTE_PATH } from '../../../common/constants';
+import {
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  STATUS_ROUTE_PATH,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  FINDINGS_INDEX_PATTERN,
+  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+} from '../../../common/constants';
 import type { CspApiRequestHandlerContext, CspRouter } from '../../types';
-import type { CspSetupStatus, CspStatusCode } from '../../../common/types';
+import type { CspSetupStatus, CspStatusCode, IndexStatus } from '../../../common/types';
 import {
   getAgentStatusesByAgentPolicies,
   getCspAgentPolicies,
   getCspPackagePolicies,
 } from '../../lib/fleet_util';
-import { checkForFindings } from '../../lib/check_for_findings';
+import { checkIndexStatus } from '../../lib/check_index_status';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
 
@@ -49,18 +55,34 @@ const getHealthyAgents = async (
 };
 
 const calculateCspStatusCode = (
-  hasFindings: boolean,
+  indicesStatus: {
+    findingsLatest: IndexStatus;
+    findings: IndexStatus;
+    score: IndexStatus;
+  },
   installedCspPackagePolicies: number,
   healthyAgents: number,
   timeSinceInstallationInMinutes: number
 ): CspStatusCode => {
-  if (hasFindings) return 'indexed';
+  // We check privileges only for the relevant indices for our pages to appear
+  if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
+    return 'unprivileged';
+  if (indicesStatus.findingsLatest === 'not-empty') return 'indexed';
   if (installedCspPackagePolicies === 0) return 'not-installed';
   if (healthyAgents === 0) return 'not-deployed';
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
   if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 
   throw new Error('Could not determine csp status');
+};
+
+const assertResponse = (resp: CspSetupStatus, logger: CspApiRequestHandlerContext['logger']) => {
+  if (
+    resp.status === 'unprivileged' &&
+    !resp.indicesDetails.some((idxDetails) => idxDetails.status === 'unprivileged')
+  ) {
+    logger.warn('Returned status in `unprivileged` but response is missing the unprivileged index');
+  }
 };
 
 const getCspStatus = async ({
@@ -72,16 +94,23 @@ const getCspStatus = async ({
   agentPolicyService,
   agentService,
 }: CspApiRequestHandlerContext): Promise<CspSetupStatus> => {
-  const [hasFindings, installation, latestCspPackage, installedPackagePolicies] = await Promise.all(
-    [
-      checkForFindings(esClient.asCurrentUser, true, logger),
-      packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
-      packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
-      getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
-        per_page: 10000,
-      }),
-    ]
-  );
+  const [
+    findingsLatestIndexStatus,
+    findingsIndexStatus,
+    scoreIndexStatus,
+    installation,
+    latestCspPackage,
+    installedPackagePolicies,
+  ] = await Promise.all([
+    checkIndexStatus(esClient.asCurrentUser, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
+    checkIndexStatus(esClient.asCurrentUser, FINDINGS_INDEX_PATTERN, logger),
+    checkIndexStatus(esClient.asCurrentUser, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
+    packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
+    packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
+    getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
+      per_page: 10000,
+    }),
+  ]);
 
   const healthyAgents = await getHealthyAgents(
     soClient,
@@ -94,8 +123,27 @@ const getCspStatus = async ({
   const latestCspPackageVersion = latestCspPackage.version;
 
   const MIN_DATE = 0;
+  const indicesDetails = [
+    {
+      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      status: findingsLatestIndexStatus,
+    },
+    {
+      index: FINDINGS_INDEX_PATTERN,
+      status: findingsIndexStatus,
+    },
+    {
+      index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+      status: scoreIndexStatus,
+    },
+  ];
+
   const status = calculateCspStatusCode(
-    hasFindings,
+    {
+      findingsLatest: findingsLatestIndexStatus,
+      findings: findingsIndexStatus,
+      score: scoreIndexStatus,
+    },
     installedPackagePoliciesTotal,
     healthyAgents,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE)
@@ -104,18 +152,23 @@ const getCspStatus = async ({
   if (status === 'not-installed')
     return {
       status,
+      indicesDetails,
       latestPackageVersion: latestCspPackageVersion,
       healthyAgents,
       installedPackagePolicies: installedPackagePoliciesTotal,
     };
 
-  return {
+  const response = {
     status,
+    indicesDetails,
     latestPackageVersion: latestCspPackageVersion,
     healthyAgents,
     installedPackagePolicies: installedPackagePoliciesTotal,
     installedPackageVersion: installation?.install_version,
   };
+
+  assertResponse(response, logger);
+  return response;
 };
 
 export const defineGetCspStatusRoute = (router: CspRouter): void =>

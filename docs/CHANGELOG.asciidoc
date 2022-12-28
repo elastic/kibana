@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.5.x releases.
 
+* <<release-notes-8.5.3>>
 * <<release-notes-8.5.2>>
 * <<release-notes-8.5.1>>
 * <<release-notes-8.5.0>>
@@ -38,6 +39,29 @@ Review important information about the {kib} 8.5.x releases.
 //* <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.5.3]]
+== {kib} 8.5.3
+
+Review the following information about the {kib} 8.5.3 release.
+
+[float]
+[[breaking-changes-8.5.3]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in {kib} 8.5.3.
+// end::notable-breaking-changes[]
+
+{kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[fixes-v8.5.3]]
+=== Bug fixes
+Elastic Security::
+For the Elastic Security 8.5.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
 [[release-notes-8.5.2]]
 == {kib} 8.5.2
@@ -52,9 +76,7 @@ Review the following information about the {kib} 8.5.2 release.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade, review the breaking change, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
 There are no breaking changes in {kib} 8.5.2.
-// end::notable-breaking-changes[]
 
 {kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
@@ -208,13 +230,39 @@ Uptime::
 Review the following information about the {kib} 8.5.0 release.
 
 [float]
+[[security-update-v8.5.0]]
+=== Security update
+
+The 8.5.0 release contains a fix to a potential security vulnerability. For more information, check link:https://discuss.elastic.co/t/7-17-8-8-5-0-security-update/320920[Security announcements].
+
+[float]
 [[known-issues-8.5.0]]
 === Known issues
 
-Due to a recent change in the Red Hat scan verification process,
-{kib} 8.5.0 is not available in the Red Hat Ecosystem Catalog.
-This known issue will be fixed in the next release.
-To download the {kib} 8.5.0 image, use the https://www.docker.elastic.co/r/kibana/kibana[Elastic docker registry].
+[discrete]
+[[known-issue-red-hat]]
+.{kib} is unavailable in the Red Hat Ecosystem Catalog
+[%collapsible]
+====
+*Details* +
+Due to a recent change in the Red Hat scan verification process, {kib} 8.5.0 is not available in the Red Hat Ecosystem Catalog.
+
+*Impact* +
+This known issue will be fixed in the next release. To download the {kib} 8.5.0 image, use the https://www.docker.elastic.co/r/kibana/kibana[Elastic docker registry].
+====
+
+[discrete]
+[[known-issue-field-formatters]]
+.Unable to create visualizations with field formatters
+[%collapsible]
+====
+*Details* +
+When you create *Lens* and aggregation-based visualizations with field formatters, {kib} fails to apply the formatter.
+
+*Impact* +
+To create *Lens* and aggregation-based visualizations with field formatters, upgrade to 8.6.0.
+====
+
 
 [float]
 [[breaking-changes-8.5.0]]
