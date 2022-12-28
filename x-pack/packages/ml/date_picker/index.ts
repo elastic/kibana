@@ -6,7 +6,7 @@
  */
 
 export { MlDatePickerContextProvider } from './src/hooks/use_ml_date_picker_context';
-export { useTimefilter } from './src/hooks/use_time_filter';
+export { useTimefilter, useTimeRangeUpdates } from './src/hooks/use_time_filter';
 export { MlDatePickerWrapper } from './src/components/ml_date_picker_wrapper';
 export {
   MlFullTimeRangeSelector,

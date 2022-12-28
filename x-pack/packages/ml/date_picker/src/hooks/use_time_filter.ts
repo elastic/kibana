@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
+import { isEqual } from 'lodash';
 import { useMlDatePickerContext } from './use_ml_date_picker_context';
 
 interface UseTimefilterOptions {
@@ -19,19 +20,24 @@ export const useTimefilter = ({
   timeRangeSelector,
   autoRefreshSelector,
 }: UseTimefilterOptions = {}) => {
-  const { data } = useMlDatePickerContext();
-  const { timefilter } = data.query.timefilter;
+  const {
+    data: {
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+  } = useMlDatePickerContext();
 
   useEffect(() => {
-    if (timeRangeSelector === true) {
+    if (timeRangeSelector === true && !timefilter.isTimeRangeSelectorEnabled()) {
       timefilter.enableTimeRangeSelector();
-    } else if (timeRangeSelector === false) {
+    } else if (timeRangeSelector === false && timefilter.isTimeRangeSelectorEnabled()) {
       timefilter.disableTimeRangeSelector();
     }
 
-    if (autoRefreshSelector === true) {
+    if (autoRefreshSelector === true && !timefilter.isAutoRefreshSelectorEnabled()) {
       timefilter.enableAutoRefreshSelector();
-    } else if (autoRefreshSelector === false) {
+    } else if (autoRefreshSelector === false && timefilter.isAutoRefreshSelectorEnabled()) {
       timefilter.disableAutoRefreshSelector();
     }
   }, [timeRangeSelector, autoRefreshSelector, timefilter]);
@@ -42,18 +48,27 @@ export const useTimefilter = ({
 export const useRefreshIntervalUpdates = () => {
   const timefilter = useTimefilter();
 
-  return useObservable(
-    timefilter.getRefreshIntervalUpdate$().pipe(map(timefilter.getRefreshInterval)),
-    timefilter.getRefreshInterval()
+  const refreshIntervalObservable$ = useMemo(
+    () => timefilter.getRefreshIntervalUpdate$().pipe(map(timefilter.getRefreshInterval)),
+    [timefilter]
   );
+
+  return useObservable(refreshIntervalObservable$, timefilter.getRefreshInterval());
 };
 
 export const useTimeRangeUpdates = (absolute = false) => {
   const timefilter = useTimefilter();
 
-  const getTimeCallback = absolute
-    ? timefilter.getAbsoluteTime.bind(timefilter)
-    : timefilter.getTime.bind(timefilter);
+  const getTimeCallback = useMemo(() => {
+    return absolute
+      ? timefilter.getAbsoluteTime.bind(timefilter)
+      : timefilter.getTime.bind(timefilter);
+  }, [absolute, timefilter]);
 
-  return useObservable(timefilter.getTimeUpdate$().pipe(map(getTimeCallback)), getTimeCallback());
+  const timeChangeObservable$ = useMemo(
+    () => timefilter.getTimeUpdate$().pipe(map(getTimeCallback), distinctUntilChanged(isEqual)),
+    [timefilter, getTimeCallback]
+  );
+
+  return useObservable(timeChangeObservable$, getTimeCallback());
 };

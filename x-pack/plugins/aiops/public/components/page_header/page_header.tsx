@@ -19,6 +19,7 @@ import {
 import { useUrlState } from '@kbn/ml-url-state';
 import { useStorage } from '@kbn/ml-local-storage';
 import {
+  useTimefilter,
   MlDatePickerContextProvider,
   MlDatePickerWrapper,
   MlFullTimeRangeSelector,
@@ -31,7 +32,6 @@ import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { useCss } from '../../hooks/use_css';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
-import { useTimefilter } from '../../hooks/use_time_filter';
 import {
   AIOPS_FROZEN_TIER_PREFERENCE,
   type AiOpsKey,
