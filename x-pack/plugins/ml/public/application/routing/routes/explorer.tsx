@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { useUrlState } from '@kbn/ml-url-state';
 import { NavigateToPath, useMlKibana, useTimefilter } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
@@ -30,7 +31,6 @@ import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
-import { useUrlState } from '../../util/url_state';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { JOB_ID } from '../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
