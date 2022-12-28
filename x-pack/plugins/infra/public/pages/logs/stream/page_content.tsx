@@ -15,6 +15,7 @@ import {
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 import { StreamPageLogsContentForState } from './page_logs_content';
 import { StreamPageMissingIndicesContent } from './page_missing_indices_content';
+import { LogStreamPageContentProviders } from './page_providers';
 
 export const ConnectedStreamPageContent: React.FC = () => {
   const logStreamPageStateService = useLogStreamPageStateContext();
@@ -34,7 +35,11 @@ export const StreamPageContentForState: React.FC<{ logStreamPageState: LogStream
   } else if (logStreamPageState.matches('missingLogViewIndices')) {
     return <StreamPageMissingIndicesContent />;
   } else if (logStreamPageState.matches({ hasLogViewIndices: 'initialized' })) {
-    return <StreamPageLogsContentForState logStreamPageState={logStreamPageState} />;
+    return (
+      <LogStreamPageContentProviders logStreamPageState={logStreamPageState}>
+        <StreamPageLogsContentForState logStreamPageState={logStreamPageState} />
+      </LogStreamPageContentProviders>
+    );
   } else {
     return null;
   }

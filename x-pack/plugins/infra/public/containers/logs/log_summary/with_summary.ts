@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import { useActor } from '@xstate/react';
+import stringify from 'json-stable-stringify';
+import { useMemo } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
 import { useLogViewContext } from '../../../hooks/use_log_view';
-import {
-  useLogStreamPageStateContext,
-  useLogStreamQueryChildService,
-} from '../../../observability_logs/log_stream_page/state';
-import { useSerializedParsedQuery } from '../../../observability_logs/log_stream_query_state';
+import { useLogStreamPageStateContext } from '../../../observability_logs/log_stream_page/state';
 import { RendererFunction } from '../../../utils/typed_react';
 import { useLogPositionStateContext } from '../log_position';
 import { LogSummaryBuckets, useLogSummary } from './log_summary';
@@ -28,8 +27,13 @@ export const WithSummary = ({
   }>;
 }) => {
   const { logViewId } = useLogViewContext();
-  const serializedQuery = useSerializedParsedQuery(
-    useLogStreamQueryChildService(useLogStreamPageStateContext())
+  const [logStreamPageState] = useActor(useLogStreamPageStateContext());
+  const serializedParsedQuery = useMemo(
+    () =>
+      logStreamPageState.matches({ hasLogViewIndices: 'initialized' })
+        ? stringify(logStreamPageState.context.parsedQuery)
+        : null,
+    [logStreamPageState]
   );
   const { startTimestamp, endTimestamp } = useLogPositionStateContext();
 
@@ -41,7 +45,7 @@ export const WithSummary = ({
     logViewId,
     throttledStartTimestamp,
     throttledEndTimestamp,
-    serializedQuery
+    serializedParsedQuery
   );
 
   return children({ buckets, start, end });

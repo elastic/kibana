@@ -7,6 +7,7 @@
 
 import stringify from 'json-stable-stringify';
 import React, { useMemo } from 'react';
+import { LogStreamPageActorRef } from '../../../observability_logs/log_stream_page/state';
 import { LogEntryFlyoutProvider } from '../../../containers/logs/log_flyout';
 import { LogHighlightsStateProvider } from '../../../containers/logs/log_highlights/log_highlights';
 import {
@@ -17,7 +18,6 @@ import { LogStreamProvider, useLogStreamContext } from '../../../containers/logs
 import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_configuration';
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { useLogViewContext } from '../../../hooks/use_log_view';
-import { LogStreamQueryActorRef } from '../../../observability_logs/log_stream_query_state';
 import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
 
 const ViewLogInContext: React.FC = ({ children }) => {
@@ -40,13 +40,13 @@ const ViewLogInContext: React.FC = ({ children }) => {
 };
 
 const LogEntriesStateProvider: React.FC<{
-  logStreamQueryState: LogStreamQueryStateWithQuery;
-}> = ({ children, logStreamQueryState }) => {
+  logStreamPageState: InitializedLogStreamPageState;
+}> = ({ children, logStreamPageState }) => {
   const { logViewId } = useLogViewContext();
   const { startTimestamp, endTimestamp, targetPosition } = useLogPositionStateContext();
   const {
     context: { parsedQuery },
-  } = logStreamQueryState;
+  } = logStreamPageState;
 
   // Don't render anything if the date range is incorrect.
   if (!startTimestamp || !endTimestamp) {
@@ -67,13 +67,13 @@ const LogEntriesStateProvider: React.FC<{
 };
 
 const LogHighlightsState: React.FC<{
-  logStreamQueryState: LogStreamQueryStateWithQuery;
-}> = ({ children, logStreamQueryState }) => {
+  logStreamPageState: InitializedLogStreamPageState;
+}> = ({ children, logStreamPageState }) => {
   const { logViewId, logView } = useLogViewContext();
   const { topCursor, bottomCursor, entries } = useLogStreamContext();
   const serializedParsedQuery = useMemo(
-    () => stringify(logStreamQueryState.context.parsedQuery),
-    [logStreamQueryState.context.parsedQuery]
+    () => stringify(logStreamPageState.context.parsedQuery),
+    [logStreamPageState.context.parsedQuery]
   );
 
   const highlightsProps = {
@@ -89,15 +89,15 @@ const LogHighlightsState: React.FC<{
 };
 
 export const LogStreamPageContentProviders: React.FC<{
-  logStreamQueryState: LogStreamQueryStateWithQuery;
-}> = ({ children, logStreamQueryState }) => {
+  logStreamPageState: InitializedLogStreamPageState;
+}> = ({ children, logStreamPageState }) => {
   return (
     <LogViewConfigurationProvider>
       <LogEntryFlyoutProvider>
         <LogPositionStateProvider>
           <ViewLogInContext>
-            <LogEntriesStateProvider logStreamQueryState={logStreamQueryState}>
-              <LogHighlightsState logStreamQueryState={logStreamQueryState}>
+            <LogEntriesStateProvider logStreamPageState={logStreamPageState}>
+              <LogHighlightsState logStreamPageState={logStreamPageState}>
                 {children}
               </LogHighlightsState>
             </LogEntriesStateProvider>
@@ -108,4 +108,7 @@ export const LogStreamPageContentProviders: React.FC<{
   );
 };
 
-type LogStreamQueryStateWithQuery = MatchedStateFromActor<LogStreamQueryActorRef, 'hasQuery'>;
+type InitializedLogStreamPageState = MatchedStateFromActor<
+  LogStreamPageActorRef,
+  { hasLogViewIndices: 'initialized' }
+>;

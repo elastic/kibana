@@ -23,16 +23,3 @@ type LogStreamPageStateWithLogViewIndices =
 export const selectLogStreamQueryChildService = (
   state: LogStreamPageStateWithLogViewIndices
 ): LogStreamQueryActorRef => state.children.logStreamQuery;
-
-// TODO: maybe just throw when narrowing the state argument doesn't work?
-// export const selectLogStreamQueryChildService = (
-//   state: LogStreamPageState
-// ): LogStreamQueryActorRef => {
-//   const { logStreamQuery } = state.children;
-
-//   if (logStreamQuery == null) {
-//     throw new Error('Failed to access LogStreamQuery child service.');
-//   }
-
-//   return logStreamQuery;
-// };

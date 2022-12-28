@@ -10,12 +10,6 @@ import type { Query } from '@kbn/es-query';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { useActor } from '@xstate/react';
-import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
-import {
-  LogStreamPageActorRef,
-  selectLogStreamQueryChildService,
-} from '../../../observability_logs/log_stream_page/state';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
@@ -37,12 +31,13 @@ import { useViewLogInProviderContext } from '../../../containers/logs/view_log_i
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogViewContext } from '../../../hooks/use_log_view';
+import { LogStreamPageActorRef } from '../../../observability_logs/log_stream_page/state';
 import { type ParsedQuery } from '../../../observability_logs/log_stream_query_state';
+import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
+import { LogStreamPageTemplate } from './components/stream_page_template';
 import { LogsToolbar } from './page_toolbar';
 import { PageViewLogInContext } from './page_view_log_in_context';
-import { LogStreamPageTemplate } from './components/stream_page_template';
-import { LogStreamPageContentProviders } from './page_providers';
 
 const PAGE_THRESHOLD = 2;
 
@@ -301,18 +296,7 @@ export const StreamPageLogsContentForState = React.memo<{
     context: { parsedQuery },
   } = logStreamPageState;
 
-  const logStreamQueryService = selectLogStreamQueryChildService(logStreamPageState);
-  const [logStreamQueryState] = useActor(logStreamQueryService);
-
-  if (logStreamQueryState.matches('hasQuery')) {
-    return (
-      <LogStreamPageContentProviders logStreamQueryState={logStreamQueryState}>
-        <StreamPageLogsContent filterQuery={parsedQuery} />
-      </LogStreamPageContentProviders>
-    );
-  } else {
-    return null;
-  }
+  return <StreamPageLogsContent filterQuery={parsedQuery} />;
 });
 
 const LogPageMinimapColumn = euiStyled.div`
