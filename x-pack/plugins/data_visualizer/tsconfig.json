@@ -50,6 +50,8 @@
     "@kbn/ml-agg-utils",
     "@kbn/test-jest-helpers",
     "@kbn/field-types",
+    "@kbn/ml-nested-property",
+    "@kbn/ml-url-state",
   ],
   "exclude": [
     "target/**/*",
