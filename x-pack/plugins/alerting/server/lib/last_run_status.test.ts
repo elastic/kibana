@@ -71,7 +71,10 @@ describe('lastRunFromState', () => {
     );
 
     expect(result.lastRun.outcome).toEqual('warning');
-    expect(result.lastRun.outcomeMsg).toEqual(['MOCK_WARNING', 'Rule execution reported a warning']);
+    expect(result.lastRun.outcomeMsg).toEqual([
+      'MOCK_WARNING',
+      'Rule execution reported a warning',
+    ]);
     expect(result.lastRun.warning).toEqual(null);
 
     expect(result.lastRun.alertsCount).toEqual({
