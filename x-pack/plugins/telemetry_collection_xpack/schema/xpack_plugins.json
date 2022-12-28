@@ -5115,6 +5115,34 @@
               }
             }
           }
+        },
+        "resources_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "resource_type": {
+                "type": "keyword"
+              },
+              "resource_type_doc_count": {
+                "type": "long"
+              },
+              "resource_sub_type": {
+                "type": "keyword"
+              },
+              "resource_sub_type_doc_count": {
+                "type": "long"
+              },
+              "passed_findings_count": {
+                "type": "long"
+              },
+              "failed_findings_count": {
+                "type": "long"
+              }
+            }
+          }
         }
       }
     },
@@ -5202,6 +5230,18 @@
               "type": "long",
               "_meta": {
                 "description": "The total number of enrolled agents currently offline"
+              }
+            },
+            "inactive": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of of enrolled agents currently inactive"
+              }
+            },
+            "unenrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of agents currently unenrolled"
               }
             },
             "total_all_statuses": {

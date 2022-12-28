@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within node_modules/@kbn/dev-utils/target_node/src/plugin_list/generate_plugin_list.js
+  You can update the template within packages/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts
 
 ////
 
@@ -447,6 +447,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
 |Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_defend/README.md[cloudDefend]
+|This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
