@@ -12,7 +12,7 @@ import { getErrorDistribution } from './distribution/get_distribution';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
-import { getErrorGroupSamples } from './get_error_groups/get_error_group_samples';
+import { getErrorGroupSampleIds } from './get_error_groups/get_error_group_sample_ids';
 import { getErrorGroupSampleDetails } from './get_error_groups/get_error_group_sample_details';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getTopErroneousTransactionsPeriods } from './erroneous_transactions/get_top_erroneous_transactions';
@@ -209,7 +209,7 @@ const errorGroupsSamplesRoute = createApmServerRoute({
     const { serviceName, groupId } = params.path;
     const { environment, kuery, start, end } = params.query;
 
-    return getErrorGroupSamples({
+    return getErrorGroupSampleIds({
       environment,
       groupId,
       kuery,

@@ -11,7 +11,7 @@ import {
 } from '../../utils/test_helpers';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
-import { getErrorGroupSamples } from './get_error_groups/get_error_group_samples';
+import { getErrorGroupSampleIds } from './get_error_groups/get_error_group_sample_ids';
 import { getErrorGroupSampleDetails } from './get_error_groups/get_error_group_sample_details';
 
 describe('error queries', () => {
@@ -23,7 +23,7 @@ describe('error queries', () => {
 
   it('fetches the error group samples by the groupId', async () => {
     mock = await inspectSearchParams(({ mockApmEventClient }) =>
-      getErrorGroupSamples({
+      getErrorGroupSampleIds({
         groupId: 'groupId',
         serviceName: 'serviceName',
         apmEventClient: mockApmEventClient,

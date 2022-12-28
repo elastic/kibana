@@ -19,7 +19,7 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 
 const ERROR_SAMPLES_SIZE = 10000;
 
-export async function getErrorGroupSamples({
+export async function getErrorGroupSampleIds({
   environment,
   kuery,
   serviceName,
@@ -52,7 +52,7 @@ export async function getErrorGroupSamples({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
           ],
-          should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
+          should: [{ term: { [TRANSACTION_SAMPLED]: true } }], // prefer error samples with related transactions
         },
       },
       _source: [ERROR_ID],

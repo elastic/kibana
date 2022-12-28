@@ -7,12 +7,7 @@
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import {
-  ERROR_ID,
-  SERVICE_NAME,
-  TRANSACTION_SAMPLED,
-} from '../../../../common/es_fields/apm';
+import { ERROR_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../../transactions/get_transaction';
@@ -50,13 +45,8 @@ export async function getErrorGroupSampleDetails({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
           ],
-          should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
         },
       },
-      sort: asMutableArray([
-        { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
-        { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
-      ] as const),
     },
   };
 
