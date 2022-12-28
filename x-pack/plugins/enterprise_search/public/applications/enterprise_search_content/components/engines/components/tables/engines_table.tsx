@@ -55,11 +55,11 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       dataType: 'string',
     },
     {
-      field: 'indices.index_count',
+      field: 'indices.length',
+      datatype: 'number',
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.indices', {
         defaultMessage: 'Indices',
       }),
-      datatype: 'number',
     },
 
     {

@@ -50,7 +50,7 @@ export const EnginesList = () => {
           <EuiButton
             fill
             iconType="plusInCircle"
-            data-test-subj="appSearchEnginesEngineCreationButton"
+            data-test-subj="enterpriseSearchContentEnginesCreationButton"
             href={'TODO'}
           >
             {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
