@@ -223,8 +223,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(messages[2].failedMonitors).eql([
           {
             id: httpProjectMonitors.monitors[0].id,
-            details: `Multiple urls are not supported for http project monitors in ${kibanaVersion}. Please set only 1 url per monitor. You monitor was not created or updated.`,
-            reason: 'Unsupported Heartbeat option',
+            details: `\`http\` project monitors must have exactly one value for field \`urls\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+            reason: 'Invalid Heartbeat configuration',
           },
           {
             id: httpProjectMonitors.monitors[0].id,
@@ -335,8 +335,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(messages[2].failedMonitors).eql([
           {
             id: tcpProjectMonitors.monitors[2].id,
-            details: `Multiple hosts are not supported for tcp project monitors in ${kibanaVersion}. Please set only 1 host per monitor. You monitor was not created or updated.`,
-            reason: 'Unsupported Heartbeat option',
+            details: `\`tcp\` project monitors must have exactly one value for field \`hosts\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+            reason: 'Invalid Heartbeat configuration',
           },
           {
             id: tcpProjectMonitors.monitors[2].id,
@@ -434,8 +434,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(messages[2].failedMonitors).eql([
           {
             id: icmpProjectMonitors.monitors[2].id,
-            details: `Multiple hosts are not supported for icmp project monitors in ${kibanaVersion}. Please set only 1 host per monitor. You monitor was not created or updated.`,
-            reason: 'Unsupported Heartbeat option',
+            details: `\`icmp\` project monitors must have exactly one value for field \`hosts\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+            reason: 'Invalid Heartbeat configuration',
           },
           {
             id: icmpProjectMonitors.monitors[2].id,
