@@ -85,9 +85,9 @@ const fetchSloList = async (
       query: {
         ...(params.page && { page: params.page }),
         ...(params.name && { name: params.name }),
-        ...(params.sortBy && { sort_by: params.sortBy }),
+        ...(params.sortBy && { sortBy: params.sortBy }),
         ...(params.indicatorTypes &&
-          params.indicatorTypes.length > 0 && { indicator_types: params.indicatorTypes.join(',') }),
+          params.indicatorTypes.length > 0 && { indicatorTypes: params.indicatorTypes.join(',') }),
       },
       signal: abortController.signal,
     });
