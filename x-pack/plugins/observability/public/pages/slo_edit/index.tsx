@@ -17,7 +17,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { SloEditForm } from './components/slo_edit_form';
 import PageNotFound from '../404';
-import { isSloFeatureEnabled } from '../slos/helpers';
+import { isSloFeatureEnabled } from '../slos/helpers/is_slo_feature_enabled';
 
 export function SloEditPage() {
   const { http } = useKibana<ObservabilityAppServices>().services;

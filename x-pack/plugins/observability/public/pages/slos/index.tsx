@@ -14,7 +14,7 @@ import { paths } from '../../config';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
-import { isSloFeatureEnabled } from './helpers';
+import { isSloFeatureEnabled } from './helpers/is_slo_feature_enabled';
 import { SLOS_BREADCRUMB_TEXT, SLOS_PAGE_TITLE } from './translations';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
