@@ -19,7 +19,7 @@ import type {
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from '@kbn/core-saved-objects-api-server';
 import {
-  AuditAction,
+  SecurityAction,
   type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
   type SavedObjectsRawDocSource,
@@ -207,23 +207,18 @@ export async function updateObjectsSpaces({
   const authorizationResult = await securityExtension?.performAuthorization({
     // If a user tries to share/unshare an object to/from '*', they need to have 'share_to_space' privileges for the Global Resource (e.g.,
     // All privileges for All Spaces).
-    actions: new Set(['share_to_space']),
+    actions: new Set([SecurityAction.UPDATE_OBJECTS_SPACES]),
     types: new Set(typesAndSpaces.keys()),
     spaces: spacesToAuthorize,
     enforceMap: typesAndSpaces,
-    auditCallback: (error) => {
-      for (const { value } of validObjects) {
-        securityExtension!.addAuditEvent({
-          action: AuditAction.UPDATE_OBJECTS_SPACES,
-          savedObject: { type: value.type, id: value.id },
-          addToSpaces,
-          deleteFromSpaces,
-          error,
-          ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the update operation has not occurred yet
-        });
-      }
-    },
     options: { allowGlobalResource: true },
+    auditOptions: {
+      objects: validObjects.map((obj) => {
+        return { type: obj.value.type, id: obj.value.id };
+      }),
+      addToSpaces,
+      deleteFromSpaces,
+    },
   });
 
   const time = new Date().toISOString();

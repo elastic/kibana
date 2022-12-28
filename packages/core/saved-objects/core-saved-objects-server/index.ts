@@ -80,8 +80,9 @@ export type {
   AddAuditEventParams,
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
+  AuthorizeCreateObject,
 } from './src/extensions/security';
-export { AuditAction } from './src/extensions/security';
+export { AuditAction, SecurityAction } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
 export type { SavedObjectsExtensions } from './src/extensions/extensions';
 export {

@@ -27,7 +27,10 @@ import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-inte
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { UpdateObjectsSpacesParams } from './update_objects_spaces';
 import { updateObjectsSpaces } from './update_objects_spaces';
-import { AuditAction, type ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import {
+  SecurityAction,
+  type ISavedObjectsSecurityExtension,
+} from '@kbn/core-saved-objects-server';
 import {
   checkAuthError,
   enforceError,
@@ -696,21 +699,22 @@ describe('#updateObjectsSpaces', () => {
         expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
       });
 
-      test(`adds audit event when not unauthorized`, async () => {
-        setupPerformAuthEnforceFailure(mockSecurityExt);
+      // ToDo: can no longer validate audit logs at this level
+      // test(`adds audit event when not unauthorized`, async () => {
+      //   setupPerformAuthEnforceFailure(mockSecurityExt);
 
-        await expect(updateObjectsSpaces(params)).rejects.toThrow(enforceError);
-        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+      //   await expect(updateObjectsSpaces(params)).rejects.toThrow(enforceError);
+      //   expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
 
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-          action: AuditAction.UPDATE_OBJECTS_SPACES,
-          addToSpaces: params.spacesToAdd,
-          deleteFromSpaces: undefined,
-          savedObject: { type: params.objects[0].type, id: params.objects[0].id },
-          error: enforceError,
-        });
-      });
+      //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
+      //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
+      //     action: AuditAction.UPDATE_OBJECTS_SPACES,
+      //     addToSpaces: params.spacesToAdd,
+      //     deleteFromSpaces: undefined,
+      //     savedObject: { type: params.objects[0].type, id: params.objects[0].id },
+      //     error: enforceError,
+      //   });
+      // });
 
       test(`returns error from es client bulk operation`, async () => {
         setupPerformAuthFullyAuthorized(mockSecurityExt);
@@ -765,7 +769,7 @@ describe('#updateObjectsSpaces', () => {
 
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
-        const expectedActions = new Set(['share_to_space']);
+        const expectedActions = new Set([SecurityAction.UPDATE_OBJECTS_SPACES]);
         const expectedSpaces = new Set([defaultSpace, otherSpace, EXISTING_SPACE]);
         const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
         const expectedEnforceMap = new Map<string, Set<string>>();
@@ -789,21 +793,22 @@ describe('#updateObjectsSpaces', () => {
         expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
       });
 
-      test(`adds audit event per object when successful`, async () => {
-        await updateObjectsSpaces(params);
+      // ToDo: can no longer validate audit logs at this level
+      // test(`adds audit event per object when successful`, async () => {
+      //   await updateObjectsSpaces(params);
 
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-        objects.forEach((obj) => {
-          expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-            action: AuditAction.UPDATE_OBJECTS_SPACES,
-            savedObject: { type: obj.type, id: obj.id },
-            outcome: 'unknown',
-            addToSpaces: spacesToAdd,
-            deleteFromSpaces: spacesToRemove,
-            error: undefined,
-          });
-        });
-      });
+      //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
+      //   objects.forEach((obj) => {
+      //     expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
+      //       action: AuditAction.UPDATE_OBJECTS_SPACES,
+      //       savedObject: { type: obj.type, id: obj.id },
+      //       outcome: 'unknown',
+      //       addToSpaces: spacesToAdd,
+      //       deleteFromSpaces: spacesToRemove,
+      //       error: undefined,
+      //     });
+      //   });
+      // });
     });
 
     describe('all spaces', () => {
@@ -837,7 +842,7 @@ describe('#updateObjectsSpaces', () => {
 
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
-        const expectedActions = new Set(['share_to_space']);
+        const expectedActions = new Set([SecurityAction.UPDATE_OBJECTS_SPACES]);
         const expectedSpaces = new Set(['*', defaultSpace, otherSpace, EXISTING_SPACE]);
         const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
         const expectedEnforceMap = new Map<string, Set<string>>();
@@ -869,7 +874,7 @@ describe('#updateObjectsSpaces', () => {
 
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
-        const expectedActions = new Set(['share_to_space']);
+        const expectedActions = new Set([SecurityAction.UPDATE_OBJECTS_SPACES]);
         const expectedSpaces = new Set(['*', defaultSpace, otherSpace, EXISTING_SPACE]);
         const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
         const expectedEnforceMap = new Map<string, Set<string>>();

@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
-import { AuditAction } from '@kbn/core-saved-objects-server';
+import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest, SavedObjectsClient } from '@kbn/core/server';
 import type {
   GetAllSpacesOptions,
@@ -325,7 +325,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
       let error: Error | undefined;
       try {
         await this.securityExtension.performAuthorization({
-          actions: new Set(['bulk_update']),
+          actions: new Set([SecurityAction.BULK_UPDATE]),
           types: new Set(typesAndSpaces.keys()),
           spaces: uniqueSpaces,
           enforceMap: typesAndSpaces,

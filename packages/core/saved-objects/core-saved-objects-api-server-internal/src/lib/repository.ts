@@ -72,6 +72,8 @@ import {
   AuditAction,
   type CheckAuthorizationResult,
   type AuthorizationTypeMap,
+  SecurityAction,
+  AuthorizeCreateObject,
 } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_NAMESPACE_STRING,
@@ -351,28 +353,34 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       existingOriginId = preflightResult?.existingDocument?._source?.originId;
     }
 
-    const spacesToEnforce = new Set(initialNamespaces).add(namespaceString); // Always check/enforce authZ for the active space
-    const existingNamespaces = preflightResult?.existingDocument?._source?.namespaces || [];
-    const spacesToAuthorize = new Set(existingNamespaces);
-    spacesToAuthorize.delete(ALL_NAMESPACES_STRING); // Don't accidentally check for global privileges when the object exists in '*'
-    const authorizationResult = await this._securityExtension?.performAuthorization({
-      // If a user tries to create an object with `initialNamespaces: ['*']`, they need to have 'create' privileges for the Global Resource
-      // (e.g., All privileges for All Spaces).
-      // Inversely, if a user tries to overwrite an object that already exists in '*', they don't need to 'create' privileges for the Global
-      // Resource, so in that case we have to filter out that string from spacesToAuthorize (because `allowGlobalResource: true` is used
-      // below.)
-      actions: new Set(['create']),
-      types: new Set([type]),
-      spaces: new Set([...spacesToEnforce, ...spacesToAuthorize]), // existing namespaces are included so we can later redact if necessary
-      enforceMap: new Map([[type, spacesToEnforce]]),
-      auditCallback: (error) =>
-        this._securityExtension!.addAuditEvent({
-          action: AuditAction.CREATE,
-          savedObject: { type, id },
-          error,
-          ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the create operation has not occurred yet
-        }),
-      options: { allowGlobalResource: true },
+    // const spacesToEnforce = new Set(initialNamespaces).add(namespaceString); // Always check/enforce authZ for the active space
+    // const existingNamespaces = preflightResult?.existingDocument?._source?.namespaces || [];
+    // const spacesToAuthorize = new Set(existingNamespaces);
+    // spacesToAuthorize.delete(ALL_NAMESPACES_STRING); // Don't accidentally check for global privileges when the object exists in '*'
+    // const authorizationResult = await this._securityExtension?.performAuthorization({
+    //   // If a user tries to create an object with `initialNamespaces: ['*']`, they need to have 'create' privileges for the Global Resource
+    //   // (e.g., All privileges for All Spaces).
+    //   // Inversely, if a user tries to overwrite an object that already exists in '*', they don't need to 'create' privileges for the Global
+    //   // Resource, so in that case we have to filter out that string from spacesToAuthorize (because `allowGlobalResource: true` is used
+    //   // below.)
+    //   actions: new Set([SecurityAction.CREATE]),
+    //   types: new Set([type]),
+    //   spaces: new Set([...spacesToEnforce, ...spacesToAuthorize]), // existing namespaces are included so we can later redact if necessary
+    //   enforceMap: new Map([[type, spacesToEnforce]]),
+    //   options: { allowGlobalResource: true },
+    //   auditOptions: { objects: [{ type, id }] },
+    // });
+
+    const authorizationResult = await this._securityExtension?.authorizeCreate({
+      namespaceString,
+      objects: [
+        {
+          type,
+          id,
+          initialNamespaces,
+          existingNamespaces: preflightResult?.existingDocument?._source?.namespaces,
+        },
+      ],
     });
 
     if (preflightResult?.error) {
@@ -524,45 +532,59 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       objects: preflightCheckObjects,
     });
 
-    const typesAndSpaces = new Map<string, Set<string>>();
-    const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
-    for (const { value } of validObjects) {
-      const { object, preflightCheckIndex: index } = value;
+    // const typesAndSpaces = new Map<string, Set<string>>();
+    // const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
+    // for (const { value } of validObjects) {
+    //   const { object, preflightCheckIndex: index } = value;
+    //   const preflightResult = index !== undefined ? preflightCheckResponse[index] : undefined;
+
+    //   const spacesToEnforce = typesAndSpaces.get(object.type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
+    //   for (const space of object.initialNamespaces ?? []) {
+    //     spacesToEnforce.add(space);
+    //     spacesToAuthorize.add(space);
+    //   }
+    //   typesAndSpaces.set(object.type, spacesToEnforce);
+    //   for (const space of preflightResult?.existingDocument?._source.namespaces ?? []) {
+    //     if (space === ALL_NAMESPACES_STRING) continue; // Don't accidentally check for global privileges when the object exists in '*'
+    //     spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
+    //   }
+    // }
+
+    // const authorizationResult = await this._securityExtension?.performAuthorization({
+    //   // If a user tries to create an object with `initialNamespaces: ['*']`, they need to have 'bulk_create' privileges for the Global
+    //   // Resource (e.g., All privileges for All Spaces).
+    //   // Inversely, if a user tries to overwrite an object that already exists in '*', they don't need to have 'bulk_create' privileges for the Global
+    //   // Resource, so in that case we have to filter out that string from spacesToAuthorize (because `allowGlobalResource: true` is used
+    //   // below.)
+    //   actions: new Set([SecurityAction.BULK_CREATE]),
+    //   types: new Set(typesAndSpaces.keys()),
+    //   spaces: spacesToAuthorize,
+    //   enforceMap: typesAndSpaces,
+    //   options: { allowGlobalResource: true },
+    //   auditOptions: {
+    //     objects: validObjects.map((element) => {
+    //       return {
+    //         type: element.value.object.type,
+    //         id: element.value.object.id,
+    //       };
+    //     }),
+    //   },
+    // });
+
+    const authObjects: AuthorizeCreateObject[] = validObjects.map((element) => {
+      const { object, preflightCheckIndex: index } = element.value;
       const preflightResult = index !== undefined ? preflightCheckResponse[index] : undefined;
+      return {
+        type: object.type,
+        id: object.id,
+        initialNamespaces: object.initialNamespaces,
+        existingNamespaces: preflightResult?.existingDocument?._source.namespaces,
+      };
+    });
 
-      const spacesToEnforce = typesAndSpaces.get(object.type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
-      for (const space of object.initialNamespaces ?? []) {
-        spacesToEnforce.add(space);
-        spacesToAuthorize.add(space);
-      }
-      typesAndSpaces.set(object.type, spacesToEnforce);
-      for (const space of preflightResult?.existingDocument?._source.namespaces ?? []) {
-        if (space === ALL_NAMESPACES_STRING) continue; // Don't accidentally check for global privileges when the object exists in '*'
-        spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
-      }
-    }
-
-    const authorizationResult = await this._securityExtension?.performAuthorization({
-      // If a user tries to create an object with `initialNamespaces: ['*']`, they need to have 'bulk_create' privileges for the Global
-      // Resource (e.g., All privileges for All Spaces).
-      // Inversely, if a user tries to overwrite an object that already exists in '*', they don't need to have 'bulk_create' privileges for the Global
-      // Resource, so in that case we have to filter out that string from spacesToAuthorize (because `allowGlobalResource: true` is used
-      // below.)
-      actions: new Set(['bulk_create']),
-      types: new Set(typesAndSpaces.keys()),
-      spaces: spacesToAuthorize,
-      enforceMap: typesAndSpaces,
-      auditCallback: (error) => {
-        for (const { value } of validObjects) {
-          this._securityExtension!.addAuditEvent({
-            action: AuditAction.CREATE,
-            savedObject: { type: value.object.type, id: value.object.id },
-            error,
-            ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the create operation has not occurred yet
-          });
-        }
-      },
-      options: { allowGlobalResource: true },
+    const authorizationResult = await this._securityExtension?.authorizeCreate({
+      namespaceString,
+      objects: authObjects,
     });
 
     let bulkRequestIndexCounter = 0;
@@ -767,13 +789,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     }
 
     await this._securityExtension?.performAuthorization({
-      actions: new Set(['bulk_create']),
+      actions: new Set([SecurityAction.CHECK_CONFLICTS]),
       types: new Set(typesAndSpaces.keys()),
       spaces: new Set([namespaceString]), // Always check authZ for the active space
       enforceMap: typesAndSpaces,
-      // auditCallback is intentionally omitted, this function in the previous Security SOC wrapper implementation
+      // auditing is intentionally bypassed, this function in the previous Security SOC wrapper implementation
       // did not have audit logging. This is primarily because it is only used by Kibana and is not exposed in a
       // public HTTP API
+      auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
     });
 
     const bulkGetDocs = validObjects.map(({ value: { type, id } }) => ({
@@ -845,18 +868,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const typesAndSpaces = new Map<string, Set<string>>([[type, new Set([namespaceString])]]); // Always enforce authZ for the active space
 
     await this._securityExtension?.performAuthorization({
-      actions: new Set(['delete']),
+      actions: new Set([SecurityAction.DELETE]),
       types: new Set([type]),
       spaces: new Set([namespaceString]), // Always check authZ for the active space
       enforceMap: typesAndSpaces,
-      auditCallback: (error) => {
-        this._securityExtension!.addAuditEvent({
-          action: AuditAction.DELETE,
-          savedObject: { type, id },
-          error,
-          ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the delete operation has not occurred yet
-        });
-      },
+      auditOptions: { objects: [{ type, id }] },
     });
 
     const rawId = this._serializer.generateRawId(namespace, type, id);
@@ -1144,19 +1160,17 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     }
 
     await this._securityExtension?.performAuthorization({
-      actions: new Set(['bulk_delete']),
+      actions: new Set([SecurityAction.BULK_DELETE]),
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
       enforceMap: typesAndSpaces,
-      auditCallback: (error) => {
-        for (const { value } of expectedBulkDeleteMultiNamespaceDocsResults) {
-          this._securityExtension!.addAuditEvent({
-            action: AuditAction.DELETE,
-            savedObject: { type: value.type, id: value.id },
-            error,
-            ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the delete operation has not occurred yet
-          });
-        }
+      auditOptions: {
+        objects: expectedBulkDeleteMultiNamespaceDocsResults.map((element) => {
+          return {
+            type: element.value.type,
+            id: element.value.id,
+          };
+        }),
       },
     });
 
@@ -1444,12 +1458,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     let preAuthorizationResult: CheckAuthorizationResult<'find'> | undefined;
     if (!disableExtensions && this._securityExtension) {
       preAuthorizationResult = await this._securityExtension.performAuthorization({
-        actions: new Set(['find']),
+        actions: new Set([SecurityAction.FIND]),
         types: new Set(types),
         spaces: spacesToPreauthorize,
+        auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
       });
-      if (preAuthorizationResult.status === 'unauthorized') {
+      if (preAuthorizationResult?.status === 'unauthorized') {
         // If the user is unauthorized to find *anything* they requested, return an empty response
+        // This is one of the last remaining calls to addAuditEvent outside of the sec ext
         this._securityExtension.addAuditEvent({
           action: AuditAction.FIND,
           error: new Error(`User is unauthorized for any requested types/spaces.`),
@@ -1459,7 +1475,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         });
         return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
       }
-      if (preAuthorizationResult.status === 'partially_authorized') {
+      if (preAuthorizationResult?.status === 'partially_authorized') {
         typeToNamespacesMap = new Map<string, string[]>();
         for (const [objType, entry] of preAuthorizationResult.typeMap) {
           if (!entry.find) continue;
@@ -1557,7 +1573,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         ? // If there are any namespaces in the object results that were not already checked during pre-authorization, we need *another*
           // authorization check so we can correctly redact the object namespaces below.
           await this._securityExtension?.performAuthorization({
-            actions: new Set(['find']),
+            actions: new Set([SecurityAction.FIND]),
             types: new Set(types),
             spaces: spacesToAuthorize,
           })
@@ -1725,21 +1741,32 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       }),
     };
 
+    const auditObjects = new Array<{ type: string; id: string }>();
+    for (const { type, id, error: bulkError } of result.saved_objects) {
+      if (!!bulkError) continue; // Only log success events for objects that were actually found (and are being returned to the user)
+      auditObjects.concat({ type, id });
+    }
+
     const authorizationResult = await this._securityExtension?.performAuthorization({
-      actions: new Set(['bulk_get']),
+      actions: new Set([SecurityAction.BULK_GET]),
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
       enforceMap: typesAndSpaces,
-      auditCallback: (error) => {
-        for (const { type, id, error: bulkError } of result.saved_objects) {
-          if (!error && !!bulkError) continue; // Only log success events for objects that were actually found (and are being returned to the user)
-          this._securityExtension!.addAuditEvent({
-            action: AuditAction.GET,
-            savedObject: { type, id },
-            error,
-          });
-        }
-      },
+      // ToDo: need to handle this case!
+      // auditCallback: (error) => {
+      //   for (const { type, id, error: bulkError } of result.saved_objects) {
+      //     if (!error && !!bulkError) continue; // Only log success events for objects that were actually found (and are being returned to the user)
+      //     this._securityExtension!.addAuditEvent({
+      //       action: AuditAction.GET,
+      //       savedObject: { type, id },
+      //       error,
+      //     });
+      //   }
+      // },
+      auditOptions: {
+        objects: auditObjects.length ? auditObjects : undefined,
+        useSuccessOutcome: true,
+      }, // ToDo: why is this array empty in out unit testing? Because we forgot a mock?
     });
 
     return this.optionallyDecryptAndRedactBulkResult(result, authorizationResult?.typeMap);
@@ -1810,20 +1837,20 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const existingNamespaces = body?._source?.namespaces || [];
 
     const authorizationResult = await this._securityExtension?.performAuthorization({
-      actions: new Set(['get']),
+      actions: new Set([SecurityAction.GET]),
       types: new Set([type]),
       spaces: new Set([...spacesToEnforce, ...existingNamespaces]), // existing namespaces are included so we can later redact if necessary
       enforceMap: new Map([[type, spacesToEnforce]]),
-      auditCallback: (error) => {
-        if (error) {
-          this._securityExtension!.addAuditEvent({
-            action: AuditAction.GET,
-            savedObject: { type, id },
-            error,
-          });
-        }
-        // Audit event for success case is added separately below
-      },
+      // auditCallback: (error) => {
+      //   if (error) {
+      //     this._securityExtension!.addAuditEvent({
+      //       action: AuditAction.GET,
+      //       savedObject: { type, id },
+      //       error,
+      //     });
+      //   }
+      // },
+      auditOptions: { objects: [{ type, id }], bypassOnSuccess: true }, // Audit event for success case is added separately below
     });
 
     if (
@@ -1912,17 +1939,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const existingNamespaces = preflightResult?.savedObjectNamespaces || [];
 
     const authorizationResult = await this._securityExtension?.performAuthorization({
-      actions: new Set(['update']),
+      actions: new Set([SecurityAction.UPDATE]),
       types: new Set([type]),
       spaces: new Set([...spacesToEnforce, ...existingNamespaces]), // existing namespaces are included so we can later redact if necessary
       enforceMap: new Map([[type, spacesToEnforce]]),
-      auditCallback: (error) =>
-        this._securityExtension!.addAuditEvent({
-          action: AuditAction.UPDATE,
-          savedObject: { type, id },
-          error,
-          ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the update/upsert operation has not occurred yet
-        }),
+      auditOptions: { objects: [{ type, id }] },
     });
 
     if (
@@ -2193,19 +2214,17 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     }
 
     const authorizationResult = await this._securityExtension?.performAuthorization({
-      actions: new Set(['bulk_update']),
+      actions: new Set([SecurityAction.BULK_UPDATE]),
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
       enforceMap: typesAndSpaces,
-      auditCallback: (error) => {
-        for (const { value } of validObjects) {
-          this._securityExtension!.addAuditEvent({
-            action: AuditAction.UPDATE,
-            savedObject: { type: value.type, id: value.id },
-            error,
-            ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the update operation has not occurred yet
-          });
-        }
+      auditOptions: {
+        objects: validObjects.map((element) => {
+          return {
+            type: element.value.type,
+            id: element.value.id,
+          };
+        }),
       },
     });
 
@@ -2367,17 +2386,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     const spaces = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
     await this._securityExtension?.performAuthorization({
-      actions: new Set(['delete']),
+      actions: new Set([SecurityAction.REMOVE_REFERENCES]),
       types: new Set([type]),
       spaces,
       enforceMap: new Map([[type, spaces]]),
-      auditCallback: (error) =>
-        this._securityExtension!.addAuditEvent({
-          action: AuditAction.REMOVE_REFERENCES,
-          savedObject: { type, id },
-          error,
-          ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the updateByQuery operation has not occurred yet
-        }),
+      auditOptions: { objects: [{ type, id }] },
     });
 
     const allTypes = this._registry.getAllTypes().map((t) => t.name);
@@ -2652,12 +2665,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     if (!disableExtensions && this._securityExtension) {
       const spaces = new Set(namespaces);
       const preAuthorizationResult = await this._securityExtension?.performAuthorization({
-        actions: new Set(['open_point_in_time']),
+        actions: new Set([SecurityAction.OPEN_POINT_IN_TIME]),
         types: new Set(types),
         spaces,
       });
-      if (preAuthorizationResult.status === 'unauthorized') {
+      if (preAuthorizationResult?.status === 'unauthorized') {
         // If the user is unauthorized to find *anything* they requested, return an empty response
+        // This is one of the last remaining calls to addAuditEvent outside of the security extension
         this._securityExtension.addAuditEvent({
           action: AuditAction.OPEN_POINT_IN_TIME,
           error: new Error('User is unauthorized for any requested types/spaces.'),

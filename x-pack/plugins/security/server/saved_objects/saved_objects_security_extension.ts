@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
 import type {
   AddAuditEventParams,
   AuthorizationTypeEntry,
@@ -18,6 +19,7 @@ import type {
   PerformAuthorizationParams,
   RedactNamespacesParams,
 } from '@kbn/core-saved-objects-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import type { AuditLogger } from '../audit';
@@ -38,12 +40,100 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   private readonly auditLogger: AuditLogger;
   private readonly errors: SavedObjectsClient['errors'];
   private readonly checkPrivilegesFunc: CheckSavedObjectsPrivileges;
+  private readonly actionMap: Map<
+    SecurityAction,
+    { authzAction: string | undefined; auditAction: AuditAction | undefined }
+  >;
 
   constructor({ actions, auditLogger, errors, checkPrivileges }: Params) {
     this.actions = actions;
     this.auditLogger = auditLogger;
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
+
+    // OPERATION                          ES AUTH ACTION          AUDIT ACTION
+    // -----------------------------------------------------------------------------------------
+    // Check Conflicts                    'bulk_create'           N/A
+    // Close PIT                          N/A                     AuditAction.CLOSE_POINT_IN_TIME
+    // Collect References                 'bulk_get'              AuditAction.COLLECT_MULTINAMESPACE_REFERENCES
+    // Collect Refs For Updating Spaces   'share_to_space'        AuditAction.COLLECT_MULTINAMESPACE_REFERENCES
+    // Create                             'create'                AuditAction.CREATE
+    // Bulk Create                        'bulk_create'           AuditAction.CREATE
+    // Delete                             'delete'                AuditAction.DELETE
+    // Bulk Delete                        'bulk_delete'           AuditAction.DELETE
+    // Find                               'find'                  AuditAction.FIND
+    // Get                                'get'                   AuditAction.GET
+    // Bulk Get                           'bulk_get'              AuditAction.GET
+    // Internal Bulk Resolve              'bulk_get'              AuditAction.RESOLVE
+    // Open PIT                           'open_point_in_time'    AuditAction.OPEN_POINT_IN_TIME
+    // Remove References                  'delete'                AuditAction.REMOVE_REFERENCES
+    // Update                             'update'                AuditAction.UPDATE
+    // Bulk Update                        'bulk_update'           AuditAction.UPDATE
+    // Update Objects Spaces              'share_to_space'        AuditAction.UPDATE_OBJECTS_SPACES
+    this.actionMap = new Map([
+      [SecurityAction.CHECK_CONFLICTS, { authzAction: 'bulk_create', auditAction: undefined }],
+      [
+        SecurityAction.CLOSE_POINT_IN_TIME,
+        { authzAction: undefined, auditAction: AuditAction.CLOSE_POINT_IN_TIME },
+      ],
+      [
+        SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES,
+        { authzAction: 'bulk_get', auditAction: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES },
+      ],
+      [
+        SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES_UPDATE_SPACES,
+        {
+          authzAction: 'share_to_space',
+          auditAction: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
+        },
+      ],
+      [SecurityAction.CREATE, { authzAction: 'create', auditAction: AuditAction.CREATE }],
+      [SecurityAction.BULK_CREATE, { authzAction: 'bulk_create', auditAction: AuditAction.CREATE }],
+      [SecurityAction.DELETE, { authzAction: 'delete', auditAction: AuditAction.DELETE }],
+      [SecurityAction.BULK_DELETE, { authzAction: 'bulk_delete', auditAction: AuditAction.DELETE }],
+      [SecurityAction.FIND, { authzAction: 'find', auditAction: AuditAction.FIND }],
+      [SecurityAction.GET, { authzAction: 'get', auditAction: AuditAction.GET }],
+      [SecurityAction.BULK_GET, { authzAction: 'bulk_get', auditAction: AuditAction.GET }],
+      [
+        SecurityAction.INTERNAL_BULK_RESOLVE,
+        { authzAction: 'bulk_get', auditAction: AuditAction.RESOLVE },
+      ],
+      [
+        SecurityAction.OPEN_POINT_IN_TIME,
+        { authzAction: 'open_point_in_time', auditAction: AuditAction.OPEN_POINT_IN_TIME },
+      ],
+      [
+        SecurityAction.REMOVE_REFERENCES,
+        { authzAction: 'delete', auditAction: AuditAction.REMOVE_REFERENCES },
+      ],
+      [SecurityAction.UPDATE, { authzAction: 'update', auditAction: AuditAction.UPDATE }],
+      [SecurityAction.BULK_UPDATE, { authzAction: 'bulk_update', auditAction: AuditAction.UPDATE }],
+      [
+        SecurityAction.UPDATE_OBJECTS_SPACES,
+        { authzAction: 'share_to_space', auditAction: AuditAction.UPDATE_OBJECTS_SPACES },
+      ],
+    ]);
+  }
+
+  private translateActions<A extends string>(
+    securityActions: Set<SecurityAction>
+  ): { authzActions: Set<A>; auditActions: Set<AuditAction> } {
+    const authzActions = new Set<A>();
+    const auditActions = new Set<AuditAction>();
+    for (const secAction of securityActions) {
+      const { authzAction, auditAction } = this.decodeSecurityAction(secAction);
+      if (authzAction) authzActions.add(authzAction as A);
+      if (auditAction) auditActions.add(auditAction as AuditAction);
+    }
+    return { authzActions, auditActions };
+  }
+
+  private decodeSecurityAction(securityAction: SecurityAction): {
+    authzAction: string | undefined;
+    auditAction: AuditAction | undefined;
+  } {
+    const { authzAction, auditAction } = this.actionMap.get(securityAction)!;
+    return { authzAction, auditAction };
   }
 
   private async checkAuthorization<A extends string>(
@@ -95,7 +185,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         } else {
           const entry = privilegeActionsMap.get(privilege)!; // always defined
           objTypes = [entry.type];
-          action = entry.action;
+          action = entry.action as A;
         }
 
         for (const type of objTypes) {
@@ -139,33 +229,114 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return { typeMap, status: 'unauthorized' };
   }
 
+  private auditHelper(
+    action: AuditAction,
+    objects?: Array<{ type: string; id: string }>,
+    useSuccessOutcome: boolean = false,
+    addToSpaces?: string[],
+    deleteFromSpaces?: string[],
+    error?: Error
+  ) {
+    if (objects && objects?.length > 0) {
+      for (const obj of objects) {
+        this.addAuditEvent({
+          action,
+          savedObject: { type: obj.type, id: obj.id },
+          error,
+          // By default, if authorization was a success the outcome is 'unknown' because the operation has not occurred yet
+          // The GET action is one of the few exceptions to this, and hence it passes true to useSuccessOutcome
+          ...(!error && { outcome: useSuccessOutcome ? 'success' : 'unknown' }),
+          addToSpaces,
+          deleteFromSpaces,
+        });
+      }
+    } else {
+      this.addAuditEvent({
+        action,
+        error,
+        // outcome: error ? 'failure' : useSuccessOutcome ? 'success' : 'unknown',
+        ...(!error && { outcome: useSuccessOutcome ? 'success' : 'unknown' }),
+        addToSpaces,
+        deleteFromSpaces,
+      });
+    }
+  }
+
   enforceAuthorization<A extends string>(params: EnforceAuthorizationParams<A>): void {
-    const { typesAndSpaces, action, typeMap, auditCallback } = params;
+    const { typesAndSpaces, action, typeMap, auditOptions } = params;
+    const {
+      objects: auditObjects,
+      bypassOnSuccess: bypassAuditOnSuccess,
+      bypassOnFailure: bypassAuditOnFailure,
+      useSuccessOutcome,
+      addToSpaces,
+      deleteFromSpaces,
+    } = auditOptions ?? {};
+
+    const { authzAction, auditAction } = this.decodeSecurityAction(action);
+
     const unauthorizedTypes = new Set<string>();
-    for (const [type, spaces] of typesAndSpaces) {
-      const spacesArray = [...spaces];
-      if (!isAuthorizedInAllSpaces(type, action, spacesArray, typeMap)) {
-        unauthorizedTypes.add(type);
+
+    if (authzAction) {
+      for (const [type, spaces] of typesAndSpaces) {
+        const spacesArray = [...spaces];
+        if (!isAuthorizedInAllSpaces(type, authzAction as A, spacesArray, typeMap)) {
+          unauthorizedTypes.add(type);
+        }
       }
     }
 
     if (unauthorizedTypes.size > 0) {
       const targetTypes = [...unauthorizedTypes].sort().join(',');
-      const msg = `Unable to ${action} ${targetTypes}`;
+      const msg = `Unable to ${authzAction} ${targetTypes}`;
       const error = this.errors.decorateForbiddenError(new Error(msg));
-      auditCallback?.(error);
+      if (auditAction && !bypassAuditOnFailure) {
+        this.auditHelper(
+          auditAction,
+          auditObjects,
+          useSuccessOutcome,
+          addToSpaces,
+          deleteFromSpaces,
+          error
+        );
+      }
       throw error;
     }
-    auditCallback?.();
+
+    if (auditAction && !bypassAuditOnSuccess) {
+      this.auditHelper(auditAction, auditObjects, useSuccessOutcome);
+    }
   }
 
   async performAuthorization<A extends string>(
     params: PerformAuthorizationParams<A>
-  ): Promise<CheckAuthorizationResult<A>> {
-    const checkResult: CheckAuthorizationResult<A> = await this.checkAuthorization({
+  ): Promise<CheckAuthorizationResult<A> | undefined> {
+    if (params.actions.size === 0) {
+      throw new Error('No actions specified for authorization check');
+    }
+    const { authzActions, auditActions } = this.translateActions(params.actions);
+
+    const {
+      objects: auditObjects,
+      bypassOnSuccess: bypassAuditOnSuccess,
+      useSuccessOutcome,
+    } = params.auditOptions || {};
+
+    // If there are no actions to authorize then we can just add any audits for the sec actions
+    // Example: SecurityAction.CLOSE_POINT_IN_TIME does not need authz, but we want an audit trail
+    if (authzActions.size <= 0) {
+      if (!bypassAuditOnSuccess && auditActions.size > 0) {
+        auditActions.forEach((auditAction) => {
+          this.auditHelper(auditAction, auditObjects, useSuccessOutcome);
+        });
+      }
+      return undefined;
+    }
+
+    const checkResult: CheckAuthorizationResult<string> = await this.checkAuthorization({
       types: params.types,
       spaces: params.spaces,
-      actions: params.actions,
+      actions: authzActions,
       options: { allowGlobalResource: params.options?.allowGlobalResource === true },
     });
 
@@ -176,7 +347,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           typesAndSpaces,
           action,
           typeMap: checkResult.typeMap,
-          auditCallback: params.auditCallback,
+          auditOptions: params.auditOptions,
         });
       });
     }
@@ -217,6 +388,49 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     } catch (error) {
       throw this.errors.decorateGeneralError(error, error.body && error.body.reason);
     }
+  }
+
+  async authorizeCreate(params: {
+    // action: SecurityAction.CREATE | SecurityAction.BULK_CREATE;
+    namespaceString: string;
+    objects: Array<{
+      type: string;
+      id: string;
+      initialNamespaces: string[] | undefined;
+      existingNamespaces: string[] | undefined;
+    }>;
+  }): Promise<CheckAuthorizationResult<string> | undefined> {
+    const { namespaceString, objects } = params;
+
+    const action = objects.length > 1 ? SecurityAction.BULK_CREATE : SecurityAction.CREATE;
+    const typesAndSpaces = new Map<string, Set<string>>();
+    const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
+
+    for (const obj of objects) {
+      const spacesToEnforce = typesAndSpaces.get(obj.type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
+      for (const space of obj.initialNamespaces ?? []) {
+        spacesToEnforce.add(space);
+        spacesToAuthorize.add(space);
+      }
+      typesAndSpaces.set(obj.type, spacesToEnforce);
+
+      for (const space of obj.existingNamespaces ?? []) {
+        if (space === ALL_NAMESPACES_STRING) continue; // Don't accidentally check for global privileges when the object exists in '*'
+        spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
+      }
+    }
+    spacesToAuthorize.delete(ALL_NAMESPACES_STRING); // Don't accidentally check for global privileges when the object exists in '*'
+
+    const returnVal = await this.performAuthorization({
+      actions: new Set([action]),
+      types: new Set(typesAndSpaces.keys()),
+      spaces: spacesToAuthorize,
+      enforceMap: typesAndSpaces,
+      options: { allowGlobalResource: true },
+      auditOptions: { objects },
+    });
+
+    return returnVal;
   }
 }
 

@@ -503,23 +503,24 @@ describe('collectMultiNamespaceReferences', () => {
         expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
       });
 
-      test(`adds audit event per object when not successful`, async () => {
-        // Unlike other functions, it doesn't validate the level of authorization first, so we need to
-        // carry on and mock the enforce function as well to create an unauthorized condition
-        setupPerformAuthEnforceFailure(mockSecurityExt);
+      // ToDo: Is there any way to validate the audit events from this level (they are now called in the extension)?
+      // test(`adds audit event per object when not successful`, async () => {
+      //   // Unlike other functions, it doesn't validate the level of authorization first, so we need to
+      //   // carry on and mock the enforce function as well to create an unauthorized condition
+      //   setupPerformAuthEnforceFailure(mockSecurityExt);
 
-        await expect(collectMultiNamespaceReferences(params)).rejects.toThrow(enforceError);
-        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+      //   await expect(collectMultiNamespaceReferences(params)).rejects.toThrow(enforceError);
+      //   expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
 
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-        objects.forEach((obj) => {
-          expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-            action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
-            savedObject: { type: obj.type, id: obj.id },
-            error: enforceError,
-          });
-        });
-      });
+      //   // expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
+      //   // objects.forEach((obj) => {
+      //   //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
+      //   //     action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
+      //   //     savedObject: { type: obj.type, id: obj.id },
+      //   //     error: enforceError,
+      //   //   });
+      //   // });
+      // });
     });
 
     describe('checks privileges', () => {
@@ -633,6 +634,7 @@ describe('collectMultiNamespaceReferences', () => {
         });
       });
 
+      // We can check this because it is still being done at the repo level (trying to move audit logging to the extension)
       test(`adds audit event per object when successful`, async () => {
         expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
 

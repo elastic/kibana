@@ -18,7 +18,7 @@ import type {
   SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
 import {
-  AuditAction,
+  SecurityAction,
   type ISavedObjectsEncryptionExtension,
   type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
@@ -324,21 +324,22 @@ async function authorizeAuditAndRedact<T>(
     return resolvedObjects;
   }
 
-  const authorizationResult = await securityExtension?.performAuthorization({
-    actions: new Set(['bulk_get']),
+  const { typeMap } = (await securityExtension?.performAuthorization({
+    actions: new Set([SecurityAction.INTERNAL_BULK_RESOLVE]),
     types: new Set(typesAndSpaces.keys()),
     spaces: spacesToAuthorize,
     enforceMap: typesAndSpaces,
-    auditCallback: (error) => {
-      for (const { type, id } of auditableObjects) {
-        securityExtension.addAuditEvent({
-          action: AuditAction.RESOLVE,
-          savedObject: { type, id },
-          error,
-        });
-      }
-    },
-  });
+    auditOptions: { useSuccessOutcome: true },
+    // auditCallback: (error) => {
+    //   for (const { type, id } of auditableObjects) {
+    //     securityExtension.addAuditEvent({
+    //       action: AuditAction.RESOLVE,
+    //       savedObject: { type, id },
+    //       error,
+    //     });
+    //   }
+    // },
+  })) ?? { typeMap: new Map() }; // ToDo: Not sure if this is the best approach
 
   return resolvedObjects.map((result) => {
     if (isBulkResolveError(result)) {
@@ -347,7 +348,7 @@ async function authorizeAuditAndRedact<T>(
     return {
       ...result,
       saved_object: securityExtension.redactNamespaces({
-        typeMap: authorizationResult.typeMap,
+        typeMap,
         savedObject: result.saved_object,
       }),
     };

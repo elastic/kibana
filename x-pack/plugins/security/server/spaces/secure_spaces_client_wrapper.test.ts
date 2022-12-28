@@ -7,7 +7,7 @@
 
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
-import { AuditAction } from '@kbn/core-saved-objects-server';
+import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
 import { setMapsAreEqual, setsAreEqual } from '@kbn/core-saved-objects-utils-server';
 import type { EcsEventOutcome, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -740,7 +740,7 @@ describe('SecureSpacesClientWrapper', () => {
       const targetTypes = aliases.map((alias) => alias.targetType);
       const targetSpaces = aliases.map((alias) => alias.targetSpace);
 
-      const expectedActions = new Set(['bulk_update']);
+      const expectedActions = new Set([SecurityAction.BULK_UPDATE]);
       const expectedSpaces = new Set(targetSpaces);
       const expectedTypes = new Set(targetTypes);
       const expectedEnforceMap = new Map<string, Set<string>>();

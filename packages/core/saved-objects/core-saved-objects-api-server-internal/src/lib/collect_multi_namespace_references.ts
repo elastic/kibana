@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import {
   AuditAction,
+  SecurityAction,
   type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
@@ -250,8 +251,12 @@ async function optionallyUseSecurity(
     addSpacesToAuthorize(obj.spacesWithMatchingAliases);
     addSpacesToAuthorize(obj.spacesWithMatchingOrigins);
   }
+  // const action =
+  //   purpose === 'updateObjectsSpaces' ? ('share_to_space' as const) : ('bulk_get' as const);
   const action =
-    purpose === 'updateObjectsSpaces' ? ('share_to_space' as const) : ('bulk_get' as const);
+    purpose === 'updateObjectsSpaces'
+      ? SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES_UPDATE_SPACES
+      : SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES;
 
   // Enforce authorization based on all *requested* object types and the current space
   const typesAndSpaces = objects.reduce(
@@ -259,22 +264,13 @@ async function optionallyUseSecurity(
     new Map<string, Set<string>>()
   );
 
-  const { typeMap } = await securityExtension?.performAuthorization({
+  const { typeMap } = (await securityExtension?.performAuthorization({
     actions: new Set([action]),
     types: typesToAuthorize,
     spaces: spacesToAuthorize,
     enforceMap: typesAndSpaces,
-    auditCallback: (error) => {
-      if (!error) return; // We will audit success results below, after redaction
-      for (const { type, id } of objects) {
-        securityExtension!.addAuditEvent({
-          action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
-          savedObject: { type, id },
-          error,
-        });
-      }
-    },
-  });
+    auditOptions: { bypassOnSuccess: true }, // We will audit success results below, after redaction
+  })) ?? { typeMap: new Map() };
 
   // Now, filter/redact the results. Most SOR functions just redact the `namespaces` field from each returned object. However, this function
   // will actually filter the returned object graph itself.
@@ -332,6 +328,9 @@ async function optionallyUseSecurity(
       if (spaces.length) {
         // Only generate success audit records for "non-empty results" with 1+ spaces
         // ("empty result" means the object was a non-multi-namespace type, or hidden type, or not found)
+        // ToDo: this is one of the remaining calls to addAuditEvent outside of the security extension
+        // This is a bit complicated to change now, but can ultimately be removed when authz logic is
+        // migrated from the repo level to the extension level.
         securityExtension.addAuditEvent({
           action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
           savedObject: { type, id },

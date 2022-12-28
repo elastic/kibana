@@ -241,9 +241,31 @@ export const setupPerformAuthFullyAuthorized = (
 ) => {
   mockSecurityExt.performAuthorization.mockImplementation(
     (params: PerformAuthorizationParams<string>): Promise<CheckAuthorizationResult<string>> => {
-      const { auditCallback } = params;
-      auditCallback?.(undefined);
+      // const { auditCallback } = params;
+      // auditCallback?.(undefined);
       return Promise.resolve({ status: 'fully_authorized', typeMap: authMap });
+    }
+  );
+};
+
+export const setupAuthorizeCreate = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
+) => {
+  mockSecurityExt.authorizeCreate.mockImplementation(
+    (params: {
+      namespaceString: string;
+      objects: Array<{
+        type: string;
+        id: string;
+        initialNamespaces: string[] | undefined;
+        existingNamespaces: string[] | undefined;
+      }>;
+    }): Promise<CheckAuthorizationResult<string>> => {
+      if (status === 'unauthorized') throw enforceError;
+      // const { auditCallback } = params;
+      // auditCallback?.(undefined);
+      return Promise.resolve({ status, typeMap: authMap });
     }
   );
 };
@@ -253,8 +275,8 @@ export const setupPerformAuthPartiallyAuthorized = (
 ) => {
   mockSecurityExt.performAuthorization.mockImplementation(
     (params: PerformAuthorizationParams<string>): Promise<CheckAuthorizationResult<string>> => {
-      const { auditCallback } = params;
-      auditCallback?.(undefined);
+      // const { auditCallback } = params;
+      // auditCallback?.(undefined);
       return Promise.resolve({ status: 'partially_authorized', typeMap: authMap });
     }
   );
@@ -265,8 +287,8 @@ export const setupPerformAuthUnauthorized = (
 ) => {
   mockSecurityExt.performAuthorization.mockImplementation(
     (params: PerformAuthorizationParams<string>): Promise<CheckAuthorizationResult<string>> => {
-      const { auditCallback } = params;
-      auditCallback?.(undefined);
+      // const { auditCallback } = params;
+      // auditCallback?.(undefined);
       return Promise.resolve({ status: 'unauthorized', typeMap: new Map([]) });
     }
   );
@@ -277,8 +299,8 @@ export const setupPerformAuthEnforceFailure = (
 ) => {
   mockSecurityExt.performAuthorization.mockImplementation(
     (params: PerformAuthorizationParams<string>) => {
-      const { auditCallback } = params;
-      auditCallback?.(enforceError);
+      // const { auditCallback } = params;
+      // auditCallback?.(enforceError);
       throw enforceError;
     }
   );

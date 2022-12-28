@@ -7,7 +7,64 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type { EcsEventOutcome } from '@kbn/ecs';
+import { EcsEventOutcome } from '@kbn/ecs';
+
+/**
+ * The SecurityAction enumeration contains values for all
+ * valid shared object security actions. The string for
+ * each value correlates to the ES operation.
+ */
+export enum SecurityAction {
+  CHECK_CONFLICTS,
+  CLOSE_POINT_IN_TIME,
+  COLLECT_MULTINAMESPACE_REFERENCES,
+  COLLECT_MULTINAMESPACE_REFERENCES_UPDATE_SPACES,
+  CREATE,
+  BULK_CREATE,
+  DELETE,
+  BULK_DELETE,
+  FIND,
+  GET,
+  BULK_GET,
+  INTERNAL_BULK_RESOLVE,
+  OPEN_POINT_IN_TIME,
+  REMOVE_REFERENCES,
+  UPDATE,
+  BULK_UPDATE,
+  UPDATE_OBJECTS_SPACES,
+}
+
+/**
+ * The AuditOptions interface contains optional settings for audit
+ * logging within the ISavedObjectsSecurityExtension.
+ */
+export interface AuditOptions {
+  /**
+   * An array of applicable objects for the authorization action
+   * If undefined or empty, general auditing will occur (one log/action)
+   */
+  objects?: Array<{ type: string; id: string }>;
+  /**
+   * Whether or not to bypass audit logging on authz success
+   */
+  bypassOnSuccess?: boolean;
+  /**
+   * Whether or not to bypass audit logging on authz failure
+   */
+  bypassOnFailure?: boolean;
+  /**
+   * If authz success should be logged as 'success' (default is 'unknown')
+   */
+  useSuccessOutcome?: boolean;
+  /**
+   * An array of spaces which to add the objects (used in Update Object Spaces)
+   */
+  addToSpaces?: string[];
+  /**
+   * An array of spaces from which to remove the objects (used in Update Object Spaces)
+   */
+  deleteFromSpaces?: string[];
+}
 
 /**
  * The PerformAuthorizationParams interface contains settings for checking
@@ -17,7 +74,7 @@ export interface PerformAuthorizationParams<A extends string> {
   /**
    * A set of actions to check.
    */
-  actions: Set<A>;
+  actions: Set<SecurityAction>;
   /**
    * A set of types to check.
    */
@@ -32,18 +89,16 @@ export interface PerformAuthorizationParams<A extends string> {
    */
   enforceMap?: Map<string, Set<string>>;
   /**
-   * A callback intended to handle adding audit events in
-   * both error (unauthorized), or success (authorized)
-   * cases
-   */
-  auditCallback?: (error?: Error) => void;
-  /**
-   * Authorization options
+   * Options
    * allowGlobalResource - whether or not to allow global resources, false if options are undefined
    */
   options?: {
-    allowGlobalResource: boolean;
+    allowGlobalResource?: boolean;
   };
+  /**
+   * auditOptions - options for audit logging
+   */
+  auditOptions?: AuditOptions;
 }
 
 /**
@@ -121,9 +176,9 @@ export interface EnforceAuthorizationParams<A extends string> {
    */
   typesAndSpaces: Map<string, Set<string>>;
   /**
-   * The relevant action (create, update, etc.)
+   * The relevant security action (create, update, etc.)
    */
-  action: A;
+  action: SecurityAction;
   /**
    * The authorization map from CheckAuthorizationResult: a
    * map of type to record of action/AuthorizationTypeEntry
@@ -131,11 +186,9 @@ export interface EnforceAuthorizationParams<A extends string> {
    */
   typeMap: AuthorizationTypeMap<A>;
   /**
-   * A callback intended to handle adding audit events in
-   * both error (unauthorized), or success (authorized)
-   * cases
+   * auditOptions - options for audit logging
    */
-  auditCallback?: (error?: Error) => void;
+  auditOptions?: AuditOptions;
 }
 
 /**
@@ -209,11 +262,40 @@ export interface RedactNamespacesParams<T, A extends string> {
   typeMap: AuthorizationTypeMap<A>;
 }
 
+export interface AuthorizeCreateObject {
+  type: string;
+  id: string;
+  initialNamespaces: string[] | undefined;
+  existingNamespaces: string[] | undefined;
+}
+
 /**
  * The ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository security extension.
  * It contains functions for checking & enforcing authorization, adding audit events, and redacting namespaces.
  */
 export interface ISavedObjectsSecurityExtension {
+  // ToDo: Document
+  // authorizeCreate: <T extends string>(
+  //   action: SecurityAction.CREATE | SecurityAction.BULK_CREATE,
+  //   namespaceString: string,
+  //   objects: Array<{
+  //     type: string;
+  //     id: string;
+  //     initialNamespaces: string[] | undefined;
+  //     existingNamespaces: string[] | undefined;
+  //   }>
+  // ) => Promise<CheckAuthorizationResult<T> | undefined>;
+
+  /**
+   * Performs authorization for create actions
+   * @param params - actions, types & spaces map, audit callback, options (enforce bypassed if enforce map is undefined)
+   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeCreate: (params: {
+    namespaceString: string;
+    objects: AuthorizeCreateObject[];
+  }) => Promise<CheckAuthorizationResult<string> | undefined>;
+
   /**
    * Performs authorization (check & enforce) of actions on specified types in specified spaces.
    * @param params - actions, types & spaces map, audit callback, options (enforce bypassed if enforce map is undefined)
@@ -221,7 +303,7 @@ export interface ISavedObjectsSecurityExtension {
    */
   performAuthorization: <T extends string>(
     params: PerformAuthorizationParams<T>
-  ) => Promise<CheckAuthorizationResult<T>>;
+  ) => Promise<CheckAuthorizationResult<T> | undefined>;
 
   /**
    * Enforces authorization of a single action on specified types in specified spaces.
