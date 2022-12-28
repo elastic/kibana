@@ -8,17 +8,17 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { anSLO } from '../../../data/slo';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloListItem as Component, SloListItemProps } from './slo_list_item';
+import { SloStatusBadge as Component, SloStatusProps } from './slo_status_badge';
+import { anSLO } from '../../../data/slo';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/SloListItem',
+  title: 'app/SLO/ListPage/SloStatusBadge',
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: SloListItemProps) => (
+const Template: ComponentStory<typeof Component> = (props: SloStatusProps) => (
   <Component {...props} />
 );
 
@@ -26,5 +26,5 @@ const defaultProps = {
   slo: anSLO,
 };
 
-export const SloListItem = Template.bind({});
-SloListItem.args = defaultProps;
+export const SloStatusBadge = Template.bind({});
+SloStatusBadge.args = defaultProps;
