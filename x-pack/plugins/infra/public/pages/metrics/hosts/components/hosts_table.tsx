@@ -31,7 +31,7 @@ const HOST_METRICS: Array<{ type: SnapshotMetricType }> = [
 
 export const HostsTable = () => {
   const { sourceId } = useSourceContext();
-  const { buildQuery, dateRangeTimestamp, panelFilters } = useUnifiedSearchContext();
+  const { buildQuery, dateRangeTimestamp } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
   const timeRange: InfraTimerangeInput = {
@@ -82,7 +82,7 @@ export const HostsTable = () => {
 
   return (
     <>
-      {loading || !panelFilters ? (
+      {loading ? (
         <InfraLoadingPanel
           height="100%"
           width="auto"

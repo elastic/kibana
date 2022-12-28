@@ -7,7 +7,7 @@
 
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
 import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
-import { computeErrorBudget, computeSLI } from '../../domain/services';
+import { computeErrorBudget, computeSLI, computeSummaryStatus } from '../../domain/services';
 import { SLIClient } from './sli_client';
 import {
   Criteria,
@@ -62,9 +62,10 @@ function computeSloWithSummary(
   for (const slo of sloList) {
     const sliValue = computeSLI(indicatorDataBySlo[slo.id]);
     const errorBudget = computeErrorBudget(slo, indicatorDataBySlo[slo.id]);
+    const status = computeSummaryStatus(slo, sliValue, errorBudget);
     sloListWithSummary.push({
       ...slo,
-      summary: { sliValue, errorBudget },
+      summary: { status, sliValue, errorBudget },
     });
   }
   return sloListWithSummary;

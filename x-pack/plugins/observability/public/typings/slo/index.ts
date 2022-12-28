@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { budgetingMethodSchema, createSLOParamsSchema, GetSLOResponse } from '@kbn/slo-schema';
+import { statusSchema } from '@kbn/slo-schema';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
 
@@ -22,6 +23,7 @@ type SLO = GetSLOResponse;
 
 type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
 
+type Status = t.OutputOf<typeof statusSchema>;
 interface SLOList {
   results: SLO[];
   page: number;
@@ -45,4 +47,5 @@ export type {
   DurationUnit,
   SLO,
   SLOList,
+  Status,
 };
