@@ -11,6 +11,7 @@ import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
+import { DataSourceContext } from '../../hooks/use_data_source';
 import { SavedSearchSavedObject } from '../../application/utils/search_utils';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
@@ -34,9 +35,11 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   return (
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
-        <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-          <LogCategorizationPage dataView={dataView} savedSearch={savedSearch} />
-        </StorageContextProvider>
+        <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+          <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+            <LogCategorizationPage />
+          </StorageContextProvider>
+        </DataSourceContext.Provider>
       </UrlStateProvider>
     </AiopsAppContext.Provider>
   );

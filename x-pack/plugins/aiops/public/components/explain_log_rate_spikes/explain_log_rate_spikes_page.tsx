@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState, FC } from 'react';
+
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -13,41 +14,29 @@ import {
   EuiHorizontalRule,
   EuiPageBody,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiPanel,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useStorage } from '@kbn/ml-local-storage';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedSearch } from '@kbn/discover-plugin/public';
-
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
-import { MlFullTimeRangeSelector, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
-import { useCss } from '../../hooks/use_css';
+
+import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
+import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
+
 import { DocumentCountContent } from '../document_count_content/document_count_content';
-import { DatePickerWrapper } from '../date_picker_wrapper';
 import { SearchPanel } from '../search_panel';
+import type { GroupTableItem } from '../spike_analysis_table/types';
+import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
+import { PageHeader } from '../page_header';
 
 import { restorableDefaults, type AiOpsPageUrlState } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
-import type { GroupTableItem } from '../spike_analysis_table/types';
-import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
-
-import {
-  AIOPS_FROZEN_TIER_PREFERENCE,
-  type AiOpsKey,
-  type AiOpsStorageMapped,
-} from '../../types/storage';
 
 function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: GroupTableItem) {
   if (changePoint) {
@@ -63,18 +52,12 @@ function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: Grou
  * ExplainLogRateSpikes props require a data view.
  */
 interface ExplainLogRateSpikesPageProps {
-  /** The data view to analyze. */
-  dataView: DataView;
-  /** The saved search to analyze. */
-  savedSearch: SavedSearch | SavedSearchSavedObject | null;
+  compact?: boolean;
 }
 
-export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
-  dataView,
-  savedSearch,
-}) => {
-  const { aiopsPageHeader, dataViewTitleHeader } = useCss();
+export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ compact }) => {
   const { data: dataService } = useAiopsAppContext();
+  const { dataView, savedSearch } = useDataSource();
 
   const {
     currentSelectedChangePoint,
@@ -121,15 +104,6 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
       });
     },
     [currentSavedSearch, aiopsListState, setAiopsListState]
-  );
-
-  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
-    AiOpsKey,
-    AiOpsStorageMapped<typeof AIOPS_FROZEN_TIER_PREFERENCE>
-  >(
-    AIOPS_FROZEN_TIER_PREFERENCE,
-    // By default we will exclude frozen data tier
-    FROZEN_TIER_PREFERENCE.EXCLUDE
   );
 
   const {
@@ -202,42 +176,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
 
   return (
     <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiPageContentHeader css={aiopsPageHeader}>
-            <EuiPageContentHeaderSection>
-              <div css={dataViewTitleHeader}>
-                <EuiTitle size={'s'}>
-                  <h2>{dataView.getName()}</h2>
-                </EuiTitle>
-              </div>
-            </EuiPageContentHeaderSection>
-
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="s"
-              data-test-subj="aiopsTimeRangeSelectorSection"
-            >
-              {dataView.timeFieldName !== undefined && (
-                <EuiFlexItem grow={false}>
-                  <MlFullTimeRangeSelector
-                    frozenDataPreference={frozenDataPreference}
-                    setFrozenDataPreference={setFrozenDataPreference}
-                    dataView={dataView}
-                    query={undefined}
-                    disabled={false}
-                    timefilter={timefilter}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <DatePickerWrapper />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentHeader>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <PageHeader compact={compact} />
       <EuiHorizontalRule />
       <EuiPageContentBody>
         <EuiFlexGroup gutterSize="m" direction="column">

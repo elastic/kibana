@@ -7,6 +7,8 @@
 
 import React, { FC } from 'react';
 
+import { EuiSpacer } from '@elastic/eui';
+
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
@@ -42,6 +44,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
           <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
             <PageHeader />
+            <EuiSpacer />
             <ChangePointDetectionContextProvider>
               <ChangePointDetectionPage />
             </ChangePointDetectionContextProvider>

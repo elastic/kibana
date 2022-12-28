@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 
 import type { TimeRange } from '@kbn/es-query';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeHistoryContract } from '@kbn/data-plugin/public';
@@ -147,37 +146,45 @@ export const MlDatePickerWrapper: FC<{
 
   useEffect(
     function warnAboutShortRefreshInterval() {
+      const isResolvedFromUrlState = !!globalState?.refreshInterval;
       const isTooShort = refreshInterval.value < DEFAULT_REFRESH_INTERVAL_MS;
 
       // Only warn about short interval with enabled auto-refresh.
       if (!isTooShort || refreshInterval.pause) return;
 
-      toasts.addWarning({
-        title: i18n.translate('xpack.ml.datePicker.shortRefreshIntervalURLWarningMessage', {
-          defaultMessage:
-            'The refresh interval in the URL is shorter than the minimum supported by Machine Learning.',
-        }),
-        text: toMountPoint(
-          wrapWithTheme(
-            <EuiButton
-              onClick={setRefreshInterval.bind(null, {
-                pause: refreshInterval.pause,
-                value: DEFAULT_REFRESH_INTERVAL_MS,
-              })}
-            >
-              <FormattedMessage
-                id="xpack.ml.datePicker.pageRefreshResetButton"
-                defaultMessage="Set to {defaultInterval}"
-                values={{
-                  defaultInterval: `${DEFAULT_REFRESH_INTERVAL_MS / 1000}s`,
-                }}
-              />
-            </EuiButton>,
-            theme$
-          )
-        ),
-        toastLifeTimeMs: 30000,
-      });
+      toasts.addWarning(
+        {
+          title: isResolvedFromUrlState
+            ? i18n.translate('xpack.ml.datePicker.shortRefreshIntervalURLWarningMessage', {
+                defaultMessage:
+                  'The refresh interval in the URL is shorter than the minimum supported interval.',
+              })
+            : i18n.translate('xpack.ml.datePicker.shortRefreshIntervalTimeFilterWarningMessage', {
+                defaultMessage:
+                  'The refresh interval in Advanced Settings is shorter than the minimum supported interval.',
+              }),
+          text: toMountPoint(
+            wrapWithTheme(
+              <EuiButton
+                onClick={setRefreshInterval.bind(null, {
+                  pause: refreshInterval.pause,
+                  value: DEFAULT_REFRESH_INTERVAL_MS,
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.ml.datePicker.pageRefreshResetButton"
+                  defaultMessage="Set to {defaultInterval}"
+                  values={{
+                    defaultInterval: `${DEFAULT_REFRESH_INTERVAL_MS / 1000}s`,
+                  }}
+                />
+              </EuiButton>,
+              theme$
+            )
+          ),
+        },
+        { toastLifeTimeMs: 30000 }
+      );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [

@@ -24,6 +24,7 @@ import {
 } from '../../application/utils/search_utils';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { DataSourceContext } from '../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { SpikeAnalysisTableRowStateProvider } from '../spike_analysis_table/spike_analysis_table_row_provider';
@@ -98,11 +99,13 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
   return (
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
-        <SpikeAnalysisTableRowStateProvider>
-          <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-            <ExplainLogRateSpikesPage dataView={dataView} savedSearch={savedSearch} />
-          </StorageContextProvider>
-        </SpikeAnalysisTableRowStateProvider>
+        <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+          <SpikeAnalysisTableRowStateProvider>
+            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+              <ExplainLogRateSpikesPage />
+            </StorageContextProvider>
+          </SpikeAnalysisTableRowStateProvider>
+        </DataSourceContext.Provider>
       </UrlStateProvider>
     </AiopsAppContext.Provider>
   );
