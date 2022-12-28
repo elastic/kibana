@@ -70,11 +70,11 @@ export function SloEditForm({ slo }: SloEditFormProps) {
     objective: {
       target: 0,
     },
-    ...slo,
   };
 
   const { control, watch, getFieldState, getValues, formState, trigger } = useForm({
     defaultValues,
+    values: slo,
     mode: 'all',
   });
 
