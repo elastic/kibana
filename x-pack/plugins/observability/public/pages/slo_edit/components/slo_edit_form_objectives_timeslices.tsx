@@ -48,7 +48,7 @@ export function SloEditFormObjectivesTimeslices({ control }: SloEditFormObjectiv
 
       <EuiFlexItem>
         <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.objectives.targetSlo', {
+          {i18n.translate('xpack.observability.slos.sloEdit.objectives.timesliceWindow', {
             defaultMessage: 'Timeslice window (minutes)',
           })}
         </EuiFormLabel>

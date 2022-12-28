@@ -54,7 +54,7 @@ export function SloEditFormDefinitionCustomKql({ control }: SloEditFormDefinitio
               }}
               isInvalid={!Boolean(indicesNames.find((index) => index.label === field.value))}
               placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.sloDefinition.customKql.index',
+                'xpack.observability.slos.sloEdit.sloDefinition.customKql.index.selectIndex',
                 {
                   defaultMessage: 'Select an index',
                 }
