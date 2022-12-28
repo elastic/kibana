@@ -5,7 +5,8 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { dateRangeSchema } from '../../types/schema';
+
+import { dateRangeSchema } from '@kbn/slo-schema';
 
 type DateRange = t.TypeOf<typeof dateRangeSchema>;
 

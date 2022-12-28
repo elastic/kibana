@@ -9,7 +9,20 @@ import { SLO } from '../../typings';
 import { toDuration } from './duration';
 
 export function toSLO(result: any): SLO {
-  const duration = toDuration(result.time_window.duration);
+  const duration = toDuration(result.timeWindow.duration);
 
-  return { ...result, time_window: { duration } };
+  return {
+    id: String(result.id),
+    name: String(result.name),
+    objective: { target: Number(result.objective.target) },
+    timeWindow: {
+      duration,
+    },
+    summary: {
+      sliValue: Number(result.summary.sliValue),
+      errorBudget: {
+        remaining: Number(result.summary.errorBudget.remaining),
+      },
+    },
+  };
 }
