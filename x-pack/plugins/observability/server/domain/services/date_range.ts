@@ -16,7 +16,7 @@ export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
     const unit = toMomentUnitOfTime(timeWindow.duration.unit);
     const now = moment.utc(currentDate).startOf('minute');
-    const startTime = moment.utc(timeWindow.calendar.start_time);
+    const startTime = moment.utc(timeWindow.calendar.startTime);
 
     const differenceInUnit = now.diff(startTime, unit);
     if (differenceInUnit < 0) {

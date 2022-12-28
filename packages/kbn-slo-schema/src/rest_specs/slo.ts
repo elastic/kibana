@@ -26,8 +26,8 @@ const createSLOParamsSchema = t.type({
       name: t.string,
       description: t.string,
       indicator: indicatorSchema,
-      time_window: timeWindowSchema,
-      budgeting_method: budgetingMethodSchema,
+      timeWindow: timeWindowSchema,
+      budgetingMethod: budgetingMethodSchema,
       objective: objectiveSchema,
     }),
     t.partial({ settings: optionalSettingsSchema }),
@@ -69,13 +69,13 @@ const SLOResponseSchema = t.type({
   name: t.string,
   description: t.string,
   indicator: indicatorSchema,
-  time_window: timeWindowSchema,
-  budgeting_method: budgetingMethodSchema,
+  timeWindow: timeWindowSchema,
+  budgetingMethod: budgetingMethodSchema,
   objective: objectiveSchema,
   revision: t.number,
   settings: settingsSchema,
-  created_at: dateType,
-  updated_at: dateType,
+  createdAt: dateType,
+  updatedAt: dateType,
 });
 
 const SLOWithSummaryResponseSchema = t.intersection([
@@ -93,8 +93,8 @@ const updateSLOParamsSchema = t.type({
     name: t.string,
     description: t.string,
     indicator: indicatorSchema,
-    time_window: timeWindowSchema,
-    budgeting_method: budgetingMethodSchema,
+    timeWindow: timeWindowSchema,
+    budgetingMethod: budgetingMethodSchema,
     objective: objectiveSchema,
     settings: settingsSchema,
   }),
@@ -104,7 +104,7 @@ const updateSLOResponseSchema = SLOResponseSchema;
 
 const findSLOResponseSchema = t.type({
   page: t.number,
-  per_page: t.number,
+  perPage: t.number,
   total: t.number,
   results: t.array(SLOWithSummaryResponseSchema),
 });
