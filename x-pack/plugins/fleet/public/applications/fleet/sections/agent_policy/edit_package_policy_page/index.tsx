@@ -138,8 +138,7 @@ export const EditPackagePolicyForm = memo<{
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
   >(
-    ({ isValid, updatedPolicy }) => {
-      updatePackagePolicy(updatedPolicy);
+    ({ isValid }) => {
       setFormState((prevState) => {
         if (prevState === 'VALID' && !isValid) {
           return 'INVALID';
@@ -147,7 +146,7 @@ export const EditPackagePolicyForm = memo<{
         return prevState;
       });
     },
-    [updatePackagePolicy, setFormState]
+    [setFormState]
   );
 
   // Cancel url + Success redirect Path:
