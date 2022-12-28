@@ -46,7 +46,6 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import { tableDefaults } from '../../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../../common/store/data_table';
 import {
-  getRulesUrl,
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -672,12 +671,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <HeaderPage
-                backOptions={{
-                  path: getRulesUrl(),
-                  text: i18n.BACK_TO_RULES,
-                  pageId: SecurityPageName.rules,
-                  dataTestSubj: 'ruleDetailsBackToAllRules',
-                }}
                 border
                 subtitle={subTitle}
                 subtitle2={
