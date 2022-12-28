@@ -412,7 +412,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     try {
       const queryDslJson = JSON.parse(queryDsl);
       return Object.keys(queryDslJson).length > 0;
-    } catch (e) {
+    } catch {
       return false;
     }
   };
