@@ -33,6 +33,7 @@ export interface CspmResourcesStats {
   passed_findings_count: number;
   failed_findings_count: number;
 }
+<<<<<<< HEAD
 export interface CspmAccountsStats {
   account_id: string;
   posture_score: number;
@@ -46,3 +47,5 @@ export interface CspmAccountsStats {
   nodes_count: number;
   pods_count: number;
 }
+=======
+>>>>>>> upstream/main
