@@ -7,12 +7,15 @@
 
 import expect from '@kbn/expect';
 import { DeepPartial } from 'utility-types';
+import type { ReportApiJSON } from '../../../../x-pack/plugins/reporting/common/types';
 import type { CsvSavedSearchExportBodyType } from '../../../../x-pack/plugins/reporting/server/export_types/csv_saved_object/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
+const LOGSTASH_DATA_ARCHIVE = 'test/functional/fixtures/es_archiver/logstash_functional';
+const LOGSTASH_SAVED_OBJECTS = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
 const LOGS_SAVED_SEARCH_ID = '9747bd90-8581-11ed-97c5-596122858f69'; // "A Saved Search"
 const LOGS_SAVED_FILTERED_SEARCH_ID = 'd7a79750-3edd-11e9-99cc-4d80163ee9e7'; // "A Saved Search With a DATE FILTER"
-const ECOM_SAVED_SEARCH_ID = '6091ead0-1c6d-11ea-a100-8589bb9d7c6b';
+const ECOM_SAVED_SEARCH_ID = '6091ead0-1c6d-11ea-a100-8589bb9d7c6b'; // "Ecommerce Data"
 
 const getMockRequestBody = (
   obj: Partial<CsvSavedSearchExportBodyType>
@@ -47,14 +50,18 @@ export default ({ getService }: FtrProviderContext) => {
         'dateFormat:tz': 'UTC',
         dateFormat: 'YYYY-MM-DD HH:mm:ss.SSS',
       });
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs'
-      );
+      await esArchiver.load(LOGSTASH_DATA_ARCHIVE);
+      await kibanaServer.importExport.load(LOGSTASH_SAVED_OBJECTS);
+    });
+
+    after(async () => {
+      await kibanaServer.uiSettings.replace({});
+      await esArchiver.unload(LOGSTASH_DATA_ARCHIVE);
+      await kibanaServer.importExport.unload(LOGSTASH_SAVED_OBJECTS);
     });
 
     describe('export with no saved filters and no job post params', () => {
-      let job: any;
+      let job: ReportApiJSON;
       let path: string;
       let csvFile: string;
 
@@ -85,6 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('export with saved filters and no job post params', () => {
+      let job: ReportApiJSON;
       let path: string;
       let csvFile: string;
 
@@ -92,8 +100,20 @@ export default ({ getService }: FtrProviderContext) => {
         const { text, status } = await requestCsvFromSavedSearch(LOGS_SAVED_FILTERED_SEARCH_ID);
         expect(status).to.eql(200);
         const { payload } = JSON.parse(text);
+        job = payload.job;
         path = payload.path;
         await reportingAPI.waitForJobToFinish(path);
+      });
+
+      it('job response data is correct', () => {
+        expect(path).to.be.a('string');
+        expect(job).to.be.an('object');
+        expect(job.attempts).equal(0);
+        expect(job.created_by).equal('elastic');
+        expect(job.jobtype).equal('csv_saved_object');
+        expect(job.payload.objectType).equal('saved search');
+        expect(job.payload.title).equal('A Saved Search With a DATE FILTER');
+        expect(job.payload.version).equal('7.17');
       });
 
       it('csv file matches', async () => {
@@ -103,6 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('export with saved filters and job post params', () => {
+      let job: ReportApiJSON;
       let path: string;
       let csvFile: string;
 
@@ -115,8 +136,20 @@ export default ({ getService }: FtrProviderContext) => {
         });
         expect(status).to.eql(200);
         const { payload } = JSON.parse(text);
+        job = payload.job;
         path = payload.path;
         await reportingAPI.waitForJobToFinish(path);
+      });
+
+      it('job response data is correct', () => {
+        expect(path).to.be.a('string');
+        expect(job).to.be.an('object');
+        expect(job.attempts).equal(0);
+        expect(job.created_by).equal('elastic');
+        expect(job.jobtype).equal('csv_saved_object');
+        expect(job.payload.objectType).equal('saved search');
+        expect(job.payload.title).equal('A Saved Search With a DATE FILTER');
+        expect(job.payload.version).equal('7.17');
       });
 
       it('csv file matches', async () => {
@@ -126,6 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('export with no saved filters and job post params', () => {
+      let job: ReportApiJSON;
       let path: string;
       let csvFile: string;
 
@@ -138,8 +172,20 @@ export default ({ getService }: FtrProviderContext) => {
         });
         expect(status).to.eql(200);
         const { payload } = JSON.parse(text);
+        job = payload.job;
         path = payload.path;
         await reportingAPI.waitForJobToFinish(path);
+      });
+
+      it('job response data is correct', () => {
+        expect(path).to.be.a('string');
+        expect(job).to.be.an('object');
+        expect(job.attempts).equal(0);
+        expect(job.created_by).equal('elastic');
+        expect(job.jobtype).equal('csv_saved_object');
+        expect(job.payload.objectType).equal('saved search');
+        expect(job.payload.title).equal('A Saved Search');
+        expect(job.payload.version).equal('7.17');
       });
 
       it('csv file matches', async () => {
@@ -149,6 +195,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('export with no saved filters and job post params with custom time zone', () => {
+      let job: ReportApiJSON;
       let path: string;
       let csvFile: string;
 
@@ -163,12 +210,24 @@ export default ({ getService }: FtrProviderContext) => {
         });
         expect(status).to.eql(200);
         const { payload } = JSON.parse(text);
+        job = payload.job;
         path = payload.path;
         await reportingAPI.waitForJobToFinish(path);
       });
 
       after(async () => {
         await reportingAPI.teardownEcommerce();
+      });
+
+      it('job response data is correct', () => {
+        expect(path).to.be.a('string');
+        expect(job).to.be.an('object');
+        expect(job.attempts).equal(0);
+        expect(job.created_by).equal('elastic');
+        expect(job.jobtype).equal('csv_saved_object');
+        expect(job.payload.objectType).equal('saved search');
+        expect(job.payload.title).equal('Ecommerce Data');
+        expect(job.payload.version).equal('7.17');
       });
 
       it('csv file matches', async () => {
