@@ -474,6 +474,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     () => currentDataView.timeFieldName !== undefined && currentDataView.timeFieldName !== '',
     [currentDataView.timeFieldName]
   );
+
   return (
     <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="m">
