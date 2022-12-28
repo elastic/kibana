@@ -244,7 +244,7 @@ describe('QueryStringInput', () => {
 
     expect(mockCallback).toHaveBeenCalledTimes(0);
 
-    jest.advanceTimersByTime(100);
+    jest.advanceTimersByTime(300);
 
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith(false);
@@ -273,7 +273,7 @@ describe('QueryStringInput', () => {
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith(true);
 
-    jest.advanceTimersByTime(100);
+    jest.advanceTimersByTime(300);
     expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
@@ -297,7 +297,7 @@ describe('QueryStringInput', () => {
 
     expect(mockCallback).toHaveBeenCalledTimes(0);
 
-    jest.advanceTimersByTime(100);
+    jest.advanceTimersByTime(350);
 
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith(kqlQuery);
