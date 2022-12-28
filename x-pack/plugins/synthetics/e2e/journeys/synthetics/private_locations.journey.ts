@@ -14,7 +14,7 @@ import {
   cleanTestMonitors,
   getPrivateLocations,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey(`PrivateLocationsSettings`, async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
