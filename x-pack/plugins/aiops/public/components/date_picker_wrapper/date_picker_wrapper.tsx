@@ -267,7 +267,7 @@ export const DatePickerWrapper: FC = () => {
             color="primary"
             iconType={'refresh'}
             onClick={() => updateLastRefresh()}
-            data-test-subj="aiOpsRefreshPageButton"
+            data-test-subj="mlDatePickerRefreshPageButton"
           >
             <FormattedMessage id="xpack.aiops.pageRefreshButton" defaultMessage="Refresh" />
           </EuiButton>
