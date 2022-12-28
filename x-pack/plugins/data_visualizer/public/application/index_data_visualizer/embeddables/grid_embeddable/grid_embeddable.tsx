@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { pick } from 'lodash';
 import { Observable, Subject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
@@ -23,6 +24,7 @@ import {
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { Query } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { MlDatePickerContextProvider } from '@kbn/ml-date-picker';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 import { SamplingOption } from '../../../../../common/types/field_stats';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
@@ -215,18 +217,24 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
 
     const I18nContext = this.services[0].i18n.Context;
 
+    const services = { ...this.services[0], ...this.services[1] };
+
     ReactDOM.render(
       <I18nContext>
         <KibanaThemeProvider theme$={this.services[0].theme.theme$}>
-          <KibanaContextProvider services={{ ...this.services[0], ...this.services[1] }}>
-            <Suspense fallback={<EmbeddableLoading />}>
-              <IndexDataVisualizerViewWrapper
-                id={this.input.id}
-                embeddableContext={this}
-                embeddableInput={this.getInput$()}
-                onOutputChange={(output) => this.updateOutput(output)}
-              />
-            </Suspense>
+          <KibanaContextProvider services={services}>
+            <MlDatePickerContextProvider
+              deps={pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings'])}
+            >
+              <Suspense fallback={<EmbeddableLoading />}>
+                <IndexDataVisualizerViewWrapper
+                  id={this.input.id}
+                  embeddableContext={this}
+                  embeddableInput={this.getInput$()}
+                  onOutputChange={(output) => this.updateOutput(output)}
+                />
+              </Suspense>
+            </MlDatePickerContextProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </I18nContext>,
