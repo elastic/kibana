@@ -181,7 +181,7 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
 
           // If the request failed, log the error and return an empty object
           if (result.reason instanceof Error) {
-            deps.log.debug(`Failed to retrieve autocomplete suggestions: ${result.reason.message}`);
+            deps.log.warn(`Failed to retrieve autocomplete suggestions: ${result.reason.message}`);
           }
 
           return {};
