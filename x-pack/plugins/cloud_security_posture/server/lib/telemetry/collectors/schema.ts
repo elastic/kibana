@@ -53,4 +53,16 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       },
     },
   },
+  resources_stats: {
+    type: 'array',
+    items: {
+      account_id: { type: 'keyword' },
+      resource_type: { type: 'keyword' },
+      resource_type_doc_count: { type: 'long' },
+      resource_sub_type: { type: 'keyword' },
+      resource_sub_type_doc_count: { type: 'long' },
+      passed_findings_count: { type: 'long' },
+      failed_findings_count: { type: 'long' },
+    },
+  },
 };
