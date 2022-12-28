@@ -28,7 +28,7 @@ import { useUrlState } from '@kbn/ml-url-state';
 
 import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../hooks/use_time_filter';
 import { useMlDatePickerContext } from '../hooks/use_ml_date_picker_context';
-import { dataVisualizerRefresh$ } from '../services/timefilter_refresh_service';
+import { mlDatePickerRefresh$ } from '../services/timefilter_refresh_service';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5000;
 const DATE_PICKER_MAX_WIDTH = 540;
@@ -63,17 +63,19 @@ function getRecentlyUsedRangesFactory(timeHistory: TimeHistoryContract) {
 }
 
 function updateLastRefresh(timeRange?: OnRefreshProps) {
-  dataVisualizerRefresh$.next({ lastRefresh: Date.now(), timeRange });
+  mlDatePickerRefresh$.next({ lastRefresh: Date.now(), timeRange });
 }
 
-export const MlDatePickerWrapper: FC<{
+interface MlDatePickerWrapperProps {
   isAutoRefreshOnly?: boolean;
   showRefresh?: boolean;
   compact?: boolean;
   uiSettingsKeys: typeof UI_SETTINGS;
   wrapWithTheme: typeof wrapWithTheme;
   toMountPoint: typeof toMountPoint;
-}> = ({
+}
+
+export const MlDatePickerWrapper: FC<MlDatePickerWrapperProps> = ({
   isAutoRefreshOnly,
   showRefresh,
   compact = false,
@@ -254,11 +256,7 @@ export const MlDatePickerWrapper: FC<{
   }
 
   return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="center"
-      data-test-subj="mlNavigationMenuDatePickerWrapper"
-    >
+    <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlDatePickerWrapper">
       <EuiFlexItem
         grow={false}
         css={
