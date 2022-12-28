@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
-import { TabNavigationComponent } from '.';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { navTabs } from '../../../app/home/home_navigations';
-import { HostsTableType } from '../../../explore/hosts/store/model';
-import type { RouteSpyState } from '../../utils/route/types';
-import type { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
-import { SecurityPageName } from '../../../app/types';
+
+import type { SecuritySolutionTabNavigationProps } from './types';
+import { TabNavigationWithBreadcrumbs } from './tab_navigation_with_breadcrumbs';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -48,6 +47,7 @@ jest.mock('../../lib/kibana/kibana_react', () => {
   };
 });
 jest.mock('../link_to');
+jest.mock('../../utils/route/use_route_spy');
 
 jest.mock('react-router-dom', () => ({
   useLocation: jest.fn(() => ({
@@ -57,18 +57,28 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('SIEM Navigation', () => {
-  const mockProps: TabNavigationComponentProps &
-    SecuritySolutionTabNavigationProps &
-    RouteSpyState = {
-    pageName: SecurityPageName.hosts,
-    pathName: '/',
-    detailName: undefined,
-    search: '',
-    tabName: HostsTableType.authentications,
+  const mockProps: SecuritySolutionTabNavigationProps = {
     navTabs,
   };
-  const wrapper = mount(<TabNavigationComponent {...mockProps} />);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('it calls setBreadcrumbs with correct path on mount', () => {
+    (useRouteSpy as jest.Mock).mockReturnValueOnce([
+      {
+        pageName: 'hosts',
+        pathName: '/',
+        savedQuery: undefined,
+        search: '',
+        state: undefined,
+        tabName: 'authentications',
+      },
+    ]);
+
+    render(<TabNavigationWithBreadcrumbs {...mockProps} />);
+
     expect(mockSetBreadcrumbs).toHaveBeenNthCalledWith(
       1,
       {
@@ -86,13 +96,34 @@ describe('SIEM Navigation', () => {
       mockNavigateToUrl
     );
   });
+
   test('it calls setBreadcrumbs with correct path on update', () => {
-    wrapper.setProps({
-      pageName: 'network',
-      pathName: '/',
-      tabName: 'authentications',
-    });
-    wrapper.update();
+    (useRouteSpy as jest.Mock)
+      .mockReturnValueOnce([
+        {
+          pageName: 'hosts',
+          pathName: '/',
+          savedQuery: undefined,
+          search: '',
+          state: undefined,
+          tabName: 'authentications',
+        },
+      ])
+      .mockReturnValue([
+        {
+          pageName: 'network',
+          pathName: '/',
+          savedQuery: undefined,
+          search: '',
+          state: undefined,
+          tabName: 'authentications',
+        },
+      ]);
+
+    const { rerender } = render(<TabNavigationWithBreadcrumbs {...mockProps} />);
+
+    rerender(<TabNavigationWithBreadcrumbs {...mockProps} />);
+
     expect(mockSetBreadcrumbs).toHaveBeenNthCalledWith(
       2,
       {
