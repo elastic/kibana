@@ -4,8 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SLO } from '../../../typings';
 
-export function isSloHealthy(slo: SLO) {
-  return slo.objective.target <= slo.summary.sliValue;
+import { ErrorBudget } from '../../../domain/models';
+
+export function createErrorBudget(params: Partial<ErrorBudget> = {}): ErrorBudget {
+  return {
+    initial: 0.05,
+    consumed: 0.1,
+    remaining: 0.9,
+    isEstimated: false,
+    ...params,
+  };
 }
