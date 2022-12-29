@@ -16,10 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUrlState } from '@kbn/ml-url-state';
 import './_index.scss';
 
 import { Dictionary } from '../../../../common/types/common';
-import { useUrlState } from '../../util/url_state';
 import { IdBadges } from './id_badges';
 import {
   BADGE_LIMIT,

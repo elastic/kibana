@@ -40,20 +40,20 @@ describe('FindSLO', () => {
 
       expect(result).toEqual({
         page: 1,
-        per_page: 25,
+        perPage: 25,
         total: 1,
         results: [
           {
             id: slo.id,
             name: 'irrelevant',
             description: 'irrelevant',
-            budgeting_method: 'occurrences',
+            budgetingMethod: 'occurrences',
             indicator: {
               params: {
                 environment: 'irrelevant',
                 service: 'irrelevant',
-                transaction_name: 'irrelevant',
-                transaction_type: 'irrelevant',
+                transactionName: 'irrelevant',
+                transactionType: 'irrelevant',
                 'threshold.us': 500000,
               },
               type: 'sli.apm.transaction_duration',
@@ -61,26 +61,27 @@ describe('FindSLO', () => {
             objective: {
               target: 0.999,
             },
-            time_window: {
+            timeWindow: {
               duration: '7d',
-              is_rolling: true,
+              isRolling: true,
             },
             settings: {
-              timestamp_field: '@timestamp',
-              sync_delay: '1m',
+              timestampField: '@timestamp',
+              syncDelay: '1m',
               frequency: '1m',
             },
             summary: {
-              sli_value: 0.9999,
-              error_budget: {
+              status: 'HEALTHY',
+              sliValue: 0.9999,
+              errorBudget: {
                 initial: 0.001,
                 consumed: 0.1,
                 remaining: 0.9,
-                is_estimated: false,
+                isEstimated: false,
               },
             },
-            created_at: slo.created_at.toISOString(),
-            updated_at: slo.updated_at.toISOString(),
+            createdAt: slo.createdAt.toISOString(),
+            updatedAt: slo.updatedAt.toISOString(),
             revision: slo.revision,
           },
         ],
@@ -206,7 +207,7 @@ function someIndicatorData(slo: SLO): Record<SLOId, IndicatorData> {
     [slo.id]: {
       good: 9999,
       total: 10000,
-      date_range: toDateRange(slo.time_window),
+      dateRange: toDateRange(slo.timeWindow),
     },
   };
 }

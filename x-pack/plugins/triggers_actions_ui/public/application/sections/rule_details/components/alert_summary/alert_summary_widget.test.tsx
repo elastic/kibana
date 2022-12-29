@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -18,11 +19,22 @@ jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
 
 jest.mock('../../../../hooks/use_load_alert_summary', () => ({
   useLoadAlertSummary: jest.fn().mockReturnValue({
-    alertSummary: { active: 1, recovered: 7 },
+    alertSummary: {
+      activeAlertCount: 1,
+      recoveredAlertCount: 7,
+      activeAlerts: [
+        { key: 1671321600000, doc_count: 0 },
+        { key: 1671408000000, doc_count: 1 },
+      ],
+      recoveredAlerts: [
+        { key: 1671321600000, doc_count: 2 },
+        { key: 1671408000000, doc_count: 5 },
+      ],
+    },
   }),
 }));
 
-describe('Rule Alert Summary', () => {
+describe('Alert Summary Widget', () => {
   let wrapper: ReactWrapper;
   const mockedTimeRange = {
     ...mockAlertSummaryTimeRange,
@@ -52,7 +64,7 @@ describe('Rule Alert Summary', () => {
   it('should show zeros for all alerts counters', async () => {
     expect(wrapper.find('[data-test-subj="activeAlertsCount"]').text()).toEqual('1');
     expect(wrapper.find('[data-test-subj="recoveredAlertsCount"]').text()).toBe('7');
-    expect(wrapper.find('[data-test-subj="totalAlertsCount"]').text()).toBe('8');
+    expect(wrapper.find('[data-test-subj="totalAlertsCount"]').at(1).text()).toBe('Alerts (8)');
     expect(wrapper.find('[data-test-subj="mockedTimeRangeTitle"]').text()).toBe(
       'mockedTimeRangeTitle'
     );

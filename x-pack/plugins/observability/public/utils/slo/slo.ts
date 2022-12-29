@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SLO } from '../../typings';
+import type { SLO, Status } from '../../typings';
 import { toDuration } from './duration';
 
 export function toSLO(result: any): SLO {
-  const duration = toDuration(result.time_window.duration);
+  const duration = toDuration(result.timeWindow.duration);
 
   return {
     id: String(result.id),
@@ -19,9 +19,11 @@ export function toSLO(result: any): SLO {
       duration,
     },
     summary: {
-      sliValue: Number(result.summary.sli_value),
+      status: result.summary.status as Status,
+      sliValue: Number(result.summary.sliValue),
       errorBudget: {
-        remaining: Number(result.summary.error_budget.remaining),
+        remaining: Number(result.summary.errorBudget.remaining),
+        isEstimated: result.summary.errorBudget.isEstimated,
       },
     },
   };
