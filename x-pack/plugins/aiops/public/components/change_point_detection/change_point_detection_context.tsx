@@ -18,6 +18,7 @@ import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import type { Query, Filter } from '@kbn/es-query';
+import { usePageUrlState } from '@kbn/ml-url-state';
 import {
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
@@ -27,8 +28,12 @@ import { useTimefilter, useTimeRangeUpdates } from '../../hooks/use_time_filter'
 import { useChangePointResults } from './use_change_point_agg_request';
 import { type TimeBuckets, TimeBucketsInterval } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
-import { usePageUrlState } from '../../hooks/use_url_state';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
+
+export interface ChangePointDetectionPageUrlState {
+  pageKey: 'changePoint';
+  pageUrlState: ChangePointDetectionRequestParams;
+}
 
 export interface ChangePointDetectionRequestParams {
   fn: string;
@@ -157,7 +162,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   }, [dataView]);
 
   const [requestParamsFromUrl, updateRequestParams] =
-    usePageUrlState<ChangePointDetectionRequestParams>('changePoint');
+    usePageUrlState<ChangePointDetectionPageUrlState>('changePoint');
 
   const resultQuery = useMemo<Query>(() => {
     return (
