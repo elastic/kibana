@@ -391,7 +391,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   }
 
   async authorizeCreate(params: {
-    // action: SecurityAction.CREATE | SecurityAction.BULK_CREATE;
+    action: SecurityAction.CREATE | SecurityAction.BULK_CREATE;
     namespaceString: string;
     objects: Array<{
       type: string;
@@ -400,9 +400,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       existingNamespaces: string[] | undefined;
     }>;
   }): Promise<CheckAuthorizationResult<string> | undefined> {
-    const { namespaceString, objects } = params;
+    const { action, namespaceString, objects } = params;
 
-    const action = objects.length > 1 ? SecurityAction.BULK_CREATE : SecurityAction.CREATE;
+    //  const action = objects.length > 1 ? SecurityAction.BULK_CREATE : SecurityAction.CREATE;
     const typesAndSpaces = new Map<string, Set<string>>();
     const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
 

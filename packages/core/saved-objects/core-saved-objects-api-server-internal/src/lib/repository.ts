@@ -372,6 +372,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     // });
 
     const authorizationResult = await this._securityExtension?.authorizeCreate({
+      action: SecurityAction.CREATE,
       namespaceString,
       objects: [
         {
@@ -583,6 +584,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     });
 
     const authorizationResult = await this._securityExtension?.authorizeCreate({
+      action: SecurityAction.BULK_CREATE,
       namespaceString,
       objects: authObjects,
     });

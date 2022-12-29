@@ -292,6 +292,7 @@ export interface ISavedObjectsSecurityExtension {
    * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeCreate: (params: {
+    action: SecurityAction.CREATE | SecurityAction.BULK_CREATE;
     namespaceString: string;
     objects: AuthorizeCreateObject[];
   }) => Promise<CheckAuthorizationResult<string> | undefined>;

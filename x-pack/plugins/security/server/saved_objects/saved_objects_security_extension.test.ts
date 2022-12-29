@@ -1430,6 +1430,7 @@ describe('#authorizeCreate', () => {
       jest.spyOn(securityExtension, 'performAuthorization');
 
       await securityExtension.authorizeCreate({
+        action: SecurityAction.CREATE,
         namespaceString: namespace,
         objects: [obj1],
       });
@@ -1511,6 +1512,7 @@ describe('#authorizeCreate', () => {
 
       const objects = [obj1, obj2, obj3, obj4];
       await securityExtension.authorizeCreate({
+        action: SecurityAction.BULK_CREATE,
         namespaceString: namespace,
         objects,
       });
