@@ -36,6 +36,9 @@ describe('Timeline notes tab', () => {
   before(() => {
     cleanKibana();
     login();
+  });
+
+  beforeEach(() => {
     visitWithoutDateRange(TIMELINES_URL);
 
     createTimeline(getTimelineNonValidQuery())
