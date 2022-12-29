@@ -23,6 +23,7 @@ const getMockRequestBody = (
 ): CsvSavedSearchExportBodyType => {
   return obj
     ? {
+        ...obj,
         timerange: { ...obj?.timerange },
       }
     : null;
@@ -68,6 +69,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('CSV Generation from Saved Search ID', () => {
     before(async () => {
+      // clear any previous UI Settings
+      await kibanaServer.uiSettings.replace({});
+
       // explicitly delete all pre-existing logstash indices, since we have exports with no time filter
       log.info(`deleting logstash indices`);
       await cleanupLogstash();

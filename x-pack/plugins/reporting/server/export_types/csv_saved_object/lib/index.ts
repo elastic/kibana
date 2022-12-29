@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { isStringArray } from './is_string_array';
 export { getSortForSearchSource } from './get_sort_for_search_source';
 export { getSharingData } from './get_sharing_data';
