@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SLO } from '../../typings';
+import type { SLO, Status } from '../../typings';
 import { toDuration } from './duration';
 
 export function toSLO(result: any): SLO {
@@ -19,9 +19,11 @@ export function toSLO(result: any): SLO {
       duration,
     },
     summary: {
+      status: result.summary.status as Status,
       sliValue: Number(result.summary.sliValue),
       errorBudget: {
         remaining: Number(result.summary.errorBudget.remaining),
+        isEstimated: result.summary.errorBudget.isEstimated,
       },
     },
   };
