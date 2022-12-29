@@ -11,7 +11,6 @@ import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
 import { Query } from '@kbn/es-query';
-import { map as loMap } from 'lodash';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   checkHitCount,
