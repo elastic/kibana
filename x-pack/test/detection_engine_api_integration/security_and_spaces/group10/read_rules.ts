@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -237,7 +236,8 @@ export default ({ getService }: FtrProviderContext) => {
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
                 action_type_id: hookAction.actionTypeId,
-              } as unknown as RuleAction,
+                uuid: bodyToCompare.actions[0].uuid,
+              },
             ],
             throttle: '1h',
           };

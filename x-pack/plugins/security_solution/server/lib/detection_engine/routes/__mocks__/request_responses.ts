@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
-import type { SanitizedRule, ResolvedSanitizedRule, RuleAction } from '@kbn/alerting-plugin/common';
+import type { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
 
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -535,7 +535,8 @@ export const legacyGetNotificationResult = ({
       },
       group: 'default',
       id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-    } as unknown as RuleAction,
+      uuid: '123-456',
+    },
   ],
   throttle: null,
   notifyWhen: null,
@@ -583,7 +584,8 @@ export const legacyGetHourlyNotificationResult = (
       },
       actionTypeId: '.email',
       id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-    } as unknown as RuleAction,
+      uuid: '123-456',
+    },
   ],
   throttle: null,
   notifyWhen: 'onActiveAlert',
@@ -631,7 +633,8 @@ export const legacyGetDailyNotificationResult = (
       },
       actionTypeId: '.email',
       id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-    } as unknown as RuleAction,
+      uuid: '123-456',
+    },
   ],
   throttle: null,
   notifyWhen: 'onActiveAlert',
@@ -679,7 +682,8 @@ export const legacyGetWeeklyNotificationResult = (
       },
       actionTypeId: '.email',
       id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-    } as unknown as RuleAction,
+      uuid: '123-456',
+    },
   ],
   throttle: null,
   notifyWhen: 'onActiveAlert',
@@ -754,6 +758,7 @@ export const legacyGetSiemNotificationRuleEveryRunSOResult = (
           subject: 'Test Actions',
         },
         action_type_id: '.email',
+        uuid: '123-456',
       },
     ],
     ruleThrottle: 'rule',
@@ -790,6 +795,7 @@ export const legacyGetSiemNotificationRuleHourlyActionsSOResult = (
           subject: 'Test Actions',
         },
         action_type_id: '.email',
+        uuid: '123-456',
       },
     ],
     ruleThrottle: '1h',
@@ -829,6 +835,7 @@ export const legacyGetSiemNotificationRuleDailyActionsSOResult = (
           subject: 'Test Actions',
         },
         action_type_id: '.email',
+        uuid: '123-456',
       },
     ],
     ruleThrottle: '1d',
@@ -868,6 +875,7 @@ export const legacyGetSiemNotificationRuleWeeklyActionsSOResult = (
           subject: 'Test Actions',
         },
         action_type_id: '.email',
+        uuid: '123-456',
       },
     ],
     ruleThrottle: '7d',

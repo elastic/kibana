@@ -13,10 +13,10 @@ import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { NormalizedAlertActionOptionalUuid } from '../types';
 import { RulesClientContext } from '../types';
 
-export async function validateActions(
+export async function validateActions<U extends NormalizedAlertActionOptionalUuid>(
   context: RulesClientContext,
   alertType: UntypedNormalizedRuleType,
-  data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: NormalizedAlertActionOptionalUuid[] }
+  data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: U[] }
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
   const hasNotifyWhen = typeof notifyWhen !== 'undefined';

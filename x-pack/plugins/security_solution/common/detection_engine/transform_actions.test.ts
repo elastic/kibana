@@ -20,6 +20,7 @@ describe('transform_actions', () => {
       group: 'group',
       action_type_id: 'action_type_id',
       params: {},
+      uuid: '123-456',
     };
     const alertAction = transformRuleToAlertAction(ruleAction);
     expect(alertAction).toEqual({
@@ -27,6 +28,7 @@ describe('transform_actions', () => {
       group: ruleAction.group,
       actionTypeId: ruleAction.action_type_id,
       params: ruleAction.params,
+      uuid: '123-456',
     });
   });
 

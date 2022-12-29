@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 // eslint-disable-next-line no-restricted-imports
@@ -56,7 +55,8 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com',
           },
-        } as unknown as RuleAction,
+          uuid: '123-456',
+        },
       ],
       throttle: '1d',
     });
@@ -70,6 +70,7 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com',
           },
+          uuid: '123-456',
         },
       ],
       alertThrottle: '1d',
@@ -103,6 +104,7 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com',
           },
+          uuid: '111-111',
         },
         {
           id: '555',
@@ -111,8 +113,9 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com/2',
           },
+          uuid: '222-222',
         },
-      ] as unknown as RuleAction[],
+      ],
       throttle: '1d',
     });
     const [[, arg2, arg3]] = savedObjectsClient.create.mock.calls;
@@ -125,6 +128,7 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com',
           },
+          uuid: '111-111',
         },
         {
           actionRef: 'action_1',
@@ -133,6 +137,7 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com/2',
           },
+          uuid: '222-222',
         },
       ],
       alertThrottle: '1d',

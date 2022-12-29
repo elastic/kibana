@@ -43,6 +43,8 @@ export const RuleAction = t.exact(
   t.intersection([BaseRuleAction, t.type({ uuid: RuleActionUuid })])
 );
 
+export type RuleActionWithoutUuid = t.TypeOf<typeof BaseRuleAction>;
+
 export type RuleActionArray = t.TypeOf<typeof RuleActionArray>;
 export const RuleActionArray = t.array(RuleAction);
 

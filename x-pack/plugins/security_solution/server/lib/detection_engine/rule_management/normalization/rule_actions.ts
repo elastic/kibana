@@ -101,7 +101,7 @@ export const transformActions = (
   if (alertAction != null && alertAction.length !== 0) {
     return alertAction.map((action) => transformAlertToRuleAction(action));
   } else if (legacyRuleActions != null) {
-    return legacyRuleActions.actions as RuleResponse['actions'];
+    return legacyRuleActions.actions;
   } else {
     return [];
   }

@@ -41,7 +41,6 @@ import {
 
 import {
   transformAlertToRuleResponseAction,
-  transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
 } from '../../../../../common/detection_engine/transform_actions';
 
@@ -463,7 +462,15 @@ export const convertPatchAPIToInternalSchema = (
     },
     schedule: { interval: nextParams.interval ?? existingRule.schedule.interval },
     actions: nextParams.actions
-      ? nextParams.actions.map(transformRuleToAlertAction)
+      ? nextParams.actions.map(
+          ({ group, id, params, action_type_id: actionTypeId, uuid: actionUuid }) => ({
+            group,
+            id,
+            params,
+            actionTypeId,
+            ...(actionUuid && { uuid: actionUuid }),
+          })
+        )
       : existingRule.actions,
     throttle: nextParams.throttle
       ? transformToAlertThrottle(nextParams.throttle)
@@ -526,7 +533,13 @@ export const convertCreateAPIToInternalSchema = (
     },
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? defaultEnabled,
-    actions: input.actions?.map(transformRuleToAlertAction) ?? [],
+    actions:
+      input.actions?.map(({ group, id, params, action_type_id: actionTypeId }) => ({
+        group,
+        id,
+        params,
+        actionTypeId,
+      })) ?? [],
     throttle: transformToAlertThrottle(input.throttle),
     notifyWhen: transformToNotifyWhen(input.throttle),
   };

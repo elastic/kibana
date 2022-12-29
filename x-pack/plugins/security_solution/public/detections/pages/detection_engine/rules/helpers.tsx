@@ -25,7 +25,10 @@ import type { ResponseAction } from '../../../../../common/detection_engine/rule
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
-import { transformRuleToAlertResponseAction } from '../../../../../common/detection_engine/transform_actions';
+import {
+  transformRuleToAlertAction,
+  transformRuleToAlertResponseAction,
+} from '../../../../../common/detection_engine/transform_actions';
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import type {
   AboutStepRule,
@@ -76,13 +79,7 @@ export const getActionsStepsData = (
   const { enabled, throttle, meta, actions = [], response_actions: responseActions } = rule;
 
   return {
-    actions: actions?.map(({ group, id, params, action_type_id: actionTypeId, uuid }) => ({
-      group,
-      id,
-      params,
-      actionTypeId,
-      uuid,
-    })),
+    actions: actions?.map(transformRuleToAlertAction),
     responseActions: responseActions?.map(transformRuleToAlertResponseAction),
     throttle,
     kibanaSiemAppUrl: meta?.kibana_siem_app_url,

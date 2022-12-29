@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 
+import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyUpdateOrCreateRuleActionsSavedObject } from '../../logic/rule_actions/legacy_update_or_create_rule_actions_saved_object';
@@ -66,10 +67,10 @@ export const legacyCreateLegacyNotificationRoute = (
           id: undefined,
           ruleAlertId,
         });
-        let res;
+        let updateOrCreateResponse: PartialRule<LegacyRuleNotificationAlertTypeParams>;
 
         if (notification != null) {
-          res = await rulesClient.update<LegacyRuleNotificationAlertTypeParams>({
+          updateOrCreateResponse = await rulesClient.update<LegacyRuleNotificationAlertTypeParams>({
             id: notification.id,
             data: {
               tags: [],
@@ -86,7 +87,7 @@ export const legacyCreateLegacyNotificationRoute = (
             },
           });
         } else {
-          res = await legacyCreateNotifications({
+          updateOrCreateResponse = await legacyCreateNotifications({
             rulesClient,
             actions,
             enabled: true,
@@ -98,7 +99,7 @@ export const legacyCreateLegacyNotificationRoute = (
         await legacyUpdateOrCreateRuleActionsSavedObject({
           ruleAlertId,
           savedObjectsClient,
-          actions: res.actions,
+          actions: updateOrCreateResponse.actions,
           throttle: interval,
           logger,
         });

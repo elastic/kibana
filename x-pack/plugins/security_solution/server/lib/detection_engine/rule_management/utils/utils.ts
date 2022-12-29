@@ -10,7 +10,7 @@ import pMap from 'p-map';
 import uuid from 'uuid';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleAction, RuleActionWithoutUuid } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 
@@ -180,9 +180,9 @@ const createQuery = (type: string, id: string) =>
  * @returns
  */
 export const swapActionIds = async (
-  action: RuleAction,
+  action: RuleActionWithoutUuid,
   savedObjectsClient: SavedObjectsClientContract
-): Promise<RuleAction | Error> => {
+): Promise<RuleActionWithoutUuid | Error> => {
   try {
     const search = createQuery('action', action.id);
     const foundAction = await savedObjectsClient.find<RuleAction>({
@@ -244,19 +244,19 @@ export const migrateLegacyActionsIds = async (
     rules,
     async (rule) => {
       if (isImportRule(rule)) {
-        const newActions: Array<RuleAction | Error> = await pMap(
+        const newActions: Array<RuleActionWithoutUuid | Error> = await pMap(
           // can we swap the pre 8.0 action connector(s) id with the new,
           // post-8.0 action id (swap the originId for the new _id?)
-          // @ts-ignore
           rule.actions ?? [],
-          (action: RuleAction) => swapActionIds(action, savedObjectsClient),
+          (action: RuleActionWithoutUuid) => swapActionIds(action, savedObjectsClient),
           { concurrency: MAX_CONCURRENT_SEARCHES }
         );
 
         // were there any errors discovered while trying to migrate and swap the action connector ids?
-        const [actionMigrationErrors, newlyMigratedActions] = partition<RuleAction | Error, Error>(
-          (item): item is Error => item instanceof Error
-        )(newActions);
+        const [actionMigrationErrors, newlyMigratedActions] = partition<
+          RuleActionWithoutUuid | Error,
+          Error
+        >((item): item is Error => item instanceof Error)(newActions);
 
         if (actionMigrationErrors == null || actionMigrationErrors.length === 0) {
           return { ...rule, actions: newlyMigratedActions };
