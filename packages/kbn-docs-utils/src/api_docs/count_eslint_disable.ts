@@ -9,6 +9,12 @@
 import { asyncMapWithLimit } from '@kbn/std';
 import Fs from 'fs';
 import Path from 'path';
+import ignore from 'ignore';
+
+let _cache_gitIgnore: ReturnType<ReturnType<typeof ignore>['createFilter']> | undefined;
+function gitignore(path: string): boolean {
+  return (_cache_gitIgnore ??= ignore().createFilter())(path);
+}
 
 export interface EslintDisableCounts {
   eslintDisableLineCount: number;
@@ -23,11 +29,11 @@ async function fetchAllFilePaths(path: string): Promise<string[]> {
   const dirContent = await Fs.promises.readdir(path, { withFileTypes: true });
   for (const item of dirContent) {
     const itemPath = Path.resolve(path, item.name);
-    if (item.isDirectory()) {
-      if (item.name === 'target') {
-        continue;
-      }
+    if (gitignore(itemPath)) {
+      continue;
+    }
 
+    if (item.isDirectory()) {
       filePaths.push(...(await fetchAllFilePaths(itemPath)));
     } else if (item.isFile()) {
       filePaths.push(itemPath);
