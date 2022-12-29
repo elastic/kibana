@@ -10,6 +10,8 @@ import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
+import { Query } from '@kbn/es-query';
+import { map as loMap } from 'lodash';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   checkHitCount,
@@ -84,11 +86,32 @@ export function fetchAll(
     sendLoadingMsg(dataSubjects.main$, { recordRawType });
     sendLoadingMsg(dataSubjects.documents$, { recordRawType, query });
     sendLoadingMsg(dataSubjects.totalHits$, { recordRawType });
+    sendLoadingMsg(dataSubjects.availableFields$, { recordRawType });
+
+    const isQueryType = (obj: unknown): obj is Query => obj && obj.query && obj.language;
+
+    // @ts-expect-error
+    const indexFilter = isQueryType(query) ? query : undefined;
+
+    services.dataViews
+      .getFieldsForIndexPattern(dataView, {
+        // todo figure out how to get query types to match
+        // indexFilter
+        includeUnmapped: true,
+      })
+      .then((flds) => {
+        /*
+      dataSubjects.availableFields$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        fields: loMap(flds, 'name'),
+      });
+      */
+      });
 
     // Start fetching all required requests
     const documents =
       useSql && query
-        ? fetchSql(query, dataView, data, services.expressions, inspectorAdapters)
+        ? fetchSql(query, services.dataViews, data, services.expressions, inspectorAdapters)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects

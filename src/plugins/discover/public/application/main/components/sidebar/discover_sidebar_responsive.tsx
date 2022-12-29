@@ -252,16 +252,18 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, []);
 
   const { dataViewFieldEditor, dataViewEditor } = services;
-  const { availableFields$ } = props;
+  // const { availableFields$ } = props;
 
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) || !selectedDataView?.isPersisted();
 
+  /**
   useEffect(() => {
     // For an external embeddable like the Field stats
     // it is useful to know what fields are populated in the docs fetched
     // or what fields are selected by the user
 
+    // todo this needs to be removed
     const availableFields =
       props.columns.length > 0 ? props.columns : Object.keys(sidebarState.fieldCounts || {});
     availableFields$.next({
@@ -269,6 +271,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       fields: availableFields,
     });
   }, [selectedDataView, sidebarState.fieldCounts, props.columns, availableFields$]);
+*/
 
   const editField = useMemo(
     () =>
