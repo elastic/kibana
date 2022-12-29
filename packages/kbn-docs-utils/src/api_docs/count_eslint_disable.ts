@@ -24,6 +24,10 @@ async function fetchAllFilePaths(path: string): Promise<string[]> {
   for (const item of dirContent) {
     const itemPath = Path.resolve(path, item.name);
     if (item.isDirectory()) {
+      if (item.name === 'target') {
+        continue;
+      }
+
       filePaths.push(...(await fetchAllFilePaths(itemPath)));
     } else if (item.isFile()) {
       filePaths.push(itemPath);
