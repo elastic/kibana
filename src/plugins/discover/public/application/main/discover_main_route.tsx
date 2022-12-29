@@ -125,7 +125,6 @@ export function DiscoverMainRoute(props: Props) {
           toastNotifications,
           isTextBasedQuery
         );
-        await data.dataViews.refreshFields(dataViewData);
         setDataViewList(ipList);
 
         return dataViewData;
