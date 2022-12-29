@@ -5,4 +5,22 @@
  * 2.0.
  */
 
-describe('get_sort', () => {});
+import { stubIndexPattern } from 'src/plugins/data/common/stubs';
+import { getSort } from './get_sort';
+
+const createMockIndexPattern = () => stubIndexPattern;
+
+describe('get_sort', () => {
+  it('gets the sort for @timestamp', () => {
+    const sortPair: [string, string] = ['sortField', 'desc'];
+    const mockIndexPattern = createMockIndexPattern();
+    const result = getSort(sortPair, mockIndexPattern);
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "sortField": "desc",
+        },
+      ]
+    `);
+  });
+});

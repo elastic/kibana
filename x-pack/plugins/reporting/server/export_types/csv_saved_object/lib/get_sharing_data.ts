@@ -15,11 +15,14 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../../../src/plugins/discover/common';
 import { getSortForSearchSource } from './get_sort_for_search_source';
-import { isStringArray } from './is_string_array';
 
-type SavedSearchObjectType = SavedObject<
+export type SavedSearchObjectType = SavedObject<
   VisualizationSavedObjectAttributes & { columns?: string[]; sort: Array<[string, string]> }
 >;
+
+function isStringArray(arr: unknown | string[]): arr is string[] {
+  return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
+}
 
 /**
  * Partially copied from src/plugins/discover/public/application/apps/main/utils/get_sharing_data.ts
@@ -33,15 +36,24 @@ export async function getSharingData(
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index');
+
   if (!index) {
     throw new Error(`Search Source is missing the "index" field`);
   }
+
+  // Inject sort
+  searchSource.setField('sort', getSortForSearchSource(savedSearch.attributes.sort, index));
 
   // Remove the fields that are not suitable for export and paging
   searchSource.removeField('highlight');
   searchSource.removeField('highlightAll');
   searchSource.removeField('aggs');
   searchSource.removeField('size');
+
+  const [hideTimeColumn, useFieldsFromSource] = await Promise.all([
+    services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
+    services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
+  ]);
 
   // Add/adjust columns from the saved search attributes and UI Settings
   let columns: string[] | undefined;
@@ -51,7 +63,6 @@ export async function getSharingData(
     columns = columnsTemp;
 
     // conditionally add the time field column:
-    const hideTimeColumn = await services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
     if (index?.timeFieldName && !hideTimeColumn) {
       timeFieldName = index.timeFieldName;
     }
@@ -64,8 +75,7 @@ export async function getSharingData(
      * Otherwise, the requests will ask for all fields, even if only a few are really needed.
      * Discover does not set fields, since having all fields is needed for the UI.
      */
-    const useFieldsApi = !(await services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE));
-    if (useFieldsApi && columns.length) {
+    if (!useFieldsFromSource && columns.length) {
       searchSource.setField('fields', columns);
     }
   }
@@ -117,9 +127,6 @@ export async function getSharingData(
   if (combinedFilters) {
     searchSource.setField('filter', combinedFilters);
   }
-
-  // Inject sort
-  searchSource.setField('sort', getSortForSearchSource(savedSearch.attributes.sort, index));
 
   return {
     columns,
