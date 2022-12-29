@@ -103,19 +103,19 @@ export interface RuleExecutionContext {
   spaceId: string;
 }
 
+export interface RunningStatusChangeArgs {
+  newStatus: RuleExecutionStatus.running;
+}
+
+export interface StatusChangeArgsWithMessage {
+  newStatus: Exclude<RuleExecutionStatus, RuleExecutionStatus.running>;
+  metrics?: MetricsArgs;
+  message: string;
+}
 /**
  * Information about the status change event.
  */
-export type StatusChangeArgs =
-  | {
-      newStatus: RuleExecutionStatus.running;
-      metrics?: MetricsArgs;
-    }
-  | {
-      newStatus: Exclude<RuleExecutionStatus, RuleExecutionStatus.running>;
-      metrics?: MetricsArgs;
-      message: string;
-    };
+export type StatusChangeArgs = RunningStatusChangeArgs | StatusChangeArgsWithMessage;
 
 export interface MetricsArgs {
   searchDurations?: string[];

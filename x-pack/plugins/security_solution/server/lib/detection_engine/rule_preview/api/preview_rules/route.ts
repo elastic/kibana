@@ -39,7 +39,7 @@ import { throwAuthzError } from '../../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
-import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
+import type { RuleExecutionContext, StatusChangeArgsWithMessage } from '../../../rule_monitoring';
 
 import type { ConfigType } from '../../../../../config';
 import { alertInstanceFactoryStub } from '../../../signals/preview/alert_instance_factory_stub';
@@ -123,7 +123,7 @@ export const previewRulesRoute = async (
         const spaceId = siemClient.getSpaceId();
         const previewId = uuidv4();
         const username = security?.authc.getCurrentUser(request)?.username;
-        const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
+        const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgsWithMessage> = [];
         const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
         const runState: Record<string, unknown> = {};
         const logs: RulePreviewLogs[] = [];
@@ -267,7 +267,7 @@ export const previewRulesRoute = async (
 
             const errors = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-              .map((item) => item.message ?? 'Unkown Error');
+              .map((item) => item.message ?? 'Unknown Error');
 
             const warnings = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
