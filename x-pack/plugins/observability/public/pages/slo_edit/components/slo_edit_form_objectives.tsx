@@ -34,7 +34,7 @@ export const TIMEWINDOW_OPTIONS = [30, 7].map((number) => ({
   }),
 }));
 
-interface SloEditFormObjectivesProps {
+export interface SloEditFormObjectivesProps {
   control: Control<CreateSLOParamsForFE>;
   watch: UseFormWatch<CreateSLOParamsForFE>;
 }

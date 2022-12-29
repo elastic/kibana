@@ -15,7 +15,7 @@ export interface UseFetchIndicesResponse {
   error: boolean;
 }
 
-interface Index {
+export interface Index {
   health?: string;
   status?: string;
   name: string;

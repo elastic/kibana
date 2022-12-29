@@ -12,7 +12,7 @@ import { Control, Controller } from 'react-hook-form';
 
 import type { CreateSLOParamsForFE } from '../../../typings';
 
-interface SloEditFormObjectivesTimeslicesProps {
+export interface SloEditFormObjectivesTimeslicesProps {
   control: Control<CreateSLOParamsForFE>;
 }
 

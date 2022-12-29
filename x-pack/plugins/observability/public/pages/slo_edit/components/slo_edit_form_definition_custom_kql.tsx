@@ -13,7 +13,7 @@ import { Control, Controller } from 'react-hook-form';
 import { useFetchIndices } from '../../../hooks/use_fetch_indices';
 import type { CreateSLOParamsForFE } from '../../../typings';
 
-interface SloEditFormDefinitionCustomKqlProps {
+export interface SloEditFormDefinitionCustomKqlProps {
   control: Control<CreateSLOParamsForFE>;
 }
 

@@ -26,20 +26,14 @@ import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useCheckFormPartialValidities } from '../helpers/use_check_form_partial_validities';
 import { SloEditFormDefinitionCustomKql } from './slo_edit_form_definition_custom_kql';
 import { SloEditFormDescription } from './slo_edit_form_description';
-import {
-  SloEditFormObjectives,
-  BUDGETING_METHOD_OPTIONS,
-  TIMEWINDOW_OPTIONS,
-} from './slo_edit_form_objectives';
+import { SloEditFormObjectives } from './slo_edit_form_objectives';
 import { paths } from '../../../config';
 import { SLO } from '../../../typings';
-import type { CreateSLOParamsForFE, BudgetingMethod } from '../../../typings';
+import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 
 export interface SloEditFormProps {
   slo: SLO | undefined;
 }
-
-const SLI_OPTIONS = [{ value: 'sli.kql.custom' as const, text: 'KQL custom indicator' }];
 
 const maxWidth = 775;
 
@@ -50,30 +44,8 @@ export function SloEditForm({ slo }: SloEditFormProps) {
     notifications: { toasts },
   } = useKibana().services;
 
-  const defaultValues: CreateSLOParamsForFE = {
-    name: '',
-    description: '',
-    indicator: {
-      type: SLI_OPTIONS[0].value,
-      params: {
-        index: '',
-        filter: '',
-        good: '',
-        total: '',
-      },
-    },
-    timeWindow: {
-      duration: TIMEWINDOW_OPTIONS[0].value,
-      isRolling: true,
-    },
-    budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value as BudgetingMethod,
-    objective: {
-      target: 0,
-    },
-  };
-
   const { control, watch, getFieldState, getValues, formState, trigger } = useForm({
-    defaultValues,
+    defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
     values: slo,
     mode: 'all',
   });
