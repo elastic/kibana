@@ -8,6 +8,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
 import { useCallback } from 'react';
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { debounce } from 'lodash';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
@@ -57,6 +58,12 @@ export const useUnifiedSearch = () => {
     [getTime, dispatch, filterManager, getRangeInTimestamp]
   );
 
+  // This won't prevent onSubmit from being fired twice when `clear filters` is clicked,
+  // that happens because both onQuerySubmit and onFiltersUpdated are internally triggered on same event by SearchBar.
+  // This just delays potential duplicate onSubmit calls
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debounceOnSubmit = useCallback(debounce(onSubmit, 100), [onSubmit]);
+
   const saveQuery = useCallback(
     (newSavedQuery: SavedQuery) => {
       const savedQueryFilters = newSavedQuery.attributes.filters ?? [];
@@ -97,7 +104,7 @@ export const useUnifiedSearch = () => {
     clearSavedQuery,
     controlPanelFilters: state.panelFilters,
     dateRangeTimestamp: state.dateRangeTimestamp,
-    onSubmit,
+    onSubmit: debounceOnSubmit,
     saveQuery,
     unifiedSearchQuery: state.query,
     unifiedSearchDateRange: getTime(),
