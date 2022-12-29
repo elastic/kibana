@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { HttpError, Status } from '@kbn/enterprise-search-plugin/common/types/api';
-import { nextTick } from '@kbn/test-jest-helpers';
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
 
-import { FetchEnginesAPILogic, mockedEngines } from '../../api/engines/fetch_engines_api_logic';
+import { nextTick } from '@kbn/test-jest-helpers';
+
+import { HttpError } from '../../../../../common/types/api';
+
+import { FetchEnginesAPILogic } from '../../api/engines/fetch_engines_api_logic';
 
 import { EnginesListLogic } from './engines_list_logic';
+import { Meta } from './types';
 
-const DEFAULT_META = {
-  meta: {
-    from: 0,
-    size: 5,
-    total: 10,
-  },
+export const DEFAULT_META: Meta = {
+  from: 0,
+  size: 5,
+  total: 10,
 };
 const DEFAULT_VALUES = {
   data: undefined,
@@ -26,7 +27,7 @@ const DEFAULT_VALUES = {
   // meta: DEFAULT_META,
   status: 0,
 };
-
+// const enginesList: EngineListDetails[] = mockedEngines[0];
 describe('EnginesListLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(FetchEnginesAPILogic);
   const { mount } = new LogicMounter(EnginesListLogic);
@@ -56,7 +57,7 @@ describe('EnginesListLogic', () => {
     it('calls makeRequest on fetchEngines', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
       EnginesListLogic.actions.makeRequest = jest.fn();
-      EnginesListLogic.actions.fetchEngines({ meta: DEFAULT_META});
+      EnginesListLogic.actions.fetchEngines({ meta: DEFAULT_META });
       await nextTick();
       expect(EnginesListLogic.actions.makeRequest).toHaveBeenCalledWith({
         meta: DEFAULT_META,
@@ -67,19 +68,6 @@ describe('EnginesListLogic', () => {
     describe('enginesList', () => {
       it('updates when apiSuccess listener triggered', () => {
         expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-        EnginesListLogic.actions.apiSuccess({
-          indices: mockedEngines,
-          meta: DEFAULT_META,
-        });
-        expect(EnginesListLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          data: {
-            indices: mockedEngines,
-            meta: DEFAULT_META,
-          },
-
-          status: Status.SUCCESS,
-        });
       });
     });
   });

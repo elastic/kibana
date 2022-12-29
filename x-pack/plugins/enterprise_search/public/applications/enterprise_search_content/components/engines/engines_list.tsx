@@ -21,7 +21,7 @@ import { EnginesListTable } from './components/tables/engines_table';
 import { EnginesListLogic } from './engines_list_logic';
 // import { EngineListDetails, Meta } from './types';
 
-export const EnginesList = () => {
+export const EnginesList: React.FC = () => {
   const { fetchEngines } = useActions(EnginesListLogic);
   const { meta, enginesList } = useValues(EnginesListLogic);
 
