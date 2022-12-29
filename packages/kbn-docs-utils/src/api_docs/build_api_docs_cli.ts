@@ -15,6 +15,7 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Project } from 'ts-morph';
+import { getRepoFiles } from '@kbn/get-repo-files';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
 import { ApiDeclaration, ApiStats, PluginMetaInfo } from './types';
@@ -89,14 +90,22 @@ export function runBuildApiDocsCli() {
       } = getPluginApiMap(project, plugins, log, { collectReferences, pluginFilter });
 
       const reporter = CiStatsReporter.fromEnv(log);
+      const allRepoFiles = Array.from(await getRepoFiles());
+      const pathsByPlugin = new Map(
+        plugins.map((p) => [
+          p,
+          allRepoFiles.flatMap((f) => (f.abs.startsWith(p.directory + '/') ? f.abs : [])),
+        ])
+      );
 
       const allPluginStats: { [key: string]: PluginMetaInfo & ApiStats & EslintDisableCounts } = {};
       for (const plugin of plugins) {
         const id = plugin.manifest.id;
         const pluginApi = pluginApiMap[id];
+        const paths = pathsByPlugin.get(plugin) ?? [];
 
         allPluginStats[id] = {
-          ...(await countEslintDisableLines(plugin.directory)),
+          ...(await countEslintDisableLines(paths)),
           ...collectApiStatsForPlugin(
             pluginApi,
             missingApiItems,

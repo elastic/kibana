@@ -6,75 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { asyncMapWithLimit } from '@kbn/std';
+import { asyncForEachWithLimit } from '@kbn/std';
 import Fs from 'fs';
-import Path from 'path';
-import ignore from 'ignore';
-
-let _cache_gitIgnore: ReturnType<ReturnType<typeof ignore>['createFilter']> | undefined;
-function gitignore(path: string): boolean {
-  return (_cache_gitIgnore ??= ignore().createFilter())(path);
-}
 
 export interface EslintDisableCounts {
   eslintDisableLineCount: number;
   eslintDisableFileCount: number;
 }
 
-async function fetchAllFilePaths(path: string): Promise<string[]> {
-  if ((await Fs.promises.stat(path)).isFile()) {
-    return [path];
-  }
-  const filePaths: string[] = [];
-  const dirContent = await Fs.promises.readdir(path, { withFileTypes: true });
-  for (const item of dirContent) {
-    const itemPath = Path.resolve(path, item.name);
-    if (gitignore(itemPath)) {
-      continue;
-    }
+const count = (string: string, regexp: RegExp) => Array.from(string.matchAll(regexp)).length;
 
-    if (item.isDirectory()) {
-      filePaths.push(...(await fetchAllFilePaths(itemPath)));
-    } else if (item.isFile()) {
-      filePaths.push(itemPath);
-    }
-  }
-  return filePaths;
-}
+export async function countEslintDisableLines(paths: string[]): Promise<EslintDisableCounts> {
+  let eslintDisableFileCount = 0;
+  let eslintDisableLineCount = 0;
 
-function findOccurrences(fileContent: string, regexp: RegExp): number {
-  // using the flag 'g' returns an array of found occurrences.
-  const matchingResults = fileContent.toString().match(new RegExp(regexp, 'g')) || [];
-  return matchingResults.length;
-}
+  await asyncForEachWithLimit(paths, 100, async (path) => {
+    const content = await Fs.promises.readFile(path, 'utf8');
 
-async function countEsLintDisableInFile(path: string): Promise<EslintDisableCounts> {
-  const fileContent = await Fs.promises.readFile(path, { encoding: 'utf8' });
+    eslintDisableLineCount +=
+      count(content, /eslint-disable-next-line/g) + count(content, /eslint-disable-line/g);
+    eslintDisableFileCount += count(content, /eslint-disable\s/g);
+  });
 
-  return {
-    eslintDisableLineCount:
-      findOccurrences(fileContent, /eslint-disable-next-line/) +
-      findOccurrences(fileContent, /eslint-disable-line/),
-    eslintDisableFileCount: findOccurrences(fileContent, /eslint-disable\s/),
-  };
-}
-
-export async function countEslintDisableLines(path: string): Promise<EslintDisableCounts> {
-  const filePaths = await fetchAllFilePaths(path);
-
-  const allEslintDisableCounts = await asyncMapWithLimit(filePaths, 100, (filePath) =>
-    countEsLintDisableInFile(filePath)
-  );
-
-  return allEslintDisableCounts.reduce(
-    (acc, fileEslintDisableCounts) => {
-      return {
-        eslintDisableFileCount:
-          acc.eslintDisableFileCount + fileEslintDisableCounts.eslintDisableFileCount,
-        eslintDisableLineCount:
-          acc.eslintDisableLineCount + fileEslintDisableCounts.eslintDisableLineCount,
-      };
-    },
-    { eslintDisableFileCount: 0, eslintDisableLineCount: 0 }
-  );
+  return { eslintDisableFileCount, eslintDisableLineCount };
 }
