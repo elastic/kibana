@@ -99,12 +99,16 @@ function DiscoverDocumentsComponent({
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
   const documentState = useDataState(documents$);
-  const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
-  // this is needed to prevent data view pushing onSort because there has been a state change with a new data view
-  // but the data view in internal state was not set. due to the change of the timefield, this can lead to a change
-  // of state, EuiDataGrid pushing an onSort event, because the next timefield is already used a sorting param
-  // but it's not an available column
-  const dataViewChanged = index && dataView.id && index !== dataView.id;
+  const isDataLoading = documentState.fetchStatus === FetchStatus.LOADING;
+  // This is needed to prevent EuiDataGrid pushing onSort because the data view has been switched.
+  // 1. When switching the data view, the sorting in the URL is reset to the default sorting of the selected data view.
+  // 2. The new sort param is already available in this component and propagated to the EuiDataGrid.
+  // 3. currentColumns are still referring to the old state
+  // 4. since the new sort by field isn't available in currentColumns EuiDataGrid is emitting a 'onSort', which is unsorting the grid
+  // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
+  // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
+  const isDataViewLoading = index && dataView.id && index !== dataView.id;
+  const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
@@ -159,11 +163,7 @@ function DiscoverDocumentsComponent({
     [isPlainRecord, uiSettings, dataView.timeFieldName]
   );
 
-  if (
-    dataViewChanged ||
-    ((!documentState.result || documentState.result.length === 0) &&
-      documentState.fetchStatus === FetchStatus.LOADING)
-  ) {
+  if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       <div className="dscDocuments__loading">
         <EuiText size="xs" color="subdued">
@@ -190,7 +190,7 @@ function DiscoverDocumentsComponent({
             dataView={dataView}
             rows={rows}
             sort={sort || []}
-            isLoading={isLoading}
+            isLoading={isDataLoading}
             searchDescription={savedSearch.description}
             sharedItemTitle={savedSearch.title}
             onAddColumn={onAddColumn}
@@ -216,7 +216,7 @@ function DiscoverDocumentsComponent({
               columns={currentColumns}
               expandedDoc={expandedDoc}
               dataView={dataView}
-              isLoading={isLoading}
+              isLoading={isDataLoading}
               rows={rows}
               sort={(sort as SortOrder[]) || []}
               sampleSize={sampleSize}
