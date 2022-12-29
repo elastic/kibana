@@ -7,6 +7,7 @@
 
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 
 interface StatusBySeverity {
   doc_count_error_upper_bound: number;
@@ -51,6 +52,21 @@ export interface AlertsByStatusResponse<Hit = {}, Aggregations = {} | undefined>
   };
 }
 
+export interface VisualizationAlertsByStatusResponse<Hit = {}, Aggregations = {} | undefined> {
+  took: number;
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
+  aggregations?: Aggregations;
+  hits: {
+    total: number;
+    hits: Hit[];
+  };
+}
+
 export interface SeverityBuckets {
   key: Severity;
   value: number;
@@ -59,3 +75,16 @@ export interface SeverityBuckets {
 export type ParsedAlertsData = Partial<
   Record<Status, { total: number; severities: SeverityBuckets[] }>
 > | null;
+
+export interface AlertDonutEmbeddableProps {
+  status: Status;
+  setQuery: GlobalTimeArgs['setQuery'];
+  timerange: { from: string; to: string };
+  label: string;
+}
+
+export interface VisualizationAlertsByStatusData {
+  responses: VisualizationAlertsByStatusResponse[];
+  requests: Array<{}>;
+  isLoading: boolean;
+}

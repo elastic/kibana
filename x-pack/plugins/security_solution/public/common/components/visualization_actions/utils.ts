@@ -168,3 +168,13 @@ export const getRequestsAndResponses = (requests: Request[]) => {
     { requests: [], responses: [] }
   );
 };
+
+export const parseVisualizationData = (data: string[]): object[] => {
+  return data.reduce<object[]>((acc, req) => {
+    try {
+      acc.push(JSON.parse(req));
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
+    return acc;
+  }, []);
+};

@@ -53,6 +53,9 @@ import { emptyDonutColor } from '../../../../common/components/charts/donutchart
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { AlertDonutEmbeddable } from './alert_donut_embeddable';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   padding: 0 4px;
@@ -93,6 +96,9 @@ export const AlertsByStatus = ({
   const { onClick: goToAlerts, href } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.alerts,
   });
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const { to, from, setQuery } = useGlobalTime();
+  const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   const isLargerBreakpoint = useIsWithinMinBreakpoint('xl');
   const isSmallBreakpoint = useIsWithinMaxBreakpoint('s');
@@ -117,7 +123,7 @@ export const AlertsByStatus = ({
     additionalFilters,
     entityFilter,
     signalIndexName,
-    skip: !toggleStatus,
+    skip: !toggleStatus || isChartEmbeddablesEnabled,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
   });
   const legendItems: LegendItem[] = useMemo(
@@ -161,6 +167,7 @@ export const AlertsByStatus = ({
             inspectMultiple
             toggleStatus={toggleStatus}
             toggleQuery={setToggleStatus}
+            showInspectButton={!isChartEmbeddablesEnabled}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
@@ -177,7 +184,7 @@ export const AlertsByStatus = ({
           {toggleStatus && (
             <>
               <EuiFlexGroup justifyContent="center" gutterSize="none">
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={isChartEmbeddablesEnabled}>
                   {totalAlerts !== 0 && (
                     <EuiText className="eui-textCenter" size="s">
                       <>
@@ -191,41 +198,73 @@ export const AlertsByStatus = ({
                   )}
                   <EuiSpacer size="l" />
                   <EuiFlexGroup justifyContent="center">
-                    <StyledFlexItem key="alerts-status-open" grow={false}>
-                      <DonutChart
-                        data={donutData?.open?.severities}
-                        fillColor={fillColor}
-                        height={donutHeight}
-                        label={STATUS_OPEN}
-                        title={<ChartLabel count={openCount} />}
-                        totalCount={openCount}
-                      />
+                    <StyledFlexItem key="alerts-status-open" grow={isChartEmbeddablesEnabled}>
+                      {isChartEmbeddablesEnabled ? (
+                        <AlertDonutEmbeddable
+                          status={'open'}
+                          setQuery={setQuery}
+                          timerange={timerange}
+                          label={STATUS_OPEN}
+                        />
+                      ) : (
+                        <DonutChart
+                          data={donutData?.open?.severities}
+                          fillColor={fillColor}
+                          height={donutHeight}
+                          label={STATUS_OPEN}
+                          title={<ChartLabel count={openCount} />}
+                          totalCount={openCount}
+                        />
+                      )}
                     </StyledFlexItem>
-                    <StyledFlexItem key="alerts-status-acknowledged" grow={false}>
-                      <DonutChart
-                        data={donutData?.acknowledged?.severities}
-                        fillColor={fillColor}
-                        height={donutHeight}
-                        label={STATUS_ACKNOWLEDGED}
-                        title={<ChartLabel count={acknowledgedCount} />}
-                        totalCount={acknowledgedCount}
-                      />
+                    <StyledFlexItem
+                      key="alerts-status-acknowledged"
+                      grow={isChartEmbeddablesEnabled}
+                    >
+                      {isChartEmbeddablesEnabled ? (
+                        <AlertDonutEmbeddable
+                          status={'acknowledged'}
+                          setQuery={setQuery}
+                          timerange={timerange}
+                          label={STATUS_ACKNOWLEDGED}
+                        />
+                      ) : (
+                        <DonutChart
+                          data={donutData?.acknowledged?.severities}
+                          fillColor={fillColor}
+                          height={donutHeight}
+                          label={STATUS_ACKNOWLEDGED}
+                          title={<ChartLabel count={acknowledgedCount} />}
+                          totalCount={acknowledgedCount}
+                        />
+                      )}
                     </StyledFlexItem>
-                    <StyledFlexItem key="alerts-status-closed" grow={false}>
-                      <DonutChart
-                        data={donutData?.closed?.severities}
-                        fillColor={fillColor}
-                        height={donutHeight}
-                        label={STATUS_CLOSED}
-                        title={<ChartLabel count={closedCount} />}
-                        totalCount={closedCount}
-                      />
+                    <StyledFlexItem key="alerts-status-closed" grow={isChartEmbeddablesEnabled}>
+                      {isChartEmbeddablesEnabled ? (
+                        <AlertDonutEmbeddable
+                          status={'closed'}
+                          setQuery={setQuery}
+                          timerange={timerange}
+                          label={STATUS_CLOSED}
+                        />
+                      ) : (
+                        <DonutChart
+                          data={donutData?.acknowledged?.severities}
+                          fillColor={fillColor}
+                          height={donutHeight}
+                          label={STATUS_CLOSED}
+                          title={<ChartLabel count={closedCount} />}
+                          totalCount={closedCount}
+                        />
+                      )}
                     </StyledFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <StyledLegendFlexItem grow={false}>
-                  {legendItems.length > 0 && <Legend legendItems={legendItems} />}
-                </StyledLegendFlexItem>
+                {!isChartEmbeddablesEnabled && (
+                  <StyledLegendFlexItem grow={false}>
+                    {legendItems.length > 0 && <Legend legendItems={legendItems} />}
+                  </StyledLegendFlexItem>
+                )}
               </EuiFlexGroup>
               <EuiSpacer size="m" />
             </>

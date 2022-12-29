@@ -21,11 +21,12 @@ import { inputsSelectors } from '../../store';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { getRequestsAndResponses } from './utils';
+import { getRequestsAndResponses, parseVisualizationData } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
-const LensComponentWrapper = styled.div<{ height?: string }>`
+const LensComponentWrapper = styled.div<{ height?: string; width?: string }>`
   height: ${({ height }) => height ?? 'auto'};
+  width: ${({ width }) => width ?? 'auto'};
   > div {
     background-color: transparent;
   }
@@ -54,6 +55,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   extraActions,
   getLensAttributes,
   height: wrapperHeight,
+  width: wrapperWidth,
   id,
   inputsModelId = InputsModelId.global,
   inspectTitle,
@@ -61,6 +63,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   scopeId = SourcererScopeName.default,
   stackByField,
   timerange,
+  onLoad,
 }) => {
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
@@ -124,28 +127,38 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     return { response, additionalResponses };
   }, [visualizationData.responses]);
 
-  const onLoad = useCallback((isLoading, adapters) => {
-    if (!adapters) {
-      return;
-    }
-    const data = getRequestsAndResponses(adapters?.requests?.getRequests());
-    setVisualizationData({
-      requests: data.requests,
-      responses: data.responses,
-      isLoading,
-    });
-  }, []);
+  const callback = useCallback(
+    (isLoading, adapters) => {
+      if (!adapters) {
+        return;
+      }
+      const data = getRequestsAndResponses(adapters?.requests?.getRequests());
+      setVisualizationData({
+        requests: data.requests,
+        responses: data.responses,
+        isLoading,
+      });
+      if (onLoad != null) {
+        onLoad({
+          requests: parseVisualizationData(data.requests),
+          responses: parseVisualizationData(data.responses),
+          isLoading,
+        });
+      }
+    },
+    [onLoad]
+  );
 
   return (
     <>
       {attributes && searchSessionId ? (
-        <LensComponentWrapper height={wrapperHeight}>
+        <LensComponentWrapper height={wrapperHeight} width={wrapperWidth}>
           <LensComponent
             id={id}
             style={style}
             timeRange={timerange}
             attributes={attributes}
-            onLoad={onLoad}
+            onLoad={callback}
             onBrushEnd={updateDateRange}
             viewMode={ViewMode.VIEW}
             withDefaultActions={false}

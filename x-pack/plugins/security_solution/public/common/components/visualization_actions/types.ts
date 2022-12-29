@@ -33,18 +33,28 @@ export interface VisualizationActionsProps {
   title: React.ReactNode;
 }
 
+export interface EmbeddableData {
+  requests: object[];
+  responses: object[];
+  isLoading: boolean;
+}
+
+export type OnEmbeddableLoaded = (data: EmbeddableData) => void;
+
 export interface LensEmbeddableComponentProps {
-  extraOptions?: ExtraOptions;
   extraActions?: Action[];
+  extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   height?: string;
   id: string;
   inputsModelId?: InputsModelId.global | InputsModelId.timeline;
   inspectTitle?: string;
   lensAttributes?: LensAttributes;
+  onLoad?: OnEmbeddableLoaded;
   scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
+  width?: string;
 }
 
 export enum RequestStatus {
