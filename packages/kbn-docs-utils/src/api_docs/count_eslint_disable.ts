@@ -14,7 +14,7 @@ export interface EslintDisableCounts {
   eslintDisableFileCount: number;
 }
 
-const count = (string: string, regexp: RegExp) => Array.from(string.matchAll(regexp)).length;
+const count = (s: string, r: RegExp) => Array.from(s.matchAll(r)).length;
 
 export async function countEslintDisableLines(paths: string[]): Promise<EslintDisableCounts> {
   let eslintDisableFileCount = 0;
