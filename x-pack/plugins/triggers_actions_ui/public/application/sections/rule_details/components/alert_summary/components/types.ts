@@ -6,10 +6,13 @@
  */
 
 import { AlertStatus } from '@kbn/rule-data-utils';
+import { Alert } from '../../../../../hooks/use_load_alert_summary';
 
 export interface AlertsSummaryWidgetUIProps {
-  active: number;
-  recovered: number;
+  activeAlertCount: number;
+  activeAlerts: Alert[];
+  recoveredAlertCount: number;
+  recoveredAlerts: Alert[];
   timeRangeTitle: JSX.Element | string;
   onClick: (status?: AlertStatus) => void;
 }
