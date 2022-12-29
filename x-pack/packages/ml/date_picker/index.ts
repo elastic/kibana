@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export { DatePickerContextProvider } from './src/hooks/use_date_picker_context';
+export {
+  DatePickerContextProvider,
+  type DatePickerDependencies,
+} from './src/hooks/use_date_picker_context';
 export {
   useRefreshIntervalUpdates,
   useTimefilter,

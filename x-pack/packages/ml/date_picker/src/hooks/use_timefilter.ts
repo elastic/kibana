@@ -9,6 +9,9 @@ import { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { isEqual } from 'lodash';
+
+import type { TimeRange } from '@kbn/es-query';
+
 import { useDatePickerContext } from './use_date_picker_context';
 
 interface UseTimefilterOptions {
@@ -56,7 +59,7 @@ export const useRefreshIntervalUpdates = () => {
   return useObservable(refreshIntervalObservable$, timefilter.getRefreshInterval());
 };
 
-export const useTimeRangeUpdates = (absolute = false) => {
+export const useTimeRangeUpdates = (absolute = false): TimeRange => {
   const timefilter = useTimefilter();
 
   const getTimeCallback = useMemo(() => {
