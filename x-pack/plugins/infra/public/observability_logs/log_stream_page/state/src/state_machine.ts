@@ -181,7 +181,6 @@ export const createLogStreamPageStateMachine = ({
   toastsService,
   filterManagerService,
   urlStateStorage,
-  savedQueriesService,
 }: LogStreamPageStateMachineDependencies) =>
   createPureLogStreamPageStateMachine().withConfig({
     services: {
@@ -201,7 +200,6 @@ export const createLogStreamPageStateMachine = ({
             toastsService,
             filterManagerService,
             urlStateStorage,
-            savedQueriesService,
           }
         );
       },

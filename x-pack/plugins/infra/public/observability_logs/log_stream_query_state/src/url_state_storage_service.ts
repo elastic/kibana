@@ -25,7 +25,6 @@ interface LogStreamQueryUrlStateDependencies {
 }
 
 const defaultFilterStateKey = 'logFilter'; // TODO: change to a different key for BWC
-const defaultSavedQueryIdKey = 'savedQueryId';
 const defaultFilterStateValue: Required<FilterStateInUrl> = {
   query: {
     language: 'kuery',
@@ -118,7 +117,6 @@ export const updateFiltersInUrl =
 export const initializeFromUrl =
   ({
     filterStateKey = defaultFilterStateKey,
-    savedQueryIdKey = defaultSavedQueryIdKey,
     toastsService,
     urlStateStorage,
   }: LogStreamQueryUrlStateDependencies): InvokeCreator<
@@ -128,7 +126,6 @@ export const initializeFromUrl =
   (_context, _event) =>
   (send) => {
     const queryValueFromUrl = urlStateStorage.get(filterStateKey) ?? defaultFilterStateValue;
-    // const savedQueryIdFromUrl = urlStateStorage.get(savedQueryIdKey);
 
     const queryE = decodeQueryValueFromUrl(queryValueFromUrl);
 
@@ -147,47 +144,6 @@ export const initializeFromUrl =
         filters: queryE.right.filters ?? defaultFilterStateValue.filters,
       });
     }
-
-    // if (savedQueryIdFromUrl) {
-    //   return [
-    //     actions.assign<LogStreamQueryContext, LogStreamQueryEvent>({
-    //       // TODO: This should perform validation / error handling of the URL key
-    //       savedQueryId: savedQueryIdFromUrl,
-    //     } as LogStreamQueryContextWithSavedQueryId),
-    //     actions.send('RESOLVING_SAVED_QUERY_ID'),
-    //   ];
-    // } else {
-    //   return pipe(
-    //     legacyFilterStateInUrlRT.decode(queryValueFromUrl),
-    //     Either.map((legacyQuery) => ({ query: legacyQuery })),
-    //     Either.alt(() => filterStateInUrlRT.decode(queryValueFromUrl)),
-    //     Either.fold(
-    //       (errors) => [
-    //         {
-    //           type: '__notifyOnError',
-    //           exec: () => {
-    //             withNotifyOnErrors(toastsService).onGetError(
-    //               createPlainError(formatErrors(errors))
-    //             );
-    //           },
-    //         },
-    //         actions.assign<LogStreamQueryContext, LogStreamQueryEvent>({
-    //           query: defaultFilterStateValue.query,
-    //           filters: defaultFilterStateValue.filters,
-    //           parsedQuery: safeDefaultParsedQuery,
-    //         } as LogStreamQueryContextWithQuery & LogStreamQueryContextWithParsedQuery),
-    //       ],
-    //       ({ query, filters }) => [
-    //         actions.assign<LogStreamQueryContext, LogStreamQueryEvent>({
-    //           query,
-    //           filters,
-    //           parsedQuery: safeDefaultParsedQuery,
-    //         } as LogStreamQueryContextWithQuery & LogStreamQueryContextWithParsedQuery),
-    //         actions.send('URL_INITIALIZED'),
-    //       ]
-    //     )
-    //   );
-    // }
   };
 
 const filterMeta = rt.partial({

@@ -95,10 +95,6 @@ export type LogStreamQueryEvent =
       filters: Filter[];
     }
   | {
-      type: 'RESOLVING_SAVED_QUERY_ID'; // placeholder
-      data: any;
-    }
-  | {
       type: 'STATE_FROM_URL_KEY_CHANGED';
       query?: AnyQuery;
       filters?: Filter[];

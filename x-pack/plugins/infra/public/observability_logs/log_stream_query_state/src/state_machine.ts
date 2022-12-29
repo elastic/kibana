@@ -7,7 +7,7 @@
 
 import { EsQueryConfig } from '@kbn/es-query';
 import { actions, ActorRefFrom, createMachine, SpecialTargets } from 'xstate';
-import { FilterManager, QueryStart, QueryStringContract } from '@kbn/data-plugin/public';
+import type { FilterManager, QueryStringContract } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { OmitDeprecatedState, sendIfDefined } from '../../xstate_helpers';
@@ -36,12 +36,11 @@ import {
   updateQueryInSearchBar,
   updateFiltersInSearchBar,
 } from './search_bar_state_service';
-import { resolveSavedQueryId } from './saved_query_service';
 
 export const createPureLogStreamQueryStateMachine = (
   initialContext: LogStreamQueryContextWithDataViews
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QEUCuYBOBPAdKgdgJZEAuhAhgDaEBekAxANoAMAuoqAA4D2shZ3fBxAAPRAFoALAE5JOAMzMATM1kAOAKzLJANjUAaEFgkBGHQHYcJ+Sek6T5nfIvnzkgL7vDaTLmL8KahpiKAAxDG4AWwBVDEp6ACUAUQBlAHkAGQA1AEkAOQBxAH0UgEEspIARIuRopISATSKcypZ2JBAePgEhDrEEcQ01aRxlNSdJE2YdJTUTDUNjBHkRnQ0TcfslE0ld+U9vdGwcfzIqWhDwqNj4-JyAFRzSjJyALSqi0IS0gFki6ISGTawi6AUEwn64nkSnkOCGzkkGm25nkrgWRlMzDkQ2kQymKOk0wsBxAPmOGDg3EoADcQilyNTIGSsDkIPQIIIwCd8NTuABrLnMnAU2BU2n4KD0xkQZmshDEXkAY3IPTawI6oJ6EIksw0OCU0nManGkkczDUkgti0Q1mYODc2jURvWOyUOhJQpFYrpDKZRxZbMwEQwOE4lBVADNuBhIjhPZSaT7pbKIPKedxlaq2OquLwwb1QJCNDodDhLbjzIbK1o3daEEoNHrzGZDapmNY1G6PF5Sf6cAALciwZn0FL3Ur3JKfb5-AEZIoAaSSTQAwgAJUqFKo5zp5rV9RB2SyEnSSeQaXZqZwzOsrMtOo0zDaKEzzD19wfD-30Wr1JpfX4SiSUoEnXIoACEQKKddNwKbc2BBPdCHBA961NUZ1DUZgNFcBslDrNYcFkVRUQcOxJCxfYeyFT8R1CHIMknBIUmnQCUmA0C1wgqCYK3VoEI1JCUMLRAdGUIjSKdN1cRheQCL1YjpFIytTyxd1qI-IcR0qCdSiKXIkgAdRY3i4P49pc26ZCC1EG1ZiUe1pFfNYLQorFJDrSsrAsGQG3NXZi3Uw5fAHLS+wpalzggFUQnoLJnhaCccjSPJPlKBj4Is3crOE2yECPIjcR2S1sKPcxb2YWEVgtEizA2GYNHfELaPCsBIuoaKyAlOKEp0x4UpKaIVxXJIqkyxCcps-oVjtSQlEcaxZmUEtXAqqrpBqpS6vGBsmuOdrCE62L4pePrktSlIhpGsbzIm-NtQGawFPMN0NlsSYZJ0OtdhMe1TXMIY5pmLDpD23ADqO7qTsS-rUtCdKMnGwTJoekwGz+hsLEbJzhlPAjmEseY9Ao+btkbTwe3wbgIDgYRmTu-cRIGJxLDGCYpmB+Y6yhBwFHkU0nMcS03RLMG8CIUhAloSAGesh7BhUbzpAbDaVDmfCMQGJQDRwK8StxXytAvMXTil4IJSuGI4ll3Ki1PfU6pWN1oVfbnlasBFTw0RQZHPMWvUTCUpT9XxWRtqaJCGO0S2VixBZemQ6zRtQyxWuxKMJXCxYjchCEoSAEgTcVJV9GV-TD5H7tQwYrysZXzCxb2AeGdEln5lOGzMFR05UXaNOasLfHD1HpBGVRLSwnCXqRbnbDHtHtavZXdGmNQxZakKIeH1DSKI2wVMUVQLTkzXdjtQ05uNU8r7mdfB+OBUou3pnl9GDZAbE7WnA1pYz6ItxZgmhviYO+X4QoRSijFCUz88oN1+p2NycxhimmmHWJQFF9Q6CUleSsRV7BUWCvtSBXUoAwKLLCd6WDlZKRLBRNYbsHLWFPHoJ8Z52yNQpkAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QEUCuYBOBPAdKgdgJZEAuhAhgDaEBekAxANoAMAuoqAA4D2shZ3fBxAAPRAFoALAE5JOAMzMATM1kAOAKzLJANjUAaEFgkBGHQHYcJ+Sek6T5nfIvnzkgL7vDaTLmL8KahpiKAAxDG4AWwBVDEp6AEkAOQSAFQSAQQAZBIAtAFEAEQB9UIAlAHkAWWLosqyWdiQQHj4BIWaxBHF5JXkcDTVnSQ0lB3lXDUNjbpNmOUHpQbnzeWlmHQtPb3RsHAALclgfbHoAZVSM1PzSypq6rOKAaXyATWKAYQAJDKSAcSKjWErQCgmEXTslnWOkk8g0kkkQ02SmmiDWOERrjUOjGQ2YJhMGm2IBOuEOx12WHoyGi+TK73K1WKZ3yGTK32KACE2Z8fv9AWxgbxQR1QF0lJJLKpEWpmBpXEpRqiEDoNDhZKoJg47JJ5vJiaSDkdSfRQgkstcymdbkyWWyOdyyrzfgDCkDmiD2uDEDplOqtWpzEodEs+vJlar1brpFrzDr5joDZSjRTfPRClcMsUAGoJfIAdWt3xdAqaXGFXs6iBMSjUShwcYJqrUCOY80kyrjVgsMkVzBbI02Sd8KcNGDAADcqIQIOQyPgoPRs9kEhn0hUkqUMubS0K2oQwVWEJD1UsTAjZRpIeZlYp+msW5qzCZsYrh3tyWPJ9PZ-PF8ucjXBIN2ZaIPg+fIil3D0KwPUVRDRdYMSURxrFrZRNlcW9mHvaRHxjZ9XyJLwSWTKdqF-EIlxXICQLOMCIKgt1BRg-dDzFUw4XVIN7DUWxJFsUYdGVBETAbSVzEGSRg3Q6R31wciZznKiANXK5gM3UJtyyaDyzY+CuhrNU3EVCwNCvF8dQjZhLEJPRdRQsZzM8Ej8G4CA4GEUk9xFb1unsesxnsNZg16AllR6BwFHkSU1GkfjdRi8x5LwIhSECWhIB8ysOO6UZmG7aRFTwlQ+JRIwJCUJRpBwIZEVUeEiq0eEUv8Mhp2CBdwiiWJKGyuC-PEDQYRwILrCKpwxhMCKiqsYYYQ0RQZDhFLP0pfr2IQhBbBq6U1EvBUlQq2ZpF2msqr0RxXCKjwSMNNaR0UiANoMtFzDE+LpDjJw2zw2ERN1bjpP2mEQb41bjWTYgnpevybpwfFNBbX0Lt6AGCq+4HsRlPQTAh1M9nHJ7lIXWGj3MfFaolNs+LiyUNmVanRpDeQhjjM9gpS4m-zJ3Khv6fiQyKmNNl1VUZvrawYT0HFz0UQkXPcIA */
   createMachine<LogStreamQueryContext, LogStreamQueryEvent, LogStreamQueryTypestate>(
     {
       context: initialContext,
@@ -58,9 +57,6 @@ export const createPureLogStreamQueryStateMachine = (
 
         initializingFromUrl: {
           on: {
-            RESOLVING_SAVED_QUERY_ID: {
-              target: 'resolvingSavedQueryId',
-            },
             INITIALIZED_FROM_URL: {
               target: 'validating',
               actions: ['storeQuery', 'storeFilters'],
@@ -72,22 +68,6 @@ export const createPureLogStreamQueryStateMachine = (
           },
         },
 
-        resolvingSavedQueryId: {
-          invoke: {
-            src: 'resolveSavedQueryId',
-            onDone: {
-              target: 'hasQuery',
-              actions: ['storeResolvedSavedQuery'],
-            },
-            onError: {
-              target: 'failedResolvingSavedQueryId',
-            },
-          },
-        },
-
-        // TODO: Add error handling, probably want to copy the behaviour of use_saved_query from the stateful search bar
-        failedResolvingSavedQueryId: {},
-
         hasQuery: {
           entry: ['updateQueryInUrl', 'updateQueryInSearchBar', 'updateFiltersInSearchBar'],
           invoke: [
@@ -96,9 +76,6 @@ export const createPureLogStreamQueryStateMachine = (
             },
             {
               src: 'subscribeToFilterSearchBarChanges',
-            },
-            {
-              src: 'subscribeToUrlStateStorageChanges',
             },
           ],
           initial: 'revalidating',
@@ -184,15 +161,6 @@ export const createPureLogStreamQueryStateMachine = (
             ? ({ dataViews: event.dataViews } as LogStreamQueryContextWithDataViews)
             : {}
         ),
-        storeResolvedSavedQuery: actions.assign((_context, event) =>
-          'data' in event
-            ? {
-                query: event.data.query,
-                filters: event.data.filters,
-                parsedQuery: safeDefaultParsedQuery,
-              }
-            : {}
-        ),
         storeValidationError: actions.assign((_context, event) =>
           'error' in event
             ? ({
@@ -226,7 +194,6 @@ export interface LogStreamQueryStateMachineDependencies {
   filterManagerService: FilterManager;
   urlStateStorage: IKbnUrlStateStorage;
   toastsService: IToasts;
-  savedQueriesService: QueryStart['savedQueries'];
 }
 
 export const createLogStreamQueryStateMachine = (
@@ -237,7 +204,6 @@ export const createLogStreamQueryStateMachine = (
     toastsService,
     filterManagerService,
     urlStateStorage,
-    savedQueriesService,
   }: LogStreamQueryStateMachineDependencies
 ) =>
   createPureLogStreamQueryStateMachine(initialContext).withConfig({
@@ -266,7 +232,6 @@ export const createLogStreamQueryStateMachine = (
         toastsService,
         urlStateStorage,
       }),
-      resolveSavedQueryId: resolveSavedQueryId({ savedQueriesService }),
     },
   });
 

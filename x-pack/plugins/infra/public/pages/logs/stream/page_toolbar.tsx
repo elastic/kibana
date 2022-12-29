@@ -58,7 +58,7 @@ export const LogsToolbar = () => {
         useDefaultBehaviors={true}
         indexPatterns={dataViews}
         showQueryInput={true}
-        showQueryMenu={true}
+        showQueryMenu={false}
         showFilterBar={true}
         showDatePicker={true}
         displayStyle="inPage"
