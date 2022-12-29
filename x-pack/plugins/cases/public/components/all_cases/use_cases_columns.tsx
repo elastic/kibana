@@ -112,8 +112,10 @@ export const useCasesColumns = ({
 
   const columns: CasesColumns[] = [
     {
+      field: 'title',
       name: i18n.NAME,
-      render: (theCase: Case) => {
+      sortable: true,
+      render: (title: string, theCase: Case) => {
         if (theCase.id != null && theCase.title != null) {
           const caseDetailsLinkComponent = isSelectorView ? (
             <TruncatedText text={theCase.title} />
@@ -288,22 +290,26 @@ export const useCasesColumns = ({
     },
     {
       name: i18n.STATUS,
-      render: (theCase: Case) => {
-        if (theCase.status === null || theCase.status === undefined) {
-          return getEmptyTagValue();
+      field: 'status',
+      sortable: true,
+      render: (status: Case['status']) => {
+        if (status != null) {
+          return <Status status={status} />;
         }
 
-        return <Status status={theCase.status} />;
+        return getEmptyTagValue();
       },
     },
     {
       name: i18n.SEVERITY,
-      render: (theCase: Case) => {
-        if (theCase.severity != null) {
-          const severityData = severities[theCase.severity ?? CaseSeverity.LOW];
+      sortable: true,
+      field: 'severity',
+      render: (severity: Case['severity']) => {
+        if (severity != null) {
+          const severityData = severities[severity ?? CaseSeverity.LOW];
           return (
             <EuiHealth
-              data-test-subj={`case-table-column-severity-${theCase.severity}`}
+              data-test-subj={`case-table-column-severity-${severity}`}
               color={severityData.color}
             >
               {severityData.label}

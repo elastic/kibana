@@ -44,9 +44,6 @@ const ProgressLoader = styled(EuiProgress)`
     `}
 `;
 
-const getSortField = (field: string): SortFieldCase =>
-  field === SortFieldCase.closedAt ? SortFieldCase.closedAt : SortFieldCase.createdAt;
-
 export interface AllCasesListProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
@@ -123,7 +120,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         if (sort) {
           newQueryParams = {
             ...newQueryParams,
-            sortField: getSortField(sort.field),
+            sortField: sort.field,
             sortOrder: sort.direction,
           };
         }
