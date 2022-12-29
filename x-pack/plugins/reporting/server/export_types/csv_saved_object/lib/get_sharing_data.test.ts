@@ -30,6 +30,11 @@ describe('get_sharing_data', () => {
   let mockIndexPattern: DataView;
   let mockSearchSource: SearchSource;
   let mockSavedSearch: SavedSearchObjectType;
+  const mockSearchSourceGetField = (fieldName: string) => {
+    if (fieldName === 'index') {
+      return mockIndexPattern;
+    }
+  };
 
   const coreStart = coreMock.createStart();
   const request = httpServerMock.createKibanaRequest();
@@ -76,18 +81,14 @@ describe('get_sharing_data', () => {
       coreMigrationVersion: '7.17.9',
     };
     mockSearchSource = createMockSearchSource();
-    mockSearchSource.getField = jest.fn((fieldName: string) => {
-      if (fieldName === 'index') {
-        return mockIndexPattern;
-      }
-    });
+    mockSearchSource.getField = jest.fn(mockSearchSourceGetField);
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  it('transforms saved search into search source using columns with automatic time field', async () => {
+  it('with search source using columns with automatic time field', async () => {
     mockIndexPattern = createMockIndexPattern();
     const sharingData = await getSharingData({ uiSettings }, mockSearchSource, mockSavedSearch);
     expect(sharingData.columns).toMatchInlineSnapshot(`
@@ -108,7 +109,7 @@ describe('get_sharing_data', () => {
     ]);
   });
 
-  it('transforms saved search into search source with automatic time field and with no columns', async () => {
+  it('with search source with automatic time field and with no columns', async () => {
     mockIndexPattern = createMockIndexPattern();
     mockSavedSearch.attributes.columns = [];
     const sharingData = await getSharingData({ uiSettings }, mockSearchSource, mockSavedSearch);
@@ -120,7 +121,7 @@ describe('get_sharing_data', () => {
     expect(mockSearchSource.setField).toHaveBeenNthCalledWith(2, 'fields', ['*']);
   });
 
-  it('transforms saved search into search source using columns without time field', async () => {
+  it('with search source using columns without time field', async () => {
     mockIndexPattern = createMockIndexPatternWithoutTimeField();
     mockSavedSearch.attributes.sort = [];
     const sharingData = await getSharingData({ uiSettings }, mockSearchSource, mockSavedSearch);
@@ -135,6 +136,175 @@ describe('get_sharing_data', () => {
     expect(mockSearchSource.setField).toHaveBeenNthCalledWith(2, 'fields', [
       'clientip',
       'extension',
+    ]);
+  });
+
+  it('with saved search containing filters', async () => {
+    mockIndexPattern = createMockIndexPattern();
+    mockSearchSource.getField = jest.fn((fieldName) => {
+      if (fieldName === 'filter') {
+        return [
+          {
+            query: {
+              range: {
+                '@timestamp': { gte: '2015-09-20T10:19:40.307Z', lt: '2015-09-20T10:26:56.221Z' },
+              },
+            },
+          },
+          { query: { match_phrase: { 'extension.raw': 'gif' } } },
+        ];
+      }
+      return mockSearchSourceGetField(fieldName);
+    });
+
+    const sharingData = await getSharingData({ uiSettings }, mockSearchSource, mockSavedSearch);
+    expect(sharingData.columns).toMatchInlineSnapshot(`
+      Array [
+        "@timestamp",
+        "clientip",
+        "extension",
+      ]
+    `);
+    expect(mockSearchSource.setField).toBeCalledTimes(3);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(1, 'sort', [
+      { '@timestamp': 'desc' },
+    ]);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(2, 'fields', [
+      '@timestamp',
+      'clientip',
+      'extension',
+    ]);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(3, 'filter', [
+      {
+        query: {
+          range: {
+            '@timestamp': { gte: '2015-09-20T10:19:40.307Z', lt: '2015-09-20T10:26:56.221Z' },
+          },
+        },
+      },
+      { query: { match_phrase: { 'extension.raw': 'gif' } } },
+    ]);
+  });
+
+  it('with saved search containing filters to be combined with time range filter and timezone from the request', async () => {
+    mockIndexPattern = createMockIndexPattern();
+    mockSearchSource.getField = jest.fn((fieldName) => {
+      if (fieldName === 'filter') {
+        return [
+          {
+            query: {
+              range: {
+                '@timestamp': { gte: '2015-09-20T10:19:40.307Z', lt: '2015-09-20T10:26:56.221Z' },
+              },
+            },
+          },
+          { query: { match_phrase: { 'extension.raw': 'gif' } } },
+        ];
+      }
+      return mockSearchSourceGetField(fieldName);
+    });
+    const mockTimeRangeFilterFromRequest = {
+      min: '2022-12-29T22:22:22.222Z',
+      max: '2022-12-30T22:22:22.222Z',
+      timezone: 'US/Alaska',
+    };
+
+    const sharingData = await getSharingData(
+      { uiSettings },
+      mockSearchSource,
+      mockSavedSearch,
+      mockTimeRangeFilterFromRequest
+    );
+    expect(sharingData.columns).toMatchInlineSnapshot(`
+      Array [
+        "@timestamp",
+        "clientip",
+        "extension",
+      ]
+    `);
+    expect(mockSearchSource.setField).toBeCalledTimes(3);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(1, 'sort', [
+      { '@timestamp': 'desc' },
+    ]);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(2, 'fields', [
+      '@timestamp',
+      'clientip',
+      'extension',
+    ]);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(3, 'filter', [
+      {
+        meta: { index: 'logstash-*' },
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: '2022-12-29T22:22:22.222Z',
+              lte: '2022-12-30T22:22:22.222Z',
+            },
+          },
+        },
+      },
+      {
+        query: {
+          range: {
+            '@timestamp': { gte: '2015-09-20T10:19:40.307Z', lt: '2015-09-20T10:26:56.221Z' },
+          },
+        },
+      },
+      { query: { match_phrase: { 'extension.raw': 'gif' } } },
+    ]);
+  });
+
+  it('with saved search containing filters to be combined with time range filter from the request in epoch_millis', async () => {
+    mockIndexPattern = createMockIndexPattern();
+    mockSearchSource.getField = jest.fn((fieldName) => {
+      if (fieldName === 'filter') {
+        return [{ query: { match_phrase: { 'extension.raw': 'gif' } } }];
+      }
+      return mockSearchSourceGetField(fieldName);
+    });
+    const mockTimeRangeFilterFromRequest = {
+      min: 1671352518736,
+      max: 1672352518736,
+      timezone: 'US/Alaska',
+    };
+
+    const sharingData = await getSharingData(
+      { uiSettings },
+      mockSearchSource,
+      mockSavedSearch,
+      mockTimeRangeFilterFromRequest
+    );
+    expect(sharingData.columns).toMatchInlineSnapshot(`
+      Array [
+        "@timestamp",
+        "clientip",
+        "extension",
+      ]
+    `);
+    expect(mockSearchSource.setField).toBeCalledTimes(3);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(1, 'sort', [
+      { '@timestamp': 'desc' },
+    ]);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(2, 'fields', [
+      '@timestamp',
+      'clientip',
+      'extension',
+    ]);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(3, 'filter', [
+      {
+        meta: { index: 'logstash-*' },
+        query: {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: '2022-12-18T08:35:18.736Z',
+              lte: '2022-12-29T22:21:58.736Z',
+            },
+          },
+        },
+      },
+      { query: { match_phrase: { 'extension.raw': 'gif' } } },
     ]);
   });
 });

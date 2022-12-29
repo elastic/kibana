@@ -95,8 +95,8 @@ export async function getSharingData(
         range: {
           [timeFieldName]: {
             format: 'strict_date_optional_time',
-            gte: minTime,
-            lte: maxTime,
+            gte: minTime?.toISOString(),
+            lte: maxTime?.toISOString(),
           },
         },
       },
