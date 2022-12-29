@@ -45,7 +45,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   };
 
   const onPanelFiltersChange = (panelFilters: Filter[]) => {
-    // ControlsContent trigger this event 2 times during its loading lifecycle
+    // <ControlsContent /> triggers this event 2 times during its loading lifecycle
     if (!deepEqual(controlPanelFilters, panelFilters)) {
       onQueryChange({ panelFilters });
     }
