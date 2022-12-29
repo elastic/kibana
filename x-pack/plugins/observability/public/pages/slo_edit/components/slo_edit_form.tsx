@@ -27,6 +27,7 @@ import { useCheckFormPartialValidities } from '../helpers/use_check_form_partial
 import { SloEditFormDefinitionCustomKql } from './slo_edit_form_definition_custom_kql';
 import { SloEditFormDescription } from './slo_edit_form_description';
 import { SloEditFormObjectives } from './slo_edit_form_objectives';
+import { processValues } from '../helpers/process_slo_form_values';
 import { paths } from '../../../config';
 import { SLO } from '../../../typings';
 import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
@@ -63,8 +64,8 @@ export function SloEditForm({ slo }: SloEditFormProps) {
 
   const handleCreateSlo = () => {
     const values = getValues();
-
-    createSlo({ ...values, objective: { target: values.objective.target / 100 } });
+    const processedValues = processValues(values);
+    createSlo(processedValues);
   };
 
   if (successCreatingSlo) {
