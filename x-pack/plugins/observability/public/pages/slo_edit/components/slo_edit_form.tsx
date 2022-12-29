@@ -68,12 +68,21 @@ export function SloEditForm({ slo }: SloEditFormProps) {
   };
 
   if (successCreatingSlo) {
-    toasts.addSuccess(`Successfully created ${getValues().name}`);
+    toasts.addSuccess(
+      i18n.translate('xpack.observability.slos.sloEdit.creation.success', {
+        defaultMessage: 'Successfully created {name}',
+        values: { name: getValues().name },
+      })
+    );
     navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 
   if (errorCreatingSlo) {
-    toasts.addError(new Error(errorCreatingSlo), { title: 'Something went wrong' });
+    toasts.addError(new Error(errorCreatingSlo), {
+      title: i18n.translate('xpack.observability.slos.sloEdit.creation.error', {
+        defaultMessage: 'Something went wrong',
+      }),
+    });
   }
 
   useEffect(() => {
