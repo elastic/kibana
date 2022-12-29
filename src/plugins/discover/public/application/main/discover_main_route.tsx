@@ -63,9 +63,6 @@ export function DiscoverMainRoute(props: Props) {
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const { id } = useParams<DiscoverLandingParams>();
-  useEffect(() => {
-    setLoading(true);
-  }, [id]);
 
   /**
    * Get location state of scoped history only on initial load
@@ -145,6 +142,7 @@ export function DiscoverMainRoute(props: Props) {
 
   const loadSavedSearch = useCallback(async () => {
     try {
+      setLoading(true);
       const currentSavedSearch = await getSavedSearch(id, {
         search: services.data.search,
         savedObjectsClient: core.savedObjects.client,
