@@ -31,7 +31,6 @@ import type {
 import {
   initializeFromUrl,
   safeDefaultParsedQuery,
-  subscribeToUrlStateStorageChanges,
   updateFiltersInUrl,
   updateQueryInUrl,
 } from './url_state_storage_service';
@@ -40,7 +39,7 @@ import { showValidationErrorToast, validateQuery } from './validate_query_servic
 export const createPureLogStreamQueryStateMachine = (
   initialContext: LogStreamQueryContextWithDataViews
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QEUCuYBOBPAdKgdgJZEAuhAhgDaEBekAxANoAMAuoqAA4D2shZ3fBxAAPRAFoALAE5JOAMzMATM1kAOAKzLJANjUAaEFgkBGHQHYcJ+Sek6T5nfIvnzkgL7vDaTLmL8KahpiKAAxDG4AWwBVDEp6AEkAOQSAFQSAQQAZBIAtAFEAEQB9UIAlAHkAWWLosqyWdiQQHj4BIWaxBHF5JXkcDTVnSQ0lB3lXDUNjbpNmOUHpQbnzeWlmHQtPb3RsHAALclgfbHoAZVSM1PzSypq6rOKAaXyATWKAYQAJDKSAcSKjWErQCgmEXTslnWOkk8g0kkkQ02SmmiDWOERrjUOjGQ2YJhMGm2IBOuEOx12WHoyGi+TK73K1WKZ3yGTK32KACE2Z8fv9AWxgbxQR1QF0lJJLKpEWpmBpXEpRqiEDoNDhZKoJg47JJ5vJiaSDkdSfRQgkstcymdbkyWWyOdyyrzfgDCkDmiD2uDEDplOqtWpzEodEs+vJlar1brpFrzDr5joDZSjRTfPRClcMsUAGoJfIAdWt3xdAqaXGFXs6iBMSjUShwcYJqrUCOY80kyrjVgsMkVzBbI02Sd8KcNGDAADcqIQIOQyPgoPRs9kEhn0hUkqUMubS0K2oQwVWEJD1UsTAjZRpIeZlYp+msW5qzCZsYrh3tyWPJ9PZ-PF8ucjXBIN2ZaIPg+fIil3D0KwPUVRDRdYMSURxrFrZRNlcW9mHvaRHxjZ9XyJLwSWTKdqF-EIlxXICQLOMCIKgt1BRg-dDzFUw4XVIN7DUWxJFsUYdGVBETAbSVzEGSRg3Q6R31wciZznKiANXK5gM3UJtyyaDyzY+CuhrNU3EVCwNCvF8dQjZhLEJPRdRQsZzM8Ej8G4CA4GEUk9xFb1unsesxnsNZg16AllR6BwFHkRFgxkRwJXPeS8CIUhAloSAfMrDjulGZhu2kRU8JUPiUSMCQlCUaQcCGRFVHhQqtHhZL-DIadggXcIoliSgsrgvzxA0GEcCC6xCqcMYTAiwqrGGGENEUGQ4WSz9KT69iEIQWxqulNRLwVJVytmaQdpraxNmcRVXxW40yJ-daDLRcwxOkWw4ycNs8NhETdW46S9phAG+Ju1M9mIRSIAevzCrkfFNBbX1Komn78ukEyAZlPQTBBr8IeUhcoaPcx8RqiU2z4tRZGJ4SjrJkaQ3kIY4zPYLkrxv9CZywb+n4kNCpjTZdVVab63O3RX3PRRCRc9wgA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QEUCuYBOBPAdKgdgJZEAuhAhgDaEBekAxANoAMAuoqAA4D2shZ3fBxAAPRAFoATAHZJOAMwBWJQBYAjNIBszAJwAOTZIA0ILBMnyca+Wp2bFenfL1b5zTQF8PJtJlzF+CmoaYigAMQxuAFsAVQxKegBJADlEgBVEgEEAGUSALQBRABEAfTCAJQB5AFkSmPLslnYkEB4+ASEWsQRxeRU5PXdNA001RX1tRRMzBBkdHHVmFWZpHTVJC2ZFFS8fdGwcAAtyWF9semQYgvKATTKq2oBlAszygGEACRKAIVeSz8yyQA4sUmsI2oFBMJupIVNIcLoVHpBoppLJFMZTIh7DgdMsnNINHZlip5LsQGdcMdTvssPQwolsmlro97jUSs9Xp8fn8AcDQWxwbxIZ1QN1tHICWoXJJNDoMfJ5NNsYpcfj5ITVpoSZ5vBTaUcTpT6EVMmlMiUAGqJAoAdVZfJBRTBLQhHWhiDscllKwsKnUOmYajUyoQqysmmkKh00mYbijjkU5MphppfhwGDAADcqIQIOQyPgoPRLTlEqaMpVkmVMoyBc0uML3V1PZHcfK1P6UXY0aG3JZ5Pp1WpRgZJEm9SnqSnMznqPnC8XS7kK4kqxyYm83gVivWhe1CFCWwhB8wFjJRvJJINZZHpH24woh7obKPDBO9um53mC6ES2XV3XR5N23XdnUFV0m0PUVRAkNZcVkUY8UUQxmDjPRQ39NQcCjNENUkWwVEUJZpGTA1vwXP9l3LM012rMJa2yPdIIPI8xQkaRLB0CZiO2aQ9EkJxQxQ1UBKUZg9HWUl1FI8l8G4CA4GESl9xFD0elPHBBk0YYdLGCYtlDKRtARcYtivFw0S0Mj0wIAIyFzOgIFU5t2J6QS9BwDYVmlHRYR0rZNCMjRsJHST-RE8dOJ2ScDXsoJaFCCJojiSgXOg9Ten6LzI1GawrKvWFQ07SxZE41Y1jsawP31dNp1pdK2NghBbHmRFkS2NFx0xGZxA0ORFDMyMPNWcYbIOeqv1zZyWLU48NWwyqtTcXQ9FJTDlgQ-pkW1HbJPGqkjTi-AKMamDuj8lQEWlBwVAlWUrw2s8Y22gwkQMfbYrqo701nabfyLM71NjbCBOWCTfLhdxQ1hM9ZScPQNW4xQR2sA6cAogGoCB49eiULTL1RPQMUDQcpixBB-WeqNx2lIlEdkrwgA */
   createMachine<LogStreamQueryContext, LogStreamQueryEvent, LogStreamQueryTypestate>(
     {
       context: initialContext,
@@ -103,23 +102,16 @@ export const createPureLogStreamQueryStateMachine = (
             },
           },
           on: {
-            STATE_FROM_URL_KEY_CHANGED: {
-              target: '.revalidating',
-              actions: [
-                'storeQuery',
-                'storeFilters',
-                'updateQueryInSearchBar',
-                'updateFiltersInSearchBar',
-              ],
-            },
             QUERY_FROM_SEARCH_BAR_CHANGED: {
               target: '.revalidating',
               actions: ['storeQuery', 'updateQueryInUrl'],
             },
+
             FILTERS_FROM_SEARCH_BAR_CHANGED: {
               target: '.revalidating',
               actions: ['storeFilters', 'updateFiltersInUrl'],
             },
+
             DATA_VIEWS_CHANGED: {
               target: '.revalidating',
               actions: 'storeDataViews',
@@ -228,10 +220,6 @@ export const createLogStreamQueryStateMachine = (
       }),
       subscribeToFilterSearchBarChanges: subscribeToFilterSearchBarChanges({
         filterManagerService,
-      }),
-      subscribeToUrlStateStorageChanges: subscribeToUrlStateStorageChanges({
-        toastsService,
-        urlStateStorage,
       }),
     },
   });

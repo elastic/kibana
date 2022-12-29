@@ -12,8 +12,6 @@ import * as Array from 'fp-ts/lib/Array';
 import * as Either from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
-import stringify from 'json-stable-stringify';
-import { concatMap, distinctUntilChanged, map } from 'rxjs/operators';
 import { InvokeCreator } from 'xstate';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import { replaceStateKeyInQueryString } from '../../../utils/url_state';
@@ -26,7 +24,7 @@ interface LogStreamQueryUrlStateDependencies {
   urlStateStorage: IKbnUrlStateStorage;
 }
 
-const defaultFilterStateKey = 'logFilter'; // TODO: change to a different key for BWC
+const defaultFilterStateKey = 'logFilter';
 const defaultFilterStateValue: Required<FilterStateInUrl> = {
   query: {
     language: 'kuery',
@@ -42,41 +40,6 @@ export const safeDefaultParsedQuery: ParsedQuery = {
     filter: [{ match_none: {} }],
   },
 };
-
-export const subscribeToUrlStateStorageChanges =
-  ({
-    toastsService,
-    urlStateStorage,
-    filterStateKey = defaultFilterStateKey,
-  }: LogStreamQueryUrlStateDependencies): InvokeCreator<
-    LogStreamQueryContext,
-    LogStreamQueryEvent
-  > =>
-  (_context, _event) =>
-    urlStateStorage.change$(filterStateKey).pipe(
-      map(() => urlStateStorage.get(filterStateKey)),
-      // TODO: this prevents an infinite loop, but not double-fetching}
-      // aside from that, the filter value is retroactively modified somewhere
-      // so deepEqual always returns false, hence the stringify
-      distinctUntilChanged((prev, current) => stringify(prev) === stringify(current)),
-      map(decodeQueryValueFromUrl),
-      concatMap((queryE): LogStreamQueryEvent[] => {
-        if (Either.isLeft(queryE)) {
-          withNotifyOnErrors(toastsService).onGetError(createPlainError(formatErrors(queryE.left)));
-        } else {
-          const { query, filters } = queryE.right;
-          return [
-            {
-              type: 'STATE_FROM_URL_KEY_CHANGED',
-              ...(query != null ? { query } : {}),
-              ...(filters != null ? { filters } : {}),
-            },
-          ];
-        }
-
-        return [];
-      })
-    );
 
 export const updateQueryInUrl =
   ({
@@ -110,7 +73,7 @@ export const updateFiltersInUrl =
     urlStateStorage.set(
       filterStateKey,
       filterStateInUrlRT.encode({
-        query: context.query, // TODO: Possibly revisit. set() sets an entire key, so we'll need to add query / filters to the opposite update function I think.
+        query: context.query,
         filters: context.filters,
       })
     );

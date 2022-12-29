@@ -93,9 +93,4 @@ export type LogStreamQueryEvent =
       type: 'INITIALIZED_FROM_URL';
       query: AnyQuery;
       filters: Filter[];
-    }
-  | {
-      type: 'STATE_FROM_URL_KEY_CHANGED';
-      query?: AnyQuery;
-      filters?: Filter[];
     };
