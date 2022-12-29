@@ -15,12 +15,12 @@ import { i18n } from '@kbn/i18n';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
+import { UrlStateProvider } from '@kbn/ml-url-state';
 import {
   SEARCH_QUERY_LANGUAGE,
   SearchQueryLanguage,
   SavedSearchSavedObject,
 } from '../../application/utils/search_utils';
-import { UrlStateProvider } from '../../hooks/use_url_state';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 
@@ -40,6 +40,11 @@ export interface ExplainLogRateSpikesAppStateProps {
 const defaultSearchQuery = {
   match_all: {},
 };
+
+export interface AiOpsPageUrlState {
+  pageKey: 'AIOPS_INDEX_VIEWER';
+  pageUrlState: AiOpsIndexBasedAppState;
+}
 
 export interface AiOpsIndexBasedAppState {
   searchString?: Query['query'];
