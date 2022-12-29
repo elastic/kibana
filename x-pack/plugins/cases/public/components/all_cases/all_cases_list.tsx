@@ -122,7 +122,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       ({ page, sort }: EuiBasicTableOnChange) => {
         let newQueryParams = queryParams;
         if (sort) {
-          console.log(getSortField('a'));
           newQueryParams = {
             ...newQueryParams,
             sortField: getSortField(sort.field),
