@@ -6,6 +6,7 @@
  */
 
 import { IToasts } from '@kbn/core-notifications-browser';
+import { Query } from '@kbn/es-query';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Array from 'fp-ts/lib/Array';
 import * as Either from 'fp-ts/lib/Either';
@@ -15,6 +16,7 @@ import stringify from 'json-stable-stringify';
 import { concatMap, distinctUntilChanged, map } from 'rxjs/operators';
 import { InvokeCreator } from 'xstate';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';
+import { replaceStateKeyInQueryString } from '../../../utils/url_state';
 import type { LogStreamQueryContext, LogStreamQueryEvent, ParsedQuery } from './types';
 
 interface LogStreamQueryUrlStateDependencies {
@@ -208,3 +210,6 @@ const decodeQueryValueFromUrl = (queryValueFromUrl: unknown) =>
     ),
     () => filterStateInUrlRT.decode(queryValueFromUrl)
   );
+
+export const replaceLogFilterInQueryString = (query: Query) =>
+  replaceStateKeyInQueryString<Query>(defaultFilterStateKey, query);
