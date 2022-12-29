@@ -47,7 +47,7 @@ describe('Entity Analytics Dashboard', () => {
   });
 
   describe('Without data', () => {
-    before(() => {
+    beforeEach(() => {
       visit(ENTITY_ANALYTICS_URL);
     });
 
