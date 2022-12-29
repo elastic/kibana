@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useActor } from '@xstate/react';
+import { useSelector } from '@xstate/react';
 import stringify from 'json-stable-stringify';
-import { useMemo } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
 import { useLogViewContext } from '../../../hooks/use_log_view';
 import { useLogStreamPageStateContext } from '../../../observability_logs/log_stream_page/state';
@@ -27,13 +26,10 @@ export const WithSummary = ({
   }>;
 }) => {
   const { logViewId } = useLogViewContext();
-  const [logStreamPageState] = useActor(useLogStreamPageStateContext());
-  const serializedParsedQuery = useMemo(
-    () =>
-      logStreamPageState.matches({ hasLogViewIndices: 'initialized' })
-        ? stringify(logStreamPageState.context.parsedQuery)
-        : null,
-    [logStreamPageState]
+  const serializedParsedQuery = useSelector(useLogStreamPageStateContext(), (logStreamPageState) =>
+    logStreamPageState.matches({ hasLogViewIndices: 'initialized' })
+      ? stringify(logStreamPageState.context.parsedQuery)
+      : null
   );
   const { startTimestamp, endTimestamp } = useLogPositionStateContext();
 
