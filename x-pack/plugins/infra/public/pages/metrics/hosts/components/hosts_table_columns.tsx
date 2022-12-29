@@ -11,13 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import type { SnapshotMetricInput, SnapshotNodeMetric } from '../../../../../common/http_api';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
-import { CloudProviderIconWithTitle, CloudProviders } from './cloud_provider_icon_with_title';
+import { CloudProviderIconWithTitle } from './cloud_provider_icon_with_title';
 import { TruncateLinkWithTooltip } from './truncate_link_with_tooltip';
 
 interface HostNodeRow extends HostMetics {
   os?: string | null;
   servicesOnHost?: number | null;
-  title: { name: string; cloudProvider?: CloudProviders | null };
+  title: { name: string; cloudProvider?: string | null };
   name: string;
 }
 
@@ -106,14 +106,6 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     field: 'memoryTotal.avg',
     sortable: true,
     render: (avg: number) => <>{formatMetric('memoryTotal', avg)}</>,
-  },
-  {
-    name: i18n.translate('xpack.infra.hostsTable.servicesOnHostColumnHeader', {
-      defaultMessage: 'Services on Host',
-    }),
-    field: 'servicesOnHost',
-    sortable: true,
-    render: (servicesOnHost: number) => <>{formatMetric('cpuCores', servicesOnHost)}</>,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.averageMemoryUsageColumnHeader', {

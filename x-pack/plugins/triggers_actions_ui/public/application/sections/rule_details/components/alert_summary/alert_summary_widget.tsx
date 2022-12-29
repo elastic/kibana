@@ -18,7 +18,7 @@ export const AlertSummaryWidget = ({
   timeRange,
 }: AlertSummaryWidgetProps) => {
   const {
-    alertSummary: { active, recovered },
+    alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount, recoveredAlerts },
     isLoading,
     error,
   } = useLoadAlertSummary({
@@ -32,9 +32,11 @@ export const AlertSummaryWidget = ({
 
   return (
     <AlertsSummaryWidgetUI
-      active={active}
+      activeAlertCount={activeAlertCount}
+      activeAlerts={activeAlerts}
       onClick={onClick}
-      recovered={recovered}
+      recoveredAlertCount={recoveredAlertCount}
+      recoveredAlerts={recoveredAlerts}
       timeRangeTitle={timeRange.title}
     />
   );
