@@ -103,8 +103,6 @@ function renderNotifications(
   });
 }
 
-type EmbeddableWithDescription = IEmbeddable & { getDescription: () => string };
-
 export function PanelHeader({
   title,
   description,

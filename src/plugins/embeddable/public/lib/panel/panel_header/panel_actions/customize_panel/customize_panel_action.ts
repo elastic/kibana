@@ -8,20 +8,28 @@
 
 import { i18n } from '@kbn/i18n';
 import { Action } from '@kbn/ui-actions-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import { ViewMode } from '../../../../types';
-import { IEmbeddable } from '../../../../embeddables';
+import { IEmbeddable, Embeddable, EmbeddableInput } from '../../../..';
 
 export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
 
-type GetUserData = (
-  context: ActionContext
-) => Promise<{ title: string | undefined; description?: string | undefined; hideTitle?: boolean }>;
+type GetUserData = (context: CustomPanelActionContext) => Promise<{
+  title: string | undefined;
+  description?: string | undefined;
+  hideTitle?: boolean;
+  timeRange?: TimeRange;
+}>;
 
-interface ActionContext {
-  embeddable: IEmbeddable;
+export interface TimeRangeInput extends EmbeddableInput {
+  timeRange: TimeRange;
 }
 
-export class CustomizePanelAction implements Action<ActionContext> {
+export interface CustomPanelActionContext {
+  embeddable: IEmbeddable | Embeddable<TimeRangeInput>;
+}
+
+export class CustomizePanelAction implements Action<CustomPanelActionContext> {
   public readonly type = ACTION_CUSTOMIZE_PANEL;
   public id = ACTION_CUSTOMIZE_PANEL;
   public order = 40;
@@ -38,13 +46,17 @@ export class CustomizePanelAction implements Action<ActionContext> {
     return 'pencil';
   }
 
-  public async isCompatible({ embeddable }: ActionContext) {
+  public async isCompatible({ embeddable }: CustomPanelActionContext) {
     return embeddable.getInput().viewMode === ViewMode.EDIT ? true : false;
   }
 
-  public async execute({ embeddable }: ActionContext) {
-    const data = await this.getDataFromUser({ embeddable });
-    const { title, description, hideTitle } = data;
-    embeddable.updateInput({ title, description, hidePanelTitles: hideTitle });
+  public async execute({ embeddable }: CustomPanelActionContext) {
+    const {
+      title,
+      description,
+      hideTitle: hidePanelTitles,
+      timeRange,
+    } = await this.getDataFromUser({ embeddable });
+    embeddable.updateInput({ title, description, hidePanelTitles, timeRange });
   }
 }

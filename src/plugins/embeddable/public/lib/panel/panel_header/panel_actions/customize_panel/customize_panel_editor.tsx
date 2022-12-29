@@ -22,32 +22,121 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable, EmbeddableInput } from '../../../..';
+import { TimeRange } from '@kbn/es-query';
+import { TimeRangeInput } from './customize_panel_action';
+import {
+  IContainer,
+  ContainerInput,
+  IEmbeddable,
+  Embeddable,
+  EmbeddableOutput,
+  TimePickerRange,
+} from '../../../..';
+
+type PanelSettings = {
+  title?: string;
+  hideTitle?: boolean;
+  description?: string;
+  timeRange?: TimeRange;
+};
 
 interface CustomizePanelProps {
   embeddable: IEmbeddable;
-  updateInput: (input: Partial<EmbeddableInput>) => void;
+  dateFormat?: string;
+  commonlyUsedRanges: TimePickerRange[];
+  updatePanelSettings: (panelSettings: PanelSettings) => void;
   cancel: () => void;
 }
 
+const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
+
+type VisualizeEmbeddable = IEmbeddable<{ id: string }, EmbeddableOutput & { visTypeName: string }>;
+
+function isVisualizeEmbeddable(
+  embeddable: IEmbeddable | VisualizeEmbeddable
+): embeddable is VisualizeEmbeddable {
+  return embeddable.type === VISUALIZE_EMBEDDABLE_TYPE;
+}
+
+function isTimeRangeCompatible(embeddable: IEmbeddable) {
+  const isInputControl =
+    isVisualizeEmbeddable(embeddable) &&
+    (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'input_control_vis';
+
+  const isMarkdown =
+    isVisualizeEmbeddable(embeddable) &&
+    (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
+
+  const isImage = embeddable.type === 'image';
+
+  return Boolean(
+    embeddable &&
+      embeddable.parent &&
+      hasTimeRange(embeddable) &&
+      !isInputControl &&
+      !isMarkdown &&
+      !isImage
+  );
+}
+
+function hasTimeRange(
+  embeddable: IEmbeddable | Embeddable<TimeRangeInput>
+): embeddable is Embeddable<TimeRangeInput> {
+  return (embeddable as Embeddable<TimeRangeInput>).getInput().timeRange !== undefined;
+}
+
+function doesInheritTimeRange(embeddable: IEmbeddable) {
+  if (!embeddable.parent) {
+    return false;
+  }
+
+  const parent = embeddable.parent as IContainer<{}, ContainerInput<TimeRangeInput>>;
+
+  // if it's a dashboard emptys screen, there will be no embeddable
+  if (!parent.getInput().panels[embeddable.id]) {
+    return false;
+  }
+  // If there is no explicit input defined on the parent then this embeddable inherits the
+  // time range from whatever the time range of the parent is.
+  return parent.getInput().panels[embeddable.id].explicitInput.timeRange === undefined;
+}
+
 export const CustomizePanelEditor = (props: CustomizePanelProps) => {
-  const { cancel, updateInput } = props;
-  const [hideTitle, setHideTitle] = useState(props.embeddable.getInput().hidePanelTitles);
+  const { cancel, updatePanelSettings, embeddable } = props;
+  const timeRangeCompatible = isTimeRangeCompatible(embeddable);
+  const [hideTitle, setHideTitle] = useState(embeddable.getInput().hidePanelTitles);
   const [description, setDescription] = useState(
-    props.embeddable.getInput().description ?? props.embeddable.getOutput().defaultDescription
+    embeddable.getInput().description ?? embeddable.getOutput().defaultDescription
   );
   const [title, setTitle] = useState(
-    props.embeddable.getInput().title ?? props.embeddable.getOutput().defaultTitle
+    embeddable.getInput().title ?? embeddable.getOutput().defaultTitle
+  );
+  const [inheritTimeRange, setInheritTimeRange] = useState(
+    timeRangeCompatible ? doesInheritTimeRange(embeddable) : false
+  );
+  const [timeRange, setTimeRange] = useState(
+    timeRangeCompatible
+      ? (embeddable as Embeddable<TimeRangeInput>).getInput().timeRange
+      : undefined
   );
 
   const save = () => {
-    const newTitle = title === props.embeddable.getOutput().defaultTitle ? undefined : title;
+    const newTitle = title === embeddable.getOutput().defaultTitle ? undefined : title;
     const newDescription =
-      description === props.embeddable.getOutput().defaultDescription ? undefined : description;
-    updateInput({ title: newTitle, hidePanelTitles: hideTitle, description: newDescription });
+      description === embeddable.getOutput().defaultDescription ? undefined : description;
+    const newPanelSettings: PanelSettings = {
+      title: newTitle,
+      hideTitle,
+      description: newDescription,
+    };
+    if (Boolean(timeRangeCompatible)) {
+      newPanelSettings.timeRange = !inheritTimeRange ? timeRange : undefined;
+    }
+    updatePanelSettings(newPanelSettings);
   };
 
   return (
@@ -57,7 +146,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
           <h2>
             <FormattedMessage
               id="embeddableApi.customizePanel.flyout.title"
-              defaultMessage="Customize panel"
+              defaultMessage="Edit panel settings"
             />
           </h2>
         </EuiTitle>
@@ -89,7 +178,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               <EuiButtonEmpty
                 size="xs"
                 data-test-subj="resetCustomEmbeddablePanelTitle"
-                onClick={() => setTitle(props.embeddable.getOutput().defaultTitle ?? '')}
+                onClick={() => setTitle(embeddable.getOutput().defaultTitle ?? '')}
                 disabled={hideTitle}
                 aria-label={i18n.translate(
                   'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
@@ -133,9 +222,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               <EuiButtonEmpty
                 size="xs"
                 data-test-subj="resetCustomEmbeddablePanelTitle"
-                onClick={() =>
-                  setDescription(props.embeddable.getOutput().defaultDescription ?? '')
-                }
+                onClick={() => setDescription(embeddable.getOutput().defaultDescription ?? '')}
                 disabled={hideTitle}
                 aria-label={i18n.translate(
                   'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
@@ -162,11 +249,57 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.flyout.optionsMenuForm.panelDescriptionAriaLabel',
                 {
-                  defaultMessage: 'Enter a description for your panel',
+                  defaultMessage: 'Enter a custom description for your panel',
                 }
               )}
             />
           </EuiFormRow>
+          {timeRangeCompatible ? (
+            <>
+              <EuiFormRow>
+                <EuiSwitch
+                  checked={!inheritTimeRange}
+                  data-test-subj="customizePanelShowCustomTimeRange"
+                  id="hideTitle"
+                  label={
+                    <FormattedMessage
+                      defaultMessage="Apply custom time range to panel"
+                      id="embeddableApi.customizePanel.flyout.optionsMenuForm.showCustomTimeRangeSwitch"
+                    />
+                  }
+                  onChange={(e) => setInheritTimeRange(!e.target.checked)}
+                />
+              </EuiFormRow>
+              {!inheritTimeRange ? (
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="uiActionsEnhanced.customizePanel.flyout.optionsMenuForm.panelTimeRangeFormRowLabel"
+                      defaultMessage="Panel time range"
+                    />
+                  }
+                >
+                  <EuiSuperDatePicker
+                    start={timeRange?.from ?? undefined}
+                    end={timeRange?.to ?? undefined}
+                    onTimeChange={({ start, end }) => setTimeRange({ from: start, to: end })}
+                    showUpdateButton={false}
+                    dateFormat={props.dateFormat}
+                    commonlyUsedRanges={props.commonlyUsedRanges.map(
+                      ({ from, to, display }: { from: string; to: string; display: string }) => {
+                        return {
+                          start: from,
+                          end: to,
+                          label: display,
+                        };
+                      }
+                    )}
+                    data-test-subj="customizePanelTimeRangeDatePicker"
+                  />
+                </EuiFormRow>
+              ) : null}
+            </>
+          ) : null}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -174,7 +307,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={cancel}>
               <FormattedMessage
-                id="embeddableApi.customizePanel.flyout.cancel"
+                id="embeddableApi.customizePanel.flyout.cancelButtonTitle"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -191,94 +324,4 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
       </EuiFlyoutFooter>
     </>
   );
-
-  // return (
-  //   <EuiFocusTrap clickOutsideDisables={true} initialFocus={'.panelTitleInputText'}>
-  //     <EuiOutsideClickDetector onOutsideClick={this.props.cancel}>
-  //       <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="euiModal__flex">
-  //         <form
-  //           onSubmit={(event: FormEvent) => {
-  //             event.preventDefault();
-  //             this.save();
-  //           }}
-  //         >
-  //           <EuiModalHeader>
-  //             <EuiModalHeaderTitle data-test-subj="customizePanelTitle">
-  //               <h2 id={titleId}>Customize panel</h2>
-  //             </EuiModalHeaderTitle>
-  //           </EuiModalHeader>
-
-  //           <EuiModalBody>
-  //             <EuiFormRow>
-  //               <EuiSwitch
-  //                 checked={!this.state.hideTitle}
-  //                 data-test-subj="customizePanelHideTitle"
-  //                 id="hideTitle"
-  //                 label={
-  //                   <FormattedMessage
-  //                     defaultMessage="Show panel title"
-  //                     id="embeddableApi.customizePanel.flyout.showTitle"
-  //                   />
-  //                 }
-  //                 onChange={this.onHideTitleToggle}
-  //               />
-  //             </EuiFormRow>
-  //             <EuiFormRow
-  //               label={i18n.translate(
-  //                 'embeddableApi.customizePanel.flyout.optionsMenuForm.panelTitleFormRowLabel',
-  //                 {
-  //                   defaultMessage: 'Panel title',
-  //                 }
-  //               )}
-  //             >
-  //               <EuiFieldText
-  //                 id="panelTitleInput"
-  //                 className="panelTitleInputText"
-  //                 data-test-subj="customEmbeddablePanelTitleInput"
-  //                 name="min"
-  //                 type="text"
-  //                 disabled={this.state.hideTitle}
-  //                 value={this.state.title || ''}
-  //                 onChange={(e) => this.setState({ title: e.target.value })}
-  //                 aria-label={i18n.translate(
-  //                   'embeddableApi.customizePanel.flyout.optionsMenuForm.panelTitleInputAriaLabel',
-  //                   {
-  //                     defaultMessage: 'Enter a custom title for your panel',
-  //                   }
-  //                 )}
-  //                 append={
-  //                   <EuiButtonEmpty
-  //                     data-test-subj="resetCustomEmbeddablePanelTitle"
-  //                     onClick={this.reset}
-  //                     disabled={this.state.hideTitle}
-  //                   >
-  //                     <FormattedMessage
-  //                       id="embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomDashboardButtonLabel"
-  //                       defaultMessage="Reset"
-  //                     />
-  //                   </EuiButtonEmpty>
-  //                 }
-  //               />
-  //             </EuiFormRow>
-  //           </EuiModalBody>
-  //           <EuiModalFooter>
-  //             <EuiButtonEmpty onClick={() => this.props.cancel()}>
-  //               <FormattedMessage
-  //                 id="embeddableApi.customizePanel.flyout.cancel"
-  //                 defaultMessage="Cancel"
-  //               />
-  //             </EuiButtonEmpty>
-
-  //             <EuiButton data-test-subj="saveNewTitleButton" onClick={this.save} fill>
-  //               <FormattedMessage
-  //                 id="embeddableApi.customizePanel.flyout.saveButtonTitle"
-  //                 defaultMessage="Save"
-  //               />
-  //             </EuiButton>
-  //           </EuiModalFooter>
-  //         </form>
-  //       </div>
-  //     </EuiOutsideClickDetector>
-  //   </EuiFocusTrap>
-  // );
 };

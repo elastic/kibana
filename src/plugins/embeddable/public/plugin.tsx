@@ -9,6 +9,7 @@
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { getSavedObjectFinder, showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -151,6 +152,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
     });
 
+    const { uiSettings } = core;
+
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
       this.appList = appList;
     });
@@ -184,6 +187,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
             getActions={uiActions.getTriggerCompatibleActions}
             getEmbeddableFactory={this.getEmbeddableFactory}
             getAllEmbeddableFactories={this.getEmbeddableFactories}
+            dateFormat={uiSettings.get(UI_SETTINGS.DATE_FORMAT)}
+            commonlyUsedRanges={uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)}
             overlays={core.overlays}
             notifications={core.notifications}
             application={core.application}

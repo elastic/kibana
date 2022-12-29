@@ -17,6 +17,7 @@ import classNames from 'classnames';
 import React, { ReactNode } from 'react';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
+import { TimeRange } from '@kbn/es-query';
 import { CoreStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isPromise } from '@kbn/std';
@@ -49,7 +50,7 @@ import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_a
 import { EditPanelAction } from '../actions';
 import { CustomizePanelEditor } from './panel_header/panel_actions/customize_panel/customize_panel_editor';
 import { EmbeddableStart } from '../../plugin';
-import { EmbeddableStateTransfer, isSelfStyledEmbeddable } from '..';
+import { EmbeddableStateTransfer, isSelfStyledEmbeddable, TimePickerRange } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -85,6 +86,8 @@ interface Props {
   getActions?: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories?: EmbeddableStart['getEmbeddableFactories'];
+  dateFormat?: string;
+  commonlyUsedRanges: TimePickerRange[];
   overlays?: CoreStart['overlays'];
   notifications?: CoreStart['notifications'];
   application?: CoreStart['application'];
@@ -373,6 +376,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   private getUniversalActions = (): PanelUniversalActions => {
+    const { dateFormat, commonlyUsedRanges } = this.props;
     let actions = {};
     if (this.props.inspector) {
       actions = {
@@ -395,14 +399,17 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           title: string | undefined;
           description: string | undefined;
           hideTitle?: boolean;
+          timeRange?: TimeRange;
         }>((resolve) => {
           const flyoutInstance = overlays.openFlyout(
             toMountPoint(
               <CustomizePanelEditor
                 embeddable={context.embeddable}
-                updateInput={({ title, description, hidePanelTitles }) => {
+                dateFormat={dateFormat}
+                commonlyUsedRanges={commonlyUsedRanges}
+                updatePanelSettings={({ title, description, hideTitle, timeRange }) => {
                   flyoutInstance.close();
-                  resolve({ title, description, hideTitle: hidePanelTitles });
+                  resolve({ title, description, hideTitle, timeRange });
                 }}
                 cancel={() => flyoutInstance.close()}
               />,
