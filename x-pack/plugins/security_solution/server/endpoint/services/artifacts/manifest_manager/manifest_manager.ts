@@ -374,18 +374,41 @@ export class ManifestManager {
     newManifest: Manifest
   ): Promise<Error[]> {
     const errors: Error[] = [];
+
+    const artifactsToCreate: InternalArtifactCompleteSchema[] = [];
+
     for (const artifact of artifacts) {
       if (internalArtifactCompleteSchema.is(artifact)) {
-        const [err, fleetArtifact] = await this.pushArtifact(artifact);
-        if (err) {
-          errors.push(err);
-        } else if (fleetArtifact) {
-          newManifest.replaceArtifact(fleetArtifact);
-        }
+        artifactsToCreate.push(artifact);
       } else {
         errors.push(new EndpointError(`Incomplete artifact: ${getArtifactId(artifact)}`, artifact));
       }
     }
+
+    if (artifactsToCreate.length === 0) {
+      return errors;
+    }
+
+    let fleetArtifacts: InternalArtifactCompleteSchema[] = [];
+    try {
+      fleetArtifacts = await this.artifactClient.bulkCreateArtifacts(artifactsToCreate);
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isConflictError(err)) {
+        // TODO find artifact id from the bulk create error
+        this.logger.debug(`Tried to create artifact, but it already exists.`); // ${artifactId}
+      } else {
+        errors.push(err);
+      }
+    }
+
+    artifactsToCreate.forEach((artifact, index) => {
+      const fleetArtifact = fleetArtifacts[index];
+      const artifactId = getArtifactId(artifact);
+      // Cache the compressed body of the artifact
+      this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
+      newManifest.replaceArtifact(fleetArtifact);
+    });
+
     return errors;
   }
 

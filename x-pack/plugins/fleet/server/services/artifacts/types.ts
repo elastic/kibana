@@ -80,6 +80,8 @@ export interface ArtifactsClientInterface {
 
   createArtifact(options: ArtifactsClientCreateOptions): Promise<Artifact>;
 
+  bulkCreateArtifacts(optionsList: ArtifactsClientCreateOptions[]): Promise<Artifact[]>;
+
   deleteArtifact(id: string): Promise<void>;
 
   listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
