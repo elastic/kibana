@@ -24,12 +24,13 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   //
   // const NEW_SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
   // const NEW_SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
+  before(() => {
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+  });
+
   beforeEach(() => {
     login(ROLES.t2_analyst);
     navigateTo('/app/osquery');
-  });
-  before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
   });
 
   after(() => {
@@ -64,6 +65,8 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   });
 
   it('should run query and enable ecs mapping', () => {
+    navigateTo('/app/osquery/packs');
+    cy.waitForReact(1000);
     const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
     cy.contains('New live query').click();
     selectAllAgents();
@@ -100,6 +103,7 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
       });
     });
   });
+
   it('to click the edit button and edit pack', () => {
     navigateTo('/app/osquery/saved_queries');
     cy.getBySel('pagination-button-next').click();

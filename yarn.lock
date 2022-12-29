@@ -11610,20 +11610,20 @@ cyclist@~0.2.2:
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-0.2.2.tgz#1b33792e11e914a2fd6d6ed6447464444e5fa640"
   integrity sha1-GzN5LhHpFKL9bW7WRHRkRE5fpkA=
 
-cypress-axe@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/cypress-axe/-/cypress-axe-1.0.0.tgz#ab4e9486eaa3bb956a90a1ae40d52df42827b4f0"
-  integrity sha512-QBlNMAd5eZoyhG8RGGR/pLtpHGkvgWXm2tkP68scJ+AjYiNNOlJihxoEwH93RT+rWOLrefw4iWwEx8kpEcrvJA==
+cypress-axe@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/cypress-axe/-/cypress-axe-1.2.0.tgz#224936a3346055f6c22636e645746cc903aaa947"
+  integrity sha512-mK7rxc8+e0IM519efgkzVBQRYLapy55TOVNbWZsbX3495xFzf8NnkMddUaHAGgAnF+kcyJU7zNPu3lTiOD58WQ==
 
 cypress-file-upload@^5.0.8:
   version "5.0.8"
   resolved "https://registry.yarnpkg.com/cypress-file-upload/-/cypress-file-upload-5.0.8.tgz#d8824cbeaab798e44be8009769f9a6c9daa1b4a1"
   integrity sha512-+8VzNabRk3zG6x8f8BWArF/xA/W0VK4IZNx3MV0jFWrJS/qKn8eHfa5nU73P9fOQAgwHFJx7zjg4lwOnljMO8g==
 
-cypress-multi-reporters@^1.6.1:
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/cypress-multi-reporters/-/cypress-multi-reporters-1.6.1.tgz#515b891f6c80e0700068efb03ab9d55388399c95"
-  integrity sha512-FPeC0xWF1N6Myrwc2m7KC0xxlrtG8+x4hlsPFBDRWP8u/veR2x90pGaH3BuJfweV7xoQ4Zo85Qjhu3fgZGrBQQ==
+cypress-multi-reporters@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/cypress-multi-reporters/-/cypress-multi-reporters-1.6.2.tgz#129dfeffa00d4deca3e9f58d84570b9962c28c2b"
+  integrity sha512-lvwGwHqZG5CwGxBJ6UJXWaxlWGkJgxBjP0h+IVLrrwRlJpT4coSwwt+UzMdeqEMrzT4IDfhbtmUNOiDleisOYA==
   dependencies:
     debug "^4.1.1"
     lodash "^4.17.15"
@@ -11652,10 +11652,10 @@ cypress-recurse@^1.24.0:
   dependencies:
     humanize-duration "^3.27.3"
 
-cypress@^11.2.0:
-  version "11.2.0"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-11.2.0.tgz#63edef8c387b687066c5493f6f0ad7b9ced4b2b7"
-  integrity sha512-u61UGwtu7lpsNWLUma/FKNOsrjcI6wleNmda/TyKHe0dOBcVjbCPlp1N6uwFZ0doXev7f/91YDpU9bqDCFeBLA==
+cypress@^12.2.0:
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-12.2.0.tgz#86ddc1ecfffadf57a8689e211cfb4437735f4e92"
+  integrity sha512-kvl95ri95KK8mAy++tEU/wUgzAOMiIciZSL97LQvnOinb532m7dGvwN0mDSIGbOd71RREtmT9o4h088RjK5pKw==
   dependencies:
     "@cypress/request" "^2.88.10"
     "@cypress/xvfb" "^1.2.4"
