@@ -6,6 +6,13 @@
  */
 
 import {
+  createSLOParamsSchema,
+  deleteSLOParamsSchema,
+  findSLOParamsSchema,
+  getSLOParamsSchema,
+  updateSLOParamsSchema,
+} from '@kbn/slo-schema';
+import {
   CreateSLO,
   DefaultResourceInstaller,
   DefaultSLIClient,
@@ -23,13 +30,6 @@ import {
   TransformGenerator,
 } from '../../services/slo/transform_generators';
 import { IndicatorTypes } from '../../domain/models';
-import {
-  createSLOParamsSchema,
-  deleteSLOParamsSchema,
-  findSLOParamsSchema,
-  getSLOParamsSchema,
-  updateSLOParamsSchema,
-} from '../../types/rest_specs';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
