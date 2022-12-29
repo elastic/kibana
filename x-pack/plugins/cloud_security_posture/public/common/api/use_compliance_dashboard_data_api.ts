@@ -13,7 +13,7 @@ import { POLICY_TEMPLATE, STATS_ROUTE_PATH } from '../../../common/constants';
 const getCspmStatsKey = ['csp_cspm_dashboard_stats'];
 const getKspmStatsKey = ['csp_kspm_dashboard_stats'];
 
-export const getStatsUrl = (policyTemplate: POLICY_TEMPLATE) => {
+export const getStatsRoute = (policyTemplate: POLICY_TEMPLATE) => {
   return STATS_ROUTE_PATH.replace('{policy_template}', policyTemplate);
 };
 
@@ -23,7 +23,8 @@ export const useCspmComplianceDashboardDataApi = (
   const { http } = useKibana().services;
   return useQuery(
     getCspmStatsKey,
-    () => http.get<ComplianceDashboardData>(getStatsUrl('cis_aws')),
+    // TODO: remove casting and use actual policy template
+    () => http.get<ComplianceDashboardData>(getStatsRoute('cis_aws' as POLICY_TEMPLATE)),
     options
   );
 };
@@ -34,7 +35,8 @@ export const useKspmComplianceDashboardDataApi = (
   const { http } = useKibana().services;
   return useQuery(
     getKspmStatsKey,
-    () => http.get<ComplianceDashboardData>(getStatsUrl('cis_k8s')),
+    // TODO: remove casting and use actual policy template
+    () => http.get<ComplianceDashboardData>(getStatsRoute('cis_k8s' as POLICY_TEMPLATE)),
     options
   );
 };
