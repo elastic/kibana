@@ -7,7 +7,7 @@
 
 import type { BaseParams, BasePayload } from '../base';
 
-export interface JobParamsCsvFromSavedObject extends BaseParams {
+interface CsvFromSavedObjectBase {
   objectType: 'saved search';
   timerange?: {
     timezone?: string;
@@ -17,12 +17,5 @@ export interface JobParamsCsvFromSavedObject extends BaseParams {
   savedObjectId: string;
 }
 
-export interface TaskPayloadCsvFromSavedObject extends BasePayload {
-  objectType: 'saved search';
-  timerange?: {
-    timezone?: string;
-    min?: string | number;
-    max?: string | number;
-  };
-  savedObjectId: string;
-}
+export type JobParamsCsvFromSavedObject = CsvFromSavedObjectBase & BaseParams;
+export type TaskPayloadCsvFromSavedObject = CsvFromSavedObjectBase & BasePayload;

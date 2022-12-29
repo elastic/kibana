@@ -55,7 +55,7 @@ export function registerGenerateFromSavedObject(reporting: ReportingCore, logger
       },
     },
     authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-      // Validate the timerange
+      // 1. Parse the optional time range for validation
       let minTime: moment.Moment | undefined;
       let maxTime: moment.Moment | undefined;
       if (req.body?.timerange?.min || req.body?.timerange?.max) {
@@ -69,12 +69,12 @@ export function registerGenerateFromSavedObject(reporting: ReportingCore, logger
         }
       }
 
-      // 1. Read the saved object to guard against 404 and get the title
       try {
+        // 2. Read the saved object to get the title
         const searchObject: SavedObject<{ title?: string }> =
           await context.core.savedObjects.client.get('search', req.params.savedObjectId);
 
-        // 2. Store the job params in the Report queue
+        // 3. Store the job params in the Report queue
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
 
         const jobParams: JobParamsCsvFromSavedObject = {
@@ -88,7 +88,7 @@ export function registerGenerateFromSavedObject(reporting: ReportingCore, logger
 
         const result = await requestHandler.handleGenerateRequest(CSV_JOB_TYPE, jobParams);
 
-        // 3. Return details of the stored report
+        // 4. Return details of the stored report
         return res.ok({
           body: result,
           headers: { 'content-type': 'application/json' },

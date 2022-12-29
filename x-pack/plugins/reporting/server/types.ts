@@ -109,29 +109,3 @@ export interface ReportingRequestHandlerContext {
  * @internal
  */
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
-
-/**
- * @internal
- */
-export interface TimeRangeParams {
-  timezone: string;
-  min: Date | string | number | null;
-  max: Date | string | number | null;
-}
-
-/**
- * @internal
- */
-export interface JobParamPostPayload {
-  timerange: TimeRangeParams;
-}
-
-/**
- * @internal
- */
-export interface ScheduledTaskParams<JobParamsType> {
-  headers?: string; // serialized encrypted headers
-  jobParams: JobParamsType;
-  title: string;
-  type: string | null;
-}
