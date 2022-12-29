@@ -79,12 +79,18 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.eql(
-            `This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]`
+            `WARNING: This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
         });
+      });
 
+      const thresholdIndexTestCases = [
+        ['host_alias', 'auditbeat-8.0.0'],
+        ['host_alias*', 'auditbeat-*'],
+      ];
+      thresholdIndexTestCases.forEach((index) => {
         it(`for threshold rule with index param: ${index}`, async () => {
           const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(index),
@@ -112,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.eql(
-            `This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]`
+            `WARNING: This rule may not have the required read privileges to the following indices/index patterns: ["${index[0]}"]. \nERROR: An error occurred during rule execution: message: "Aggregations were missing on threshold rule search result"`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
