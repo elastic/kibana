@@ -274,7 +274,7 @@ const loginViaConfig = () => {
         method: 'POST',
         url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
       });
-    })
+    });
   });
 };
 
