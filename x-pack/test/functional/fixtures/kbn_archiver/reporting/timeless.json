@@ -1,0 +1,47 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "title": "timeless-test",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "7.17.9",
+  "id": "58835c20-87a9-11ed-9097-518b57bf82ea",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2022-12-29T18:48:12.259Z",
+  "version": "WzEzNywyXQ=="
+}
+
+{
+  "attributes": {
+    "columns": [],
+    "description": "",
+    "grid": {},
+    "hideChart": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [],
+    "title": "timeless: no filter, no columns selected"
+  },
+  "coreMigrationVersion": "7.17.9",
+  "id": "6eec8310-87a9-11ed-9097-518b57bf82ea",
+  "migrationVersion": {
+    "search": "7.9.3"
+  },
+  "references": [
+    {
+      "id": "58835c20-87a9-11ed-9097-518b57bf82ea",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2022-12-29T18:48:49.858Z",
+  "version": "WzE1MywyXQ=="
+}
