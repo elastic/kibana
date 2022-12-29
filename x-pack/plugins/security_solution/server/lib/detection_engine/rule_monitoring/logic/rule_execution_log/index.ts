@@ -10,8 +10,6 @@ export * from './client_for_routes/client_interface';
 export * from './service_interface';
 export * from './service';
 
-export { ruleExecutionType } from './execution_saved_object/saved_objects_type';
-
 export { RULE_EXECUTION_LOG_PROVIDER } from './event_log/constants';
 export { createRuleExecutionSummary } from './create_rule_execution_summary';
 export * from './utils/normalization';

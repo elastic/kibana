@@ -15,7 +15,6 @@ import type {
 } from '../../../../../../../common/detection_engine/rule_monitoring';
 
 import type { IEventLogReader } from '../event_log/event_log_reader';
-import type { IRuleExecutionSavedObjectsClient } from '../execution_saved_object/saved_objects_client';
 import type {
   GetExecutionEventsArgs,
   GetExecutionResultsArgs,
@@ -23,7 +22,6 @@ import type {
 } from './client_interface';
 
 export const createClientForRoutes = (
-  soClient: IRuleExecutionSavedObjectsClient,
   eventLog: IEventLogReader,
   logger: Logger
 ): IRuleExecutionLogForRoutes => {
