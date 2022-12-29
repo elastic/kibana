@@ -23,7 +23,7 @@ import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
-import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
+import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { render } from '@testing-library/react';
 import { expectIdsInDoc } from '../../test/utils';
@@ -74,7 +74,7 @@ describe('<Findings />', () => {
       })
     );
     (useCISIntegrationPoliciesLink as jest.Mock).mockImplementation(() => chance.url());
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     renderFindingsPage();
 
@@ -96,7 +96,7 @@ describe('<Findings />', () => {
         data: { status: 'indexing' },
       })
     );
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     renderFindingsPage();
 
@@ -118,7 +118,7 @@ describe('<Findings />', () => {
         data: { status: 'index-timeout' },
       })
     );
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     renderFindingsPage();
 
@@ -140,7 +140,7 @@ describe('<Findings />', () => {
         data: { status: 'unprivileged' },
       })
     );
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     renderFindingsPage();
 

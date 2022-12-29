@@ -13,12 +13,12 @@ import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { useComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
+import { useKspmComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
 import { DASHBOARD_CONTAINER } from './test_subjects';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
-import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
+import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { expectIdsInDoc } from '../../test/utils';
 import { ComplianceDashboardData } from '../../../common/types';
 
@@ -237,7 +237,7 @@ describe('<ComplianceDashboard />', () => {
       })
     );
     (useCISIntegrationPoliciesLink as jest.Mock).mockImplementation(() => chance.url());
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     renderComplianceDashboardPage();
 
@@ -259,7 +259,7 @@ describe('<ComplianceDashboard />', () => {
         data: { status: 'indexing' },
       })
     );
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     renderComplianceDashboardPage();
 
@@ -281,7 +281,7 @@ describe('<ComplianceDashboard />', () => {
         data: { status: 'index-timeout' },
       })
     );
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     renderComplianceDashboardPage();
 
@@ -303,7 +303,7 @@ describe('<ComplianceDashboard />', () => {
         data: { status: 'unprivileged' },
       })
     );
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
 
     renderComplianceDashboardPage();
 
@@ -319,7 +319,7 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('shows dashboard when there are findings in latest findings index', () => {
-    (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+    (useKspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: mockDashboardData,
