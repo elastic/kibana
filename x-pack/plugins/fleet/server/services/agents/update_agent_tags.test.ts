@@ -212,7 +212,7 @@ describe('update_agent_tags', () => {
           tagsToRemove: [],
           kuery: '',
           total: 100,
-          retryCount: 3,
+          retryCount: 5,
         }
       )
     ).rejects.toThrowError('version conflict of 100 agents');
