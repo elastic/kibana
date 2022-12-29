@@ -124,15 +124,17 @@ type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
 export {
-  SLOResponseSchema,
   createSLOParamsSchema,
   deleteSLOParamsSchema,
-  getSLOParamsSchema,
-  getSLOResponseSchema,
-  updateSLOParamsSchema,
-  updateSLOResponseSchema,
   findSLOParamsSchema,
   findSLOResponseSchema,
+  getSLOParamsSchema,
+  getSLOResponseSchema,
+  SLOResponseSchema,
+  sortBySchema,
+  sortDirectionSchema,
+  updateSLOParamsSchema,
+  updateSLOResponseSchema,
 };
 export type {
   SLOResponse,
