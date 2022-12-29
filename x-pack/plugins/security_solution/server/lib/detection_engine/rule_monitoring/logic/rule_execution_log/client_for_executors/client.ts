@@ -164,6 +164,11 @@ export const createClientForExecutors = (
     args: NormalizedStatusChangeArgs
   ): Promise<void> => {
     const { newStatus, message, metrics } = args;
+
+    if (newStatus === RuleExecutionStatus.running) {
+      return;
+    }
+
     const {
       total_search_duration_ms: totalSearchDurationMs,
       total_indexing_duration_ms: totalIndexingDurationMs,
@@ -180,10 +185,6 @@ export const createClientForExecutors = (
 
     if (executionGapDurationS) {
       ruleMonitoringService?.setLastRunMetricsGapDurationS(executionGapDurationS);
-    }
-
-    if (!message) {
-      return;
     }
 
     if (newStatus === RuleExecutionStatus.failed) {
@@ -232,6 +233,12 @@ interface NormalizedStatusChangeArgs {
 }
 
 const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChangeArgs => {
+  if (args.newStatus === RuleExecutionStatus.running) {
+    return {
+      newStatus: args.newStatus,
+      message: '',
+    };
+  }
   const { newStatus, message, metrics } = args;
 
   return {

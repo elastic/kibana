@@ -106,11 +106,16 @@ export interface RuleExecutionContext {
 /**
  * Information about the status change event.
  */
-export interface StatusChangeArgs {
-  newStatus: RuleExecutionStatus;
-  message?: string;
-  metrics?: MetricsArgs;
-}
+export type StatusChangeArgs =
+  | {
+      newStatus: RuleExecutionStatus.running;
+      metrics?: MetricsArgs;
+    }
+  | {
+      newStatus: Exclude<RuleExecutionStatus, RuleExecutionStatus.running>;
+      metrics?: MetricsArgs;
+      message: string;
+    };
 
 export interface MetricsArgs {
   searchDurations?: string[];
