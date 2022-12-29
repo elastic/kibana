@@ -47,7 +47,7 @@ export interface ReportingInternalSetup {
 }
 
 export interface ReportingInternalStart {
-  browserDriverFactory: HeadlessChromiumDriverFactory;
+  browserDriverFactory: HeadlessChromiumDriverFactory | null;
   store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
