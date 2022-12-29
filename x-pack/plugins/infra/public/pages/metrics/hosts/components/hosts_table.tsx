@@ -9,14 +9,15 @@ import React, { useCallback, useEffect } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { HostsTableColumns } from './hosts_table_columns';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
-import { useHostsViewContext } from '../hooks/use_host_view';
-import { useTableProperties } from '../hooks/use_table_properties_url_state';
+import { useHostsTable } from '../hooks/use_hosts_table';
 import { useSnapshot } from '../../inventory_view/hooks/use_snaphot';
-import { useHostTable } from '../hooks/use_host_table';
+import type { SnapshotMetricType } from '../../../../../common/inventory_models/types';
+import { useTableProperties } from '../hooks/use_table_properties_url_state';
+import { useHostsViewContext } from '../hooks/use_hosts_view';
+import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 
 const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
   { type: 'rx' },
@@ -28,40 +29,30 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
 ];
 
 export const HostsTable = () => {
-  const { baseRequest, fetch$, setHostViewState } = useHostsViewContext();
+  const { baseRequest, setHostViewState, hostViewState } = useHostsViewContext();
+  const { onSubmit } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
   // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
   // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
   // if we introduce data view selection, we'll have to change this hook and the endpoint to accept a new parameter for the indices
-  const { loading, nodes, error, reload } = useSnapshot({
+  const { loading, nodes, error } = useSnapshot({
     ...baseRequest,
     metrics: HOST_TABLE_METRICS,
   });
 
-  const items = useHostTable(nodes);
-
-  const onReload = () => {
-    fetch$.next('load');
-  };
-
   useEffect(() => {
-    setHostViewState({
-      loading,
-      totalHits: nodes.length,
-      error,
-    });
-  }, [error, loading, nodes.length, setHostViewState]);
+    if (hostViewState.loading !== loading) {
+      setHostViewState({
+        loading,
+        totalHits: nodes.length,
+        error,
+      });
+    }
+  }, [error, loading, nodes.length, hostViewState, setHostViewState]);
 
-  useEffect(() => {
-    const refetch = fetch$.subscribe(() => {
-      reload();
-      setHostViewState({ loading: true, totalHits: 0, error: null });
-    });
-    return () => {
-      refetch.unsubscribe();
-    };
-  }, [reload, fetch$, setHostViewState]);
+  const items = useHostsTable(nodes);
+  const noData = items.length === 0;
 
   const onTableChange = useCallback(
     ({ page = {}, sort = {} }) => {
@@ -80,8 +71,6 @@ export const HostsTable = () => {
     },
     [setProperties, properties.pagination, properties.sorting]
   );
-
-  const noData = items.length === 0;
 
   if (loading) {
     return (
@@ -107,7 +96,7 @@ export const HostsTable = () => {
         refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
           defaultMessage: 'Check for new data',
         })}
-        onRefetch={onReload}
+        onRefetch={() => onSubmit()}
         testString="noMetricsDataPrompt"
       />
     );

@@ -6,18 +6,16 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
-import { debounce } from 'lodash';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_hosts_url_state';
 
 export const useUnifiedSearch = () => {
-  const [panelFilters, setPanelFilters] = useState<Filter[] | null>(null);
-  const { state, dispatch, getRangeInTimestamp, getTime, fetch$ } = useHostsUrlState();
+  const { state, dispatch, getRangeInTimestamp, getTime } = useHostsUrlState();
   const { metricsDataView } = useMetricsDataViewContext();
   const { services } = useKibana<InfraClientStartDeps>();
   const {
@@ -32,32 +30,32 @@ export const useUnifiedSearch = () => {
   const { filterManager } = queryManager;
 
   const onSubmit = useCallback(
-    (query?: Query, dateRange?: TimeRange, filters?: Filter[]) => {
-      if (query || dateRange || filters) {
-        const newDateRange = dateRange ?? getTime();
+    (data?: {
+      query?: Query;
+      dateRange?: TimeRange;
+      filters?: Filter[];
+      panelFilters?: Filter[];
+    }) => {
+      const { query, dateRange, filters, panelFilters } = data ?? {};
+      const newDateRange = dateRange ?? getTime();
 
-        if (filters) {
-          filterManager.setFilters(filters);
-        }
-        dispatch({
-          type: 'setQuery',
-          payload: {
-            query,
-            filters: filters ? filterManager.getFilters() : undefined,
-            dateRange: newDateRange,
-            dateRangeTimestamp: getRangeInTimestamp(newDateRange),
-          },
-        });
+      if (filters) {
+        filterManager.setFilters(filters);
       }
+
+      dispatch({
+        type: 'setQuery',
+        payload: {
+          query,
+          filters: filters ? filterManager.getFilters() : undefined,
+          dateRange: newDateRange,
+          dateRangeTimestamp: getRangeInTimestamp(newDateRange),
+          panelFilters,
+        },
+      });
     },
     [getTime, dispatch, filterManager, getRangeInTimestamp]
   );
-
-  // This won't prevent onSubmit from being fired twice when `clear filters` is clicked,
-  // that happens because both onQuerySubmit and onFiltersUpdated are internally triggered on same event by SearchBar.
-  // This just delays potential duplicate onSubmit calls
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debounceOnSubmit = useCallback(debounce(onSubmit, 100), [onSubmit]);
 
   const saveQuery = useCallback(
     (newSavedQuery: SavedQuery) => {
@@ -88,24 +86,22 @@ export const useUnifiedSearch = () => {
     if (!metricsDataView) {
       return null;
     }
-    if (Array.isArray(panelFilters) && panelFilters.length > 0) {
-      return buildEsQuery(metricsDataView, state.query, [...state.filters, ...panelFilters]);
-    }
-    return buildEsQuery(metricsDataView, state.query, [...state.filters]);
-  }, [metricsDataView, panelFilters, state.filters, state.query]);
+    return buildEsQuery(metricsDataView, state.query, [
+      ...state.filters,
+      ...(state.panelFilters ?? []),
+    ]);
+  }, [metricsDataView, state.query, state.filters, state.panelFilters]);
 
   return {
-    dateRangeTimestamp: state.dateRangeTimestamp,
     buildQuery,
-    onSubmit: debounceOnSubmit,
-    saveQuery,
     clearSavedQuery,
+    controlPanelFilters: state.panelFilters,
+    dateRangeTimestamp: state.dateRangeTimestamp,
+    onSubmit,
+    saveQuery,
     unifiedSearchQuery: state.query,
     unifiedSearchDateRange: getTime(),
     unifiedSearchFilters: state.filters,
-    setPanelFilters,
-    panelFilters,
-    fetch$,
   };
 };
 

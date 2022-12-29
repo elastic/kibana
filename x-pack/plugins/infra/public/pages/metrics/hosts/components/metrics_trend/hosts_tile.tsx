@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-import { useHostsViewContext } from '../../hooks/use_host_view';
+import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { type ChartBaseProps, MetricsChart } from './metrics_chart';
 
 export const HostsTile = ({ type, ...props }: ChartBaseProps) => {

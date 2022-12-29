@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 import { TimeRange } from '@kbn/es-query';
 import DateMath from '@kbn/datemath';
 import deepEqual from 'fast-deep-equal';
@@ -15,7 +15,6 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { FilterStateStore } from '@kbn/es-query';
-import { Subject } from 'rxjs';
 import { useUrlState } from '../../../../utils/use_url_state';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 
@@ -35,6 +34,7 @@ const CALCULATED_DATE_RANGE_FROM = new Date(
 const INITIAL_HOSTS_STATE: HostsState = {
   query: DEFAULT_QUERY,
   filters: [],
+  panelFilters: [],
   // for unified search
   dateRange: { ...INITIAL_DATE_RANGE },
   // for useSnapshot
@@ -56,14 +56,16 @@ const reducer = (state: HostsState, action: Action): HostsState => {
     case 'setFilter':
       return { ...state, filters: [...action.payload] };
     case 'setQuery':
-      const { filters, query, ...payload } = action.payload;
+      const { filters, query, panelFilters, ...payload } = action.payload;
       const newFilters = !filters ? state.filters : filters;
+      const newControlPanelFilters = !panelFilters ? state.panelFilters : panelFilters;
       const newQuery = !query ? state.query : query;
       return {
         ...state,
         ...payload,
         filters: [...newFilters],
         query: { ...newQuery },
+        panelFilters: [...newControlPanelFilters],
       };
     default:
       throw new Error();
@@ -71,7 +73,6 @@ const reducer = (state: HostsState, action: Action): HostsState => {
 };
 
 export const useHostsUrlState = () => {
-  const fetch$ = useMemo(() => new Subject<'load'>(), []);
   const [urlState, setUrlState] = useUrlState<HostsState>({
     defaultState: INITIAL_HOSTS_STATE,
     decodeUrlState,
@@ -96,26 +97,18 @@ export const useHostsUrlState = () => {
   useEffect(() => {
     if (!deepEqual(state, urlState)) {
       setUrlState(state);
-    } else {
-      fetch$.next('load');
     }
-  }, [setUrlState, state, urlState, fetch$]);
+  }, [setUrlState, state, urlState]);
 
   return {
-    state,
     dispatch,
     getRangeInTimestamp,
     getTime,
-    fetch$,
+    state,
   };
 };
 
 const HostsFilterRT = rt.intersection([
-  rt.partial({
-    $state: rt.type({
-      store: enumeration('FilterStateStore', FilterStateStore),
-    }),
-  }),
   rt.type({
     meta: rt.partial({
       alias: rt.union([rt.null, rt.string]),
@@ -133,6 +126,9 @@ const HostsFilterRT = rt.intersection([
   }),
   rt.partial({
     query: rt.record(rt.string, rt.any),
+    $state: rt.type({
+      store: enumeration('FilterStateStore', FilterStateStore),
+    }),
   }),
 ]);
 
@@ -155,12 +151,13 @@ const DateRangeRT = rt.type({
 
 const HostsStateRT = rt.type({
   filters: HostsFiltersRT,
+  panelFilters: HostsFiltersRT,
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
   dateRangeTimestamp: DateRangeRT,
 });
 
-type HostsState = rt.TypeOf<typeof HostsStateRT>;
+export type HostsState = rt.TypeOf<typeof HostsStateRT>;
 
 const SetQueryType = rt.partial(HostsStateRT.props);
 

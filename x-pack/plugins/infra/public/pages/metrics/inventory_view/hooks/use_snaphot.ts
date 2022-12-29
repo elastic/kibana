@@ -24,6 +24,7 @@ export interface UseSnapshotRequest
   sendRequestImmediately?: boolean;
   includeTimeseries?: boolean;
   timerange?: InfraTimerangeInput;
+  requestTs?: number;
 }
 export function useSnapshot({
   timerange,
@@ -33,6 +34,7 @@ export function useSnapshot({
   groupBy = null,
   sendRequestImmediately = true,
   includeTimeseries = true,
+  requestTs,
   ...args
 }: UseSnapshotRequest) {
   const decodeResponse = (response: any) => {
@@ -69,7 +71,7 @@ export function useSnapshot({
         await makeRequest();
       }
     })();
-  }, [makeRequest, sendRequestImmediately]);
+  }, [makeRequest, sendRequestImmediately, requestTs]);
 
   return {
     error: (error && error.message) || null,
