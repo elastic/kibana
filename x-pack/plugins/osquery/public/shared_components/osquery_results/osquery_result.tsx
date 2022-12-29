@@ -17,7 +17,6 @@ import { AlertAttachmentContext } from '../../common/contexts';
 
 interface OsqueryResultProps extends Omit<OsqueryActionResultsProps, 'alertId'> {
   actionId: string;
-  queryId: string;
   startDate: string;
 }
 
@@ -26,6 +25,19 @@ export const OsqueryResult = React.memo<OsqueryResultProps>(
     const { data } = useLiveQueryDetails({
       actionId,
     });
+
+    if (ecsData === null) {
+      return (
+        <PackQueriesStatusTable
+          actionId={actionId}
+          // queryId={queryId}
+          data={data?.queries}
+          startDate={data?.['@timestamp']}
+          expirationDate={data?.expiration}
+          agentIds={agentIds}
+        />
+      );
+    }
 
     return (
       <AlertAttachmentContext.Provider value={ecsData}>

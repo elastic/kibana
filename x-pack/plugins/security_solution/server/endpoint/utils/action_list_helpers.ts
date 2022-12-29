@@ -11,16 +11,18 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
+import { transformToEndpointActions } from './transform_to_endpoint_actions';
+import { ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 import type {
   LogsEndpointAction,
   EndpointActionResponse,
   LogsEndpointActionResponse,
+  LogsOsqueryActionTransformed,
 } from '../../../common/endpoint/types';
 import { ACTIONS_SEARCH_PAGE_SIZE, ACTION_RESPONSE_INDICES } from '../services/actions/constants';
-import { getDateFilters } from '../services/actions/utils';
 import { catchAndWrapError } from './wrap_errors';
 import type { GetActionDetailsListParam } from '../services/actions/action_list';
+import { getDateFilters } from '../services/actions/utils';
 
 const queryOptions = Object.freeze({
   ignore: [404],
@@ -38,7 +40,10 @@ export const getActions = async ({
   unExpiredOnly,
 }: Omit<GetActionDetailsListParam, 'logger'>): Promise<{
   actionIds: string[];
-  actionRequests: TransportResult<estypes.SearchResponse<LogsEndpointAction>, unknown>;
+  actionRequests: TransportResult<
+    estypes.SearchResponse<LogsEndpointAction | LogsOsqueryActionTransformed>,
+    unknown
+  >;
 }> => {
   const additionalFilters = [];
 
@@ -55,17 +60,12 @@ export const getActions = async ({
   }
 
   if (unExpiredOnly) {
-    additionalFilters.push({ range: { expiration: { gte: 'now' } } });
+    // additionalFilters.push({ range: { expiration: { gte: 'now' } } });
   }
 
   const dateFilters = getDateFilters({ startDate, endDate });
 
-  const actionsFilters = [
-    { term: { input_type: 'endpoint' } },
-    { term: { type: 'INPUT_ACTION' } },
-    ...dateFilters,
-    ...additionalFilters,
-  ];
+  const actionsFilters = [{ term: { type: 'INPUT_ACTION' } }, ...dateFilters, ...additionalFilters];
 
   const must: SearchRequest = [
     {
@@ -82,7 +82,7 @@ export const getActions = async ({
   }
 
   const actionsSearchQuery: SearchRequest = {
-    index: ENDPOINT_ACTIONS_INDEX,
+    index: [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX],
     size,
     from,
     body: {
@@ -100,19 +100,23 @@ export const getActions = async ({
   };
 
   const actionRequests: TransportResult<
-    estypes.SearchResponse<LogsEndpointAction>,
+    estypes.SearchResponse<LogsEndpointAction | LogsOsqueryActionTransformed>,
     unknown
   > = await esClient
-    .search<LogsEndpointAction>(actionsSearchQuery, {
+    .search<LogsEndpointAction | LogsOsqueryActionTransformed>(actionsSearchQuery, {
       ...queryOptions,
       meta: true,
     })
     .catch(catchAndWrapError);
 
+  const transformedActions = transformToEndpointActions(actionRequests.body?.hits.hits);
   // only one type of actions
-  const actionIds = actionRequests?.body?.hits?.hits.map((e) => {
-    return (e._source as LogsEndpointAction).EndpointActions.action_id;
+  const actionIds = transformedActions.map((e) => {
+    return (e._source as LogsEndpointAction | LogsOsqueryActionTransformed).EndpointActions
+      .action_id;
   });
+
+  actionRequests.body.hits.hits = transformedActions;
 
   return { actionIds, actionRequests };
 };
@@ -164,5 +168,6 @@ export const getActionResponses = async ({
       meta: true,
     })
     .catch(catchAndWrapError);
+  // TODO CHECK this type
   return actionResponses;
 };

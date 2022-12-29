@@ -290,6 +290,7 @@ const getActionDetailsList = async ({
       agentState,
       isExpired,
       status,
+      // status: action.status ?? status,
       createdBy: action.createdBy,
       comment: action.comment,
       parameters: action.parameters,

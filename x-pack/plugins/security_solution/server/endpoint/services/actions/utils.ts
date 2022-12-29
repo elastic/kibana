@@ -25,9 +25,11 @@ import type {
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  LogsOsqueryActionTransformed,
 } from '../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
 import type { EndpointMetadataService } from '../metadata';
+
 /**
  * Type guard to check if a given Action is in the shape of the Endpoint Action.
  * @param item
@@ -38,6 +40,15 @@ export const isLogsEndpointAction = (
   return 'EndpointActions' in item && 'user' in item && 'agent' in item && '@timestamp' in item;
 };
 
+export const isOsqueryAction = (
+  item: LogsEndpointAction | EndpointAction | LogsOsqueryActionTransformed
+): item is LogsOsqueryActionTransformed => {
+  return (
+    'EndpointActions' in item &&
+    'input_type' in item.EndpointActions &&
+    item.EndpointActions?.input_type === 'osquery'
+  );
+};
 /**
  * Type guard to track if a given action response is in the shape of the Endpoint Action Response (from the endpoint index)
  * @param item
@@ -67,9 +78,27 @@ interface NormalizedActionRequest {
  * types of action request.
  */
 export const mapToNormalizedActionRequest = (
-  actionRequest: EndpointAction | LogsEndpointAction
+  actionRequest: EndpointAction | LogsEndpointAction | LogsOsqueryActionTransformed
 ): NormalizedActionRequest => {
   const type = 'ACTION_REQUEST';
+  if (isOsqueryAction(actionRequest)) {
+    return {
+      agents: Array.isArray(actionRequest.agent.id)
+        ? actionRequest.agent.id
+        : [actionRequest.agent.id],
+      // not sure if we want to show live qureies triggered from alerts in the activity log
+      // alert: actionRequest.alert.id,
+      command: 'osquery',
+      comment: 'live query',
+      createdBy: actionRequest.user.id,
+      createdAt: actionRequest['@timestamp'],
+      expiration: actionRequest.EndpointActions.expiration,
+      id: actionRequest.EndpointActions.action_id,
+      type,
+      parameters: undefined,
+    };
+  }
+
   if (isLogsEndpointAction(actionRequest)) {
     return {
       agents: Array.isArray(actionRequest.agent.id)
@@ -461,13 +490,13 @@ export const categorizeActionResults = ({
 // for 8.4+ we only search on endpoint actions index
 // and thus there are only endpoint actions in the results
 export const formatEndpointActionResults = (
-  results: Array<estypes.SearchHit<LogsEndpointAction>>
+  results: Array<estypes.SearchHit<LogsEndpointAction | LogsOsqueryActionTransformed>>
 ): EndpointActivityLogAction[] => {
   return results?.length
     ? results?.map((e) => {
         return {
           type: ActivityLogItemTypes.ACTION,
-          item: { id: e._id, data: e._source as LogsEndpointAction },
+          item: { id: e._id, data: e._source as LogsEndpointAction | LogsOsqueryActionTransformed },
         };
       })
     : [];

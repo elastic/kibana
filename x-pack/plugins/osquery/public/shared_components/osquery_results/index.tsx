@@ -25,9 +25,11 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   ruleName,
   alertId,
   ecsData,
+  actionId,
 }) => {
   const { data: actionsData } = useAllLiveQueries({
-    filterQuery: { term: { alert_ids: alertId } },
+    alertId,
+    actionId,
     activePage: 0,
     limit: 100,
     direction: Direction.desc,
@@ -37,16 +39,13 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   return (
     <div data-test-subj={'osquery-results'}>
       {actionsData?.data.items.map((item, index) => {
-        const actionId = item.fields?.action_id?.[0];
-        const queryId = item.fields?.['queries.action_id']?.[0];
-        // const query = item.fields?.['queries.query']?.[0];
+        const actionIndex = item.fields?.action_id?.[0];
         const startDate = item.fields?.['@timestamp'][0];
 
         return (
           <OsqueryResult
-            key={actionId + index}
-            actionId={actionId}
-            queryId={queryId}
+            key={actionIndex + index}
+            actionId={actionIndex}
             startDate={startDate}
             ruleName={ruleName}
             agentIds={agentIds}

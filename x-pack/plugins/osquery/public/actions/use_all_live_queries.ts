@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type { ActionEdges, ActionsStrategyResponse, Direction } from '../../common/search_strategy';
-import type { ESTermQuery, ESExistsQuery } from '../../common/typed_json';
+import type { ESTermQuery, ESExistsQuery, ESMatchPhraseQuery } from '../../common/typed_json';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
@@ -20,23 +20,50 @@ interface UseAllLiveQueries {
   direction: Direction;
   limit: number;
   sortField: string;
-  filterQuery?: ESTermQuery | ESExistsQuery | string;
   skip?: boolean;
+  actionId?: string;
+  alertId?: string;
 }
+
+const getFilterQuery = (
+  alertId?: string,
+  actionId?: string
+): ESTermQuery | ESExistsQuery | ESMatchPhraseQuery => {
+  if (alertId) {
+    return { term: { alert_ids: alertId } };
+  }
+
+  if (actionId) {
+    return {
+      match_phrase: {
+        action_id: actionId,
+      },
+    };
+  }
+
+  return {
+    exists: {
+      field: 'user_id',
+    },
+  };
+};
 
 export const useAllLiveQueries = ({
   activePage,
   direction,
   limit,
   sortField,
-  filterQuery,
   skip = false,
+  actionId,
+  alertId,
 }: UseAllLiveQueries) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
+  const filterQuery = getFilterQuery(alertId, actionId);
+
   return useQuery(
-    ['actions', { activePage, direction, limit, sortField }],
+    ['actions', { activePage, direction, limit, sortField, actionId, alertId }],
     () =>
       http.get<{ data: Omit<ActionsStrategyResponse, 'edges'> & { items: ActionEdges } }>(
         '/api/osquery/live_queries',

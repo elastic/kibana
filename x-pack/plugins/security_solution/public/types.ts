@@ -88,7 +88,7 @@ export interface StartPlugins {
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
-  osquery?: OsqueryPluginStart;
+  osquery: OsqueryPluginStart;
   security: SecurityPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   threatIntelligence: ThreatIntelligencePluginStart;
@@ -106,7 +106,6 @@ export type StartServices = CoreStart &
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
     onAppLeave: (handler: AppLeaveHandler) => void;
-
     /**
      * This component will be exposed to all lazy loaded plugins, via useKibana hook. It should wrap every plugin route.
      * The goal is to allow page property customization (such as `template`).

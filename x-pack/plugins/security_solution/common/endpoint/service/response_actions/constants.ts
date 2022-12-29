@@ -17,6 +17,7 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'suspend-process',
   'running-processes',
   'get-file',
+  'osquery',
 ] as const;
 
 export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS_NAMES[number];
@@ -45,6 +46,7 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'suspend-process',
   'processes',
   'get-file',
+  'osquery',
 ] as const;
 
 export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMANDS[number];

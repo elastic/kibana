@@ -90,7 +90,7 @@ interface EndpointActionFields<
 interface ActionRequestFields {
   expiration: string;
   type: 'INPUT_ACTION';
-  input_type: 'endpoint';
+  input_type: 'endpoint' | 'osquery';
 }
 
 interface ActionResponseFields {
@@ -114,6 +114,17 @@ export interface LogsEndpointAction {
   };
 }
 
+export interface LogsOsqueryAction {
+  action_id: string;
+  '@timestamp': string;
+  input_type: 'osquery';
+  expiration: string;
+  type: 'INPUT_ACTION';
+  alert_ids: string[];
+  agent_ids: string[];
+  user_id: string;
+}
+
 /**
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
@@ -130,6 +141,30 @@ export interface LogsEndpointActionResponse<TOutputContent extends object = obje
   };
   error?: EcsError;
 }
+export interface LogsOsqueryActionTransformed {
+  '@timestamp': string;
+  agent: {
+    id: string | string[];
+  };
+  EndpointActions: {
+    data: {
+      command: 'osquery';
+      // queries: source.queries,
+    };
+    action_id: string;
+    input_type: 'osquery';
+    expiration: string;
+    type: 'INPUT_ACTION';
+  };
+  user: {
+    id: string;
+  };
+  // TODO check if we can get/need this
+  completed_at?: string;
+  started_at?: string;
+}
+
+export type LogsAction = LogsEndpointAction | LogsOsqueryAction;
 
 interface ResponseActionParametersWithPid {
   pid: number;
@@ -204,7 +239,7 @@ export interface EndpointActivityLogAction {
   type: typeof ActivityLogItemTypes.ACTION;
   item: {
     id: string;
-    data: LogsEndpointAction;
+    data: LogsEndpointAction | LogsOsqueryActionTransformed;
   };
 }
 
