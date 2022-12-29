@@ -29,11 +29,14 @@ describe('Alert Details Page Navigation', () => {
       cleanKibana();
       login();
       createCustomRuleEnabled(rule, 'rule1');
-      visit(ALERTS_URL);
-      waitForAlertsPanelToBeLoaded();
     });
 
     describe('context menu', () => {
+      beforeEach(() => {
+        visit(ALERTS_URL);
+        waitForAlertsPanelToBeLoaded();
+      });
+
       it('should navigate to the details page from the alert context menu', () => {
         cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
         cy.get(OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN).click({ force: true });
