@@ -43,8 +43,6 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
       fieldFormatsRegistry,
     };
 
-    // console.log(JSON.stringify({ csvSearchSourceJob: job }));
-
     const csv = new CsvGenerator(
       job,
       config,
