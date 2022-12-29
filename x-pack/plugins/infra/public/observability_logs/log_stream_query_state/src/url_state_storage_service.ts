@@ -156,8 +156,8 @@ const filterMeta = rt.partial({
   isMultiIndex: rt.boolean,
   type: rt.string,
   key: rt.string,
-  params: rt.unknown,
-  value: rt.string,
+  params: rt.any,
+  value: rt.any,
 });
 
 const filter = rt.intersection([
