@@ -30,7 +30,7 @@ const strings = {
     }),
   getWarningLabel: () =>
     i18n.translate('unifiedSearch.filter.closeEditorConfirmModal.warningLabel', {
-      defaultMessage: 'If you leave now, your unsaved work will be lost.',
+      defaultMessage: 'If you leave now, your unsaved filter changes will be lost.',
     }),
 };
 
