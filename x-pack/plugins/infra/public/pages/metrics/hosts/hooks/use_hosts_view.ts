@@ -53,7 +53,7 @@ export const useHostsView = () => {
         ignoreLookback: true,
       },
       // The user might want to click on the submit button without changing the filters
-      // This is to make sure the child components will still be re-rendered
+      // This makes sure all child componets will re-render.
       requestTs: new Date().getTime(),
     };
     return snapshotRequest;
