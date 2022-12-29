@@ -13,6 +13,7 @@ import {
 import {
   CspRuleTemplateV830,
   CspRuleTemplateV840,
+  CspRuleTemplateV870,
 } from '../../../common/schemas/csp_rule_template';
 
 function migrateCspRuleMetadata(
@@ -36,6 +37,20 @@ function migrateCspRuleMetadata(
   };
 }
 
+function deprecateCspRuleTemplateState(
+  doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV840>,
+  context: SavedObjectMigrationContext
+): SavedObjectUnsanitizedDoc<CspRuleTemplateV870> {
+  const { ...metadata } = doc.attributes.metadata;
+  return {
+    ...doc,
+    attributes: {
+      metadata,
+    },
+  };
+}
+
 export const cspRuleTemplateMigrations: SavedObjectMigrationMap = {
   '8.4.0': migrateCspRuleMetadata,
+  '8.7.0': deprecateCspRuleTemplateState,
 };
