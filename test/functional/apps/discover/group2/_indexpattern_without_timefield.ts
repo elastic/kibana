@@ -141,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       url = await browser.getCurrentUrl();
       expect(url).to.contain(`with-different-timefield`);
-      browser.goBack();
+      await browser.goBack();
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(url).to.contain(`@timestamp`);
     });
