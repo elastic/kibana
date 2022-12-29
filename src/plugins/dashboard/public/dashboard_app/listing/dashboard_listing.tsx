@@ -24,6 +24,9 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/core/public';
 import { TableListView, type UserContentCommonSchema } from '@kbn/content-management-table-list';
 
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { SAVED_OBJECT_LOADED_TIME } from '../../dashboard_constants';
+
 import {
   getDashboardBreadcrumb,
   dashboardListingTableStrings,
@@ -274,6 +277,7 @@ export const DashboardListing = ({
         referencesToExclude?: SavedObjectsFindOptionsReference[];
       } = {}
     ) => {
+      const searchStartTime = window.performance.now();
       return findDashboards
         .findSavedObjects({
           search: searchTerm,
@@ -282,6 +286,15 @@ export const DashboardListing = ({
           hasNoReference: referencesToExclude,
         })
         .then(({ total, hits }) => {
+          const searchEndTime = window.performance.now();
+          const searchDuration = searchEndTime - searchStartTime;
+          reportPerformanceMetricEvent(pluginServices.getServices().analytics, {
+            eventName: SAVED_OBJECT_LOADED_TIME,
+            duration: searchDuration,
+            meta: {
+              saved_object_type: 'dashboard',
+            },
+          });
           return {
             total,
             hits: hits.map(toTableListViewSavedObject),
