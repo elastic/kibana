@@ -44,6 +44,10 @@ const ProgressLoader = styled(EuiProgress)`
     `}
 `;
 
+const getSortField = (field: string): SortFieldCase =>
+  // @ts-ignore
+  SortFieldCase[field] ?? SortFieldCase.title;
+
 export interface AllCasesListProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
@@ -118,9 +122,10 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       ({ page, sort }: EuiBasicTableOnChange) => {
         let newQueryParams = queryParams;
         if (sort) {
+          console.log(getSortField('a'));
           newQueryParams = {
             ...newQueryParams,
-            sortField: sort.field,
+            sortField: getSortField(sort.field),
             sortOrder: sort.direction,
           };
         }

@@ -289,8 +289,8 @@ export const useCasesColumns = ({
       },
     },
     {
-      name: i18n.STATUS,
       field: 'status',
+      name: i18n.STATUS,
       sortable: true,
       render: (status: Case['status']) => {
         if (status != null) {
@@ -301,9 +301,9 @@ export const useCasesColumns = ({
       },
     },
     {
+      field: 'severity',
       name: i18n.SEVERITY,
       sortable: true,
-      field: 'severity',
       render: (severity: Case['severity']) => {
         if (severity != null) {
           const severityData = severities[severity ?? CaseSeverity.LOW];
