@@ -13,7 +13,10 @@ import { ComplianceDashboardData } from '../../../common/types';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { DASHBOARD_CONTAINER } from './test_subjects';
-import { useComplianceDashboardDataApi } from '../../common/api';
+import {
+  useCspmComplianceDashboardDataApi,
+  useKspmComplianceDashboardDataApi,
+} from '../../common/api';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudSummarySection } from './dashboard_sections/cloud_summary_section';
@@ -33,7 +36,10 @@ export const ComplianceDashboard = () => {
 
   const getSetupStatus = useCspSetupStatusApi();
   const hasFindings = getSetupStatus.data?.status === 'indexed';
-  const getDashboardData = useComplianceDashboardDataApi({
+  const getCspmDashboardData = useCspmComplianceDashboardDataApi({
+    enabled: hasFindings,
+  });
+  const getKspmDashboardData = useKspmComplianceDashboardDataApi({
     enabled: hasFindings,
   });
 
@@ -43,22 +49,22 @@ export const ComplianceDashboard = () => {
         label: 'Cloud',
         isSelected: selectedTab === 'cspm',
         onClick: () => setSelectedTab('cspm'),
-        content: <PostureDashboard complianceData={getDashboardData.data!} />,
+        content: <PostureDashboard complianceData={getCspmDashboardData.data!} />,
       },
       {
         label: 'Kubernetes',
         isSelected: selectedTab === 'kspm',
         onClick: () => setSelectedTab('kspm'),
-        content: <PostureDashboard complianceData={getDashboardData.data!} />,
+        content: <PostureDashboard complianceData={getKspmDashboardData.data!} />,
       },
     ],
-    [getDashboardData.data, selectedTab]
+    [getCspmDashboardData.data, getKspmDashboardData.data, selectedTab]
   );
 
   if (!hasFindings) return <NoFindingsStates />;
 
   return (
-    <CloudPosturePage query={getDashboardData}>
+    <CloudPosturePage query={selectedTab === 'cspm' ? getCspmDashboardData : getKspmDashboardData}>
       <EuiPageHeader
         bottomBorder
         pageTitle={

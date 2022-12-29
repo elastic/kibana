@@ -7,6 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { schema } from '@kbn/config-schema';
 import { aggregateLatestFindings } from '../../tasks/findings_stats_task';
 import type { ComplianceDashboardData } from '../../../common/types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
@@ -38,12 +39,16 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
   router.get(
     {
       path: STATS_ROUTE_PATH,
-      validate: false,
+      validate: {
+        params: schema.object({
+          policy_template: schema.string(),
+        }),
+      },
       options: {
         tags: ['access:cloud-security-posture-read'],
       },
     },
-    async (context, _, response) => {
+    async (context, request, response) => {
       const cspContext = await context.csp;
 
       try {
@@ -54,7 +59,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
           keep_alive: '30s',
         });
 
-        const policyTemplate = 'cis_k8s' as POLICY_TEMPLATE;
+        const policyTemplate = request.params.policy_template as POLICY_TEMPLATE;
 
         const query: QueryDslQueryContainer = {
           bool: {
