@@ -121,6 +121,10 @@ export const CaseAttributesRt = rt.intersection([
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRT, rt.null]),
   }),
+  rt.partial({
+    total_alerts: rt.number,
+    total_comment: rt.number,
+  }),
 ]);
 
 export const CasePostRequestRt = rt.intersection([

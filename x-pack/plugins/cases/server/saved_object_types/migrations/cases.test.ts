@@ -17,6 +17,8 @@ import {
   addAssignees,
   addDuration,
   addSeverity,
+  addTotalAlerts,
+  addTotalComment,
   caseConnectorIdMigration,
   convertSeverity,
   convertStatus,
@@ -670,6 +672,42 @@ describe('case migrations', () => {
         attributes: {
           ...doc.attributes,
           status: ESCaseStatus.OPEN,
+        },
+        references: [],
+      });
+    });
+
+    it('default value for total_alerts is -1', () => {
+      const doc = {
+        id: '123',
+        type: 'abc',
+        attributes: {},
+        references: [],
+      } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+      expect(addTotalAlerts(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          total_alerts: -1,
+        },
+        references: [],
+      });
+    });
+
+    it('default value for total_comment is -1', () => {
+      const doc = {
+        id: '123',
+        type: 'abc',
+        attributes: {},
+        references: [],
+      } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+      expect(addTotalComment(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          total_comment: -1,
         },
         references: [],
       });
