@@ -123,7 +123,7 @@ export class IndexPatternsFetcher {
       patternList
         .map(async (index) => {
           // perserve negated patterns
-          if (index.startsWith('-')) {
+          if (index.startsWith('-') || index.includes(':-')) {
             return true;
           }
           const searchResponse = await this.elasticsearchClient.fieldCaps({
