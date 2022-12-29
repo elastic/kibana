@@ -30,7 +30,7 @@ export const JIRA_ACTION_ID: ActionTypeId = '.jira';
 export const WEBHOOK_ACTION_ID: ActionTypeId = '.webhook';
 export const EMAIL_ACTION_ID: ActionTypeId = '.email';
 
-export type RuleAction = Omit<RuleActionOrig, 'actionTypeId'>;
+export type RuleAction = Omit<RuleActionOrig, 'actionTypeId', 'uuid'>;
 
 interface Translations {
   defaultActionMessage: string;
@@ -55,7 +55,7 @@ export function populateAlertActions({
       id: aId.id,
       group: groupId,
       params: {},
-    } as RuleAction;
+    };
 
     const recoveredAction: RuleAction = {
       id: aId.id,
@@ -63,7 +63,7 @@ export function populateAlertActions({
       params: {
         message: translations.defaultRecoveryMessage,
       },
-    } as unknown as RuleAction;
+    };
 
     switch (aId.actionTypeId) {
       case PAGER_DUTY_ACTION_ID:
