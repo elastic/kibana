@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import type { SLOList } from '../typings';
+import { FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-export const emptySloList: SLOList = {
+export const emptySloList: FindSLOResponse = {
   results: [],
   page: 1,
   perPage: 25,
@@ -55,7 +54,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
   updatedAt: now,
 };
 
-export const sloList: SLOList = {
+export const sloList: FindSLOResponse = {
   results: [
     {
       ...baseSlo,
