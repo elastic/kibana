@@ -11,10 +11,10 @@ import { render, waitFor } from '@testing-library/react';
 import { NotificationsList } from './notifications_list';
 import { useMlKibana } from '../../contexts/kibana';
 
+jest.mock('@kbn/ml-date-picker');
 jest.mock('../../contexts/kibana');
 jest.mock('../../services/toast_notification_service');
 jest.mock('../../contexts/ml/ml_notifications_context');
-jest.mock('../../contexts/kibana/use_timefilter');
 jest.mock('../../contexts/kibana/use_field_formatter');
 jest.mock('../../components/saved_objects_warning');
 

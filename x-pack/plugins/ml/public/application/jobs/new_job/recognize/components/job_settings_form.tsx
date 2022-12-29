@@ -19,9 +19,8 @@ import {
   EuiSwitch,
   EuiTextAlign,
 } from '@elastic/eui';
-import { getTimeFilterRange } from '@kbn/ml-date-picker';
+import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { ModuleJobUI, SAVE_STATE } from '../page';
-import { useTimefilter } from '../../../../contexts/kibana';
 import { useMlContext } from '../../../../contexts/ml';
 import {
   composeValidators,

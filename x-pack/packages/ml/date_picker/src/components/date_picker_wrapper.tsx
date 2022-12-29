@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeHistoryContract } from '@kbn/data-plugin/public';
 import { useUrlState } from '@kbn/ml-url-state';
 
-import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../hooks/use_time_filter';
+import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../hooks/use_timefilter';
 import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 

@@ -44,7 +44,7 @@ jest.mock('@kbn/ml-url-state', () => {
   };
 });
 
-jest.mock('../hooks/use_time_filter', () => ({
+jest.mock('../hooks/use_timefilter', () => ({
   useRefreshIntervalUpdates: jest.fn(),
   useTimefilter: () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires

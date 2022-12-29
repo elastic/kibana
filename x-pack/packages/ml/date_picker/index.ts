@@ -6,7 +6,11 @@
  */
 
 export { DatePickerContextProvider } from './src/hooks/use_date_picker_context';
-export { useTimefilter, useTimeRangeUpdates } from './src/hooks/use_time_filter';
+export {
+  useRefreshIntervalUpdates,
+  useTimefilter,
+  useTimeRangeUpdates,
+} from './src/hooks/use_timefilter';
 export { DatePickerWrapper } from './src/components/date_picker_wrapper';
 export {
   FullTimeRangeSelector,

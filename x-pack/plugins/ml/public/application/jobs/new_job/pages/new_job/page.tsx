@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getTimeFilterRange } from '@kbn/ml-date-picker';
+import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { useTimeBuckets } from '../../../../components/custom_hooks/use_time_buckets';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
@@ -34,7 +34,7 @@ import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useMlContext } from '../../../../contexts/ml';
-import { useMlKibana, useTimefilter } from '../../../../contexts/kibana';
+import { useMlKibana } from '../../../../contexts/kibana';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';

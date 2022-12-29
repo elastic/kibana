@@ -6,31 +6,35 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { useDatePickerContext } from './use_date_picker_context';
 import { useTimefilter } from './use_timefilter';
 
-jest.mock('./kibana_context', () => ({
-  useMlKibana: () => {
-    return {
-      services: {
-        data: {
-          query: {
-            timefilter: {
-              timefilter: {
-                disableTimeRangeSelector: jest.fn(),
-                disableAutoRefreshSelector: jest.fn(),
-                enableTimeRangeSelector: jest.fn(),
-                enableAutoRefreshSelector: jest.fn(),
-              },
-            },
-          },
+jest.mock('./use_date_picker_context');
+
+const mockContextFactory = (
+  isAutoRefreshSelectorEnabled: boolean = true,
+  isTimeRangeSelectorEnabled: boolean = true
+) => ({
+  data: {
+    query: {
+      timefilter: {
+        timefilter: {
+          disableTimeRangeSelector: jest.fn(),
+          disableAutoRefreshSelector: jest.fn(),
+          enableTimeRangeSelector: jest.fn(),
+          enableAutoRefreshSelector: jest.fn(),
+          isAutoRefreshSelectorEnabled: jest.fn(() => isAutoRefreshSelectorEnabled),
+          isTimeRangeSelectorEnabled: jest.fn(() => isTimeRangeSelectorEnabled),
         },
       },
-    };
+    },
   },
-}));
+});
 
 describe('useTimefilter', () => {
   test('will not trigger any date picker settings by default', () => {
+    (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory());
+
     const { result } = renderHook(() => useTimefilter());
     const timefilter = result.current;
 
@@ -41,6 +45,8 @@ describe('useTimefilter', () => {
   });
 
   test('custom disabled overrides', () => {
+    (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory());
+
     const { result } = renderHook(() =>
       useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false })
     );
@@ -53,6 +59,8 @@ describe('useTimefilter', () => {
   });
 
   test('custom enabled overrides', () => {
+    (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory(false, false));
+
     const { result } = renderHook(() =>
       useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true })
     );

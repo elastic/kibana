@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import moment from 'moment';
 import { FullTimeRangeSelector, FROZEN_TIER_PREFERENCE } from '@kbn/ml-date-picker';
-import type { GetTimeFieldRangeResponse } from '@kbn/ml-date-picker';
+import { useTimefilter, type GetTimeFieldRangeResponse } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 import { WizardNav } from '../wizard_nav';
 import { StepProps, WIZARD_STEPS } from '../step_types';
@@ -21,7 +21,7 @@ import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { TimeRangePicker, TimeRange } from '../../../common/components';
-import { useMlKibana, useTimefilter } from '../../../../../contexts/kibana';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   ML_FROZEN_TIER_PREFERENCE,
   type MlStorageKey,
