@@ -419,7 +419,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
       }
     }
-    spacesToAuthorize.delete(ALL_NAMESPACES_STRING); // Don't accidentally check for global privileges when the object exists in '*'
 
     const returnVal = await this.performAuthorization({
       actions: new Set([action]),
