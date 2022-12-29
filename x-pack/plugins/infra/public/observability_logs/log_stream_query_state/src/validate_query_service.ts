@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { IToasts } from '@kbn/core-notifications-browser';
 import { buildEsQuery, EsQueryConfig, isOfQueryType } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import type { InvokeCreator } from 'xstate';
 import { QueryParsingError, UnsupportedLanguageError } from './errors';
 import type { LogStreamQueryContext, LogStreamQueryEvent } from './types';
@@ -47,3 +49,22 @@ export const validateQuery =
       });
     }
   };
+
+export const showValidationErrorToast =
+  ({ toastsService }: { toastsService: IToasts }) =>
+  (_context: LogStreamQueryContext, event: LogStreamQueryEvent) => {
+    if (event.type !== 'VALIDATION_FAILED') {
+      return;
+    }
+
+    toastsService.addError(event.error, {
+      title: validationErrorToastTitle,
+    });
+  };
+
+const validationErrorToastTitle = i18n.translate(
+  'xpack.infra.logsPage.toolbar.logFilterErrorToastTitle',
+  {
+    defaultMessage: 'Log filter error',
+  }
+);
