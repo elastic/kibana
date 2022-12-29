@@ -81,12 +81,7 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
                 <EuiFlexItem>
                   <EuiLink onClick={handleNavigate}>{slo.name}</EuiLink>
                 </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <div>
-                    <SloBadges slo={slo} />
-                  </div>
-                </EuiFlexItem>
+                <SloBadges slo={slo} />
               </EuiFlexGroup>
             </EuiFlexItem>
 
