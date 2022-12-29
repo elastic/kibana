@@ -12,23 +12,29 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  ConfigKey,
+  EncryptedSyntheticsSavedMonitor,
+  SourceType,
+  SyntheticsMonitor,
+} from '../../../../../../../common/runtime_types';
 import { fetchDeleteMonitor } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import * as labels from './labels';
 
 export const DeleteMonitor = ({
-  configId,
-  name,
+  fields,
   reloadPage,
-  isProjectMonitor,
-  setIsDeleteModalVisible,
+  setMonitorPendingDeletion,
 }: {
-  configId: string;
-  name: string;
+  fields: SyntheticsMonitor | EncryptedSyntheticsSavedMonitor;
   reloadPage: () => void;
-  isProjectMonitor?: boolean;
-  setIsDeleteModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setMonitorPendingDeletion: (val: null) => void;
 }) => {
+  const configId = fields[ConfigKey.CONFIG_ID];
+  const name = fields[ConfigKey.NAME];
+  const isProjectMonitor = fields[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const handleConfirmDelete = () => {
@@ -37,7 +43,7 @@ export const DeleteMonitor = ({
 
   const { status: monitorDeleteStatus } = useFetcher(() => {
     if (isDeleting) {
-      return fetchDeleteMonitor({ id: configId });
+      return fetchDeleteMonitor({ configId });
     }
   }, [configId, isDeleting]);
 
@@ -78,9 +84,9 @@ export const DeleteMonitor = ({
       monitorDeleteStatus === FETCH_STATUS.FAILURE
     ) {
       setIsDeleting(false);
-      setIsDeleteModalVisible(false);
+      setMonitorPendingDeletion(null);
     }
-  }, [setIsDeleting, isDeleting, reloadPage, monitorDeleteStatus, setIsDeleteModalVisible, name]);
+  }, [setIsDeleting, isDeleting, reloadPage, monitorDeleteStatus, setMonitorPendingDeletion, name]);
 
   return (
     <EuiConfirmModal
@@ -88,7 +94,7 @@ export const DeleteMonitor = ({
         defaultMessage: 'Delete "{name}" monitor?',
         values: { name },
       })}
-      onCancel={() => setIsDeleteModalVisible(false)}
+      onCancel={() => setMonitorPendingDeletion(null)}
       onConfirm={handleConfirmDelete}
       cancelButtonText={labels.NO_LABEL}
       confirmButtonText={labels.YES_LABEL}
