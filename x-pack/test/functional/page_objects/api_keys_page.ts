@@ -57,6 +57,10 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('formFlyoutSubmitButton');
     },
 
+    async getSubmitButtonOnApiKeyFlyout() {
+      return await testSubjects.find('formFlyoutSubmitButton');
+    },
+
     async clickCancelButtonOnApiKeyFlyout() {
       return await testSubjects.click('formFlyoutCancelButton');
     },

@@ -173,10 +173,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
 
-        const flyout = await pageObjects.apiKeys.getFlyout();
-
         await retry.try(async () => {
-          expect(await flyout.isEnabled()).to.be(true);
+          const submitButton = await pageObjects.apiKeys.getSubmitButtonOnApiKeyFlyout();
+          expect(await submitButton.isEnabled()).to.be(true);
         });
 
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Update API Key');
