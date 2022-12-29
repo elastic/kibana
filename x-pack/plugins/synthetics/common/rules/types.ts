@@ -17,6 +17,8 @@ import type {
   EmailConnectorTypeId,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
 
+import type { ActionConnector as RawActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+
 export type ActionTypeId =
   | typeof SlackConnectorTypeId
   | typeof PagerDutyConnectorTypeId
@@ -27,3 +29,5 @@ export type ActionTypeId =
   | typeof JiraConnectorTypeId
   | typeof WebhookConnectorTypeId
   | typeof EmailConnectorTypeId;
+
+export type ActionConnector = Omit<RawActionConnector, 'secrets'>;
