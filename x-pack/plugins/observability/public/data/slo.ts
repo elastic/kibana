@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SLO, SLOList } from '../../public';
+import type { SLO, SLOList } from '../typings';
 
 export const emptySloList: SLOList = {
   results: [],
@@ -24,9 +24,11 @@ export const sloList: SLOList = {
       },
       objective: { target: 0.98 },
       summary: {
+        status: 'HEALTHY',
         sliValue: 0.99872,
         errorBudget: {
           remaining: 0.936,
+          isEstimated: false,
         },
       },
     },
@@ -38,16 +40,50 @@ export const sloList: SLOList = {
       },
       objective: { target: 0.98 },
       summary: {
+        status: 'VIOLATED',
         sliValue: 0.97,
         errorBudget: {
           remaining: 0,
+          isEstimated: false,
+        },
+      },
+    },
+    {
+      id: 'c0f8d669-9177-4706-9098-f397a88173a7',
+      name: 'availability',
+      timeWindow: {
+        duration: { value: 30, unit: 'd' },
+      },
+      objective: { target: 0.98 },
+      summary: {
+        status: 'NO_DATA',
+        sliValue: -1,
+        errorBudget: {
+          remaining: 1,
+          isEstimated: false,
+        },
+      },
+    },
+    {
+      id: 'c0f8d669-9177-4706-9098-f397a88173a7',
+      name: 'availability with timeslices',
+      timeWindow: {
+        duration: { value: 30, unit: 'd' },
+      },
+      objective: { target: 0.98 },
+      summary: {
+        status: 'DEGRADING',
+        sliValue: 0.97,
+        errorBudget: {
+          remaining: 0.12,
+          isEstimated: false,
         },
       },
     },
   ],
   page: 1,
   perPage: 25,
-  total: 2,
+  total: 4,
 };
 
 export const anSLO: SLO = {
@@ -60,9 +96,30 @@ export const anSLO: SLO = {
     target: 0.98,
   },
   summary: {
+    status: 'HEALTHY',
     sliValue: 0.990097,
     errorBudget: {
       remaining: 0.504831,
+      isEstimated: false,
+    },
+  },
+};
+
+export const aForecastedSLO: SLO = {
+  id: '2f17deb0-725a-11ed-ab7c-4bb641cfc57e',
+  name: 'SLO latency service log',
+  timeWindow: {
+    duration: { value: 7, unit: 'd' },
+  },
+  objective: {
+    target: 0.98,
+  },
+  summary: {
+    status: 'HEALTHY',
+    sliValue: 0.990097,
+    errorBudget: {
+      remaining: 0.504831,
+      isEstimated: true,
     },
   },
 };

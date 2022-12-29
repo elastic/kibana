@@ -28,11 +28,30 @@ const errorBudgetSchema = t.type({
   initial: t.number,
   consumed: t.number,
   remaining: t.number,
-  is_estimated: t.boolean,
+  isEstimated: t.boolean,
 });
 
-const summarySchema = t.type({ sli_value: t.number, error_budget: errorBudgetSchema });
+const statusSchema = t.union([
+  t.literal('NO_DATA'),
+  t.literal('HEALTHY'),
+  t.literal('DEGRADING'),
+  t.literal('VIOLATED'),
+]);
+
+const summarySchema = t.type({
+  status: statusSchema,
+  sliValue: t.number,
+  errorBudget: errorBudgetSchema,
+});
 
 const dateRangeSchema = t.type({ from: dateType, to: dateType });
 
-export { ALL_VALUE, allOrAnyString, dateRangeSchema, dateType, errorBudgetSchema, summarySchema };
+export {
+  ALL_VALUE,
+  allOrAnyString,
+  dateRangeSchema,
+  dateType,
+  errorBudgetSchema,
+  statusSchema,
+  summarySchema,
+};

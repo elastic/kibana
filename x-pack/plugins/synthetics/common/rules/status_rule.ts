@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SLO } from '../../../typings';
 
-export function isSloHealthy(slo: SLO) {
-  return slo.objective.target <= slo.summary.sliValue;
-}
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const StatusRulePramsSchema = schema.object({});
+
+export type StatusRuleParams = TypeOf<typeof StatusRulePramsSchema>;

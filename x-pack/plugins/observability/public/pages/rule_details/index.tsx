@@ -372,7 +372,7 @@ export function RuleDetailsPage() {
           : [],
       }}
     >
-      <EuiFlexGroup wrap={true} gutterSize="m">
+      <EuiFlexGroup wrap gutterSize="m">
         <EuiFlexItem style={{ minWidth: 350 }}>
           {getRuleStatusPanel({
             rule,
@@ -382,17 +382,15 @@ export function RuleDetailsPage() {
             statusMessage,
           })}
         </EuiFlexItem>
-        <EuiSpacer size="m" />
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
             featureIds={featureIds}
-            onClick={(status) => onAlertSummaryWidgetClick(status)}
+            onClick={onAlertSummaryWidgetClick}
             timeRange={defaultAlertTimeRange}
             filter={alertSummaryWidgetFilter.current}
           />
         </EuiFlexItem>
-        <EuiSpacer size="m" />
-        {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
+        {getRuleDefinition({ rule, onEditRule: reloadRule } as RuleDefinitionProps)}
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />

@@ -84,13 +84,13 @@ export class UpdateSLO {
       name: slo.name,
       description: slo.description,
       indicator: slo.indicator,
-      budgeting_method: slo.budgeting_method,
-      time_window: slo.time_window,
+      budgetingMethod: slo.budgetingMethod,
+      timeWindow: slo.timeWindow,
       objective: slo.objective,
       settings: slo.settings,
       revision: slo.revision,
-      created_at: slo.created_at,
-      updated_at: slo.updated_at,
+      createdAt: slo.createdAt,
+      updatedAt: slo.updatedAt,
     });
   }
 }
