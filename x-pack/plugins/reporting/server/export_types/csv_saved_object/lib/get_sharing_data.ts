@@ -59,7 +59,7 @@ export async function getSharingData(
   let columns: string[] | undefined;
   let timeFieldName: string | undefined;
   const columnsTemp = savedSearch.attributes?.columns;
-  if (typeof columnsTemp !== 'undefined' && isStringArray(columnsTemp)) {
+  if (typeof columnsTemp !== 'undefined' && columnsTemp.length > 0 && isStringArray(columnsTemp)) {
     columns = columnsTemp;
 
     // conditionally add the time field column:
@@ -78,6 +78,8 @@ export async function getSharingData(
     if (!useFieldsFromSource && columns.length) {
       searchSource.setField('fields', columns);
     }
+  } else {
+    searchSource.setField('fields', ['*']);
   }
 
   // Combine the job's time filter into the SearchSource instance

@@ -14,6 +14,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 const LOGSTASH_DATA_ARCHIVE = 'test/functional/fixtures/es_archiver/logstash_functional';
 const LOGSTASH_SAVED_OBJECTS = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
 const LOGS_SAVED_SEARCH_ID = '9747bd90-8581-11ed-97c5-596122858f69';
+const LOGS_SAVED_SEARCH_NO_COLUMNS_DATE_FILTER_ID = 'a5698f80-879c-11ed-b087-77d36820f941';
 const LOGS_SAVED_SEARCH_DATE_FILTER_ID = 'd7a79750-3edd-11e9-99cc-4d80163ee9e7';
 const LOGS_SAVED_SEARCH_TERMS_FILTER_ID = '53193950-8649-11ed-9cfd-b9cddf37f461';
 const ECOM_SAVED_SEARCH_ID = '6091ead0-1c6d-11ea-a100-8589bb9d7c6b';
@@ -159,6 +160,44 @@ export default ({ getService }: FtrProviderContext) => {
         const response = await supertest.get(path);
         expect(response.header['content-disposition']).to.equal(
           'inline; filename="A Saved Search with a date filter.csv"'
+        );
+        expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
+        csvFile = response.text;
+        expectSnapshot(csvFile).toMatch();
+      });
+    });
+
+    describe('export with no selected columns and saved date filter and no job post params', () => {
+      let job: ReportApiJSON;
+      let path: string;
+      let csvFile: string;
+
+      before(async () => {
+        const { text, status } = await requestCsvFromSavedSearch(
+          LOGS_SAVED_SEARCH_NO_COLUMNS_DATE_FILTER_ID
+        );
+        expect(status).to.eql(200);
+        const { payload } = JSON.parse(text);
+        job = payload.job;
+        path = payload.path;
+        await reportingAPI.waitForJobToFinish(path);
+      });
+
+      it('job response data is correct', () => {
+        expect(path).to.be.a('string');
+        expect(job).to.be.an('object');
+        expect(job.attempts).equal(0);
+        expect(job.created_by).equal('elastic');
+        expect(job.jobtype).equal('csv_saved_object');
+        expect(job.payload.objectType).equal('saved search');
+        expect(job.payload.title).equal('Saved Search with date filter and no columns selected');
+        expect(job.payload.version).equal('7.17');
+      });
+
+      it('csv file matches', async () => {
+        const response = await supertest.get(path);
+        expect(response.header['content-disposition']).to.equal(
+          'inline; filename="Saved Search with date filter and no columns selected.csv"'
         );
         expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
         csvFile = response.text;

@@ -11,8 +11,8 @@
   },
   "references": [],
   "type": "index-pattern",
-  "updated_at": "2022-12-28T19:02:39.715Z",
-  "version": "WzI4MCwxXQ=="
+  "updated_at": "2022-12-29T17:13:37.050Z",
+  "version": "WzE4LDFd"
 }
 
 {
@@ -53,8 +53,8 @@
     }
   ],
   "type": "search",
-  "updated_at": "2022-12-28T19:09:50.004Z",
-  "version": "WzI4NSwxXQ=="
+  "updated_at": "2022-12-29T17:13:37.050Z",
+  "version": "WzE5LDFd"
 }
 
 {
@@ -100,8 +100,8 @@
     }
   ],
   "type": "search",
-  "updated_at": "2022-12-28T19:02:39.715Z",
-  "version": "WzI4MSwxXQ=="
+  "updated_at": "2022-12-29T17:13:37.050Z",
+  "version": "WzIwLDFd"
 }
 
 {
@@ -137,8 +137,47 @@
     }
   ],
   "type": "search",
-  "updated_at": "2022-12-28T19:02:39.715Z",
-  "version": "WzI4MiwxXQ=="
+  "updated_at": "2022-12-29T17:13:37.050Z",
+  "version": "WzIxLDFd"
+}
+
+{
+  "attributes": {
+    "columns": [],
+    "description": "",
+    "grid": {},
+    "hideChart": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"meta\":{\"params\":{\"lt\":\"2015-09-21T04:32:48.778+00:00\",\"gte\":\"2015-09-21T04:02:04.265+00:00\"},\"field\":\"@timestamp\",\"alias\":null,\"negate\":false,\"disabled\":false,\"type\":\"range\",\"key\":\"@timestamp\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"range\":{\"@timestamp\":{\"lt\":\"2015-09-21T04:32:48.778+00:00\",\"gte\":\"2015-09-21T04:02:04.265+00:00\"}}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "title": "Saved Search with date filter and no columns selected"
+  },
+  "coreMigrationVersion": "7.17.9",
+  "id": "a5698f80-879c-11ed-b087-77d36820f941",
+  "migrationVersion": {
+    "search": "7.9.3"
+  },
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2022-12-29T17:17:17.822Z",
+  "version": "Wzc5LDFd"
 }
 
 {
@@ -181,6 +220,6 @@
     }
   ],
   "type": "search",
-  "updated_at": "2022-12-28T19:10:04.195Z",
-  "version": "WzI4NCwxXQ=="
+  "updated_at": "2022-12-29T17:13:37.050Z",
+  "version": "WzIyLDFd"
 }

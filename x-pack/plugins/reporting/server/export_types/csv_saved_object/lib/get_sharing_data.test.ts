@@ -112,17 +112,12 @@ describe('get_sharing_data', () => {
     mockIndexPattern = createMockIndexPattern();
     mockSavedSearch.attributes.columns = [];
     const sharingData = await getSharingData({ uiSettings }, mockSearchSource, mockSavedSearch);
-    // FIXME
-    expect(sharingData.columns).toMatchInlineSnapshot(`
-      Array [
-        "@timestamp",
-      ]
-    `);
+    expect(sharingData.columns).toBe(undefined);
     expect(mockSearchSource.setField).toBeCalledTimes(2);
     expect(mockSearchSource.setField).toHaveBeenNthCalledWith(1, 'sort', [
       { '@timestamp': 'desc' },
     ]);
-    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(2, 'fields', ['@timestamp']);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(2, 'fields', ['*']);
   });
 
   it('transforms saved search into search source using columns without time field', async () => {
