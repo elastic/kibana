@@ -65,8 +65,6 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   });
 
   it('should run query and enable ecs mapping', () => {
-    navigateTo('/app/osquery/packs');
-    cy.waitForReact(1000);
     const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
     cy.contains('New live query').click();
     selectAllAgents();
@@ -113,9 +111,11 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
-    cy.get('[data-test-subj="ECSMappingEditorForm"]').within(() => {
-      cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
-    });
+    cy.get('[data-test-subj="ECSMappingEditorForm"]')
+      .first()
+      .within(() => {
+        cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
+      });
     cy.react('EuiButton').contains('Update query').click();
     cy.wait(5000);
 
