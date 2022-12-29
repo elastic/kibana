@@ -30,7 +30,7 @@ export const JIRA_ACTION_ID: ActionTypeId = '.jira';
 export const WEBHOOK_ACTION_ID: ActionTypeId = '.webhook';
 export const EMAIL_ACTION_ID: ActionTypeId = '.email';
 
-export type RuleAction = Omit<RuleActionOrig, 'actionTypeId', 'uuid'>;
+export type RuleAction = Omit<RuleActionOrig, 'actionTypeId' | 'uuid'>;
 
 interface Translations {
   defaultActionMessage: string;

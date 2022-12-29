@@ -102,7 +102,7 @@ import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
 import {
-  IUnsecuredActionsClient,
+  type IUnsecuredActionsClient,
   UnsecuredActionsClient,
 } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
