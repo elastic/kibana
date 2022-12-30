@@ -44,6 +44,7 @@ describe('Open timeline', () => {
         refreshTimelinesUntilTimeLinePresent(timelineId)
           // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
           // request responses and indeterminism since on clicks to activates URL's.
+          .then(() => cy.wrap(timelineId).as('timelineId'))
           .then(() => cy.wait(1000))
           .then(() =>
             addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
@@ -57,7 +58,8 @@ describe('Open timeline', () => {
   });
 
   describe('Open timeline modal', () => {
-    before(() => {
+    beforeEach(function () {
+      visitWithoutDateRange(TIMELINES_URL);
       openTimelineFromSettings();
     });
 
