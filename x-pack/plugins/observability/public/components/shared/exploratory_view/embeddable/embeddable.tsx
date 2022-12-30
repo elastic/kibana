@@ -8,7 +8,7 @@
 import { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import {
   FormulaPublicApi,
   LensEmbeddableInput,

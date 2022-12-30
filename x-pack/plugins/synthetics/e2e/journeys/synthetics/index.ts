@@ -17,3 +17,4 @@ export * from './private_locations.journey';
 export * from './alerting_default.journey';
 export * from './global_parameters.journey';
 export * from './detail_flyout';
+export * from './alert_rules/default_status_alert.journey';
