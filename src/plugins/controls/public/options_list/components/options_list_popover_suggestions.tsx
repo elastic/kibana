@@ -17,6 +17,7 @@ import {
   EuiBadge,
   EuiIcon,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListReduxState } from '../types';
@@ -130,8 +131,20 @@ export const OptionsListPopoverSuggestions = ({
               : key
           }
         >
-          <EuiFlexGroup gutterSize="none" responsive={false}>
-            <EuiFlexItem>{`${key}`}</EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                min-width: 0;
+              `}
+            >
+              <span
+                css={css`
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                `}
+              >{`${key}`}</span>
+            </EuiFlexItem>
             {!showOnlySelected && (
               <EuiFlexItem grow={false} tabIndex={-1}>
                 {availableOptions && availableOptions[key] && (
