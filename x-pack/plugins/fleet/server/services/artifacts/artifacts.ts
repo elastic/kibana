@@ -116,7 +116,9 @@ export const bulkCreateArtifacts = async (
     const nonConflictErrors = res.items
       .filter((item) => item.create?.status !== 409)
       .map((item) => new Error(item.create?.error?.reason));
-    return { errors: nonConflictErrors };
+    if (nonConflictErrors.length > 0) {
+      return { errors: nonConflictErrors };
+    }
   }
 
   return {
