@@ -20,7 +20,7 @@ export interface EndpointArtifactClientInterface {
 
   bulkCreateArtifacts(
     artifacts: InternalArtifactCompleteSchema[]
-  ): Promise<InternalArtifactCompleteSchema[]>;
+  ): Promise<{ artifacts?: InternalArtifactCompleteSchema[]; errors?: Error[] }>;
 
   deleteArtifact(id: string): Promise<void>;
 
@@ -79,7 +79,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
 
   async bulkCreateArtifacts(
     artifacts: InternalArtifactCompleteSchema[]
-  ): Promise<InternalArtifactCompleteSchema[]> {
+  ): Promise<{ artifacts?: InternalArtifactCompleteSchema[]; errors?: Error[] }> {
     const optionsList = artifacts.map((artifact) => ({
       content: Buffer.from(artifact.body, 'base64').toString(),
       identifier: artifact.identifier,

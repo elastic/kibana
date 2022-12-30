@@ -389,25 +389,22 @@ export class ManifestManager {
       return errors;
     }
 
-    let fleetArtifacts: InternalArtifactCompleteSchema[] = [];
-    try {
-      fleetArtifacts = await this.artifactClient.bulkCreateArtifacts(artifactsToCreate);
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isConflictError(err)) {
-        // TODO find artifact id from the bulk create error
-        this.logger.debug(`Tried to create artifact, but it already exists.`); // ${artifactId}
-      } else {
-        errors.push(err);
-      }
+    const { artifacts: fleetArtifacts, errors: createErrors } =
+      await this.artifactClient.bulkCreateArtifacts(artifactsToCreate);
+
+    if (createErrors) {
+      errors.push(...createErrors);
     }
 
-    artifactsToCreate.forEach((artifact, index) => {
-      const fleetArtifact = fleetArtifacts[index];
-      const artifactId = getArtifactId(artifact);
-      // Cache the compressed body of the artifact
-      this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
-      newManifest.replaceArtifact(fleetArtifact);
-    });
+    if (fleetArtifacts) {
+      artifactsToCreate.forEach((artifact, index) => {
+        const fleetArtifact = fleetArtifacts[index];
+        const artifactId = getArtifactId(artifact);
+        // Cache the compressed body of the artifact
+        this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
+        newManifest.replaceArtifact(fleetArtifact);
+      });
+    }
 
     return errors;
   }

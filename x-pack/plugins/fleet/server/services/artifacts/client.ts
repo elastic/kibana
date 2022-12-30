@@ -77,7 +77,9 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
     return createArtifact(this.esClient, newArtifactData);
   }
 
-  async bulkCreateArtifacts(optionsList: ArtifactsClientCreateOptions[]): Promise<Artifact[]> {
+  async bulkCreateArtifacts(
+    optionsList: ArtifactsClientCreateOptions[]
+  ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> {
     const newArtifactsData = [];
 
     for (const options of optionsList) {

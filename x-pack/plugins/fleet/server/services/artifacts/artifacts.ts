@@ -88,7 +88,7 @@ export const bulkCreateArtifacts = async (
   esClient: ElasticsearchClient,
   artifacts: NewArtifact[],
   refresh = false
-): Promise<Artifact[]> => {
+): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> => {
   const ids = artifacts.map((artifact) => uniqueIdFromArtifact(artifact));
   const newArtifactsData = artifacts.map((artifact) =>
     newArtifactToElasticsearchProperties(artifact)
@@ -104,24 +104,26 @@ export const bulkCreateArtifacts = async (
       newArtifactsData[index],
     ])
     .flatMap((arr) => arr);
-  try {
-    await withPackageSpan('Bulk create fleet artifacts', () =>
-      esClient.bulk({
-        index: FLEET_SERVER_ARTIFACTS_INDEX,
-        body,
-        refresh,
-      })
-    );
-  } catch (e) {
-    // we ignore 409 errors from the create (document already exists)
-    if (!isElasticsearchVersionConflictError(e)) {
-      throw new ArtifactsElasticsearchError(e);
-    }
+
+  const res = await withPackageSpan('Bulk create fleet artifacts', () =>
+    esClient.bulk({
+      index: FLEET_SERVER_ARTIFACTS_INDEX,
+      body,
+      refresh,
+    })
+  );
+  if (res.errors) {
+    const nonConflictErrors = res.items
+      .filter((item) => item.create?.status !== 409)
+      .map((item) => new Error(item.create?.error?.reason));
+    return { errors: nonConflictErrors };
   }
 
-  return ids.map((id, index) =>
-    esSearchHitToArtifact({ _id: id, _source: newArtifactsData[index] })
-  );
+  return {
+    artifacts: ids.map((id, index) =>
+      esSearchHitToArtifact({ _id: id, _source: newArtifactsData[index] })
+    ),
+  };
 };
 
 export const deleteArtifact = async (esClient: ElasticsearchClient, id: string): Promise<void> => {
