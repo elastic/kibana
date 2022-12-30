@@ -319,6 +319,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             searchString: searchString.value,
             runPastTimeout,
             selectedOptions,
+            page: 2,
           },
           this.abortController.signal
         );

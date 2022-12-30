@@ -40,6 +40,7 @@ export const setupOptionsListSuggestionsRoute = (
         body: schema.object(
           {
             fieldName: schema.string(),
+            page: schema.maybe(schema.number()),
             sort: schema.maybe(schema.any()),
             filters: schema.maybe(schema.any()),
             fieldSpec: schema.maybe(schema.any()),
@@ -86,7 +87,7 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, fieldName, runtimeFieldMap } = request;
+    const { runPastTimeout, filters, fieldName, runtimeFieldMap, firstPage } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
@@ -128,7 +129,7 @@ export const setupOptionsListSuggestionsRoute = (
         ...runtimeFieldMap,
       },
     };
-
+    console.log(JSON.stringify(body));
     /**
      * Run ES query
      */
@@ -138,7 +139,8 @@ export const setupOptionsListSuggestionsRoute = (
      * Parse ES response into Options List Response
      */
     const totalCardinality = get(rawEsResult, 'aggregations.unique_terms.value');
-    const suggestions = suggestionBuilder.parse(rawEsResult);
+    const suggestions = suggestionBuilder.parse(rawEsResult, request.page);
+    console.log(suggestions);
     const invalidSelections = validationBuilder.parse(rawEsResult);
     return {
       suggestions,

@@ -19,7 +19,7 @@ import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip
 
 export interface OptionsListValidationAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
-  parse: (response: SearchResponse) => string[];
+  parse: (response: SearchResponse, page?: number) => string[];
 }
 
 export interface OptionsListSuggestionAggregationBuilder {
@@ -110,8 +110,9 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
    * the "Keyword only" query / parser should be used when the options list is built on a field which has only keyword mappings.
    */
   keywordOnly: {
-    buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => ({
+    buildAggregation: ({ fieldName, searchString, sort, page }: OptionsListRequestBody) => ({
       terms: {
+        size: (page ?? 1) === 1 ? 10 : 100,
         field: fieldName,
         include: `${getEscapedQuery(searchString)}.*`,
         execution_hint: 'map',
@@ -119,13 +120,12 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         order: getSortType(sort),
       },
     }),
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.buckets').reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
+    parse: (rawEsResult, page = 1) =>
+      get(rawEsResult, 'aggregations.suggestions.buckets')
+        ?.slice((page - 1) * 10, (page - 1) * 10 + 9)
+        ?.reduce((suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
           return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
-        },
-        {}
-      ),
+        }, {}),
   },
 
   /**
@@ -147,6 +147,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         aggs: {
           keywordSuggestions: {
             terms: {
+              size: (req.page ?? 1) === 1 ? 10 : 100,
               field: fieldName,
               shard_size: 10,
               order: getSortType(sort),
@@ -155,44 +156,49 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         },
       };
     },
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.keywordSuggestions.buckets').reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
+    parse: (rawEsResult, page = 1) =>
+      get(rawEsResult, 'aggregations.suggestions.keywordSuggestions.buckets')
+        ?.slice((page - 1) * 10, (page - 1) * 10 + 9)
+        ?.reduce((suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
           return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
-        },
-        {}
-      ),
+        }, {}),
   },
 
   /**
    * the "Boolean" query / parser should be used when the options list is built on a field of type boolean. The query is slightly different than a keyword query.
    */
   boolean: {
-    buildAggregation: ({ fieldName, sort }: OptionsListRequestBody) => ({
+    buildAggregation: ({ fieldName, sort, page }: OptionsListRequestBody) => ({
       terms: {
+        size: (page ?? 1) === 1 ? 10 : 100,
         field: fieldName,
         execution_hint: 'map',
         shard_size: 10,
         order: getSortType(sort),
       },
     }),
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
-          return {
-            ...suggestions,
-            [suggestion.key_as_string]: { doc_count: suggestion.doc_count },
-          };
-        },
-        {}
-      ),
+    parse: (rawEsResult, page = 1) =>
+      get(rawEsResult, 'aggregations.suggestions.buckets')
+        ?.slice((page - 1) * 10, (page - 1) * 10 + 9)
+        ?.reduce(
+          (
+            suggestions: OptionsListSuggestions,
+            suggestion: EsBucket & { key_as_string: string }
+          ) => {
+            return {
+              ...suggestions,
+              [suggestion.key_as_string]: { doc_count: suggestion.doc_count },
+            };
+          },
+          {}
+        ),
   },
 
   /**
    * the "IP" query / parser should be used when the options list is built on a field of type IP.
    */
   ip: {
-    buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => {
+    buildAggregation: ({ fieldName, searchString, sort, page }: OptionsListRequestBody) => {
       let ipRangeQuery: IpRangeQuery = {
         validSearch: true,
         rangeQuery: [
@@ -222,6 +228,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         aggs: {
           filteredSuggestions: {
             terms: {
+              size: (page ?? 1) === 1 ? 10 : 100,
               field: fieldName,
               execution_hint: 'map',
               shard_size: 10,
@@ -231,7 +238,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         },
       };
     },
-    parse: (rawEsResult) => {
+    parse: (rawEsResult, page = 1) => {
       if (!Boolean(rawEsResult.aggregations?.suggestions)) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
@@ -243,7 +250,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
       getIpBuckets(rawEsResult, buckets, 'ipv6');
       return buckets
         .sort((bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count)
-        .slice(0, 10) // only return top 10 results
+        ?.slice((page - 1) * 10, (page - 1) * 10 + 9)
         .reduce((suggestions, suggestion: EsBucket) => {
           return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
         }, {});
@@ -268,6 +275,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         aggs: {
           nestedSuggestions: {
             terms: {
+              size: (req.page ?? 1) === 1 ? 10 : 100,
               field: fieldName,
               include: `${getEscapedQuery(searchString)}.*`,
               execution_hint: 'map',
@@ -278,12 +286,11 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         },
       };
     },
-    parse: (rawEsResult) =>
-      get(rawEsResult, 'aggregations.suggestions.nestedSuggestions.buckets').reduce(
-        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
+    parse: (rawEsResult, page = 1) =>
+      get(rawEsResult, 'aggregations.suggestions.nestedSuggestions.buckets')
+        ?.slice((page - 1) * 10, (page - 1) * 10 + 9)
+        ?.reduce((suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
           return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
-        },
-        {}
-      ),
+        }, {}),
   },
 };
