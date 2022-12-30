@@ -9,7 +9,6 @@
 import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
 import type { RuleUpdateProps } from '../../../../../../common/detection_engine/rule_schema';
-import { transformRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
 
 import type { InternalRuleUpdate, RuleParams, RuleAlertType } from '../../../rule_schema';
 import { transformToAlertThrottle, transformToNotifyWhen } from '../../normalization/rule_actions';
@@ -76,7 +75,16 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
+    actions:
+      ruleUpdate.actions != null
+        ? ruleUpdate.actions.map(({ group, id, params, action_type_id: actionTypeId, uuid }) => ({
+            group,
+            id,
+            params,
+            actionTypeId,
+            ...(uuid && { uuid }),
+          }))
+        : [],
     throttle: transformToAlertThrottle(ruleUpdate.throttle),
     notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
   };

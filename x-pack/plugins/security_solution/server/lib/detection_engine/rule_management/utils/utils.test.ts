@@ -330,6 +330,7 @@ describe('utils', () => {
           params: {},
           group: '',
           action_type_id: 'action_123',
+          uuid: '123-456',
         },
       ];
 
@@ -672,12 +673,12 @@ describe('utils', () => {
   });
 
   describe('migrateLegacyActionsIds', () => {
-    const mockAction: RuleAction = {
+    const mockAction = {
       group: 'group string',
       id: 'some-7.x-id',
       action_type_id: '.slack',
       params: {},
-    } as RuleAction;
+    };
     const soClient = clients.core.savedObjects.getClient();
     beforeEach(() => {
       soClient.find.mockReset();

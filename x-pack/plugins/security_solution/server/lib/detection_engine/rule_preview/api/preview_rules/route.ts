@@ -14,7 +14,6 @@ import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeState,
-  SanitizedRuleConfig,
 } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
@@ -218,6 +217,7 @@ export const previewRulesRoute = async (
 
           const rule = {
             ...internalRule,
+            actions: internalRule.actions.map((action) => ({ ...action, uuid: uuid.v4() })),
             id: previewId,
             createdAt: new Date(),
             createdBy: username ?? 'preview-created-by',
@@ -226,7 +226,7 @@ export const previewRulesRoute = async (
             ruleTypeName,
             updatedAt: new Date(),
             updatedBy: username ?? 'preview-updated-by',
-          } as unknown as SanitizedRuleConfig;
+          };
 
           let invocationStartTime;
 

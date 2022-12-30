@@ -45,7 +45,7 @@ export const legacyGetRuleActionsFromSavedObject = (
   // We have to serialize the action from the saved object references
   const actionsWithIdReplacedFromReference = existingActions.flatMap<LegacyRuleAlertAction>(
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    ({ group, params, action_type_id, actionRef }) => {
+    ({ group, params, action_type_id, actionRef, uuid }) => {
       const found = savedObject.references?.find(
         (reference) => actionRef === reference.name && reference.type === 'action'
       );
@@ -56,7 +56,8 @@ export const legacyGetRuleActionsFromSavedObject = (
             group,
             params,
             action_type_id,
-          } as LegacyRuleAlertAction,
+            uuid,
+          },
         ];
       } else {
         // We cannot find it so we return no actions. This line should not be reached.
@@ -113,14 +114,13 @@ export const legacyGetActionReference = (id: string, index: number) => ({
 export const legacyTransformActionToReference = (
   alertAction: RuleAction,
   index: number
-): LegacyRuleAlertSavedObjectAction =>
-  ({
-    actionRef: `action_${index}`,
-    group: alertAction.group,
-    params: alertAction.params,
-    action_type_id: alertAction.actionTypeId,
-    uuid: alertAction.uuid,
-  } as unknown as LegacyRuleAlertSavedObjectAction);
+): LegacyRuleAlertSavedObjectAction => ({
+  actionRef: `action_${index}`,
+  group: alertAction.group,
+  params: alertAction.params,
+  action_type_id: alertAction.actionTypeId,
+  uuid: alertAction.uuid,
+});
 
 /**
  * Given an alertAction this returns a transformed legacy action as a reference.
@@ -136,4 +136,5 @@ export const legacyTransformLegacyRuleAlertActionToReference = (
   group: alertAction.group,
   params: alertAction.params,
   action_type_id: alertAction.action_type_id,
+  uuid: alertAction.uuid,
 });

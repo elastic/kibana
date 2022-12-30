@@ -7,7 +7,6 @@
 import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import { v4 } from 'uuid';
 import { parseDuration } from '../../../common/parse_duration';
 import { RawRule, SanitizedRule, RuleTypeParams, Rule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -86,12 +85,7 @@ export async function create<Params extends RuleTypeParams = never>(
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
   }
 
-  const actionsWithUuid = data.actions.map((action) => ({
-    ...action,
-    uuid: v4(),
-  }));
-
-  await validateActions(context, ruleType, { ...data, actions: actionsWithUuid });
+  await validateActions<Omit<NormalizedAlertAction, 'uuid'>>(context, ruleType, data);
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);
@@ -109,7 +103,7 @@ export async function create<Params extends RuleTypeParams = never>(
     references,
     params: updatedParams,
     actions,
-  } = await extractReferences(context, ruleType, actionsWithUuid, validatedAlertTypeParams);
+  } = await extractReferences(context, ruleType, data.actions, validatedAlertTypeParams);
 
   const createTime = Date.now();
   const lastRunTimestamp = new Date();

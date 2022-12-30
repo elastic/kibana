@@ -183,6 +183,7 @@ describe('Rule actions normalization', () => {
             group: 'group',
             action_type_id: 'actionTypeId',
             params: {},
+            uuid: '123-456',
           },
         ],
       };
@@ -217,6 +218,7 @@ describe('Rule actions normalization', () => {
             group: 'group',
             action_type_id: 'actionTypeId',
             params: {},
+            uuid: '123-456',
           },
         ],
       };
@@ -244,6 +246,7 @@ describe('Rule actions normalization', () => {
             group: 'group',
             action_type_id: 'actionTypeId',
             params: {},
+            uuid: '123-456',
           },
         ],
       };
@@ -326,6 +329,7 @@ describe('Rule actions normalization', () => {
             group: 'group',
             action_type_id: 'actionTypeId',
             params: {},
+            uuid: '123-456',
           },
         ],
       };
@@ -360,6 +364,7 @@ describe('Rule actions normalization', () => {
             group: 'group',
             action_type_id: 'actionTypeId',
             params: {},
+            uuid: '123-456',
           },
         ],
       };
@@ -370,8 +375,9 @@ describe('Rule actions normalization', () => {
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
+          uuid: '123-456',
         },
-      ] as RuleResponse['actions']);
+      ]);
     });
 
     test('It will transform the legacyRuleActions if the alertAction is undefined', () => {
@@ -385,6 +391,7 @@ describe('Rule actions normalization', () => {
             group: 'group',
             action_type_id: 'actionTypeId',
             params: {},
+            uuid: '123-456',
           },
         ],
       };
@@ -395,8 +402,9 @@ describe('Rule actions normalization', () => {
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
+          uuid: '123-456',
         },
-      ] as RuleResponse['actions']);
+      ]);
     });
   });
 });

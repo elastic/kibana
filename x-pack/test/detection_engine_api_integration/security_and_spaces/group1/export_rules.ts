@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -283,8 +282,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                uuid: firstRule.actions[0].uuid,
               },
-            ] as unknown as RuleAction[],
+            ],
             throttle: '1h',
           };
 
@@ -361,6 +361,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                uuid: firstRule.actions[0].uuid,
               },
               {
                 group: 'default',
@@ -370,8 +371,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                uuid: firstRule.actions[1].uuid,
               },
-            ] as unknown as RuleAction[],
+            ],
             throttle: '1h',
           };
 
@@ -481,6 +483,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                uuid: secondRule.actions[0].uuid,
               },
               {
                 group: 'default',
@@ -490,8 +493,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                uuid: secondRule.actions[1].uuid,
               },
-            ] as unknown as RuleAction[],
+            ],
             throttle: '1h',
           };
 
@@ -506,6 +510,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                uuid: firstRule.actions[0].uuid,
               },
               {
                 group: 'default',
@@ -515,8 +520,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                uuid: firstRule.actions[1].uuid,
               },
-            ] as unknown as RuleAction[],
+            ],
             throttle: '1h',
           };
 

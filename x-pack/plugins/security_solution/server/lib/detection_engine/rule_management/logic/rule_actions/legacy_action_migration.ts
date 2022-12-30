@@ -169,7 +169,7 @@ export const getUpdatedActionsParams = ({
           ...resOfAction,
           id: actionReference[actionRef].id,
           actionTypeId,
-        } as RuleAction,
+        },
       ];
     }, []),
     throttle: transformToAlertThrottle(ruleThrottle),
