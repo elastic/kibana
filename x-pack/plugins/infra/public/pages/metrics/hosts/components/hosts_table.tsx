@@ -42,14 +42,21 @@ export const HostsTable = () => {
   });
 
   useEffect(() => {
-    if (hostViewState.loading !== loading) {
+    if (hostViewState.loading !== loading || nodes.length !== hostViewState.totalHits) {
       setHostViewState({
         loading,
         totalHits: nodes.length,
         error,
       });
     }
-  }, [error, hostViewState.loading, loading, nodes.length, setHostViewState]);
+  }, [
+    error,
+    hostViewState.loading,
+    hostViewState.totalHits,
+    loading,
+    nodes.length,
+    setHostViewState,
+  ]);
 
   const items = useHostsTable(nodes);
   const noData = items.length === 0;

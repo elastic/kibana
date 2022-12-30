@@ -69,10 +69,12 @@ export const MetricsChart = ({
     [metrics, type]
   );
 
-  const metricsValue = useMemo(
-    () => overrideValue ?? (metrics ?? []).find((m) => m.name === type)?.[metricType] ?? 0,
-    [metricType, metrics, overrideValue, type]
-  );
+  const metricsValue = useMemo(() => {
+    if (overrideValue) {
+      return overrideValue;
+    }
+    return (metrics ?? []).find((m) => m.name === type)?.[metricType] ?? 0;
+  }, [metricType, metrics, overrideValue, type]);
 
   const metricsData: MetricWNumber = {
     title,
