@@ -39,11 +39,13 @@ export const OptionsListPopoverFooter = () => {
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { setExclude },
+    actions: { setExclude, gotoFirstPage, gotoPrevPage, gotoNextPage },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
+  const page = select((state) => state.componentState.page);
+
   const exclude = select((state) => state.explicitInput.exclude);
   const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
 
@@ -72,18 +74,34 @@ export const OptionsListPopoverFooter = () => {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="arrowStart" />
+                  <EuiButtonIcon
+                    iconType="arrowStart"
+                    disabled={page === 1}
+                    onClick={() => dispatch(gotoFirstPage({}))}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="arrowLeft" />
+                  <EuiButtonIcon
+                    iconType="arrowLeft"
+                    disabled={page === 1}
+                    onClick={() => dispatch(gotoPrevPage({}))}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiBadge>
-                    {OptionsListStrings.popover.getCardinalityBadge(1, 10, totalCardinality)}
+                    {OptionsListStrings.popover.getCardinalityBadge(
+                      (page - 1) * 10 + 1,
+                      Math.min((page - 1) * 10 + 10, totalCardinality),
+                      totalCardinality
+                    )}
                   </EuiBadge>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon iconType="arrowRight" />
+                  <EuiButtonIcon
+                    iconType="arrowRight"
+                    disabled={(page - 1) * 10 + 10 >= totalCardinality}
+                    onClick={() => dispatch(gotoNextPage({}))}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

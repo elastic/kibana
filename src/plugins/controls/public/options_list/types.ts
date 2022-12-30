@@ -21,6 +21,7 @@ interface SearchString {
 
 // Component state is only used by public components.
 export interface OptionsListComponentState {
+  page: number;
   field?: OptionsListField;
   totalCardinality?: number;
   availableOptions?: OptionsListSuggestions;

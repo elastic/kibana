@@ -19,6 +19,7 @@ import {
 } from '../../common/options_list/suggestions_sorting';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
+  page: 1,
   searchString: { value: '', valid: true },
 });
 
@@ -76,6 +77,15 @@ export const optionsListReducers = {
   },
   setExclude: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.explicitInput.exclude = action.payload;
+  },
+  gotoFirstPage: (state: WritableDraft<OptionsListReduxState>) => {
+    state.componentState.page = 1;
+  },
+  gotoPrevPage: (state: WritableDraft<OptionsListReduxState>) => {
+    state.componentState.page -= 1;
+  },
+  gotoNextPage: (state: WritableDraft<OptionsListReduxState>) => {
+    state.componentState.page += 1;
   },
   clearValidAndInvalidSelections: (state: WritableDraft<OptionsListReduxState>) => {
     state.componentState.invalidSelections = [];
