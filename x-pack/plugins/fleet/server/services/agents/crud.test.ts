@@ -57,14 +57,20 @@ describe('Agents CRUD test', () => {
       const result = await getAgentTags(soClientMock, esClientMock, { showInactive: false });
 
       expect(result).toEqual(['tag1', 'tag2']);
-      expect(searchMock).toHaveBeenCalledWith({
-        aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
-        body: {
-          query: expect.any(Object),
-        },
-        index: '.fleet-agents',
-        size: 0,
-      });
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
+          body: {
+            query: expect.any(Object),
+          },
+          index: '.fleet-agents',
+          size: 0,
+          fields: ['status'],
+          runtime_mappings: {
+            status: expect.anything(),
+          },
+        })
+      );
     });
 
     it('should return empty list if no agent tags', async () => {
@@ -99,25 +105,31 @@ describe('Agents CRUD test', () => {
         kuery: 'fleet-agents.policy_id: 123',
       });
 
-      expect(searchMock).toHaveBeenCalledWith({
-        aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
-        body: {
-          query: {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                {
-                  match: {
-                    policy_id: '123',
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
+          body: {
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    match: {
+                      policy_id: '123',
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
           },
-        },
-        index: '.fleet-agents',
-        size: 0,
-      });
+          index: '.fleet-agents',
+          size: 0,
+          fields: ['status'],
+          runtime_mappings: {
+            status: expect.anything(),
+          },
+        })
+      );
     });
   });
 
