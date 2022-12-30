@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MlStorageContextProvider, useStorage } from './src/storage_context';
+export { StorageContextProvider, useStorage } from './src/storage_context';

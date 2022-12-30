@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { MlStorageContextProvider, useStorage } from '@kbn/ml-local-storage';
+import { StorageContextProvider, useStorage } from '@kbn/ml-local-storage';
 
 import { ML_STORAGE_KEYS } from './storage';
 
@@ -32,9 +32,9 @@ const mockStorage: Storage = {
 
 const Provider: FC = ({ children }) => {
   return (
-    <MlStorageContextProvider storage={mockStorage} storageKeys={ML_STORAGE_KEYS}>
+    <StorageContextProvider storage={mockStorage} storageKeys={ML_STORAGE_KEYS}>
       {children}
-    </MlStorageContextProvider>
+    </StorageContextProvider>
   );
 };
 

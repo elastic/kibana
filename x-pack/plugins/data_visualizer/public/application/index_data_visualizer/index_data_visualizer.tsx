@@ -15,7 +15,7 @@ import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { MlStorageContextProvider } from '@kbn/ml-local-storage';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import {
@@ -321,12 +321,12 @@ export const IndexDataVisualizer: FC<{
   return (
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
       <KibanaContextProvider services={{ ...services }}>
-        <MlStorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
+        <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
           <DataVisualizerStateContextProvider
             IndexDataVisualizerComponent={IndexDataVisualizerView}
             getAdditionalLinks={getAdditionalLinks}
           />
-        </MlStorageContextProvider>
+        </StorageContextProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );

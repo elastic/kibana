@@ -46,16 +46,16 @@ export const MlStorageContext = React.createContext<StorageAPI>({
   },
 });
 
-interface MlStorageContextProviderProps<K extends TStorageKey> {
+interface StorageContextProviderProps<K extends TStorageKey> {
   storage: Storage;
   storageKeys: readonly K[];
 }
 
-export function MlStorageContextProvider<K extends TStorageKey, T extends TStorage>({
+export function StorageContextProvider<K extends TStorageKey, T extends TStorage>({
   children,
   storage,
   storageKeys,
-}: PropsWithChildren<MlStorageContextProviderProps<K>>) {
+}: PropsWithChildren<StorageContextProviderProps<K>>) {
   const initialValue = useMemo(() => {
     return storageKeys.reduce((acc, curr) => {
       acc[curr as K] = storage.get(curr as string);

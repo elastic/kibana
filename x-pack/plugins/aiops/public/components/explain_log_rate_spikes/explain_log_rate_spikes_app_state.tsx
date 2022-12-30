@@ -13,7 +13,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { MlStorageContextProvider } from '@kbn/ml-local-storage';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
@@ -99,9 +99,9 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
         <SpikeAnalysisTableRowStateProvider>
-          <MlStorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+          <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
             <ExplainLogRateSpikesPage dataView={dataView} savedSearch={savedSearch} />
-          </MlStorageContextProvider>
+          </StorageContextProvider>
         </SpikeAnalysisTableRowStateProvider>
       </UrlStateProvider>
     </AiopsAppContext.Provider>

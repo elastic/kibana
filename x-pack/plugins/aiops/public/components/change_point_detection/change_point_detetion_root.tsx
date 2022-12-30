@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { MlStorageContextProvider } from '@kbn/ml-local-storage';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
@@ -40,12 +40,12 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-          <MlStorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+          <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
             <PageHeader />
             <ChangePointDetectionContextProvider>
               <ChangePointDetectionPage />
             </ChangePointDetectionContextProvider>
-          </MlStorageContextProvider>
+          </StorageContextProvider>
         </DataSourceContext.Provider>
       </UrlStateProvider>
     </AiopsAppContext.Provider>
