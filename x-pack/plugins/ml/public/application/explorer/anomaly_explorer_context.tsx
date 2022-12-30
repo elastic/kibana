@@ -18,6 +18,7 @@ import { useTableSeverity } from '../components/controls/select_severity';
 
 export type AnomalyExplorerContextValue =
   | {
+      anomalyExplorerChartsService: AnomalyExplorerChartsService;
       anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService;
       anomalyTimelineStateService: AnomalyTimelineStateService;
       chartsStateService: AnomalyChartsStateService;
@@ -100,6 +101,7 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
     );
 
     setAnomalyExplorerContextValue({
+      anomalyExplorerChartsService,
       anomalyExplorerCommonStateService,
       anomalyTimelineStateService,
       chartsStateService,
