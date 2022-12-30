@@ -141,7 +141,7 @@ export interface ActionStatus {
   type?: string;
   // how many agents were actioned by the user
   nbAgentsActioned: number;
-  status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS';
+  status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS' | 'ROLLOUT_PASSED';
   expiration?: string;
   completionTime?: string;
   cancellationTime?: string;

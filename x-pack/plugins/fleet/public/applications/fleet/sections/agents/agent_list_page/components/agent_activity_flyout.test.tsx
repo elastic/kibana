@@ -180,6 +180,73 @@ describe('AgentActivityFlyout', () => {
     ).toContain('Completed Sep 15, 2022 12:00 PM'.replace(/\s/g, ''));
   });
 
+  it('should render agent activity for rollout passed upgrade', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action3',
+        nbAgentsActionCreated: 2,
+        nbAgentsAck: 1,
+        type: 'UPGRADE',
+        nbAgentsActioned: 2,
+        status: 'ROLLOUT_PASSED',
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+        completionTime: '2022-09-15T12:00:00.000Z',
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
+    const result = renderComponent();
+
+    expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
+      '1 of 2 agents upgraded, 1 agent(s) offline during the rollout period'
+    );
+    expect(
+      result.container
+        .querySelector('[data-test-subj="statusDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Completed Sep 15, 2022 12:00 PM'.replace(/\s/g, ''));
+  });
+
+  it('should render agent activity for rollout passed upgrade with failed', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action3',
+        nbAgentsActionCreated: 2,
+        nbAgentsAck: 1,
+        type: 'UPGRADE',
+        nbAgentsActioned: 2,
+        status: 'ROLLOUT_PASSED',
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 1,
+        completionTime: '2022-09-15T12:00:00.000Z',
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
+    const result = renderComponent();
+
+    expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
+      '1 of 2 agents upgraded, 1 agent(s) offline during the rollout period'
+    );
+    expect(
+      result.container
+        .querySelector('[data-test-subj="statusDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain(
+      'A problem occurred during this operation. Started on Sep 15, 2022 10:00 AM.'.replace(
+        /\s/g,
+        ''
+      )
+    );
+  });
+
   it('should render agent activity for expired unenroll', () => {
     const mockActionStatuses = [
       {
