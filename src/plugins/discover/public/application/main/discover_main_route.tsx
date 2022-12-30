@@ -21,7 +21,7 @@ import {
   getSavedSearch,
   getSavedSearchFullPathUrl,
 } from '@kbn/saved-search-plugin/public';
-import { getState } from './services/discover_state';
+import { getDiscoverStateContainer } from './services/discover_state';
 import { loadDataView, resolveDataView } from './utils/resolve_data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
@@ -56,8 +56,8 @@ export function DiscoverMainRoute(props: Props) {
     dataViewEditor,
   } = services;
   const [error, setError] = useState<Error>();
+  const [loading, setLoading] = useState(true);
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
-  const dataView = savedSearch?.searchSource?.getField('index');
   const [dataViewList, setDataViewList] = useState<DataViewListItem[]>([]);
   const [hasESData, setHasESData] = useState(false);
   const [hasUserDataView, setHasUserDataView] = useState(false);
@@ -94,8 +94,19 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const { appStateContainer } = getState({ history, savedSearch: nextSavedSearch, services });
-        const { index, query } = appStateContainer.getState();
+        const defaultDataView = await data.dataViews.getDefaultDataView();
+
+        if (!defaultDataView) {
+          setShowNoDataPage(true);
+          return;
+        }
+
+        const { appState } = getDiscoverStateContainer({
+          history,
+          savedSearch: nextSavedSearch,
+          services,
+        });
+        const { index, query } = appState.getState();
         const ip = await loadDataView(
           data.dataViews,
           config,
@@ -132,6 +143,7 @@ export function DiscoverMainRoute(props: Props) {
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
       try {
+        setLoading(true);
         const currentSavedSearch = await getSavedSearch(id, {
           search: services.data.search,
           savedObjectsClient: core.savedObjects.client,
@@ -165,6 +177,7 @@ export function DiscoverMainRoute(props: Props) {
             currentSavedSearch.id
           );
         }
+        setLoading(false);
       } catch (e) {
         if (e instanceof DataViewSavedObjectConflictError) {
           setError(e);
@@ -209,6 +222,7 @@ export function DiscoverMainRoute(props: Props) {
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
       if (nextDataView) {
+        setLoading(true);
         setShowNoDataPage(false);
         setError(undefined);
         await loadSavedSearch(nextDataView as DataView);
@@ -257,7 +271,7 @@ export function DiscoverMainRoute(props: Props) {
     return <DiscoverError error={error} />;
   }
 
-  if (!dataView || !savedSearch) {
+  if (loading || !savedSearch) {
     return <LoadingIndicator type="elastic" />;
   }
 
