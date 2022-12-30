@@ -6,7 +6,7 @@
  */
 
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { ESQuery } from '../../../../../common/typed_json';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 
 interface StatusBySeverity {
@@ -16,7 +16,7 @@ interface StatusBySeverity {
 }
 
 interface StatusBucket {
-  key: Status;
+  key: AlertsByStatus;
   doc_count: number;
   statusBySeverity?: StatusBySeverity;
 }
@@ -73,11 +73,13 @@ export interface SeverityBuckets {
   label?: string;
 }
 export type ParsedAlertsData = Partial<
-  Record<Status, { total: number; severities: SeverityBuckets[] }>
+  Record<AlertsByStatus, { total: number; severities: SeverityBuckets[] }>
 > | null;
 
+export type AlertsByStatus = 'open' | 'acknowledged' | 'closed';
+
 export interface AlertDonutEmbeddableProps {
-  status: Status;
+  status: AlertsByStatus;
   setQuery: GlobalTimeArgs['setQuery'];
   timerange: { from: string; to: string };
   label: string;
@@ -85,6 +87,16 @@ export interface AlertDonutEmbeddableProps {
 
 export interface VisualizationAlertsByStatusData {
   responses: VisualizationAlertsByStatusResponse[];
-  requests: Array<{}>;
+  requests: ESQuery[];
   isLoading: boolean;
+}
+export interface VisualizationInspectQuery {
+  dsl: ESQuery[];
+  response: VisualizationAlertsByStatusResponse[];
+}
+
+export enum AlertsByStatusQueryId {
+  'openAlertsQuery' = 'openAlertsQuery',
+  'acknowledgedAlertsQuery' = 'acknowledgedAlertsQuery',
+  'closedAlertsQuery' = 'closedAlertsQuery',
 }

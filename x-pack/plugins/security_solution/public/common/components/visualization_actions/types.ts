@@ -34,8 +34,8 @@ export interface VisualizationActionsProps {
 }
 
 export interface EmbeddableData {
-  requests: object[];
-  responses: object[];
+  requests: string[];
+  responses: string[];
   isLoading: boolean;
 }
 

@@ -169,12 +169,11 @@ export const getRequestsAndResponses = (requests: Request[]) => {
   );
 };
 
-export const parseVisualizationData = (data: string[]): object[] => {
-  return data.reduce<object[]>((acc, req) => {
+export const parseVisualizationData = <T>(data: string[]): T[] =>
+  data.reduce((acc, curr) => {
     try {
-      acc.push(JSON.parse(req));
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
-    return acc;
-  }, []);
-};
+      return [...acc, JSON.parse(curr)];
+    } catch (e) {
+      return acc;
+    }
+  }, [] as T[]);

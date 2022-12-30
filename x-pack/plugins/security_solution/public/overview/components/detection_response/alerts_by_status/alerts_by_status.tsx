@@ -56,6 +56,11 @@ import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { AlertDonutEmbeddable } from './alert_donut_embeddable';
+import { inputsSelectors } from '../../../../common/store';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { parseVisualizationData } from '../../../../common/components/visualization_actions/utils';
+import type { VisualizationAlertsByStatusResponse } from './types';
+import { AlertsByStatusQueryId } from './types';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   padding: 0 4px;
@@ -86,6 +91,7 @@ const eventKindSignalFilter: EntityFilter = {
   value: 'signal',
 };
 
+// eslint-disable-next-line complexity
 export const AlertsByStatus = ({
   additionalFilters,
   signalIndexName,
@@ -96,6 +102,39 @@ export const AlertsByStatus = ({
   const { onClick: goToAlerts, href } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.alerts,
   });
+  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
+  const { inspect: inspectOpenAlerts } = useDeepEqualSelector((state) =>
+    getGlobalQuery(state, AlertsByStatusQueryId.openAlertsQuery)
+  );
+  const { inspect: inspectAcknowledgedAlerts } = useDeepEqualSelector((state) =>
+    getGlobalQuery(state, AlertsByStatusQueryId.acknowledgedAlertsQuery)
+  );
+  const { inspect: inspectClosedAlerts } = useDeepEqualSelector((state) =>
+    getGlobalQuery(state, AlertsByStatusQueryId.closedAlertsQuery)
+  );
+  const visualizationOpenAlertsData =
+    inspectOpenAlerts != null
+      ? parseVisualizationData<VisualizationAlertsByStatusResponse>(inspectOpenAlerts?.response)[0]
+          .hits.total
+      : 0;
+  const visualizationAcknowledgedAlertsData =
+    inspectAcknowledgedAlerts != null
+      ? parseVisualizationData<VisualizationAlertsByStatusResponse>(
+          inspectAcknowledgedAlerts?.response
+        )[0].hits.total
+      : 0;
+  const visualizationClosedAlertsData =
+    inspectClosedAlerts != null
+      ? parseVisualizationData<VisualizationAlertsByStatusResponse>(
+          inspectClosedAlerts?.response
+        )[0].hits.total
+      : 0;
+
+  const visualizationTotalAlertsData =
+    visualizationOpenAlertsData +
+      visualizationAcknowledgedAlertsData +
+      visualizationClosedAlertsData ?? 0;
+
   const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
   const { to, from, setQuery } = useGlobalTime();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
@@ -185,17 +224,28 @@ export const AlertsByStatus = ({
             <>
               <EuiFlexGroup justifyContent="center" gutterSize="none">
                 <EuiFlexItem grow={isChartEmbeddablesEnabled}>
-                  {totalAlerts !== 0 && (
-                    <EuiText className="eui-textCenter" size="s">
-                      <>
-                        <b>
-                          <FormattedCount count={totalAlerts} />
-                        </b>
-                        <> </>
-                        <small>{ALERTS(totalAlerts)}</small>
-                      </>
-                    </EuiText>
-                  )}
+                  {totalAlerts !== 0 ||
+                    (visualizationTotalAlertsData !== 0 && (
+                      <EuiText className="eui-textCenter" size="s">
+                        <>
+                          <b>
+                            <FormattedCount
+                              count={
+                                isChartEmbeddablesEnabled
+                                  ? visualizationTotalAlertsData
+                                  : totalAlerts
+                              }
+                            />
+                          </b>
+                          <> </>
+                          <small>
+                            {ALERTS(
+                              isChartEmbeddablesEnabled ? visualizationTotalAlertsData : totalAlerts
+                            )}
+                          </small>
+                        </>
+                      </EuiText>
+                    ))}
                   <EuiSpacer size="l" />
                   <EuiFlexGroup justifyContent="center">
                     <StyledFlexItem key="alerts-status-open" grow={isChartEmbeddablesEnabled}>

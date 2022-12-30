@@ -4,16 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { DonutChartWrapper } from '../../../../common/components/charts/donutchart';
 import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 import { getAlertsBySeverityAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_donut';
 import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
 import type { EmbeddableData } from '../../../../common/components/visualization_actions/types';
+import { parseVisualizationData } from '../../../../common/components/visualization_actions/utils';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { inputsSelectors } from '../../../../common/store/inputs';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { ChartLabel } from './chart_label';
-import type { AlertDonutEmbeddableProps, VisualizationAlertsByStatusData } from './types';
+import type { AlertDonutEmbeddableProps, VisualizationAlertsByStatusResponse } from './types';
+import { AlertsByStatusQueryId } from './types';
 
 const ChartSize = '135px';
 
@@ -23,17 +27,28 @@ const AlertDonutEmbeddableComponent: React.FC<AlertDonutEmbeddableProps> = ({
   timerange,
   label,
 }) => {
+  const queryId = AlertsByStatusQueryId[`${status}AlertsQuery`];
   const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
     inputId: InputsModelId.global,
-    queryId: `alertsStatus${status}`,
+    queryId,
   });
-  const [visualizationData, setVisualizationData] = useState<VisualizationAlertsByStatusData>();
+  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
+  const { inspect } = useDeepEqualSelector((state) => getGlobalQuery(state, queryId));
+  const visualizationData = inspect?.response
+    ? parseVisualizationData<VisualizationAlertsByStatusResponse>(inspect?.response)
+    : null;
 
   const onEmbeddableLoad = useCallback(
-    (result: EmbeddableData) => {
-      setVisualizationData(result as VisualizationAlertsByStatusData);
+    ({ requests, responses, isLoading }: EmbeddableData) => {
+      setQuery({
+        id: queryId,
+        searchSessionId,
+        refetch: refetchByRestartingSession,
+        loading: isLoading,
+        inspect: { dsl: requests, response: responses },
+      });
     },
-    [setVisualizationData]
+    [queryId, refetchByRestartingSession, searchSessionId, setQuery]
   );
 
   const extraOptions = useMemo(() => ({ status }), [status]);
@@ -48,14 +63,14 @@ const AlertDonutEmbeddableComponent: React.FC<AlertDonutEmbeddableProps> = ({
     });
   }, [refetchByRestartingSession, searchSessionId, setQuery, status]);
 
-  const dataExists = visualizationData != null && visualizationData.responses[0].hits.total !== 0;
+  const dataExists = visualizationData != null && visualizationData[0].hits.total !== 0;
 
   return (
     <DonutChartWrapper
       isChartEmbeddablesEnabled={true}
       dataExists={dataExists}
       label={label}
-      title={dataExists ? <ChartLabel count={visualizationData.responses[0].hits.total} /> : null}
+      title={dataExists ? <ChartLabel count={visualizationData[0].hits.total} /> : null}
     >
       <LensEmbeddable
         timerange={timerange}
