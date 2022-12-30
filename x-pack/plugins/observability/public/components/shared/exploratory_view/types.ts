@@ -32,6 +32,7 @@ export const ReportViewTypes = {
   cwv: 'core-web-vitals',
   mdd: 'device-data-distribution',
   smt: 'single-metric',
+  htm: 'heatmap',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -68,7 +69,7 @@ export interface MetricOption {
   timeScale?: string;
   showPercentileAnnotations?: boolean;
   formula?: string;
-  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition'>;
+  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition' | 'textAlign'>;
   palette?: PaletteOutput;
   format?: 'percent' | 'number';
 }

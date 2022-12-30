@@ -7,16 +7,16 @@
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
-import type { BulkExportProps, BulkExportResponse } from '../api';
+import type { BulkExportResponse, QueryOrIds } from '../api';
 import { bulkExportRules } from '../api';
 
 export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 
 export const useBulkExportMutation = (
-  options?: UseMutationOptions<BulkExportResponse, Error, BulkExportProps>
+  options?: UseMutationOptions<BulkExportResponse, Error, QueryOrIds>
 ) => {
-  return useMutation<BulkExportResponse, Error, BulkExportProps>(
-    (action: BulkExportProps) => bulkExportRules(action),
+  return useMutation<BulkExportResponse, Error, QueryOrIds>(
+    (action: QueryOrIds) => bulkExportRules(action),
     {
       ...options,
       mutationKey: BULK_ACTION_MUTATION_KEY,

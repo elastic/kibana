@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { journey, step, expect, before } from '@elastic/synthetics';
+import { journey, step, expect, before, after } from '@elastic/synthetics';
 import {
   addTestMonitor,
   cleanTestMonitors,
   enableMonitorManagedViaApi,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey(`MonitorSelector`, async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
@@ -26,6 +26,10 @@ journey(`MonitorSelector`, async ({ page, params }) => {
     await addTestMonitor(params.kibanaUrl, testMonitor1);
     await addTestMonitor(params.kibanaUrl, testMonitor2);
     await addTestMonitor(params.kibanaUrl, testMonitor3);
+  });
+
+  after(async () => {
+    await cleanTestMonitors(params);
   });
 
   step('Go to monitor-management', async () => {

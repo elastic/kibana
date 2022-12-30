@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { KueryNode } from '@kbn/es-query';
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { RuleTableItem } from '../../../../types';
 import {
@@ -25,12 +25,16 @@ export type ComponentOpts = {
   getFilter: () => KueryNode | null;
   onPerformingAction?: () => void;
   onActionPerformed?: () => void;
+  isDeletingRules?: boolean;
+  isEnablingRules?: boolean;
+  isDisablingRules?: boolean;
   isSnoozingRules?: boolean;
   isUnsnoozingRules?: boolean;
   isSchedulingRules?: boolean;
   isUnschedulingRules?: boolean;
   isUpdatingRuleAPIKeys?: boolean;
   setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
+  setRulesToDeleteFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
   setRulesToUpdateAPIKey: React.Dispatch<React.SetStateAction<string[]>>;
   setRulesToSnooze: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
   setRulesToUnsnooze: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
@@ -41,29 +45,9 @@ export type ComponentOpts = {
   setRulesToScheduleFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
   setRulesToUnscheduleFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
   setRulesToUpdateAPIKeyFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  onDisable: () => Promise<void>;
+  onEnable: () => Promise<void>;
 } & BulkOperationsComponentOpts;
-
-const ButtonWithTooltip = ({
-  showTooltip,
-  tooltip,
-  children,
-}: {
-  showTooltip: boolean;
-  tooltip: string;
-  children: JSX.Element;
-}) => {
-  if (!showTooltip) {
-    return children;
-  }
-  return (
-    <EuiFlexGroup gutterSize="none" alignItems="center">
-      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIconTip position="right" color="warning" size="s" type="alert" content={tooltip} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
 
 export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   selectedItems,
@@ -71,14 +55,16 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   getFilter,
   onPerformingAction = noop,
   onActionPerformed = noop,
+  isDeletingRules = false,
+  isEnablingRules = false,
+  isDisablingRules = false,
   isSnoozingRules = false,
   isUnsnoozingRules = false,
   isSchedulingRules = false,
   isUnschedulingRules = false,
   isUpdatingRuleAPIKeys = false,
-  enableRules,
-  disableRules,
   setRulesToDelete,
+  setRulesToDeleteFilter,
   setRulesToUpdateAPIKey,
   setRulesToSnooze,
   setRulesToUnsnooze,
@@ -89,14 +75,12 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   setRulesToScheduleFilter,
   setRulesToUnscheduleFilter,
   setRulesToUpdateAPIKeyFilter,
+  onEnable,
+  onDisable,
 }: ComponentOpts) => {
   const {
     notifications: { toasts },
   } = useKibana().services;
-
-  const [isEnablingRules, setIsEnablingRules] = useState<boolean>(false);
-  const [isDisablingRules, setIsDisablingRules] = useState<boolean>(false);
-  const [isDeletingRules, setIsDeletingRules] = useState<boolean>(false);
 
   const isPerformingAction =
     isEnablingRules ||
@@ -108,13 +92,6 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     isUnschedulingRules ||
     isUpdatingRuleAPIKeys;
 
-  const allRulesDisabled = useMemo(() => {
-    if (isAllSelected) {
-      return false;
-    }
-    return selectedItems.every(isRuleDisabled);
-  }, [selectedItems, isAllSelected]);
-
   const hasDisabledByLicenseRuleTypes = useMemo(() => {
     if (isAllSelected) {
       return false;
@@ -122,60 +99,14 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     return !!selectedItems.find((alertItem) => !alertItem.enabledInLicense);
   }, [selectedItems, isAllSelected]);
 
-  async function onEnableAllClick() {
-    if (isAllSelected) {
-      return;
-    }
-    onPerformingAction();
-    setIsEnablingRules(true);
-    try {
-      await enableRules(selectedItems);
-    } catch (e) {
-      toasts.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToEnableRulesMessage',
-          {
-            defaultMessage: 'Failed to enable rules',
-          }
-        ),
-      });
-    } finally {
-      setIsEnablingRules(false);
-      onActionPerformed();
-    }
-  }
-
-  async function onDisableAllClick() {
-    if (isAllSelected) {
-      return;
-    }
-    onPerformingAction();
-    setIsDisablingRules(true);
-    try {
-      await disableRules(selectedItems);
-    } catch (e) {
-      toasts.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDisableRulesMessage',
-          {
-            defaultMessage: 'Failed to disable rules',
-          }
-        ),
-      });
-    } finally {
-      setIsDisablingRules(false);
-      onActionPerformed();
-    }
-  }
-
   async function deleteSelectedItems() {
-    if (isAllSelected) {
-      return;
-    }
     onPerformingAction();
-    setIsDeletingRules(true);
     try {
-      setRulesToDelete(selectedItems.map((selected: any) => selected.id));
+      if (isAllSelected) {
+        setRulesToDeleteFilter(getFilter());
+      } else {
+        setRulesToDelete(selectedItems.map((selected) => selected.id));
+      }
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
@@ -186,7 +117,6 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         ),
       });
     } finally {
-      setIsDeletingRules(false);
       onActionPerformed();
     }
   }
@@ -360,48 +290,32 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
-      <ButtonWithTooltip
-        showTooltip={isAllSelected}
-        tooltip={i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableDisableUnsupported',
-          {
-            defaultMessage: 'Bulk enable or disable is unsupported when selecting all rules.',
-          }
-        )}
-      >
-        <>
-          {allRulesDisabled && (
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                onClick={onEnableAllClick}
-                isLoading={isEnablingRules}
-                isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes || isAllSelected}
-                data-test-subj="enableAll"
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableAllTitle"
-                  defaultMessage="Enable"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          {!allRulesDisabled && (
-            <EuiFlexItem>
-              <EuiButtonEmpty
-                onClick={onDisableAllClick}
-                isLoading={isDisablingRules}
-                isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes || isAllSelected}
-                data-test-subj="disableAll"
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.disableAllTitle"
-                  defaultMessage="Disable"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-        </>
-      </ButtonWithTooltip>
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          onClick={onEnable}
+          isLoading={isEnablingRules}
+          isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+          data-test-subj="bulkEnable"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableAllTitle"
+            defaultMessage="Enable"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          onClick={onDisable}
+          isLoading={isDisablingRules}
+          isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+          data-test-subj="bulkDisable"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.disableAllTitle"
+            defaultMessage="Disable"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiButtonEmpty
           onClick={updateAPIKeysClick}
@@ -416,39 +330,25 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ButtonWithTooltip
-          showTooltip={isAllSelected}
-          tooltip={i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteUnsupported',
-            {
-              defaultMessage: 'Bulk delete is unsupported when selecting all rules.',
-            }
-          )}
+        <EuiButtonEmpty
+          onClick={deleteSelectedItems}
+          isLoading={isDeletingRules}
+          iconType="trash"
+          color="danger"
+          isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+          data-test-subj="bulkDelete"
+          className="actBulkActionPopover__deleteAll"
         >
-          <EuiButtonEmpty
-            onClick={deleteSelectedItems}
-            isLoading={isDeletingRules}
-            iconType="trash"
-            color="danger"
-            isDisabled={isPerformingAction || isAllSelected}
-            data-test-subj="deleteAll"
-            className="actBulkActionPopover__deleteAll"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteAllTitle"
-              defaultMessage="Delete"
-            />
-          </EuiButtonEmpty>
-        </ButtonWithTooltip>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.deleteAllTitle"
+            defaultMessage="Delete"
+          />
+        </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
 export const RuleQuickEditButtonsWithApi = withBulkRuleOperations(RuleQuickEditButtons);
-
-function isRuleDisabled(alert: RuleTableItem) {
-  return alert.enabled === false;
-}
 
 function noop() {}

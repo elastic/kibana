@@ -19,7 +19,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsBulkGetObject,
 } from '@kbn/core/server';
-
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
@@ -43,7 +43,7 @@ import {
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
-import { ActionTypeRegistry, MAX_ATTEMPTS } from './action_type_registry';
+import { ActionTypeRegistry } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
   createEphemeralExecutionEnqueuerFunction,
@@ -102,7 +102,7 @@ import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
 import {
-  IUnsecuredActionsClient,
+  type IUnsecuredActionsClient,
   UnsecuredActionsClient,
 } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
@@ -136,6 +136,8 @@ export interface PluginStartContract {
     actionTypeId: string,
     options?: { notifyUsage: boolean }
   ): boolean;
+
+  getAllTypes: ActionTypeRegistry['getAllTypes'];
 
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
@@ -358,7 +360,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
         ensureSufficientLicense(actionType);
-        actionType.maxAttempts = actionType.maxAttempts ?? MAX_ATTEMPTS;
         actionTypeRegistry.register(actionType);
       },
       registerSubActionConnectorType: <
@@ -551,6 +552,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ) => {
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
+      getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
@@ -567,7 +569,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     request: KibanaRequest
   ) =>
     savedObjects.getScopedClient(request, {
-      excludedWrappers: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes,
     });
 
@@ -630,7 +632,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             );
           }
           const unsecuredSavedObjectsClient = savedObjects.getScopedClient(request, {
-            excludedWrappers: ['security'],
+            excludedExtensions: [SECURITY_EXTENSION_ID],
             includedHiddenTypes,
           });
           return new ActionsClient({

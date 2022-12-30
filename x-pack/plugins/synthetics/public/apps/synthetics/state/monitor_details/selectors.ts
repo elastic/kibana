@@ -11,13 +11,14 @@ import type { SyntheticsAppState } from '../root_reducer';
 const getState = (appState: SyntheticsAppState) => appState.monitorDetails;
 
 export const selectorMonitorDetailsState = createSelector(getState, (state) => state);
+export const selectorError = createSelector(getState, (state) => state.error);
 
 export const selectSelectedLocationId = createSelector(
   getState,
   (state) => state.selectedLocationId
 );
 
-export const selectLatestPing = createSelector(getState, (state) => state.pings.data[0] ?? null);
+export const selectLastRunMetadata = createSelector(getState, (state) => state.lastRun);
 
 export const selectPingsLoading = createSelector(getState, (state) => state.pings.loading);
 

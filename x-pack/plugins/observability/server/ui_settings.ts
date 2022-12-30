@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from '@kbn/core/types';
+import { i18n } from '@kbn/i18n';
 import { observabilityFeatureId, ProgressiveLoadingQuality } from '../common';
 import {
   enableComparisonByDefault,
@@ -21,11 +21,17 @@ import {
   apmTraceExplorerTab,
   apmOperationsTab,
   apmLabsButton,
-  enableInfrastructureHostsView,
-  enableServiceMetrics,
+  enableAgentExplorerView,
   enableAwsLambdaMetrics,
+  apmAWSLambdaPriceFactor,
+  apmAWSLambdaRequestCostPerMillion,
   enableCriticalPath,
+  enableInfrastructureHostsView,
 } from '../common/ui_settings_keys';
+
+const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
+  defaultMessage: 'beta',
+});
 
 const technicalPreviewLabel = i18n.translate(
   'xpack.observability.uiSettings.technicalPreviewLabel',
@@ -39,7 +45,7 @@ function feedbackLink({ href }: { href: string }) {
   )}</a>`;
 }
 
-type UiSettings = UiSettingsParams<boolean | number | string> & { showInLabs?: boolean };
+type UiSettings = UiSettingsParams<boolean | number | string | object> & { showInLabs?: boolean };
 
 /**
  * uiSettings definitions for Observability.
@@ -52,10 +58,11 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: false,
     description: i18n.translate(
-      'xpack.observability.enableNewSyntheticsViewExperimentDescription',
+      'xpack.observability.enableNewSyntheticsViewExperimentDescriptionBeta',
       {
         defaultMessage:
-          'Enable new synthetic monitoring application in observability. Refresh the page to apply the setting.',
+          '{technicalPreviewLabel} Enable new synthetic monitoring application in observability. Refresh the page to apply the setting.',
+        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
       }
     ),
     schema: schema.boolean(),
@@ -161,21 +168,6 @@ export const uiSettings: Record<string, UiSettings> = {
     },
     showInLabs: true,
   },
-  [enableServiceMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
-      defaultMessage: 'Service metrics',
-    }),
-    value: false,
-    description: i18n.translate('xpack.observability.apmEnableServiceMetricsGroupsDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enables Service metrics. When is enabled, additional configuration in APM Server is required.',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-    showInLabs: true,
-  },
   [apmServiceInventoryOptimizedSorting]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmServiceInventoryOptimizedSorting', {
@@ -235,17 +227,17 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
+        '{betaLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
       values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        betaLabel: `<em>[${betaLabel}]</em>`,
         feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-operations-breakdown' }),
       },
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
-    showInLabs: true,
+    showInLabs: false,
   },
   [apmLabsButton]: {
     category: [observabilityFeatureId],
@@ -268,7 +260,12 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: false,
     description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage: 'Enable the Hosts view in the Infrastructure app',
+      defaultMessage:
+        '{technicalPreviewLabel} Enable the Hosts view in the Infrastructure app. {feedbackLink}.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-host-observability' }),
+      },
     }),
     schema: schema.boolean(),
   },
@@ -290,6 +287,46 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
+  },
+  [enableAgentExplorerView]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableAgentExplorer', {
+      defaultMessage: 'Agent explorer',
+    }),
+    description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
+      defaultMessage: '{technicalPreviewLabel} Enables Agent explorer view.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: true,
+    type: 'boolean',
+    showInLabs: true,
+  },
+  [apmAWSLambdaPriceFactor]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmAWSLambdaPricePerGbSeconds', {
+      defaultMessage: 'AWS lambda price factor',
+    }),
+    type: 'json',
+    value: JSON.stringify({ x86_64: 0.0000166667, arm: 0.0000133334 }, null, 2),
+    description: i18n.translate('xpack.observability.apmAWSLambdaPricePerGbSecondsDescription', {
+      defaultMessage: 'Price per Gb-second.',
+    }),
+    schema: schema.object({
+      arm: schema.number(),
+      x86_64: schema.number(),
+    }),
+  },
+  [apmAWSLambdaRequestCostPerMillion]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmAWSLambdaRequestCostPerMillion', {
+      defaultMessage: 'AWS lambda price per 1M requests',
+    }),
+    value: 0.2,
+    schema: schema.number({ min: 0 }),
   },
   [enableCriticalPath]: {
     category: [observabilityFeatureId],

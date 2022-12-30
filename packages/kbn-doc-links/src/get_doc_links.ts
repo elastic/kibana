@@ -37,8 +37,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
     elasticStackGetStarted: `${ELASTIC_WEBSITE_URL}guide/en/index.html`,
     upgrade: {
-      upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/upgrading-elastic-stack-on-prem.html`,
-      upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/upgrade-elastic-stack-for-elastic-cloud.html`,
+      upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrading-elastic-stack-on-prem.html`,
+      upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrade-elastic-stack-for-elastic-cloud.html`,
     },
     apm: {
       kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
@@ -138,8 +138,10 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       languageAnalyzers: `${ELASTICSEARCH_DOCS}analysis-lang-analyzer.html`,
       languageClients: `${ENTERPRISE_SEARCH_DOCS}programming-language-clients.html`,
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
+      machineLearningStart: `${ENTERPRISE_SEARCH_DOCS}machine-learning-start.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
+      syncRules: `${ENTERPRISE_SEARCH_DOCS}sync-rules.html`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
@@ -337,7 +339,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       migrationApiDeprecation: `${ELASTICSEARCH_DOCS}migration-api-deprecation.html`,
       nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
       releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
-      version8ReleaseHighlights: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/elastic-stack-highlights.html`,
+      latestReleaseHighlights: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/elastic-stack-highlights.html`,
       remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
       remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
       remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
@@ -373,14 +375,14 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         linux_deadlock: `${SECURITY_SOLUTION_DOCS}ts-management.html#linux-deadlock`,
       },
       packageActionTroubleshooting: {
-        // TODO: Pending to be updated when docs are ready
-        es_connection: '',
+        es_connection: `${SECURITY_SOLUTION_DOCS}ts-management.html`,
       },
       responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
       configureEndpointIntegrationPolicy: `${SECURITY_SOLUTION_DOCS}configure-endpoint-integration-policy.html`,
       exceptions: {
-        value_lists: `${SECURITY_SOLUTION_DOCS}detections-ui-exceptions.html#manage-value-lists`,
+        value_lists: `${SECURITY_SOLUTION_DOCS}detections-ui-exceptions.html`,
       },
+      privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -486,6 +488,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
       slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
+      connectors: `${KIBANA_DOCS}action-types.html`,
     },
     maps: {
       guide: `${KIBANA_DOCS}maps.html`,

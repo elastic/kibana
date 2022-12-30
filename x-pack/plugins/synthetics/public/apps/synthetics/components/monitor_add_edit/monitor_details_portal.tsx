@@ -7,26 +7,32 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiLink, EuiIcon } from '@elastic/eui';
 import { InPortal } from 'react-reverse-portal';
 import { MonitorDetailsLinkPortalNode } from './portals';
 
-export const MonitorDetailsLinkPortal = ({ name, id }: { name: string; id: string }) => {
+export const MonitorDetailsLinkPortal = ({
+  name,
+  configId,
+}: {
+  name: string;
+  configId: string;
+}) => {
   return (
     <InPortal node={MonitorDetailsLinkPortalNode}>
-      <MonitorDetailsLink name={name} id={id} />
+      <MonitorDetailsLink name={name} configId={configId} />
     </InPortal>
   );
 };
 
-export const MonitorDetailsLink = ({ name, id }: { name: string; id: string }) => {
+export const MonitorDetailsLink = ({ name, configId }: { name: string; configId: string }) => {
   const history = useHistory();
   const href = history.createHref({
-    pathname: `monitor/${id}`,
+    pathname: `monitor/${configId}`,
   });
   return (
-    <EuiButtonEmpty href={href} iconType="arrowLeft" flush="left">
-      {name}
-    </EuiButtonEmpty>
+    <EuiLink href={href}>
+      <EuiIcon type="arrowLeft" /> {name}
+    </EuiLink>
   );
 };

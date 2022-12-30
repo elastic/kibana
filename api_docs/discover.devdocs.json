@@ -258,9 +258,9 @@
           " extends ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           }
         ],
@@ -429,9 +429,9 @@
               " & ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ") | undefined"
@@ -624,6 +624,22 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/discover/public/locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.breakdownField",
+            "type": "string",
+            "tags": [],
+            "label": "breakdownField",
+            "description": [
+              "\nBreakdown field"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
             "deprecated": false,
@@ -984,7 +1000,7 @@
                 "section": "def-common.SearchSourceSearchOptions",
                 "text": "SearchSourceSearchOptions"
               },
-              " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
+              " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean, includeFields?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1214,6 +1230,20 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.usesAdHocDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "usesAdHocDataView",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.SavedSearch.timeRestore",
             "type": "CompoundType",
             "tags": [],
@@ -1277,6 +1307,20 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.breakdownField",
+            "type": "string",
+            "tags": [],
+            "label": "breakdownField",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
             "deprecated": false,

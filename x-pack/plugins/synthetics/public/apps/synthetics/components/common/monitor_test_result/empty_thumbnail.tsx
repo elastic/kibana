@@ -13,9 +13,9 @@ import { useEuiTheme, useEuiBackgroundColor, EuiIcon, EuiLoadingContent } from '
 export const THUMBNAIL_WIDTH = 96;
 export const THUMBNAIL_HEIGHT = 64;
 
-export const thumbnailStyle = css`
+export const thumbnailStyle = `
   padding: 0;
-  margin: 0;
+  margin: auto;
   width: ${THUMBNAIL_WIDTH}px;
   height: ${THUMBNAIL_HEIGHT}px;
   object-fit: contain;

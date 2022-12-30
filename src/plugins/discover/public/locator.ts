@@ -91,6 +91,10 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Hide mini distribution/preview charts when in Field Statistics mode
    */
   hideAggregatedPreview?: boolean;
+  /**
+   * Breakdown field
+   */
+  breakdownField?: string;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
@@ -99,7 +103,10 @@ export interface DiscoverAppLocatorDependencies {
   useHash: boolean;
 }
 
-export interface HistoryLocationState {
+/**
+ * Location state of scoped history (history instance of Kibana Platform application service)
+ */
+export interface MainHistoryLocationState {
   dataViewSpec?: DataViewSpec;
 }
 
@@ -126,6 +133,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       interval,
       viewMode,
       hideAggregatedPreview,
+      breakdownField,
     } = params;
     const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
@@ -138,6 +146,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       savedQuery?: string;
       viewMode?: string;
       hideAggregatedPreview?: boolean;
+      breakdownField?: string;
     } = {};
     const queryState: GlobalQueryStateFromUrl = {};
     const { isFilterPinned } = await import('@kbn/es-query');
@@ -156,8 +165,9 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
     if (viewMode) appState.viewMode = viewMode;
     if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
+    if (breakdownField) appState.breakdownField = breakdownField;
 
-    const state: HistoryLocationState = {};
+    const state: MainHistoryLocationState = {};
     if (dataViewSpec) {
       state.dataViewSpec = dataViewSpec;
     }

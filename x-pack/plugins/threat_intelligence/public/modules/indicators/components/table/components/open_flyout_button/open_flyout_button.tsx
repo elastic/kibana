@@ -8,7 +8,7 @@
 import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Indicator } from '../../../../types';
+import { Indicator } from '../../../../../../../common/types/indicator';
 
 export const BUTTON_TEST_ID = 'tiToggleIndicatorFlyoutButton';
 

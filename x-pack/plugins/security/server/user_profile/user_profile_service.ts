@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SecurityActivateUserProfileRequest,
-  SecurityUserProfileWithMetadata,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityActivateUserProfileRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { SecurityUserProfile } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
@@ -24,8 +21,7 @@ import type {
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { CheckUserProfilesPrivilegesResponse } from '../authorization/types';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
-import type { Session } from '../session_management';
-import { getPrintableSessionId } from '../session_management';
+import { getPrintableSessionId, type Session } from '../session_management';
 import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
@@ -316,14 +312,14 @@ export class UserProfileService {
       throw error;
     }
 
-    if (!userSession) {
+    if (userSession.error) {
       return null;
     }
 
-    if (!userSession.userProfileId) {
+    if (!userSession.value.userProfileId) {
       this.logger.debug(
         `User profile missing from the current session [sid=${getPrintableSessionId(
-          userSession.sid
+          userSession.value.sid
         )}].`
       );
       return null;
@@ -331,15 +327,14 @@ export class UserProfileService {
 
     let body;
     try {
-      // @ts-expect-error Invalid response format.
-      body = (await clusterClient.asInternalUser.security.getUserProfile({
-        uid: userSession.userProfileId,
+      body = await clusterClient.asInternalUser.security.getUserProfile({
+        uid: userSession.value.userProfileId,
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
-      })) as { profiles: SecurityUserProfileWithMetadata[] };
+      });
     } catch (error) {
       this.logger.error(
         `Failed to retrieve user profile for the current user [sid=${getPrintableSessionId(
-          userSession.sid
+          userSession.value.sid
         )}]: ${getDetailedErrorMessage(error)}`
       );
       throw error;
@@ -348,7 +343,7 @@ export class UserProfileService {
     if (body.profiles.length === 0) {
       this.logger.error(
         `The user profile for the current user [sid=${getPrintableSessionId(
-          userSession.sid
+          userSession.value.sid
         )}] is not found.`
       );
       throw new Error(`User profile is not found.`);
@@ -369,11 +364,10 @@ export class UserProfileService {
     }
 
     try {
-      // @ts-expect-error Invalid response format.
-      const body = (await clusterClient.asInternalUser.security.getUserProfile({
+      const body = await clusterClient.asInternalUser.security.getUserProfile({
         uid: [...uids].join(','),
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
-      })) as { profiles: SecurityUserProfileWithMetadata[] };
+      });
 
       return body.profiles.map((rawUserProfile) => parseUserProfile<D>(rawUserProfile));
     } catch (error) {

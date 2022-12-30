@@ -9,6 +9,7 @@ import { mockedSearchService } from '../../../common/mocks/test_providers';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { createFetchIndicators } from './fetch_indicators';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { FactoryQueryType } from '../../../../common/constants';
 
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 
@@ -47,15 +48,12 @@ describe('FetchIndicatorsService', () => {
                 fields: [{ field: '*', include_unmapped: true }],
                 from: 0,
                 query: expect.objectContaining({ bool: expect.anything() }),
-                runtime_mappings: {
-                  'threat.indicator.name': { script: expect.anything(), type: 'keyword' },
-                  'threat.indicator.name_origin': { script: expect.anything(), type: 'keyword' },
-                },
                 size: 25,
                 sort: [],
               },
               index: [],
             },
+            factoryQueryType: FactoryQueryType.IndicatorGrid,
           }),
           expect.anything()
         );

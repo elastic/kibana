@@ -16,6 +16,15 @@ import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionFunctionFont,
+  FontWeight,
+  TextAlignment,
+} from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
+import type { MetricVisExpressionFunctionDefinition } from '@kbn/expression-legacy-metric-vis-plugin/common';
 import { getSuggestions } from './metric_suggestions';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
@@ -97,75 +106,48 @@ const toExpression = (
   };
   const metricFontSize = labelToMetricFontSizeMap[state?.size || DEFAULT_TITLE_SIZE];
 
+  const fontFn = buildExpressionFunction<ExpressionFunctionFont>('font', {
+    align: (state?.textAlign || DEFAULT_TEXT_ALIGNMENT) as TextAlignment,
+    size: metricFontSize,
+    weight: '600' as FontWeight,
+    lHeight: metricFontSize * 1.5,
+    sizeUnit: labelFont.sizeUnit,
+  });
+
+  const labelFontFn = buildExpressionFunction<ExpressionFunctionFont>('font', {
+    align: (state?.textAlign || DEFAULT_TEXT_ALIGNMENT) as TextAlignment,
+    size: labelFont.size,
+    lHeight: labelFont.size * 1.5,
+    sizeUnit: labelFont.sizeUnit,
+  });
+
+  const visdimensionFn = buildExpressionFunction<ExpressionFunctionVisDimension>('visdimension', {
+    accessor: state.accessor,
+  });
+
+  const legacyMetricVisFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>(
+    'legacyMetricVis',
+    {
+      autoScaleMetricAlignment: state?.autoScaleMetricAlignment,
+      labelPosition: state?.titlePosition || DEFAULT_TITLE_POSITION,
+      font: buildExpression([fontFn]),
+      labelFont: buildExpression([labelFontFn]),
+      metric: buildExpression([visdimensionFn]),
+      showLabels: !attributes?.mode || attributes?.mode === 'full',
+      colorMode: !canColor ? ColorMode.None : state?.colorMode || ColorMode.None,
+      autoScale: true,
+      colorFullBackground: true,
+      palette:
+        state?.colorMode && state?.colorMode !== ColorMode.None
+          ? paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)
+          : undefined,
+      percentageMode: false,
+    }
+  );
+
   return {
     type: 'expression',
-    chain: [
-      ...(datasourceExpression?.chain ?? []),
-      {
-        type: 'function',
-        function: 'legacyMetricVis',
-        arguments: {
-          labelPosition: [state?.titlePosition || DEFAULT_TITLE_POSITION],
-          font: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'font',
-                  arguments: {
-                    align: [state?.textAlign || DEFAULT_TEXT_ALIGNMENT],
-                    size: [metricFontSize],
-                    weight: ['600'],
-                    lHeight: [metricFontSize * 1.5],
-                    sizeUnit: [labelFont.sizeUnit],
-                  },
-                },
-              ],
-            },
-          ],
-          labelFont: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'font',
-                  arguments: {
-                    align: [state?.textAlign || DEFAULT_TEXT_ALIGNMENT],
-                    size: [labelFont.size],
-                    lHeight: [labelFont.size * 1.5],
-                    sizeUnit: [labelFont.sizeUnit],
-                  },
-                },
-              ],
-            },
-          ],
-          metric: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'visdimension',
-                  arguments: {
-                    accessor: [state.accessor],
-                  },
-                },
-              ],
-            },
-          ],
-          showLabels: [!attributes?.mode || attributes?.mode === 'full'],
-          colorMode: !canColor ? [ColorMode.None] : [state?.colorMode || ColorMode.None],
-          autoScale: [true],
-          colorFullBackground: [true],
-          palette:
-            state?.colorMode && state?.colorMode !== ColorMode.None
-              ? [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)]
-              : [],
-        },
-      },
-    ],
+    chain: [...(datasourceExpression?.chain ?? []), legacyMetricVisFn.toAst()],
   };
 };
 
@@ -241,6 +223,7 @@ export const getLegacyMetricVisualization = ({
               defaultMessage: 'Value',
             }),
           },
+          isMetricDimension: true,
           groupLabel: i18n.translate('xpack.lens.metric.label', {
             defaultMessage: 'Metric',
           }),
@@ -249,7 +232,7 @@ export const getLegacyMetricVisualization = ({
             ? [
                 {
                   columnId: props.state.accessor,
-                  triggerIcon: hasColoring ? 'colorBy' : undefined,
+                  triggerIconType: hasColoring ? 'colorBy' : undefined,
                   palette: hasColoring ? stops.map(({ color }) => color) : undefined,
                 },
               ]
@@ -332,5 +315,30 @@ export const getLegacyMetricVisualization = ({
   getErrorMessages(state) {
     // Is it possible to break it?
     return undefined;
+  },
+
+  getVisualizationInfo(state: LegacyMetricState) {
+    const dimensions = [];
+    if (state.accessor) {
+      dimensions.push({
+        id: state.accessor,
+        name: i18n.translate('xpack.lens.metric.label', {
+          defaultMessage: 'Metric',
+        }),
+        dimensionType: 'metric',
+      });
+    }
+
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: 'metric',
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
   },
 });

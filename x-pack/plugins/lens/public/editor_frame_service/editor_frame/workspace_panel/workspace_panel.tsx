@@ -36,6 +36,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
+import { getSearchWarningMessages } from '../../../utils';
 import {
   FramePublicAPI,
   isLensBrushEvent,
@@ -231,32 +232,37 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (renderDeps.current) {
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
+        const datasource = Object.values(renderDeps.current.datasourceMap)[0];
+        const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
 
-        const requestWarnings: string[] = [];
-        const datasource = Object.values(renderDeps.current?.datasourceMap)[0];
-        const datasourceState = Object.values(renderDeps.current?.datasourceStates)[0].state;
+        let requestWarnings: Array<React.ReactNode | string> = [];
+
         if (adapters?.requests) {
-          plugins.data.search.showWarnings(adapters.requests, (warning) => {
-            const warningMessage = datasource.getSearchWarningMessages?.(datasourceState, warning);
-
-            requestWarnings.push(...(warningMessage || []));
-            if (warningMessage && warningMessage.length) return true;
-          });
-        }
-        if (adapters && adapters.tables) {
-          dispatchLens(
-            onActiveDataChange({
-              activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
-                (acc, [key, value], index, tables) => ({
-                  ...acc,
-                  [tables.length === 1 ? defaultLayerId : key]: value,
-                }),
-                {}
-              ),
-              requestWarnings,
-            })
+          requestWarnings = getSearchWarningMessages(
+            adapters.requests,
+            datasource,
+            datasourceState,
+            {
+              searchService: plugins.data.search,
+            }
           );
         }
+
+        dispatchLens(
+          onActiveDataChange({
+            activeData:
+              adapters && adapters.tables
+                ? Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
+                    (acc, [key, value], index, tables) => ({
+                      ...acc,
+                      [tables.length === 1 ? defaultLayerId : key]: value,
+                    }),
+                    {}
+                  )
+                : undefined,
+            requestWarnings,
+          })
+        );
       }
     },
     [dispatchLens, plugins.data.search]
@@ -304,7 +310,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         framePublicAPI
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
+    [
+      activeVisualization,
+      visualization.state,
+      activeDatasourceId,
+      datasourceMap,
+      datasourceStates,
+      framePublicAPI.dateRange,
+    ]
   );
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
@@ -318,6 +331,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceStates,
           datasourceLayers,
           indexPatterns: dataViews.indexPatterns,
+          dateRange: framePublicAPI.dateRange,
           searchSessionId,
         });
 
@@ -362,6 +376,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceLayers,
     dataViews.indexPatterns,
     searchSessionId,
+    framePublicAPI.dateRange,
   ]);
 
   useEffect(() => {
@@ -809,6 +824,7 @@ export const VisualizationWrapper = ({
                     href={core.application.getUrlForApp('management', {
                       path: '/kibana/indexPatterns/create',
                     })}
+                    style={{ width: '100%' }}
                     data-test-subj="configuration-failure-reconfigure-indexpatterns"
                   >
                     {i18n.translate('xpack.lens.editorFrame.dataViewReconfigure', {

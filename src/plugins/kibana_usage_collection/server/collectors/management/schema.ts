@@ -394,10 +394,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:visualize:legacyPieChartsLibrary': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'visualization:visualize:legacyHeatmapChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -440,6 +436,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:apmEnableServiceMetrics': {
     type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmAgentExplorerView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmAWSLambdaPriceFactor': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmAWSLambdaRequestCostPerMillion': {
+    type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
   'banners:placement': {
@@ -566,7 +574,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'enterpriseSearch:enableBehavioralAnalyticsSection': {
+  'enterpriseSearch:enableEnginesSection': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

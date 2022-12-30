@@ -38,6 +38,7 @@ export interface TimelineEventsAllStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
+type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
 export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsPaginated {
   authFilter?: JsonObject;
   excludeEcsData?: boolean;
@@ -45,4 +46,5 @@ export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsP
   fields: string[] | Array<{ field: string; include_unmapped: boolean }>;
   language: 'eql' | 'kuery' | 'lucene';
   runtimeMappings: MappingRuntimeFields;
+  filterStatus?: AlertWorkflowStatus;
 }

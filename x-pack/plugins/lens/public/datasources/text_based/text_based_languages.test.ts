@@ -76,8 +76,12 @@ const expectedIndexPatterns = {
 };
 
 const indexPatterns = expectedIndexPatterns;
+const dateRange = {
+  fromDate: '2022-03-17T08:25:00.000Z',
+  toDate: '2022-04-17T08:25:00.000Z',
+};
 
-describe('IndexPattern Data Source', () => {
+describe('Textbased Data Source', () => {
   let baseState: TextBasedPrivateState;
   let TextBasedDatasource: Datasource<TextBasedPrivateState, TextBasedPersistedState>;
 
@@ -186,6 +190,88 @@ describe('IndexPattern Data Source', () => {
         layers: {},
       };
       expect(TextBasedDatasource?.getSelectedFields?.(state)).toEqual([]);
+    });
+  });
+
+  describe('#getDropProps', () => {
+    it('should return undefined if source is not present', () => {
+      const props = {
+        target: {
+          layerId: 'a',
+          groupId: 'groupId',
+          columnId: 'col1',
+          filterOperations: jest.fn(),
+        },
+        state: baseState,
+        indexPatterns,
+      };
+      expect(TextBasedDatasource.getDropProps(props)).toBeUndefined();
+    });
+
+    it('should return undefined if target group not allows non numeric fields', () => {
+      const newState = {
+        ...baseState,
+        layers: {
+          a: {
+            columns: [],
+            allColumns: [
+              {
+                columnId: 'col1',
+                fieldName: 'Test 1',
+                meta: {
+                  type: 'string',
+                },
+              },
+            ],
+            query: { sql: 'SELECT * FROM foo' },
+            index: 'foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+      const props = {
+        target: {
+          layerId: 'a',
+          groupId: 'groupId',
+          columnId: 'col1',
+          filterOperations: jest.fn(),
+          isMetricDimension: true,
+        },
+        source: {
+          id: 'col1',
+          field: 'Test 1',
+          humanData: {
+            label: 'Test 1',
+          },
+        },
+        state: newState,
+        indexPatterns,
+      };
+      expect(TextBasedDatasource.getDropProps(props)).toBeUndefined();
+    });
+
+    it('should return props if field is allowed to be dropped', () => {
+      const props = {
+        target: {
+          layerId: 'a',
+          groupId: 'groupId',
+          columnId: 'col1',
+          filterOperations: jest.fn(),
+          isMetricDimension: true,
+        },
+        source: {
+          id: 'col1',
+          field: 'Test 1',
+          humanData: {
+            label: 'Test 1',
+          },
+        },
+        state: baseState,
+        indexPatterns,
+      };
+      expect(TextBasedDatasource.getDropProps(props)).toStrictEqual({
+        dropTypes: ['field_add'],
+        nextLabel: 'Test 1',
+      });
     });
   });
 
@@ -387,6 +473,27 @@ describe('IndexPattern Data Source', () => {
         layerId: 'newid',
       });
     });
+
+    it('should not return suggestions if no query is given', () => {
+      const state = {
+        layers: {},
+        initialContext: {
+          contextualFields: ['bytes', 'dest'],
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+      const suggestions = TextBasedDatasource.getDatasourceSuggestionsForVisualizeField(
+        state,
+        '1',
+        '',
+        indexPatterns
+      );
+      expect(suggestions).toEqual([]);
+    });
   });
 
   describe('#getErrorMessages', () => {
@@ -540,7 +647,9 @@ describe('IndexPattern Data Source', () => {
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = TextBasedDatasource.initialize();
-      expect(TextBasedDatasource.toExpression(state, 'first', indexPatterns)).toEqual(null);
+      expect(TextBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange)).toEqual(
+        null
+      );
     });
 
     it('should generate an expression for an SQL query', async () => {
@@ -590,7 +699,7 @@ describe('IndexPattern Data Source', () => {
         ],
       } as unknown as TextBasedPrivateState;
 
-      expect(TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns))
+      expect(TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange))
         .toMatchInlineSnapshot(`
         Object {
           "chain": Array [

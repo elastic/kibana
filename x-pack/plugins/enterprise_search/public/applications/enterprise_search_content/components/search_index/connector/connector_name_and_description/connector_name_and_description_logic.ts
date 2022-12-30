@@ -22,11 +22,11 @@ import {
   PutConnectorNameAndDescriptionResponse,
 } from '../../../../api/connector/update_connector_name_and_description_api_logic';
 import {
-  FetchIndexApiLogic,
-  FetchIndexApiParams,
-  FetchIndexApiResponse,
-} from '../../../../api/index/fetch_index_api_logic';
-import { isConnectorIndex } from '../../../../utils/indices';
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicActions,
+} from '../../../../api/index/cached_fetch_index_api_logic';
+import { FetchIndexApiResponse } from '../../../../api/index/fetch_index_api_logic';
+import { isConnectorIndex, isCrawlerIndex } from '../../../../utils/indices';
 
 type NameAndDescription = Partial<Pick<Connector, 'name' | 'description'>>;
 
@@ -34,7 +34,7 @@ type ConnectorNameAndDescriptionActions = Pick<
   Actions<PutConnectorNameAndDescriptionArgs, PutConnectorNameAndDescriptionResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
-  fetchIndexApiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
+  fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
   saveNameAndDescription: () => void;
   setIsEditing(isEditing: boolean): { isEditing: boolean };
   setLocalNameAndDescription(nameAndDescription: NameAndDescription): NameAndDescription;
@@ -65,14 +65,16 @@ export const ConnectorNameAndDescriptionLogic = kea<
     actions: [
       ConnectorNameAndDescriptionApiLogic,
       ['apiError', 'apiSuccess', 'makeRequest'],
-      FetchIndexApiLogic,
+      CachedFetchIndexApiLogic,
       ['apiSuccess as fetchIndexApiSuccess'],
     ],
-    values: [FetchIndexApiLogic, ['data as index']],
+    values: [CachedFetchIndexApiLogic, ['indexData as index']],
   },
   events: ({ actions, values }) => ({
     afterMount: () =>
-      actions.setNameAndDescription(isConnectorIndex(values.index) ? values.index.connector : {}),
+      actions.setNameAndDescription(
+        isConnectorIndex(values.index) || isCrawlerIndex(values.index) ? values.index.connector : {}
+      ),
   }),
   listeners: ({ actions, values }) => ({
     apiError: (error) => flashAPIErrors(error),
@@ -83,7 +85,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
           { defaultMessage: 'Configuration successfully updated' }
         )
       );
-      FetchIndexApiLogic.actions.makeRequest({ indexName });
+      CachedFetchIndexApiLogic.actions.makeRequest({ indexName });
     },
     fetchIndexApiSuccess: (index) => {
       if (!values.isEditing && isConnectorIndex(index)) {
@@ -92,7 +94,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
     },
     makeRequest: () => clearFlashMessages(),
     saveNameAndDescription: () => {
-      if (isConnectorIndex(values.index)) {
+      if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
         actions.makeRequest({
           connectorId: values.index.connector.id,
           indexName: values.index.connector.index_name,

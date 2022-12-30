@@ -8,7 +8,7 @@
 
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
 import classNames from 'classnames';
-import { EsqlLang, monaco } from '@kbn/monaco';
+import { SQLLang, monaco } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
 import {
@@ -48,7 +48,7 @@ import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 
 import './overwrite.scss';
-import { IUnifiedSearchPluginServices } from '../../types';
+import type { IUnifiedSearchPluginServices } from '../../types';
 
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
@@ -72,7 +72,7 @@ const languageId = (language: string) => {
   switch (language) {
     case 'sql':
     default: {
-      return EsqlLang.ID;
+      return SQLLang.ID;
     }
   }
 };
@@ -337,8 +337,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     overviewRulerLanes: 0,
     hideCursorInOverviewRuler: true,
     scrollbar: {
-      vertical: 'hidden',
       horizontal: 'hidden',
+      vertical: 'auto',
     },
     overviewRulerBorder: false,
     readOnly: isDisabled,

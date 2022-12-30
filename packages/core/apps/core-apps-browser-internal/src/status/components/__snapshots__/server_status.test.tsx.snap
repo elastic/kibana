@@ -1,100 +1,61 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ServerStatus renders correctly for green state 2`] = `
-<EuiBadge
+<span
   aria-label="Green"
-  color="success"
+  class="euiBadge emotion-euiBadge"
   data-test-subj="serverStatusTitleBadge"
+  style="background-color: rgb(109, 204, 177); color: rgb(0, 0, 0);"
+  title="Green"
 >
-  <EuiInnerText>
+  <span
+    class="euiBadge__content emotion-euiBadge__content"
+  >
     <span
-      aria-label="Green"
-      className="euiBadge euiBadge--iconLeft"
-      data-test-subj="serverStatusTitleBadge"
-      style={
-        Object {
-          "backgroundColor": "#6dccb1",
-          "color": "#000",
-        }
-      }
-      title="Green"
+      class="euiBadge__text emotion-euiBadge__text"
     >
-      <span
-        className="euiBadge__content"
-      >
-        <span
-          className="euiBadge__text"
-        >
-          Green
-        </span>
-      </span>
+      Green
     </span>
-  </EuiInnerText>
-</EuiBadge>
+  </span>
+</span>
 `;
 
 exports[`ServerStatus renders correctly for red state 2`] = `
-<EuiBadge
+<span
   aria-label="Red"
-  color="success"
+  class="euiBadge emotion-euiBadge"
   data-test-subj="serverStatusTitleBadge"
+  style="background-color: rgb(109, 204, 177); color: rgb(0, 0, 0);"
+  title="Red"
 >
-  <EuiInnerText>
+  <span
+    class="euiBadge__content emotion-euiBadge__content"
+  >
     <span
-      aria-label="Red"
-      className="euiBadge euiBadge--iconLeft"
-      data-test-subj="serverStatusTitleBadge"
-      style={
-        Object {
-          "backgroundColor": "#6dccb1",
-          "color": "#000",
-        }
-      }
-      title="Red"
+      class="euiBadge__text emotion-euiBadge__text"
     >
-      <span
-        className="euiBadge__content"
-      >
-        <span
-          className="euiBadge__text"
-        >
-          Red
-        </span>
-      </span>
+      Red
     </span>
-  </EuiInnerText>
-</EuiBadge>
+  </span>
+</span>
 `;
 
 exports[`ServerStatus renders correctly for yellow state 2`] = `
-<EuiBadge
+<span
   aria-label="Yellow"
-  color="success"
+  class="euiBadge emotion-euiBadge"
   data-test-subj="serverStatusTitleBadge"
+  style="background-color: rgb(109, 204, 177); color: rgb(0, 0, 0);"
+  title="Yellow"
 >
-  <EuiInnerText>
+  <span
+    class="euiBadge__content emotion-euiBadge__content"
+  >
     <span
-      aria-label="Yellow"
-      className="euiBadge euiBadge--iconLeft"
-      data-test-subj="serverStatusTitleBadge"
-      style={
-        Object {
-          "backgroundColor": "#6dccb1",
-          "color": "#000",
-        }
-      }
-      title="Yellow"
+      class="euiBadge__text emotion-euiBadge__text"
     >
-      <span
-        className="euiBadge__content"
-      >
-        <span
-          className="euiBadge__text"
-        >
-          Yellow
-        </span>
-      </span>
+      Yellow
     </span>
-  </EuiInnerText>
-</EuiBadge>
+  </span>
+</span>
 `;

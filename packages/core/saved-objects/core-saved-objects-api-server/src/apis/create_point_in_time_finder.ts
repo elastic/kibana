@@ -7,9 +7,11 @@
  */
 
 import type { SavedObjectsFindOptions, SavedObjectsFindResponse } from './find';
-import type { SavedObjectsClientContract } from '../saved_objects_client';
+import type { ISavedObjectsRepository } from '../saved_objects_repository';
 
 /**
+ * Options for the create point-in-time finder operation
+ *
  * @public
  */
 export type SavedObjectsCreatePointInTimeFinderOptions = Omit<
@@ -18,21 +20,31 @@ export type SavedObjectsCreatePointInTimeFinderOptions = Omit<
 >;
 
 /**
+ * Point-in-time finder client.
+ * Partially implements {@link ISavedObjectsRepository}
+ *
  * @public
  */
 export type SavedObjectsPointInTimeFinderClient = Pick<
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
   'find' | 'openPointInTimeForType' | 'closePointInTime'
 >;
 
 /**
+ * Dependencies for the create point-in-time finder operation
+ *
  * @public
  */
 export interface SavedObjectsCreatePointInTimeFinderDependencies {
+  /** the point-in-time finder client */
   client: SavedObjectsPointInTimeFinderClient;
 }
 
-/** @public */
+/**
+ * Point-in-time finder
+ *
+ * @public
+ */
 export interface ISavedObjectsPointInTimeFinder<T, A> {
   /**
    * An async generator which wraps calls to `savedObjectsClient.find` and

@@ -21,7 +21,7 @@ import {
   getViewInAppUrl,
   setRecoveredAlertsContext,
 } from './common';
-import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { UptimeCorePluginsSetup } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
@@ -115,12 +115,13 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   async executor({
     params,
     services: {
-      alertWithLifecycle,
-      scopedClusterClient,
-      savedObjectsClient,
-      getAlertStartedDate,
       alertFactory,
+      alertWithLifecycle,
+      getAlertStartedDate,
+      savedObjectsClient,
+      scopedClusterClient,
     },
+    spaceId,
     state,
     startedAt,
   }) {
@@ -154,7 +155,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
         const alertId = DURATION_ANOMALY.id + index;
         const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
         const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
-          monitorId: DURATION_ANOMALY.id + index,
+          monitorId: alertId,
           dateRangeEnd: 'now',
           dateRangeStart: indexedStartedAt,
         });
@@ -178,13 +179,13 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
         });
         alertInstance.scheduleActions(DURATION_ANOMALY.id, {
           [ALERT_REASON_MSG]: alertReasonMessage,
-          [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
+          [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
           ...summary,
         });
       });
     }
 
-    setRecoveredAlertsContext(alertFactory);
+    setRecoveredAlertsContext({ alertFactory });
 
     return updateState(state, foundAnomalies);
   },

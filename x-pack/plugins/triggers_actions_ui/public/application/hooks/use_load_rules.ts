@@ -89,6 +89,7 @@ export function useLoadRules({
   typesFilter,
   actionTypesFilter,
   ruleExecutionStatusesFilter,
+  ruleLastRunOutcomesFilter,
   ruleStatusesFilter,
   tagsFilter,
   sort,
@@ -120,6 +121,7 @@ export function useLoadRules({
         typesFilter,
         actionTypesFilter,
         ruleExecutionStatusesFilter,
+        ruleLastRunOutcomesFilter,
         ruleStatusesFilter,
         tagsFilter,
         sort,
@@ -144,6 +146,7 @@ export function useLoadRules({
         hasEmptyTypesFilter &&
         isEmpty(actionTypesFilter) &&
         isEmpty(ruleExecutionStatusesFilter) &&
+        isEmpty(ruleLastRunOutcomesFilter) &&
         isEmpty(ruleStatusesFilter) &&
         isEmpty(tagsFilter)
       );
@@ -168,6 +171,7 @@ export function useLoadRules({
     typesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
+    ruleLastRunOutcomesFilter,
     ruleStatusesFilter,
     tagsFilter,
     sort,

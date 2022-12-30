@@ -6,8 +6,8 @@
  */
 import uuid from 'uuid';
 import { journey, step, expect, Page } from '@elastic/synthetics';
-import { FormMonitorType } from '../../../common/runtime_types/monitor_management';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { FormMonitorType } from '../../../common/runtime_types';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 const customLocation = process.env.SYNTHETICS_TEST_LOCATION;
 
@@ -144,31 +144,31 @@ const createMonitorJourney = ({
   monitorEditDetails: Array<[string, string]>;
 }) => {
   journey(
-    `Synthetics - add monitor - ${monitorName}`,
+    `SyntheticsAddMonitor - ${monitorName}`,
     async ({ page, params }: { page: Page; params: any }) => {
       const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
       step('Go to monitor management', async () => {
-        await syntheticsApp.navigateToMonitorManagement();
+        await syntheticsApp.navigateToMonitorManagement(true);
       });
 
-      step('login to Kibana', async () => {
-        await syntheticsApp.loginToKibana();
-        const invalid = await page.locator(
-          `text=Username or password is incorrect. Please try again.`
-        );
-        expect(await invalid.isVisible()).toBeFalsy();
-      });
-
-      step('Ensure all montiors are deleted', async () => {
-        await syntheticsApp.navigateToMonitorManagement();
+      step('Ensure all monitors are deleted', async () => {
         await syntheticsApp.waitForLoadingToFinish();
         const isSuccessful = await syntheticsApp.deleteMonitors();
         expect(isSuccessful).toBeTruthy();
       });
 
-      step(`create ${monitorName}`, async () => {
+      step('handles validation', async () => {
         await syntheticsApp.navigateToAddMonitor();
+        await syntheticsApp.ensureIsOnMonitorConfigPage();
+        await syntheticsApp.clickByTestSubj('syntheticsMonitorConfigSubmitButton');
+        await page.waitForSelector('text=Monitor name is required');
+        await page.waitForSelector('text=Monitor script is required');
+        const success = page.locator('text=Monitor added successfully.');
+        expect(await success.count()).toBe(0);
+      });
+
+      step(`create ${monitorName}`, async () => {
         await syntheticsApp.createMonitor({ monitorConfig, monitorType });
         const isSuccessful = await syntheticsApp.confirmAndSave();
         expect(isSuccessful).toBeTruthy();
@@ -190,9 +190,18 @@ const createMonitorJourney = ({
         expect(hasFailure).toBeFalsy();
       });
 
+      step('cannot save monitor with the same name', async () => {
+        await syntheticsApp.navigateToAddMonitor();
+        await syntheticsApp.createMonitor({ monitorConfig, monitorType });
+        await page.waitForSelector('text=Monitor name already exists');
+        await syntheticsApp.clickByTestSubj('syntheticsMonitorConfigSubmitButton');
+        const success = page.locator('text=Monitor added successfully.');
+        expect(await success.count()).toBe(0);
+      });
+
       step('delete monitor', async () => {
         await syntheticsApp.navigateToMonitorManagement();
-        await syntheticsApp.findByText('Monitor name');
+        await syntheticsApp.findByText('Monitor');
         const isSuccessful = await syntheticsApp.deleteMonitors();
         expect(isSuccessful).toBeTruthy();
       });

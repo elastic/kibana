@@ -35,6 +35,16 @@
   font-weight: 300;
 }
 
+.optionsList__existsFilter {
+  font-style: italic;
+}
+
+.optionsList__negateLabel {
+  font-weight: bold;
+  font-size: $euiSizeM;
+  color: $euiColorDanger;
+}
+
 .optionsList__ignoredBadge {
   margin-left: $euiSizeS;
 }
@@ -76,4 +86,12 @@
 
 .optionsList--filterGroup {
   width: 100%;
+}
+
+.optionsList--hiddenEditorForm {
+  margin-left: $euiSizeXXL + $euiSizeM;
+}
+
+.optionsList--sortPopover {
+  width: $euiSizeXL * 7;
 }

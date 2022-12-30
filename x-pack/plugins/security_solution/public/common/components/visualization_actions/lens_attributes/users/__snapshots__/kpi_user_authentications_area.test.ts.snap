@@ -167,7 +167,7 @@ Object {
     },
     "visualization": Object {
       "axisTitlesVisibilitySettings": Object {
-        "x": true,
+        "x": false,
         "yLeft": false,
         "yRight": true,
       },

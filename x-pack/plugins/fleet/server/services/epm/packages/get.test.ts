@@ -22,9 +22,16 @@ import { appContextService } from '../../app_context';
 
 import { PackageNotFoundError } from '../../../errors';
 
+import { getSettings } from '../../settings';
+
 import { getPackageInfo, getPackageUsageStats } from './get';
 
 const MockRegistry = Registry as jest.Mocked<typeof Registry>;
+
+jest.mock('../../settings');
+
+const mockGetSettings = getSettings as jest.Mock;
+mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: true });
 
 describe('When using EPM `get` services', () => {
   describe('and invoking getPackageUsageStats()', () => {

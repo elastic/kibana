@@ -3996,7 +3996,13 @@
             "text": "IStateSyncConfig"
           },
           "<State, ",
-          "IStateStorage",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.IStateStorage",
+            "text": "IStateStorage"
+          },
           ">) => ",
           {
             "pluginId": "kibanaUtils",
@@ -4006,7 +4012,13 @@
             "text": "ISyncStateRef"
           },
           "<",
-          "IStateStorage",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.IStateStorage",
+            "text": "IStateStorage"
+          },
           ">"
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
@@ -4029,7 +4041,13 @@
                 "text": "IStateSyncConfig"
               },
               "<State, ",
-              "IStateStorage",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.IStateStorage",
+                "text": "IStateStorage"
+              },
               ">"
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
@@ -4060,7 +4078,13 @@
             "text": "IStateSyncConfig"
           },
           "<any, ",
-          "IStateStorage",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.IStateStorage",
+            "text": "IStateStorage"
+          },
           ">[]) => ",
           {
             "pluginId": "kibanaUtils",
@@ -4070,7 +4094,13 @@
             "text": "ISyncStateRef"
           },
           "<",
-          "IStateStorage",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.IStateStorage",
+            "text": "IStateStorage"
+          },
           ">"
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
@@ -4095,7 +4125,13 @@
                 "text": "IStateSyncConfig"
               },
               "<any, ",
-              "IStateStorage",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.IStateStorage",
+                "text": "IStateStorage"
+              },
               ">[]"
             ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
@@ -4804,7 +4840,13 @@
             "text": "IKbnUrlStateStorage"
           },
           " extends ",
-          "IStateStorage"
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.IStateStorage",
+            "text": "IStateStorage"
+          }
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
         "deprecated": false,
@@ -5068,7 +5110,13 @@
             "text": "ISessionStorageStateStorage"
           },
           " extends ",
-          "IStateStorage"
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "public",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-public.IStateStorage",
+            "text": "IStateStorage"
+          }
         ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
         "deprecated": false,
@@ -5151,6 +5199,159 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-public.IStateStorage",
+        "type": "Interface",
+        "tags": [],
+        "label": "IStateStorage",
+        "description": [
+          "\nAny StateStorage have to implement IStateStorage interface\nStateStorage is responsible for:\n* state serialisation / deserialization\n* persisting to and retrieving from storage\n\nFor an example take a look at already implemented {@link IKbnUrlStateStorage} and {@link ISessionStorageStateStorage} state storages"
+        ],
+        "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.IStateStorage.set",
+            "type": "Function",
+            "tags": [],
+            "label": "set",
+            "description": [
+              "\nTake in a state object, should serialise and persist"
+            ],
+            "signature": [
+              "<State>(key: string, state: State) => any"
+            ],
+            "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.IStateStorage.set.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.IStateStorage.set.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "State"
+                ],
+                "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.IStateStorage.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nShould retrieve state from the storage and deserialize it"
+            ],
+            "signature": [
+              "<State = unknown>(key: string) => State | null"
+            ],
+            "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.IStateStorage.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.IStateStorage.change$",
+            "type": "Function",
+            "tags": [],
+            "label": "change$",
+            "description": [
+              "\nShould notify when the stored state has changed"
+            ],
+            "signature": [
+              "(<State = unknown>(key: string) => ",
+              "Observable",
+              "<State | null>) | undefined"
+            ],
+            "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.IStateStorage.change$.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.IStateStorage.cancel",
+            "type": "Function",
+            "tags": [],
+            "label": "cancel",
+            "description": [
+              "\nOptional method to cancel any pending activity\n{@link syncState} will call it during destroy, if it is provided by IStateStorage"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -6491,17 +6692,17 @@
           "{ [K in keyof T]: ReturnType<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
+            "section": "def-common.Ensure",
             "text": "Ensure"
           },
           "<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
+            "section": "def-common.Ensure",
             "text": "Ensure"
           },
           "<T[K], ",
@@ -6537,9 +6738,9 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
+            "section": "def-common.Ensure",
             "text": "Ensure"
           },
           "<T, ",
@@ -7623,9 +7824,9 @@
           "(res: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ", err: ",
@@ -7639,9 +7840,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
+            "section": "def-common.IKibanaResponse",
             "text": "IKibanaResponse"
           },
           "<any>"
@@ -7662,9 +7863,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaResponseFactory",
+                "section": "def-common.KibanaResponseFactory",
                 "text": "KibanaResponseFactory"
               }
             ],
@@ -9352,9 +9553,9 @@
           "<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Serializable",
+            "section": "def-common.Serializable",
             "text": "Serializable"
           },
           ">) => S"
@@ -9402,9 +9603,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.Serializable",
+                "section": "def-common.Serializable",
                 "text": "Serializable"
               },
               ">"
@@ -11330,17 +11531,17 @@
           "(state: ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ", version: string) => ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           }
         ],
@@ -11359,9 +11560,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               }
             ],
@@ -11434,17 +11635,17 @@
           "{ [K in keyof T]: ReturnType<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
+            "section": "def-common.Ensure",
             "text": "Ensure"
           },
           "<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
+            "section": "def-common.Ensure",
             "text": "Ensure"
           },
           "<T[K], ",
@@ -11480,9 +11681,9 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
+            "section": "def-common.Ensure",
             "text": "Ensure"
           },
           "<T, ",

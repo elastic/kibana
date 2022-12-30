@@ -21,3 +21,5 @@ const MAX_ALLOWED_RESULTS = 100;
  * */
 export const getPageCount = (count: number = 0) =>
   Math.ceil(Math.min(count || 0, MAX_ALLOWED_RESULTS) / ITEMS_PER_PAGE);
+
+export const openAlertsFilter = { field: 'kibana.alert.workflow_status', value: 'open' };

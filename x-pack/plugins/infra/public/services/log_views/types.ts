@@ -32,5 +32,5 @@ export interface ILogViewsClient {
   getResolvedLogViewStatus(resolvedLogView: ResolvedLogView): Promise<LogViewStatus>;
   getResolvedLogView(logViewId: string): Promise<ResolvedLogView>;
   putLogView(logViewId: string, logViewAttributes: Partial<LogViewAttributes>): Promise<LogView>;
-  resolveLogView(logViewAttributes: LogViewAttributes): Promise<ResolvedLogView>;
+  resolveLogView(logViewId: string, logViewAttributes: LogViewAttributes): Promise<ResolvedLogView>;
 }

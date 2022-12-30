@@ -250,10 +250,10 @@ Object {
   "baseElement": <body>
     <div>
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <span
             data-test-subj="test-add-to-timeline"
@@ -266,10 +266,10 @@ Object {
   </body>,
   "container": <div>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <span
           data-test-subj="test-add-to-timeline"
@@ -339,10 +339,10 @@ Object {
   "baseElement": <body>
     <div>
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <span
             data-test-subj="test-add-to-timeline"
@@ -355,10 +355,10 @@ Object {
   </body>,
   "container": <div>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <span
           data-test-subj="test-add-to-timeline"

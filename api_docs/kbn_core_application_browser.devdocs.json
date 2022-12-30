@@ -402,7 +402,7 @@
             ],
             "signature": [
               "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: ",
-              "ButtonColor",
+              "EuiButtonColor",
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-application-browser",
@@ -494,7 +494,7 @@
                   "(optional) color for the confirmation button\nso we can show to the user the right UX for him to saved his/her/their changes"
                 ],
                 "signature": [
-                  "ButtonColor",
+                  "EuiButtonColor",
                   " | undefined"
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
@@ -614,7 +614,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "ButtonColor",
+              "EuiButtonColor",
               " | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
@@ -1249,7 +1249,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/types.ts"
+                "path": "src/plugins/dashboard/public/dashboard_app/types.ts"
               },
               {
                 "plugin": "dashboard",
@@ -2184,7 +2184,7 @@
             "section": "def-common.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          " | undefined; tooltip?: string | undefined; searchable?: boolean | undefined; deepLinks?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2200,7 +2200,7 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
+          " | undefined; defaultPath?: string | undefined; }"
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,

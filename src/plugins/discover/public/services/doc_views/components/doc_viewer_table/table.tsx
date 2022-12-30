@@ -7,7 +7,7 @@
  */
 
 import './table.scss';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,7 +35,7 @@ import { usePager } from '../../../../hooks/use_pager';
 import { FieldName } from '../../../../components/field_name/field_name';
 import { SHOW_MULTIFIELDS } from '../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../doc_views_types';
-import { getFieldsToShow } from '../../../../utils/get_fields_to_show';
+import { getShouldShowFieldHandler } from '../../../../utils/get_should_show_field_handler';
 import { getIgnoredReason } from '../../../../utils/get_ignored_reason';
 import { formatFieldValue } from '../../../../utils/format_value';
 import { isNestedFieldParent } from '../../../../application/main/utils/nested_fields';
@@ -122,7 +122,10 @@ export const DocViewerTable = ({
   );
 
   const flattened = hit.flattened;
-  const fieldsToShow = getFieldsToShow(Object.keys(flattened), dataView, showMultiFields);
+  const shouldShowFieldHandler = useMemo(
+    () => getShouldShowFieldHandler(Object.keys(flattened), dataView, showMultiFields),
+    [flattened, dataView, showMultiFields]
+  );
 
   const searchPlaceholder = i18n.translate('discover.docView.table.searchPlaceHolder', {
     defaultMessage: 'Search field names',
@@ -229,7 +232,7 @@ export const DocViewerTable = ({
     })
     .reduce<ItemsEntry>(
       (acc, curFieldName) => {
-        if (!fieldsToShow.includes(curFieldName)) {
+        if (!shouldShowFieldHandler(curFieldName)) {
           return acc;
         }
 

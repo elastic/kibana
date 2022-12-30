@@ -8,7 +8,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { useComboInput, useInput } from '../../../hooks';
+import type { useComboInput, useInput, useSwitchInput } from '../../../hooks';
 import { sendCreateAgentPolicy, sendGetOneAgentPolicy, useStartServices } from '../../../hooks';
 
 import type { NewAgentPolicy } from '../../../types';
@@ -33,15 +33,18 @@ export type QuickStartCreateFormStatus = 'initial' | 'loading' | 'error' | 'succ
 
 export interface QuickStartCreateForm {
   status: QuickStartCreateFormStatus;
+  fleetServerHosts: FleetServerHost[];
   error?: string;
   submit: () => void;
-  fleetServerHost?: FleetServerHost;
+  setFleetServerHost: React.Dispatch<React.SetStateAction<FleetServerHost | undefined | null>>;
+  fleetServerHost?: FleetServerHost | null;
   isFleetServerHostSubmitted: boolean;
   fleetServerPolicyId?: string;
   serviceToken?: string;
   inputs: {
     hostUrlsInput: ReturnType<typeof useComboInput>;
     nameInput: ReturnType<typeof useInput>;
+    isDefaultInput: ReturnType<typeof useSwitchInput>;
   };
 }
 
@@ -56,6 +59,7 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
   const [error, setError] = useState<string | undefined>();
 
   const {
+    fleetServerHosts,
     fleetServerHost,
     isFleetServerHostSubmitted,
     saveFleetServerHost,
@@ -78,18 +82,21 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
 
   const submit = useCallback(async () => {
     try {
-      if (validate()) {
+      if ((!fleetServerHost && validate()) || fleetServerHost) {
         setStatus('loading');
 
         const newFleetServerHost = {
           name: inputs.nameInput.value,
           host_urls: inputs.hostUrlsInput.value,
-          is_default: true,
-          id: 'fleet-server-host',
+          is_default: inputs.isDefaultInput.value,
           is_preconfigured: false,
         };
-        setFleetServerHost(newFleetServerHost);
-        await saveFleetServerHost(newFleetServerHost);
+
+        if (!fleetServerHost) {
+          const res = await saveFleetServerHost(newFleetServerHost);
+          setFleetServerHost(res);
+        }
+
         await generateServiceToken();
 
         const existingPolicy = await sendGetOneAgentPolicy(
@@ -123,8 +130,10 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     }
   }, [
     validate,
+    fleetServerHost,
     inputs.nameInput.value,
     inputs.hostUrlsInput.value,
+    inputs.isDefaultInput.value,
     setFleetServerHost,
     saveFleetServerHost,
     generateServiceToken,
@@ -137,7 +146,9 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     error,
     submit,
     fleetServerPolicyId,
+    fleetServerHosts,
     fleetServerHost,
+    setFleetServerHost,
     isFleetServerHostSubmitted,
     serviceToken,
     inputs,

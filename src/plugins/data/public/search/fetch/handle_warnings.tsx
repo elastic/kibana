@@ -8,7 +8,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { debounce } from 'lodash';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
@@ -57,19 +57,23 @@ export function handleWarnings({
   theme,
   callback,
   sessionId = '',
+  requestId,
 }: {
   request: SearchRequest;
   response: estypes.SearchResponse;
   theme: ThemeServiceStart;
   callback?: WarningHandlerCallback;
   sessionId?: string;
+  requestId?: string;
 }) {
   const warnings = extractWarnings(response);
   if (warnings.length === 0) {
     return;
   }
 
-  const internal = callback ? filterWarnings(warnings, callback) : warnings;
+  const internal = callback
+    ? filterWarnings(warnings, callback, request, response, requestId)
+    : warnings;
   if (internal.length === 0) {
     return;
   }
@@ -95,12 +99,16 @@ export function handleWarnings({
       <>
         {warning.text}
         <EuiSpacer size="s" />
-        <ShardFailureOpenModalButton
-          request={request as ShardFailureRequest}
-          response={response}
-          theme={theme}
-          title={title}
-        />
+        <EuiTextAlign textAlign="right">
+          <ShardFailureOpenModalButton
+            theme={theme}
+            title={title}
+            getRequestMeta={() => ({
+              request: request as ShardFailureRequest,
+              response,
+            })}
+          />
+        </EuiTextAlign>
       </>,
       { theme$: theme.theme$ }
     );
@@ -116,12 +124,22 @@ export function handleWarnings({
 /**
  * @internal
  */
-export function filterWarnings(warnings: SearchResponseWarning[], cb: WarningHandlerCallback) {
+export function filterWarnings(
+  warnings: SearchResponseWarning[],
+  cb: WarningHandlerCallback,
+  request: SearchRequest,
+  response: estypes.SearchResponse,
+  requestId: string | undefined
+) {
   const unfiltered: SearchResponseWarning[] = [];
 
   // use the consumer's callback as a filter to receive warnings to handle on our side
   warnings.forEach((warning) => {
-    const consumerHandled = cb?.(warning);
+    const consumerHandled = cb?.(warning, {
+      requestId,
+      request,
+      response,
+    });
     if (!consumerHandled) {
       unfiltered.push(warning);
     }

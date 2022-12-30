@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiImage, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EmptyImage } from '../screenshot/empty_image';
 import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
 import { useCompositeImage } from '../../../hooks/use_composite_image';
 
@@ -22,6 +23,8 @@ interface ScreenshotImageProps {
   imageCaption: JSX.Element;
   isStepFailed: boolean;
   isLoading: boolean;
+  asThumbnail?: boolean;
+  size?: 'm';
 }
 
 const ScreenshotThumbnail: React.FC<ScreenshotImageProps & { imageData?: string }> = ({
@@ -30,6 +33,8 @@ const ScreenshotThumbnail: React.FC<ScreenshotImageProps & { imageData?: string 
   imageData,
   isStepFailed,
   isLoading,
+  asThumbnail = true,
+  size,
 }) => {
   return imageData ? (
     <EuiImage
@@ -39,11 +44,13 @@ const ScreenshotThumbnail: React.FC<ScreenshotImageProps & { imageData?: string 
       data-test-subj="stepScreenshotThumbnail"
       hasShadow
       url={imageData}
-      size="s"
+      size={size}
       className="syntheticsStepImage"
     />
-  ) : (
+  ) : asThumbnail ? (
     <EmptyThumbnail isLoading={isLoading} />
+  ) : (
+    <EmptyImage isLoading={isLoading} size={size} />
   );
 };
 /**
@@ -64,6 +71,8 @@ const RecomposedScreenshotImage: React.FC<
   setImageData,
   isStepFailed,
   isLoading,
+  asThumbnail,
+  size,
 }) => {
   // initially an undefined URL value is passed to the image display, and a loading spinner is rendered.
   // `useCompositeImage` will call `setImageData` when the image is composited, and the updated `imageData` will display.
@@ -76,6 +85,8 @@ const RecomposedScreenshotImage: React.FC<
       imageData={imageData}
       isStepFailed={isStepFailed}
       isLoading={isLoading}
+      asThumbnail={asThumbnail}
+      size={size}
     />
   );
 };
@@ -88,6 +99,8 @@ export interface StepImagePopoverProps {
   isImagePopoverOpen: boolean;
   isStepFailed: boolean;
   isLoading: boolean;
+  asThumbnail?: boolean;
+  size?: 'm';
 }
 
 const JourneyStepImage: React.FC<
@@ -104,6 +117,8 @@ const JourneyStepImage: React.FC<
   setImageData,
   isStepFailed,
   isLoading,
+  asThumbnail = true,
+  size,
 }) => {
   if (imgSrc) {
     return (
@@ -113,6 +128,8 @@ const JourneyStepImage: React.FC<
         imageData={imageData}
         isStepFailed={isStepFailed}
         isLoading={isLoading}
+        asThumbnail={asThumbnail}
+        size={size}
       />
     );
   } else if (imgRef) {
@@ -125,6 +142,8 @@ const JourneyStepImage: React.FC<
         setImageData={setImageData}
         isStepFailed={isStepFailed}
         isLoading={isLoading}
+        asThumbnail={asThumbnail}
+        size={size}
       />
     );
   }
@@ -139,31 +158,35 @@ export const JourneyStepImagePopover: React.FC<StepImagePopoverProps> = ({
   isImagePopoverOpen,
   isStepFailed,
   isLoading,
+  asThumbnail = true,
+  size,
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const [imageData, setImageData] = React.useState<string | undefined>(imgSrc || undefined);
+  const [imageData, setImageData] = useState<string | undefined>(imgSrc || undefined);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // for legacy screenshots, when a new image arrives, we must overwrite it
     if (imgSrc && imgSrc !== imageData) {
       setImageData(imgSrc);
     }
   }, [imgSrc, imageData]);
 
-  const setImageDataCallback = React.useCallback(
+  const setImageDataCallback = useCallback(
     (newImageData: string | undefined) => setImageData(newImageData),
     [setImageData]
   );
 
   const isImageLoading = isLoading || (!!imgRef && !imageData);
 
+  const thumbnailS = asThumbnail ? thumbnailStyle : null;
+
   return (
     <EuiPopover
       css={css`
         figure {
           img {
-            ${thumbnailStyle};
+            ${thumbnailS};
             border: ${euiTheme.border.thin};
             ${isStepFailed ? `border-color: ${euiTheme.colors.danger}` : ``};
           }
@@ -180,6 +203,8 @@ export const JourneyStepImagePopover: React.FC<StepImagePopoverProps> = ({
           imageData={imageData}
           isStepFailed={isStepFailed}
           isLoading={isImageLoading}
+          asThumbnail={asThumbnail}
+          size={size}
         />
       }
       isOpen={isImagePopoverOpen}
@@ -195,12 +220,10 @@ export const JourneyStepImagePopover: React.FC<StepImagePopoverProps> = ({
             object-fit: contain;
           `}
         />
+      ) : asThumbnail ? (
+        <EmptyThumbnail isLoading={isLoading} />
       ) : (
-        <EmptyThumbnail
-          isLoading={isLoading}
-          width={POPOVER_IMG_WIDTH}
-          height={POPOVER_IMG_HEIGHT}
-        />
+        <EmptyImage isLoading={isLoading} />
       )}
     </EuiPopover>
   );

@@ -140,6 +140,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 labelTemplate: '{{value}}',
               },
             },
+            'transaction.duration.us': {
+              id: 'duration',
+              params: {
+                inputFormat: 'microseconds',
+                outputFormat: 'asMilliseconds',
+                showSuffix: true,
+                useShortSuffix: true,
+                outputPrecision: 2,
+                includeSpaceWithSuffix: true,
+              },
+            },
           })
         );
       });
