@@ -14,7 +14,6 @@ import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hit
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
@@ -136,7 +135,6 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
       fetchStatus: FetchStatus.COMPLETE,
       fields: [] as string[],
     }) as AvailableFields$,
-    dataViewList: [dataView as DataViewListItem],
     onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
@@ -151,7 +149,7 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
 }
 
 function getAppStateContainer({ query }: { query?: Query | AggregateQuery }) {
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
   appStateContainer.set({
     query: query ?? { query: '', language: 'lucene' },
     filters: [],
@@ -166,7 +164,11 @@ async function mountComponent(
 ): Promise<ReactWrapper<DiscoverSidebarResponsiveProps>> {
   let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
   const mockedServices = services ?? createMockServices();
-  mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () => props.dataViewList);
+  mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
+    props.selectedDataView
+      ? [{ id: props.selectedDataView.id!, title: props.selectedDataView.title! }]
+      : []
+  );
   mockedServices.data.dataViews.get = jest.fn().mockImplementation(async (id) => {
     return [props.selectedDataView].find((d) => d!.id === id);
   });
@@ -227,6 +229,11 @@ describe('discover responsive sidebar', function () {
     expect(compLoadingExistence.find(EuiProgress).exists()).toBe(true);
 
     await act(async () => {
+      const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
+      appStateContainer.set({
+        query: { query: '', language: 'lucene' },
+        filters: [],
+      });
       resolveFunction!({
         indexPatternTitle: 'test-loaded',
         existingFieldNames: Object.keys(mockfieldCounts),

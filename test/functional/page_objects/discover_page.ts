@@ -555,6 +555,12 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  public async isAdHocDataViewSelected() {
+    const dataView = await this.getCurrentlySelectedDataView();
+    await this.testSubjects.click('discover-dataView-switch-link');
+    return this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
+  }
+
   public async isFieldSelected(field: string) {
     if (!(await this.testSubjects.exists('fieldListGroupedSelectedFields'))) {
       return false;
