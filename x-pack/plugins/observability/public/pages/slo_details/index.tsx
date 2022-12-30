@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import { IBasePath } from '@kbn/core-http-browser';
 import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { SLOResponse } from '@kbn/slo-schema';
 import { ObservabilityAppServices } from '../../application/types';
 import { paths } from '../../config';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -21,7 +22,6 @@ import { isSloFeatureEnabled } from '../slos/helpers';
 import { SLOS_BREADCRUMB_TEXT } from '../slos/translations';
 import { SloDetailsPathParams } from './types';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
-import { SLO } from '../../typings';
 import { SloDetails } from './components/slo_details';
 import { SLO_DETAILS_BREADCRUMB_TEXT } from './translations';
 import { PageTitle } from './components/page_title';
@@ -54,7 +54,7 @@ export function SloDetailsPage() {
   );
 }
 
-function getBreadcrumbs(basePath: IBasePath, slo: SLO | undefined): EuiBreadcrumbProps[] {
+function getBreadcrumbs(basePath: IBasePath, slo: SLOResponse | undefined): EuiBreadcrumbProps[] {
   return [
     {
       href: basePath.prepend(paths.observability.slos),
