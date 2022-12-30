@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
-import { euiLightVars } from '@kbn/ui-theme';
+import React, { MouseEvent } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,13 +15,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { MouseEvent } from 'react';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertStateInfo } from './alert_state_chart';
 import { AlertsSummaryWidgetUIProps } from './types';
 
 export const AlertsSummaryWidgetUI = ({
-  active,
-  recovered,
+  activeAlertCount,
+  activeAlerts,
+  recoveredAlertCount,
+  recoveredAlerts,
   timeRangeTitle,
   onClick,
 }: AlertsSummaryWidgetUIProps) => {
@@ -45,79 +47,71 @@ export const AlertsSummaryWidgetUI = ({
       onClick={handleClick}
     >
       <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title"
-                    defaultMessage="Alerts"
-                  />
-                </h5>
-              </EuiTitle>
-              {!!timeRangeTitle && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiText size="s" color="subdued" data-test-subj="timeRangeTitle">
-                    {timeRangeTitle}
-                  </EuiText>
-                </>
-              )}
-            </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h5 data-test-subj="totalAlertsCount">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title"
+                defaultMessage="Alerts"
+              />
+              &nbsp;({activeAlertCount + recoveredAlertCount})
+            </h5>
+          </EuiTitle>
+          {!!timeRangeTitle && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued" data-test-subj="timeRangeTitle">
+                {timeRangeTitle}
+              </EuiText>
+            </>
+          )}
+        </EuiFlexItem>
 
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-                <EuiFlexItem>
-                  <EuiLink onClick={handleClick}>
-                    <EuiText color={euiLightVars.euiTextColor}>
-                      <h3 data-test-subj="totalAlertsCount">{active + recovered}</h3>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel"
-                        defaultMessage="All"
-                      />
-                    </EuiText>
-                  </EuiLink>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiLink
-                    onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
-                      handleClick(event, ALERT_STATUS_ACTIVE)
-                    }
-                  >
-                    <EuiText color={euiLightVars.euiColorDangerText}>
-                      <h3 data-test-subj="activeAlertsCount">{active}</h3>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel"
-                        defaultMessage="Currently active"
-                      />
-                    </EuiText>
-                  </EuiLink>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiLink
-                    onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
-                      handleClick(event, ALERT_STATUS_RECOVERED)
-                    }
-                  >
-                    <EuiFlexItem>
-                      <EuiText color={euiLightVars.euiColorSuccessText}>
-                        <h3 data-test-subj="recoveredAlertsCount">{recovered}</h3>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.recoveredLabel"
-                        defaultMessage="Recovered"
-                      />
-                    </EuiText>
-                  </EuiLink>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFlexGroup wrap>
+            {/* Active */}
+            <EuiFlexItem style={{ minWidth: '200px' }}>
+              <EuiLink
+                onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
+                  handleClick(event, ALERT_STATUS_ACTIVE)
+                }
+              >
+                <AlertStateInfo
+                  count={activeAlertCount}
+                  data={activeAlerts}
+                  dataTestSubj="activeAlertsCount"
+                  id="active"
+                  stroke="#E7664C"
+                  title={
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel"
+                      defaultMessage="Active"
+                    />
+                  }
+                />
+              </EuiLink>
+            </EuiFlexItem>
+            {/* Recovered */}
+            <EuiFlexItem style={{ minWidth: '200px' }}>
+              <EuiLink
+                onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
+                  handleClick(event, ALERT_STATUS_RECOVERED)
+                }
+              >
+                <AlertStateInfo
+                  count={recoveredAlertCount}
+                  data={recoveredAlerts}
+                  dataTestSubj="recoveredAlertsCount"
+                  id="recovered"
+                  stroke="#54B399"
+                  title={
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.rule.ruleSummary.recoveredLabel"
+                      defaultMessage="Recovered"
+                    />
+                  }
+                />
+              </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
