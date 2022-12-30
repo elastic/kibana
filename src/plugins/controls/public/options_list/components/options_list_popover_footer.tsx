@@ -45,6 +45,7 @@ export const OptionsListPopoverFooter = () => {
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const exclude = select((state) => state.explicitInput.exclude);
+  const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
 
   return (
     <>
@@ -54,7 +55,7 @@ export const OptionsListPopoverFooter = () => {
           background-color: ${useEuiBackgroundColor('subdued')};
         `}
       >
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
               legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
@@ -67,22 +68,26 @@ export const OptionsListPopoverFooter = () => {
               data-test-subj="optionsList__includeExcludeButtonGroup"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="none" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon iconType="arrowStart" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon iconType="arrowLeft" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge>1-10 of 1241</EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon iconType="arrowRight" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {totalCardinality > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon iconType="arrowStart" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon iconType="arrowLeft" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>
+                    {OptionsListStrings.popover.getCardinalityBadge(1, 10, totalCardinality)}
+                  </EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon iconType="arrowRight" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPopoverFooter>
     </>
