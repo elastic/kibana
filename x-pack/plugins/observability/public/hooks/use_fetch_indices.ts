@@ -16,21 +16,7 @@ export interface UseFetchIndicesResponse {
 }
 
 export interface Index {
-  health?: string;
-  status?: string;
   name: string;
-  uuid?: string;
-  primary?: number | string;
-  replica?: number | string;
-  documents: number;
-  documents_deleted: number;
-  size: string;
-  primary_size: string;
-  isFrozen: boolean;
-  hidden: boolean;
-  aliases: string | string[];
-  data_stream?: string;
-  [key: string]: any;
 }
 
 export function useFetchIndices(): UseFetchIndicesResponse {

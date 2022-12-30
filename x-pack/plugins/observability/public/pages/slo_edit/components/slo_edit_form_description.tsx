@@ -18,11 +18,11 @@ import React from 'react';
 import { Control, Controller } from 'react-hook-form';
 import type { CreateSLOParams } from '@kbn/slo-schema';
 
-export interface SloEditFormDescriptionProps {
+export interface Props {
   control: Control<CreateSLOParams>;
 }
 
-export function SloEditFormDescription({ control }: SloEditFormDescriptionProps) {
+export function SloEditFormDescription({ control }: Props) {
   const sloNameId = useGeneratedHtmlId({ prefix: 'sloName' });
   const descriptionId = useGeneratedHtmlId({ prefix: 'sloDescription' });
 
@@ -74,7 +74,7 @@ export function SloEditFormDescription({ control }: SloEditFormDescriptionProps)
               placeholder={i18n.translate(
                 'xpack.observability.slos.sloEdit.description.sloDescriptionPlaceholder',
                 {
-                  defaultMessage: 'The purpose of SLO, internal or external.',
+                  defaultMessage: 'A short description of the SLO',
                 }
               )}
               {...field}

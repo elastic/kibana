@@ -8,21 +8,21 @@
 import React from 'react';
 import Router from 'react-router-dom';
 import { waitFor, fireEvent, screen } from '@testing-library/dom';
+import { BasePath } from '@kbn/core-http-server-internal';
+import { cleanup } from '@testing-library/react';
 
-import { ConfigSchema } from '../../plugin';
-import { Subset } from '../../typings';
-import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
-import { SloEditPage } from '.';
-import { anSLO } from '../../data/slo';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useCreateSlo } from '../../hooks/slo/use_create_slo';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
+import { ConfigSchema } from '../../plugin';
+import { Subset } from '../../typings';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
-import { BasePath } from '@kbn/core-http-server-internal';
-import { cleanup } from '@testing-library/react';
+import { anSLO } from '../../data/slo';
 import { paths } from '../../config';
+import { SloEditPage } from '.';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

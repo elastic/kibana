@@ -14,10 +14,23 @@ export function transformGetSloToCreateSloParams(
 
   return {
     ...values,
-    objective: { target: values.objective.target * 100 },
+    objective: {
+      target: values.objective.target * 100,
+      ...(values.objective.timesliceTarget && {
+        timesliceTarget: values.objective.timesliceTarget * 100,
+      }),
+    },
   } as unknown as CreateSLOParams;
 }
 
 export function processValues(values: CreateSLOParams): CreateSLOParams {
-  return { ...values, objective: { target: values.objective.target / 100 } };
+  return {
+    ...values,
+    objective: {
+      target: values.objective.target / 100,
+      ...(values.objective.timesliceTarget && {
+        timesliceTarget: values.objective.timesliceTarget / 100,
+      }),
+    },
+  };
 }

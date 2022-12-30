@@ -8,15 +8,12 @@
 import { FormState, UseFormGetFieldState } from 'react-hook-form';
 import type { CreateSLOParams } from '@kbn/slo-schema';
 
-interface UseCheckFormPartialValiditiesProps {
+interface Props {
   getFieldState: UseFormGetFieldState<CreateSLOParams>;
   formState: FormState<CreateSLOParams>;
 }
 
-export function useCheckFormPartialValidities({
-  getFieldState,
-  formState,
-}: UseCheckFormPartialValiditiesProps) {
+export function useCheckFormPartialValidities({ getFieldState, formState }: Props) {
   const isDefinitionValid = (
     [
       'indicator.params.index',

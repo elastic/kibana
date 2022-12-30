@@ -20,7 +20,7 @@ export function SloListWelcomePrompt() {
   } = useKibana().services;
 
   const handleClickCreateSlo = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloEdit()));
+    navigateToUrl(basePath.prepend(paths.observability.sloCreate));
   };
 
   return (

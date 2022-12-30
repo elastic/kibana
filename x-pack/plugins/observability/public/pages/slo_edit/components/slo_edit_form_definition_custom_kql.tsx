@@ -13,15 +13,12 @@ import type { CreateSLOParams } from '@kbn/slo-schema';
 
 import { useFetchIndices } from '../../../hooks/use_fetch_indices';
 
-export interface SloEditFormDefinitionCustomKqlProps {
+export interface Props {
   control: Control<CreateSLOParams>;
   trigger: UseFormTrigger<CreateSLOParams>;
 }
 
-export function SloEditFormDefinitionCustomKql({
-  control,
-  trigger,
-}: SloEditFormDefinitionCustomKqlProps) {
+export function SloEditFormDefinitionCustomKql({ control, trigger }: Props) {
   const { loading, indices = [] } = useFetchIndices();
 
   const indicesNames = indices.map(({ name }) => ({

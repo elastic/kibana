@@ -123,6 +123,8 @@ type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
+type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
+
 export {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
@@ -136,6 +138,7 @@ export {
   updateSLOResponseSchema,
 };
 export type {
+  BudgetingMethod,
   CreateSLOParams,
   CreateSLOResponse,
   FindSLOParams,

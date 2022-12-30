@@ -34,12 +34,12 @@ export const TIMEWINDOW_OPTIONS = [30, 7].map((number) => ({
   }),
 }));
 
-export interface SloEditFormObjectivesProps {
+export interface Props {
   control: Control<CreateSLOParams>;
   watch: UseFormWatch<CreateSLOParams>;
 }
 
-export function SloEditFormObjectives({ control, watch }: SloEditFormObjectivesProps) {
+export function SloEditFormObjectives({ control, watch }: Props) {
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
 
@@ -101,14 +101,19 @@ export function SloEditFormObjectives({ control, watch }: SloEditFormObjectivesP
           <Controller
             name="objective.target"
             control={control}
-            rules={{ required: true, min: 0.0001, max: 100, validate: (value) => value > 0 }}
+            rules={{
+              required: true,
+              min: 0.001,
+              max: 100,
+              validate: (value) => value > 0 && value < 100,
+            }}
             render={({ field }) => (
               <EuiFieldNumber
                 data-test-subj="sloFormObjectiveTargetInput"
                 {...field}
                 min={0}
-                max={100}
-                step={0.0001}
+                max={99.999}
+                step={0.001}
                 onChange={(event) => field.onChange(Number(event.target.value))}
               />
             )}

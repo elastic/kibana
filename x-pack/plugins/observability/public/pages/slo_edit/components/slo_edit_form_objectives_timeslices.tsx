@@ -11,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { Control, Controller } from 'react-hook-form';
 import type { CreateSLOParams } from '@kbn/slo-schema';
 
-export interface SloEditFormObjectivesTimeslicesProps {
+export interface Props {
   control: Control<CreateSLOParams>;
 }
 
-export function SloEditFormObjectivesTimeslices({ control }: SloEditFormObjectivesTimeslicesProps) {
+export function SloEditFormObjectivesTimeslices({ control }: Props) {
   return (
     <EuiFlexGrid columns={3}>
       <EuiFlexItem>

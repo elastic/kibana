@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import type { CreateSLOParams } from '@kbn/slo-schema';
+import type { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 
@@ -31,7 +31,7 @@ export function useCreateSlo(): UseCreateSlo {
       const body = JSON.stringify(slo);
 
       try {
-        await http.post<string>(`/api/observability/slos`, { body });
+        await http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
         setSuccess(true);
       } catch (e) {
         setError(e);

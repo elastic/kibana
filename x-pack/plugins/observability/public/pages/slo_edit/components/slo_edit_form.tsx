@@ -35,13 +35,13 @@ import {
 import { paths } from '../../../config';
 import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 
-export interface SloEditFormProps {
+export interface Props {
   slo: SLOWithSummaryResponse | undefined;
 }
 
 const maxWidth = 775;
 
-export function SloEditForm({ slo }: SloEditFormProps) {
+export function SloEditForm({ slo }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },

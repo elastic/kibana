@@ -12,7 +12,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import {
   SloEditFormDefinitionCustomKql as Component,
-  SloEditFormDefinitionCustomKqlProps,
+  Props,
 } from './slo_edit_form_definition_custom_kql';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 
@@ -22,7 +22,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: SloEditFormDefinitionCustomKqlProps) => {
+const Template: ComponentStory<typeof Component> = (props: Props) => {
   const methods = useForm({ defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES });
   return (
     <FormProvider {...methods}>
