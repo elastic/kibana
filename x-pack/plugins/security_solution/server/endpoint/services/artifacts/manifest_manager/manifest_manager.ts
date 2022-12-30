@@ -397,8 +397,11 @@ export class ManifestManager {
     }
 
     if (fleetArtifacts) {
-      artifactsToCreate.forEach((artifact, index) => {
-        const fleetArtifact = fleetArtifacts[index];
+      artifactsToCreate.forEach((artifact) => {
+        const fleetArtifact = fleetArtifacts.find(
+          (fleetArt) => fleetArt.identifier === artifact.identifier
+        );
+        if (!fleetArtifact) return;
         const artifactId = getArtifactId(artifact);
         // Cache the compressed body of the artifact
         this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
