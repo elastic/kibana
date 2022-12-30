@@ -26,7 +26,6 @@ export function SloEditFormObjectivesTimeslices({ control }: SloEditFormObjectiv
         </EuiFormLabel>
         <Controller
           name="objective.timesliceTarget"
-          shouldUnregister
           control={control}
           rules={{
             required: true,
@@ -36,6 +35,7 @@ export function SloEditFormObjectivesTimeslices({ control }: SloEditFormObjectiv
           render={({ field }) => (
             <EuiFieldNumber
               {...field}
+              data-test-subj="sloFormObjectiveTimesliceTargetInput"
               min={0}
               max={100}
               step={0.0001}
@@ -54,12 +54,12 @@ export function SloEditFormObjectivesTimeslices({ control }: SloEditFormObjectiv
 
         <Controller
           name="objective.timesliceWindow"
-          shouldUnregister
           control={control}
           rules={{ required: true, min: 1, max: 120 }}
           render={({ field }) => (
             <EuiFieldNumber
               {...field}
+              data-test-subj="sloFormObjectiveTimesliceWindowInput"
               value={String(field.value)}
               min={1}
               max={120}

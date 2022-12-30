@@ -90,7 +90,7 @@ export function SloEditForm({ slo }: SloEditFormProps) {
   }
 
   return (
-    <EuiTimeline>
+    <EuiTimeline data-test-subj="sloForm">
       <EuiTimelineItem
         verticalAlign="top"
         icon={
@@ -122,7 +122,13 @@ export function SloEditForm({ slo }: SloEditFormProps) {
             name="indicator.type"
             control={control}
             rules={{ required: true }}
-            render={({ field }) => <EuiSelect {...field} options={SLI_OPTIONS} />}
+            render={({ field }) => (
+              <EuiSelect
+                data-test-subj="sloFormIndicatorTypeSelect"
+                {...field}
+                options={SLI_OPTIONS}
+              />
+            )}
           />
 
           <EuiSpacer size="xxl" />
@@ -190,6 +196,7 @@ export function SloEditForm({ slo }: SloEditFormProps) {
           <EuiButton
             fill
             color="primary"
+            data-test-subj="sloFormSubmitButton"
             onClick={handleCreateSlo}
             disabled={!formState.isValid}
             isLoading={loadingCreatingSlo && !errorCreatingSlo}

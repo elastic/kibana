@@ -43,6 +43,7 @@ export function SloEditFormDescription({ control }: SloEditFormDescriptionProps)
             <EuiFieldText
               fullWidth
               id={sloNameId}
+              data-test-subj="sloFormNameInput"
               placeholder={i18n.translate(
                 'xpack.observability.slos.sloEdit.description.sloNamePlaceholder',
                 {
@@ -69,12 +70,14 @@ export function SloEditFormDescription({ control }: SloEditFormDescriptionProps)
             <EuiTextArea
               fullWidth
               id={descriptionId}
+              data-test-subj="sloFormDescriptionTextArea"
               placeholder={i18n.translate(
                 'xpack.observability.slos.sloEdit.description.sloDescriptionPlaceholder',
                 {
                   defaultMessage: 'The purpose of SLO, internal or external.',
                 }
               )}
+              {...field}
             />
           )}
         />

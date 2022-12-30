@@ -49,7 +49,6 @@ export function SloEditFormDefinitionCustomKql({
 
         <Controller
           name="indicator.params.index"
-          shouldUnregister
           control={control}
           rules={{
             required: true,
@@ -60,6 +59,7 @@ export function SloEditFormDefinitionCustomKql({
               fullWidth
               isClearable
               aria-label="Indices"
+              data-test-subj="sloFormCustomKqlIndexInput"
               status={loading ? 'loading' : field.value ? 'unchanged' : 'unchanged'}
               onItemClick={({ label }) => {
                 field.onChange(label);
@@ -86,14 +86,14 @@ export function SloEditFormDefinitionCustomKql({
         </EuiFormLabel>
         <Controller
           name="indicator.params.filter"
-          shouldUnregister
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
             <EuiSuggest
               append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
               status="unchanged"
-              aria-label="Filter"
+              aria-label="Filter query"
+              data-test-subj="sloFormCustomKqlFilterQueryInput"
               placeholder={i18n.translate(
                 'xpack.observability.slos.sloEdit.sloDefinition.customKql.customFilter',
                 {
@@ -115,14 +115,14 @@ export function SloEditFormDefinitionCustomKql({
         </EuiFormLabel>
         <Controller
           name="indicator.params.good"
-          shouldUnregister
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
             <EuiSuggest
               append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
               status="unchanged"
-              aria-label="Filter"
+              aria-label="Good filter"
+              data-test-subj="sloFormCustomKqlGoodQueryInput"
               placeholder={i18n.translate(
                 'xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQueryPlaceholder',
                 {
@@ -144,14 +144,14 @@ export function SloEditFormDefinitionCustomKql({
         </EuiFormLabel>
         <Controller
           name="indicator.params.total"
-          shouldUnregister
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
             <EuiSuggest
               append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
               status="unchanged"
-              aria-label="Filter"
+              aria-label="Total filter"
+              data-test-subj="sloFormCustomKqlTotalQueryInput"
               placeholder={i18n.translate(
                 'xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQueryPlaceholder',
                 {

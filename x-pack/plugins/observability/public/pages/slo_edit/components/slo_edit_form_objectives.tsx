@@ -55,11 +55,15 @@ export function SloEditFormObjectives({ control, watch }: SloEditFormObjectivesP
 
           <Controller
             name="budgetingMethod"
-            shouldUnregister
             control={control}
             rules={{ required: true }}
             render={({ field }) => (
-              <EuiSelect id={budgetingSelect} options={BUDGETING_METHOD_OPTIONS} {...field} />
+              <EuiSelect
+                id={budgetingSelect}
+                data-test-subj="sloFormBudgetingMethodSelect"
+                options={BUDGETING_METHOD_OPTIONS}
+                {...field}
+              />
             )}
           />
         </EuiFlexItem>
@@ -73,12 +77,12 @@ export function SloEditFormObjectives({ control, watch }: SloEditFormObjectivesP
 
           <Controller
             name="timeWindow.duration"
-            shouldUnregister
             control={control}
             rules={{ required: true }}
             render={({ field }) => (
               <EuiSelect
                 id={timeWindowSelect}
+                data-test-subj="sloFormTimeWindowDurationSelect"
                 options={TIMEWINDOW_OPTIONS}
                 {...field}
                 value={String(field.value)}
@@ -96,11 +100,11 @@ export function SloEditFormObjectives({ control, watch }: SloEditFormObjectivesP
 
           <Controller
             name="objective.target"
-            shouldUnregister
             control={control}
             rules={{ required: true, min: 0.0001, max: 100, validate: (value) => value > 0 }}
             render={({ field }) => (
               <EuiFieldNumber
+                data-test-subj="sloFormObjectiveTargetInput"
                 {...field}
                 min={0}
                 max={100}
