@@ -54,7 +54,7 @@ describe('Agents CRUD test', () => {
         },
       });
 
-      const result = await getAgentTags(esClientMock, { showInactive: false });
+      const result = await getAgentTags(soClientMock, esClientMock, { showInactive: false });
 
       expect(result).toEqual(['tag1', 'tag2']);
       expect(searchMock).toHaveBeenCalledWith({
@@ -74,7 +74,7 @@ describe('Agents CRUD test', () => {
         },
       });
 
-      const result = await getAgentTags(esClientMock, { showInactive: false });
+      const result = await getAgentTags(soClientMock, esClientMock, { showInactive: false });
 
       expect(result).toEqual([]);
     });
@@ -82,7 +82,7 @@ describe('Agents CRUD test', () => {
     it('should return empty list if no agent index', async () => {
       searchMock.mockRejectedValueOnce(new errors.ResponseError({ statusCode: 404 } as any));
 
-      const result = await getAgentTags(esClientMock, { showInactive: false });
+      const result = await getAgentTags(soClientMock, esClientMock, { showInactive: false });
 
       expect(result).toEqual([]);
     });
@@ -94,7 +94,7 @@ describe('Agents CRUD test', () => {
         },
       });
 
-      await getAgentTags(esClientMock, {
+      await getAgentTags(soClientMock, esClientMock, {
         showInactive: true,
         kuery: 'fleet-agents.policy_id: 123',
       });
