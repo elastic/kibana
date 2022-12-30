@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import { CreateSLOParamsForFE } from '../../../typings';
+import type { CreateSLOParams, GetSLOResponse } from '@kbn/slo-schema';
 
-export function processValues(values: CreateSLOParamsForFE): CreateSLOParamsForFE {
+export function transformGetSloToCreateSloParams(
+  values: GetSLOResponse | undefined
+): CreateSLOParams | undefined {
+  if (!values) return undefined;
+
+  return {
+    ...values,
+    objective: { target: values.objective.target * 100 },
+  } as unknown as CreateSLOParams;
+}
+
+export function processValues(values: CreateSLOParams): CreateSLOParams {
   return { ...values, objective: { target: values.objective.target / 100 } };
 }

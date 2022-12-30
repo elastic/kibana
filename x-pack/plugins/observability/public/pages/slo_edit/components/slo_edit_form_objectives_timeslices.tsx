@@ -9,11 +9,10 @@ import React from 'react';
 import { EuiFieldNumber, EuiFlexGrid, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Control, Controller } from 'react-hook-form';
-
-import type { CreateSLOParamsForFE } from '../../../typings';
+import type { CreateSLOParams } from '@kbn/slo-schema';
 
 export interface SloEditFormObjectivesTimeslicesProps {
-  control: Control<CreateSLOParamsForFE>;
+  control: Control<CreateSLOParams>;
 }
 
 export function SloEditFormObjectivesTimeslices({ control }: SloEditFormObjectivesTimeslicesProps) {
@@ -61,6 +60,7 @@ export function SloEditFormObjectivesTimeslices({ control }: SloEditFormObjectiv
           render={({ field }) => (
             <EuiFieldNumber
               {...field}
+              value={String(field.value)}
               min={1}
               max={120}
               step={1}

@@ -9,12 +9,12 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSuggest } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Control, Controller } from 'react-hook-form';
+import type { CreateSLOParams } from '@kbn/slo-schema';
 
 import { useFetchIndices } from '../../../hooks/use_fetch_indices';
-import type { CreateSLOParamsForFE } from '../../../typings';
 
 export interface SloEditFormDefinitionCustomKqlProps {
-  control: Control<CreateSLOParamsForFE>;
+  control: Control<CreateSLOParams>;
 }
 
 export function SloEditFormDefinitionCustomKql({ control }: SloEditFormDefinitionCustomKqlProps) {

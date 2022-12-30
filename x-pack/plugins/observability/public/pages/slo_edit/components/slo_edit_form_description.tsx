@@ -16,10 +16,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Control, Controller } from 'react-hook-form';
-import type { CreateSLOParamsForFE } from '../../../typings';
+import type { CreateSLOParams } from '@kbn/slo-schema';
 
 export interface SloEditFormDescriptionProps {
-  control: Control<CreateSLOParamsForFE>;
+  control: Control<CreateSLOParams>;
 }
 
 export function SloEditFormDescription({ control }: SloEditFormDescriptionProps) {

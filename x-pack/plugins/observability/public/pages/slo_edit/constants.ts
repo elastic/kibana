@@ -6,7 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BudgetingMethod, CreateSLOParamsForFE } from '../../typings';
+import type { CreateSLOParams } from '@kbn/slo-schema';
+
+import { BudgetingMethod } from '../../typings';
 import {
   BUDGETING_METHOD_OPTIONS,
   TIMEWINDOW_OPTIONS,
@@ -21,7 +23,7 @@ export const SLI_OPTIONS = [
   },
 ];
 
-export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOParamsForFE = {
+export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOParams = {
   name: '',
   description: '',
   indicator: {

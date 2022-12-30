@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Control, Controller, UseFormWatch } from 'react-hook-form';
+import type { CreateSLOParams } from '@kbn/slo-schema';
 
 import { SloEditFormObjectivesTimeslices } from './slo_edit_form_objectives_timeslices';
-import type { CreateSLOParamsForFE } from '../../../typings';
 
 export const BUDGETING_METHOD_OPTIONS = [
   { value: 'occurrences', text: 'Occurences' },
@@ -35,8 +35,8 @@ export const TIMEWINDOW_OPTIONS = [30, 7].map((number) => ({
 }));
 
 export interface SloEditFormObjectivesProps {
-  control: Control<CreateSLOParamsForFE>;
-  watch: UseFormWatch<CreateSLOParamsForFE>;
+  control: Control<CreateSLOParams>;
+  watch: UseFormWatch<CreateSLOParams>;
 }
 
 export function SloEditFormObjectives({ control, watch }: SloEditFormObjectivesProps) {

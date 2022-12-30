@@ -20,6 +20,7 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { Controller, useForm } from 'react-hook-form';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
@@ -27,13 +28,15 @@ import { useCheckFormPartialValidities } from '../helpers/use_check_form_partial
 import { SloEditFormDefinitionCustomKql } from './slo_edit_form_definition_custom_kql';
 import { SloEditFormDescription } from './slo_edit_form_description';
 import { SloEditFormObjectives } from './slo_edit_form_objectives';
-import { processValues } from '../helpers/process_slo_form_values';
+import {
+  processValues,
+  transformGetSloToCreateSloParams,
+} from '../helpers/process_slo_form_values';
 import { paths } from '../../../config';
-import { SLO } from '../../../typings';
 import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 
 export interface SloEditFormProps {
-  slo: SLO | undefined;
+  slo: SLOWithSummaryResponse | undefined;
 }
 
 const maxWidth = 775;
@@ -47,7 +50,7 @@ export function SloEditForm({ slo }: SloEditFormProps) {
 
   const { control, watch, getFieldState, getValues, formState, trigger } = useForm({
     defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
-    values: slo,
+    values: transformGetSloToCreateSloParams(slo),
     mode: 'all',
   });
 
