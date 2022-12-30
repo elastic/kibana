@@ -48,6 +48,14 @@ import { AddToCaseWrapper } from '../cases/add_to_cases';
 const DataContext = createContext<ResultEdges>([]);
 
 const StyledEuiDataGrid = styled(EuiDataGrid)`
+  min-height: ${(props: { rowCount: number }) => {
+    const initialHeight = 64;
+    const rowHeight = 36;
+    const heightResult = props.rowCount * rowHeight + initialHeight;
+
+    return heightResult > 499 ? '500px' : `${heightResult}px`;
+  }};
+
   :not(.euiDataGrid--fullScreen) {
     max-height: 500px;
   }
