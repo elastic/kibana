@@ -14662,8 +14662,6 @@
     "xpack.fleet.upgradeAgents.confirmScheduleMultipleButtonLabel": "计划",
     "xpack.fleet.upgradeAgents.confirmSingleButtonLabel": "升级代理",
     "xpack.fleet.upgradeAgents.fatalErrorNotificationTitle": "升级{count, plural, one {代理} other { {count} 个代理} =true {所有选定代理}}时出错",
-    "xpack.fleet.upgradeAgents.maintenanceAvailableLabel": "维护窗口可用",
-    "xpack.fleet.upgradeAgents.maintenanceAvailableTooltip": "定义可用于执行升级的持续时间。将在此持续时间内统一传播代理升级，以免耗尽网络资源。",
     "xpack.fleet.upgradeAgents.noMaintenanceWindowOption": "立即",
     "xpack.fleet.upgradeAgents.noVersionsText": "没有任何选定的代理符合升级条件。请选择一个或多个符合条件的代理。",
     "xpack.fleet.upgradeAgents.scheduleUpgradeMultipleTitle": "计划升级{count, plural, one {代理} other {{count} 个代理} =true {所有选定代理}}",
