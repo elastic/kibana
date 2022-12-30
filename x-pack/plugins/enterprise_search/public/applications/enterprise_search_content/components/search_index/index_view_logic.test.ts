@@ -34,7 +34,7 @@ const DEFAULT_VALUES = {
   connectorId: null,
   error: null,
   fetchIndexApiData: undefined,
-  fetchIndexApiStatus: Status.LOADING,
+  fetchIndexApiStatus: Status.IDLE,
   hasAdvancedFilteringFeature: false,
   hasBasicFilteringFeature: false,
   hasFilteringFeature: false,
