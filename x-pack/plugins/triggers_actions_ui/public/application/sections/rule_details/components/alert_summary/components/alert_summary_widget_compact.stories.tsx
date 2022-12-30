@@ -6,14 +6,14 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { AlertsSummaryWidgetUI as Component } from './alert_summary_widget_ui';
+import { AlertsSummaryWidgetCompact as Component } from './alert_summary_widget_compact';
 
 export default {
   component: Component,
-  title: 'app/AlertsSummaryWidgetUI',
+  title: 'app/AlertsSummaryWidget',
 };
 
-export const Overview = {
+export const Compact = {
   args: {
     activeAlertCount: 94,
     activeAlerts: [

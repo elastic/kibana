@@ -17,17 +17,34 @@ import {
 } from '@elastic/eui';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertStateInfo } from './alert_state_chart';
-import { AlertsSummaryWidgetUIProps } from './types';
+import { AlertStateInfo } from './alert_state_info';
+import { Alert } from '../../../../../hooks/use_load_alert_summary';
 
-export const AlertsSummaryWidgetUI = ({
+export interface AlertsSummaryWidgetCompactProps {
+  activeAlertCount: number;
+  activeAlerts: Alert[];
+  recoveredAlertCount: number;
+  recoveredAlerts: Alert[];
+  timeRangeTitle: JSX.Element | string;
+  onClick: (status?: AlertStatus) => void;
+}
+
+export const AlertsSummaryWidgetCompact = ({
   activeAlertCount,
   activeAlerts,
   recoveredAlertCount,
   recoveredAlerts,
   timeRangeTitle,
   onClick,
-}: AlertsSummaryWidgetUIProps) => {
+}: AlertsSummaryWidgetCompactProps) => {
+  const domain = {
+    min: 0,
+    max: Math.max(
+      ...activeAlerts.map((alert) => alert.doc_count),
+      ...recoveredAlerts.map((alert) => alert.doc_count)
+    ),
+  };
+
   const handleClick = (
     event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
     status?: AlertStatus
@@ -80,6 +97,7 @@ export const AlertsSummaryWidgetUI = ({
                   count={activeAlertCount}
                   data={activeAlerts}
                   dataTestSubj="activeAlertsCount"
+                  domain={domain}
                   id="active"
                   stroke="#E7664C"
                   title={
@@ -102,6 +120,7 @@ export const AlertsSummaryWidgetUI = ({
                   count={recoveredAlertCount}
                   data={recoveredAlerts}
                   dataTestSubj="recoveredAlertsCount"
+                  domain={domain}
                   id="recovered"
                   stroke="#54B399"
                   title={
