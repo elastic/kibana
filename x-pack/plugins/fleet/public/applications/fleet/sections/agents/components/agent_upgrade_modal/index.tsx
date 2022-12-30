@@ -381,7 +381,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
                       'Define the rollout period for upgrades to your Elastic Agents. Any agents that are offline during this period will be upgraded when they come back online.',
                   })}
                 >
-                  <EuiIcon type="iInCircle" title="TooltipIcon" />
+                  <EuiIcon type="iInCircle" />
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
