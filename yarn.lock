@@ -1197,7 +1197,7 @@
     "@babel/parser" "^7.20.7"
     "@babel/types" "^7.20.7"
 
-"@babel/traverse@^7.10.3", "@babel/traverse@^7.12.11", "@babel/traverse@^7.12.9", "@babel/traverse@^7.13.0", "@babel/traverse@^7.19.0", "@babel/traverse@^7.19.1", "@babel/traverse@^7.20.10", "@babel/traverse@^7.20.7", "@babel/traverse@^7.20.8", "@babel/traverse@^7.4.5", "@babel/traverse@^7.7.2":
+"@babel/traverse@^7.10.3", "@babel/traverse@^7.12.11", "@babel/traverse@^7.12.9", "@babel/traverse@^7.13.0", "@babel/traverse@^7.19.0", "@babel/traverse@^7.19.1", "@babel/traverse@^7.20.10", "@babel/traverse@^7.20.7", "@babel/traverse@^7.4.5", "@babel/traverse@^7.7.2":
   version "7.20.10"
   resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.20.10.tgz#2bf98239597fcec12f842756f186a9dde6d09230"
   integrity sha512-oSf1juCgymrSez8NI4A2sr4+uB/mFd9MXplYGPEBnfAuWmmyeVcHa6xLPiaRBcXkcb/28bgxmQLTVwFKE1yfsg==
