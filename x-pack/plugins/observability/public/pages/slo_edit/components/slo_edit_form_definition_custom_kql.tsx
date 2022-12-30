@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSuggest } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Control, Controller } from 'react-hook-form';
+import { Control, Controller, UseFormTrigger } from 'react-hook-form';
 import type { CreateSLOParams } from '@kbn/slo-schema';
 
 import { useFetchIndices } from '../../../hooks/use_fetch_indices';
 
 export interface SloEditFormDefinitionCustomKqlProps {
   control: Control<CreateSLOParams>;
+  trigger: UseFormTrigger<CreateSLOParams>;
 }
 
-export function SloEditFormDefinitionCustomKql({ control }: SloEditFormDefinitionCustomKqlProps) {
+export function SloEditFormDefinitionCustomKql({
+  control,
+  trigger,
+}: SloEditFormDefinitionCustomKqlProps) {
   const { loading, indices = [] } = useFetchIndices();
 
   const indicesNames = indices.map(({ name }) => ({
@@ -25,6 +29,14 @@ export function SloEditFormDefinitionCustomKql({ control }: SloEditFormDefinitio
     label: name,
     description: '',
   }));
+
+  // Indices are loading in asynchrously, so trigger field validation
+  // once results are returned from API
+  useEffect(() => {
+    if (!loading && indices.length) {
+      trigger();
+    }
+  }, [indices.length, loading, trigger]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   EuiAvatar,
   EuiButton,
@@ -89,10 +89,6 @@ export function SloEditForm({ slo }: SloEditFormProps) {
     });
   }
 
-  useEffect(() => {
-    trigger();
-  }, [trigger]);
-
   return (
     <EuiTimeline>
       <EuiTimelineItem
@@ -132,7 +128,7 @@ export function SloEditForm({ slo }: SloEditFormProps) {
           <EuiSpacer size="xxl" />
 
           {watch('indicator.type') === 'sli.kql.custom' ? (
-            <SloEditFormDefinitionCustomKql control={control} />
+            <SloEditFormDefinitionCustomKql control={control} trigger={trigger} />
           ) : null}
 
           <EuiSpacer size="m" />

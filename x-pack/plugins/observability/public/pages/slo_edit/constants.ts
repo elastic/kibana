@@ -35,7 +35,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOParams = {
     },
   },
   timeWindow: {
-    duration: TIMEWINDOW_OPTIONS[0].value,
+    duration: TIMEWINDOW_OPTIONS[0].value as any, // Get this to be a proper Duration
     isRolling: true,
   },
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
