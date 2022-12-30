@@ -35,7 +35,7 @@ export function useFetchIndices(): UseFetchIndicesResponse {
       http: HttpSetup
     ): Promise<any> => {
       try {
-        const response = await http.get<Index>(`/api/index_management/indices`, {
+        const response = await http.get<Index[]>(`/api/index_management/indices`, {
           signal: abortController.signal,
         });
 

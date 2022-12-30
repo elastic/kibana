@@ -47,9 +47,13 @@ export function SloEditPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.sloEditPageTitle', {
-          defaultMessage: 'Create new SLO',
-        }),
+        pageTitle: slo
+          ? i18n.translate('xpack.observability.sloEditPageTitle', {
+              defaultMessage: 'Edit SLO',
+            })
+          : i18n.translate('xpack.observability.sloCreatePageTitle', {
+              defaultMessage: 'Create new SLO',
+            }),
         rightSideItems: [],
         bottomBorder: false,
       }}
