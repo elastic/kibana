@@ -7,7 +7,15 @@
  */
 
 import React from 'react';
-import { EuiPopoverFooter, EuiButtonGroup, useEuiBackgroundColor } from '@elastic/eui';
+import {
+  EuiPopoverFooter,
+  EuiButtonGroup,
+  useEuiBackgroundColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiBadge,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
@@ -46,14 +54,36 @@ export const OptionsListPopoverFooter = () => {
           background-color: ${useEuiBackgroundColor('subdued')};
         `}
       >
-        <EuiButtonGroup
-          legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
-          options={aggregationToggleButtons}
-          idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-          onChange={(optionId) => dispatch(setExclude(optionId === 'optionsList__excludeResults'))}
-          buttonSize="compressed"
-          data-test-subj="optionsList__includeExcludeButtonGroup"
-        />
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
+              options={aggregationToggleButtons}
+              idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
+              onChange={(optionId) =>
+                dispatch(setExclude(optionId === 'optionsList__excludeResults'))
+              }
+              buttonSize="compressed"
+              data-test-subj="optionsList__includeExcludeButtonGroup"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="none" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon iconType="arrowStart" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon iconType="arrowLeft" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge>1-10 of 1241</EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon iconType="arrowRight" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPopoverFooter>
     </>
   );
