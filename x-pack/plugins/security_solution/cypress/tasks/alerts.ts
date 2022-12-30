@@ -29,6 +29,8 @@ import {
   TAKE_ACTION_BTN,
   TAKE_ACTION_MENU,
   ADD_ENDPOINT_EXCEPTION_BTN,
+  ALERTS_HISTOGRAM_PANEL_LOADER,
+  ALERTS_CONTAINER_LOADING_BAR,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -211,6 +213,8 @@ export const waitForAlerts = () => {
 export const waitForAlertsPanelToBeLoaded = () => {
   cy.get(LOADING_ALERTS_PANEL).should('exist');
   cy.get(LOADING_ALERTS_PANEL).should('not.exist');
+  cy.get(ALERTS_CONTAINER_LOADING_BAR).should('not.exist');
+  cy.get(ALERTS_HISTOGRAM_PANEL_LOADER).should('not.exist');
 };
 
 export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {

@@ -22,7 +22,6 @@ import { cleanKibana } from '../../tasks/common';
 
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
-  closeOpenTimelineModal,
   markAsFavorite,
   openTimelineById,
   openTimelineFromSettings,
@@ -61,10 +60,6 @@ describe('Open timeline', () => {
     beforeEach(function () {
       visitWithoutDateRange(TIMELINES_URL);
       openTimelineFromSettings();
-    });
-
-    after(() => {
-      closeOpenTimelineModal();
     });
 
     it('should open a modal', () => {

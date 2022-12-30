@@ -22,6 +22,9 @@ describe('Toggle full screen', () => {
   before(() => {
     cleanKibana();
     login();
+  });
+
+  beforeEach(() => {
     visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
