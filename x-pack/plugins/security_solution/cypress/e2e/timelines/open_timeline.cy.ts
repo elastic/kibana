@@ -60,6 +60,7 @@ describe('Open timeline', () => {
     beforeEach(function () {
       visitWithoutDateRange(TIMELINES_URL);
       openTimelineFromSettings();
+      openTimelineById(this.timelineId);
     });
 
     it('should open a modal', () => {
