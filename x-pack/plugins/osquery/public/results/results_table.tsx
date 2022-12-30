@@ -53,7 +53,7 @@ const StyledEuiDataGrid = styled(EuiDataGrid)`
     const rowHeight = 36;
     const heightResult = props.rowCount * rowHeight + initialHeight;
 
-    return heightResult > 499 ? '500px' : `${heightResult}px`;
+    return heightResult > 499 ? 500 : heightResult + 'px';
   }};
 
   :not(.euiDataGrid--fullScreen) {
@@ -439,7 +439,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             aria-label="Osquery results"
             columns={columns}
             columnVisibility={columnVisibility}
-            rowCount={allResultsData?.total ?? 0}
+            rowCount={1}
             renderCellValue={renderCellValue}
             leadingControlColumns={leadingControlColumns}
             sorting={tableSorting}
