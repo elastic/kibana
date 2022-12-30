@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import {
   Chart,
   Metric,
@@ -64,34 +64,17 @@ export const MetricsChart = ({
   ...props
 }: Props) => {
   const metrics = useMemo(() => (nodes ?? [])[0]?.metrics ?? [], [nodes]);
-
-  const getTimeseries = useCallback(
-    (metricName: AcceptedType) => {
-      if (!metrics || !metrics.length) {
-        return null;
-      }
-      return metrics.find((m) => m.name === metricName)?.timeseries;
-    },
-    [metrics]
+  const metricsTimeseries = useMemo(
+    () => (metrics ?? []).find((m) => m.name === type)?.timeseries,
+    [metrics, type]
   );
 
-  const getValue = useCallback(
-    (metricName: AcceptedType) => {
-      if (!metrics || !metrics.length) {
-        return 0;
-      }
-      return metrics.find((m) => m.name === metricName)?.[metricType] ?? 0;
-    },
-    [metrics, metricType]
-  );
-
-  const metricsTimeseries = useMemo(() => getTimeseries(type), [getTimeseries, type]);
   const metricsValue = useMemo(
-    () => overrideValue ?? getValue(type),
-    [getValue, overrideValue, type]
+    () => overrideValue ?? (metrics ?? []).find((m) => m.name === type)?.[metricType] ?? 0,
+    [metricType, metrics, overrideValue, type]
   );
 
-  const metricData: MetricWNumber = {
+  const metricsData: MetricWNumber = {
     title,
     subtitle,
     color,
@@ -125,7 +108,7 @@ export const MetricsChart = ({
           anchorClassName="eui-fullWidth"
         >
           <ChartStyled size={{ height: MIN_HEIGHT }}>
-            <Metric id={id} data={[[metricData]]} />
+            <Metric id={id} data={[[metricsData]]} />
           </ChartStyled>
         </EuiToolTip>
       )}

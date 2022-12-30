@@ -49,7 +49,7 @@ export const HostsTable = () => {
         error,
       });
     }
-  }, [error, loading, nodes.length, hostViewState, setHostViewState]);
+  }, [error, hostViewState.loading, loading, nodes.length, setHostViewState]);
 
   const items = useHostsTable(nodes);
   const noData = items.length === 0;

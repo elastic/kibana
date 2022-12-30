@@ -54,7 +54,7 @@ export const useHostsView = () => {
       },
       // The user might want to click on the submit button without changing the filters
       // This makes sure all child componets will re-render.
-      requestTs: new Date().getTime(),
+      requestTs: Date.now(),
     };
     return snapshotRequest;
   }, [buildQuery, dateRangeTimestamp.from, dateRangeTimestamp.to, sourceId]);
