@@ -64,7 +64,7 @@ const findSLOParamsSchema = t.partial({
   }),
 });
 
-const SLOResponseSchema = t.type({
+const sloResponseSchema = t.type({
   id: t.string,
   name: t.string,
   description: t.string,
@@ -78,12 +78,12 @@ const SLOResponseSchema = t.type({
   updatedAt: dateType,
 });
 
-const SLOWithSummaryResponseSchema = t.intersection([
-  SLOResponseSchema,
+const sloWithSummaryResponseSchema = t.intersection([
+  sloResponseSchema,
   t.type({ summary: summarySchema }),
 ]);
 
-const getSLOResponseSchema = SLOWithSummaryResponseSchema;
+const getSLOResponseSchema = sloWithSummaryResponseSchema;
 
 const updateSLOParamsSchema = t.type({
   path: t.type({
@@ -100,17 +100,17 @@ const updateSLOParamsSchema = t.type({
   }),
 });
 
-const updateSLOResponseSchema = SLOResponseSchema;
+const updateSLOResponseSchema = sloResponseSchema;
 
 const findSLOResponseSchema = t.type({
   page: t.number,
   perPage: t.number,
   total: t.number,
-  results: t.array(SLOWithSummaryResponseSchema),
+  results: t.array(sloWithSummaryResponseSchema),
 });
 
-type SLOResponse = t.OutputOf<typeof SLOResponseSchema>;
-type SLOWithSummaryResponse = t.OutputOf<typeof SLOWithSummaryResponseSchema>;
+type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
+type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
@@ -130,20 +130,19 @@ export {
   findSLOResponseSchema,
   getSLOParamsSchema,
   getSLOResponseSchema,
-  SLOResponseSchema,
-  sortBySchema,
-  sortDirectionSchema,
+  sloResponseSchema,
+  sloWithSummaryResponseSchema,
   updateSLOParamsSchema,
   updateSLOResponseSchema,
 };
 export type {
-  SLOResponse,
-  SLOWithSummaryResponse,
   CreateSLOParams,
   CreateSLOResponse,
-  GetSLOResponse,
-  UpdateSLOParams,
-  UpdateSLOResponse,
   FindSLOParams,
   FindSLOResponse,
+  GetSLOResponse,
+  SLOResponse,
+  SLOWithSummaryResponse,
+  UpdateSLOParams,
+  UpdateSLOResponse,
 };
