@@ -20,6 +20,7 @@ export type AnomalyExplorerContextValue =
   | {
       anomalyExplorerChartsService: AnomalyExplorerChartsService;
       anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService;
+      anomalyTimelineService: AnomalyTimelineService;
       anomalyTimelineStateService: AnomalyTimelineStateService;
       chartsStateService: AnomalyChartsStateService;
     }
@@ -103,6 +104,7 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
     setAnomalyExplorerContextValue({
       anomalyExplorerChartsService,
       anomalyExplorerCommonStateService,
+      anomalyTimelineService,
       anomalyTimelineStateService,
       chartsStateService,
     });
