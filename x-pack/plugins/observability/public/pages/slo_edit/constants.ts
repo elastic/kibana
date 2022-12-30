@@ -5,23 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { CreateSLOParams } from '@kbn/slo-schema';
 
-import { BudgetingMethod } from '../../typings';
+import { SLI_OPTIONS } from './components/slo_edit_form';
 import {
   BUDGETING_METHOD_OPTIONS,
   TIMEWINDOW_OPTIONS,
 } from './components/slo_edit_form_objectives';
-
-export const SLI_OPTIONS = [
-  {
-    value: 'sli.kql.custom' as const,
-    text: i18n.translate('xpack.observability.slos.sloTypes.kqlCustomIndicator', {
-      defaultMessage: 'KQL custom indicator',
-    }),
-  },
-];
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOParams = {
   name: '',
@@ -39,7 +29,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOParams = {
     duration: TIMEWINDOW_OPTIONS[0].value,
     isRolling: true,
   },
-  budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value as BudgetingMethod,
+  budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
   objective: {
     target: 0,
   },

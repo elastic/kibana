@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Control, Controller, UseFormWatch } from 'react-hook-form';
-import type { CreateSLOParams } from '@kbn/slo-schema';
+import type { BudgetingMethod, CreateSLOParams } from '@kbn/slo-schema';
 
 import { SloEditFormObjectivesTimeslices } from './slo_edit_form_objectives_timeslices';
 
-export const BUDGETING_METHOD_OPTIONS = [
+export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: string }> = [
   { value: 'occurrences', text: 'Occurences' },
   { value: 'timeslices', text: 'Timeslices' },
 ];

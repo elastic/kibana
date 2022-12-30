@@ -49,6 +49,8 @@ const sloSchema = t.type({
 
 const sloWithSummarySchema = t.intersection([sloSchema, t.type({ summary: summarySchema })]);
 
+type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
+
 export {
   budgetingMethodSchema,
   objectiveSchema,
@@ -59,3 +61,5 @@ export {
   sloWithSummarySchema,
   timeslicesBudgetingMethodSchema,
 };
+
+export type { BudgetingMethod };

@@ -33,13 +33,22 @@ import {
   transformGetSloToCreateSloParams,
 } from '../helpers/process_slo_form_values';
 import { paths } from '../../../config';
-import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 
 export interface SloEditFormProps {
   slo: SLOWithSummaryResponse | undefined;
 }
 
 const maxWidth = 775;
+
+export const SLI_OPTIONS = [
+  {
+    value: 'sli.kql.custom' as const,
+    text: i18n.translate('xpack.observability.slos.sloTypes.kqlCustomIndicator', {
+      defaultMessage: 'KQL custom indicator',
+    }),
+  },
+];
 
 export function SloEditForm({ slo }: SloEditFormProps) {
   const {
