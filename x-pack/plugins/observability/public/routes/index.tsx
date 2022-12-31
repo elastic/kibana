@@ -139,7 +139,7 @@ export const routes = {
     params: {},
     exact: true,
   },
-  '/slos/edit': {
+  '/slos/create': {
     handler: () => {
       return <SloEditPage />;
     },
