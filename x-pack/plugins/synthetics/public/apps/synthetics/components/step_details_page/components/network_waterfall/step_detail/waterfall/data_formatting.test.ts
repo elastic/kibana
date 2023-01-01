@@ -12,18 +12,12 @@ import {
   getSeriesAndDomain,
   getSidebarItems,
 } from './data_formatting';
-import {
-  NetworkItems,
-  MimeType,
-  FriendlyFlyoutLabels,
-  FriendlyTimingLabels,
-  Timings,
-  Metadata,
-} from './types';
+import { MimeType, FriendlyFlyoutLabels, FriendlyTimingLabels, Timings, Metadata } from './types';
 import { WaterfallDataEntry } from '../../waterfall/types';
 import { mockMoment } from '../../../../../../utils/formatting/test_helpers';
+import { NetworkEvent } from '../../../../../../../../../common/runtime_types';
 
-export const networkItems: NetworkItems = [
+export const networkItems: NetworkEvent[] = [
   {
     timestamp: '2021-01-05T19:22:28.928Z',
     method: 'GET',
@@ -83,7 +77,7 @@ export const networkItems: NetworkItems = [
   },
 ];
 
-export const networkItemsWithoutFullTimings: NetworkItems = [
+export const networkItemsWithoutFullTimings: NetworkEvent[] = [
   networkItems[0],
   {
     timestamp: '2021-01-05T19:22:28.928Z',
@@ -108,7 +102,7 @@ export const networkItemsWithoutFullTimings: NetworkItems = [
   },
 ];
 
-export const networkItemsWithoutAnyTimings: NetworkItems = [
+export const networkItemsWithoutAnyTimings: NetworkEvent[] = [
   {
     timestamp: '2021-01-05T19:22:28.928Z',
     method: 'GET',
@@ -132,7 +126,7 @@ export const networkItemsWithoutAnyTimings: NetworkItems = [
   },
 ];
 
-export const networkItemsWithoutTimingsObject: NetworkItems = [
+export const networkItemsWithoutTimingsObject: NetworkEvent[] = [
   {
     timestamp: '2021-01-05T19:22:28.928Z',
     method: 'GET',
@@ -144,13 +138,37 @@ export const networkItemsWithoutTimingsObject: NetworkItems = [
   },
 ];
 
-export const networkItemsWithUncommonMimeType: NetworkItems = [
+export const networkItemsWithUncommonMimeType: NetworkEvent[] = [
   {
     timestamp: '2021-01-05T19:22:28.928Z',
     method: 'GET',
     url: 'https://unpkg.com/director@1.2.8/build/director.js',
     status: 200,
     mimeType: 'application/x-javascript',
+    requestSentTime: 18098833.537,
+    loadEndTime: 18098977.648000002,
+    timings: {
+      blocked: 84.54599999822676,
+      receive: 3.068000001803739,
+      queueing: 3.69700000010198,
+      proxy: -1,
+      total: 144.1110000014305,
+      wait: 52.56100000042352,
+      connect: -1,
+      send: 0.2390000008745119,
+      ssl: -1,
+      dns: -1,
+    },
+  },
+];
+
+export const networkItemsWithUnknownMimeType: NetworkEvent[] = [
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'https://unpkg.com/director@1.2.8/build/director.js',
+    status: 200,
+    mimeType: 'application/x-unknown',
     requestSentTime: 18098833.537,
     loadEndTime: 18098977.648000002,
     timings: {
@@ -193,20 +211,21 @@ describe('getConnectingTime', () => {
 describe('Palettes', () => {
   it('A colour palette comprising timing and mime type colours is correctly generated', () => {
     expect(colourPalette).toEqual({
-      blocked: '#dcd4c4',
-      connect: '#da8b45',
-      dns: '#54b399',
-      font: '#aa6556',
-      html: '#f3b3a6',
+      blocked: '#b0c9e0',
+      connect: '#c8b8dc',
+      dns: '#aad9cc',
+      font: '#d36086',
+      html: '#6092c0',
+      image: '#ca8eae',
       media: '#d6bf57',
-      other: '#e7664c',
-      receive: '#54b399',
-      script: '#9170b8',
-      send: '#d36086',
-      ssl: '#edc5a2',
-      stylesheet: '#ca8eae',
-      wait: '#b0c9e0',
-      xhr: '#e7664c',
+      other: '#b9a888',
+      receive: '#ebdfab',
+      script: '#da8b45',
+      send: '#f3b3a6',
+      ssl: '#e5c7d7',
+      stylesheet: '#9170b8',
+      wait: '#e7664c',
+      xhr: '#54b399',
     });
   });
 });
@@ -222,12 +241,12 @@ describe('getSeriesAndDomain', () => {
       Array [
         Object {
           "config": Object {
-            "colour": "#dcd4c4",
+            "colour": "#b0c9e0",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#dcd4c4",
+              "colour": "#b0c9e0",
               "value": "Queued / Blocked: 0.854ms",
             },
           },
@@ -237,12 +256,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#54b399",
+            "colour": "#aad9cc",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#54b399",
+              "colour": "#aad9cc",
               "value": "DNS: 3.560ms",
             },
           },
@@ -252,12 +271,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#da8b45",
+            "colour": "#c8b8dc",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#da8b45",
+              "colour": "#c8b8dc",
               "value": "Connecting: 25.721ms",
             },
           },
@@ -267,12 +286,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#edc5a2",
+            "colour": "#e5c7d7",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#edc5a2",
+              "colour": "#e5c7d7",
               "value": "TLS: 55.387ms",
             },
           },
@@ -282,12 +301,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#d36086",
+            "colour": "#f3b3a6",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#d36086",
+              "colour": "#f3b3a6",
               "value": "Sending request: 0.360ms",
             },
           },
@@ -297,12 +316,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#b0c9e0",
+            "colour": "#e7664c",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#b0c9e0",
+              "colour": "#e7664c",
               "value": "Waiting (TTFB): 34.578ms",
             },
           },
@@ -312,12 +331,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#ca8eae",
+            "colour": "#9170b8",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#ca8eae",
+              "colour": "#9170b8",
               "value": "Content downloading (CSS): 0.552ms",
             },
           },
@@ -327,12 +346,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#dcd4c4",
+            "colour": "#b0c9e0",
             "id": 1,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#dcd4c4",
+              "colour": "#b0c9e0",
               "value": "Queued / Blocked: 84.546ms",
             },
           },
@@ -342,12 +361,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#d36086",
+            "colour": "#f3b3a6",
             "id": 1,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#d36086",
+              "colour": "#f3b3a6",
               "value": "Sending request: 0.239ms",
             },
           },
@@ -357,12 +376,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#b0c9e0",
+            "colour": "#e7664c",
             "id": 1,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#b0c9e0",
+              "colour": "#e7664c",
               "value": "Waiting (TTFB): 52.561ms",
             },
           },
@@ -372,12 +391,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#9170b8",
+            "colour": "#da8b45",
             "id": 1,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#9170b8",
+              "colour": "#da8b45",
               "value": "Content downloading (JS): 3.068ms",
             },
           },
@@ -395,12 +414,12 @@ describe('getSeriesAndDomain', () => {
       Array [
         Object {
           "config": Object {
-            "colour": "#dcd4c4",
+            "colour": "#b0c9e0",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#dcd4c4",
+              "colour": "#b0c9e0",
               "value": "Queued / Blocked: 0.854ms",
             },
           },
@@ -410,12 +429,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#54b399",
+            "colour": "#aad9cc",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#54b399",
+              "colour": "#aad9cc",
               "value": "DNS: 3.560ms",
             },
           },
@@ -425,12 +444,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#da8b45",
+            "colour": "#c8b8dc",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#da8b45",
+              "colour": "#c8b8dc",
               "value": "Connecting: 25.721ms",
             },
           },
@@ -440,12 +459,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#edc5a2",
+            "colour": "#e5c7d7",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#edc5a2",
+              "colour": "#e5c7d7",
               "value": "TLS: 55.387ms",
             },
           },
@@ -455,12 +474,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#d36086",
+            "colour": "#f3b3a6",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#d36086",
+              "colour": "#f3b3a6",
               "value": "Sending request: 0.360ms",
             },
           },
@@ -470,12 +489,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#b0c9e0",
+            "colour": "#e7664c",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#b0c9e0",
+              "colour": "#e7664c",
               "value": "Waiting (TTFB): 34.578ms",
             },
           },
@@ -485,12 +504,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#ca8eae",
+            "colour": "#9170b8",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#ca8eae",
+              "colour": "#9170b8",
               "value": "Content downloading (CSS): 0.552ms",
             },
           },
@@ -500,11 +519,11 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#9170b8",
+            "colour": "#da8b45",
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#9170b8",
+              "colour": "#da8b45",
               "value": "Content downloading (JS): 2.793ms",
             },
           },
@@ -634,20 +653,20 @@ describe('getSeriesAndDomain', () => {
   });
 
   it('handles formatting when mime type is not mapped to a specific mime type bucket', () => {
-    const { series } = getSeriesAndDomain(networkItemsWithUncommonMimeType);
+    const { series } = getSeriesAndDomain(networkItemsWithUnknownMimeType);
     /* verify that raw mime type appears in the tooltip config and that
      * the colour is mapped to mime type other */
-    const contentDownloadedingConfigItem = series.find((item: WaterfallDataEntry) => {
+    const contentDownloadingConfigItem = series.find((item: WaterfallDataEntry) => {
       const { tooltipProps } = item.config;
       if (tooltipProps && typeof tooltipProps.value === 'string') {
         return (
-          tooltipProps.value.includes('application/x-javascript') &&
+          tooltipProps.value.includes('application/x-unknown') &&
           tooltipProps.colour === colourPalette[MimeType.Other]
         );
       }
       return false;
     });
-    expect(contentDownloadedingConfigItem).toBeDefined();
+    expect(contentDownloadingConfigItem).toBeDefined();
   });
 
   it.each([

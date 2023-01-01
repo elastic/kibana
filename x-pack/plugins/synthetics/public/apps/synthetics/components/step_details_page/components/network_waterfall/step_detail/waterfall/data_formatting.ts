@@ -9,26 +9,25 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import moment from 'moment';
 
 import { NetworkEvent } from '../../../../../../../../../common/runtime_types';
+import { WaterfallData, WaterfallMetadata } from '../../waterfall';
 import {
-  NetworkItems,
-  NetworkItem,
   FriendlyFlyoutLabels,
-  FriendlyTimingLabels,
   FriendlyMimetypeLabels,
+  FriendlyTimingLabels,
+  ItemMatcher,
+  LegendItem,
+  Metadata,
   MimeType,
   MimeTypesMap,
-  Timings,
-  Metadata,
+  SidebarItem,
   TIMING_ORDER,
-  SidebarItems,
-  LegendItems,
+  Timings,
 } from './types';
-import { WaterfallData, WaterfallMetadata } from '../../waterfall';
 
-export const extractItems = (data: NetworkEvent[]): NetworkItems => {
+export const extractItems = (data: NetworkEvent[]): NetworkEvent[] => {
   // NOTE: This happens client side as the "payload" property is mapped
   // in such a way it can't be queried (or sorted on) via ES.
-  return data.sort((a: NetworkItem, b: NetworkItem) => {
+  return data.sort((a: NetworkEvent, b: NetworkEvent) => {
     return a.requestSentTime - b.requestSentTime;
   });
 };
@@ -59,19 +58,15 @@ const getFriendlyTooltipValue = ({
   return `${label}: ${formatValueForDisplay(value)}ms`;
 };
 export const isHighlightedItem = (
-  item: NetworkItem,
-  query?: string,
-  activeFilters: string[] = []
+  item: NetworkEvent,
+  queryMatcher?: ItemMatcher,
+  filterMatcher?: ItemMatcher
 ) => {
-  if (!query && activeFilters?.length === 0) {
+  if (!queryMatcher && !filterMatcher) {
     return true;
   }
 
-  const matchQuery = query ? item.url?.includes(query) : true;
-  const matchFilters =
-    activeFilters.length > 0 ? activeFilters.includes(MimeTypesMap[item.mimeType!]) : true;
-
-  return !!(matchQuery && matchFilters);
+  return (queryMatcher?.(item) ?? true) && (filterMatcher?.(item) ?? true);
 };
 
 const getFriendlyMetadataValue = ({ value, postFix }: { value?: number; postFix?: string }) => {
@@ -97,13 +92,45 @@ export const getConnectingTime = (connect?: number, ssl?: number) => {
   }
 };
 
+export const getQueryMatcher = (query?: string): ItemMatcher => {
+  if (!query) {
+    return (item: NetworkEvent) => true;
+  }
+
+  const regExp = new RegExp(query, 'i');
+
+  return (item: NetworkEvent) => {
+    return (item.url?.search(regExp) ?? -1) > -1;
+  };
+};
+
+export const getFilterMatcher = (filters: string[] | undefined): ItemMatcher => {
+  if (!filters?.length) {
+    return (item: NetworkEvent) => true;
+  }
+
+  const filtersByMimeType = filters.reduce((acc, cur) => {
+    acc.set(cur as MimeType, true);
+
+    return acc;
+  }, new Map<MimeType, boolean>());
+
+  return (item: NetworkEvent) => {
+    const resolvedMimeType = item.mimeType
+      ? MimeTypesMap[item.mimeType] ?? MimeType.Other
+      : MimeType.Other;
+
+    return filtersByMimeType.has(resolvedMimeType);
+  };
+};
+
 export const getSeriesAndDomain = (
-  items: NetworkItems,
+  items: NetworkEvent[],
   onlyHighlighted = false,
   query?: string,
   activeFilters?: string[]
 ) => {
-  const getValueForOffset = (item: NetworkItem) => {
+  const getValueForOffset = (item: NetworkEvent) => {
     return item.requestSentTime;
   };
   // The earliest point in time a request is sent or started. This will become our notion of "0".
@@ -124,12 +151,14 @@ export const getSeriesAndDomain = (
   const metadata: WaterfallMetadata = [];
   let totalHighlightedRequests = 0;
 
+  const queryMatcher = getQueryMatcher(query);
+  const filterMatcher = getFilterMatcher(activeFilters);
   items.forEach((item, index) => {
     const mimeTypeColour = getColourForMimeType(item.mimeType);
     const offsetValue = getValueForOffset(item);
     let currentOffset = offsetValue - zeroOffset;
     metadata.push(formatMetadata({ item, index, requestStart: currentOffset }));
-    const isHighlighted = isHighlightedItem(item, query, activeFilters);
+    const isHighlighted = isHighlightedItem(item, queryMatcher, filterMatcher);
     if (isHighlighted) {
       totalHighlightedRequests++;
     }
@@ -234,7 +263,7 @@ const formatMetadata = ({
   index,
   requestStart,
 }: {
-  item: NetworkItem;
+  item: NetworkEvent;
   index: number;
   requestStart: number;
 }) => {
@@ -331,13 +360,15 @@ const formatMetadata = ({
 };
 
 export const getSidebarItems = (
-  items: NetworkItems,
+  items: NetworkEvent[],
   onlyHighlighted: boolean,
   query: string,
   activeFilters: string[]
-): SidebarItems => {
+): SidebarItem[] => {
+  const queryMatcher = getQueryMatcher(query);
+  const filterMatcher = getFilterMatcher(activeFilters);
   const sideBarItems = items.map((item, index) => {
-    const isHighlighted = isHighlightedItem(item, query, activeFilters);
+    const isHighlighted = isHighlightedItem(item, queryMatcher, filterMatcher);
     const offsetIndex = index + 1;
     const { url, status, method } = item;
     return { url, status, method, isHighlighted, offsetIndex, index };
@@ -348,8 +379,8 @@ export const getSidebarItems = (
   return sideBarItems;
 };
 
-export const getLegendItems = (): LegendItems => {
-  let timingItems: LegendItems = [];
+export const getLegendItems = (): LegendItem[] => {
+  let timingItems: LegendItem[] = [];
   Object.values(Timings).forEach((timing) => {
     // The "receive" timing is mapped to a mime type colour, so we don't need to show this in the legend
     if (timing === Timings.Receive) {
@@ -357,15 +388,15 @@ export const getLegendItems = (): LegendItems => {
     }
     timingItems = [
       ...timingItems,
-      { name: FriendlyTimingLabels[timing], colour: TIMING_PALETTE[timing] },
+      { name: FriendlyTimingLabels[timing], color: TIMING_PALETTE[timing] },
     ];
   });
 
-  let mimeTypeItems: LegendItems = [];
+  let mimeTypeItems: LegendItem[] = [];
   Object.values(MimeType).forEach((mimeType) => {
     mimeTypeItems = [
       ...mimeTypeItems,
-      { name: FriendlyMimetypeLabels[mimeType], colour: MIME_TYPE_PALETTE[mimeType] },
+      { name: FriendlyMimetypeLabels[mimeType], color: MIME_TYPE_PALETTE[mimeType] },
     ];
   });
 
@@ -383,25 +414,25 @@ const buildTimingPalette = (): TimingColourPalette => {
   const palette = Object.values(Timings).reduce<Partial<TimingColourPalette>>((acc, value) => {
     switch (value) {
       case Timings.Blocked:
-        acc[value] = SAFE_PALETTE[16];
-        break;
-      case Timings.Dns:
-        acc[value] = SAFE_PALETTE[0];
-        break;
-      case Timings.Connect:
-        acc[value] = SAFE_PALETTE[7];
-        break;
-      case Timings.Ssl:
-        acc[value] = SAFE_PALETTE[17];
-        break;
-      case Timings.Send:
-        acc[value] = SAFE_PALETTE[2];
-        break;
-      case Timings.Wait:
         acc[value] = SAFE_PALETTE[11];
         break;
+      case Timings.Dns:
+        acc[value] = SAFE_PALETTE[10];
+        break;
+      case Timings.Connect:
+        acc[value] = SAFE_PALETTE[13];
+        break;
+      case Timings.Ssl:
+        acc[value] = SAFE_PALETTE[14];
+        break;
+      case Timings.Send:
+        acc[value] = SAFE_PALETTE[19];
+        break;
+      case Timings.Wait:
+        acc[value] = SAFE_PALETTE[9];
+        break;
       case Timings.Receive:
-        acc[value] = SAFE_PALETTE[0];
+        acc[value] = SAFE_PALETTE[15];
         break;
     }
     return acc;
@@ -421,23 +452,28 @@ const buildMimeTypePalette = (): MimeTypeColourPalette => {
   const palette = Object.values(MimeType).reduce<Partial<MimeTypeColourPalette>>((acc, value) => {
     switch (value) {
       case MimeType.Html:
-        acc[value] = SAFE_PALETTE[19];
+        acc[value] = SAFE_PALETTE[1];
         break;
       case MimeType.Script:
-        acc[value] = SAFE_PALETTE[3];
+        acc[value] = SAFE_PALETTE[7];
         break;
       case MimeType.Stylesheet:
+        acc[value] = SAFE_PALETTE[3];
+        break;
+      case MimeType.Image:
         acc[value] = SAFE_PALETTE[4];
         break;
       case MimeType.Media:
         acc[value] = SAFE_PALETTE[5];
         break;
       case MimeType.Font:
-        acc[value] = SAFE_PALETTE[8];
+        acc[value] = SAFE_PALETTE[2];
         break;
       case MimeType.XHR:
+        acc[value] = SAFE_PALETTE[0];
+        break;
       case MimeType.Other:
-        acc[value] = SAFE_PALETTE[9];
+        acc[value] = SAFE_PALETTE[6];
         break;
     }
     return acc;

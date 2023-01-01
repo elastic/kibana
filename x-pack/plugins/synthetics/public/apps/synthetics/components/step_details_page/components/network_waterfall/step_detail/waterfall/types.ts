@@ -152,6 +152,7 @@ export enum MimeType {
   Script = 'script',
   Stylesheet = 'stylesheet',
   Media = 'media',
+  Image = 'image',
   Font = 'font',
   XHR = 'xhr',
   Other = 'other',
@@ -174,6 +175,12 @@ export const FriendlyMimetypeLabels = {
     'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.stylesheet',
     {
       defaultMessage: 'CSS',
+    }
+  ),
+  [MimeType.Image]: i18n.translate(
+    'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.image',
+    {
+      defaultMessage: 'Image',
     }
   ),
   [MimeType.Media]: i18n.translate(
@@ -207,18 +214,21 @@ export const FriendlyMimetypeLabels = {
 export const MimeTypesMap: Record<string, MimeType> = {
   'text/html': MimeType.Html,
   'application/javascript': MimeType.Script,
+  'application/x-javascript': MimeType.Script,
   'text/javascript': MimeType.Script,
   'text/css': MimeType.Stylesheet,
+
   // Images
-  'image/apng': MimeType.Media,
-  'image/bmp': MimeType.Media,
-  'image/gif': MimeType.Media,
-  'image/x-icon': MimeType.Media,
-  'image/jpeg': MimeType.Media,
-  'image/png': MimeType.Media,
-  'image/svg+xml': MimeType.Media,
-  'image/tiff': MimeType.Media,
-  'image/webp': MimeType.Media,
+  'image/apng': MimeType.Image,
+  'image/bmp': MimeType.Image,
+  'image/gif': MimeType.Image,
+  'image/x-icon': MimeType.Image,
+  'image/jpeg': MimeType.Image,
+  'image/png': MimeType.Image,
+  'image/svg+xml': MimeType.Image,
+  'image/tiff': MimeType.Image,
+  'image/webp': MimeType.Image,
+
   // Common audio / video formats
   'audio/wave': MimeType.Media,
   'audio/wav': MimeType.Media,
@@ -230,6 +240,7 @@ export const MimeTypesMap: Record<string, MimeType> = {
   'audio/ogg': MimeType.Media,
   'video/ogg': MimeType.Media,
   'application/ogg': MimeType.Media,
+
   // Fonts
   'font/otf': MimeType.Font,
   'font/ttf': MimeType.Font,
@@ -245,18 +256,50 @@ export const MimeTypesMap: Record<string, MimeType> = {
   'application/json': MimeType.XHR,
 };
 
-export type NetworkItem = NetworkEvent;
-export type NetworkItems = NetworkItem[];
-
-export type SidebarItem = Pick<NetworkItem, 'url' | 'status' | 'method'> & {
+export type SidebarItem = Pick<NetworkEvent, 'url' | 'status' | 'method'> & {
   isHighlighted: boolean;
   index: number;
   offsetIndex: number;
 };
-export type SidebarItems = SidebarItem[];
 
 export interface LegendItem {
   name: string;
-  colour: string;
+  color: string;
 }
-export type LegendItems = LegendItem[];
+
+export type ItemMatcher = (item: NetworkEvent) => boolean;
+
+export const MIME_FILTERS = [
+  {
+    label: FriendlyMimetypeLabels[MimeType.Html],
+    mimeType: MimeType.Html,
+  },
+  {
+    label: FriendlyMimetypeLabels[MimeType.Stylesheet],
+    mimeType: MimeType.Stylesheet,
+  },
+  {
+    label: FriendlyMimetypeLabels[MimeType.Font],
+    mimeType: MimeType.Font,
+  },
+  {
+    label: FriendlyMimetypeLabels[MimeType.Script],
+    mimeType: MimeType.Script,
+  },
+  {
+    label: FriendlyMimetypeLabels[MimeType.Image],
+    mimeType: MimeType.Image,
+  },
+  {
+    label: FriendlyMimetypeLabels[MimeType.Media],
+    mimeType: MimeType.Media,
+  },
+  {
+    label: FriendlyMimetypeLabels[MimeType.XHR],
+    mimeType: MimeType.XHR,
+  },
+  {
+    label: FriendlyMimetypeLabels[MimeType.Other],
+    mimeType: MimeType.Other,
+  },
+];

@@ -7,11 +7,12 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { WaterfallMarkerTrend } from './waterfall_marker_trend';
 
 export function WaterfallMarkerIcon({ field, label }: { field: string; label: string }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
 
   if (!field) {
     return (
@@ -20,7 +21,7 @@ export function WaterfallMarkerIcon({ field, label }: { field: string; label: st
           defaultMessage: 'An icon indicating that this marker has no field associated with it',
         })}
         type="dot"
-        size="l"
+        size="m"
       />
     );
   }
@@ -32,8 +33,10 @@ export function WaterfallMarkerIcon({ field, label }: { field: string; label: st
       anchorPosition="downLeft"
       panelStyle={{ paddingBottom: 0, paddingLeft: 4 }}
       zIndex={100}
+      css={{ top: 4 }}
       button={
         <EuiButtonIcon
+          css={{ color: euiTheme.colors.mediumShade }}
           aria-label={i18n.translate(
             'xpack.synthetics.synthetics.markers.openEmbeddableButton.label',
             {
@@ -41,8 +44,7 @@ export function WaterfallMarkerIcon({ field, label }: { field: string; label: st
             }
           )}
           iconType="dot"
-          iconSize="l"
-          color="text"
+          iconSize="m"
           onClick={() => setIsOpen((prevState) => !prevState)}
         />
       }

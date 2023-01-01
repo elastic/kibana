@@ -18,6 +18,7 @@ import {
   TickFormatter,
   TooltipInfo,
 } from '@elastic/charts';
+import { useEuiTheme } from '@elastic/eui';
 import { useChartTheme } from '../../../../../../../../hooks/use_chart_theme';
 import { BAR_HEIGHT } from './constants';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
@@ -71,6 +72,7 @@ export const WaterfallBarChart = ({
   index,
 }: Props) => {
   const theme = useChartTheme();
+  const { euiTheme } = useEuiTheme();
   const { onElementClick, onProjectionClick } = useWaterfallContext();
   const handleElementClick = useMemo(() => onElementClick, [onElementClick]);
   const handleProjectionClick = useMemo(() => onProjectionClick, [onProjectionClick]);
@@ -107,6 +109,10 @@ export const WaterfallBarChart = ({
           style={{
             axisLine: {
               visible: false,
+            },
+            tickLabel: {
+              fontSize: 12,
+              fill: euiTheme.colors.darkestShade,
             },
           }}
         />

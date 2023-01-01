@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, Context } from 'react';
+import React, { createContext, useContext, Context, Dispatch, SetStateAction } from 'react';
 import { JourneyStep } from '../../../../../../../../../common/runtime_types';
 import { WaterfallData, WaterfallDataEntry, WaterfallMetadata } from '../types';
 import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../components/use_flyout';
-import { SidebarItems } from '../../step_detail/waterfall/types';
+import { SidebarItem } from '../../step_detail/waterfall/types';
 
 export type MarkerItems = Array<{
   id:
@@ -31,8 +31,7 @@ export interface IWaterfallContext {
   onProjectionClick?: OnProjectionClick;
   onSidebarClick?: OnSidebarClick;
   showOnlyHighlightedNetworkRequests: boolean;
-  sidebarItems?: SidebarItems;
-  legendItems?: unknown[];
+  sidebarItems?: SidebarItem[];
   metadata: WaterfallMetadata;
   renderTooltipItem: (
     item: WaterfallDataEntry['config']['tooltipProps'],
@@ -40,28 +39,16 @@ export interface IWaterfallContext {
   ) => JSX.Element;
   markerItems?: MarkerItems;
   activeStep?: JourneyStep;
+  activeFilters: string[];
+  setActiveFilters: Dispatch<SetStateAction<string[]>>;
+  setOnlyHighlighted: (val: boolean) => void;
+  query: string;
+  setQuery: (val: string) => void;
 }
 
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
-interface ProviderProps {
-  totalNetworkRequests: number;
-  highlightedNetworkRequests: number;
-  fetchedNetworkRequests: number;
-  data: IWaterfallContext['data'];
-  onElementClick?: IWaterfallContext['onElementClick'];
-  onProjectionClick?: IWaterfallContext['onProjectionClick'];
-  onSidebarClick?: IWaterfallContext['onSidebarClick'];
-  showOnlyHighlightedNetworkRequests: IWaterfallContext['showOnlyHighlightedNetworkRequests'];
-  sidebarItems?: IWaterfallContext['sidebarItems'];
-  legendItems?: IWaterfallContext['legendItems'];
-  metadata: IWaterfallContext['metadata'];
-  renderTooltipItem: IWaterfallContext['renderTooltipItem'];
-  markerItems?: MarkerItems;
-  activeStep?: JourneyStep;
-}
-
-export const WaterfallProvider: React.FC<ProviderProps> = ({
+export const WaterfallProvider: React.FC<IWaterfallContext> = ({
   children,
   data,
   markerItems,
@@ -70,13 +57,17 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
   onSidebarClick,
   showOnlyHighlightedNetworkRequests,
   sidebarItems,
-  legendItems,
   metadata,
   renderTooltipItem,
   totalNetworkRequests,
   highlightedNetworkRequests,
   fetchedNetworkRequests,
   activeStep,
+  activeFilters,
+  setActiveFilters,
+  setOnlyHighlighted,
+  query,
+  setQuery,
 }) => {
   return (
     <WaterfallContext.Provider
@@ -86,7 +77,6 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
         markerItems,
         showOnlyHighlightedNetworkRequests,
         sidebarItems,
-        legendItems,
         metadata,
         onElementClick,
         onProjectionClick,
@@ -95,6 +85,11 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
         totalNetworkRequests,
         highlightedNetworkRequests,
         fetchedNetworkRequests,
+        activeFilters,
+        setActiveFilters,
+        setOnlyHighlighted,
+        query,
+        setQuery,
       }}
     >
       {children}

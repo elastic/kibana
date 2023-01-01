@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 import { WaterfallChartTooltip } from './styles';
-import { FIXED_AXIS_HEIGHT } from './constants';
+import { FIXED_AXIS_HEIGHT, RESOURCE_TITLE_FONT_SIZE } from './constants';
 import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
 
 interface Props {
@@ -47,12 +47,15 @@ const InnerContainer = euiStyled.span`
   align-items: center;
 `;
 
-const IndexNumber = euiStyled(EuiText)`
+const IndexNumber = euiStyled(EuiText)<{ charLength: number }>`
   font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
-  margin-right: ${(props) => props.theme.eui.euiSizeXS};
+  margin-right: ${(props) => props.theme.eui.euiSizeS};
   line-height: ${FIXED_AXIS_HEIGHT}px;
   text-align: right;
   background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+  min-width: ${(props) => props.charLength + 3}ch;
+  text-align: center;
+  color: ${(props) => props.theme.eui.euiColorDarkShade};
 `;
 
 const FirstChunk = euiStyled.span`
@@ -60,12 +63,14 @@ const FirstChunk = euiStyled.span`
   white-space: nowrap;
   overflow: hidden;
   line-height: ${FIXED_AXIS_HEIGHT}px;
+  font-size: ${RESOURCE_TITLE_FONT_SIZE}px;
   text-align: left;
 `; // safari doesn't auto align text left in some cases
 
 const LastChunk = euiStyled.span`
   flex-shrink: 0;
   line-height: ${FIXED_AXIS_HEIGHT}px;
+  font-size: ${RESOURCE_TITLE_FONT_SIZE}px;
   text-align: left;
 `; // safari doesn't auto align text left in some cases
 
@@ -134,12 +139,8 @@ export const MiddleTruncatedText = ({
               flush={'left'}
             >
               <InnerContainer>
-                <IndexNumber
-                  color="subdued"
-                  size="s"
-                  style={{ minWidth: String(highestIndex).length + 1 + 'ch' }}
-                >
-                  {index + '.'}
+                <IndexNumber color="subdued" size="s" charLength={String(highestIndex).length}>
+                  {index}
                 </IndexNumber>
                 {secureHttps && (
                   <SecureIcon

@@ -8,14 +8,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiLoadingSpinner,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { BreakdownLegend } from './components/timings_breakdown/breakdown_legend';
 import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
 import { ObjectWeightList } from './components/object_weight_list';
@@ -108,15 +101,15 @@ export const StepDetailPage = () => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="s" />
+
+      <EuiSpacer size="l" />
+
       {data && (
-        <div>
-          <WaterfallChartContainer
-            checkGroup={checkGroupId}
-            stepIndex={Number(stepIndex)}
-            activeStep={activeStep}
-          />
-        </div>
+        <WaterfallChartContainer
+          checkGroup={checkGroupId}
+          stepIndex={Number(stepIndex)}
+          activeStep={activeStep}
+        />
       )}
     </>
   );

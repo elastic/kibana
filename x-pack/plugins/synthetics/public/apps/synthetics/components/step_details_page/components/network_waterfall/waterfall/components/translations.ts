@@ -14,6 +14,13 @@ export const FILTER_REQUESTS_LABEL = i18n.translate(
   }
 );
 
+export const SEARCH_REQUESTS_LABEL = i18n.translate(
+  'xpack.synthetics.synthetics.waterfall.searchBox.searchLabel',
+  {
+    defaultMessage: 'Search',
+  }
+);
+
 export const FILTER_SCREENREADER_LABEL = i18n.translate(
   'xpack.synthetics.synthetics.waterfall.filterGroup.filterScreenreaderLabel',
   {
@@ -25,20 +32,6 @@ export const FILTER_REMOVE_SCREENREADER_LABEL = i18n.translate(
   'xpack.synthetics.synthetics.waterfall.filterGroup.removeFilterScreenReaderLabel',
   {
     defaultMessage: 'Remove filter by',
-  }
-);
-
-export const FILTER_POPOVER_OPEN_LABEL = i18n.translate(
-  'xpack.synthetics.pingList.synthetics.waterfall.filters.popover',
-  {
-    defaultMessage: 'Click to open waterfall filters',
-  }
-);
-
-export const FILTER_COLLAPSE_REQUESTS_LABEL = i18n.translate(
-  'xpack.synthetics.pingList.synthetics.waterfall.filters.collapseRequestsLabel',
-  {
-    defaultMessage: 'Collapse to only show matching requests',
   }
 );
 

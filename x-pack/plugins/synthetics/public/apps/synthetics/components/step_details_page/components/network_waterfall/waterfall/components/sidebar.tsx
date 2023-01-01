@@ -6,15 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
 import { IWaterfallContext, useWaterfallContext } from '../context/waterfall_chart';
-import {
-  WaterfallChartSidebarContainer,
-  WaterfallChartSidebarContainerInnerPanel,
-  WaterfallChartSidebarContainerFlexGroup,
-  WaterfallChartSidebarFlexItem,
-  WaterfallChartSidebarWrapper,
-} from './styles';
+import { WaterfallChartSidebarWrapper } from './styles';
 import { WaterfallChartProps } from './waterfall_chart';
 
 interface SidebarProps {
@@ -23,35 +18,41 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
+  const { euiTheme } = useEuiTheme();
   const { onSidebarClick } = useWaterfallContext();
   const handleSidebarClick = useMemo(() => onSidebarClick, [onSidebarClick]);
 
   return (
     <WaterfallChartSidebarWrapper grow={SIDEBAR_GROW_SIZE}>
-      <WaterfallChartSidebarContainer
-        height={items.length * FIXED_AXIS_HEIGHT}
+      <div
+        style={{ height: items.length * FIXED_AXIS_HEIGHT, overflow: 'hidden' }}
         data-test-subj="wfSidebarContainer"
       >
-        <WaterfallChartSidebarContainerInnerPanel
-          paddingSize="none"
-          hasBorder={false}
-          hasShadow={false}
-        >
-          <WaterfallChartSidebarContainerFlexGroup
+        <EuiPanel css={{ height: '100%' }} hasBorder={false} hasShadow={false} paddingSize="none">
+          <EuiFlexGroup
+            css={{ height: '100%' }}
             direction="column"
             gutterSize="none"
             responsive={false}
           >
             {items.map((item, index) => {
               return (
-                <WaterfallChartSidebarFlexItem key={index}>
+                <EuiFlexItem
+                  key={index}
+                  css={{
+                    outline: 0,
+                    minWidth: 0, // Needed for flex to not stretch noWrap children
+                    justifyContent: 'space-around',
+                    paddingRight: euiTheme.size.s,
+                  }}
+                >
                   {render(item, index, handleSidebarClick)}
-                </WaterfallChartSidebarFlexItem>
+                </EuiFlexItem>
               );
             })}
-          </WaterfallChartSidebarContainerFlexGroup>
-        </WaterfallChartSidebarContainerInnerPanel>
-      </WaterfallChartSidebarContainer>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </div>
     </WaterfallChartSidebarWrapper>
   );
 };

@@ -7,7 +7,7 @@
 
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { MIME_FILTERS } from '../components/network_waterfall/step_detail/waterfall/waterfall_filter';
+import { MIME_FILTERS } from '../components/network_waterfall/step_detail/waterfall/types';
 import {
   MimeType,
   MimeTypesMap,

@@ -7,19 +7,17 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiHealth } from '@elastic/eui';
-import { useTrackMetric, METRIC_TYPE } from '@kbn/observability-plugin/public';
-import { JourneyStep } from '../../../../../../../../../common/runtime_types';
-import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
-import { SidebarItem, LegendItem, NetworkItems } from './types';
+import { JourneyStep, NetworkEvent } from '../../../../../../../../../common/runtime_types';
+import { getSeriesAndDomain, getSidebarItems } from './data_formatting';
+import { SidebarItem, LegendItem } from './types';
 import { WaterfallProvider, WaterfallChart, RenderItem, useFlyout } from '../../waterfall';
-import { WaterfallFilter } from './waterfall_filter';
 import { WaterfallFlyout } from './waterfall_flyout';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
 import { MarkerItems } from '../../waterfall/context/waterfall_chart';
 
 export const renderLegendItem: RenderItem<LegendItem> = (item) => {
   return (
-    <EuiHealth color={item.colour} className="eui-textNoWrap">
+    <EuiHealth color={item.color} className="eui-textNoWrap">
       {item.name}
     </EuiHealth>
   );
@@ -28,7 +26,7 @@ export const renderLegendItem: RenderItem<LegendItem> = (item) => {
 interface Props {
   total: number;
   activeStep?: JourneyStep;
-  data: NetworkItems;
+  data: NetworkEvent[];
   markerItems?: MarkerItems;
 }
 
@@ -42,7 +40,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [onlyHighlighted, setOnlyHighlighted] = useState(false);
 
-  const [networkData] = useState<NetworkItems>(data);
+  const [networkData] = useState<NetworkEvent[]>(data);
 
   const hasFilters = activeFilters.length > 0;
 
@@ -54,10 +52,6 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
     return getSidebarItems(networkData, onlyHighlighted, query, activeFilters);
   }, [networkData, query, activeFilters, onlyHighlighted]);
 
-  const legendItems = useMemo(() => {
-    return getLegendItems();
-  }, []);
-
   const {
     flyoutData,
     onBarClick,
@@ -66,19 +60,6 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
     isFlyoutVisible,
     onFlyoutClose,
   } = useFlyout(metadata);
-
-  const renderFilter = useCallback(() => {
-    return (
-      <WaterfallFilter
-        query={query}
-        setQuery={setQuery}
-        activeFilters={activeFilters}
-        setActiveFilters={setActiveFilters}
-        onlyHighlighted={onlyHighlighted}
-        setOnlyHighlighted={setOnlyHighlighted}
-      />
-    );
-  }, [activeFilters, setActiveFilters, onlyHighlighted, setOnlyHighlighted, query, setQuery]);
 
   const renderFlyout = useCallback(() => {
     return (
@@ -106,14 +87,6 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
     [hasFilters, onlyHighlighted, onSidebarClick, highestSideBarIndex]
   );
 
-  useTrackMetric({ app: 'uptime', metric: 'waterfall_chart_view', metricType: METRIC_TYPE.COUNT });
-  useTrackMetric({
-    app: 'uptime',
-    metric: 'waterfall_chart_view',
-    metricType: METRIC_TYPE.COUNT,
-    delay: 15000,
-  });
-
   return (
     <WaterfallProvider
       activeStep={activeStep}
@@ -127,8 +100,12 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
       onSidebarClick={onSidebarClick}
       showOnlyHighlightedNetworkRequests={onlyHighlighted}
       sidebarItems={sidebarItems}
-      legendItems={legendItems}
       metadata={metadata}
+      activeFilters={activeFilters}
+      setActiveFilters={setActiveFilters}
+      setOnlyHighlighted={setOnlyHighlighted}
+      query={query}
+      setQuery={setQuery}
       renderTooltipItem={useCallback((tooltipProps) => {
         return <EuiHealth color={String(tooltipProps?.colour)}>{tooltipProps?.value}</EuiHealth>;
       }, [])}
@@ -150,8 +127,6 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
         renderSidebarItem={renderSidebarItem}
         renderLegendItem={renderLegendItem}
         renderFlyout={renderFlyout}
-        renderFilter={renderFilter}
-        fullHeight={true}
       />
     </WaterfallProvider>
   );

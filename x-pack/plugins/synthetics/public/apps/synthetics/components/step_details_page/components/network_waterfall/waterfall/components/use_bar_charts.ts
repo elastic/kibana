@@ -27,19 +27,21 @@ export const useBarCharts = ({ data }: UseBarHookProps) => {
        * We must keep track of the number of unique resources added to the each array. */
       const uniqueResources = new Set();
       let lastIndex: number;
-      data.forEach((item) => {
-        if (uniqueResources.size === CANVAS_MAX_ITEMS && item.x > lastIndex) {
-          chartIndex++;
-          uniqueResources.clear();
-        }
-        uniqueResources.add(item.x);
-        lastIndex = item.x;
-        if (!chartsN[chartIndex]) {
-          chartsN.push([item]);
-          return;
-        }
-        chartsN[chartIndex].push(item);
-      });
+      data
+        .filter((item) => true)
+        .forEach((item) => {
+          if (uniqueResources.size === CANVAS_MAX_ITEMS && item.x > lastIndex) {
+            chartIndex++;
+            uniqueResources.clear();
+          }
+          uniqueResources.add(item.x);
+          lastIndex = item.x;
+          if (!chartsN[chartIndex]) {
+            chartsN.push([item]);
+            return;
+          }
+          chartsN[chartIndex].push(item);
+        });
     }
 
     setCharts(chartsN);

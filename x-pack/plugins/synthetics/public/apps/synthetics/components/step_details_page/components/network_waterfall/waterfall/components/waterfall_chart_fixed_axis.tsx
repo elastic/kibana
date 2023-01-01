@@ -18,6 +18,7 @@ import {
   TickFormatter,
   TooltipType,
 } from '@elastic/charts';
+import { useEuiTheme } from '@elastic/eui';
 import { useChartTheme } from '../../../../../../../../hooks/use_chart_theme';
 import { WaterfallChartFixedAxisContainer } from './styles';
 import { WaterfallChartMarkers } from './waterfall_markers';
@@ -30,6 +31,7 @@ interface Props {
 
 export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }: Props) => {
   const theme = useChartTheme();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <WaterfallChartFixedAxisContainer>
@@ -38,13 +40,26 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
           showLegend={false}
           rotation={90}
           tooltip={{ type: TooltipType.None }}
-          theme={theme}
+          theme={[
+            {
+              background: {
+                color: 'transparent',
+              },
+            },
+            theme,
+          ]}
         />
 
         <Axis
           id="time"
           position={Position.Top}
           tickFormat={tickFormat}
+          style={{
+            tickLabel: {
+              fontSize: 12,
+              fill: euiTheme.colors.darkestShade,
+            },
+          }}
           domain={domain}
           showGridLines={true}
         />

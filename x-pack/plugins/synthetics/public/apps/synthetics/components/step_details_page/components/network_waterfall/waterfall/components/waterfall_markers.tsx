@@ -10,6 +10,7 @@ import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+
 import { useWaterfallContext } from '..';
 import { MarkerItems } from '../context/waterfall_chart';
 import { WaterfallMarkerIcon } from './waterfall_marker_icon';
@@ -21,9 +22,8 @@ export const FIELD_SYNTHETICS_DCL = 'browser.experience.dcl.us';
 export const LAYOUT_SHIFT = 'layoutShift';
 
 export function WaterfallChartMarkers() {
-  const { markerItems } = useWaterfallContext();
-
   const theme = useTheme();
+  const { markerItems } = useWaterfallContext();
 
   const markerItemsByOffset = useMemo(
     () =>
@@ -35,15 +35,35 @@ export function WaterfallChartMarkers() {
   );
 
   const annotations = useMemo(() => {
-    return Array.from(markerItemsByOffset.entries()).map(([offset, items]) => {
-      let uniqueIds = (items ?? [])
+    let lastOffset: number;
+    const recognizedMarkerItemsByOffset = Array.from(markerItemsByOffset.entries()).reduce(
+      (acc, [offset, items]) => {
+        // Remove unrecognized marks e.g. custom marks
+        const vitalMarkers = items.filter(({ id }) => getMarkersInfo(id, theme) !== undefined);
+
+        const hasMultipleMarksAtOffset = vitalMarkers.some(({ id }) => id !== LAYOUT_SHIFT);
+        const isLastOffsetTooClose = lastOffset && Math.abs(offset - lastOffset) < 100; // 100ms
+
+        // If offsets coincide or are too close, remove less important marks e.g. Layout Shift
+        const filteredItems =
+          hasMultipleMarksAtOffset || isLastOffsetTooClose
+            ? vitalMarkers.filter(({ id }) => id !== LAYOUT_SHIFT)
+            : vitalMarkers;
+
+        if (filteredItems.length) {
+          acc.set(offset, filteredItems);
+        }
+
+        lastOffset = offset;
+        return acc;
+      },
+      new Map<number, MarkerItems>()
+    );
+
+    return Array.from(recognizedMarkerItemsByOffset.entries()).map(([offset, items]) => {
+      const uniqueIds = (items ?? [])
         .map(({ id }) => id)
         .filter((id, index, arr) => arr.indexOf(id) === index);
-
-      // Omit coinciding layoutShift's with other vital marks
-      if (uniqueIds.length > 1) {
-        uniqueIds = uniqueIds.filter((id) => id !== LAYOUT_SHIFT);
-      }
 
       const label = uniqueIds.map((id) => getMarkersInfo(id, theme)?.label ?? id).join(' / ');
       const id = uniqueIds[0];
@@ -56,6 +76,7 @@ export function WaterfallChartMarkers() {
         field: markersInfo?.field ?? '',
         color: markersInfo?.color ?? theme.eui.euiColorMediumShade,
         strokeWidth: markersInfo?.strokeWidth ?? 1,
+        dash: markersInfo?.dash,
       };
     });
   }, [markerItemsByOffset, theme]);
@@ -66,7 +87,7 @@ export function WaterfallChartMarkers() {
 
   return (
     <Wrapper>
-      {annotations.map(({ id, offset, label, field, color, strokeWidth }) => {
+      {annotations.map(({ id, offset, label, field, color, strokeWidth, dash }) => {
         const key = `${id}-${offset}`;
 
         return (
@@ -90,8 +111,10 @@ export function WaterfallChartMarkers() {
                 strokeWidth,
                 stroke: color,
                 opacity: 1,
+                dash,
               },
             }}
+            zIndex={theme.eui.euiZLevel0}
           />
         );
       })}
@@ -104,37 +127,42 @@ function getMarkersInfo(id: string, theme: ReturnType<typeof useTheme>) {
     case 'domContentLoaded':
       return {
         label: DOCUMENT_CONTENT_LOADED_LABEL,
-        color: theme.eui.euiColorVis0,
+        color: theme.eui.euiColorMediumShade,
         field: FIELD_SYNTHETICS_DCL,
-        strokeWidth: 2,
+        strokeWidth: 1,
+        dash: undefined,
       };
     case 'firstContentfulPaint':
       return {
         label: FCP_LABEL,
-        color: theme.eui.euiColorVis1,
+        color: theme.eui.euiColorMediumShade,
         field: FIELD_SYNTHETICS_FCP,
-        strokeWidth: 2,
+        strokeWidth: 1,
+        dash: undefined,
       };
     case 'largestContentfulPaint':
       return {
         label: LCP_LABEL,
-        color: theme.eui.euiColorVis2,
+        color: theme.eui.euiColorMediumShade,
         field: FIELD_SYNTHETICS_LCP,
-        strokeWidth: 2,
+        strokeWidth: 1,
+        dash: undefined,
       };
     case 'layoutShift':
       return {
         label: LAYOUT_SHIFT_LABEL,
-        color: theme.eui.euiColorVis6,
+        color: theme.eui.euiColorMediumShade,
         field: '',
         strokeWidth: 1,
+        dash: [5, 5],
       };
     case 'loadEvent':
       return {
         label: LOAD_EVENT_LABEL,
-        color: theme.eui.euiColorVis9,
+        color: theme.eui.euiColorMediumShade,
         field: FIELD_SYNTHETICS_DOCUMENT_ONLOAD,
-        strokeWidth: 2,
+        strokeWidth: 1,
+        dash: undefined,
       };
   }
 

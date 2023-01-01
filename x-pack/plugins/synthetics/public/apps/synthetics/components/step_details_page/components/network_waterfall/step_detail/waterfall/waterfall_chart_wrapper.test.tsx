@@ -10,18 +10,21 @@ import { act, fireEvent, waitFor } from '@testing-library/react';
 import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
 import { networkItems as mockNetworkItems } from './data_formatting.test';
 
-import { extractItems, isHighlightedItem } from './data_formatting';
+import {
+  extractItems,
+  isHighlightedItem,
+  getQueryMatcher,
+  getFilterMatcher,
+} from './data_formatting';
 import { BAR_HEIGHT } from '../../waterfall/components/constants';
 import { MimeType } from './types';
-import {
-  FILTER_POPOVER_OPEN_LABEL,
-  FILTER_REQUESTS_LABEL,
-  FILTER_COLLAPSE_REQUESTS_LABEL,
-} from '../../waterfall/components/translations';
+import { FILTER_REQUESTS_LABEL } from '../../waterfall/components/translations';
 import { render } from '../../../../../../utils/testing';
 
 const getHighLightedItems = (query: string, filters: string[]) => {
-  return NETWORK_EVENTS.events.filter((item) => isHighlightedItem(item, query, filters));
+  return NETWORK_EVENTS.events.filter((item) =>
+    isHighlightedItem(item, getQueryMatcher(query), getFilterMatcher(filters))
+  );
 };
 
 describe('WaterfallChartWrapper', () => {
@@ -67,13 +70,14 @@ describe('WaterfallChartWrapper', () => {
     );
 
     const SIDE_BAR_ITEMS_HEIGHT = NETWORK_EVENTS.events.length * BAR_HEIGHT;
-    expect(getByTestId('wfSidebarContainer')).toHaveAttribute('height', `${SIDE_BAR_ITEMS_HEIGHT}`);
-
-    expect(getByTestId('wfDataOnlyBarChart')).toHaveAttribute('height', `${SIDE_BAR_ITEMS_HEIGHT}`);
+    expect(getByTestId('wfSidebarContainer').style).toHaveProperty(
+      'height',
+      `${SIDE_BAR_ITEMS_HEIGHT}px`
+    );
   });
 
   it('search by mime type works', () => {
-    const { getAllByTestId, getByLabelText, getAllByText } = render(
+    const { getAllByTestId, getByText } = render(
       <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
     );
 
@@ -81,9 +85,9 @@ describe('WaterfallChartWrapper', () => {
 
     expect(sideBarItems).toHaveLength(5);
 
-    fireEvent.click(getByLabelText(FILTER_POPOVER_OPEN_LABEL));
+    // fireEvent.click(getByLabelText(FILTER_POPOVER_OPEN_LABEL));
 
-    fireEvent.click(getAllByText('XHR')[1]);
+    fireEvent.click(getByText('XHR'));
 
     // inout has debounce effect so hence the timer
     act(() => {
@@ -99,7 +103,7 @@ describe('WaterfallChartWrapper', () => {
   });
 
   it('renders sidebar even when filter matches 0 resources', () => {
-    const { getAllByTestId, getByLabelText, getAllByText, queryAllByTestId } = render(
+    const { getAllByTestId, getByTestId, getByLabelText, queryAllByTestId, getByText } = render(
       <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
     );
 
@@ -107,9 +111,9 @@ describe('WaterfallChartWrapper', () => {
 
     expect(sideBarItems).toHaveLength(5);
 
-    fireEvent.click(getByLabelText(FILTER_POPOVER_OPEN_LABEL));
+    // fireEvent.click(getByLabelText(FILTER_POPOVER_OPEN_LABEL));
 
-    fireEvent.click(getAllByText('CSS')[1]);
+    fireEvent.click(getByText('CSS'));
 
     // inout has debounce effect so hence the timer
     act(() => {
@@ -124,7 +128,8 @@ describe('WaterfallChartWrapper', () => {
       NETWORK_EVENTS.events.length - highlightedItemsLength
     );
 
-    fireEvent.click(getByLabelText(FILTER_COLLAPSE_REQUESTS_LABEL));
+    // fireEvent.click(getByLabelText(FILTER_COLLAPSE_REQUESTS_LABEL));
+    fireEvent.click(getByTestId('syntheticsWaterfallHideNonMatching'));
 
     // filter bar is still accessible even when no resources match filter
     expect(getByLabelText(FILTER_REQUESTS_LABEL)).toBeInTheDocument();
@@ -140,7 +145,7 @@ describe('WaterfallChartWrapper', () => {
     );
 
     expect(getByText(`${mockNetworkItems[0].url}`)).toBeInTheDocument();
-    expect(getByText(`1.`)).toBeInTheDocument();
+    expect(getByText(`1`)).toBeInTheDocument();
     expect(queryByText('Content type')).not.toBeInTheDocument();
     expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
 
@@ -167,35 +172,18 @@ describe('WaterfallChartWrapper', () => {
     });
   });
 
-  it('opens flyout on sidebar click and closes on second sidebar click', async () => {
-    const { getByText, getByTestId, queryByText } = render(
-      <WaterfallChartWrapper total={mockNetworkItems.length} data={mockNetworkItems} />
+  it('Shows "Hide nonmatching" when search or filter is active', async () => {
+    const { getByText, getByTestId, queryByTestId } = render(
+      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
     );
 
-    expect(getByText(`${mockNetworkItems[0].url}`)).toBeInTheDocument();
-    expect(getByText(`1.`)).toBeInTheDocument();
-    expect(queryByText('Content type')).not.toBeInTheDocument();
-    expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
+    expect(queryByTestId('syntheticsWaterfallHideNonMatching')).not.toBeInTheDocument();
 
-    // open flyout
-    // selector matches both button and accessible text. Button is the second element in the array;
-    const sidebarButton = getByTestId(`middleTruncatedTextButton1`);
-    fireEvent.click(sidebarButton);
+    // Toggle a filter
+    fireEvent.click(getByText('Image').closest('[aria-checked]'));
 
-    // check for sample flyout items and that the flyout is focused
     await waitFor(() => {
-      const waterfallFlyout = getByTestId('waterfallFlyout');
-      expect(waterfallFlyout).toBeInTheDocument();
-      expect(getByText('Content type')).toBeInTheDocument();
-      expect(getByText(`${mockNetworkItems[0]?.mimeType}`)).toBeInTheDocument();
-    });
-
-    fireEvent.click(sidebarButton);
-
-    /* check that sample flyout items are gone from the DOM */
-    await waitFor(() => {
-      expect(queryByText('Content type')).not.toBeInTheDocument();
-      expect(queryByText(`${mockNetworkItems[0]?.mimeType}`)).not.toBeInTheDocument();
+      expect(getByTestId('syntheticsWaterfallHideNonMatching')).toBeInTheDocument();
     });
   });
 });
