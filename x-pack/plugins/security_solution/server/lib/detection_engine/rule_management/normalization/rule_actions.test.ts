@@ -183,7 +183,6 @@ describe('Rule actions normalization', () => {
             group: 'group',
             action_type_id: 'actionTypeId',
             params: {},
-            uuid: '123-456',
           },
         ],
       };
@@ -218,7 +217,6 @@ describe('Rule actions normalization', () => {
             group: 'group',
             action_type_id: 'actionTypeId',
             params: {},
-            uuid: '123-456',
           },
         ],
       };
@@ -246,7 +244,6 @@ describe('Rule actions normalization', () => {
             group: 'group',
             action_type_id: 'actionTypeId',
             params: {},
-            uuid: '123-456',
           },
         ],
       };
@@ -309,14 +306,14 @@ describe('Rule actions normalization', () => {
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
-          uuid: '123-456',
+          uuid: '111-111',
         },
         {
           id: 'id_2',
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
-          uuid: '123-456',
+          uuid: '222-222',
         },
       ];
       const legacyRuleActions: LegacyRuleActions = {
@@ -329,7 +326,6 @@ describe('Rule actions normalization', () => {
             group: 'group',
             action_type_id: 'actionTypeId',
             params: {},
-            uuid: '123-456',
           },
         ],
       };
@@ -340,14 +336,14 @@ describe('Rule actions normalization', () => {
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
-          uuid: '123-456',
+          uuid: '111-111',
         },
         {
           id: 'id_2',
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
-          uuid: '123-456',
+          uuid: '222-222',
         },
       ]);
     });
@@ -364,7 +360,6 @@ describe('Rule actions normalization', () => {
             group: 'group',
             action_type_id: 'actionTypeId',
             params: {},
-            uuid: '123-456',
           },
         ],
       };
@@ -375,9 +370,8 @@ describe('Rule actions normalization', () => {
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
-          uuid: '123-456',
         },
-      ]);
+      ] as RuleResponse['actions']);
     });
 
     test('It will transform the legacyRuleActions if the alertAction is undefined', () => {
@@ -391,7 +385,6 @@ describe('Rule actions normalization', () => {
             group: 'group',
             action_type_id: 'actionTypeId',
             params: {},
-            uuid: '123-456',
           },
         ],
       };
@@ -402,9 +395,8 @@ describe('Rule actions normalization', () => {
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
-          uuid: '123-456',
         },
-      ]);
+      ] as RuleResponse['actions']);
     });
   });
 });

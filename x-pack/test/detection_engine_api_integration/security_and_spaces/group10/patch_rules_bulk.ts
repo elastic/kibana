@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '@kbn/security-solution-plugin/common/constants';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
+import { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -181,7 +182,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         // @ts-expect-error
         body.forEach((response) => {
-          const bodyToCompare = removeServerGeneratedProperties(response);
           const outputRule = getSimpleRuleOutput(response.rule_id, false);
           outputRule.actions = [
             {
@@ -192,11 +192,10 @@ export default ({ getService }: FtrProviderContext) => {
                 message:
                   'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
-              uuid: bodyToCompare.actions[0].uuid,
             },
-          ];
+          ] as unknown as RuleResponse['actions'];
           outputRule.throttle = '1h';
-
+          const bodyToCompare = removeServerGeneratedProperties(response);
           expect(bodyToCompare).to.eql(outputRule);
         });
       });

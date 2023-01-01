@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
 import {
   BulkPatchRulesRequestBody,
-  BulkCrudRulesResponse,
+  LegacyBulkCrudRulesResponse,
 } from '../../../../../../../common/detection_engine/rule_management';
 
 import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
@@ -122,7 +122,7 @@ export const bulkPatchRulesRoute = (
         })
       );
 
-      const [validated, errors] = validate(rules, BulkCrudRulesResponse);
+      const [validated, errors] = validate(rules, LegacyBulkCrudRulesResponse);
       if (errors != null) {
         return siemResponse.error({
           statusCode: 500,

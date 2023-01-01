@@ -12,7 +12,7 @@ import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../../../common/
 import {
   BulkCreateRulesRequestBody,
   validateCreateRuleProps,
-  BulkCrudRulesResponse,
+  LegacyBulkCrudRulesResponse,
 } from '../../../../../../../common/detection_engine/rule_management';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -140,7 +140,7 @@ export const bulkCreateRulesRoute = (
           })
         ),
       ];
-      const [validated, errors] = validate(rulesBulk, BulkCrudRulesResponse);
+      const [validated, errors] = validate(rulesBulk, LegacyBulkCrudRulesResponse);
       if (errors != null) {
         return siemResponse.error({
           statusCode: 500,

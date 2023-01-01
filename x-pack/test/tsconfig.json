@@ -109,5 +109,6 @@
     "@kbn/core-saved-objects-common",
     "@kbn/alerting-fixture-plugin",
     "@kbn/user-profile-components",
+    "@kbn/securitysolution-io-ts-alerting-types",
   ]
 }

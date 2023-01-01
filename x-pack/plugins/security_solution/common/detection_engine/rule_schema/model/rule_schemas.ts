@@ -211,6 +211,13 @@ export const SharedResponseProps = t.intersection([
   t.exact(t.type({ actions: RuleActionArray })),
 ]);
 
+export const LegacySharedResponseProps = t.intersection([
+  baseSchema.response,
+  t.exact(t.type(responseRequiredFields)),
+  t.exact(t.partial(responseOptionalFields)),
+  t.exact(t.type({ actions: RuleActionWithoutUuidArray })),
+]);
+
 // -------------------------------------------------------------------------------------------------
 // EQL rule schema
 
@@ -537,6 +544,9 @@ export const RulePatchProps = t.intersection([TypeSpecificPatchProps, SharedPatc
 
 export type RuleResponse = t.TypeOf<typeof RuleResponse>;
 export const RuleResponse = t.intersection([SharedResponseProps, TypeSpecificResponse]);
+
+export type LegacyRuleResponse = t.TypeOf<typeof LegacyRuleResponse>;
+export const LegacyRuleResponse = t.intersection([LegacySharedResponseProps, TypeSpecificResponse]);
 
 // -------------------------------------------------------------------------------------------------
 // Rule preview schemas
