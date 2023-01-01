@@ -24,8 +24,8 @@ import { TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import { wrapWithTheme, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { useUrlState } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
-import { useUrlState } from '../../../util/url_state';
 import { useMlKibana } from '../../../contexts/kibana';
 import {
   useRefreshIntervalUpdates,

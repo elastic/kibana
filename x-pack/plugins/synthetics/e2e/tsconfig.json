@@ -15,5 +15,6 @@
     "@kbn/dev-utils",
     "@kbn/observability-plugin",
     "@kbn/ux-plugin",
+    "@kbn/ftr-common-functional-services",
   ]
 }
