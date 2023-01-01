@@ -85,8 +85,6 @@ describe('WaterfallChartWrapper', () => {
 
     expect(sideBarItems).toHaveLength(5);
 
-    // fireEvent.click(getByLabelText(FILTER_POPOVER_OPEN_LABEL));
-
     fireEvent.click(getByText('XHR'));
 
     // inout has debounce effect so hence the timer
@@ -111,8 +109,6 @@ describe('WaterfallChartWrapper', () => {
 
     expect(sideBarItems).toHaveLength(5);
 
-    // fireEvent.click(getByLabelText(FILTER_POPOVER_OPEN_LABEL));
-
     fireEvent.click(getByText('CSS'));
 
     // inout has debounce effect so hence the timer
@@ -128,7 +124,6 @@ describe('WaterfallChartWrapper', () => {
       NETWORK_EVENTS.events.length - highlightedItemsLength
     );
 
-    // fireEvent.click(getByLabelText(FILTER_COLLAPSE_REQUESTS_LABEL));
     fireEvent.click(getByTestId('syntheticsWaterfallHideNonMatching'));
 
     // filter bar is still accessible even when no resources match filter
