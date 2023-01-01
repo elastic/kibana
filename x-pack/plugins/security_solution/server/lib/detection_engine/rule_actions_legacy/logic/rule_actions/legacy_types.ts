@@ -18,7 +18,6 @@ export interface LegacyRuleAlertAction {
   id: string;
   params: RuleActionParams;
   action_type_id: string;
-  uuid: string;
 }
 
 /**
@@ -30,7 +29,6 @@ export interface LegacyRuleAlertSavedObjectAction {
   params: RuleActionParams;
   action_type_id: string;
   actionRef: string;
-  uuid: string;
 }
 
 /**

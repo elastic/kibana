@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { requestContextMock } from '../../../routes/__mocks__';
 import {
   getEmptyFindResult,
@@ -169,9 +170,8 @@ describe('Legacy rule action migration logic', () => {
               },
               id: connectorId,
               group: 'default',
-              uuid: '123-456',
             },
-          ],
+          ] as unknown as RuleAction[],
           throttle: null,
           notifyWhen: 'onActiveAlert',
           muteAll: false,
@@ -193,7 +193,6 @@ describe('Legacy rule action migration logic', () => {
             subject: 'Test Actions',
             to: ['test@test.com'],
           },
-          uuid: '123-456',
         },
       ]);
       expect(migratedRule?.notifyWhen).toEqual('onActiveAlert');
@@ -241,7 +240,6 @@ describe('Legacy rule action migration logic', () => {
             to: ['test@test.com'],
             subject: 'Test Actions',
           },
-          uuid: '123-456',
         },
       ]);
       expect(migratedRule?.throttle).toEqual('1d');
@@ -289,7 +287,6 @@ describe('Legacy rule action migration logic', () => {
             to: ['test@test.com'],
             subject: 'Test Actions',
           },
-          uuid: '123-456',
         },
       ]);
       expect(migratedRule?.throttle).toEqual('1h');
@@ -337,7 +334,6 @@ describe('Legacy rule action migration logic', () => {
             to: ['test@test.com'],
             subject: 'Test Actions',
           },
-          uuid: '123-456',
         },
       ]);
       expect(migratedRule?.throttle).toEqual('7d');
@@ -373,7 +369,6 @@ describe('Legacy rule action migration logic', () => {
                 subject: 'Test Actions',
               },
               action_type_id: '.email',
-              uuid: '111-111',
             },
           ],
           references: [
@@ -401,7 +396,6 @@ describe('Legacy rule action migration logic', () => {
               subject: 'Test Actions',
               to: ['a@a.com'],
             },
-            uuid: '111-111',
           },
         ],
         throttle: '1h',
@@ -435,7 +429,6 @@ describe('Legacy rule action migration logic', () => {
                 subject: 'Rule email',
               },
               action_type_id: '.email',
-              uuid: '111-111',
             },
             {
               actionRef: 'action_1',
@@ -444,7 +437,6 @@ describe('Legacy rule action migration logic', () => {
                 message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
               action_type_id: '.slack',
-              uuid: '222-222',
             },
           ],
           references: [
@@ -477,7 +469,6 @@ describe('Legacy rule action migration logic', () => {
               subject: 'Rule email',
               to: ['test@test.com'],
             },
-            uuid: '111-111',
           },
           {
             actionTypeId: '.slack',
@@ -486,7 +477,6 @@ describe('Legacy rule action migration logic', () => {
             params: {
               message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
-            uuid: '222-222',
           },
         ],
         throttle: '1h',

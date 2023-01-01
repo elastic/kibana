@@ -330,7 +330,6 @@ describe('utils', () => {
           params: {},
           group: '',
           action_type_id: 'action_123',
-          uuid: '123-456',
         },
       ];
 

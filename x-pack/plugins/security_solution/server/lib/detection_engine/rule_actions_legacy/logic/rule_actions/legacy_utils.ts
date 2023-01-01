@@ -45,7 +45,7 @@ export const legacyGetRuleActionsFromSavedObject = (
   // We have to serialize the action from the saved object references
   const actionsWithIdReplacedFromReference = existingActions.flatMap<LegacyRuleAlertAction>(
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    ({ group, params, action_type_id, actionRef, uuid }) => {
+    ({ group, params, action_type_id, actionRef }) => {
       const found = savedObject.references?.find(
         (reference) => actionRef === reference.name && reference.type === 'action'
       );
@@ -56,7 +56,6 @@ export const legacyGetRuleActionsFromSavedObject = (
             group,
             params,
             action_type_id,
-            uuid,
           },
         ];
       } else {
@@ -119,7 +118,6 @@ export const legacyTransformActionToReference = (
   group: alertAction.group,
   params: alertAction.params,
   action_type_id: alertAction.actionTypeId,
-  uuid: alertAction.uuid,
 });
 
 /**
@@ -136,5 +134,4 @@ export const legacyTransformLegacyRuleAlertActionToReference = (
   group: alertAction.group,
   params: alertAction.params,
   action_type_id: alertAction.action_type_id,
-  uuid: alertAction.uuid,
 });

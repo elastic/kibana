@@ -11,6 +11,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { legacyCreateRuleActionsSavedObject } from './legacy_create_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 
 describe('legacy_create_rule_actions_saved_object', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
@@ -55,9 +56,8 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com',
           },
-          uuid: '123-456',
         },
-      ],
+      ] as unknown as RuleAction[],
       throttle: '1d',
     });
     const [[, arg2, arg3]] = savedObjectsClient.create.mock.calls;
@@ -70,7 +70,6 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com',
           },
-          uuid: '123-456',
         },
       ],
       alertThrottle: '1d',
@@ -104,7 +103,6 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com',
           },
-          uuid: '111-111',
         },
         {
           id: '555',
@@ -113,9 +111,8 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com/2',
           },
-          uuid: '222-222',
         },
-      ],
+      ] as unknown as RuleAction[],
       throttle: '1d',
     });
     const [[, arg2, arg3]] = savedObjectsClient.create.mock.calls;
@@ -128,7 +125,6 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com',
           },
-          uuid: '111-111',
         },
         {
           actionRef: 'action_1',
@@ -137,7 +133,6 @@ describe('legacy_create_rule_actions_saved_object', () => {
           params: {
             kibana_siem_app_url: 'www.example.com/2',
           },
-          uuid: '222-222',
         },
       ],
       alertThrottle: '1d',

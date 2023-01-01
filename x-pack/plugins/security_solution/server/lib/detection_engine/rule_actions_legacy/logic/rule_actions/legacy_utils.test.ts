@@ -102,7 +102,6 @@ describe('legacy_utils', () => {
                 params: {},
                 action_type_id: 'action_type_1',
                 actionRef: 'action_0',
-                uuid: '123-456',
               },
             ],
             ruleThrottle: '1d',
@@ -116,7 +115,6 @@ describe('legacy_utils', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
-            uuid: '123-456',
           },
         ],
         alertThrottle: '1d',
@@ -154,19 +152,16 @@ describe('legacy_utils', () => {
                 params: {},
                 action_type_id: 'action_type_1',
                 actionRef: 'action_0',
-                uuid: '123-456',
               },
               {
                 group: 'group_2',
                 params: {},
                 action_type_id: 'action_type_2',
                 actionRef: 'action_1',
-                uuid: '123-456',
               },
             ],
             ruleThrottle: '1d',
             alertThrottle: '1d',
-            uuid: '123-456',
           },
         };
       expect(legacyGetRuleActionsFromSavedObject(savedObject, logger)).toEqual<FuncReturn>({
@@ -179,14 +174,12 @@ describe('legacy_utils', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
-            uuid: '123-456',
           },
           {
             action_type_id: 'action_type_2',
             group: 'group_2',
             id: 'action-456',
             params: {},
-            uuid: '123-456',
           },
         ],
       });
@@ -216,14 +209,12 @@ describe('legacy_utils', () => {
                 params: {},
                 action_type_id: 'action_type_1',
                 actionRef: 'action_0',
-                uuid: '123-456',
               },
               {
                 group: 'group_2',
                 params: {},
                 action_type_id: 'action_type_2',
                 actionRef: 'action_1',
-                uuid: '123-456',
               },
             ],
             ruleThrottle: '1d',
@@ -240,7 +231,6 @@ describe('legacy_utils', () => {
             group: 'group_2',
             id: 'action-456',
             params: {},
-            uuid: '123-456',
           },
         ],
       });
@@ -265,7 +255,6 @@ describe('legacy_utils', () => {
                 params: {},
                 action_type_id: 'action_type_1',
                 actionRef: 'action_0',
-                uuid: '123-456',
               },
             ],
             ruleThrottle: 'no_actions',
@@ -361,8 +350,7 @@ describe('legacy_utils', () => {
         test: '123',
       },
       actionTypeId: '567',
-      uuid: '123-456',
-    };
+    } as unknown as RuleAction;
 
     test('it returns the id and index transformed with the index at 0', () => {
       expect(legacyTransformActionToReference(alertAction, 0)).toEqual<FuncReturn>({
@@ -372,7 +360,6 @@ describe('legacy_utils', () => {
         params: {
           test: '123',
         },
-        uuid: '123-456',
       });
     });
 
@@ -384,7 +371,6 @@ describe('legacy_utils', () => {
         params: {
           test: '123',
         },
-        uuid: '123-456',
       });
     });
   });
@@ -398,7 +384,6 @@ describe('legacy_utils', () => {
         test: '123',
       },
       action_type_id: '567',
-      uuid: '123-456',
     };
 
     test('it returns the id and index transformed with the index at 0', () => {
@@ -409,7 +394,6 @@ describe('legacy_utils', () => {
         params: {
           test: '123',
         },
-        uuid: '123-456',
       });
     });
 
@@ -421,7 +405,6 @@ describe('legacy_utils', () => {
         params: {
           test: '123',
         },
-        uuid: '123-456',
       });
     });
   });

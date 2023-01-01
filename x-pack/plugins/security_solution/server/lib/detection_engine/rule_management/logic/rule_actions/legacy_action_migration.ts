@@ -170,7 +170,7 @@ export const getUpdatedActionsParams = ({
           id: actionReference[actionRef].id,
           actionTypeId,
         },
-      ];
+      ] as RuleAction[];
     }, []),
     throttle: transformToAlertThrottle(ruleThrottle),
     notifyWhen: transformToNotifyWhen(ruleThrottle),
