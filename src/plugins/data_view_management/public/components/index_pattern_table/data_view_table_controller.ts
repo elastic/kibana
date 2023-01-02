@@ -30,6 +30,7 @@ export interface DataViewTableControllerConstructorArgs {
   };
 }
 
+// no reason to export this with new pattern
 export const dataViewTableControllerStateDefaults = {
   isLoadingDataViews: false,
   isLoadingHasData: true,
@@ -41,8 +42,8 @@ export const dataViewTableControllerStateDefaults = {
 const selectIndexPattern = (state: DataViewTableControllerState) => state.dataViews;
 const selectHasDataView = (state: DataViewTableControllerState) => state.hasDataView;
 const selectHasEsData = (state: DataViewTableControllerState) => state.hasEsData;
-const selectIsLoadingIndexPatterns = (state: DataViewTableControllerState) =>
-  state.isLoadingDataViews;
+// const selectIsLoadingIndexPatterns = (state: DataViewTableControllerState) =>
+//   state.isLoadingDataViews;
 const selectIsLoadingDataState = (state: DataViewTableControllerState) => state.isLoadingHasData;
 
 export class DataViewTableController {
@@ -55,7 +56,8 @@ export class DataViewTableController {
 
     const stateSelector = stateSelectorFactory(this.state$);
 
-    this.isLoadingIndexPatterns$ = stateSelector(selectIsLoadingIndexPatterns);
+    // move closer to consumer code
+    // this.isLoadingIndexPatterns$ = stateSelector(selectIsLoadingIndexPatterns);
     this.indexPatterns$ = stateSelector(selectIndexPattern, isEqual);
     this.isLoadingDataState$ = stateSelector(selectIsLoadingDataState);
     this.hasDataView$ = stateSelector(selectHasDataView);
@@ -68,12 +70,14 @@ export class DataViewTableController {
     ...dataViewTableControllerStateDefaults,
   };
 
-  private state$ = new BehaviorSubject<DataViewTableControllerState>(this.state);
+  // other code now assumes this is a BehaviorSubject
+  state$ = new BehaviorSubject<DataViewTableControllerState>(this.state);
 
   private dataViews: DataViewsPublicPluginStart;
   private defaultDataView: string;
 
-  isLoadingIndexPatterns$: Observable<boolean>;
+  // these aren't needed with new pattern
+  // isLoadingIndexPatterns$: Observable<boolean>;
   indexPatterns$: Observable<IndexPatternTableItem[]>;
   isLoadingDataState$: Observable<boolean>;
   hasDataView$: Observable<boolean>;
