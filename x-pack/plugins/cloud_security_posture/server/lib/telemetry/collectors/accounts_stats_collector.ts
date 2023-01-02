@@ -191,24 +191,22 @@ const getCspmAccountsStats = (
 ): CspmAccountsStats[] => {
   const accounts = aggregatedResourcesStats.accounts.buckets;
 
-  const cspmAccountsStats = accounts.map((account) => {
-    return {
-      account_id: account.key,
-      latest_findings_doc_count: account.doc_count,
-      posture_score: calculatePostureScore(
-        account.passed_findings_count.doc_count,
-        account.failed_findings_count.doc_count
-      ),
-      passed_findings_count: account.passed_findings_count.doc_count,
-      failed_findings_count: account.failed_findings_count.doc_count,
-      benchmark_name: account.benchmark_name.top[0].metrics['rule.benchmark.name'],
-      benchmark_id: account.benchmark_id.top[0].metrics['rule.benchmark.id'],
-      benchmark_version: account.benchmark_version.top[0].metrics['rule.benchmark.version'],
-      agents_count: account.agents_count.value,
-      nodes_count: account.nodes_count.value,
-      pods_count: account.resources.pods_count.value,
-    };
-  });
+  const cspmAccountsStats = accounts.map((account) => ({
+    account_id: account.key,
+    latest_findings_doc_count: account.doc_count,
+    posture_score: calculatePostureScore(
+      account.passed_findings_count.doc_count,
+      account.failed_findings_count.doc_count
+    ),
+    passed_findings_count: account.passed_findings_count.doc_count,
+    failed_findings_count: account.failed_findings_count.doc_count,
+    benchmark_name: account.benchmark_name.top[0].metrics['rule.benchmark.name'],
+    benchmark_id: account.benchmark_id.top[0].metrics['rule.benchmark.id'],
+    benchmark_version: account.benchmark_version.top[0].metrics['rule.benchmark.version'],
+    agents_count: account.agents_count.value,
+    nodes_count: account.nodes_count.value,
+    pods_count: account.resources.pods_count.value,
+  }));
   logger.info('CSPM telemetry: accounts stats was sent');
 
   return cspmAccountsStats;
