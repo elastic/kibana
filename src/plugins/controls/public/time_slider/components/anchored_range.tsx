@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { EuiRange, EuiRangeTick } from '@elastic/eui';
+import { _SingleRangeChangeEvent } from '@elastic/eui/src/components/form/range/types';
 
 interface Props {
   value: [number, number];
@@ -19,7 +20,7 @@ interface Props {
 }
 
 export function AnchoredRange(props: Props) {
-  function onChange(e) {
+  function onChange(e: _SingleRangeChangeEvent) {
     const from = parseInt(e.currentTarget.value, 10);
     if (!isNaN(from)) {
       props.onChange([props.timeRangeMin, from]);

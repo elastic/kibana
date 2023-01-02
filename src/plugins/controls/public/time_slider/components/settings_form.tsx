@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
@@ -20,7 +20,7 @@ interface Props {
   timeRangeMin: number;
 }
 
-export const SettingsForm: FC = (props: Props) => {
+export const SettingsForm: FC<Props> = (props: Props) => {
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
@@ -29,7 +29,7 @@ export const SettingsForm: FC = (props: Props) => {
   const dispatch = useEmbeddableDispatch();
   const isAnchored = select(getIsAnchored);
 
-  function onChange(e) {
+  function onChange(e: EuiSwitchEvent) {
     const newIsChecked = e.target.checked;
     if (newIsChecked) {
       props.onChange([props.timeRangeMin, props.value[1]]);
