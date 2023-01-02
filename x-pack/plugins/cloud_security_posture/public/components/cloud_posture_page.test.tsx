@@ -24,7 +24,7 @@ import { UseQueryResult } from '@tanstack/react-query';
 import { CloudPosturePage } from './cloud_posture_page';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import { useCISIntegrationLink } from '@kbn/cloud-security-posture-plugin/public/common/navigation/use_csp_integration_link';
+import { useCISIntegrationLink } from '../common/navigation/use_csp_integration_link';
 
 const chance = new Chance();
 jest.mock('../common/api/use_setup_status_api');
