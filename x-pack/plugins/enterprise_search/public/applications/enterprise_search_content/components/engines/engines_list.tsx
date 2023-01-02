@@ -14,26 +14,25 @@ import { EuiButton, EuiFieldSearch, EuiLink, EuiSpacer, EuiText } from '@elastic
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../shared/data_panel/data_panel';
+
+import { handlePageChange } from '../../../shared/table_pagination';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { EnginesListTable } from './components/tables/engines_table';
 
 import { EnginesListLogic } from './engines_list_logic';
+
 // import { EngineListDetails, Meta } from './types';
 
 export const EnginesList: React.FC = () => {
-  const { fetchEngines } = useActions(EnginesListLogic);
+  const { fetchEngines, onPaginate } = useActions(EnginesListLogic);
   const { meta, enginesList } = useValues(EnginesListLogic);
 
   useEffect(() => {
     fetchEngines({
       meta,
     });
-    // onPaginate();
-    // loadEngines();
-  }, []);
-
-  useEffect(() => {}, []);
+  }, [meta]);
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -102,15 +101,9 @@ export const EnginesList: React.FC = () => {
       >
         <EnginesListTable
           enginesList={enginesList}
-          // meta={meta}
+          meta={meta}
+          onChange={handlePageChange(onPaginate)}
           loading={false}
-          pagination={{
-            pageIndex: 0,
-            pageSize: 1,
-            totalItemCount: 1,
-            showPerPageOptions: false,
-          }}
-          onChange={() => {}}
         />
       </DataPanel>
 

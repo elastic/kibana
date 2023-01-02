@@ -13,7 +13,7 @@ import { flashAPIErrors } from '../../../shared/flash_messages';
 
 import { FetchEnginesAPILogic } from '../../api/engines/fetch_engines_api_logic';
 
-import { EngineListDetails, Meta } from './types';
+import { DEFAULT_META, EngineListDetails, Meta, updateMetaPageIndex } from './types';
 
 export interface EnginesListActions {
   apiError(error: HttpError): HttpError;
@@ -24,14 +24,13 @@ export interface EnginesListActions {
   fetchEngines({ meta }: { meta: Meta }): { meta: Meta };
   makeRequest: typeof FetchEnginesAPILogic.actions.makeRequest;
   onPaginate(pageNumber: number): { pageNumber: number };
-  // loadEngines: () => void; // check if we need this
-  // onEnginesLoad({ meta, results }: EnginesListAPIResponse): EnginesListAPIResponse;
-  // loadEngines({meta,results}:EnginesListAPIResponse):EnginesListAPIResponse;
 }
 export interface EngineListValues {
   data: typeof FetchEnginesAPILogic.values.data;
   enginesList: EngineListDetails[];
   meta: Meta;
+  parameters: { meta: Meta };
+  status: typeof FetchEnginesAPILogic.values.status;
 }
 
 export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListActions>>({
@@ -44,13 +43,27 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     fetchEngines: ({ meta }) => ({
       meta,
     }),
+
     onPaginate: (pageNumber) => ({ pageNumber }),
-    // loadEngines:true,
   },
-  reducers: ({}) => ({}),
+  reducers: ({}) => ({
+    parameters: [
+      { meta: DEFAULT_META },
+      {
+        apiSuccess: (_, { meta }) => ({
+          meta,
+        }),
+        onPaginate: (state, { pageNumber }) => ({
+          ...state,
+          meta: updateMetaPageIndex(state.meta, pageNumber),
+        }),
+      },
+    ],
+  }),
 
   selectors: ({ selectors }) => ({
     enginesList: [() => [selectors.data], (data) => (data?.results ? data.results : [])],
+    meta: [() => [selectors.parameters], (parameters) => parameters.meta],
   }),
   listeners: ({ actions }) => ({
     apiError: (e) => {

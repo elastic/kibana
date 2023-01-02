@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
-
 import { CriteriaWithPagination } from '@elastic/eui';
 
 export interface Meta {
@@ -14,25 +12,35 @@ export interface Meta {
   size: number;
   total: number;
 }
+
 export interface EngineListDetails {
   name: string;
   indices: string[];
   last_updated: string;
   document_count: number;
 }
+export const DEFAULT_META = {
+  from: 1,
+  size: 3,
+  total: 0,
+};
 
+export const convertMetaToPagination = (meta: Meta) => ({
+  pageIndex: meta.from - 1,
+  pageSize: meta.size,
+  totalItemCount: meta.total,
+});
+export const updateMetaPageIndex = (oldState: Meta, newPageIndex: number) => {
+  const newMetaState = { ...oldState };
+  newMetaState.from = newPageIndex;
+  return newMetaState;
+};
 export interface EnginesListTableProps {
   enginesList: EngineListDetails[];
   loading: boolean;
-  noItemsMessage?: ReactNode;
-  pagination: {
-    pageIndex: number;
-    pageSize: number;
-    totalItemCount: number;
-    showPerPageOptions: boolean;
-  };
-  // meta:Meta,
-  onChange(criteria: CriteriaWithPagination<EngineListDetails>): void;
+  isLoading?: boolean;
+  meta: Meta;
+  onChange: (criteria: CriteriaWithPagination<EngineListDetails>) => void;
 }
 export interface EnginesListAPIResponse {
   results: EngineListDetails[];

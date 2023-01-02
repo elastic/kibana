@@ -7,60 +7,42 @@
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 
-import { EnginesListAPIResponse } from '../../components/engines/types';
+import { EnginesListAPIResponse, Meta } from '../../components/engines/types';
 
-// export type FetchEnginesApiLogicResponse = EnginesListAPIResponse[];
+const metaValue: Meta = {
+  from: 1,
+  size: 3,
+  total: 5,
+};
+// These are mocked values. To be changed as per the latest requirement when Backend API is ready
 export const mockedEngines: EnginesListAPIResponse[] = [
   {
-    meta: {
-      from: 0,
-      size: 5,
-      total: 10,
-    },
+    meta: metaValue,
     results: [
       {
         name: 'engine-name-1',
         indices: ['index-18', 'index-23'],
-        last_updated: '10 Aug 2021',
-        document_count: 1,
-      },
-      {
-        name: 'engine-name-2',
-        indices: ['index-123', 'index-2345'],
-        last_updated: '05 Jan 2021',
-        document_count: 20,
-      },
-      {
-        name: 'engine-name-1',
-        indices: ['index-18', 'index-23'],
         last_updated: '21 March 2021',
-        document_count: 8,
-      },
-      {
-        name: 'engine-name-2',
-        indices: ['index-123', 'index-2345'],
-        last_updated: '16 December 2021',
-        document_count: 9,
-      },
-      {
-        name: 'engine-name-1',
-        indices: ['index-18', 'index-23'],
-        last_updated: '09 Feb 2021',
-        document_count: 30,
-      },
-      {
-        name: 'engine-name-2',
-        indices: ['index-123', 'index-2345'],
-        last_updated: '1 June 2019',
         document_count: 18,
+      },
+      {
+        name: 'engine-name-2',
+        indices: ['index-180', 'index-230', 'index-8', 'index-2'],
+        last_updated: '10 Jul 2018',
+        document_count: 10,
+      },
+
+      {
+        name: 'engine-name-3',
+        indices: ['index-2', 'index-3'],
+        last_updated: '21 December 2022',
+        document_count: 8,
       },
     ],
   },
 ];
-
 export const fetchEngines = async () => {
-  // TODO replace with http call when backend is ready
-
+  //  TODO replace with http call when backend is ready
   return mockedEngines[0];
 };
 

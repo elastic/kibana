@@ -13,16 +13,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 
 import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
-import { EngineListDetails, EnginesListTableProps } from '../../types';
+
+import { convertMetaToPagination, EngineListDetails, EnginesListTableProps } from '../../types';
 
 // add health status
 
 export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   enginesList,
-  // meta,
-  loading,
-  noItemsMessage,
-  pagination,
+  meta,
+  isLoading,
   onChange,
 }) => {
   const columns: Array<EuiBasicTableColumn<EngineListDetails>> = [
@@ -99,12 +98,10 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   return (
     <EuiBasicTable
       items={enginesList}
-      // meta={meta}
       columns={columns}
-      loading={loading}
-      pagination={pagination} // use meta field here for pagination
+      pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
       onChange={onChange}
-      noItemsMessage={noItemsMessage}
+      loading={isLoading}
     />
   );
 };
