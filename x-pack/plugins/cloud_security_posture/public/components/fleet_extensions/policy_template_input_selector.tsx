@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { PostureInput } from '../../../common/types';
+import type { PostureInput, PosturePolicyTemplate } from '../../../common/types';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
 
@@ -74,7 +74,7 @@ const AWSSetupInfoContent = () => (
   </>
 );
 
-const ConfigureIntegrationInfo = ({ type }: { type: 'cspm' | 'kspm' }) => (
+const ConfigureIntegrationInfo = ({ type }: { type: PosturePolicyTemplate }) => (
   <>
     <EuiTitle size="xs">
       <h2>
