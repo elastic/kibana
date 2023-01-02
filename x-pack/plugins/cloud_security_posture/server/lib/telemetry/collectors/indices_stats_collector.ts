@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CspmIndicesStats, IndexStats } from './types';
 import type { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { CspmIndicesStats, IndexStats } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_DEFAULT_NS,
