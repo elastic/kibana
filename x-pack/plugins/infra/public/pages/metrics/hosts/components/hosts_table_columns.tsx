@@ -108,14 +108,6 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     render: (avg: number) => <>{formatMetric('memoryTotal', avg)}</>,
   },
   {
-    name: i18n.translate('xpack.infra.hostsTable.servicesOnHostColumnHeader', {
-      defaultMessage: 'Services on Host',
-    }),
-    field: 'servicesOnHost',
-    sortable: true,
-    render: (servicesOnHost: number) => <>{formatMetric('cpuCores', servicesOnHost)}</>,
-  },
-  {
     name: i18n.translate('xpack.infra.hostsTable.averageMemoryUsageColumnHeader', {
       defaultMessage: 'Memory usage (avg.)',
     }),
