@@ -47,6 +47,7 @@ export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Pr
         const isChecked = option.id === idSelected;
         return (
           <EuiToolTip
+            key={option.id}
             content={option.tooltip}
             anchorProps={{
               style: {
