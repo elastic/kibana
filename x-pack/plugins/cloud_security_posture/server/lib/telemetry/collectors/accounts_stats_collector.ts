@@ -7,9 +7,9 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { CspmAccountsStats, CspmResourcesStats } from './types';
+import { calculatePostureScore } from '../../../routes/compliance_dashboard/get_stats';
+import type { CspmAccountsStats } from './types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
-import { calculatePostureScore } from '@kbn/cloud-security-posture-plugin/server/routes/compliance_dashboard/get_stats';
 
 interface Value {
   value: number;
