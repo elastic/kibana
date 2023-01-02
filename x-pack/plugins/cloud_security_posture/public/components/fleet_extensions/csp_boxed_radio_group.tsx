@@ -76,6 +76,12 @@ export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Pr
               &&:hover {
                 text-decoration: none;
               }
+              &:disabled {
+                svg,
+                img {
+                  filter: grayscale(1);
+                }
+              }
             `}
           >
             <EuiRadio label={option.label} id={option.id} checked={isChecked} onChange={() => {}} />
