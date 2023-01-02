@@ -68,6 +68,8 @@
     "@kbn/core-saved-objects-common",
     "@kbn/features-plugin",
     "@kbn/bfetch-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/core-elasticsearch-server",
   ],
   "exclude": [
     "target/**/*",

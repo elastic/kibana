@@ -337,8 +337,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     overviewRulerLanes: 0,
     hideCursorInOverviewRuler: true,
     scrollbar: {
-      vertical: 'hidden',
       horizontal: 'hidden',
+      vertical: 'auto',
     },
     overviewRulerBorder: false,
     readOnly: isDisabled,
