@@ -201,6 +201,8 @@ const getAwsCredentialsType = (input: Props['input']): AwsCredentialsType | unde
   input.streams[0].vars?.['aws.credentials.type'].value;
 
 export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
+  // We only have a value for 'aws.credentials.type' once the form has mounted.
+  // On initial render we don't have that value so we default to the first option.
   const awsCredentialsType = getAwsCredentialsType(input) || AWS_CREDENTIALS_OPTIONS[0].id;
   const group = options[awsCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
