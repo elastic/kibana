@@ -6,10 +6,11 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiLink, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiPageHeader, EuiSpacer, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { ComplianceDashboardData } from '../../../common/types';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
@@ -36,18 +37,50 @@ import {
 const IntegrationPostureDashboard = ({
   complianceData,
   notInstalledConfig,
-  showInstallationPrompt,
+  isIntegrationInstalled,
 }: {
   complianceData: ComplianceDashboardData;
   notInstalledConfig: CspNoDataPageProps;
-  showInstallationPrompt?: boolean;
+  isIntegrationInstalled?: boolean;
 }) => {
-  const noData = complianceData.stats.totalFindings === 0;
+  const noFindings = complianceData.stats.totalFindings === 0;
 
-  if (noData) return <div>empty</div>;
-  if (showInstallationPrompt && notInstalledConfig)
+  // the integration is not installed, and there are no findings for this integration
+  if (noFindings && !isIntegrationInstalled && notInstalledConfig) {
     return <CspNoDataPage {...notInstalledConfig} />;
+  }
 
+  // the integration is installed, but there are no findings for this integration
+  if (noFindings) {
+    return (
+      // height is calculated for the screen height minus the kibana header, page title, and tabs
+      <div style={{ height: 'calc(100vh - 265px)', display: 'flex', justifyContent: 'center' }}>
+        <EuiEmptyPrompt
+          data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT}
+          color="plain"
+          icon={<EuiIcon type="logoSecurity" size="xl" />}
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.csp.integrationDashboard.noFindings.promptTitle"
+                defaultMessage="No Findings"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.csp.integrationDashboard.noFindingsPrompt.promptDescription"
+                defaultMessage="Integration installed but you dont have findings"
+              />
+            </p>
+          }
+        />
+      </div>
+    );
+  }
+
+  // there are findings, displays dashboard even if integration is not installed
   return (
     <>
       <CloudSummarySection complianceData={complianceData} />
@@ -148,9 +181,9 @@ export const ComplianceDashboard = () => {
             <IntegrationPostureDashboard
               complianceData={getCspmDashboardData.data!}
               notInstalledConfig={getNotInstalledConfig(CSPM_POLICY_TEMPLATE, cspmIntegrationLink)}
-              showInstallationPrompt={
-                !getSetupStatus.data?.installedPolicyTemplates.includes(CSPM_POLICY_TEMPLATE)
-              }
+              isIntegrationInstalled={getSetupStatus.data?.installedPolicyTemplates.includes(
+                CSPM_POLICY_TEMPLATE
+              )}
             />
           </CloudPosturePage>
         ),
@@ -164,15 +197,22 @@ export const ComplianceDashboard = () => {
             <IntegrationPostureDashboard
               complianceData={getKspmDashboardData.data!}
               notInstalledConfig={getNotInstalledConfig(KSPM_POLICY_TEMPLATE, kspmIntegrationLink)}
-              showInstallationPrompt={
-                !getSetupStatus.data?.installedPolicyTemplates.includes(KSPM_POLICY_TEMPLATE)
-              }
+              isIntegrationInstalled={getSetupStatus.data?.installedPolicyTemplates.includes(
+                KSPM_POLICY_TEMPLATE
+              )}
             />
           </CloudPosturePage>
         ),
       },
     ],
-    [getCspmDashboardData, getKspmDashboardData, getNotInstalledConfig, selectedTab]
+    [
+      cspmIntegrationLink,
+      getCspmDashboardData,
+      getKspmDashboardData,
+      getSetupStatus.data?.installedPolicyTemplates,
+      kspmIntegrationLink,
+      selectedTab,
+    ]
   );
 
   if (!hasFindings) return <NoFindingsStates />;
@@ -197,6 +237,7 @@ export const ComplianceDashboard = () => {
           max-width: 1600px;
           margin-left: auto;
           margin-right: auto;
+          height: 100%;
         `}
       >
         {tabs.find((t) => t.isSelected)?.content}

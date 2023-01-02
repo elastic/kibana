@@ -7,16 +7,19 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UseQueryResult } from '@tanstack/react-query';
-import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiImage, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../common/constants';
 import { SubscriptionNotAllowed } from './subscription_not_allowed';
 import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import { CspLoadingState } from './csp_loading_state';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
+
+import illustration from './no_data_illustration.svg';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
@@ -82,37 +85,63 @@ export const CspNoDataPage = ({
   />
 );
 
-const packageNotInstalledRenderer = (cisIntegrationLink?: string) => {
-  const noDataConfig = {
-    pageTitle: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {
-      defaultMessage: 'Install Integration to get started',
-    }),
-    docsLink: 'https://ela.st/kspm',
-    actionHref: cisIntegrationLink,
-    actionTitle: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.buttonLabel', {
-      defaultMessage: 'Add a KSPM integration',
-    }),
-    actionDescription: (
-      <FormattedMessage
-        id="xpack.csp.cloudPosturePage.packageNotInstalled.description"
-        defaultMessage="Use our {integrationFullName} (KSPM) integration to measure your Kubernetes cluster setup against CIS recommendations."
-        values={{
-          integrationFullName: (
-            <EuiLink href="https://ela.st/kspm">
-              <FormattedMessage
-                id="xpack.csp.cloudPosturePage.packageNotInstalled.integrationNameLabel"
-                defaultMessage="Kubernetes Security Posture Management"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  };
+const packageNotInstalledRenderer = (kspmIntegrationLink?: string, cspmIntegrationLink?: sting) => {
+  // const noDataConfig = {
+  //   pageTitle: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {
+  //     defaultMessage: 'Install Integration to get started',
+  //   }),
+  //   docsLink: 'https://ela.st/kspm',
+  //   actionHref: cisIntegrationLink,
+  //   actionTitle: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.buttonLabel', {
+  //     defaultMessage: 'Add a KSPM integration',
+  //   }),
+  //   actionDescription: (
+  //     <FormattedMessage
+  //       id="xpack.csp.cloudPosturePage.packageNotInstalled.description"
+  //       defaultMessage="Use our {integrationFullName} (KSPM) integration to measure your Kubernetes cluster setup against CIS recommendations."
+  //       values={{
+  //         integrationFullName: (
+  //           <EuiLink href="https://ela.st/kspm">
+  //             <FormattedMessage
+  //               id="xpack.csp.cloudPosturePage.packageNotInstalled.integrationNameLabel"
+  //               defaultMessage="Kubernetes Security Posture Management"
+  //             />
+  //           </EuiLink>
+  //         ),
+  //       }}
+  //     />
+  //   ),
+  // };
 
   return (
     <FullSizeCenteredPage>
-      <CspNoDataPage {...noDataConfig} />
+      <EuiEmptyPrompt
+        // icon={<EuiIcon type={'logoSecurity'} size="xxl" />}
+        icon={<EuiImage size="fullWidth" src={illustration} alt="" />}
+        title={<h2>Detect security misconfigurations in your cloud resources! </h2>}
+        layout="horizontal"
+        color="plain"
+        body={
+          <p>
+            Add the security posture management integration to begin. Learn more about Cloud
+            Security Posture.
+          </p>
+        }
+        actions={
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton color="primary" fill href={cspmIntegrationLink}>
+                Add CSPM Integration
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton color="primary" fill href={kspmIntegrationLink}>
+                Add KSPM Integration
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
     </FullSizeCenteredPage>
   );
 };
@@ -200,7 +229,8 @@ export const CloudPosturePage = <TData, TError>({
 }: CloudPosturePageProps<TData, TError>) => {
   const subscriptionStatus = useSubscriptionStatus();
   const getSetupStatus = useCspSetupStatusApi();
-  const cisIntegrationLink = useCspIntegrationLink();
+  const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
+  const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
 
   const render = () => {
     if (subscriptionStatus.isError) {
@@ -224,7 +254,7 @@ export const CloudPosturePage = <TData, TError>({
     }
 
     if (getSetupStatus.data.status === 'not-installed') {
-      return packageNotInstalledRenderer(cisIntegrationLink);
+      return packageNotInstalledRenderer(kspmIntegrationLink, cspmIntegrationLink);
     }
 
     if (!query) {
