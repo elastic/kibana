@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useEuiTheme, EuiButton, EuiRadio } from '@elastic/eui';
+import { useEuiTheme, EuiButton, EuiRadio, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 interface Props {
@@ -37,7 +37,7 @@ export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Pr
 
         // Show rows for m- screens (below 768px)
         @media only screen and (max-width: ${euiTheme.breakpoint.m}px) {
-          button {
+          .euiToolTipAnchor {
             min-width: 100%;
           }
         }
@@ -46,46 +46,60 @@ export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Pr
       {options.map((option) => {
         const isChecked = option.id === idSelected;
         return (
-          <EuiButton
-            disabled={option.disabled || disabled}
-            style={{
-              flex: 1,
-              border: `1px solid ${
-                isChecked ? euiTheme.colors.primary : euiTheme.colors.lightShade
-              }`,
-            }}
-            // Use empty string to fallback to no color
-            // @ts-ignore
-            color={isChecked ? 'primary' : ''}
-            onClick={() => onChange(option.id)}
-            iconType={option.icon}
-            iconSide="right"
-            contentProps={{
+          <EuiToolTip
+            content={option.tooltip}
+            anchorProps={{
               style: {
-                justifyContent: 'flex-start',
+                flexGrow: 1,
               },
             }}
-            css={css`
-              height: ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl};
-              svg,
-              img {
-                margin-left: auto;
-              }
-
-              &&,
-              &&:hover {
-                text-decoration: none;
-              }
-              &:disabled {
+          >
+            <EuiButton
+              disabled={option.disabled || disabled}
+              style={{
+                border: `1px solid ${
+                  isChecked ? euiTheme.colors.primary : euiTheme.colors.lightShade
+                }`,
+              }}
+              // Use empty string to fallback to no color
+              // @ts-ignore
+              color={isChecked ? 'primary' : ''}
+              onClick={() => onChange(option.id)}
+              iconType={option.icon}
+              iconSide="right"
+              contentProps={{
+                style: {
+                  justifyContent: 'flex-start',
+                },
+              }}
+              css={css`
+                width: 100%;
+                height: ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl};
                 svg,
                 img {
-                  filter: grayscale(1);
+                  margin-left: auto;
                 }
-              }
-            `}
-          >
-            <EuiRadio label={option.label} id={option.id} checked={isChecked} onChange={() => {}} />
-          </EuiButton>
+
+                &&,
+                &&:hover {
+                  text-decoration: none;
+                }
+                &:disabled {
+                  svg,
+                  img {
+                    filter: grayscale(1);
+                  }
+                }
+              `}
+            >
+              <EuiRadio
+                label={option.label}
+                id={option.id}
+                checked={isChecked}
+                onChange={() => {}}
+              />
+            </EuiButton>
+          </EuiToolTip>
         );
       })}
     </div>
