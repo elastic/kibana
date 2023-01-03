@@ -405,3 +405,8 @@ This content has moved. Refer to {kibana-ref-all}/7.17/upgrade-assistant.html[Up
 == Install {kib} on macOS with Homebrew
 
 This page has been deleted. Refer to <<install>>.
+
+[role="exclude",id="managing-alerts-and-actions"]
+== Alerts and Actions
+
+This page has been deleted. Refer to <<alerting-getting-started>>.
