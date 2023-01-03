@@ -8,7 +8,7 @@
 require('../../../../src/setup_node_env');
 
 const { createReadStream, createWriteStream } = require('fs');
-const { mkdir } = require('fs/promises');
+const { mkdir, rm } = require('fs/promises');
 const path = require('path');
 const { Transform } = require('stream');
 const { createGzip } = require('zlib');
@@ -30,12 +30,8 @@ const {
     throw new Error('missing required --src argument');
   }
 
-  const targetDir = path
-    .dirname(sourceFile)
-    .split(path.sep)
-    .slice(0, -1)
-    .concat('metricbeat')
-    .join(path.sep);
+  const sourceDir = path.dirname(path.resolve(sourceFile));
+  const targetDir = path.join(path.dirname(sourceDir), 'metricbeat');
   const targetFile = path.join(targetDir, 'data.json.gz');
 
   console.info(`creating dir ${targetDir}`);
@@ -61,7 +57,7 @@ const {
           : source.beat
           ? 'beats'
           : source.elasticsearch
-          ? 'elasticsearch'
+          ? 'es'
           : null;
         /* eslint-enable no-nested-ternary */
 
@@ -79,4 +75,13 @@ const {
   ]);
 
   console.info(`created metricbeat data at ${targetFile}`);
+
+  const mappingsFile = path.join(sourceDir, 'mappings.json');
+  try {
+    await rm(mappingsFile);
+    console.info(`removed mappings at path ${mappingsFile}`);
+  } catch (err) {
+    if (err.code === 'ENOENT') return;
+    console.warn(`failed to remove mappings at path ${mappingsFile}:`, err);
+  }
 })();
