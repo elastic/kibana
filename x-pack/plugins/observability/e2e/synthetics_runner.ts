@@ -62,10 +62,7 @@ export class SyntheticsRunner {
 
       const promises = dataArchives.map((archive) => esArchiver.loadIfNeeded(e2eDir + archive));
 
-      await Promise.all([
-        ...promises,
-        esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote'),
-      ]);
+      await Promise.all([...promises]);
     } catch (e) {
       console.log(e);
     }
@@ -98,10 +95,18 @@ export class SyntheticsRunner {
     const { headless, match, pauseOnError } = this.params;
     const results = await syntheticsRun({
       params: { kibanaUrl: this.kibanaUrl, getService: this.getService },
-      playwrightOptions: { headless, chromiumSandbox: false, timeout: 60 * 1000 },
+      playwrightOptions: {
+        headless,
+        chromiumSandbox: false,
+        timeout: 60 * 1000,
+        viewport: {
+          height: 900,
+          width: 1600,
+        },
+      },
       match: match === 'undefined' ? '' : match,
       pauseOnError,
-      screenshots: 'off',
+      screenshots: 'only-on-failure',
     });
 
     await this.assertResults(results);
