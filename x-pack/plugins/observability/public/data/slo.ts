@@ -25,7 +25,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       index: 'some-index',
       filter: 'baz: foo and bar > 2',
       good: 'http_status: 2xx',
-      total: '',
+      total: 'a query',
     },
   },
   timeWindow: {
