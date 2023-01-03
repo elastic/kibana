@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
       await retry.try(async () => {
-        await clickInChart(6, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+        await clickInChart(30, 5); // hardcoded position of bar, depends heavy on data and charts implementation
         await testSubjects.existOrFail('applyFiltersPopoverButton', { timeout: 2500 });
       });
 
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'AL');
       expect(hasGeoDestFilter).to.be(true);
-      await filterBar.addFilter('geo.src', 'is', 'US');
+      await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'US' });
       await filterBar.toggleFilterPinned('geo.src');
     });
 
@@ -131,9 +131,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await filterBar.addFilter('geo.src', 'is', 'US');
+      await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'US' });
       await filterBar.toggleFilterPinned('geo.src');
-      await filterBar.addFilter('geo.dest', 'is', 'LS');
+      await filterBar.addFilter({ field: 'geo.dest', operation: 'is', value: 'LS' });
 
       await dashboardAddPanel.clickCreateNewLink();
       await PageObjects.header.waitUntilLoadingHasFinished();

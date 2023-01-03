@@ -186,6 +186,7 @@ export const serviceDetail = {
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,
+                  flyoutDetailTab: t.string,
                 }),
                 offsetRt,
               ]),
@@ -237,6 +238,7 @@ export const serviceDetail = {
               path: t.type({
                 groupId: t.string,
               }),
+              query: t.partial({ errorId: t.string }),
             }),
           },
           '/services/{serviceName}/errors': {

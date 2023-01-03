@@ -143,11 +143,11 @@ const RuleAdd = ({
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      const res = await getRuleActionErrors(rule as Rule, actionTypeRegistry);
+      const res = await getRuleActionErrors(rule.actions, actionTypeRegistry);
       setIsLoading(false);
       setRuleActionsErrors([...res]);
     })();
-  }, [rule, actionTypeRegistry]);
+  }, [rule.actions, actionTypeRegistry]);
 
   useEffect(() => {
     if (config.minimumScheduleInterval && !initialValues?.schedule?.interval) {
@@ -196,10 +196,9 @@ const RuleAdd = ({
 
   const ruleType = rule.ruleTypeId ? ruleTypeRegistry.get(rule.ruleTypeId) : null;
 
-  const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
-    rule as Rule,
-    ruleType,
-    config
+  const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = useMemo(
+    () => getRuleErrors(rule as Rule, ruleType, config),
+    [rule, ruleType, config]
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule

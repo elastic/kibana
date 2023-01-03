@@ -74,7 +74,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should preserve app filters in lens', async () => {
-      await filterBar.addFilter('bytes', 'is between', '3500', '4000');
+      await filterBar.addFilter({
+        field: 'bytes',
+        operation: 'is between',
+        value: { from: '3500', to: '4000' },
+      });
       await PageObjects.discover.findFieldByName('geo.src');
       await PageObjects.discover.clickFieldListItemVisualize('geo.src');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -131,6 +135,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
         'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('textBased-visualize');
+
+      await retry.try(async () => {
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
+        expect(dimensions).to.have.length(2);
+        expect(await dimensions[1].getVisibleText()).to.be('average');
+      });
+    });
+
+    it('should visualize correctly text based language queries based on index patterns', async () => {
+      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();

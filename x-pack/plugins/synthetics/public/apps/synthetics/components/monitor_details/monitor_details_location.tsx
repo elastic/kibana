@@ -50,7 +50,7 @@ export const MonitorDetailsLocation: React.FC = () => {
       );
 
       const menuItems = loadingLocationsStatus
-        ? [<span>Loading...</span>]
+        ? [<span key="loading">Loading...</span>]
         : monitor.locations
             .map((location) => {
               const fullLocation = locations.find((l) => l.id === location.id);
