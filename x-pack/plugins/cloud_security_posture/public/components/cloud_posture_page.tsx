@@ -93,25 +93,41 @@ const packageNotInstalledRenderer = (
     <FullSizeCenteredPage>
       <EuiEmptyPrompt
         icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
-        title={<h2>Detect security misconfigurations in your cloud resources! </h2>}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
+              defaultMessage="Detect security misconfigurations in your cloud resources!"
+            />
+          </h2>
+        }
         layout="horizontal"
         color="plain"
         body={
           <p>
-            Add the security posture management integration to begin. Learn more about Cloud
-            Security Posture.
+            <FormattedMessage
+              id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
+              defaultMessage="Add the security posture management integration to begin. Learn more about Cloud
+            Security Posture."
+            />
           </p>
         }
         actions={
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButton color="primary" fill href={cspmIntegrationLink}>
-                Add CSPM Integration
+                <FormattedMessage
+                  id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
+                  defaultMessage="Add CSPM Integration"
+                />
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton color="primary" fill href={kspmIntegrationLink}>
-                Add KSPM Integration
+                <FormattedMessage
+                  id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
+                  defaultMessage="Add KSPM Integration"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
