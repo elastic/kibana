@@ -18,7 +18,7 @@ export const recordVideo = (page: Page) => {
   after(async () => {
     try {
       const videoFilePath = await page.video()?.path();
-      const pathToVideo = videoFilePath?.replace('.synthetics/videos/', '').replace('.webm', '');
+      const pathToVideo = videoFilePath?.replace('.journeys/videos/', '').replace('.webm', '');
       const newVideoPath = videoFilePath?.replace(pathToVideo!, runner.currentJourney!.name);
       fs.renameSync(videoFilePath!, newVideoPath!);
     } catch (e) {
