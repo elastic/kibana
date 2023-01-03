@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { ESQL_LANG_ID, ESQL_THEME_ID } from './lib/constants';
-export { ESQLLang } from './language';
-export type { ESQLCustomAutocompleteCallbacks } from './lib/autocomplete/types';
-export { buildESQlTheme } from './lib/monaco/esql_theme';
+export enum DynamicAutocompleteItem {
+  SourceIdentifier = 'SourceIdentifier',
+  FieldIdentifier = 'FieldIdentifier',
+}
+
+export function isDynamicAutocompleteItem(v: unknown): v is DynamicAutocompleteItem {
+  return (
+    v === DynamicAutocompleteItem.SourceIdentifier || v === DynamicAutocompleteItem.FieldIdentifier
+  );
+}
