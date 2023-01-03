@@ -35,6 +35,18 @@ export function SloEditFormDefinitionCustomKql({ control, trigger }: Props) {
     }
   }, [indices.length, loading, trigger]);
 
+  function valueMatchIndex(value: string | undefined, index: string): boolean {
+    if (value === undefined) {
+      return false;
+    }
+
+    if (value.length > 0 && value.substring(value.length - 1) === '*') {
+      return index.indexOf(value.substring(0, value.length - 1), 0) > -1;
+    }
+
+    return index === value;
+  }
+
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
@@ -49,7 +61,7 @@ export function SloEditFormDefinitionCustomKql({ control, trigger }: Props) {
           control={control}
           rules={{
             required: true,
-            validate: (value) => Boolean(indices.find((index) => index.name === value)),
+            validate: (value) => indices.some((index) => valueMatchIndex(value, index.name)),
           }}
           render={({ field }) => (
             <EuiSuggest
@@ -61,7 +73,7 @@ export function SloEditFormDefinitionCustomKql({ control, trigger }: Props) {
               onItemClick={({ label }) => {
                 field.onChange(label);
               }}
-              isInvalid={!Boolean(indicesNames.find((index) => index.label === field.value))}
+              isInvalid={!indicesNames.some((index) => valueMatchIndex(field.value, index.label))}
               placeholder={i18n.translate(
                 'xpack.observability.slos.sloEdit.sloDefinition.customKql.index.selectIndex',
                 {
