@@ -52,7 +52,9 @@ disabled:
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/telemetry/config.ts
   - x-pack/test/alerting_api_integration/spaces_only_legacy/config.ts
   - x-pack/test/cloud_integration/config.ts
-  - x-pack/test/performance/config.playwright.ts
+  # Failing: browserType.launch: Executable doesn't exist
+  # https://github.com/elastic/kibana/issues/148219
+  # - x-pack/test/performance/config.playwright.ts
   - x-pack/test/load/config.ts
   - x-pack/test/plugin_api_perf/config.js
   - x-pack/test/screenshot_creation/config.ts
