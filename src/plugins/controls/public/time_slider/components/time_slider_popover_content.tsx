@@ -70,10 +70,10 @@ export function TimeSliderPopoverContent(props: Props) {
   );
   const anchorStartToggleButtonLabel = isAnchored
     ? i18n.translate('controls.timeSlider.settings.unanchorStartSwitchLabel', {
-        defaultMessage: 'Unanchor start',
+        defaultMessage: 'Unpin start',
       })
     : i18n.translate('controls.timeSlider.settings.anchorStartSwitchLabel', {
-        defaultMessage: 'Anchor start',
+        defaultMessage: 'Pin start',
       });
 
   return (
