@@ -304,6 +304,46 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         title={
           <h4>
             <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.inactivityTimeoutLabel"
+              defaultMessage="Inactivity timeout"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.inactivityTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically change to inactive status and be filtered out of the agents list."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.inactivity_timeout && validation.inactivity_timeout
+              ? validation.inactivity_timeout
+              : null
+          }
+          isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
+        >
+          <EuiFieldNumber
+            fullWidth
+            disabled={agentPolicy.is_managed === true}
+            value={agentPolicy.inactivity_timeout || ''}
+            min={0}
+            onChange={(e) => {
+              updateAgentPolicy({
+                inactivity_timeout: e.target.value ? Number(e.target.value) : 0,
+              });
+            }}
+            isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
+            onBlur={() => setTouchedFields({ ...touchedFields, inactivity_timeout: true })}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
               id="xpack.fleet.agentPolicyForm.fleetServerHostsLabel"
               defaultMessage="Fleet Server"
             />

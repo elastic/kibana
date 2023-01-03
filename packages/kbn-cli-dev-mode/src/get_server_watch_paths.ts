@@ -9,7 +9,8 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
 
 interface Options {
   pluginPaths: string[];
@@ -46,6 +47,7 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
         fromRoot('config'),
         ...pluginPaths,
         ...pluginScanDirs,
+        ...BAZEL_PACKAGE_DIRS,
       ].map((path) => Path.resolve(path))
     )
   ).filter((path) => Fs.existsSync(fromRoot(path)));
