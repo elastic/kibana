@@ -66,9 +66,8 @@ jobs:
     #   If the Autobuild fails above, remove it and uncomment the following three lines.
     #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
 
-    - run: |
-       echo "Run, Build Application using script"
-       yarn kbn bootstrap
+    - name: Bootstrap
+      run: yarn kbn bootstrap
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
