@@ -81,7 +81,10 @@ export interface InternalRenderingServiceSetup {
    */
   render(
     request: KibanaRequest,
-    uiSettings: IUiSettingsClient,
+    uiSettings: {
+      client: IUiSettingsClient;
+      globalClient: IUiSettingsClient;
+    },
     options?: IRenderOptions
   ): Promise<string>;
 }

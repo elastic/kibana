@@ -44,6 +44,10 @@ const createSetupContractMock = () => {
       defaults: { legacyInjectedUiSettingDefaults: true },
       user: { legacyInjectedUiSettingUserValues: true },
     },
+    globalSettings: {
+      defaults: { legacyInjectedUiSettingDefaults: true },
+      user: { legacyInjectedUiSettingUserValues: true },
+    },
   } as any);
   setupContract.getPlugins.mockReturnValue([]);
   setupContract.getTheme.mockReturnValue({ darkMode: false, version: 'v8' });

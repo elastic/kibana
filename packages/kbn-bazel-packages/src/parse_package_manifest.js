@@ -122,8 +122,7 @@ function validatePackageManifest(parsed) {
     throw new Error('expected manifest root to be an object');
   }
 
-  const { type, id, owner, typeDeps, runtimeDeps, devOnly, plugin, sharedBrowserBundle, ...extra } =
-    parsed;
+  const { type, id, owner, devOnly, plugin, sharedBrowserBundle, ...extra } = parsed;
 
   const extraKeys = Object.keys(extra);
   if (extraKeys.length) {
@@ -149,14 +148,6 @@ function validatePackageManifest(parsed) {
     );
   }
 
-  if (!isArrOfStrings(typeDeps)) {
-    throw err(`typeDeps`, typeDeps, `must be an array of strings`);
-  }
-
-  if (!isArrOfStrings(runtimeDeps)) {
-    throw err(`runtimeDeps`, runtimeDeps, `must be an array of strings`);
-  }
-
   if (devOnly !== undefined && typeof devOnly !== 'boolean') {
     throw err(`devOnly`, devOnly, `must be a boolean when defined`);
   }
@@ -164,8 +155,6 @@ function validatePackageManifest(parsed) {
   const base = {
     id,
     owner: Array.isArray(owner) ? owner : [owner],
-    typeDeps,
-    runtimeDeps,
     devOnly,
   };
 

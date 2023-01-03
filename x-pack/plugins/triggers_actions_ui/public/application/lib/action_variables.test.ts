@@ -64,7 +64,8 @@ const expectedTransformResult = [
     name: 'alert.actionGroupName',
   },
   {
-    description: 'A flag on the alert that indicates whether the alert is flapping.',
+    description:
+      'A flag on the alert that indicates whether the alert status is changing repeatedly.',
     name: 'alert.flapping',
   },
   {

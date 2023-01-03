@@ -23,8 +23,17 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { loadingSpinner } from './loading_spinner';
 
-interface Props {
+/**
+ * OptInExampleFlyout props
+ */
+export interface Props {
+  /**
+   * Method that provides the sample payload to show in the flyout
+   */
   fetchExample: () => Promise<unknown[]>;
+  /**
+   * Hook called when the flyout is closed
+   */
   onClose: () => void;
 }
 
@@ -38,7 +47,7 @@ interface State {
  * React component for displaying the example data associated with the Telemetry opt-in banner.
  */
 export class OptInExampleFlyout extends React.PureComponent<Props, State> {
-  _isMounted = false;
+  private _isMounted = false;
 
   public readonly state: State = {
     data: null,
@@ -71,7 +80,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
     this._isMounted = false;
   }
 
-  renderBody({ data, isLoading, hasPrivilegeToRead }: State) {
+  private renderBody({ data, isLoading, hasPrivilegeToRead }: State) {
     if (isLoading) {
       return loadingSpinner;
     }
