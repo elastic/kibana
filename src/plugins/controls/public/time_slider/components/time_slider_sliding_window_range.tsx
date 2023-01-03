@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiRange, EuiRangeTick } from '@elastic/eui';
-import { _SingleRangeChangeEvent } from '@elastic/eui/src/components/form/range/types';
+import React, { Ref, ComponentProps } from 'react';
+import { EuiDualRange, EuiRangeTick } from '@elastic/eui';
+import type { EuiDualRangeClass } from '@elastic/eui/src/components/form/range/dual_range';
+
+// Unfortunately, wrapping EuiDualRange in `withEuiTheme` has created a super annoying/verbose typing
+export type EuiDualRangeRef = EuiDualRangeClass & ComponentProps<typeof EuiDualRange>;
 
 interface Props {
   value: [number, number];
@@ -17,27 +20,26 @@ interface Props {
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
+  rangeRef?: Ref<EuiDualRangeRef>;
 }
 
-export function AnchoredRange(props: Props) {
-  function onChange(e: _SingleRangeChangeEvent) {
-    const from = parseInt(e.currentTarget.value, 10);
-    if (!isNaN(from)) {
-      props.onChange([props.timeRangeMin, from]);
-    }
+export function TimeSliderSlidingWindowRange(props: Props) {
+  function onChange(value?: [number | string, number | string]) {
+    props.onChange(value as [number, number]);
   }
 
   return (
-    <EuiRange
+    <EuiDualRange
+      ref={props.rangeRef}
       fullWidth={true}
-      value={props.value[1]}
+      value={props.value}
       onChange={onChange}
-      showRange
       showTicks={true}
       min={props.timeRangeMin}
       max={props.timeRangeMax}
       step={props.stepSize}
       ticks={props.ticks}
+      isDraggable
     />
   );
 }

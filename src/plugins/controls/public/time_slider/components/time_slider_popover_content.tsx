@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React, { Ref } from 'react';
 import { EuiButtonIcon, EuiRangeTick, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { AnchoredRange } from './anchored_range';
-import { EuiDualRangeRef, SlidingWindowRange } from './sliding_window_range';
+import { TimeSliderAnchoredRange } from './time_slider_anchored_range';
+import { EuiDualRangeRef, TimeSliderSlidingWindowRange } from './time_slider_sliding_window_range';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
 import { getIsAnchored } from '../time_slider_selectors';
@@ -49,7 +49,7 @@ export function TimeSliderPopoverContent(props: Props) {
   const dispatch = useEmbeddableDispatch();
   const isAnchored = select(getIsAnchored);
   const rangeInput = isAnchored ? (
-    <AnchoredRange
+    <TimeSliderAnchoredRange
       value={props.value}
       onChange={props.onChange}
       stepSize={props.stepSize}
@@ -58,7 +58,7 @@ export function TimeSliderPopoverContent(props: Props) {
       timeRangeMax={props.timeRangeMax}
     />
   ) : (
-    <SlidingWindowRange
+    <TimeSliderSlidingWindowRange
       value={props.value}
       onChange={props.onChange}
       stepSize={props.stepSize}
