@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { aggregationFunctionsDefinitions } from './aggregation_functions';
+export { aggregationFunctionsDefinitions, roundCommandDefinition } from './functions_commands';
 export { sourceCommandsDefinitions } from './source_commands';
 export { processingCommandsDefinitions, pipeDefinition } from './processing_commands';
 

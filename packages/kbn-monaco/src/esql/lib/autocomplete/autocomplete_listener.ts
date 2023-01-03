@@ -26,6 +26,7 @@ import {
   closeBracketDefinition,
   mathOperatorsCommandsDefinitions,
   aggregationFunctionsDefinitions,
+  roundCommandDefinition,
   assignOperatorDefinition,
   buildConstantsDefinitions,
   buildNewVarDefinition,
@@ -203,14 +204,24 @@ export class AutocompleteListener implements ESQLParserListener {
     if (ctx.exception) {
       const ve = ctx.valueExpression();
       if (!ve) {
-        this.suggestions = [...aggregationFunctionsDefinitions, ...this.fields];
-        return;
+        if (this.parentContext === ESQLParser.STATS) {
+          this.suggestions = [...aggregationFunctionsDefinitions, ...this.fields];
+          return;
+        }
+
+        if (this.parentContext === ESQLParser.EVAL) {
+          this.suggestions = [roundCommandDefinition, ...this.fields];
+          return;
+        }
       }
     }
   }
 
   exitValueExpression(ctx: ValueExpressionContext) {
-    if (this.parentContext && [ESQLParser.EVAL, ESQLParser.STATS].includes(this.parentContext)) {
+    const isInStats = this.parentContext === ESQLParser.STATS;
+    const isInEval = this.parentContext === ESQLParser.EVAL;
+
+    if (this.parentContext && (isInStats || isInEval)) {
       const hasFN = ctx.tryGetToken(esql_parser.UNARY_FUNCTION, 0);
       const hasLP = ctx.tryGetToken(esql_parser.LP, 0);
       const hasRP = ctx.tryGetToken(esql_parser.RP, 0);
@@ -230,7 +241,7 @@ export class AutocompleteListener implements ESQLParserListener {
         if (ctx.childCount === 1) {
           this.suggestions = [
             ...this.getEndCommandSuggestions(),
-            ...mathOperatorsCommandsDefinitions,
+            ...(isInEval ? mathOperatorsCommandsDefinitions : []),
           ];
           return;
         }

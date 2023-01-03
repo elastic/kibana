@@ -11,22 +11,23 @@ import { buildDocumentation } from './utils';
 
 import type { AutocompleteCommandDefinition } from '../types';
 
-export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = [
-  {
-    label: 'round',
-    insertText: 'round',
-    kind: 1,
-    detail: i18n.translate('monaco.esql.autocomplete.roundDoc', {
-      defaultMessage:
-        'Returns a number rounded to the decimal, specified by he closest integer value. The default is to round to an integer.',
-    }),
-    documentation: {
-      value: buildDocumentation('round(grouped[T]): aggregated[T]', [
-        'from index where field="value" | eval rounded = round(field)',
-      ]),
-    },
-    sortText: 'C',
+export const roundCommandDefinition: AutocompleteCommandDefinition = {
+  label: 'round',
+  insertText: 'round',
+  kind: 1,
+  detail: i18n.translate('monaco.esql.autocomplete.roundDoc', {
+    defaultMessage:
+      'Returns a number rounded to the decimal, specified by he closest integer value. The default is to round to an integer.',
+  }),
+  documentation: {
+    value: buildDocumentation('round(grouped[T]): aggregated[T]', [
+      'from index where field="value" | eval rounded = round(field)',
+    ]),
   },
+  sortText: 'C',
+};
+
+export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = [
   {
     label: 'avg',
     insertText: 'avg',
