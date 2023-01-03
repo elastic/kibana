@@ -14,7 +14,7 @@ When you run Cypress in interactive mode, an interactive runner is displayed tha
 
 #### Headless mode
 
-A headless browser is a browser simulation program that does not have a user interface. These programs operate like any other browser, but do not display any UI. This is why meanwhile you are executing the tests on this mode you are not going to see the application under test. Just the output of the test is displayed on the terminal once the execution is finished.
+A headless browser is a browser simulation program that does not have a user interface. These programs operate like any other browser but do not display any UI. This is why meanwhile you are executing the tests on this mode you are not going to see the application under test. Just the output of the test is displayed on the terminal once the execution is finished.
 
 ### Target environments
 
@@ -73,7 +73,7 @@ Cypress convention. As a convenience, by default Cypress will automatically incl
 
 ### screens/
 
-Contains the elements we want to interact with in our tests.
+Contains the elements we want to interact with within our tests.
 
 Each file inside the screens folder represents a screen in our application.
 
@@ -105,10 +105,10 @@ Loading the web page takes a big amount of time, in order to minimize that impac
 taken into consideration until another solution is implemented:
 
 - Group the tests that are similar in different contexts.
-- For every context login only once, clean the state between tests if needed without re-loading the page.
+- For every context login only once, and clean the state between tests if needed without reloading the page.
 - All tests in a spec file must be order-independent.
 
-Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
+Remember that by minimizing the number of times the web page is loaded, we minimize the execution time as well.
 
 ## Linting
 
