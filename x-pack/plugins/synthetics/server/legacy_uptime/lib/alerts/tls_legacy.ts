@@ -12,7 +12,7 @@ import { AlertInstanceContext } from '@kbn/alerting-plugin/common';
 import { Alert } from '@kbn/alerting-plugin/server';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState } from './common';
-import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { Cert, CertResult } from '../../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
