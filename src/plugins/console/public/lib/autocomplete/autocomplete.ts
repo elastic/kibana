@@ -1209,11 +1209,9 @@ export default function ({
       if (!context) {
         callback(null, []);
       } else {
-        const terms = getTerms(context, context.autoCompleteSet!);
-
-        const suggestions = getSuggestions(terms);
-
         if (!context.asyncResultsState?.isLoading) {
+          const terms = getTerms(context, context.autoCompleteSet!);
+          const suggestions = getSuggestions(terms);
           callback(null, suggestions);
         }
 
