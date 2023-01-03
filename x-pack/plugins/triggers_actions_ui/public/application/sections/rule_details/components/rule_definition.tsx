@@ -68,7 +68,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const canSaveRule =
     rule &&
-    hasAllPrivilege(rule, ruleType) &&
+    hasAllPrivilege(rule.consumer, ruleType) &&
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
   const hasEditButton = useMemo(() => {
