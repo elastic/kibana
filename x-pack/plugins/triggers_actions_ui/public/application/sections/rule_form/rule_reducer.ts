@@ -9,7 +9,8 @@ import { SavedObjectAttribute } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import { Reducer } from 'react';
 import { RuleActionParam, IntervalSchedule } from '@kbn/alerting-plugin/common';
-import { Rule, RuleAction, RuleNotifyWhenType } from '../../../types';
+import { Rule, RuleAction } from '../../../types';
+import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 export type InitialRule = Partial<Rule> &
   Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
@@ -26,12 +27,6 @@ interface CommandType<
 > {
   type: T;
 }
-
-export const DEFAULT_FREQUENCY = {
-  notifyWhen: 'onActionGroupChange' as RuleNotifyWhenType,
-  throttle: null,
-  summary: false,
-};
 
 export interface RuleState {
   rule: InitialRule;
