@@ -16809,7 +16809,6 @@
     "xpack.infra.logSourceErrorPage.tryAgainButtonLabel": "重试",
     "xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder": "搜索日志条目……（例如 host.name:host-1）",
     "xpack.infra.logsPage.toolbar.logFilterErrorToastTitle": "日志筛选错误",
-    "xpack.infra.logsPage.toolbar.logFilterUnsupportedLanguageError": "不支持 SQL",
     "xpack.infra.logStream.kqlErrorTitle": "KQL 表达式无效",
     "xpack.infra.logStream.unknownErrorTitle": "发生错误",
     "xpack.infra.logStreamEmbeddable.description": "添加实时流式传输日志的表。",
