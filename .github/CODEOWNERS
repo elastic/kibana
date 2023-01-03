@@ -736,6 +736,9 @@ packages/core/custom-branding/core-custom-branding-browser @elastic/kibana-globa
 packages/core/custom-branding/core-custom-branding-browser-internal @elastic/kibana-global-experience
 packages/core/custom-branding/core-custom-branding-browser-mocks @elastic/kibana-global-experience
 packages/core/custom-branding/core-custom-branding-common @elastic/kibana-global-experience
+packages/core/custom-branding/core-custom-branding-server @elastic/kibana-global-experience
+packages/core/custom-branding/core-custom-branding-server-internal @elastic/kibana-global-experience
+packages/core/custom-branding/core-custom-branding-server-mocks @elastic/kibana-global-experience
 packages/core/deprecations/core-deprecations-browser @elastic/kibana-core
 packages/core/deprecations/core-deprecations-browser-internal @elastic/kibana-core
 packages/core/deprecations/core-deprecations-browser-mocks @elastic/kibana-core
