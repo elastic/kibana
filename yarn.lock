@@ -12928,21 +12928,6 @@ ejs@^3.1.8:
   dependencies:
     jake "^10.8.5"
 
-elastic-apm-http-client@11.0.3:
-  version "11.0.3"
-  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.0.3.tgz#1d357af449d66695ef10019c21efe6377ad8815e"
-  integrity sha512-y+P9ByvfxjZbnLejgGaCAnwEe+FWMVshoMmjeLEEEVlQTLiFUHy7vhYyCQVqgbZzQ6zpaGPqPU2woKglKW4RHw==
-  dependencies:
-    agentkeepalive "^4.2.1"
-    breadth-filter "^2.0.0"
-    end-of-stream "^1.4.4"
-    fast-safe-stringify "^2.0.7"
-    fast-stream-to-buffer "^1.0.0"
-    object-filter-sequence "^1.0.0"
-    readable-stream "^3.4.0"
-    semver "^6.3.0"
-    stream-chopper "^3.0.1"
-
 elastic-apm-http-client@11.0.4, elastic-apm-http-client@^11.0.1:
   version "11.0.4"
   resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.0.4.tgz#3e44e56fa42235b1b16a33c6a7656cfde595f9ff"
