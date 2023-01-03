@@ -10,6 +10,8 @@ import { recordVideo } from '../../../helpers/record_video';
 import { monitorManagementPageProvider } from '../../../page_objects/uptime/monitor_management';
 
 journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
+  recordVideo(page);
+
   const uptime = monitorManagementPageProvider({ page, kibanaUrl });
 
   recordVideo(page);
