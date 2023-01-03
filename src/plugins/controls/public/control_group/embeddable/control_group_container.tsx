@@ -119,9 +119,7 @@ export class ControlGroupContainer extends Container<
     return this.createAndSaveEmbeddable(panelState.type, panelState);
   }
 
-  public openAddDataControlFlyout() {
-    openAddDataControlFlyout(this);
-  }
+  public openAddDataControlFlyout = openAddDataControlFlyout;
 
   public getEditControlGroupButton = (closePopover: () => void) => {
     const ControlsServicesProvider = pluginServices.getContextProvider();

@@ -24,7 +24,7 @@ import {
   DEFAULT_CONTROL_WIDTH,
 } from '../../../common/control_group/control_group_constants';
 
-export function openAddDataControlFlyout(controlGroup: ControlGroupContainer) {
+export function openAddDataControlFlyout(this: ControlGroupContainer) {
   const {
     overlays: { openFlyout, openConfirm },
     controls: { getControlFactory },
@@ -35,7 +35,7 @@ export function openAddDataControlFlyout(controlGroup: ControlGroupContainer) {
   let controlInput: Partial<DataControlInput> = {};
   const onCancel = () => {
     if (Object.keys(controlInput).length === 0) {
-      controlGroup.closeAllFlyouts();
+      this.closeAllFlyouts();
       return;
     }
 
@@ -46,7 +46,7 @@ export function openAddDataControlFlyout(controlGroup: ControlGroupContainer) {
       buttonColor: 'danger',
     }).then((confirmed) => {
       if (confirmed) {
-        controlGroup.closeAllFlyouts();
+        this.closeAllFlyouts();
       }
     });
   };
@@ -55,18 +55,18 @@ export function openAddDataControlFlyout(controlGroup: ControlGroupContainer) {
     toMountPoint(
       <ControlsServicesProvider>
         <ControlEditor
-          setLastUsedDataViewId={(newId) => controlGroup.setLastUsedDataViewId(newId)}
-          getRelevantDataViewId={controlGroup.getMostRelevantDataViewId}
+          setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
+          getRelevantDataViewId={this.getMostRelevantDataViewId}
           isCreate={true}
-          width={controlGroup.getInput().defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
-          grow={controlGroup.getInput().defaultControlGrow ?? DEFAULT_CONTROL_GROW}
+          width={this.getInput().defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
+          grow={this.getInput().defaultControlGrow ?? DEFAULT_CONTROL_GROW}
           updateTitle={(newTitle) => (controlInput.title = newTitle)}
-          updateWidth={(defaultControlWidth) => controlGroup.updateInput({ defaultControlWidth })}
+          updateWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
           updateGrow={(defaultControlGrow: boolean) =>
-            controlGroup.updateInput({ defaultControlGrow })
+            this.updateInput({ defaultControlGrow })
           }
           onSave={(type) => {
-            controlGroup.closeAllFlyouts();
+            this.closeAllFlyouts();
             if (!type) {
               return;
             }
@@ -77,16 +77,16 @@ export function openAddDataControlFlyout(controlGroup: ControlGroupContainer) {
             }
 
             if (type === OPTIONS_LIST_CONTROL) {
-              controlGroup.addOptionsListControl(controlInput as AddOptionsListControlProps);
+              this.addOptionsListControl(controlInput as AddOptionsListControlProps);
               return;
             }
 
             if (type === RANGE_SLIDER_CONTROL) {
-              controlGroup.addRangeSliderControl(controlInput as AddRangeSliderControlProps);
+              this.addRangeSliderControl(controlInput as AddRangeSliderControlProps);
               return;
             }
 
-            controlGroup.addDataControlFromField(controlInput as AddDataControlProps);
+            this.addDataControlFromField(controlInput as AddDataControlProps);
           }}
           onCancel={onCancel}
           onTypeEditorChange={(partialInput) =>
