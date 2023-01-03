@@ -2,6 +2,4 @@
   "type": "shared-common",
   "id": "@kbn/core-custom-branding-server-internal",
   "owner": "@elastic/kibana-global-experience",
-  "runtimeDeps": [],
-  "typeDeps": [],
 }
