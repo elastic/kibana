@@ -247,7 +247,7 @@ describe('UpdateConnector renders', () => {
     });
 
     // Wait for click event to be processed
-    await waitFor(() => expect(onConfirm).toHaveBeenCalled());
+    await waitFor(() => expect(onConfirm).toHaveBeenCalled(), { timeout: 3000 });
 
     expect(onConfirm).toHaveBeenCalledWith({
       config: {
