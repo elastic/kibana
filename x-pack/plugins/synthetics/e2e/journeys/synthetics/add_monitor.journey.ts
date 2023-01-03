@@ -181,7 +181,7 @@ const createMonitorJourney = ({
       });
 
       step(`edit ${monitorName}`, async () => {
-        await syntheticsApp.navigateToEditMonitor();
+        await syntheticsApp.navigateToEditMonitor(monitorName);
         await syntheticsApp.findByText(monitorListDetails.location);
         const hasFailure = await syntheticsApp.findEditMonitorConfiguration(
           monitorEditDetails,
@@ -212,7 +212,7 @@ const createMonitorJourney = ({
 Object.values(configuration).forEach((config) => {
   createMonitorJourney({
     monitorType: config.monitorType,
-    monitorName: `${config.monitorConfig.name} monitor`,
+    monitorName: config.monitorConfig.name,
     monitorConfig: config.monitorConfig,
     monitorListDetails: config.monitorListDetails,
     monitorEditDetails: config.monitorEditDetails as Array<[string, string]>,
