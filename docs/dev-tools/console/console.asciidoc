@@ -49,7 +49,7 @@ click the action icon (image:dev-tools/console/images/wrench.png[]) and select *
 Once copied, the username and password will need to be provided
 for the calls to work from external environments.
 
-Note: If you post a GET request with a body, will be automaically be converted to *Console* syntax as a POST request.
+NOTE: If you post a GET request with a body, it is automatically converted to *Console* syntax as a POST request.
 
 [float]
 [[console-autocomplete]]
