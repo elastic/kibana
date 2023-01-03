@@ -5,14 +5,10 @@
  * 2.0.
  */
 import type { GetLensAttributes } from '../../../types';
-import { buildAlertsOptionsFilters } from './utils';
 
 export const getAlertsTableLensAttributes: GetLensAttributes = (
   stackByField = 'kibana.alert.rule.name',
-  extraOptions = {
-    showOnlyThreatIndicatorAlerts: false,
-    showBuildingBlockAlerts: false,
-  }
+  extraOptions
 ) => ({
   title: 'Alerts',
   description: '',
@@ -45,7 +41,7 @@ export const getAlertsTableLensAttributes: GetLensAttributes = (
       query: '',
       language: 'kuery',
     },
-    filters: buildAlertsOptionsFilters(extraOptions),
+    filters: extraOptions?.filters ? extraOptions.filters : [],
     datasourceStates: {
       formBased: {
         layers: {
@@ -77,22 +73,22 @@ export const getAlertsTableLensAttributes: GetLensAttributes = (
                 },
               },
               'f04a71a3-399f-4d32-9efc-8a005e989991': {
-                label: `Count of ${extraOptions.breakdownField}`,
+                label: `Count of ${extraOptions?.breakdownField}`,
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,
                 scale: 'ratio',
-                sourceField: extraOptions.breakdownField,
+                sourceField: extraOptions?.breakdownField,
                 params: {
                   emptyAsNull: true,
                 },
               },
               '75ce269b-ee9c-4c7d-a14e-9226ba0fe059': {
-                label: `Top values of ${extraOptions.breakdownField}`,
+                label: `Top values of ${extraOptions?.breakdownField}`,
                 dataType: 'string',
                 operationType: 'terms',
                 scale: 'ordinal',
-                sourceField: extraOptions.breakdownField,
+                sourceField: extraOptions?.breakdownField,
                 isBucketed: true,
                 params: {
                   size: 1000,

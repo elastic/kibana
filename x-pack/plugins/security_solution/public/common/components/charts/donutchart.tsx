@@ -9,7 +9,7 @@ import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import type { Datum, NodeColorAccessor, PartialTheme } from '@elastic/charts';
+import type { Datum, NodeColorAccessor, PartialTheme, ElementClickListener } from '@elastic/charts';
 import {
   Chart,
   Partition,
@@ -47,6 +47,7 @@ export interface DonutChartProps {
   height?: number;
   label: React.ReactElement | string;
   legendItems?: LegendItem[] | null | undefined;
+  onElementClick?: ElementClickListener;
   title: React.ReactElement | string | number | null;
   totalCount: number | null | undefined;
 }
@@ -129,10 +130,11 @@ export const DonutChartWrapper = React.memo(DonutChartWrapperComponent);
 
 export const DonutChart = ({
   data,
-  height = 90,
   fillColor,
+  height = 90,
   label,
   legendItems,
+  onElementClick,
   title,
   totalCount,
 }: DonutChartProps) => {
@@ -145,7 +147,7 @@ export const DonutChart = ({
           <DonutChartEmpty size={height} />
         ) : (
           <Chart size={height}>
-            <Settings theme={donutTheme} baseTheme={theme} />
+            <Settings theme={donutTheme} baseTheme={theme} onElementClick={onElementClick} />
             <Partition
               id="donut-chart"
               data={data}

@@ -51,19 +51,19 @@ const initVisualizationData: {
 const style = { height: '100%', minWidth: '100px' };
 
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
-  extraOptions,
   extraActions,
+  extraOptions,
   getLensAttributes,
   height: wrapperHeight,
-  width: wrapperWidth,
   id,
   inputsModelId = InputsModelId.global,
   inspectTitle,
   lensAttributes,
+  onLoad,
   scopeId = SourcererScopeName.default,
   stackByField,
   timerange,
-  onLoad,
+  width: wrapperWidth,
 }) => {
   const { lens } = useKibana().services;
   const dispatch = useDispatch();

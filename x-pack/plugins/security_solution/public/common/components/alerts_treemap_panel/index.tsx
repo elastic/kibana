@@ -31,7 +31,6 @@ import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
 import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
 import { getAlertsTreemapLensAttributes as getLensAttributes } from '../visualization_actions/lens_attributes/common/alerts/alerts_treemap';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import type { Status } from '../../../../common/detection_engine/schemas/common';
 
 const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px
 
@@ -56,15 +55,12 @@ export interface Props {
   setStackByField0ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
   setStackByField1: (stackBy: string | undefined) => void;
   setStackByField1ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
-  showBuildingBlockAlerts: boolean;
-  showOnlyThreatIndicatorAlerts: boolean;
   signalIndexName: string | null;
   stackByField0: string;
   stackByField0ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByField1: string | undefined;
   stackByField1ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByWidth?: number;
-  status: Status;
   title: React.ReactNode;
 }
 
@@ -85,15 +81,12 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   setStackByField0ComboboxInputRef,
   setStackByField1,
   setStackByField1ComboboxInputRef,
-  showBuildingBlockAlerts,
-  showOnlyThreatIndicatorAlerts,
   signalIndexName,
   stackByField0,
   stackByField0ComboboxRef,
   stackByField1,
   stackByField1ComboboxRef,
   stackByWidth,
-  status,
   title,
 }: Props) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
@@ -109,11 +102,9 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   const extraVisualizationOptions = useMemo(
     () => ({
       breakdownField: stackByField1,
-      showBuildingBlockAlerts,
-      showOnlyThreatIndicatorAlerts,
-      status,
+      filters,
     }),
-    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, status, stackByField1]
+    [stackByField1, filters]
   );
 
   const additionalFilters = useMemo(() => {

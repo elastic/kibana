@@ -324,12 +324,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
               <ChartPanels
                 addFilter={addFilter}
                 alertsHistogramDefaultFilters={alertsHistogramDefaultFilters}
-                filterGroup={filterGroup}
                 isLoadingIndexPattern={isChartPanelLoading}
                 query={query}
                 runtimeMappings={runtimeMappings}
-                showBuildingBlockAlerts={showBuildingBlockAlerts}
-                showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
                 signalIndexName={signalIndexName}
                 updateDateRangeCallback={updateDateRangeCallback}
               />

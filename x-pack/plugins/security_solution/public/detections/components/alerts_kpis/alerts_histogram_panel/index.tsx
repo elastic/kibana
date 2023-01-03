@@ -57,7 +57,6 @@ import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import type { Status } from '../../../../../common/detection_engine/schemas/common';
 import type { EmbeddableData } from '../../../../common/components/visualization_actions/types';
 
 const defaultTotalAlertsObj: AlertsTotal = {
@@ -99,18 +98,15 @@ interface AlertsHistogramPanelProps {
   query?: Query;
   runtimeMappings?: MappingRuntimeFields;
   setComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
-  showBuildingBlockAlerts: boolean;
   showCountsInLegend?: boolean;
   showGroupByPlaceholder?: boolean;
   showLegend?: boolean;
   showLinkToAlerts?: boolean;
-  showOnlyThreatIndicatorAlerts: boolean;
   showStackBy?: boolean;
   showTotalAlertsCount?: boolean;
   signalIndexName: string | null;
   stackByLabel?: string;
   stackByWidth?: number;
-  status?: Status;
   timelineId?: string;
   title?: React.ReactNode;
   titleSize?: EuiTitleSize;
@@ -139,18 +135,15 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     query,
     runtimeMappings,
     setComboboxInputRef,
-    showBuildingBlockAlerts,
     showCountsInLegend = false,
     showGroupByPlaceholder = false,
     showLegend = true,
     showLinkToAlerts = false,
-    showOnlyThreatIndicatorAlerts,
     showStackBy = true,
     showTotalAlertsCount = false,
     signalIndexName,
     stackByLabel,
     stackByWidth,
-    status,
     timelineId,
     title = i18n.HISTOGRAM_HEADER,
     titleSize = 'm',
@@ -203,11 +196,9 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     });
     const extraVisualizationOptions = useMemo(
       () => ({
-        showBuildingBlockAlerts,
-        showOnlyThreatIndicatorAlerts,
-        status,
+        filters,
       }),
-      [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, status]
+      [filters]
     );
 
     const {

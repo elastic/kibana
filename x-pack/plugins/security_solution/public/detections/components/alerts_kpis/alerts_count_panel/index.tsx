@@ -51,15 +51,12 @@ interface AlertsCountPanelProps {
   setStackByField0ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
   setStackByField1: (stackBy: string | undefined) => void;
   setStackByField1ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
-  showBuildingBlockAlerts: boolean;
-  showOnlyThreatIndicatorAlerts: boolean;
   signalIndexName: string | null;
   stackByField0: string;
   stackByField0ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByField1: string | undefined;
   stackByField1ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByWidth?: number;
-  status: Status;
   title?: React.ReactNode;
 }
 const ChartHeight = '180px';
@@ -78,15 +75,12 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     setStackByField0ComboboxInputRef,
     setStackByField1,
     setStackByField1ComboboxInputRef,
-    showBuildingBlockAlerts,
-    showOnlyThreatIndicatorAlerts,
     signalIndexName,
     stackByField0,
     stackByField0ComboboxRef,
     stackByField1,
     stackByField1ComboboxRef,
     stackByWidth,
-    status,
     title = i18n.COUNT_TABLE_TITLE,
   }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
@@ -134,11 +128,9 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     const extraVisualizationOptions = useMemo(
       () => ({
         breakdownField: stackByField1,
-        showBuildingBlockAlerts,
-        showOnlyThreatIndicatorAlerts,
-        status,
+        filters,
       }),
-      [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, stackByField1, status]
+      [filters, stackByField1]
     );
     const {
       loading: isLoadingAlerts,

@@ -7,10 +7,11 @@
 
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Filter } from '@kbn/es-query';
 
-import type { Status } from '../../../../common/detection_engine/schemas/common';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { SourcererScopeName } from '../../store/sourcerer/model';
+import type { Status } from '../../../../common/detection_engine/schemas/common';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export type GetLensAttributes = (
@@ -98,9 +99,8 @@ export interface Response {
 
 export interface ExtraOptions {
   breakdownField?: string;
+  filters?: Filter[];
   ruleId?: string;
-  showBuildingBlockAlerts?: boolean;
-  showOnlyThreatIndicatorAlerts?: boolean;
   spaceId?: string;
   status?: Status;
 }

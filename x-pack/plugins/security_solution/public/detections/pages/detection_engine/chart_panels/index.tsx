@@ -29,7 +29,6 @@ import {
 } from '../../../components/alerts_kpis/common/config';
 import { AlertsCountPanel } from '../../../components/alerts_kpis/alerts_count_panel';
 import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translations';
-import type { Status } from '../../../../../common/detection_engine/schemas/common';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 
 const TABLE_PANEL_HEIGHT = 330; // px
@@ -53,9 +52,6 @@ export interface Props {
   runtimeMappings: MappingRuntimeFields;
   signalIndexName: string | null;
   updateDateRangeCallback: UpdateDateRange;
-  showBuildingBlockAlerts: boolean;
-  showOnlyThreatIndicatorAlerts: boolean;
-  filterGroup: Status;
 }
 
 const ChartPanelsComponent: React.FC<Props> = ({
@@ -66,9 +62,6 @@ const ChartPanelsComponent: React.FC<Props> = ({
   runtimeMappings,
   signalIndexName,
   updateDateRangeCallback,
-  showBuildingBlockAlerts,
-  filterGroup,
-  showOnlyThreatIndicatorAlerts,
 }: Props) => {
   const {
     alertViewSelection,
@@ -198,14 +191,11 @@ const ChartPanelsComponent: React.FC<Props> = ({
               query={query}
               runtimeMappings={runtimeMappings}
               setComboboxInputRef={setStackByField0ComboboxInputRef}
-              showBuildingBlockAlerts={showBuildingBlockAlerts}
               showCountsInLegend={true}
               showGroupByPlaceholder={false}
-              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
               showTotalAlertsCount={false}
               signalIndexName={signalIndexName}
               stackByLabel={GROUP_BY_LABEL}
-              status={filterGroup}
               title={title}
               titleSize={'s'}
               updateDateRange={updateDateRangeCallback}
@@ -232,14 +222,11 @@ const ChartPanelsComponent: React.FC<Props> = ({
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
               setStackByField1={updateCommonStackBy1}
               setStackByField1ComboboxInputRef={setStackByField1ComboboxInputRef}
-              showBuildingBlockAlerts={showBuildingBlockAlerts}
-              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
               signalIndexName={signalIndexName}
               stackByField0={countTableStackBy0}
               stackByField0ComboboxRef={stackByField0ComboboxRef}
               stackByField1={countTableStackBy1}
               stackByField1ComboboxRef={stackByField1ComboboxRef}
-              status={filterGroup}
               title={title}
             />
           )}
@@ -267,14 +254,11 @@ const ChartPanelsComponent: React.FC<Props> = ({
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
               setStackByField1={updateCommonStackBy1}
               setStackByField1ComboboxInputRef={setStackByField1ComboboxInputRef}
-              showBuildingBlockAlerts={showBuildingBlockAlerts}
-              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
               signalIndexName={signalIndexName}
               stackByField0={riskChartStackBy0}
               stackByField0ComboboxRef={stackByField0ComboboxRef}
               stackByField1={riskChartStackBy1}
               stackByField1ComboboxRef={stackByField1ComboboxRef}
-              status={filterGroup}
               title={title}
             />
           )}
