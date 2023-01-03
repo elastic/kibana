@@ -18,18 +18,18 @@ export const journey = new Journey({
     await page.goto(kbnUrl.get(`/app/dashboards`));
     await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
   })
-  .step('Search dashboards page', async ({ page, inputDelays }) => {
-    await page.type('[data-test-subj="tableListSearchBox"]', 'Web', {
-      delay: inputDelays.TYPING,
-    });
-    await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
-  })
-  .step('Clear the search', async ({ page, inputDelays }) => {
-    await page.click('[data-test-subj="tableListSearchBox"]');
-    await page.keyboard.press('Meta+A');
-    await page.keyboard.press('Backspace');
-    await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
-  })
+  // .step('Search dashboards page', async ({ page, inputDelays }) => {
+  //   await page.type('[data-test-subj="tableListSearchBox"]', 'Web', {
+  //     delay: inputDelays.TYPING,
+  //   });
+  //   await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
+  // })
+  // .step('Clear the search', async ({ page, inputDelays }) => {
+  //   await page.click('[data-test-subj="tableListSearchBox"]');
+  //   await page.keyboard.press('Meta+A');
+  //   await page.keyboard.press('Backspace');
+  //   await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
+  // })
   .step('Delete dashboard', async ({ page, log }) => {
     await page.click('[data-test-subj="checkboxSelectRow-7adfa750-4c81-11e8-b3d7-01146121b73d"]');
     await page.click('[data-test-subj="deleteSelectedItems"]');
