@@ -9,12 +9,17 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import { useLoadAlertSummary } from '../../../../hooks/use_load_alert_summary';
 import { AlertSummaryWidgetProps } from '.';
-import { AlertSummaryWidgetError, AlertsSummaryWidgetCompact } from './components';
+import {
+  AlertSummaryWidgetError,
+  AlertsSummaryWidgetCompact,
+  AlertsSummaryWidgetFullWidth,
+} from './components';
 
 export const AlertSummaryWidget = ({
   featureIds,
   filter,
-  onClick,
+  fullWidth,
+  onClick = () => {},
   timeRange,
 }: AlertSummaryWidgetProps) => {
   const {
@@ -30,7 +35,14 @@ export const AlertSummaryWidget = ({
   if (isLoading) return <EuiLoadingSpinner />;
   if (error) return <AlertSummaryWidgetError />;
 
-  return (
+  return fullWidth ? (
+    <AlertsSummaryWidgetFullWidth
+      activeAlertCount={activeAlertCount}
+      activeAlerts={activeAlerts}
+      recoveredAlertCount={recoveredAlertCount}
+      recoveredAlerts={recoveredAlerts}
+    />
+  ) : (
     <AlertsSummaryWidgetCompact
       activeAlertCount={activeAlertCount}
       activeAlerts={activeAlerts}

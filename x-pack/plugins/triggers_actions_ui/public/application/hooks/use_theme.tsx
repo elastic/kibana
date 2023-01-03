@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export { AlertsSummaryWidgetCompact } from './alert_summary_widget_compact';
-export { AlertSummaryWidgetError } from './alert_summary_widget_error';
-export { AlertsSummaryWidgetFullWidth } from './alert_summary_widget_full_width';
+import { useContext } from 'react';
+import { ThemeContext } from 'styled-components';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+
+export function useTheme(): EuiTheme {
+  const theme = useContext(ThemeContext);
+  return theme;
+}
