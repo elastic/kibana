@@ -124,7 +124,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             path: { groupId: '0000000000000000000000000Error 1' },
           });
 
-          const errorId = errorsSamplesResponse.body.errorSamples[0];
+          const errorId = errorsSamplesResponse.body.errorSampleIds[0];
 
           const response = await callErrorSampleDetailsApi(errorId);
           errorSampleDetailsResponse = response.body;
