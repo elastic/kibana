@@ -1,6 +1,5 @@
 .dvSearchPanel__controls {
   flex-direction: row;
-  padding: $euiSizeS;
 }
 
 .dvSearchPanel__container {
@@ -12,7 +11,7 @@
     flex-direction: column;
   }
   .dvSearchBar {
-    min-width:  #{'max(100%, 500px)'};
+    min-width:  #{'max(100%, 300px)'};
   }
   .dvSearchPanel__controls {
     padding: 0;

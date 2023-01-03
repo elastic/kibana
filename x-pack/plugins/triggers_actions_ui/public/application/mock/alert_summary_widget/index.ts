@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertSummaryTimeRange } from '../../hooks/use_load_rule_alerts_aggregations';
+import { AlertSummaryTimeRange } from '../../hooks/use_load_alert_summary';
 import { Rule } from '../../../types';
 
 export const mockRule = (): Rule => {
@@ -69,18 +69,22 @@ export const mockRule = (): Rule => {
   };
 };
 
-export const mockAggsResponse = () => {
-  return {
-    aggregations: {
-      total: {
-        buckets: { totalActiveAlerts: { doc_count: 1 }, totalRecoveredAlerts: { doc_count: 7 } },
-      },
-    },
-  };
+export const mockAlertSummaryResponse = {
+  activeAlertCount: 1,
+  recoveredAlertCount: 1,
+  activeAlerts: [
+    { key: 1671321600000, doc_count: 0 },
+    { key: 1671408000000, doc_count: 2 },
+  ],
+  recoveredAlerts: [
+    { key: 1671321600000, doc_count: 0 },
+    { key: 1671408000000, doc_count: 1 },
+  ],
 };
 
 export const mockAlertSummaryTimeRange: AlertSummaryTimeRange = {
   utcFrom: 'mockedUtcFrom',
   utcTo: 'mockedUtcTo',
+  fixedInterval: 'mockedFixedInterval',
   title: 'mockedTitle',
 };

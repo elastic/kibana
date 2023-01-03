@@ -50,6 +50,10 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   private getTimezone: ControlsSettingsService['getTimezone'];
   private timefilter: ControlsDataService['timefilter'];
   private prevTimeRange: TimeRange | undefined;
+  private prevTimesliceAsPercentage: {
+    timesliceStartAsPercentageOfTimeRange?: number;
+    timesliceEndAsPercentageOfTimeRange?: number;
+  };
   private readonly waitForControlOutputConsumersToLoad$;
 
   private reduxEmbeddableTools: ReduxEmbeddableTools<
@@ -112,6 +116,10 @@ export class TimeSliderControlEmbeddable extends Embeddable<
           )
         : undefined;
 
+    this.prevTimesliceAsPercentage = {
+      timesliceStartAsPercentageOfTimeRange: this.getInput().timesliceStartAsPercentageOfTimeRange,
+      timesliceEndAsPercentageOfTimeRange: this.getInput().timesliceEndAsPercentageOfTimeRange,
+    };
     this.syncWithTimeRange();
   }
 
@@ -125,13 +133,29 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
   private onInputChange() {
     const input = this.getInput();
+    const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+      this.prevTimesliceAsPercentage ?? {};
 
-    if (!input.timeRange) {
-      return;
-    }
-
-    if (!_.isEqual(input.timeRange, this.prevTimeRange)) {
-      const { actions, dispatch } = this.reduxEmbeddableTools;
+    const { actions, dispatch } = this.reduxEmbeddableTools;
+    if (
+      timesliceStartAsPercentageOfTimeRange !== input.timesliceStartAsPercentageOfTimeRange ||
+      timesliceEndAsPercentageOfTimeRange !== input.timesliceEndAsPercentageOfTimeRange
+    ) {
+      // Discarding edit mode changes results in replacing edited input with original input
+      // Re-sync with time range when edited input timeslice changes are discarded
+      if (
+        !input.timesliceStartAsPercentageOfTimeRange &&
+        !input.timesliceEndAsPercentageOfTimeRange
+      ) {
+        // If no selections have been saved into the timeslider, then both `timesliceStartAsPercentageOfTimeRange`
+        // and `timesliceEndAsPercentageOfTimeRange` will be undefined - so, need to reset component state to match
+        dispatch(actions.publishValue({ value: undefined }));
+        dispatch(actions.setValue({ value: undefined }));
+      } else {
+        // Otherwise, need to call `syncWithTimeRange` so that the component state value can be calculated and set
+        this.syncWithTimeRange();
+      }
+    } else if (input.timeRange && !_.isEqual(input.timeRange, this.prevTimeRange)) {
       const nextBounds = this.timeRangeToBounds(input.timeRange);
       const ticks = getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], this.getTimezone());
       dispatch(
@@ -153,6 +177,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       getState().explicitInput.timesliceStartAsPercentageOfTimeRange;
     const timesliceEndAsPercentageOfTimeRange =
       getState().explicitInput.timesliceEndAsPercentageOfTimeRange;
+
     if (
       timesliceStartAsPercentageOfTimeRange !== undefined &&
       timesliceEndAsPercentageOfTimeRange !== undefined
@@ -187,8 +212,8 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     dispatch(actions.publishValue({ value }));
   }, 500);
 
-  private onTimesliceChange = (value?: [number, number]) => {
-    const { actions, dispatch, getState } = this.reduxEmbeddableTools;
+  private getTimeSliceAsPercentageOfTimeRange(value?: [number, number]) {
+    const { getState } = this.reduxEmbeddableTools;
     let timesliceStartAsPercentageOfTimeRange: number | undefined;
     let timesliceEndAsPercentageOfTimeRange: number | undefined;
     if (value) {
@@ -199,6 +224,18 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       timesliceEndAsPercentageOfTimeRange =
         (value[TO_INDEX] - timeRangeBounds[FROM_INDEX]) / timeRange;
     }
+    this.prevTimesliceAsPercentage = {
+      timesliceStartAsPercentageOfTimeRange,
+      timesliceEndAsPercentageOfTimeRange,
+    };
+    return { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange };
+  }
+
+  private onTimesliceChange = (value?: [number, number]) => {
+    const { actions, dispatch } = this.reduxEmbeddableTools;
+
+    const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+      this.getTimeSliceAsPercentageOfTimeRange(value);
     dispatch(
       actions.setValueAsPercentageOfTimeRange({
         timesliceStartAsPercentageOfTimeRange,

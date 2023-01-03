@@ -39,3 +39,8 @@ export {
   ACTION_VISUALIZE_LENS_FIELD,
 } from './types';
 export type { ActionExecutionContext, ActionExecutionMeta, ActionMenuItemProps } from './actions';
+export {
+  CellActions,
+  CellActionsMode,
+  CellActionsContextProvider,
+} from './cell_actions/components';

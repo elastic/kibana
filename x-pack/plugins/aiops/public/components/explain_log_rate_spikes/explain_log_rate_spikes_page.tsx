@@ -27,18 +27,18 @@ import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
+import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
-import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/use_url_state';
 import { useData } from '../../hooks/use_data';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 import { SearchPanel } from '../search_panel';
 
-import { restorableDefaults } from './explain_log_rate_spikes_app_state';
+import { restorableDefaults, type AiOpsPageUrlState } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
-import type { GroupTableItem } from '../spike_analysis_table/spike_analysis_table_groups';
+import type { GroupTableItem } from '../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
 
 // TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
@@ -79,7 +79,10 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     setSelectedGroup,
   } = useSpikeAnalysisTableRowContext();
 
-  const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
+  const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
+    'AIOPS_INDEX_VIEWER',
+    restorableDefaults
+  );
   const [globalState, setGlobalState] = useUrlState('_g');
 
   const [currentSavedSearch, setCurrentSavedSearch] = useState(savedSearch);
