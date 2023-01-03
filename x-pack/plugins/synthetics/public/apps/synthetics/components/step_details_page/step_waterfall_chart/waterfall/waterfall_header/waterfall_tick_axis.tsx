@@ -59,7 +59,7 @@ export const WaterfallTickAxis = ({
                     label={
                       <EuiText size="xs">
                         <FormattedMessage
-                          id="xpack.synthetics.waterfall.networkRequests.heading"
+                          id="xpack.synthetics.waterfall.networkRequests.hideNonMatching"
                           defaultMessage="Hide nonmatching"
                         />
                       </EuiText>
