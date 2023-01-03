@@ -116,8 +116,18 @@ export const mockState: SyntheticsAppState = {
     error: null,
     data: null,
   },
+  settings: {
+    loading: false,
+    error: null,
+    success: null,
+  },
   dynamicSettings: {
     loading: false,
+  },
+  defaultAlerting: {
+    loading: false,
+    error: null,
+    success: null,
   },
 };
 

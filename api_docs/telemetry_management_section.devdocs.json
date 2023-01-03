@@ -9,13 +9,43 @@
         "type": "Function",
         "tags": [],
         "label": "LazyOptInExampleFlyout",
-        "description": [],
+        "description": [
+          "\nLazy-loaded {@link OptInExampleFlyout}"
+        ],
         "signature": [
-          "React.ExoticComponent<Props & React.RefAttributes<",
-          "OptInExampleFlyout",
-          ">> & { readonly _result: typeof ",
-          "OptInExampleFlyout",
-          "; }"
+          "React.ExoticComponent<(",
+          {
+            "pluginId": "telemetryManagementSection",
+            "scope": "public",
+            "docId": "kibTelemetryManagementSectionPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          " & React.RefAttributes<React.Component<",
+          {
+            "pluginId": "telemetryManagementSection",
+            "scope": "public",
+            "docId": "kibTelemetryManagementSectionPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          ", any, any>>) | (",
+          {
+            "pluginId": "telemetryManagementSection",
+            "scope": "public",
+            "docId": "kibTelemetryManagementSectionPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          " & { children?: React.ReactNode; })> & { readonly _result: React.ComponentType<",
+          {
+            "pluginId": "telemetryManagementSection",
+            "scope": "public",
+            "docId": "kibTelemetryManagementSectionPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          ">; }"
         ],
         "path": "src/plugins/telemetry_management_section/public/components/lazy_opt_in_example_flyout.tsx",
         "deprecated": false,
@@ -40,7 +70,60 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "telemetryManagementSection",
+        "id": "def-public.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [
+          "\nOptInExampleFlyout props"
+        ],
+        "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "telemetryManagementSection",
+            "id": "def-public.Props.fetchExample",
+            "type": "Function",
+            "tags": [],
+            "label": "fetchExample",
+            "description": [
+              "\nMethod that provides the sample payload to show in the flyout"
+            ],
+            "signature": [
+              "() => Promise<unknown[]>"
+            ],
+            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "telemetryManagementSection",
+            "id": "def-public.Props.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [
+              "\nHook called when the flyout is closed"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []
