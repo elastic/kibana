@@ -39,27 +39,33 @@ export class RunningHandler {
 
   public async waitFor(): Promise<void> {
     this.stop();
-    if (!this.isUpdating) return Promise.resolve();
-    else if (this.isUpdating && this.runningPromise) return this.runningPromise;
+    if (this.isUpdating && this.runningPromise) return this.runningPromise;
     else return Promise.resolve();
   }
 
   private setRunning(ruleId: string, namespace?: string) {
     this.isUpdating = true;
-    this.runningPromise = partiallyUpdateAlert(this.client, ruleId, { running: true }, {
-      ignore404: true,
-      namespace: namespace,
-      refresh: false,
-    });
+    this.runningPromise = partiallyUpdateAlert(
+      this.client,
+      ruleId,
+      { running: true },
+      {
+        ignore404: true,
+        namespace,
+        refresh: false,
+      }
+    );
     this.runningPromise
-    .then((mail) => {
-      this.runningPromise = undefined;
-      this.isUpdating = false
-    })
-    .catch((err) => {
-      this.runningPromise = undefined;
-      this.isUpdating = false
-      this.logger.error(`error updating running attribute rule for ${this.ruleTypeId}:${ruleId} ${err.message}`);
-    })
+      .then(() => {
+        this.runningPromise = undefined;
+        this.isUpdating = false;
+      })
+      .catch((err) => {
+        this.runningPromise = undefined;
+        this.isUpdating = false;
+        this.logger.error(
+          `error updating running attribute rule for ${this.ruleTypeId}:${ruleId} ${err.message}`
+        );
+      });
   }
 }

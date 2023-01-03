@@ -150,7 +150,11 @@ export class TaskRunner<
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
     this.ruleMonitoring = new RuleMonitoringService();
-    this.ruleRunning = new RunningHandler(this.context.internalSavedObjectsRepository, this.logger, loggerId )
+    this.ruleRunning = new RunningHandler(
+      this.context.internalSavedObjectsRepository,
+      this.logger,
+      loggerId
+    );
     this.ruleResult = new RuleResultService();
   }
 
@@ -167,13 +171,19 @@ export class TaskRunner<
     const client = this.context.internalSavedObjectsRepository;
     try {
       await this.ruleRunning.waitFor();
+      // eslint-disable-next-line no-empty
     } catch {}
     try {
-      await partiallyUpdateAlert(client, ruleId, {...attributes, running: false}, {
-        ignore404: true,
-        namespace,
-        refresh: false,
-      });
+      await partiallyUpdateAlert(
+        client,
+        ruleId,
+        { ...attributes, running: false },
+        {
+          ignore404: true,
+          namespace,
+          refresh: false,
+        }
+      );
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
     }
