@@ -47,6 +47,8 @@ import {
 import { getCurrencyCode } from './currency_codes';
 import { getDataBoundsForPalette } from '../utils';
 
+import './metric_vis.scss';
+
 export const defaultColor = euiThemeVars.euiColorLightestShade;
 const getBytesUnit = (value: number) => {
   const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte'];
@@ -361,6 +363,7 @@ export const MetricVis = ({
         max-width: 100%;
         overflow-y: auto;
       `}
+      className="mtrVisContainer"
     >
       <div
         css={css`
