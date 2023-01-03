@@ -21,7 +21,7 @@ import { inputsSelectors } from '../../store';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { getRequestsAndResponses, parseVisualizationData } from './utils';
+import { getRequestsAndResponses } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const LensComponentWrapper = styled.div<{ height?: string; width?: string }>`
@@ -151,9 +151,38 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [onLoad]
   );
 
+  const adHocDataViews = useMemo(
+    () =>
+      attributes?.state?.adHocDataViews != null
+        ? Object.values(attributes?.state?.adHocDataViews).reduce((acc, adHocDataView) => {
+            if (adHocDataView?.name != null) {
+              acc.push(adHocDataView?.name);
+            }
+            return acc;
+          }, [] as string[])
+        : null,
+    [attributes?.state?.adHocDataViews]
+  );
+
+  if (
+    !attributes ||
+    (visualizationData?.responses != null && visualizationData?.responses?.length === 0)
+  ) {
+    return (
+      <EuiEmptyPrompt
+        body={
+          <FormattedMessage
+            id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
+            defaultMessage="No data to display"
+          />
+        }
+      />
+    );
+  }
+
   return (
     <>
-      {attributes && searchSessionId ? (
+      {attributes && searchSessionId && (
         <LensComponentWrapper height={wrapperHeight} width={wrapperWidth}>
           <LensComponent
             id={id}
@@ -169,18 +198,10 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             showInspector={false}
           />
         </LensComponentWrapper>
-      ) : (
-        <EuiEmptyPrompt
-          body={
-            <FormattedMessage
-              id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
-              defaultMessage="No data to display"
-            />
-          }
-        />
       )}
-      {isShowingModal && requests.request !== null && responses.response !== null && (
+      {isShowingModal && requests.request != null && responses.response != null && (
         <ModalInspectQuery
+          adHocDataViews={adHocDataViews}
           additionalRequests={requests.additionalRequests}
           additionalResponses={responses.additionalResponses}
           closeModal={handleCloseModal}

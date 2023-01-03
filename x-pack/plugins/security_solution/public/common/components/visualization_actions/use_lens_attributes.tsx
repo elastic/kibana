@@ -66,17 +66,23 @@ export const useLensAttributes = ({
     return [];
   }, [detailName, pageName]);
 
-  const indexFilters = useMemo(() => getIndexFilters(selectedPatterns), [selectedPatterns]);
+  const attrs: LensAttributes = useMemo(
+    () =>
+      lensAttributes ??
+      ((getLensAttributes &&
+        stackByField &&
+        getLensAttributes(stackByField, extraOptions)) as LensAttributes),
+    [extraOptions, getLensAttributes, lensAttributes, stackByField]
+  );
+
+  const hasAdHocDataViews = Object.values(attrs?.state?.adHocDataViews ?? {}).length > 0;
 
   const lensAttrsWithInjectedData = useMemo(() => {
     if (lensAttributes == null && (getLensAttributes == null || stackByField == null)) {
       return null;
     }
-    const attrs: LensAttributes =
-      lensAttributes ??
-      ((getLensAttributes &&
-        stackByField &&
-        getLensAttributes(stackByField, extraOptions)) as LensAttributes);
+
+    const indexFilters = hasAdHocDataViews ? [] : getIndexFilters(selectedPatterns);
 
     return {
       ...attrs,
@@ -92,24 +98,26 @@ export const useLensAttributes = ({
           ...indexFilters,
         ],
       },
-      references: attrs.references.map((ref: { id: string; name: string; type: string }) => ({
+      references: attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
         ...ref,
         id: dataViewId,
       })),
     } as LensAttributes;
   }, [
+    attrs,
     dataViewId,
-    extraOptions,
     filters,
     getLensAttributes,
-    indexFilters,
+    hasAdHocDataViews,
     lensAttributes,
     pageFilters,
     query,
+    selectedPatterns,
     stackByField,
     tabsFilters,
     title,
   ]);
-
-  return indicesExist ? lensAttrsWithInjectedData : null;
+  return hasAdHocDataViews || (!hasAdHocDataViews && indicesExist)
+    ? lensAttrsWithInjectedData
+    : null;
 };

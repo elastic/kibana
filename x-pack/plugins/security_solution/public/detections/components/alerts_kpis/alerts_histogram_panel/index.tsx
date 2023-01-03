@@ -58,6 +58,7 @@ import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import type { Status } from '../../../../../common/detection_engine/schemas/common';
+import type { EmbeddableData } from '../../../../common/components/visualization_actions/types';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -302,6 +303,19 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       uniqueQueryId,
     });
 
+    const onEmbeddableLoad = useCallback(
+      ({ requests, responses, isLoading }: EmbeddableData) => {
+        setQuery({
+          id: uniqueQueryId,
+          searchSessionId,
+          refetch: refetchByRestartingSession,
+          loading: isLoading,
+          inspect: { dsl: requests, response: responses },
+        });
+      },
+      [refetchByRestartingSession, searchSessionId, setQuery, uniqueQueryId]
+    );
+
     useEffect(() => {
       setTotalAlertsObj(
         alertsData?.hits.total ?? {
@@ -448,6 +462,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 scopeId={SourcererScopeName.detections}
                 stackByField={selectedStackByOption}
                 timerange={timerange}
+                onLoad={onEmbeddableLoad}
               />
             ) : isInitialLoading ? (
               <MatrixLoader />

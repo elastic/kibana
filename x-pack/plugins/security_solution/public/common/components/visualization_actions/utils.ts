@@ -147,8 +147,8 @@ export const getIndexFilters = (selectedPatterns: string[]) =>
       ]
     : [];
 
-export const getRequestsAndResponses = (requests: Request[]) => {
-  return requests.reduce(
+export const getRequestsAndResponses = (requests: Request[] | null | undefined) => {
+  return (requests ?? []).reduce(
     (acc: { requests: string[]; responses: string[] }, req: Request) => {
       return {
         requests: [

@@ -42,6 +42,7 @@ export interface EmbeddableData {
 export type OnEmbeddableLoaded = (data: EmbeddableData) => void;
 
 export interface LensEmbeddableComponentProps {
+  adHocDataViews?: string[];
   extraActions?: Action[];
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
@@ -96,8 +97,10 @@ export interface Response {
 }
 
 export interface ExtraOptions {
+  breakdownField?: string;
+  ruleId?: string;
   showBuildingBlockAlerts?: boolean;
   showOnlyThreatIndicatorAlerts?: boolean;
+  spaceId?: string;
   status?: Status;
-  breakdownField?: string;
 }
