@@ -19,7 +19,7 @@ import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import { CspLoadingState } from './csp_loading_state';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 
-import illustration from './no_data_illustration.svg';
+import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
@@ -85,39 +85,14 @@ export const CspNoDataPage = ({
   />
 );
 
-const packageNotInstalledRenderer = (kspmIntegrationLink?: string, cspmIntegrationLink?: sting) => {
-  // const noDataConfig = {
-  //   pageTitle: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {
-  //     defaultMessage: 'Install Integration to get started',
-  //   }),
-  //   docsLink: 'https://ela.st/kspm',
-  //   actionHref: cisIntegrationLink,
-  //   actionTitle: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.buttonLabel', {
-  //     defaultMessage: 'Add a KSPM integration',
-  //   }),
-  //   actionDescription: (
-  //     <FormattedMessage
-  //       id="xpack.csp.cloudPosturePage.packageNotInstalled.description"
-  //       defaultMessage="Use our {integrationFullName} (KSPM) integration to measure your Kubernetes cluster setup against CIS recommendations."
-  //       values={{
-  //         integrationFullName: (
-  //           <EuiLink href="https://ela.st/kspm">
-  //             <FormattedMessage
-  //               id="xpack.csp.cloudPosturePage.packageNotInstalled.integrationNameLabel"
-  //               defaultMessage="Kubernetes Security Posture Management"
-  //             />
-  //           </EuiLink>
-  //         ),
-  //       }}
-  //     />
-  //   ),
-  // };
-
+const packageNotInstalledRenderer = (
+  kspmIntegrationLink?: string,
+  cspmIntegrationLink?: string
+) => {
   return (
     <FullSizeCenteredPage>
       <EuiEmptyPrompt
-        // icon={<EuiIcon type={'logoSecurity'} size="xxl" />}
-        icon={<EuiImage size="fullWidth" src={illustration} alt="" />}
+        icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
         title={<h2>Detect security misconfigurations in your cloud resources! </h2>}
         layout="horizontal"
         color="plain"
