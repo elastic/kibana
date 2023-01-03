@@ -345,28 +345,28 @@ Refer to the corresponding {es} logs for potential write errors.
 | `failure` | User is not authorized to search for cases.
 
 .2+| `case_ids_by_alert_id_get`
-| `success` | User has accessed cases as part of a search operation.
-| `failure` | User is not authorized to search for cases.
-
-.2+| `case_get_metrics`
-| `success` | User has accessed a case.
-| `failure` | User is not authorized to access a case.
-
-.2+| `cases_get_metrics`
 | `success` | User has accessed cases.
 | `failure` | User is not authorized to access cases.
+
+.2+| `case_get_metrics`
+| `success` | User has accessed metrics for a case.
+| `failure` | User is not authorized to access metrics for a case.
+
+.2+| `cases_get_metrics`
+| `success` | User has accessed metrics for cases.
+| `failure` | User is not authorized to access metrics for cases.
 
 .2+| `case_configuration_find`
 | `success` | User has accessed a case configuration as part of a search operation.
 | `failure` | User is not authorized to search for case configurations.
 
 .2+| `case_comment_get_metrics`
-| `success` | User has accessed case comments.
-| `failure` | User is not authorized to access case comments.
+| `success` | User has accessed metrics for case comments.
+| `failure` | User is not authorized to access metrics for case comments.
 
 .2+| `case_comment_alerts_attach_to_case`
-| `success` | User has accessed case comments.
-| `failure` | User is not authorized to access case comments.
+| `success` | User has accessed case alerts.
+| `failure` | User is not authorized to access case alerts.
 
 .2+| `case_comment_get`
 | `success` | User has accessed a case comment.
@@ -393,12 +393,12 @@ Refer to the corresponding {es} logs for potential write errors.
 | `failure` | User is not authorized to search for cases.
 
 .2+| `case_user_actions_get`
-| `success` | User has accessed a case user action.
-| `failure` | User is not authorized to access case user actions.
+| `success` | User has accessed the user activity of a case.
+| `failure` | User is not authorized to access the user activity of a case.
 
 .2+| `case_user_action_get_metrics`
-| `success` | User has accessed case user actions.
-| `failure` | User is not authorized to access case user actions.
+| `success` | User has accessed metrics for the user activity of a case.
+| `failure` | User is not authorized to access metrics for the user activity of a case.
 
 3+a|
 ===== Category: web
