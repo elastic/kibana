@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as redux from 'react-redux';
@@ -182,20 +181,18 @@ describe('EmbeddedMapComponent', () => {
   });
 
   test('map visible on open', async () => {
-    const wrapper = mount(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(true);
-    const container = wrapper.find('[data-test-subj="true-toggle-network-map"]').last();
-    container.simulate('click');
+    expect(getByTestId('siemEmbeddable')).toBeInTheDocument();
+    getByTestId('true-toggle-network-map').click();
 
     await waitFor(() => {
-      wrapper.update();
       expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', false);
-      expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(false);
+      expect(queryByTestId('siemEmbeddable')).not.toBeInTheDocument();
     });
   });
 
