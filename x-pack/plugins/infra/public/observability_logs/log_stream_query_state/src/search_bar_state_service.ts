@@ -30,11 +30,9 @@ export const subscribeToQuerySearchBarChanges =
 export const updateQueryInSearchBar =
   ({ queryStringService }: { queryStringService: QueryStringContract }) =>
   (context: LogStreamQueryContext, event: LogStreamQueryEvent) => {
-    if (!('query' in context)) {
-      return;
+    if ('query' in context) {
+      queryStringService.setQuery(context.query);
     }
-
-    queryStringService.setQuery(context.query);
   };
 
 export const subscribeToFilterSearchBarChanges =
@@ -57,9 +55,7 @@ export const subscribeToFilterSearchBarChanges =
 export const updateFiltersInSearchBar =
   ({ filterManagerService }: { filterManagerService: FilterManager }) =>
   (context: LogStreamQueryContext, event: LogStreamQueryEvent) => {
-    if (!('filters' in context)) {
-      return;
+    if ('filters' in context) {
+      filterManagerService.setFilters(context.filters);
     }
-
-    filterManagerService.setFilters(context.filters);
   };
