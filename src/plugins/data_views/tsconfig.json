@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -15,11 +13,21 @@
     "server/**/*.json"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../usage_collection/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../field_formats/tsconfig.json" },
-    { "path": "../expressions/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/usage-collection-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/es-query",
+    "@kbn/field-types",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/core-test-helpers-http-setup-browser",
+    "@kbn/config-schema",
+    "@kbn/utility-types-jest",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

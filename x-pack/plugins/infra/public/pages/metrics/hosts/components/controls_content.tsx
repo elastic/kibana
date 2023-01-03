@@ -8,8 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { ControlGroupContainer, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Filter, TimeRange, compareFilters } from '@kbn/es-query';
-import { isEqual } from 'lodash';
+import { Filter, TimeRange } from '@kbn/es-query';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
@@ -21,7 +20,7 @@ interface Props {
     language: string;
     query: string;
   };
-  setPanelFilters: React.Dispatch<React.SetStateAction<null | Filter[]>>;
+  onFilterChange: (filters: Filter[]) => void;
 }
 
 // Disable refresh, allow our timerange changes to refresh the embeddable.
@@ -35,7 +34,7 @@ export const ControlsContent: React.FC<Props> = ({
   dataViewId,
   query,
   filters,
-  setPanelFilters,
+  onFilterChange,
 }) => {
   const [controlPanel, setControlPanels] = useControlPanels(dataViewId);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer | undefined>();
@@ -44,21 +43,22 @@ export const ControlsContent: React.FC<Props> = ({
     if (!controlGroup) {
       return;
     }
-    if (
-      !isEqual(controlGroup.getInput().timeRange, timeRange) ||
-      !compareFilters(controlGroup.getInput().filters ?? [], filters) ||
-      !isEqual(controlGroup.getInput().query, query)
-    ) {
-      controlGroup.updateInput({
-        timeRange,
-        query,
-        filters,
-      });
-    }
-  }, [query, filters, controlGroup, timeRange]);
+    const filtersSubscription = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+      onFilterChange(newFilters);
+    });
+    const inputSubscription = controlGroup.getInput$().subscribe(({ panels }) => {
+      setControlPanels(panels);
+    });
+
+    return () => {
+      filtersSubscription.unsubscribe();
+      inputSubscription.unsubscribe();
+    };
+  }, [controlGroup, onFilterChange, setControlPanels]);
 
   return (
     <LazyControlsRenderer
+      filters={filters}
       getInitialInput={async () => ({
         id: dataViewId,
         type: CONTROL_GROUP_TYPE,
@@ -74,16 +74,9 @@ export const ControlsContent: React.FC<Props> = ({
       })}
       onLoadComplete={(newControlGroup) => {
         setControlGroup(newControlGroup);
-        newControlGroup.onFiltersPublished$.subscribe((newFilters) => {
-          setPanelFilters([...newFilters]);
-        });
-        newControlGroup.getInput$().subscribe(({ panels, filters: currentFilters }) => {
-          setControlPanels(panels);
-          if (currentFilters?.length === 0) {
-            setPanelFilters([]);
-          }
-        });
       }}
+      query={query}
+      timeRange={timeRange}
     />
   );
 };

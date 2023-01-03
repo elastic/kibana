@@ -18,6 +18,7 @@ import { makePing } from '../../../../common/runtime_types/ping';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
 import { DefaultUptimeAlertInstance } from './types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
+import moment from 'moment';
 
 const mockMonitors = [
   {
@@ -121,10 +122,12 @@ const mockStatusAlertDocument = (
   numTimes: number
 ) => {
   const { monitorInfo } = monitor;
+  const checkedAt = moment(monitorInfo.timestamp).format('LLL');
+
   return {
     fields: {
       ...mockCommonAlertDocumentFields(monitor.monitorInfo),
-      [ALERT_REASON]: `First from ${monitor.monitorInfo.observer?.geo?.name} failed ${count} times in the last ${interval}. Alert when > ${numTimes}.`,
+      [ALERT_REASON]: `Monitor "First" from ${monitor.monitorInfo.observer?.geo?.name} failed ${count} times in the last ${interval}. Alert when > ${numTimes}. Checked at ${checkedAt}.`,
     },
     id: getInstanceId(
       monitorInfo,
@@ -135,14 +138,17 @@ const mockStatusAlertDocument = (
 
 const mockAvailabilityAlertDocument = (monitor: GetMonitorAvailabilityResult) => {
   const { monitorInfo } = monitor;
+
+  const checkedAt = moment(monitorInfo.timestamp).format('LLL');
+
   return {
     fields: {
       ...mockCommonAlertDocumentFields(monitor.monitorInfo),
-      [ALERT_REASON]: `${monitorInfo.monitor.name || monitorInfo.monitor.id} from ${
+      [ALERT_REASON]: `Monitor "${monitorInfo.monitor.name || monitorInfo.monitor.id}" from ${
         monitorInfo.observer?.geo?.name
       } 35 days availability is ${(monitor.availabilityRatio! * 100).toFixed(
         2
-      )}%. Alert when < 99.34%.`,
+      )}%. Alert when < 99.34%. Checked at ${checkedAt}.`,
     },
     id: getInstanceId(monitorInfo, `${monitorInfo?.monitor.id}-${monitorInfo.observer?.geo?.name}`),
   };
@@ -267,6 +273,7 @@ describe('status check alert', () => {
       expect(alertInstanceMock.replaceState.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
+            "checkedAt": "July 6, 2020 9:14 PM",
             "currentTriggerStarted": "foo date string",
             "firstCheckedAt": "foo date string",
             "firstTriggeredAt": "foo date string",
@@ -281,7 +288,7 @@ describe('status check alert', () => {
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "First from harrisburg failed 234 times in the last 15 mins. Alert when > 5.",
+            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15 mins. Alert when > 5. Checked at July 6, 2020 9:14 PM.",
             "statusMessage": "failed 234 times in the last 15 mins. Alert when > 5.",
           },
         ]
@@ -292,6 +299,7 @@ describe('status check alert', () => {
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
             "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
+            "checkedAt": "July 6, 2020 9:14 PM",
             "latestErrorMessage": "error message 1",
             "monitorId": "first",
             "monitorName": "First",
@@ -299,7 +307,7 @@ describe('status check alert', () => {
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "First from harrisburg failed 234 times in the last 15 mins. Alert when > 5.",
+            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15 mins. Alert when > 5. Checked at July 6, 2020 9:14 PM.",
             "statusMessage": "failed 234 times in the last 15 mins. Alert when > 5.",
             "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zmlyc3Q=?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
           },
@@ -347,6 +355,7 @@ describe('status check alert', () => {
       expect(alertInstanceMock.replaceState.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
+            "checkedAt": "July 6, 2020 9:14 PM",
             "currentTriggerStarted": "foo date string",
             "firstCheckedAt": "foo date string",
             "firstTriggeredAt": "foo date string",
@@ -361,7 +370,7 @@ describe('status check alert', () => {
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "First from harrisburg failed 234 times in the last 15m. Alert when > 5.",
+            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15m. Alert when > 5. Checked at July 6, 2020 9:14 PM.",
             "statusMessage": "failed 234 times in the last 15m. Alert when > 5.",
           },
         ]
@@ -372,6 +381,7 @@ describe('status check alert', () => {
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
             "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
+            "checkedAt": "July 6, 2020 9:14 PM",
             "latestErrorMessage": "error message 1",
             "monitorId": "first",
             "monitorName": "First",
@@ -379,7 +389,7 @@ describe('status check alert', () => {
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "First from harrisburg failed 234 times in the last 15m. Alert when > 5.",
+            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15m. Alert when > 5. Checked at July 6, 2020 9:14 PM.",
             "statusMessage": "failed 234 times in the last 15m. Alert when > 5.",
             "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zmlyc3Q=?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
           },
@@ -418,6 +428,7 @@ describe('status check alert', () => {
       expect(alertInstanceMock.replaceState.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
+            "checkedAt": "July 6, 2020 9:14 PM",
             "currentTriggerStarted": "7.7 date",
             "firstCheckedAt": "7.7 date",
             "firstTriggeredAt": "7.7 date",
@@ -432,7 +443,7 @@ describe('status check alert', () => {
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "First from harrisburg failed 234 times in the last 14h. Alert when > 4.",
+            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 14h. Alert when > 4. Checked at July 6, 2020 9:14 PM.",
             "statusMessage": "failed 234 times in the last 14h. Alert when > 4.",
           },
         ]
@@ -634,6 +645,7 @@ describe('status check alert', () => {
       expect(alertInstanceMock.replaceState.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
+            "checkedAt": "July 6, 2020 9:14 PM",
             "currentTriggerStarted": "foo date string",
             "firstCheckedAt": "foo date string",
             "firstTriggeredAt": "foo date string",
@@ -648,7 +660,7 @@ describe('status check alert', () => {
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "First from harrisburg failed 234 times in the last 15 mins. Alert when > 3.",
+            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15 mins. Alert when > 3. Checked at July 6, 2020 9:14 PM.",
             "statusMessage": "failed 234 times in the last 15 mins. Alert when > 3.",
           },
         ]
@@ -827,6 +839,7 @@ describe('status check alert', () => {
       expect(alertInstanceMock.replaceState.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
+            "checkedAt": "July 6, 2020 9:14 PM",
             "currentTriggerStarted": "availability test",
             "firstCheckedAt": "availability test",
             "firstTriggeredAt": "availability test",
@@ -841,7 +854,7 @@ describe('status check alert', () => {
             "monitorUrl": "https://foo.com",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "Foo from harrisburg 35 days availability is 99.28%. Alert when < 99.34%.",
+            "reason": "Monitor \\"Foo\\" from harrisburg 35 days availability is 99.28%. Alert when < 99.34%. Checked at July 6, 2020 9:14 PM.",
             "statusMessage": "35 days availability is 99.28%. Alert when < 99.34%.",
           },
         ]
@@ -853,6 +866,7 @@ describe('status check alert', () => {
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
               "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
+              "checkedAt": "July 6, 2020 9:14 PM",
               "latestErrorMessage": undefined,
               "monitorId": "foo",
               "monitorName": "Foo",
@@ -860,7 +874,7 @@ describe('status check alert', () => {
               "monitorUrl": "https://foo.com",
               "observerHostname": undefined,
               "observerLocation": "harrisburg",
-              "reason": "Foo from harrisburg 35 days availability is 99.28%. Alert when < 99.34%.",
+              "reason": "Monitor \\"Foo\\" from harrisburg 35 days availability is 99.28%. Alert when < 99.34%. Checked at July 6, 2020 9:14 PM.",
               "statusMessage": "35 days availability is 99.28%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zm9v?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
             },
@@ -869,6 +883,7 @@ describe('status check alert', () => {
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
               "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
+              "checkedAt": "July 6, 2020 9:14 PM",
               "latestErrorMessage": undefined,
               "monitorId": "foo",
               "monitorName": "Foo",
@@ -876,7 +891,7 @@ describe('status check alert', () => {
               "monitorUrl": "https://foo.com",
               "observerHostname": undefined,
               "observerLocation": "fairbanks",
-              "reason": "Foo from fairbanks 35 days availability is 98.03%. Alert when < 99.34%.",
+              "reason": "Monitor \\"Foo\\" from fairbanks 35 days availability is 98.03%. Alert when < 99.34%. Checked at July 6, 2020 9:14 PM.",
               "statusMessage": "35 days availability is 98.03%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zm9v?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22fairbanks%22%5D%5D%5D",
             },
@@ -885,6 +900,7 @@ describe('status check alert', () => {
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
               "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
+              "checkedAt": "July 6, 2020 9:14 PM",
               "latestErrorMessage": undefined,
               "monitorId": "unreliable",
               "monitorName": "Unreliable",
@@ -892,7 +908,7 @@ describe('status check alert', () => {
               "monitorUrl": "https://unreliable.co",
               "observerHostname": undefined,
               "observerLocation": "fairbanks",
-              "reason": "Unreliable from fairbanks 35 days availability is 90.92%. Alert when < 99.34%.",
+              "reason": "Monitor \\"Unreliable\\" from fairbanks 35 days availability is 90.92%. Alert when < 99.34%. Checked at July 6, 2020 9:14 PM.",
               "statusMessage": "35 days availability is 90.92%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/dW5yZWxpYWJsZQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22fairbanks%22%5D%5D%5D",
             },
@@ -901,6 +917,7 @@ describe('status check alert', () => {
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
               "alertDetailsUrl": "http://localhost:5601/hfe/app/observability/alerts/mock-alert-uuid",
+              "checkedAt": "July 6, 2020 9:14 PM",
               "latestErrorMessage": undefined,
               "monitorId": "no-name",
               "monitorName": "no-name",
@@ -908,7 +925,7 @@ describe('status check alert', () => {
               "monitorUrl": "https://no-name.co",
               "observerHostname": undefined,
               "observerLocation": "fairbanks",
-              "reason": "no-name from fairbanks 35 days availability is 90.92%. Alert when < 99.34%.",
+              "reason": "Monitor \\"no-name\\" from fairbanks 35 days availability is 90.92%. Alert when < 99.34%. Checked at July 6, 2020 9:14 PM.",
               "statusMessage": "35 days availability is 90.92%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/bm8tbmFtZQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22fairbanks%22%5D%5D%5D",
             },
