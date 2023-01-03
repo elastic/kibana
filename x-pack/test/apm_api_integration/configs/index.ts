@@ -22,8 +22,6 @@ const apmFtrConfigs = {
       'xpack.apm.agent.migrations.enabled': 'true', // enable cloud migrations
       'logging.loggers': [apmDebugLogger],
     },
-
-    // enable cloud migrations
   },
   trial: {
     license: 'trial' as const,
