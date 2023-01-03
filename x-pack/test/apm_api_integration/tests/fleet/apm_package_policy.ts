@@ -13,7 +13,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
 
   async function createApmPackagePolicy() {
-    return apmApiClient.apmSuperuser({
+    return apmApiClient.superuser({
       endpoint: 'POST /internal/apm/fleet/cloud_apm_package_policy',
     });
   }

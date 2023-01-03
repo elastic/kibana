@@ -11,7 +11,7 @@ export enum ApmUsername {
   noAccessUser = 'no_access_user',
   viewerUser = 'viewer',
   editorUser = 'editor',
-  apmSuperuser = 'apmSuperuser',
+  superuser = 'superuser',
   apmAnnotationsWriteUser = 'apm_annotations_write_user',
   apmReadUserWithoutMlAccess = 'apm_read_user_without_ml_access',
   apmManageOwnAgentKeys = 'apm_manage_own_agent_keys',
@@ -102,8 +102,8 @@ export const users: Record<
   [ApmUsername.editorUser]: {
     builtInRoleNames: ['editor'],
   },
-  [ApmUsername.apmSuperuser]: {
-    builtInRoleNames: ['superuser', 'editor'],
+  [ApmUsername.superuser]: {
+    builtInRoleNames: ['superuser'],
   },
   [ApmUsername.apmReadUserWithoutMlAccess]: {
     customRoleNames: [ApmCustomRolename.apmReadUserWithoutMlAccess],
