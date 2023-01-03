@@ -152,7 +152,7 @@ describe('SLO Edit Page', () => {
         SLO_EDIT_FORM_DEFAULT_VALUES.timeWindow.duration as any
       );
       expect(screen.queryByTestId('sloFormObjectiveTargetInput')).toHaveValue(
-        SLO_EDIT_FORM_DEFAULT_VALUES.objective.target * 100
+        SLO_EDIT_FORM_DEFAULT_VALUES.objective.target
       );
 
       expect(screen.queryByTestId('sloFormNameInput')).toHaveValue(
