@@ -20,12 +20,10 @@ const LOGO =
 export class CustomBrandingPlugin implements Plugin {
   private readonly license: License;
   private readonly logger: Logger;
-  private readonly context: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.license = new License();
-    this.context = initializerContext;
   }
 
   public setup(core: CoreSetup) {
