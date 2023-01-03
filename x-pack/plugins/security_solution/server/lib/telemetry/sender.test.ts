@@ -91,6 +91,9 @@ describe('TelemetryEventsSender', () => {
             ruleset: 'Z',
             version: '100',
           },
+          destination: {
+            bytes: 1530,
+          },
           dll: {
             Ext: {
               device: {
@@ -167,6 +170,9 @@ describe('TelemetryEventsSender', () => {
             something_else: 'nope',
           },
           message: 'Malicious Behavior Detection Alert: Regsvr32 with Unusual Arguments',
+          network: {
+            transport: 'tcp',
+          },
           process: {
             name: 'foo.exe',
             nope: 'nope',
@@ -189,6 +195,13 @@ describe('TelemetryEventsSender', () => {
             },
           },
           Responses: '{ "result": 0 }', // >= 7.15
+          source: {
+            geo: {
+              continent_name: 'Europe',
+              country_iso_code: 'EE',
+              country_name: 'Estonia',
+            },
+          },
           Target: {
             process: {
               name: 'bar.exe',
@@ -271,6 +284,9 @@ describe('TelemetryEventsSender', () => {
             ruleset: 'Z',
             version: '100',
           },
+          destination: {
+            bytes: 1530,
+          },
           dll: {
             Ext: {
               device: {
@@ -341,6 +357,9 @@ describe('TelemetryEventsSender', () => {
             },
           },
           message: 'Malicious Behavior Detection Alert: Regsvr32 with Unusual Arguments',
+          network: {
+            transport: 'tcp',
+          },
           process: {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
@@ -361,6 +380,13 @@ describe('TelemetryEventsSender', () => {
             },
           },
           Responses: '{ "result": 0 }',
+          source: {
+            geo: {
+              continent_name: 'Europe',
+              country_iso_code: 'EE',
+              country_name: 'Estonia',
+            },
+          },
           Target: {
             process: {
               name: 'bar.exe',

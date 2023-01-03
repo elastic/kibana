@@ -46,6 +46,7 @@ const baseAllowlistFields: AllowlistFields = {
 // Allow list for event-related fields, which can also be nested under events[]
 const allowlistBaseEventFields: AllowlistFields = {
   credential_access: true,
+  destination: true,
   dll: {
     name: true,
     path: true,
@@ -92,9 +93,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     parent: baseAllowlistFields,
     ...baseAllowlistFields,
   },
-  network: {
-    direction: true,
-  },
+  network: true,
   registry: {
     data: {
       strings: true,
@@ -104,6 +103,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     path: true,
     value: true,
   },
+  source: true,
   Target: {
     process: {
       parent: baseAllowlistFields,
