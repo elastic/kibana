@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
-  EUI_SPARKLINE_THEME_PARTIAL,
-} from '@elastic/eui/dist/eui_charts_theme';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 import moment from 'moment';
 import React from 'react';
 import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import {
   ACTIVE_ALERT_LABEL,
   ACTIVE_COLOR,
@@ -27,23 +21,28 @@ import {
 import { Alert } from '../../../../../hooks/use_load_alert_summary';
 import { useTheme } from '../../../../../hooks/use_theme';
 
-export interface AlertsSummaryWidgetFullWidthProps {
+export interface AlertsSummaryWidgetFullSizeProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
   recoveredAlertCount: number;
   recoveredAlerts: Alert[];
 }
 
-export const AlertsSummaryWidgetFullWidth = ({
+export const AlertsSummaryWidgetFullSize = ({
   activeAlertCount,
   activeAlerts,
   recoveredAlertCount,
   recoveredAlerts,
-}: AlertsSummaryWidgetFullWidthProps) => {
+}: AlertsSummaryWidgetFullSizeProps) => {
   const theme = useTheme();
 
   return (
-    <EuiPanel element="div" data-test-subj="alertSummaryWidget" hasShadow={false} hasBorder>
+    <EuiPanel
+      element="div"
+      data-test-subj="alertSummaryWidget"
+      hasShadow={false}
+      paddingSize="none"
+    >
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column">
@@ -110,7 +109,8 @@ export const AlertsSummaryWidgetFullWidth = ({
             tickLabel: { alignment: { horizontal: Position.Left, vertical: Position.Bottom } },
           }}
         />
-        <Axis id="left" position={Position.Left} showGridLines />
+        <Axis id="left" position={Position.Left} showGridLines integersOnly ticks={4} />
+        <Axis id="right" position={Position.Right} showGridLines integersOnly ticks={4} />
         <LineSeries
           id="Active"
           xScaleType={ScaleType.Time}
@@ -126,6 +126,7 @@ export const AlertsSummaryWidgetFullWidth = ({
             point: { visible: true, radius: 3, strokeWidth: 2 },
           }}
           curve={CurveType.CURVE_MONOTONE_X}
+          timeZone="UTC"
         />
         <LineSeries
           id="Recovered"
@@ -142,6 +143,7 @@ export const AlertsSummaryWidgetFullWidth = ({
             point: { visible: true, radius: 3, strokeWidth: 2 },
           }}
           curve={CurveType.CURVE_MONOTONE_X}
+          timeZone="UTC"
         />
       </Chart>
     </EuiPanel>

@@ -7,4 +7,4 @@
 
 export { AlertsSummaryWidgetCompact } from './alert_summary_widget_compact';
 export { AlertSummaryWidgetError } from './alert_summary_widget_error';
-export { AlertsSummaryWidgetFullWidth } from './alert_summary_widget_full_width';
+export { AlertsSummaryWidgetFullSize } from './alert_summary_widget_full_size';

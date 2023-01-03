@@ -12,13 +12,13 @@ import { AlertSummaryWidgetProps } from '.';
 import {
   AlertSummaryWidgetError,
   AlertsSummaryWidgetCompact,
-  AlertsSummaryWidgetFullWidth,
+  AlertsSummaryWidgetFullSize,
 } from './components';
 
 export const AlertSummaryWidget = ({
   featureIds,
   filter,
-  fullWidth,
+  fullSize,
   onClick = () => {},
   timeRange,
 }: AlertSummaryWidgetProps) => {
@@ -35,8 +35,8 @@ export const AlertSummaryWidget = ({
   if (isLoading) return <EuiLoadingSpinner />;
   if (error) return <AlertSummaryWidgetError />;
 
-  return fullWidth ? (
-    <AlertsSummaryWidgetFullWidth
+  return fullSize ? (
+    <AlertsSummaryWidgetFullSize
       activeAlertCount={activeAlertCount}
       activeAlerts={activeAlerts}
       recoveredAlertCount={recoveredAlertCount}
