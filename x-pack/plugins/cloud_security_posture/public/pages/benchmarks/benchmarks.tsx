@@ -36,6 +36,7 @@ import { usePageSize } from '../../common/hooks/use_page_size';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
+// TODO: CIS AWS - add cspm integration button as well
 const AddCisIntegrationButton = () => {
   const cisIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
 
