@@ -15,7 +15,7 @@ import {
   setRecoveredAlertsContext,
   getAlertDetailsUrl,
 } from './common';
-import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { Cert, CertResult } from '../../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
