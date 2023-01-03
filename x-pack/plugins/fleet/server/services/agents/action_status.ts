@@ -13,8 +13,6 @@ import type { FleetServerAgentAction, ActionStatus, ListWithKuery } from '../../
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 import { appContextService } from '..';
 
-import { MINIMUM_EXECUTION_DURATION_SECONDS } from './upgrade_action_runner';
-
 const PRECISION_THRESHOLD = 40000;
 
 /**
@@ -227,9 +225,9 @@ async function _getActions(
 }
 
 export const rolloutPeriodHasPassed = (source: FleetServerAgentAction) =>
-  source.type === 'UPGRADE'
+  source.type === 'UPGRADE' && source.rollout_duration_seconds
     ? Date.now() >
       moment(source.start_time ?? Date.now())
-        .add(source.minimum_execution_duration ?? MINIMUM_EXECUTION_DURATION_SECONDS, 'seconds')
+        .add(source.rollout_duration_seconds, 'seconds')
         .valueOf()
     : false;

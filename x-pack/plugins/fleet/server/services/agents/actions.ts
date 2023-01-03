@@ -40,7 +40,7 @@ export async function createAgentAction(
     data: newAgentAction.data,
     type: newAgentAction.type,
     start_time: newAgentAction.start_time,
-    minimum_execution_duration: newAgentAction.minimum_execution_duration,
+    rollout_duration_seconds: newAgentAction.rollout_duration_seconds,
     total: newAgentAction.total,
   };
 
@@ -81,7 +81,7 @@ export async function bulkCreateAgentActions(
         '@timestamp': new Date().toISOString(),
         expiration: action.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
         start_time: action.start_time,
-        minimum_execution_duration: action.minimum_execution_duration,
+        rollout_duration_seconds: action.rollout_duration_seconds,
         agents: action.agents,
         action_id: action.id,
         data: action.data,

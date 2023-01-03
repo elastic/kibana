@@ -483,7 +483,7 @@ export default function (providerContext: FtrProviderContext) {
           'agents',
           'expiration',
           'start_time',
-          'minimum_execution_duration'
+          'rollout_duration_seconds'
         );
         expect(action.agents).contain('agent1');
         expect(action.agents).contain('agent2');
@@ -532,7 +532,7 @@ export default function (providerContext: FtrProviderContext) {
           'agents',
           'expiration',
           'start_time',
-          'minimum_execution_duration'
+          'rollout_duration_seconds'
         );
         expect(action.agents).contain('agent1');
         expect(action.agents).contain('agent2');

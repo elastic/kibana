@@ -153,17 +153,13 @@ const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: n
   if (upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
-      minimum_execution_duration: Math.min(
-        MINIMUM_EXECUTION_DURATION_SECONDS,
-        upgradeDurationSeconds
-      ),
+      rollout_duration_seconds: upgradeDurationSeconds,
     };
   }
   // Schedule without rolling upgrade (Immediately after start_time)
   if (startTime && !upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
-      minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
     };
   } else {
     // Regular bulk upgrade (non scheduled, non rolling)

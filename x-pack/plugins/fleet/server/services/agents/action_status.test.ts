@@ -11,24 +11,24 @@ describe('action_status', () => {
   it('should return true when rollout period has passed', () => {
     const source = {
       start_time: '2022-12-30T10:52:24.269Z',
-      minimum_execution_duration: 3600,
+      rollout_duration_seconds: 3600,
       type: 'UPGRADE',
     };
     expect(rolloutPeriodHasPassed(source)).toBe(true);
   });
 
-  it('should return true when rollout period has passed with default duration', () => {
+  it('should return false when rollout period not set', () => {
     const source = {
       start_time: '2022-12-30T10:52:24.269Z',
       type: 'UPGRADE',
     };
-    expect(rolloutPeriodHasPassed(source)).toBe(true);
+    expect(rolloutPeriodHasPassed(source)).toBe(false);
   });
 
   it('should return false when not upgrade action', () => {
     const source = {
       start_time: '2022-12-30T10:52:24.269Z',
-      minimum_execution_duration: 3600,
+      rollout_duration_seconds: 3600,
       type: 'UNENROLL',
     };
     expect(rolloutPeriodHasPassed(source)).toBe(false);
@@ -37,7 +37,7 @@ describe('action_status', () => {
   it('should return false when rollout period has not passed', () => {
     const source = {
       start_time: new Date().toISOString(),
-      minimum_execution_duration: 3600,
+      rollout_duration_seconds: 3600,
       type: 'UPGRADE',
     };
     expect(rolloutPeriodHasPassed(source)).toBe(false);
@@ -45,7 +45,7 @@ describe('action_status', () => {
 
   it('should return false when start_time not set', () => {
     const source = {
-      minimum_execution_duration: 3600,
+      rollout_duration_seconds: 3600,
       type: 'UPGRADE',
     };
     expect(rolloutPeriodHasPassed(source)).toBe(false);
