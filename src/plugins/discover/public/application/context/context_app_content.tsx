@@ -74,7 +74,14 @@ export function ContextAppContent({
   setAppState,
   addFilter,
 }: ContextAppContentProps) {
-  const { uiSettings: config } = useDiscoverServices();
+  const {
+    uiSettings: config,
+    fieldFormats,
+    addBasePath,
+    uiSettings,
+    dataViewFieldEditor,
+    toastNotifications,
+  } = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const isAnchorLoading =
@@ -162,6 +169,13 @@ export function ContextAppContent({
             onRemoveColumn={onRemoveColumn}
             onSetColumns={onSetColumns}
             DocumentView={DiscoverGridFlyout}
+            services={{
+              fieldFormats,
+              addBasePath,
+              uiSettings,
+              dataViewFieldEditor,
+              toastNotifications,
+            }}
           />
         </div>
       )}
