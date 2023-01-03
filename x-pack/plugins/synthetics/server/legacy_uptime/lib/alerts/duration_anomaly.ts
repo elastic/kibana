@@ -21,7 +21,7 @@ import {
   getViewInAppUrl,
   setRecoveredAlertsContext,
 } from './common';
-import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { UptimeCorePluginsSetup } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';

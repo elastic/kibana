@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.ApmSynthtraceEsClient",
+        "id": "def-common.ApmSynthtraceEsClient",
         "type": "Class",
         "tags": [],
         "label": "ApmSynthtraceEsClient",
@@ -23,7 +31,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.ApmSynthtraceEsClient.Unnamed",
+            "id": "def-common.ApmSynthtraceEsClient.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -37,7 +45,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.ApmSynthtraceEsClient.Unnamed.$1",
+                "id": "def-common.ApmSynthtraceEsClient.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "client",
@@ -52,7 +60,7 @@
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.ApmSynthtraceEsClient.Unnamed.$2",
+                "id": "def-common.ApmSynthtraceEsClient.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "logger",
@@ -67,7 +75,7 @@
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.ApmSynthtraceEsClient.Unnamed.$3",
+                "id": "def-common.ApmSynthtraceEsClient.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -86,7 +94,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.ApmSynthtraceEsClient.runningVersion",
+            "id": "def-common.ApmSynthtraceEsClient.runningVersion",
             "type": "Function",
             "tags": [],
             "label": "runningVersion",
@@ -102,7 +110,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.ApmSynthtraceEsClient.clean",
+            "id": "def-common.ApmSynthtraceEsClient.clean",
             "type": "Function",
             "tags": [],
             "label": "clean",
@@ -116,7 +124,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.ApmSynthtraceEsClient.clean.$1",
+                "id": "def-common.ApmSynthtraceEsClient.clean.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "dataStreams",
@@ -134,7 +142,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.ApmSynthtraceEsClient.updateComponentTemplates",
+            "id": "def-common.ApmSynthtraceEsClient.updateComponentTemplates",
             "type": "Function",
             "tags": [],
             "label": "updateComponentTemplates",
@@ -148,7 +156,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.ApmSynthtraceEsClient.updateComponentTemplates.$1",
+                "id": "def-common.ApmSynthtraceEsClient.updateComponentTemplates.$1",
                 "type": "number",
                 "tags": [],
                 "label": "numberOfPrimaryShards",
@@ -166,7 +174,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.ApmSynthtraceEsClient.registerGcpRepository",
+            "id": "def-common.ApmSynthtraceEsClient.registerGcpRepository",
             "type": "Function",
             "tags": [],
             "label": "registerGcpRepository",
@@ -180,7 +188,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.ApmSynthtraceEsClient.registerGcpRepository.$1",
+                "id": "def-common.ApmSynthtraceEsClient.registerGcpRepository.$1",
                 "type": "string",
                 "tags": [],
                 "label": "connectionString",
@@ -198,7 +206,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.ApmSynthtraceEsClient.refresh",
+            "id": "def-common.ApmSynthtraceEsClient.refresh",
             "type": "Function",
             "tags": [],
             "label": "refresh",
@@ -214,7 +222,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.ApmSynthtraceEsClient.refresh.$1",
+                "id": "def-common.ApmSynthtraceEsClient.refresh.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "dataStreams",
@@ -232,7 +240,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.ApmSynthtraceEsClient.index",
+            "id": "def-common.ApmSynthtraceEsClient.index",
             "type": "Function",
             "tags": [],
             "label": "index",
@@ -241,17 +249,17 @@
               "<TFields>(events: ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.EntityIterable",
+                "section": "def-common.EntityIterable",
                 "text": "EntityIterable"
               },
               "<TFields> | ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.EntityIterable",
+                "section": "def-common.EntityIterable",
                 "text": "EntityIterable"
               },
               "<TFields>[], options?: ",
@@ -259,9 +267,9 @@
               "<",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.ApmFields",
+                "section": "def-common.ApmFields",
                 "text": "ApmFields"
               },
               "> | undefined, streamProcessor?: ",
@@ -269,9 +277,9 @@
               "<",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.ApmFields",
+                "section": "def-common.ApmFields",
                 "text": "ApmFields"
               },
               "> | undefined) => Promise<void>"
@@ -282,7 +290,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.ApmSynthtraceEsClient.index.$1",
+                "id": "def-common.ApmSynthtraceEsClient.index.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "events",
@@ -290,17 +298,17 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/apm-synthtrace",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnApmSynthtracePluginApi",
-                    "section": "def-server.EntityIterable",
+                    "section": "def-common.EntityIterable",
                     "text": "EntityIterable"
                   },
                   "<TFields> | ",
                   {
                     "pluginId": "@kbn/apm-synthtrace",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnApmSynthtracePluginApi",
-                    "section": "def-server.EntityIterable",
+                    "section": "def-common.EntityIterable",
                     "text": "EntityIterable"
                   },
                   "<TFields>[]"
@@ -312,7 +320,7 @@
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.ApmSynthtraceEsClient.index.$2",
+                "id": "def-common.ApmSynthtraceEsClient.index.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -322,9 +330,9 @@
                   "<",
                   {
                     "pluginId": "@kbn/apm-synthtrace",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnApmSynthtracePluginApi",
-                    "section": "def-server.ApmFields",
+                    "section": "def-common.ApmFields",
                     "text": "ApmFields"
                   },
                   "> | undefined"
@@ -336,7 +344,7 @@
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.ApmSynthtraceEsClient.index.$3",
+                "id": "def-common.ApmSynthtraceEsClient.index.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "streamProcessor",
@@ -346,9 +354,9 @@
                   "<",
                   {
                     "pluginId": "@kbn/apm-synthtrace",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnApmSynthtracePluginApi",
-                    "section": "def-server.ApmFields",
+                    "section": "def-common.ApmFields",
                     "text": "ApmFields"
                   },
                   "> | undefined"
@@ -363,7 +371,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.ApmSynthtraceEsClient.createDataStream",
+            "id": "def-common.ApmSynthtraceEsClient.createDataStream",
             "type": "Function",
             "tags": [],
             "label": "createDataStream",
@@ -374,9 +382,9 @@
               "<",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.ApmFields",
+                "section": "def-common.ApmFields",
                 "text": "ApmFields"
               },
               ">) => Promise<void>"
@@ -387,7 +395,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.ApmSynthtraceEsClient.createDataStream.$1",
+                "id": "def-common.ApmSynthtraceEsClient.createDataStream.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "aggregator",
@@ -397,9 +405,9 @@
                   "<",
                   {
                     "pluginId": "@kbn/apm-synthtrace",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnApmSynthtracePluginApi",
-                    "section": "def-server.ApmFields",
+                    "section": "def-common.ApmFields",
                     "text": "ApmFields"
                   },
                   ">"
@@ -417,7 +425,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.EntityArrayIterable",
+        "id": "def-common.EntityArrayIterable",
         "type": "Class",
         "tags": [],
         "label": "EntityArrayIterable",
@@ -425,17 +433,17 @@
         "signature": [
           {
             "pluginId": "@kbn/apm-synthtrace",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnApmSynthtracePluginApi",
-            "section": "def-server.EntityArrayIterable",
+            "section": "def-common.EntityArrayIterable",
             "text": "EntityArrayIterable"
           },
           "<TFields> implements ",
           {
             "pluginId": "@kbn/apm-synthtrace",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnApmSynthtracePluginApi",
-            "section": "def-server.EntityIterable",
+            "section": "def-common.EntityIterable",
             "text": "EntityIterable"
           },
           "<TFields>"
@@ -446,7 +454,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityArrayIterable.Unnamed",
+            "id": "def-common.EntityArrayIterable.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -460,7 +468,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.EntityArrayIterable.Unnamed.$1",
+                "id": "def-common.EntityArrayIterable.Unnamed.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "fields",
@@ -478,7 +486,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityArrayIterable.order",
+            "id": "def-common.EntityArrayIterable.order",
             "type": "Function",
             "tags": [],
             "label": "order",
@@ -494,7 +502,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityArrayIterable.estimatedRatePerMinute",
+            "id": "def-common.EntityArrayIterable.estimatedRatePerMinute",
             "type": "Function",
             "tags": [],
             "label": "estimatedRatePerMinute",
@@ -510,7 +518,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityArrayIterable.Symbol.asyncIterator",
+            "id": "def-common.EntityArrayIterable.Symbol.asyncIterator",
             "type": "Function",
             "tags": [],
             "label": "[Symbol.asyncIterator]",
@@ -526,7 +534,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityArrayIterable.Symbol.iterator",
+            "id": "def-common.EntityArrayIterable.Symbol.iterator",
             "type": "Function",
             "tags": [],
             "label": "[Symbol.iterator]",
@@ -542,7 +550,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityArrayIterable.merge",
+            "id": "def-common.EntityArrayIterable.merge",
             "type": "Function",
             "tags": [],
             "label": "merge",
@@ -551,9 +559,9 @@
               "(...iterables: ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.EntityIterable",
+                "section": "def-common.EntityIterable",
                 "text": "EntityIterable"
               },
               "<TFields>[]) => ",
@@ -566,7 +574,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.EntityArrayIterable.merge.$1",
+                "id": "def-common.EntityArrayIterable.merge.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "iterables",
@@ -574,9 +582,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/apm-synthtrace",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnApmSynthtracePluginApi",
-                    "section": "def-server.EntityIterable",
+                    "section": "def-common.EntityIterable",
                     "text": "EntityIterable"
                   },
                   "<TFields>[]"
@@ -591,7 +599,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityArrayIterable.toArray",
+            "id": "def-common.EntityArrayIterable.toArray",
             "type": "Function",
             "tags": [],
             "label": "toArray",
@@ -612,7 +620,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.cleanWriteTargets",
+        "id": "def-common.cleanWriteTargets",
         "type": "Function",
         "tags": [],
         "label": "cleanWriteTargets",
@@ -628,7 +636,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.cleanWriteTargets.$1",
+            "id": "def-common.cleanWriteTargets.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  targets,\n  client,\n  logger,\n}",
@@ -639,7 +647,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.cleanWriteTargets.$1.targets",
+                "id": "def-common.cleanWriteTargets.$1.targets",
                 "type": "Array",
                 "tags": [],
                 "label": "targets",
@@ -653,7 +661,7 @@
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.cleanWriteTargets.$1.client",
+                "id": "def-common.cleanWriteTargets.$1.client",
                 "type": "Object",
                 "tags": [],
                 "label": "client",
@@ -667,7 +675,7 @@
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.cleanWriteTargets.$1.logger",
+                "id": "def-common.cleanWriteTargets.$1.logger",
                 "type": "Object",
                 "tags": [],
                 "label": "logger",
@@ -687,7 +695,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.createLogger",
+        "id": "def-common.createLogger",
         "type": "Function",
         "tags": [],
         "label": "createLogger",
@@ -696,9 +704,9 @@
           "(logLevel: ",
           {
             "pluginId": "@kbn/apm-synthtrace",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnApmSynthtracePluginApi",
-            "section": "def-server.LogLevel",
+            "section": "def-common.LogLevel",
             "text": "LogLevel"
           },
           ") => { perf: <T extends unknown>(name: string, cb: () => T) => T; debug: (...args: any[]) => void; info: (...args: any[]) => void; error: (...args: any[]) => void; }"
@@ -709,7 +717,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.createLogger.$1",
+            "id": "def-common.createLogger.$1",
             "type": "Enum",
             "tags": [],
             "label": "logLevel",
@@ -717,9 +725,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.LogLevel",
+                "section": "def-common.LogLevel",
                 "text": "LogLevel"
               }
             ],
@@ -734,7 +742,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.dedot",
+        "id": "def-common.dedot",
         "type": "Function",
         "tags": [],
         "label": "dedot",
@@ -748,7 +756,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.dedot.$1",
+            "id": "def-common.dedot.$1",
             "type": "Object",
             "tags": [],
             "label": "source",
@@ -763,7 +771,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.dedot.$2",
+            "id": "def-common.dedot.$2",
             "type": "Object",
             "tags": [],
             "label": "target",
@@ -782,7 +790,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.observer",
+        "id": "def-common.observer",
         "type": "Function",
         "tags": [],
         "label": "observer",
@@ -800,7 +808,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.timerange",
+        "id": "def-common.timerange",
         "type": "Function",
         "tags": [],
         "label": "timerange",
@@ -815,7 +823,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.timerange.$1",
+            "id": "def-common.timerange.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "from",
@@ -830,7 +838,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.timerange.$2",
+            "id": "def-common.timerange.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "to",
@@ -851,7 +859,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.ApmException",
+        "id": "def-common.ApmException",
         "type": "Interface",
         "tags": [],
         "label": "ApmException",
@@ -862,7 +870,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.ApmException.message",
+            "id": "def-common.ApmException.message",
             "type": "string",
             "tags": [],
             "label": "message",
@@ -876,7 +884,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.EntityIterable",
+        "id": "def-common.EntityIterable",
         "type": "Interface",
         "tags": [],
         "label": "EntityIterable",
@@ -884,9 +892,9 @@
         "signature": [
           {
             "pluginId": "@kbn/apm-synthtrace",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnApmSynthtracePluginApi",
-            "section": "def-server.EntityIterable",
+            "section": "def-common.EntityIterable",
             "text": "EntityIterable"
           },
           "<TFields> extends Iterable<TFields>,AsyncIterable<TFields>"
@@ -897,7 +905,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityIterable.order",
+            "id": "def-common.EntityIterable.order",
             "type": "Function",
             "tags": [],
             "label": "order",
@@ -913,7 +921,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityIterable.estimatedRatePerMinute",
+            "id": "def-common.EntityIterable.estimatedRatePerMinute",
             "type": "Function",
             "tags": [],
             "label": "estimatedRatePerMinute",
@@ -929,7 +937,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityIterable.toArray",
+            "id": "def-common.EntityIterable.toArray",
             "type": "Function",
             "tags": [],
             "label": "toArray",
@@ -938,9 +946,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.ApmFields",
+                "section": "def-common.ApmFields",
                 "text": "ApmFields"
               },
               "[]"
@@ -953,7 +961,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityIterable.merge",
+            "id": "def-common.EntityIterable.merge",
             "type": "Function",
             "tags": [],
             "label": "merge",
@@ -962,9 +970,9 @@
               "(...iterables: ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.EntityIterable",
+                "section": "def-common.EntityIterable",
                 "text": "EntityIterable"
               },
               "<TFields>[]) => ",
@@ -977,7 +985,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.EntityIterable.merge.$1",
+                "id": "def-common.EntityIterable.merge.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "iterables",
@@ -985,9 +993,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/apm-synthtrace",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnApmSynthtracePluginApi",
-                    "section": "def-server.EntityIterable",
+                    "section": "def-common.EntityIterable",
                     "text": "EntityIterable"
                   },
                   "<TFields>[]"
@@ -1005,7 +1013,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.Fields",
+        "id": "def-common.Fields",
         "type": "Interface",
         "tags": [],
         "label": "Fields",
@@ -1016,7 +1024,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.Fields.timestamp",
+            "id": "def-common.Fields.timestamp",
             "type": "number",
             "tags": [],
             "label": "'@timestamp'",
@@ -1035,7 +1043,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.LogLevel",
+        "id": "def-common.LogLevel",
         "type": "Enum",
         "tags": [],
         "label": "LogLevel",
@@ -1049,7 +1057,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.ApmFields",
+        "id": "def-common.ApmFields",
         "type": "Type",
         "tags": [],
         "label": "ApmFields",
@@ -1057,19 +1065,19 @@
         "signature": [
           {
             "pluginId": "@kbn/apm-synthtrace",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnApmSynthtracePluginApi",
-            "section": "def-server.Fields",
+            "section": "def-common.Fields",
             "text": "Fields"
           },
           " & Partial<{ 'timestamp.us'?: number | undefined; 'agent.name': string; 'agent.version': string; 'client.geo.city_name': string; 'client.geo.continent_name': string; 'client.geo.country_iso_code': string; 'client.geo.country_name': string; 'client.geo.region_iso_code': string; 'client.geo.region_name': string; 'client.geo.location': ",
           "GeoLocation",
-          "; 'client.ip': string; 'cloud.provider': string; 'cloud.project.name': string; 'cloud.service.name': string; 'cloud.availability_zone': string; 'cloud.machine.type': string; 'cloud.region': string; 'container.id': string; 'destination.address': string; 'destination.port': number; 'device.id': string; 'device.model.identifier': string; 'device.model.name': string; 'device.manufacturer': string; 'ecs.version': string; 'event.outcome': string; 'event.ingested': number; 'error.id': string; 'error.exception': ",
+          "; 'client.ip': string; 'cloud.provider': string; 'cloud.project.name': string; 'cloud.service.name': string; 'cloud.availability_zone': string; 'cloud.machine.type': string; 'cloud.region': string; 'container.id': string; 'destination.address': string; 'destination.port': number; 'device.id': string; 'device.model.identifier': string; 'device.model.name': string; 'device.manufacturer': string; 'ecs.version': string; 'event.outcome': string; 'event.name': string; 'event.ingested': number; 'error.id': string; 'error.exception': ",
           {
             "pluginId": "@kbn/apm-synthtrace",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnApmSynthtracePluginApi",
-            "section": "def-server.ApmException",
+            "section": "def-common.ApmException",
             "text": "ApmException"
           },
           "[]; 'error.grouping_name': string; 'error.grouping_key': string; 'faas.id': string; 'faas.name': string; 'faas.coldstart': boolean; 'faas.execution': string; 'faas.trigger.type': string; 'faas.trigger.request_id': string; 'host.name': string; 'host.architecture': string; 'host.hostname': string; 'host.os.full': string; 'host.os.name': string; 'host.os.platform': string; 'host.os.type': string; 'host.os.version': string; 'http.request.method': string; 'http.response.status_code': number; 'kubernetes.pod.uid': string; 'kubernetes.pod.name': string; 'metricset.name': string; observer: ",
@@ -1085,7 +1093,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.apm",
+        "id": "def-common.apm",
         "type": "Object",
         "tags": [],
         "label": "apm",
@@ -1096,7 +1104,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.apm.service",
+            "id": "def-common.apm.service",
             "type": "Function",
             "tags": [],
             "label": "service",
@@ -1114,7 +1122,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.apm.mobileApp",
+            "id": "def-common.apm.mobileApp",
             "type": "Function",
             "tags": [],
             "label": "mobileApp",
@@ -1132,7 +1140,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.apm.browser",
+            "id": "def-common.apm.browser",
             "type": "Function",
             "tags": [],
             "label": "browser",
@@ -1148,7 +1156,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.browser.$1",
+                "id": "def-common.apm.browser.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -1164,7 +1172,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.apm.getTransactionMetrics",
+            "id": "def-common.apm.getTransactionMetrics",
             "type": "Function",
             "tags": [],
             "label": "getTransactionMetrics",
@@ -1173,19 +1181,19 @@
               "(events: ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.ApmFields",
+                "section": "def-common.ApmFields",
                 "text": "ApmFields"
               },
               "[]) => { 'metricset.name': string; 'transaction.duration.histogram': { values: number[]; counts: number[]; }; _doc_count: number; '@timestamp'?: number | undefined; 'timestamp.us'?: number | undefined; 'agent.name'?: string | undefined; 'agent.version'?: string | undefined; 'client.geo.city_name'?: string | undefined; 'client.geo.continent_name'?: string | undefined; 'client.geo.country_iso_code'?: string | undefined; 'client.geo.country_name'?: string | undefined; 'client.geo.region_iso_code'?: string | undefined; 'client.geo.region_name'?: string | undefined; 'client.geo.location'?: ",
               "GeoLocation",
-              " | undefined; 'client.ip'?: string | undefined; 'cloud.provider'?: string | undefined; 'cloud.project.name'?: string | undefined; 'cloud.service.name'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.machine.type'?: string | undefined; 'cloud.region'?: string | undefined; 'container.id'?: string | undefined; 'destination.address'?: string | undefined; 'destination.port'?: number | undefined; 'device.id'?: string | undefined; 'device.model.identifier'?: string | undefined; 'device.model.name'?: string | undefined; 'device.manufacturer'?: string | undefined; 'ecs.version'?: string | undefined; 'event.outcome'?: string | undefined; 'event.ingested'?: number | undefined; 'error.id'?: string | undefined; 'error.exception'?: ",
+              " | undefined; 'client.ip'?: string | undefined; 'cloud.provider'?: string | undefined; 'cloud.project.name'?: string | undefined; 'cloud.service.name'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.machine.type'?: string | undefined; 'cloud.region'?: string | undefined; 'container.id'?: string | undefined; 'destination.address'?: string | undefined; 'destination.port'?: number | undefined; 'device.id'?: string | undefined; 'device.model.identifier'?: string | undefined; 'device.model.name'?: string | undefined; 'device.manufacturer'?: string | undefined; 'ecs.version'?: string | undefined; 'event.outcome'?: string | undefined; 'event.name'?: string | undefined; 'event.ingested'?: number | undefined; 'error.id'?: string | undefined; 'error.exception'?: ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.ApmException",
+                "section": "def-common.ApmException",
                 "text": "ApmException"
               },
               "[] | undefined; 'error.grouping_name'?: string | undefined; 'error.grouping_key'?: string | undefined; 'faas.id'?: string | undefined; 'faas.name'?: string | undefined; 'faas.coldstart'?: boolean | undefined; 'faas.execution'?: string | undefined; 'faas.trigger.type'?: string | undefined; 'faas.trigger.request_id'?: string | undefined; 'host.name'?: string | undefined; 'host.architecture'?: string | undefined; 'host.hostname'?: string | undefined; 'host.os.full'?: string | undefined; 'host.os.name'?: string | undefined; 'host.os.platform'?: string | undefined; 'host.os.type'?: string | undefined; 'host.os.version'?: string | undefined; 'http.request.method'?: string | undefined; 'http.response.status_code'?: number | undefined; 'kubernetes.pod.uid'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; observer?: ",
@@ -1199,7 +1207,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.getTransactionMetrics.$1",
+                "id": "def-common.apm.getTransactionMetrics.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "events",
@@ -1207,9 +1215,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/apm-synthtrace",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnApmSynthtracePluginApi",
-                    "section": "def-server.ApmFields",
+                    "section": "def-common.ApmFields",
                     "text": "ApmFields"
                   },
                   "[]"
@@ -1222,7 +1230,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.apm.getSpanDestinationMetrics",
+            "id": "def-common.apm.getSpanDestinationMetrics",
             "type": "Function",
             "tags": [],
             "label": "getSpanDestinationMetrics",
@@ -1231,19 +1239,19 @@
               "(events: ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.ApmFields",
+                "section": "def-common.ApmFields",
                 "text": "ApmFields"
               },
               "[]) => { \"metricset.name\": string; 'span.destination.service.response_time.sum.us': number; 'span.destination.service.response_time.count': number; '@timestamp'?: number | undefined; 'timestamp.us'?: number | undefined; 'agent.name'?: string | undefined; 'agent.version'?: string | undefined; 'client.geo.city_name'?: string | undefined; 'client.geo.continent_name'?: string | undefined; 'client.geo.country_iso_code'?: string | undefined; 'client.geo.country_name'?: string | undefined; 'client.geo.region_iso_code'?: string | undefined; 'client.geo.region_name'?: string | undefined; 'client.geo.location'?: ",
               "GeoLocation",
-              " | undefined; 'client.ip'?: string | undefined; 'cloud.provider'?: string | undefined; 'cloud.project.name'?: string | undefined; 'cloud.service.name'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.machine.type'?: string | undefined; 'cloud.region'?: string | undefined; 'container.id'?: string | undefined; 'destination.address'?: string | undefined; 'destination.port'?: number | undefined; 'device.id'?: string | undefined; 'device.model.identifier'?: string | undefined; 'device.model.name'?: string | undefined; 'device.manufacturer'?: string | undefined; 'ecs.version'?: string | undefined; 'event.outcome'?: string | undefined; 'event.ingested'?: number | undefined; 'error.id'?: string | undefined; 'error.exception'?: ",
+              " | undefined; 'client.ip'?: string | undefined; 'cloud.provider'?: string | undefined; 'cloud.project.name'?: string | undefined; 'cloud.service.name'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.machine.type'?: string | undefined; 'cloud.region'?: string | undefined; 'container.id'?: string | undefined; 'destination.address'?: string | undefined; 'destination.port'?: number | undefined; 'device.id'?: string | undefined; 'device.model.identifier'?: string | undefined; 'device.model.name'?: string | undefined; 'device.manufacturer'?: string | undefined; 'ecs.version'?: string | undefined; 'event.outcome'?: string | undefined; 'event.name'?: string | undefined; 'event.ingested'?: number | undefined; 'error.id'?: string | undefined; 'error.exception'?: ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.ApmException",
+                "section": "def-common.ApmException",
                 "text": "ApmException"
               },
               "[] | undefined; 'error.grouping_name'?: string | undefined; 'error.grouping_key'?: string | undefined; 'faas.id'?: string | undefined; 'faas.name'?: string | undefined; 'faas.coldstart'?: boolean | undefined; 'faas.execution'?: string | undefined; 'faas.trigger.type'?: string | undefined; 'faas.trigger.request_id'?: string | undefined; 'host.name'?: string | undefined; 'host.architecture'?: string | undefined; 'host.hostname'?: string | undefined; 'host.os.full'?: string | undefined; 'host.os.name'?: string | undefined; 'host.os.platform'?: string | undefined; 'host.os.type'?: string | undefined; 'host.os.version'?: string | undefined; 'http.request.method'?: string | undefined; 'http.response.status_code'?: number | undefined; 'kubernetes.pod.uid'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; observer?: ",
@@ -1257,7 +1265,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.getSpanDestinationMetrics.$1",
+                "id": "def-common.apm.getSpanDestinationMetrics.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "events",
@@ -1265,9 +1273,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/apm-synthtrace",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnApmSynthtracePluginApi",
-                    "section": "def-server.ApmFields",
+                    "section": "def-common.ApmFields",
                     "text": "ApmFields"
                   },
                   "[]"
@@ -1280,7 +1288,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.apm.getChromeUserAgentDefaults",
+            "id": "def-common.apm.getChromeUserAgentDefaults",
             "type": "Function",
             "tags": [],
             "label": "getChromeUserAgentDefaults",
@@ -1296,7 +1304,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.apm.getBreakdownMetrics",
+            "id": "def-common.apm.getBreakdownMetrics",
             "type": "Function",
             "tags": [],
             "label": "getBreakdownMetrics",
@@ -1305,17 +1313,17 @@
               "(events: ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.ApmFields",
+                "section": "def-common.ApmFields",
                 "text": "ApmFields"
               },
               "[]) => ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.ApmFields",
+                "section": "def-common.ApmFields",
                 "text": "ApmFields"
               },
               "[]"
@@ -1327,7 +1335,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.getBreakdownMetrics.$1",
+                "id": "def-common.apm.getBreakdownMetrics.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "events",
@@ -1335,9 +1343,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/apm-synthtrace",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnApmSynthtracePluginApi",
-                    "section": "def-server.ApmFields",
+                    "section": "def-common.ApmFields",
                     "text": "ApmFields"
                   },
                   "[]"
@@ -1350,7 +1358,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.apm.getApmWriteTargets",
+            "id": "def-common.apm.getApmWriteTargets",
             "type": "Function",
             "tags": [],
             "label": "getApmWriteTargets",
@@ -1369,7 +1377,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.getApmWriteTargets.$1",
+                "id": "def-common.apm.getApmWriteTargets.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -1387,7 +1395,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.apm.ApmSynthtraceEsClient",
+            "id": "def-common.apm.ApmSynthtraceEsClient",
             "type": "Object",
             "tags": [],
             "label": "ApmSynthtraceEsClient",
@@ -1396,9 +1404,9 @@
               "typeof ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.ApmSynthtraceEsClient",
+                "section": "def-common.ApmSynthtraceEsClient",
                 "text": "ApmSynthtraceEsClient"
               }
             ],
@@ -1408,7 +1416,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.apm.ApmSynthtraceKibanaClient",
+            "id": "def-common.apm.ApmSynthtraceKibanaClient",
             "type": "Object",
             "tags": [],
             "label": "ApmSynthtraceKibanaClient",
@@ -1423,7 +1431,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.apm.serverlessFunction",
+            "id": "def-common.apm.serverlessFunction",
             "type": "Function",
             "tags": [],
             "label": "serverlessFunction",
@@ -1439,7 +1447,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.serverlessFunction.$1",
+                "id": "def-common.apm.serverlessFunction.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -1458,7 +1466,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.stackMonitoring",
+        "id": "def-common.stackMonitoring",
         "type": "Object",
         "tags": [],
         "label": "stackMonitoring",
@@ -1469,7 +1477,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.stackMonitoring.cluster",
+            "id": "def-common.stackMonitoring.cluster",
             "type": "Function",
             "tags": [],
             "label": "cluster",
@@ -1485,7 +1493,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.stackMonitoring.cluster.$1",
+                "id": "def-common.stackMonitoring.cluster.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -1500,13 +1508,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }
