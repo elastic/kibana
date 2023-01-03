@@ -97,9 +97,7 @@ export function TimeSliderPopoverContent(props: Props) {
       </EuiFlexItem>
       <EuiFlexItem>{rangeInput}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={TimeSliderStrings.control.getClearSelection()}
-        >
+        <EuiToolTip content={TimeSliderStrings.control.getClearSelection()}>
           <EuiButtonIcon
             iconType="eraser"
             color="danger"

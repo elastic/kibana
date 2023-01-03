@@ -14,13 +14,13 @@ export const TimeSliderStrings = {
       i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
         defaultMessage: 'Clear time selection',
       }),
-    getPinStart: () => 
+    getPinStart: () =>
       i18n.translate('controls.timeSlider.settings.unanchorStartSwitchLabel', {
         defaultMessage: 'Unpin start',
       }),
     getUnpinStart: () =>
       i18n.translate('controls.timeSlider.settings.unanchorStartSwitchLabel', {
         defaultMessage: 'Unpin start',
-      })
-  }
+      }),
+  },
 };
