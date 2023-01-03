@@ -35,7 +35,7 @@ import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/commo
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useResizeObserver } from '@elastic/eui';
+import { useResizeObserver, useEuiScrollBar } from '@elastic/eui';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import {
@@ -46,8 +46,6 @@ import {
 } from '../services';
 import { getCurrencyCode } from './currency_codes';
 import { getDataBoundsForPalette } from '../utils';
-
-import './metric_vis.scss';
 
 export const defaultColor = euiThemeVars.euiColorLightestShade;
 const getBytesUnit = (value: number) => {
@@ -362,8 +360,8 @@ export const MetricVis = ({
         max-height: 100%;
         max-width: 100%;
         overflow-y: auto;
+        ${useEuiScrollBar()}
       `}
-      className="mtrVisContainer"
     >
       <div
         css={css`
