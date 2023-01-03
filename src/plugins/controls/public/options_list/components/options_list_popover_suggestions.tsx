@@ -16,6 +16,9 @@ import {
   EuiSpacer,
   EuiBadge,
   EuiIcon,
+  useEuiBackgroundColor,
+  useEuiTheme,
+  EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
@@ -38,6 +41,7 @@ export const OptionsListPopoverSuggestions = ({
     actions: { replaceSelection, deselectOption, selectOption, selectExists },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
+  const { euiTheme } = useEuiTheme();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
@@ -131,7 +135,7 @@ export const OptionsListPopoverSuggestions = ({
               : key
           }
         >
-          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false} alignItems="center">
             <EuiFlexItem
               grow={false}
               css={css`
@@ -154,9 +158,16 @@ export const OptionsListPopoverSuggestions = ({
                     )}
                     position={'right'}
                   >
-                    <EuiBadge title={undefined} className="eui-textNumber">
-                      {`${availableOptions[key].doc_count}`}
-                    </EuiBadge>
+                    <EuiText
+                      className="eui-textNumber"
+                      size="xs"
+                      color={euiTheme.colors.subduedText}
+                      css={css`
+                        font-weight: ${euiTheme.font.weight.medium};
+                      `}
+                    >
+                      {`${availableOptions[key].doc_count.toLocaleString()}`}
+                    </EuiText>
                   </EuiToolTip>
                 )}
               </EuiFlexItem>
