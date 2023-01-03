@@ -8,7 +8,6 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
-import { aggregateLatestFindings } from '../../tasks/findings_stats_task';
 import type { ComplianceDashboardData } from '../../../common/types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
@@ -67,8 +66,6 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
             filter: [{ term: { 'rule.benchmark.id': policyTemplate } }],
           },
         };
-
-        await aggregateLatestFindings(esClient, 1, cspContext.logger);
 
         const [stats, groupedFindingsEvaluation, clustersWithoutTrends, trends] = await Promise.all(
           [

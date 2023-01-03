@@ -34,6 +34,73 @@ import {
   PolicyTemplate,
 } from '../../../common/constants';
 
+const noDataOptions: Record<
+  PolicyTemplate,
+  Pick<CspNoDataPageProps, 'docsLink' | 'actionTitle' | 'actionDescription'>
+> = {
+  kspm: {
+    docsLink: 'https://ela.st/kspm',
+    actionTitle: i18n.translate(
+      'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.buttonLabel',
+      { defaultMessage: 'Add a KSPM integration' }
+    ),
+    actionDescription: (
+      <FormattedMessage
+        id="xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.description"
+        defaultMessage="Use our {integrationFullName} (KSPM) integration to measure your Kubernetes cluster setup against CIS recommendations."
+        values={{
+          integrationFullName: (
+            <EuiLink href="https://ela.st/kspm">
+              <FormattedMessage
+                id="xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.integrationNameLabel"
+                defaultMessage="Kubernetes Security Posture Management"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+  },
+  cspm: {
+    // TODO: CIS AWS - replace link or create the docs
+    docsLink: 'https://ela.st/cspm',
+    actionTitle: i18n.translate(
+      'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.buttonLabel',
+      { defaultMessage: 'Add a CSPM integration' }
+    ),
+    actionDescription: (
+      <FormattedMessage
+        id="xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.description"
+        defaultMessage="Use our {integrationFullName} (CSPM) integration to measure your Cloud account setup against CIS recommendations."
+        values={{
+          integrationFullName: (
+            // TODO: CIS AWS - replace link or create the docs
+            <EuiLink href="https://ela.st/cspm">
+              <FormattedMessage
+                id="xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.integrationNameLabel"
+                defaultMessage="Cloud Security Posture Management"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+  },
+};
+
+const getNotInstalledConfig = (
+  policyTemplate: PolicyTemplate,
+  actionHref: CspNoDataPageProps['actionHref']
+) => ({
+  pageTitle: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {
+    defaultMessage: 'Install Integration to get started',
+  }),
+  docsLink: noDataOptions[policyTemplate].docsLink,
+  actionHref,
+  actionTitle: noDataOptions[policyTemplate].actionTitle,
+  actionDescription: noDataOptions[policyTemplate].actionDescription,
+});
+
 const IntegrationPostureDashboard = ({
   complianceData,
   notInstalledConfig,
@@ -90,71 +157,6 @@ const IntegrationPostureDashboard = ({
     </>
   );
 };
-
-const noDataOptions: Record<
-  PolicyTemplate,
-  Pick<CspNoDataPageProps, 'docsLink' | 'actionTitle' | 'actionDescription'>
-> = {
-  kspm: {
-    docsLink: 'https://ela.st/kspm',
-    actionTitle: i18n.translate(
-      'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.buttonLabel',
-      { defaultMessage: 'Add a KSPM integration' }
-    ),
-    actionDescription: (
-      <FormattedMessage
-        id="xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.description"
-        defaultMessage="Use our {integrationFullName} (KSPM) integration to measure your Kubernetes cluster setup against CIS recommendations."
-        values={{
-          integrationFullName: (
-            <EuiLink href="https://ela.st/kspm">
-              <FormattedMessage
-                id="xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.integrationNameLabel"
-                defaultMessage="Kubernetes Security Posture Management"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
-  cspm: {
-    docsLink: 'https://ela.st/cspm',
-    actionTitle: i18n.translate(
-      'xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.buttonLabel',
-      { defaultMessage: 'Add a CSPM integration' }
-    ),
-    actionDescription: (
-      <FormattedMessage
-        id="xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.description"
-        defaultMessage="Use our {integrationFullName} (CSPM) integration to measure your Cloud account setup against CIS recommendations."
-        values={{
-          integrationFullName: (
-            <EuiLink href="https://ela.st/cspm">
-              <FormattedMessage
-                id="xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.integrationNameLabel"
-                defaultMessage="Cloud Security Posture Management"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
-};
-
-const getNotInstalledConfig = (
-  policyTemplate: PolicyTemplate,
-  actionHref: CspNoDataPageProps['actionHref']
-) => ({
-  pageTitle: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {
-    defaultMessage: 'Install Integration to get started',
-  }),
-  docsLink: noDataOptions[policyTemplate].docsLink,
-  actionHref,
-  actionTitle: noDataOptions[policyTemplate].actionTitle,
-  actionDescription: noDataOptions[policyTemplate].actionDescription,
-});
 
 export const ComplianceDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(CSPM_POLICY_TEMPLATE);
