@@ -28,7 +28,7 @@ import {
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { Server } from './server';

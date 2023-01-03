@@ -10079,9 +10079,9 @@
           " | undefined; title?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",
@@ -10616,9 +10616,9 @@
             "<",
             {
               "pluginId": "@kbn/utility-types",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-server.SerializableRecord",
+              "section": "def-common.SerializableRecord",
               "text": "SerializableRecord"
             },
             ">) => void"
@@ -10645,9 +10645,9 @@
                 "<",
                 {
                   "pluginId": "@kbn/utility-types",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnUtilityTypesPluginApi",
-                  "section": "def-server.SerializableRecord",
+                  "section": "def-common.SerializableRecord",
                   "text": "SerializableRecord"
                 },
                 ">"
@@ -11326,9 +11326,9 @@
             "<",
             {
               "pluginId": "@kbn/utility-types",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-server.SerializableRecord",
+              "section": "def-common.SerializableRecord",
               "text": "SerializableRecord"
             },
             ">) => void"
@@ -11355,9 +11355,9 @@
                 "<",
                 {
                   "pluginId": "@kbn/utility-types",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnUtilityTypesPluginApi",
-                  "section": "def-server.SerializableRecord",
+                  "section": "def-common.SerializableRecord",
                   "text": "SerializableRecord"
                 },
                 ">"
@@ -11527,9 +11527,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               "> & { isContainerType: boolean; }"
@@ -11575,9 +11575,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ">"
@@ -11776,9 +11776,9 @@
           " | undefined; title?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",

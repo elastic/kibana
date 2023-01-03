@@ -16,7 +16,7 @@ export type {
   ScopedFilesClient,
 } from '@kbn/files-plugin/public';
 
-export type { FileImageMetadata } from '@kbn/shared-ux-file-types/';
+export type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 
 export type {
   IContainer,
