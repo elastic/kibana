@@ -540,6 +540,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('discoverNoResultsError'); // still has error
 
         // check that the sidebar is rendered event after a refresh
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
         allFields = await PageObjects.discover.getAllFieldNames();
         expect(allFields.includes('_invalid-runtimefield')).to.be(true);
 
