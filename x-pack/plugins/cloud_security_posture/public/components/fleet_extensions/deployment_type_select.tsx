@@ -17,17 +17,17 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { cloudPostureIntegrations } from '../../common/constants';
-import { CLOUDBEAT_INTEGRATION, POLICY_TEMPLATE } from '../../../common/constants';
+import { CLOUDBEAT_INTEGRATION, PolicyTemplate } from '../../../common/constants';
 
 interface Props {
-  policyTemplate: POLICY_TEMPLATE;
+  policyTemplate: PolicyTemplate;
   type: CLOUDBEAT_INTEGRATION;
   onChange?: (type: CLOUDBEAT_INTEGRATION) => void;
   isDisabled?: boolean;
 }
 
 const kubeDeployOptions = (
-  policyTemplate: POLICY_TEMPLATE
+  policyTemplate: PolicyTemplate
 ): Array<EuiComboBoxOptionOption<CLOUDBEAT_INTEGRATION>> =>
   cloudPostureIntegrations[policyTemplate].options.map((o) => ({ value: o.type, label: o.name }));
 

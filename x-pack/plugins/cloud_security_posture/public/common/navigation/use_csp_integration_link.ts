@@ -6,11 +6,11 @@
  */
 
 import { pagePathGetters, pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public';
-import { POLICY_TEMPLATE } from '../../../common/constants';
+import { PolicyTemplate } from '../../../common/constants';
 import { useCisKubernetesIntegration } from '../api/use_cis_kubernetes_integration';
 import { useKibana } from '../hooks/use_kibana';
 
-export const useCspIntegrationLink = (policyTemplate: POLICY_TEMPLATE): string | undefined => {
+export const useCspIntegrationLink = (policyTemplate: PolicyTemplate): string | undefined => {
   const { http } = useKibana().services;
   const cisIntegration = useCisKubernetesIntegration();
 

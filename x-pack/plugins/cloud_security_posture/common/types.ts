@@ -6,6 +6,7 @@
  */
 
 import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
+import { PolicyTemplate } from './constants';
 import type { CspRuleMetadata } from './schemas/csp_rule_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
@@ -75,7 +76,7 @@ interface BaseCspSetupStatus {
   installedPackagePolicies: number;
   healthyAgents: number;
   isPluginInitialized: boolean;
-  installedPolicyTemplates: Array<'cspm' | 'kspm'>;
+  installedPolicyTemplates: PolicyTemplate[];
 }
 
 interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {

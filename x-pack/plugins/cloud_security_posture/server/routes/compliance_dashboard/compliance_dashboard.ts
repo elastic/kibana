@@ -16,7 +16,7 @@ import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
 import { getTrends, Trends } from './get_trends';
-import { POLICY_TEMPLATE } from '../../../common/constants';
+import { PolicyTemplate } from '../../../common/constants';
 
 export interface KeyDocCount<TKey = string> {
   key: TKey;
@@ -59,7 +59,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
           keep_alive: '30s',
         });
 
-        const policyTemplate = request.params.policy_template as POLICY_TEMPLATE;
+        const policyTemplate = request.params.policy_template as PolicyTemplate;
 
         const query: QueryDslQueryContainer = {
           bool: {

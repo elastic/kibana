@@ -31,7 +31,7 @@ import { CloudBenchmarksSection } from './dashboard_sections/cloud_benchmarks_se
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
-  POLICY_TEMPLATE,
+  PolicyTemplate,
 } from '../../../common/constants';
 
 const IntegrationPostureDashboard = ({
@@ -92,7 +92,7 @@ const IntegrationPostureDashboard = ({
 };
 
 const noDataOptions: Record<
-  POLICY_TEMPLATE,
+  PolicyTemplate,
   Pick<CspNoDataPageProps, 'docsLink' | 'actionTitle' | 'actionDescription'>
 > = {
   kspm: {
@@ -144,7 +144,7 @@ const noDataOptions: Record<
 };
 
 const getNotInstalledConfig = (
-  policyTemplate: POLICY_TEMPLATE,
+  policyTemplate: PolicyTemplate,
   actionHref: CspNoDataPageProps['actionHref']
 ) => ({
   pageTitle: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {

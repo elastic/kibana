@@ -61,6 +61,6 @@ export const SUPPORTED_CLOUDBEAT_INPUTS = [
 ] as const;
 
 export type CLOUDBEAT_INTEGRATION = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
-export type POLICY_TEMPLATE = typeof SUPPORTED_POLICY_TEMPLATES[number];
+export type PolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
 export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
 export type PosturePolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
