@@ -11,8 +11,10 @@ export interface EnterpriseSearchEnginesResponse {
     size: number;
     total: number;
   };
-  results: Array<{
-    name: string;
-    indices: string[];
-  }>;
+  results: EnterpriseSearchEngine[];
+}
+
+export interface EnterpriseSearchEngine {
+  name: string;
+  indices: string[];
 }

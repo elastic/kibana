@@ -24,4 +24,44 @@ export function registerEnginesRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({ path: '/api/engines' })
   );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/engines/{engine_name}',
+      validate: {
+        params: schema.object({
+          engine_name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({ path: '/api/engines/:engine_name' })
+  );
+
+  router.put(
+    {
+      path: '/internal/enterprise_search/engines/{engine_name}',
+      validate: {
+        params: schema.object({
+          engine_name: schema.string(),
+        }),
+        body: schema.object({
+          name: schema.maybe(schema.string()),
+          indices: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({ path: '/api/engines/:engine_name' })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/engines/{engine_name}',
+      validate: {
+        params: schema.object({
+          engine_name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({ path: '/api/engines/:engine_name' })
+  );
 }
