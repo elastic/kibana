@@ -25,7 +25,6 @@ export interface OptionsListComponentState {
   field?: OptionsListField;
   totalCardinality?: number;
   availableOptions?: OptionsListSuggestions;
-  visibleOptions?: string[];
   invalidSelections?: string[];
   validSelections?: string[];
   searchString: SearchString;

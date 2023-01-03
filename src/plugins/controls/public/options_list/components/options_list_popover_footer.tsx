@@ -43,7 +43,7 @@ export const OptionsListPopoverFooter = ({
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { setExclude, gotoFirstPage, gotoPrevPage, gotoNextPage },
+    actions: { setExclude },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
 
@@ -83,7 +83,6 @@ export const OptionsListPopoverFooter = ({
                     disabled={page === 1}
                     onClick={() => {
                       updatePage(1);
-                      dispatch(gotoFirstPage({}));
                     }}
                   />
                 </EuiFlexItem>
@@ -93,7 +92,6 @@ export const OptionsListPopoverFooter = ({
                     disabled={page === 1}
                     onClick={() => {
                       updatePage(page - 1);
-                      dispatch(gotoPrevPage({}));
                     }}
                   />
                 </EuiFlexItem>
@@ -109,10 +107,9 @@ export const OptionsListPopoverFooter = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     iconType="arrowRight"
-                    disabled={(page - 1) * 10 + 10 >= totalCardinality || page >= 10}
+                    disabled={totalCardinality - page * 10 <= 0}
                     onClick={() => {
                       updatePage(page + 1);
-                      dispatch(gotoNextPage({}));
                     }}
                   />
                 </EuiFlexItem>

@@ -36,7 +36,7 @@ export const OptionsListControl = ({
   // Redux embeddable Context
   const {
     useEmbeddableDispatch,
-    actions: { replaceSelection, setSearchString },
+    actions: { replaceSelection, setSearchString, setPage },
     useEmbeddableSelector: select,
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
@@ -86,12 +86,10 @@ export const OptionsListControl = ({
   const updatePage = useCallback(
     (newPage: number) => {
       console.log('new page', newPage);
-      if (newPage === 1 || newPage === 2) {
-        // logic is wrong here
-        paginationSubject.next(newPage);
-      }
+      paginationSubject.next(newPage);
+      dispatch(setPage(newPage));
     },
-    [paginationSubject]
+    [paginationSubject, dispatch, setPage]
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
