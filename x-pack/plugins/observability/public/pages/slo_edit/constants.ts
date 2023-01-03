@@ -35,7 +35,8 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
     },
   },
   timeWindow: {
-    duration: TIMEWINDOW_OPTIONS[0].value,
+    duration:
+      TIMEWINDOW_OPTIONS[TIMEWINDOW_OPTIONS.findIndex((option) => option.value === '30d')].value,
     isRolling: true,
   },
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,

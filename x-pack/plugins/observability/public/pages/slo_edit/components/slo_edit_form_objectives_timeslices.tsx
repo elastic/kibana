@@ -20,7 +20,7 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
     <EuiFlexGrid columns={3}>
       <EuiFlexItem>
         <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.objectives.timeSliceTarget', {
+          {i18n.translate('xpack.observability.slos.sloEdit.timeSliceTarget.label', {
             defaultMessage: 'Timeslice target (%)',
           })}
         </EuiFormLabel>
@@ -48,7 +48,7 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
 
       <EuiFlexItem>
         <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.objectives.timesliceWindow', {
+          {i18n.translate('xpack.observability.slos.sloEdit.timesliceWindow.label', {
             defaultMessage: 'Timeslice window (minutes)',
           })}
         </EuiFormLabel>
