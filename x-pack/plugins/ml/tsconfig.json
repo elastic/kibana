@@ -66,6 +66,8 @@
     "@kbn/task-manager-plugin",
     "@kbn/config-schema",
     "@kbn/repo-info",
+    "@kbn/ml-url-state",
+    "@kbn/ml-nested-property",
   ],
   "exclude": [
     "target/**/*",
