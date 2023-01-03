@@ -8,8 +8,8 @@
 
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ToastsStart } from '@kbn/core/public';
 import type { ValueToStringConverter } from '../types';
-import { DiscoverServices } from '../build_services';
 import { convertNameToString } from './convert_value_to_string';
 
 const WARNING_FOR_FORMULAS = i18n.translate(
@@ -25,16 +25,14 @@ const COPY_FAILED_ERROR_MESSAGE = i18n.translate('discover.grid.copyFailedErrorT
 export const copyValueToClipboard = ({
   rowIndex,
   columnId,
-  services,
+  toastNotifications,
   valueToStringConverter,
 }: {
   rowIndex: number;
   columnId: string;
-  services: DiscoverServices;
+  toastNotifications: ToastsStart;
   valueToStringConverter: ValueToStringConverter;
 }): string | null => {
-  const { toastNotifications } = services;
-
   const result = valueToStringConverter(rowIndex, columnId);
   const valueFormatted = result.formattedString;
 
@@ -75,7 +73,7 @@ export const copyColumnValuesToClipboard = async ({
 }: {
   columnId: string;
   columnDisplayName: string;
-  toastNotifications: DiscoverServices['toastNotifications'];
+  toastNotifications: ToastsStart;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
 }): Promise<string | null> => {
@@ -131,7 +129,7 @@ export const copyColumnNameToClipboard = ({
   toastNotifications,
 }: {
   columnDisplayName: string;
-  toastNotifications: DiscoverServices['toastNotifications'];
+  toastNotifications: ToastsStart;
 }): string | null => {
   const nameFormattedResult = convertNameToString(columnDisplayName);
   const textToCopy = nameFormattedResult.formattedString;

@@ -26,7 +26,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
+import { ToastsStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
@@ -53,7 +53,6 @@ import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
-import { DiscoverServices } from '../../build_services';
 
 interface SortObj {
   id: string;
@@ -199,7 +198,7 @@ export interface DiscoverGridProps {
    */
   services: {
     fieldFormats: FieldFormatsStart;
-    addBasePath: DiscoverServices['addBasePath'];
+    addBasePath: HttpStart['basePath']['prepend'];
     uiSettings: IUiSettingsClient;
     dataViewFieldEditor: DataViewFieldEditorStart;
     toastNotifications: ToastsStart;
@@ -244,8 +243,9 @@ export const DiscoverGrid = ({
   onUpdateRowsPerPage,
   onFieldEdited,
   DocumentView,
-  services: { fieldFormats, addBasePath, uiSettings, dataViewFieldEditor, toastNotifications },
+  services,
 }: DiscoverGridProps) => {
+  const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings } = services;
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -296,7 +296,10 @@ export const DiscoverGrid = ({
   /**
    * Pagination
    */
-  const defaultRowsPerPage = useMemo(() => getDefaultRowsPerPage(uiSettings), [uiSettings]);
+  const defaultRowsPerPage = useMemo(
+    () => getDefaultRowsPerPage(services.uiSettings),
+    [services.uiSettings]
+  );
   const currentPageSize =
     typeof rowsPerPageState === 'number' && rowsPerPageState > 0
       ? rowsPerPageState
@@ -354,7 +357,7 @@ export const DiscoverGrid = ({
     [onSort, isSortEnabled]
   );
 
-  const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
+  const showMultiFields = services.uiSettings.get(SHOW_MULTIFIELDS);
 
   const shouldShowFieldHandler = useMemo(() => {
     const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
@@ -371,10 +374,10 @@ export const DiscoverGrid = ({
         displayedRows,
         useNewFieldsApi,
         shouldShowFieldHandler,
-        uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
+        services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
         () => dataGridRef.current?.closeCellPopover()
       ),
-    [dataView, displayedRows, useNewFieldsApi, shouldShowFieldHandler, uiSettings]
+    [dataView, displayedRows, useNewFieldsApi, shouldShowFieldHandler, services.uiSettings]
   );
 
   /**
@@ -396,7 +399,7 @@ export const DiscoverGrid = ({
     () =>
       onFieldEdited
         ? (fieldName: string) => {
-            closeFieldEditor.current = dataViewFieldEditor.openEditor({
+            closeFieldEditor.current = services.dataViewFieldEditor.openEditor({
               ctx: {
                 dataView,
               },
@@ -407,7 +410,7 @@ export const DiscoverGrid = ({
             });
           }
         : undefined,
-    [dataView, onFieldEdited, dataViewFieldEditor]
+    [dataView, onFieldEdited, services.dataViewFieldEditor]
   );
 
   const euiGridColumns = useMemo(
@@ -447,8 +450,8 @@ export const DiscoverGrid = ({
   );
 
   const hideTimeColumn = useMemo(
-    () => uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-    [uiSettings]
+    () => services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+    [services.uiSettings]
   );
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
@@ -563,7 +566,7 @@ export const DiscoverGrid = ({
         rows: displayedRows,
         onFilter,
         dataView,
-        isDarkMode: uiSettings.get('theme:darkMode'),
+        isDarkMode: services.uiSettings.get('theme:darkMode'),
         selectedDocs: usedSelectedDocs,
         setSelectedDocs: (newSelectedDocs) => {
           setSelectedDocs(newSelectedDocs);
@@ -616,7 +619,7 @@ export const DiscoverGrid = ({
                 sampleSize,
                 advancedSettingsLink: (
                   <EuiLink
-                    href={addBasePath(
+                    href={services.addBasePath(
                       `/app/management/kibana/settings?query=${SAMPLE_SIZE_SETTING}`
                     )}
                     data-test-subj="discoverTableSampleSizeSettingsLink"

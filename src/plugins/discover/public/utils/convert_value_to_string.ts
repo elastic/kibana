@@ -8,8 +8,8 @@
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { formatFieldValue } from './format_value';
-import { DiscoverServices } from '../build_services';
 import { DataTableRecord } from '../types';
 
 interface ConvertedResult {
@@ -29,7 +29,7 @@ export const convertValueToString = ({
   rows: DataTableRecord[];
   columnId: string;
   dataView: DataView;
-  fieldFormats: DiscoverServices['fieldFormats'];
+  fieldFormats: FieldFormatsStart;
   options?: {
     disableMultiline?: boolean;
   };

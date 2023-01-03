@@ -74,6 +74,7 @@ export function ContextAppContent({
   setAppState,
   addFilter,
 }: ContextAppContentProps) {
+  const { uiSettings: config } = useDiscoverServices();
   const services = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
@@ -86,13 +87,10 @@ export function ContextAppContent({
     successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
 
   const showTimeCol = useMemo(
-    () => !services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
-    [services.uiSettings, dataView]
+    () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
+    [config, dataView]
   );
-  const defaultStepSize = useMemo(
-    () => parseInt(services.uiSettings.get(CONTEXT_STEP_SETTING), 10),
-    [services.uiSettings]
-  );
+  const defaultStepSize = useMemo(() => parseInt(config.get(CONTEXT_STEP_SETTING), 10), [config]);
 
   const loadingFeedback = () => {
     if (isLegacy && isAnchorLoading) {

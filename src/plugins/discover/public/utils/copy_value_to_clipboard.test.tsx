@@ -50,7 +50,7 @@ describe('copyValueToClipboard', () => {
   it('should copy a value to clipboard', () => {
     execCommandMock.mockImplementationOnce(() => true);
     const result = copyValueToClipboard({
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
       columnId: 'keyword_key',
       rowIndex: 0,
       valueToStringConverter,
@@ -68,7 +68,7 @@ describe('copyValueToClipboard', () => {
     execCommandMock.mockImplementationOnce(() => false);
 
     const result = copyValueToClipboard({
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
       columnId: 'keyword_key',
       rowIndex: 0,
       valueToStringConverter,
