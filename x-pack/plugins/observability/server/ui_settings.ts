@@ -220,25 +220,6 @@ export const uiSettings: Record<string, UiSettings> = {
     type: 'boolean',
     showInLabs: true,
   },
-  [apmOperationsTab]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmOperationsBreakdown', {
-      defaultMessage: 'APM Operations Breakdown',
-    }),
-    description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
-      defaultMessage:
-        '{betaLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-operations-breakdown' }),
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: false,
-  },
   [apmLabsButton]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmLabs', {
