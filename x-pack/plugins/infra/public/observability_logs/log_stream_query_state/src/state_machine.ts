@@ -132,7 +132,11 @@ export const createPureLogStreamQueryStateMachine = (
 
             VALIDATION_FAILED: {
               target: 'hasQuery.invalid',
-              actions: ['storeValidationError', 'storeDefaultParsedQuery'],
+              actions: [
+                'storeValidationError',
+                'storeDefaultParsedQuery',
+                'showValidationErrorToast',
+              ],
             },
           },
         },
