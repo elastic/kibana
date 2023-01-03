@@ -6,4 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { customBrandingServiceMock } from './custom_branding_service.mock';
+export declare const customBrandingServiceMock: {
+  create: () => any;
+  createSetupContract: () => {
+    register: jest.Mock<any, any>;
+    setUiSettingsKeys: jest.Mock<any, any>;
+  };
+  createStartContract: () => {};
+};

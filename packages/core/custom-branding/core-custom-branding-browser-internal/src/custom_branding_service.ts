@@ -43,6 +43,7 @@ export class CustomBrandingService {
    */
   public setup({ injectedMetadata }: CustomBrandingSetupDeps): CustomBrandingSetup {
     const customBranding = injectedMetadata.getCustomBranding() as CustomBranding;
+    this.customBranding = customBranding;
     this.customBranding$ = of(customBranding);
     this.hasCustomBranding$ = of(this.hasCustomBranding());
 

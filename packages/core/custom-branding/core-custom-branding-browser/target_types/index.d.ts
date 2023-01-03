@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { customBrandingServiceMock } from './custom_branding_service.mock';
+export type { CustomBrandingStart, CustomBrandingSetup, CustomBrandingSetupDeps } from './types';

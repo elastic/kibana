@@ -42,6 +42,7 @@ export class CustomBrandingService {
     for (let i = 0; i < this.settingsKeys!.length; i++) {
       const key = this.settingsKeys![i];
       const fullKey = `customBranding:${key}`;
+      // @ts-expect-error
       branding[key] = await uiSettingsClient.get(fullKey);
     }
     return branding;

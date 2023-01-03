@@ -7,34 +7,23 @@
  */
 
 import { serviceContractMock } from './service_contract.mock';
-import { CustomBranding } from '@kbn/core-custom-branding-common';
-import { of } from 'rxjs';
-
-const mockCustomBranding: CustomBranding = {
-  logo: 'img.jpg',
-};
-
-const createCustomBrandingMock = (): CustomBranding => {
-  return { ...mockCustomBranding };
-};
 
 const createSetupContractMock = () => {
   return {
     register: jest.fn(),
+    setUiSettingsKeys: jest.fn(),
   };
 };
 
 const createStartContractMock = () => {
-  return {
-    set: jest.fn(),
-    customBranding$: of(createCustomBrandingMock()),
-  };
+  return {};
 };
 
 const createMock = () => {
   const mocked = serviceContractMock();
   mocked.setup.mockReturnValue(createSetupContractMock());
   mocked.start.mockReturnValue(createStartContractMock());
+  mocked.getBrandingFor = jest.fn();
   return mocked;
 };
 

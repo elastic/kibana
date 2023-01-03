@@ -1,19 +1,19 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "node"
     ]
   },
   "kbn_references": [
-    "@kbn/config",
-    "@kbn/config-mocks",
-    "@kbn/core-custom-branding-common",
+    "@kbn/core-saved-objects-server-internal",
+    "@kbn/core-ui-settings-server-internal"
   ],
   "include": [
     "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }
