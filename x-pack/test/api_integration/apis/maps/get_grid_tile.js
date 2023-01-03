@@ -157,7 +157,7 @@ export default function ({ getService }) {
           { x: 67, y: 669 },
           { x: 89, y: 657 },
           { x: 112, y: 672 },
-          { x: 111, y: 698 }
+          { x: 111, y: 698 },
         ],
       ]);
     });
