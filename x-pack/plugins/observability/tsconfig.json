@@ -9,7 +9,7 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -66,6 +66,7 @@
     "@kbn/core-saved-objects-common",
     "@kbn/share-plugin",
     "@kbn/core-notifications-browser",
+    "@kbn/slo-schema",
   ],
   "exclude": [
     "target/**/*",

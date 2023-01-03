@@ -44,6 +44,7 @@
     "@kbn/ml-string-hash",
     "@kbn/ui-theme",
     "@kbn/field-types",
+    "@kbn/ml-nested-property",
   ],
   "exclude": [
     "target/**/*",
