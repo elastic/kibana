@@ -87,7 +87,7 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Build ES Query
      */
-    const { runPastTimeout, filters, fieldName, runtimeFieldMap, firstPage } = request;
+    const { runPastTimeout, filters, fieldName, runtimeFieldMap } = request;
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}
@@ -129,6 +129,7 @@ export const setupOptionsListSuggestionsRoute = (
         ...runtimeFieldMap,
       },
     };
+    console.log(`--- PAGE: ${request.page} ---`);
     console.log(JSON.stringify(body));
     /**
      * Run ES query

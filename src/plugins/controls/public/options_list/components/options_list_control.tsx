@@ -21,7 +21,13 @@ import { OptionsListReduxState } from '../types';
 
 import './options_list.scss';
 
-export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Subject<string> }) => {
+export const OptionsListControl = ({
+  typeaheadSubject,
+  paginationSubject,
+}: {
+  typeaheadSubject: Subject<string>;
+  paginationSubject: Subject<number>;
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const resizeRef = useRef(null);
@@ -75,6 +81,17 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       dispatch(setSearchString(newSearchString));
     },
     [typeaheadSubject, dispatch, setSearchString]
+  );
+
+  const updatePage = useCallback(
+    (newPage: number) => {
+      console.log('new page', newPage);
+      if (newPage === 1 || newPage === 2) {
+        // logic is wrong here
+        paginationSubject.next(newPage);
+      }
+    },
+    [paginationSubject]
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
@@ -154,6 +171,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
         <OptionsListPopover
+          updatePage={updatePage}
           width={dimensions.width}
           isLoading={debouncedLoading}
           updateSearchString={updateSearchString}

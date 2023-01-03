@@ -38,6 +38,7 @@ class OptionsListService implements ControlsOptionsListService {
 
   private optionsListCacheResolver = (request: OptionsListRequest) => {
     const {
+      page,
       sort,
       query,
       filters,
@@ -59,6 +60,7 @@ class OptionsListService implements ControlsOptionsListService {
       dataViewTitle,
       searchString,
       fieldName,
+      page,
     ].join('|');
   };
 

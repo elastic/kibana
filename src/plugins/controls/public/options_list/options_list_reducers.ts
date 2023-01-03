@@ -80,12 +80,22 @@ export const optionsListReducers = {
   },
   gotoFirstPage: (state: WritableDraft<OptionsListReduxState>) => {
     state.componentState.page = 1;
+    state.componentState.visibleOptions = state.componentState.availableOptions?.slice(0, 10);
   },
   gotoPrevPage: (state: WritableDraft<OptionsListReduxState>) => {
     state.componentState.page -= 1;
+    state.componentState.visibleOptions = state.componentState.availableOptions?.slice(
+      (state.componentState.page - 1) * 10,
+      (state.componentState.page - 1) * 10 + 10
+    );
   },
   gotoNextPage: (state: WritableDraft<OptionsListReduxState>) => {
     state.componentState.page += 1;
+    console.log('i am here', state.componentState.availableOptions);
+    state.componentState.visibleOptions = state.componentState.availableOptions?.slice(
+      (state.componentState.page - 1) * 10,
+      (state.componentState.page - 1) * 10 + 10
+    );
   },
   clearValidAndInvalidSelections: (state: WritableDraft<OptionsListReduxState>) => {
     state.componentState.invalidSelections = [];
@@ -120,7 +130,14 @@ export const optionsListReducers = {
       >
     >
   ) => {
-    state.componentState = { ...(state.componentState ?? {}), ...action.payload };
+    state.componentState = {
+      ...(state.componentState ?? {}),
+      ...action.payload,
+      visibleOptions: action.payload.availableOptions?.slice(
+        (state.componentState.page - 1) * 10,
+        (state.componentState.page - 1) * 10 + 10
+      ),
+    };
   },
   publishFilters: (
     state: WritableDraft<OptionsListReduxState>,

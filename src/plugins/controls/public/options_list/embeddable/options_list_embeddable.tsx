@@ -76,6 +76,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
+  private paginationSubject: Subject<number> = new Subject<number>();
   private abortController?: AbortController;
   private dataView?: DataView;
   private field?: OptionsListField;
@@ -98,6 +99,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       pluginServices.getServices());
 
     this.typeaheadSubject = new Subject<string>();
+    this.paginationSubject = new Subject<number>();
 
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
@@ -144,10 +146,11 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     // debounce typeahead pipe to slow down search string related queries
     const typeaheadPipe = this.typeaheadSubject.pipe(debounceTime(100));
+    const paginationPipe = this.paginationSubject.pipe(debounceTime(100));
 
     // fetch available options when input changes or when search string has changed
     this.subscriptions.add(
-      merge(dataFetchPipe, typeaheadPipe)
+      merge(dataFetchPipe, typeaheadPipe, paginationPipe)
         .pipe(skip(1)) // Skip the first input update because options list query will be run by initialize.
         .subscribe(this.runOptionsListQuery)
     );
@@ -274,7 +277,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       getState,
       actions: { setLoading, publishFilters, setSearchString, updateQueryResults },
     } = this.reduxEmbeddableTools;
-
+    console.log('HERE');
     const previousFieldName = this.field?.name;
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
@@ -284,11 +287,11 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     const {
-      componentState: { searchString },
+      componentState: { searchString, page },
       explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
     } = getState();
     dispatch(setLoading(true));
-    if (searchString.valid) {
+    if (searchString.valid || page === 1 || page === 2) {
       // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
       const {
         ignoreParentSettings,
@@ -307,9 +310,11 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               mode: 'absolute' as 'absolute',
             }
           : globalTimeRange;
+      console.log('PAGE', page);
       const { suggestions, invalidSelections, totalCardinality, rejected } =
         await this.optionsListService.runOptionsListRequest(
           {
+            page,
             sort,
             field,
             query,
@@ -319,7 +324,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             searchString: searchString.value,
             runPastTimeout,
             selectedOptions,
-            page: 2,
           },
           this.abortController.signal
         );
@@ -428,7 +432,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <OptionsListReduxWrapper>
-          <OptionsListControl typeaheadSubject={this.typeaheadSubject} />
+          <OptionsListControl
+            typeaheadSubject={this.typeaheadSubject}
+            paginationSubject={this.paginationSubject}
+          />
         </OptionsListReduxWrapper>
       </KibanaThemeProvider>,
       node

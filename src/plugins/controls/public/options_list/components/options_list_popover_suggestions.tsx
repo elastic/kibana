@@ -37,7 +37,7 @@ export const OptionsListPopoverSuggestions = ({
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const availableOptions = select((state) => state.componentState.availableOptions);
+  const availableOptions = select((state) => state.componentState.visibleOptions);
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
   const existsSelected = select((state) => state.explicitInput.existsSelected);

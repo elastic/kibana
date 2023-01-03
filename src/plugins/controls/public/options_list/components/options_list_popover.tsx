@@ -23,12 +23,14 @@ import { OptionsListPopoverInvalidSelections } from './options_list_popover_inva
 export interface OptionsListPopoverProps {
   width: number;
   isLoading: boolean;
+  updatePage: (newPage: number) => void; // make parameter fetchNewResults and handle logic elsewhere?
   updateSearchString: (newSearchString: string) => void;
 }
 
 export const OptionsListPopover = ({
   width,
   isLoading,
+  updatePage,
   updateSearchString,
 }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
@@ -74,7 +76,7 @@ export const OptionsListPopover = ({
           <OptionsListPopoverInvalidSelections />
         )}
       </div>
-      {!hideExclude && <OptionsListPopoverFooter />}
+      {!hideExclude && <OptionsListPopoverFooter updatePage={updatePage} />}
     </div>
   );
 };

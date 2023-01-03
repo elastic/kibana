@@ -120,12 +120,13 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         order: getSortType(sort),
       },
     }),
-    parse: (rawEsResult, page = 1) =>
-      get(rawEsResult, 'aggregations.suggestions.buckets')
-        ?.slice((page - 1) * 10, (page - 1) * 10 + 9)
-        ?.reduce((suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
+    parse: (rawEsResult) =>
+      get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
+        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
           return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
-        }, {}),
+        },
+        {}
+      ),
   },
 
   /**
@@ -156,12 +157,13 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         },
       };
     },
-    parse: (rawEsResult, page = 1) =>
-      get(rawEsResult, 'aggregations.suggestions.keywordSuggestions.buckets')
-        ?.slice((page - 1) * 10, (page - 1) * 10 + 9)
-        ?.reduce((suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
+    parse: (rawEsResult) =>
+      get(rawEsResult, 'aggregations.suggestions.keywordSuggestions.buckets')?.reduce(
+        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
           return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
-        }, {}),
+        },
+        {}
+      ),
   },
 
   /**
@@ -177,21 +179,16 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         order: getSortType(sort),
       },
     }),
-    parse: (rawEsResult, page = 1) =>
-      get(rawEsResult, 'aggregations.suggestions.buckets')
-        ?.slice((page - 1) * 10, (page - 1) * 10 + 9)
-        ?.reduce(
-          (
-            suggestions: OptionsListSuggestions,
-            suggestion: EsBucket & { key_as_string: string }
-          ) => {
-            return {
-              ...suggestions,
-              [suggestion.key_as_string]: { doc_count: suggestion.doc_count },
-            };
-          },
-          {}
-        ),
+    parse: (rawEsResult) =>
+      get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
+        (suggestions: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
+          return {
+            ...suggestions,
+            [suggestion.key_as_string]: { doc_count: suggestion.doc_count },
+          };
+        },
+        {}
+      ),
   },
 
   /**
@@ -238,7 +235,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         },
       };
     },
-    parse: (rawEsResult, page = 1) => {
+    parse: (rawEsResult) => {
       if (!Boolean(rawEsResult.aggregations?.suggestions)) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
@@ -250,7 +247,6 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
       getIpBuckets(rawEsResult, buckets, 'ipv6');
       return buckets
         .sort((bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count)
-        ?.slice((page - 1) * 10, (page - 1) * 10 + 9)
         .reduce((suggestions, suggestion: EsBucket) => {
           return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
         }, {});
@@ -286,11 +282,12 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
         },
       };
     },
-    parse: (rawEsResult, page = 1) =>
-      get(rawEsResult, 'aggregations.suggestions.nestedSuggestions.buckets')
-        ?.slice((page - 1) * 10, (page - 1) * 10 + 9)
-        ?.reduce((suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
+    parse: (rawEsResult) =>
+      get(rawEsResult, 'aggregations.suggestions.nestedSuggestions.buckets')?.reduce(
+        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
           return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
-        }, {}),
+        },
+        {}
+      ),
   },
 };

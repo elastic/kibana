@@ -34,7 +34,11 @@ const aggregationToggleButtons = [
   },
 ];
 
-export const OptionsListPopoverFooter = () => {
+export const OptionsListPopoverFooter = ({
+  updatePage,
+}: {
+  updatePage: (newPage: number) => void;
+}) => {
   // Redux embeddable container Context
   const {
     useEmbeddableDispatch,
@@ -77,14 +81,20 @@ export const OptionsListPopoverFooter = () => {
                   <EuiButtonIcon
                     iconType="arrowStart"
                     disabled={page === 1}
-                    onClick={() => dispatch(gotoFirstPage({}))}
+                    onClick={() => {
+                      updatePage(1);
+                      dispatch(gotoFirstPage({}));
+                    }}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     iconType="arrowLeft"
                     disabled={page === 1}
-                    onClick={() => dispatch(gotoPrevPage({}))}
+                    onClick={() => {
+                      updatePage(page - 1);
+                      dispatch(gotoPrevPage({}));
+                    }}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -99,8 +109,11 @@ export const OptionsListPopoverFooter = () => {
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     iconType="arrowRight"
-                    disabled={(page - 1) * 10 + 10 >= totalCardinality}
-                    onClick={() => dispatch(gotoNextPage({}))}
+                    disabled={(page - 1) * 10 + 10 >= totalCardinality || page >= 10}
+                    onClick={() => {
+                      updatePage(page + 1);
+                      dispatch(gotoNextPage({}));
+                    }}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
