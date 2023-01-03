@@ -62,9 +62,7 @@ export function openAddDataControlFlyout(this: ControlGroupContainer) {
           grow={this.getInput().defaultControlGrow ?? DEFAULT_CONTROL_GROW}
           updateTitle={(newTitle) => (controlInput.title = newTitle)}
           updateWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-          updateGrow={(defaultControlGrow: boolean) =>
-            this.updateInput({ defaultControlGrow })
-          }
+          updateGrow={(defaultControlGrow: boolean) => this.updateInput({ defaultControlGrow })}
           onSave={(type) => {
             this.closeAllFlyouts();
             if (!type) {
