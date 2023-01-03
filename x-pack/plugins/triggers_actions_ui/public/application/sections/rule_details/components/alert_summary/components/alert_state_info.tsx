@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Chart, CurveType, LineSeries, ScaleType, Settings } from '@elastic/charts';
+import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import { Color } from '@elastic/charts/dist/common/colors';
 import { ColorVariant } from '@elastic/charts/dist/utils/common';
 import { EuiFlexGroup, EuiFlexItem, EuiListGroupItemProps, EuiText } from '@elastic/eui';
@@ -19,10 +19,11 @@ import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
 import { Alert } from '../../../../../hooks/use_load_alert_summary';
 
-interface AlertChartProps {
+interface AlertStateInfoProps {
   count: number;
   data: Alert[];
   dataTestSubj: string;
+  domain: { min: number; max: number };
   id: string;
   stroke: Color | ColorVariant;
   title: EuiListGroupItemProps['label'];
@@ -32,10 +33,11 @@ export const AlertStateInfo = ({
   count,
   data,
   dataTestSubj,
+  domain,
   id,
   stroke,
   title,
-}: AlertChartProps) => {
+}: AlertStateInfoProps) => {
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const textColor = isDarkMode ? euiDarkVars.euiTextColor : euiLightVars.euiTextColor;
   const theme = [
@@ -64,6 +66,13 @@ export const AlertStateInfo = ({
       <EuiFlexItem grow={3}>
         <Chart size={{ height: 50 }}>
           <Settings theme={theme} tooltip={{ type: 'none' }} />
+          <Axis
+            domain={domain}
+            hide
+            id={id + '-axis'}
+            position={Position.Left}
+            showGridLines={false}
+          />
           <LineSeries
             id={id}
             xScaleType={ScaleType.Time}

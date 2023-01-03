@@ -11,7 +11,7 @@ import { HostMetics } from '../components/hosts_table_columns';
 
 type MappedMetrics = Record<keyof HostMetics, SnapshotNodeMetric>;
 
-export const useHostTable = (nodes: SnapshotNode[]) => {
+export const useHostsTable = (nodes: SnapshotNode[]) => {
   const items = useMemo(() => {
     return nodes.map(({ metrics, path, name }) => ({
       name,
