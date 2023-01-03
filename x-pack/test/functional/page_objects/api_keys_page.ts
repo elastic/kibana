@@ -57,8 +57,8 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('formFlyoutSubmitButton');
     },
 
-    async getSubmitButtonOnApiKeyFlyout() {
-      return await testSubjects.find('formFlyoutSubmitButton');
+    async waitForSubmitButtonOnApiKeyFlyoutEnabled() {
+      return testSubjects.waitForEnabled('formFlyoutSubmitButton', 10000);
     },
 
     async clickCancelButtonOnApiKeyFlyout() {
@@ -128,10 +128,6 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
 
     async getRestrictPrivilegesSwitch() {
       return await testSubjects.find('apiKeysRoleDescriptorsSwitch');
-    },
-
-    async getFlyout() {
-      return await find.byClassName('euiFlyout');
     },
 
     async getFlyoutTitleText() {

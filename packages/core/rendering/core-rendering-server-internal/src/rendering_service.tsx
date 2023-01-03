@@ -17,6 +17,7 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -97,6 +98,10 @@ export class RenderingService {
     const buildNum = env.packageInfo.buildNum;
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
+
+    const user: AuthenticatedUser = http.auth.get<AuthenticatedUser>(request).state ?? null;
+    console.log(user);
+
     const settings = {
       defaults: uiSettings.client?.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.client?.getUserProvided(),
@@ -105,6 +110,11 @@ export class RenderingService {
       defaults: uiSettings.globalClient?.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
     };
+
+    // console.log(settings.user['theme:darkMode'].userValue);
+    // if (user) {
+    //   settings.user['theme:darkMode'].userValue = true;
+    // }
 
     let clusterInfo = {};
     try {
