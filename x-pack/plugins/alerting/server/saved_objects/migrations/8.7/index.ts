@@ -56,6 +56,6 @@ function addActionUuid(
 export const getMigrations870 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isEsQueryRuleType(doc),
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
     pipeMigrations(addGroupByToEsQueryRule, addActionUuid)
   );
