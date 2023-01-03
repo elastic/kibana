@@ -6,6 +6,7 @@
  */
 
 import type { CreateSLOInput, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { toDuration } from '../../../utils/slo/duration';
 
 export function transformSloResponseToCreateSloInput(
   values: SLOWithSummaryResponse | undefined
@@ -18,6 +19,9 @@ export function transformSloResponseToCreateSloInput(
       target: values.objective.target * 100,
       ...(values.objective.timesliceTarget && {
         timesliceTarget: values.objective.timesliceTarget * 100,
+      }),
+      ...(values.objective.timesliceWindow && {
+        timesliceWindow: String(toDuration(values.objective.timesliceWindow).value),
       }),
     },
   };

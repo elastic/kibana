@@ -55,6 +55,7 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
 
         <Controller
           name="objective.timesliceWindow"
+          defaultValue="1"
           control={control}
           rules={{ required: true, min: 1, max: 120 }}
           render={({ field }) => (
