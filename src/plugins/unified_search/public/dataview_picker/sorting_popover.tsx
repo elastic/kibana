@@ -86,7 +86,7 @@ export function SortingPopover({ sortingService, handleSortingChange }: SortingP
           iconType="sortable"
           onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
           aria-label={optionsListStrings.popover.getSortPopoverDescription()}
-          data-test-subj="openPopoverButton"
+          data-test-subj="openSortingPopoverButton"
         />
       }
       panelPaddingSize="none"

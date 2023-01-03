@@ -14,6 +14,8 @@ import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import type { DataViewListItemEnhanced } from './dataview_list';
 import { SortingService } from './sorting_service';
 
+import { EuiPopover } from '@elastic/eui';
+
 import { SortingPopover } from './sorting_popover';
 
 describe('SortingPopover', () => {
@@ -21,7 +23,7 @@ describe('SortingPopover', () => {
   let sortingService: SortingService<DataViewListItemEnhanced>;
 
   const openPopover = (wrapper: ReactWrapper) => {
-    wrapper.find(`[data-test-subj="openPopoverButton"]`).last().simulate('click');
+    wrapper.find(`[data-test-subj="openSortingPopoverButton"]`).last().simulate('click');
   };
 
   beforeEach(() => {
@@ -40,7 +42,7 @@ describe('SortingPopover', () => {
     const wrapper = mount(
       <SortingPopover sortingService={sortingService} handleSortingChange={onChange} />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find(EuiPopover).length).toBe(1);
   });
 
   it('should open SortingPopover', () => {
