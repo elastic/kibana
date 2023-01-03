@@ -65,7 +65,7 @@ function buildEuiGridColumn({
   dataView,
   defaultColumns,
   isSortEnabled,
-  services,
+  services: { toastNotifications, hasEditDataViewPermission },
   valueToStringConverter,
   rowsCount,
   onFilter,
@@ -76,7 +76,10 @@ function buildEuiGridColumn({
   dataView: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
-  services: DiscoverServices;
+  services: {
+    toastNotifications: DiscoverServices['toastNotifications'];
+    hasEditDataViewPermission: () => boolean;
+  };
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
   onFilter?: DocViewFilterFn;
@@ -86,7 +89,7 @@ function buildEuiGridColumn({
   const editFieldButton =
     editField &&
     dataViewField &&
-    buildEditFieldButton({ services, dataView, field: dataViewField, editField });
+    buildEditFieldButton({ hasEditDataViewPermission, dataView, field: dataViewField, editField });
   const columnDisplayName =
     columnName === '_source'
       ? i18n.translate('discover.grid.documentHeader', {
@@ -114,11 +117,16 @@ function buildEuiGridColumn({
       additional: [
         ...(columnName === '__source'
           ? []
-          : [buildCopyColumnNameButton({ columnDisplayName, services })]),
+          : [
+              buildCopyColumnNameButton({
+                columnDisplayName,
+                toastNotifications,
+              }),
+            ]),
         buildCopyColumnValuesButton({
           columnId: columnName,
           columnDisplayName,
-          services,
+          toastNotifications,
           rowsCount,
           valueToStringConverter,
         }),
@@ -181,7 +189,11 @@ export function getEuiGridColumns({
   showTimeCol: boolean;
   defaultColumns: boolean;
   isSortEnabled: boolean;
-  services: DiscoverServices;
+  services: {
+    uiSettings: DiscoverServices['uiSettings'];
+    toastNotifications: DiscoverServices['toastNotifications'];
+    hasEditDataViewPermission: () => boolean;
+  };
   valueToStringConverter: ValueToStringConverter;
   onFilter: DocViewFilterFn;
   editField?: (fieldName: string) => void;

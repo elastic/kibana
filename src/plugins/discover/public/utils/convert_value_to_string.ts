@@ -22,19 +22,18 @@ export const convertValueToString = ({
   rows,
   columnId,
   dataView,
-  services,
+  fieldFormats,
   options,
 }: {
   rowIndex: number;
   rows: DataTableRecord[];
   columnId: string;
   dataView: DataView;
-  services: DiscoverServices;
+  fieldFormats: DiscoverServices['fieldFormats'];
   options?: {
     disableMultiline?: boolean;
   };
 }): ConvertedResult => {
-  const { fieldFormats } = services;
   if (!rows[rowIndex]) {
     return {
       formattedString: '',

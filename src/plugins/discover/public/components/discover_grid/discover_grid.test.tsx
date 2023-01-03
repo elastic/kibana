@@ -42,6 +42,7 @@ function getProps() {
     showTimeCol: true,
     sort: [],
     useNewFieldsApi: true,
+    services: discoverServiceMock,
   };
 }
 

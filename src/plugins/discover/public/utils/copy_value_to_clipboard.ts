@@ -69,17 +69,16 @@ export const copyValueToClipboard = ({
 export const copyColumnValuesToClipboard = async ({
   columnId,
   columnDisplayName,
-  services,
+  toastNotifications,
   valueToStringConverter,
   rowsCount,
 }: {
   columnId: string;
   columnDisplayName: string;
-  services: DiscoverServices;
+  toastNotifications: DiscoverServices['toastNotifications'];
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
 }): Promise<string | null> => {
-  const { toastNotifications } = services;
   const nameFormattedResult = convertNameToString(columnDisplayName);
   let withFormula = nameFormattedResult.withFormula;
 
@@ -129,13 +128,11 @@ export const copyColumnValuesToClipboard = async ({
 
 export const copyColumnNameToClipboard = ({
   columnDisplayName,
-  services,
+  toastNotifications,
 }: {
   columnDisplayName: string;
-  services: DiscoverServices;
+  toastNotifications: DiscoverServices['toastNotifications'];
 }): string | null => {
-  const { toastNotifications } = services;
-
   const nameFormattedResult = convertNameToString(columnDisplayName);
   const textToCopy = nameFormattedResult.formattedString;
   const copied = copyToClipboard(textToCopy);
