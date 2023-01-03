@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -14,7 +12,13 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/securitysolution-io-ts-utils",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }
