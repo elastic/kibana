@@ -137,7 +137,7 @@ export const getCurlScriptEnvVars = () => ({
   KIBANA_URL: Cypress.config().baseUrl,
 });
 
-export const postRoleAndUser = (role: ROLE) => {
+export const createRoleAndUser = (role: ROLE) => {
   const env = getCurlScriptEnvVars();
 
   // post the role
@@ -220,7 +220,7 @@ export const loginWithUser = (user: User) => {
 };
 
 export const loginWithRole = async (role: ROLE) => {
-  postRoleAndUser(role);
+  createRoleAndUser(role);
   const theUrl = Url.format({
     auth: `${role}:changeme`,
     username: role,
