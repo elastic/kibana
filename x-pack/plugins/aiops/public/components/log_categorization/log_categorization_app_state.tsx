@@ -7,11 +7,11 @@
 import React, { FC } from 'react';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { UrlStateProvider } from '@kbn/ml-url-state';
 import { LogCategorizationPage } from './log_categorization_page';
 import { SavedSearchSavedObject } from '../../application/utils/search_utils';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { UrlStateProvider } from '../../hooks/use_url_state';
 
 export interface LogCategorizationAppStateProps {
   dataView: DataView;

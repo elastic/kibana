@@ -266,19 +266,13 @@ const getSavedObjectTypes = (
           },
         },
         installed_kibana: {
-          type: 'nested',
-          properties: {
-            id: { type: 'keyword' },
-            type: { type: 'keyword' },
-          },
+          type: 'object',
+          enabled: false,
         },
         installed_kibana_space_id: { type: 'keyword' },
         package_assets: {
-          type: 'nested',
-          properties: {
-            id: { type: 'keyword' },
-            type: { type: 'keyword' },
-          },
+          type: 'object',
+          enabled: false,
         },
         install_started_at: { type: 'date' },
         install_version: { type: 'keyword' },
