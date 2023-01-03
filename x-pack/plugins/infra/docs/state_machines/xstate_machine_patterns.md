@@ -1,6 +1,8 @@
+# Patterns for designing XState state machines
+
 ## Summary
 
-Within the Infra plugin (specifically Logs) we use [Xstate](https://xstate.js.org/) for managing state. Xstate brings finite state machines and statecharts to JavaScript and TypeScript. The [Xstate docs](https://xstate.js.org/docs/) themselves are good, but this documentation serves to highlight patterns and certain choices we've made with regards to solution usage.
+Within the Infra plugin (specifically Logs) we use [Xstate](https://xstate.js.org/) for managing state. Xstate brings finite state machines and statecharts to JavaScript and TypeScript. The [Xstate docs](https://xstate.js.org/docs/) themselves are good, but this documentation serves to highlight patterns and certain choices we've made with regards to creating and composing state machines in our solution plugin. See [Patterns for using XState with React](./xstate_react_patterns.md) for more patterns specific to UI state machines and their consumption in React component hierarchies.
 
 ## Optional actions / exposing events
 
@@ -175,40 +177,6 @@ export const createLogStreamPageStateMachine = ({
 ```
 
 Here we call `withConfig()` which returns a new instance with our overrides, in this case we inject the correct services.
-
-## Pairing with React
-
-There is a [`@xstate/react` library](https://xstate.js.org/docs/recipes/react.html#usage-with-react) that provides some helpful hooks and utilities for combining React and Xstate.
-
-We have opted to use a provider approach for providing state to the React hierarchy, e.g.:
-
-```ts
-export const useLogStreamPageState = ({
-  logViewStateNotifications,
-}: {
-  logViewStateNotifications: LogViewNotificationChannel;
-}) => {
-  const logStreamPageStateService = useInterpret(
-    () =>
-      createLogStreamPageStateMachine({
-        logViewStateNotifications,
-      })
-  );
-
-  return logStreamPageStateService;
-};
-
-export const [LogStreamPageStateProvider, useLogStreamPageStateContext] =
-  createContainer(useLogStreamPageState);
-```
-
-[`useInterpret`](https://xstate.js.org/docs/packages/xstate-react/#useinterpret-machine-options-observer) returns a **static** reference:
-
-> returns a static reference (to just the interpreted machine) which will not rerender when its state changes
-
-When dealing with state it is best to use [selectors](https://xstate.js.org/docs/packages/xstate-react/#useselector-actor-selector-compare-getsnapshot), the `useSelector` hook can significantly increase performance over `useMachine`:
-
-> This hook will only cause a rerender if the selected value changes, as determined by the optional compare function.
 
 ## TypeScript usage
 

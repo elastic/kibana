@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-export const LazyControlsCallout = React.lazy(() => import('./controls_callout'));
-export type { CalloutProps } from './controls_callout';
+export { ControlsToolbarButton } from './controls_toolbar_button';

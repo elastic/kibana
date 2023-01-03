@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { isSloFeatureEnabled } from './is_slo_feature_enabled';
+export * from './src';
