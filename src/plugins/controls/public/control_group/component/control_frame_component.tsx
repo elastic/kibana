@@ -119,7 +119,12 @@ export const ControlFrame = ({
       ?.getInput$()
       .subscribe((newInput) => setTitle(newInput.title));
     const errorSubscription = embeddable?.getOutput$().subscribe({
-      error: setFatalError,
+      error: (err) => {
+        setFatalError(err);
+      },
+      next: (...args) => {
+        setFatalError(undefined);
+      },
     });
     return () => {
       inputSubscription?.unsubscribe();
