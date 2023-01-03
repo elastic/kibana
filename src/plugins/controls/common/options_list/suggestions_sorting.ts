@@ -15,12 +15,9 @@ export const OPTIONS_LIST_DEFAULT_SORT: OptionsListSortingType = {
   direction: 'desc',
 };
 
-export const optionsListSortDirections: Readonly<Direction[]> = ['asc', 'desc'] as const;
-type OptionsListSortDirection = typeof optionsListSortDirections[number];
-
 export interface OptionsListSortingType {
   by: OptionsListSortBy;
-  direction: OptionsListSortDirection;
+  direction: Direction;
 }
 
 export const getCompatibleSortingTypes = (type?: string): OptionsListSortBy[] => {

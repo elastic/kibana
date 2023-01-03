@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButtonGroupOptionProps,
   EuiSelectableOption,
   EuiPopoverTitle,
   EuiButtonGroup,
-  toSentenceCase,
   EuiButtonIcon,
   EuiSelectable,
   EuiFlexGroup,
@@ -26,7 +25,6 @@ import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public'
 
 import {
   getCompatibleSortingTypes,
-  optionsListSortDirections,
   OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortBy,
 } from '../../../common/options_list/suggestions_sorting';
@@ -39,9 +37,6 @@ interface OptionsListSortingPopoverProps {
 }
 type SortByItem = EuiSelectableOption & {
   data: { sortBy: OptionsListSortBy };
-};
-type SortOrderItem = EuiButtonGroupOptionProps & {
-  value: Direction;
 };
 
 export const OptionsListPopoverSortingButton = ({
@@ -73,18 +68,20 @@ export const OptionsListPopoverSortingButton = ({
     });
   });
 
-  const sortOrderOptions = useMemo(
-    () =>
-      optionsListSortDirections.map((key) => {
-        return {
-          id: key,
-          iconType: `sort${toSentenceCase(key)}ending`,
-          'data-test-subj': `optionsList__sortOrder_${key}`,
-          label: OptionsListStrings.editorAndPopover.sortOrder[key].getSortOrderLabel(),
-        } as SortOrderItem;
-      }),
-    []
-  );
+  const sortOrderOptions: EuiButtonGroupOptionProps[] = [
+    {
+      id: 'asc',
+      iconType: `sortAscending`,
+      'data-test-subj': `optionsList__sortOrder_asc`,
+      label: OptionsListStrings.editorAndPopover.sortOrder.asc.getSortOrderLabel(),
+    },
+    {
+      id: 'desc',
+      iconType: `sortDescending`,
+      'data-test-subj': `optionsList__sortOrder_desc`,
+      label: OptionsListStrings.editorAndPopover.sortOrder.desc.getSortOrderLabel(),
+    },
+  ];
 
   const onSortByChange = (updatedOptions: SortByItem[]) => {
     setSortByOptions(updatedOptions);
