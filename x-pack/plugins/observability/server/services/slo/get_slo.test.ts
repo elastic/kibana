@@ -66,6 +66,7 @@ describe('GetSLO', () => {
           frequency: '1m',
         },
         summary: {
+          status: 'HEALTHY',
           sliValue: 0.9999,
           errorBudget: {
             initial: 0.001,
