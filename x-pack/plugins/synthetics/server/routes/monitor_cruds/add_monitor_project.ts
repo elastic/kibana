@@ -31,6 +31,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     },
   },
   handler: async ({
+    context,
     request,
     response,
     savedObjectsClient,
