@@ -67,7 +67,10 @@ jobs:
     #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
 
     - name: Bootstrap
-      run: yarn kbn bootstrap
+      run: |
+        node -v
+        yarn -v
+        yarn kbn bootstrap
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
