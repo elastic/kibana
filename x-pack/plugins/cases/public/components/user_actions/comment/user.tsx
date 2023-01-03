@@ -97,7 +97,7 @@ export const createUserAttachmentUserActionBuilder = ({
           />
           {!isEdit && !isLoading && hasDraftComment(appId, caseId, comment.id) ? (
             <MyEuiCommentFooter>
-              <EuiText color="subdued" size="xs" data-test-subj="userAction-comment-unsaved-draft">
+              <EuiText color="subdued" size="xs" data-test-subj="user-action-comment-unsaved-draft">
                 {i18n.UNSAVED_DRAFT_COMMENT}
               </EuiText>
             </MyEuiCommentFooter>
