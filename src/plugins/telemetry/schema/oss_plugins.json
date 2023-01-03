@@ -6758,6 +6758,12 @@
                       "_meta": {
                         "description": "Indicates if security headers to disable embedding have been configured."
                       }
+                    },
+                    "crossOriginOpenerPolicy": {
+                      "type": "keyword",
+                      "_meta": {
+                        "description": "The crossOriginOpenerPolicy response header, \"NULL\" if disabled."
+                      }
                     }
                   }
                 }
@@ -9040,12 +9046,6 @@
           "type": "keyword",
           "_meta": {
             "description": "Default value of the setting was changed."
-          }
-        },
-        "observability:apmOperationsTab": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
           }
         },
         "observability:apmLabsButton": {

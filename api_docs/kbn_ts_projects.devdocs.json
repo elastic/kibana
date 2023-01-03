@@ -1,0 +1,468 @@
+{
+  "id": "@kbn/ts-projects",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/ts-projects",
+        "id": "def-common.Project",
+        "type": "Class",
+        "tags": [],
+        "label": "Project",
+        "description": [],
+        "path": "packages/kbn-ts-projects/project.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [
+              "\nThe parsed config file from disk"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ts-projects",
+                "scope": "common",
+                "docId": "kibKbnTsProjectsPluginApi",
+                "section": "def-common.TsConfig",
+                "text": "TsConfig"
+              }
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "absolute path to the tsconfig file defininig this project"
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.repoRel",
+            "type": "string",
+            "tags": [],
+            "label": "repoRel",
+            "description": [
+              "repo relative path to the tsconfig file defininig this project"
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "name of this project"
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.dir",
+            "type": "string",
+            "tags": [],
+            "label": "dir",
+            "description": [
+              "The directory containing this ts project"
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.directory",
+            "type": "string",
+            "tags": [],
+            "label": "directory",
+            "description": [
+              "The directory containing this ts project"
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.typeCheckConfigPath",
+            "type": "string",
+            "tags": [],
+            "label": "typeCheckConfigPath",
+            "description": [
+              "absolute path to the tsconfig file that will be generated for type checking this file"
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.disableTypeCheck",
+            "type": "boolean",
+            "tags": [],
+            "label": "disableTypeCheck",
+            "description": [
+              "`true` if we want to explicitly exclude this entire project from type checking"
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ts-projects",
+                "id": "def-common.Project.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "others",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  {
+                    "pluginId": "@kbn/ts-projects",
+                    "scope": "common",
+                    "docId": "kibKbnTsProjectsPluginApi",
+                    "section": "def-common.Project",
+                    "text": "Project"
+                  },
+                  ">"
+                ],
+                "path": "packages/kbn-ts-projects/project.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ts-projects",
+                "id": "def-common.Project.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ts-projects/project.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ts-projects",
+                "id": "def-common.Project.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  "ProjectOptions",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-ts-projects/project.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.reloadFromDisk",
+            "type": "Function",
+            "tags": [],
+            "label": "reloadFromDisk",
+            "description": [
+              "\nupdates the project so that the tsconfig file will be\nread from disk the next time that this.config is accessed"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.overrideConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "overrideConfig",
+            "description": [],
+            "signature": [
+              "(jsonc: string) => void"
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ts-projects",
+                "id": "def-common.Project.overrideConfig.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jsonc",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ts-projects/project.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.getBase",
+            "type": "Function",
+            "tags": [],
+            "label": "getBase",
+            "description": [
+              "\nGets the base config file for this tsconfig file. If the\n\"extends\" key is not defined this returns undefined"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/ts-projects",
+                "scope": "common",
+                "docId": "kibKbnTsProjectsPluginApi",
+                "section": "def-common.Project",
+                "text": "Project"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.Project.getKbnRefs",
+            "type": "Function",
+            "tags": [],
+            "label": "getKbnRefs",
+            "description": [
+              "\nGet the kbnRefs for this project"
+            ],
+            "signature": [
+              "(pkgMap: ",
+              "PackageMap",
+              ") => ",
+              {
+                "pluginId": "@kbn/ts-projects",
+                "scope": "common",
+                "docId": "kibKbnTsProjectsPluginApi",
+                "section": "def-common.Project",
+                "text": "Project"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-ts-projects/project.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ts-projects",
+                "id": "def-common.Project.getKbnRefs.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "pkgMap",
+                "description": [],
+                "signature": [
+                  "PackageMap"
+                ],
+                "path": "packages/kbn-ts-projects/project.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ts-projects",
+        "id": "def-common.TsConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "TsConfig",
+        "description": [],
+        "path": "packages/kbn-ts-projects/ts_configfile.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.TsConfig.extends",
+            "type": "string",
+            "tags": [],
+            "label": "extends",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ts-projects/ts_configfile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.TsConfig.compilerOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "compilerOptions",
+            "description": [],
+            "signature": [
+              "{ [key: string]: unknown; types?: string[] | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-ts-projects/ts_configfile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.TsConfig.include",
+            "type": "Array",
+            "tags": [],
+            "label": "include",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-ts-projects/ts_configfile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.TsConfig.exclude",
+            "type": "Array",
+            "tags": [],
+            "label": "exclude",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-ts-projects/ts_configfile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.TsConfig.kbn_references",
+            "type": "Array",
+            "tags": [],
+            "label": "kbn_references",
+            "description": [],
+            "signature": [
+              "(string | { path: string; force?: boolean | undefined; })[] | undefined"
+            ],
+            "path": "packages/kbn-ts-projects/ts_configfile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.TsConfig.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: unknown",
+            "description": [],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
+            "path": "packages/kbn-ts-projects/ts_configfile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ts-projects",
+        "id": "def-common.PROJECTS",
+        "type": "Array",
+        "tags": [],
+        "label": "PROJECTS",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ts-projects",
+            "scope": "common",
+            "docId": "kibKbnTsProjectsPluginApi",
+            "section": "def-common.Project",
+            "text": "Project"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-ts-projects/projects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

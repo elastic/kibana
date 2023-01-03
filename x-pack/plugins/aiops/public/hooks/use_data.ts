@@ -13,6 +13,7 @@ import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 
+import type { Dictionary } from '@kbn/ml-url-state';
 import { useTimeBuckets } from './use_time_buckets';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -26,8 +27,7 @@ import {
 
 import { useTimefilter } from './use_time_filter';
 import { useDocumentCountStats } from './use_document_count_stats';
-import type { Dictionary } from './use_url_state';
-import type { GroupTableItem } from '../components/spike_analysis_table/spike_analysis_table_groups';
+import type { GroupTableItem } from '../components/spike_analysis_table/types';
 
 const DEFAULT_BAR_TARGET = 75;
 
