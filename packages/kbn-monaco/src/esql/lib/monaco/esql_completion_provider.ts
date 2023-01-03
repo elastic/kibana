@@ -31,7 +31,7 @@ export class ESQLCompletionAdapter implements monaco.languages.CompletionItemPro
     private callbacks?: ESQLCustomAutocompleteCallbacks
   ) {}
 
-  public triggerCharacters = ['.', '(', ' '];
+  public triggerCharacters = ['(', ' ', ''];
 
   private async injectDynamicAutocompleteItems(
     suggestions: Array<AutocompleteCommandDefinition | DynamicAutocompleteItem>,

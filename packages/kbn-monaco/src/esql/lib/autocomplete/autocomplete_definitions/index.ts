@@ -18,6 +18,8 @@ export {
   mathOperatorsCommandsDefinitions,
   assignOperatorDefinition,
   byOperatorDefinition,
+  openBracketDefinition,
+  closeBracketDefinition,
 } from './operators_commands';
 
 export {

@@ -29,6 +29,26 @@ export const assignOperatorDefinition: AutocompleteCommandDefinition = {
   sortText: 'D',
 };
 
+export const openBracketDefinition: AutocompleteCommandDefinition = {
+  label: '(',
+  insertText: '(',
+  kind: 11,
+  detail: i18n.translate('monaco.esql.autocomplete.openBracketDoc', {
+    defaultMessage: 'Open Bracket (',
+  }),
+  sortText: 'A',
+};
+
+export const closeBracketDefinition: AutocompleteCommandDefinition = {
+  label: ')',
+  insertText: ')',
+  kind: 11,
+  detail: i18n.translate('monaco.esql.autocomplete.closeBracketDoc', {
+    defaultMessage: 'Close Bracket )',
+  }),
+  sortText: 'A',
+};
+
 export const mathOperatorsCommandsDefinitions: AutocompleteCommandDefinition[] = [
   {
     label: '+',

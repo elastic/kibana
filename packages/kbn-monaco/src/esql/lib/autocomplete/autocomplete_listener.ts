@@ -25,6 +25,8 @@ import {
   mathOperatorsCommandsDefinitions,
   aggregationFunctionsDefinitions,
   assignOperatorDefinition,
+  openBracketDefinition,
+  closeBracketDefinition,
   buildConstantsDefinitions,
   buildNewVarDefinition,
 } from './autocomplete_definitions';
@@ -180,15 +182,30 @@ export class AutocompleteListener implements ESQLParserListener {
     const sv = ctx.setVariable();
     if (sv) {
       try {
-        if (this.isTerminalNodeExists(sv.RP())) {
-          this.suggestions = this.getEndCommandSuggestions();
-          return;
-        }
+        sv.LP();
+      } catch (e) {
+        this.suggestions = [openBracketDefinition];
+        return;
+      }
+
+      try {
+        sv.RP();
+        this.suggestions = this.getEndCommandSuggestions();
+        return;
       } catch (e) {
         // nothing to be here
       }
-      this.suggestions = this.fields;
-      return;
+
+      if (sv.exception) {
+        if (sv.functionExpressionArgument().length) {
+          this.suggestions = [closeBracketDefinition, ...this.fields];
+          return;
+        }
+        this.suggestions = this.fields;
+        return;
+      }
+
+      this.suggestions = this.getEndCommandSuggestions();
     }
 
     const be = ctx.booleanExpression();

@@ -14,7 +14,7 @@ import type { AutocompleteCommandDefinition } from '../types';
 export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = [
   {
     label: 'round',
-    insertText: 'round(',
+    insertText: 'round',
     kind: 1,
     detail: i18n.translate('monaco.esql.autocomplete.roundDoc', {
       defaultMessage:
@@ -29,7 +29,7 @@ export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = 
   },
   {
     label: 'avg',
-    insertText: 'avg(',
+    insertText: 'avg',
     kind: 1,
     detail: i18n.translate('monaco.esql.autocomplete.avgDoc', {
       defaultMessage: 'Returns the average of the values in a field',
@@ -43,7 +43,7 @@ export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = 
   },
   {
     label: 'max',
-    insertText: 'max(',
+    insertText: 'max',
     kind: 1,
     detail: i18n.translate('monaco.esql.autocomplete.maxDoc', {
       defaultMessage: 'Returns the maximum value in a field.',
@@ -57,7 +57,7 @@ export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = 
   },
   {
     label: 'min',
-    insertText: 'min(',
+    insertText: 'min',
     kind: 1,
     detail: i18n.translate('monaco.esql.autocomplete.minDoc', {
       defaultMessage: 'Returns the minimum value in a field.',
@@ -71,7 +71,7 @@ export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = 
   },
   {
     label: 'sum',
-    insertText: 'sum(',
+    insertText: 'sum',
     kind: 1,
     detail: i18n.translate('monaco.esql.autocomplete.sumDoc', {
       defaultMessage: 'Returns the sum of the values in a field.',

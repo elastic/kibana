@@ -12,7 +12,7 @@ import type { AutocompleteCommandDefinition } from '../types';
 export const buildFieldsDefinitions = (fields: string[]): AutocompleteCommandDefinition[] =>
   fields.map((label) => ({
     label,
-    insertText: `"${label}"`,
+    insertText: label,
     kind: 4,
     detail: i18n.translate('monaco.esql.autocomplete.fieldDefinition', {
       defaultMessage: `Field specified by the input table`,
