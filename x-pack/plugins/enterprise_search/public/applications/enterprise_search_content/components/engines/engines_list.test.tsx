@@ -15,14 +15,15 @@ import { mockedEngines } from '../../api/engines/fetch_engines_api_logic';
 
 import { EnginesListTable } from './components/tables/engines_table';
 import { EnginesList } from './engines_list';
+import { DEFAULT_META } from './types';
 
 const mockValues = {
   enginesList: mockedEngines,
-  // meta: DEFAULT_META,
+  meta: DEFAULT_META,
 };
 const mockActions = {
   fetchEngines: jest.fn(),
-  // onPaginate: jest.fn(),
+  onPaginate: jest.fn(),
 };
 
 describe('EnginesList', () => {

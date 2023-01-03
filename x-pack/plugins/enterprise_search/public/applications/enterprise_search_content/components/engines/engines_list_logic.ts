@@ -29,7 +29,7 @@ export interface EngineListValues {
   data: typeof FetchEnginesAPILogic.values.data;
   enginesList: EngineListDetails[];
   meta: Meta;
-  parameters: { meta: Meta };
+  parameters: { meta: Meta }; // Added this variable to store to the search Query value as well
   status: typeof FetchEnginesAPILogic.values.status;
 }
 
