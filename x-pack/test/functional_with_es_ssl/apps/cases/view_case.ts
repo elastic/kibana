@@ -282,19 +282,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           await header.waitUntilLoadingHasFinished();
 
-          const propertyActions = await find.allByCssSelector('[data-test-subj*="property-actions-ellipses"]');
+          const propertyActions = await find.allByCssSelector(
+            '[data-test-subj*="property-actions-ellipses"]'
+          );
 
           propertyActions[propertyActions.length - 1].click();
 
           await header.waitUntilLoadingHasFinished();
 
-          const editAction = await find.byCssSelector('[data-test-subj*="property-actions-pencil"]');
+          const editAction = await find.byCssSelector(
+            '[data-test-subj*="property-actions-pencil"]'
+          );
 
           await header.waitUntilLoadingHasFinished();
 
           await editAction.click();
 
-          const editCommentTextArea = await find.byCssSelector('[data-test-subj*="user-action-markdown-form"] textarea.euiMarkdownEditorTextArea');
+          const editCommentTextArea = await find.byCssSelector(
+            '[data-test-subj*="user-action-markdown-form"] textarea.euiMarkdownEditorTextArea'
+          );
 
           await header.waitUntilLoadingHasFinished();
 
