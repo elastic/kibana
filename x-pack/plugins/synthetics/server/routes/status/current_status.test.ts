@@ -355,14 +355,14 @@ describe('current status route', () => {
       });
       expect(esClient.search).toHaveBeenCalledTimes(2);
       // These assertions are to ensure that we are paginating through the IDs we use for filtering
-      // @ts-expect-error mock search is not lining up with expected type
-      expect(esClient.search.mock.calls[0][0].query.bool.filter[2].terms['monitor.id']).toEqual([
-        'id1',
-      ]);
-      // @ts-expect-error mock search is not lining up with expected type
-      expect(esClient.search.mock.calls[1][0].query.bool.filter[2].terms['monitor.id']).toEqual([
-        'id2',
-      ]);
+      expect(
+        // @ts-expect-error mock search is not lining up with expected type
+        esClient.search.mock.calls[0][0].body.query.bool.filter[2].terms['monitor.id']
+      ).toEqual(['id1']);
+      expect(
+        // @ts-expect-error mock search is not lining up with expected type
+        esClient.search.mock.calls[1][0].body.query.bool.filter[2].terms['monitor.id']
+      ).toEqual(['id2']);
     });
   });
 });
