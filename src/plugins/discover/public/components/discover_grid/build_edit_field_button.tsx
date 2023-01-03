@@ -29,7 +29,6 @@ export const buildEditFieldButton = ({
 
   const { canEdit: canEditField } = getFieldCapabilities(dataView, field);
   const canEditDataView = hasEditDataViewPermission() || !dataView.isPersisted();
-  // Boolean(services.dataViewEditor?.userPermissions?.editDataView()) || !dataView.isPersisted();
 
   if (!canEditField || !canEditDataView) {
     return null;

@@ -245,7 +245,6 @@ export const DiscoverGrid = ({
   services: { fieldFormats, addBasePath, uiSettings, dataViewFieldEditor, toastNotifications },
 }: DiscoverGridProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  // const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
