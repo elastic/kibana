@@ -187,6 +187,18 @@ export const DiscoverTopNav = ({
     ]
   );
 
+  const onEditDataView = async (editedDataView: DataView) => {
+    const dataViewId = editedDataView.id!;
+    if (editedDataView.isPersisted()) {
+      // refetch data view to force react state update
+      // by creating new data view reference in the state
+      dataViews.clearInstanceCache(dataViewId);
+      stateContainer.actions.setDataView(await dataViews.get(dataViewId));
+    } else {
+      await updateAdHocDataViewId(editedDataView);
+    }
+  };
+
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     const { appStateContainer, setAppState } = stateContainer;
     if (newSavedQueryId) {
@@ -221,7 +233,8 @@ export const DiscoverTopNav = ({
     onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews: adHocDataViewList,
-    savedDataViewList,
+    savedDataViews: savedDataViewList,
+    onEditDataView,
   };
 
   const onTextBasedSavedAndExit = useCallback(

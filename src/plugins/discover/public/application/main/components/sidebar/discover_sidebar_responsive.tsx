@@ -186,7 +186,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef]);
 
   useEffect(() => {
-    if (selectedDataView !== selectedDataViewRef.current) {
+    if (
+      selectedDataView &&
+      selectedDataViewRef.current &&
+      selectedDataView?.id !== selectedDataViewRef.current?.id
+    ) {
       dispatchSidebarStateAction({
         type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
         payload: {
