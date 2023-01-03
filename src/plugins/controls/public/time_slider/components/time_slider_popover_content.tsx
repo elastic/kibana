@@ -8,13 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Ref } from 'react';
-import {
-  EuiButtonIcon,
-  EuiRangeTick,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiRangeTick, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { AnchoredRange } from './anchored_range';
 import { EuiDualRangeRef, SlidingWindowRange } from './sliding_window_range';
@@ -90,9 +84,7 @@ export function TimeSliderPopoverContent(props: Props) {
       responsive={false}
     >
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={anchorStartToggleButtonLabel}
-        >
+        <EuiToolTip content={anchorStartToggleButtonLabel}>
           <EuiButtonIcon
             iconType={isAnchored ? 'pin' : 'pinFilled'}
             onClick={() => {
