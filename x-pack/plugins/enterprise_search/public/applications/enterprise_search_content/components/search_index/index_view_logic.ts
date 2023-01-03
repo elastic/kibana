@@ -130,10 +130,6 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     ],
   },
   events: ({ actions }) => ({
-    afterMount: () => {
-      const { indexName } = IndexNameLogic.values;
-      actions.startFetchIndexPoll(indexName);
-    },
     beforeUnmount: () => {
       actions.stopFetchIndexPoll();
       actions.resetFetchIndexApi();

@@ -14,7 +14,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SlosPage } from '.';
-import { emptySloList, sloList } from '../../../common/data/slo';
+import { emptySloList, sloList } from '../../data/slo';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 
 jest.mock('react-router-dom', () => ({
