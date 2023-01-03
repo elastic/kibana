@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { css } from '@emotion/react';
 import { EuiImage, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EmptyImage } from '../screenshot/empty_image';
@@ -183,7 +182,7 @@ export const JourneyStepImagePopover: React.FC<StepImagePopoverProps> = ({
 
   return (
     <EuiPopover
-      css={css`
+      css={`
         figure {
           img {
             ${thumbnailS};
@@ -214,11 +213,11 @@ export const JourneyStepImagePopover: React.FC<StepImagePopoverProps> = ({
         <EuiImage
           alt={fullSizeImageAlt}
           url={imageData}
-          css={css`
-            width: ${POPOVER_IMG_WIDTH}px;
-            height: ${POPOVER_IMG_HEIGHT}px;
-            object-fit: contain;
-          `}
+          style={{
+            width: POPOVER_IMG_WIDTH,
+            height: POPOVER_IMG_HEIGHT,
+            objectFit: 'contain',
+          }}
         />
       ) : asThumbnail ? (
         <EmptyThumbnail isLoading={isLoading} />
