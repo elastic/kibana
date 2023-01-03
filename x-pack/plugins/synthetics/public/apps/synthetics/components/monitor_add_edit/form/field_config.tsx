@@ -47,7 +47,7 @@ import {
   VerificationMode,
   FieldMeta,
 } from '../types';
-import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
+import { AlertConfigKey, DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
 import { HeaderField } from '../fields/header_field';
 import { RequestBodyField } from '../fields/request_body_field';
 import { ResponseBodyIndexField } from '../fields/index_response_body_field';
@@ -437,6 +437,27 @@ export const FIELD: Record<string, FieldMeta> = {
       },
     }),
   },
+  [ConfigKey.ALERT_CONFIG]: {
+    fieldKey: AlertConfigKey.STATUS_ENABLED,
+    component: EuiSwitch,
+    label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
+      defaultMessage: 'Enable status alerts',
+    }),
+    controlled: true,
+    props: ({ isEdit, setValue, field }) => ({
+      id: 'syntheticsMonitorConfigIsAlertEnabled',
+      label: isEdit
+        ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertEnabled.label', {
+            defaultMessage: 'Disabling will stop alerting on this monitor.',
+          })
+        : i18n.translate('xpack.synthetics.monitorConfig.create.alertEnabled.label', {
+            defaultMessage: 'Enable status alerts on this monitor.',
+          }),
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
+      },
+    }),
+  },
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
     component: ComboBox,
@@ -497,7 +518,7 @@ export const FIELD: Record<string, FieldMeta> = {
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.apmServiceName.helpText', {
       defaultMessage:
-        'Corrseponds to the service.name ECS field from APM. Set this to enable integrations between APM and Synthetics data.',
+        'Corresponds to the service.name ECS field from APM. Set this to enable integrations between APM and Synthetics data.',
     }),
     controlled: true,
     props: ({ field }) => ({

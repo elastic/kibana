@@ -20,14 +20,15 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
+
 import type { TimeRange } from '@kbn/es-query';
 import { TimeHistoryContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { useUrlState } from '@kbn/ml-url-state';
 import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../../hooks/use_time_filter';
-import { useUrlState } from '../../hooks/use_url_state';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { aiopsRefresh$ } from '../../application/services/timefilter_refresh_service';
 

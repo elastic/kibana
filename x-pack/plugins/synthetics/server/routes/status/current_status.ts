@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import datemath, { Unit } from '@kbn/datemath';
 import { IKibanaResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { getMonitors } from '../common';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { ConfigKey, OverviewStatus, OverviewStatusMetaData } from '../../../common/runtime_types';
+import { ConfigKey, OverviewStatus } from '../../../common/runtime_types';
 import { QuerySchema, MonitorsQuery } from '../common';
 
 /**
@@ -27,117 +27,6 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
   if (Object.keys(datemath.unitsMap).indexOf(schedule.unit) === -1) return 0;
 
   return parseInt(schedule.number, 10) * datemath.unitsMap[schedule.unit].base;
-}
-
-const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
-
-export async function queryMonitorStatus(
-  esClient: UptimeEsClient,
-  maxLocations: number,
-  maxPeriod: number,
-  ids: string[]
-): Promise<Omit<OverviewStatus, 'disabledCount'>> {
-  const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / maxLocations);
-  const pageCount = Math.ceil(ids.length / idSize);
-  const promises: Array<Promise<any>> = [];
-  for (let i = 0; i < pageCount; i++) {
-    const params: estypes.SearchRequest = {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: maxPeriod,
-                  // @ts-expect-error can't mix number and string in client definition
-                  lte: 'now',
-                },
-              },
-            },
-            {
-              terms: {
-                'monitor.id': (ids as string[]).slice(i * idSize, i * idSize + idSize),
-              },
-            },
-            {
-              exists: {
-                field: 'summary',
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        id: {
-          terms: {
-            field: 'monitor.id',
-            size: idSize,
-          },
-          aggs: {
-            location: {
-              terms: {
-                field: 'observer.geo.name',
-                size: maxLocations,
-              },
-              aggs: {
-                status: {
-                  top_hits: {
-                    size: 1,
-                    sort: [
-                      {
-                        '@timestamp': {
-                          order: 'desc',
-                        },
-                      },
-                    ],
-                    _source: {
-                      includes: ['@timestamp', 'summary', 'monitor', 'observer', 'config_id'],
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    promises.push(esClient.baseESClient.search(params));
-  }
-  let up = 0;
-  let down = 0;
-  const upConfigs: Record<string, OverviewStatusMetaData> = {};
-  const downConfigs: Record<string, OverviewStatusMetaData> = {};
-  for await (const response of promises) {
-    response.aggregations?.id.buckets.forEach(({ location }: { key: string; location: any }) => {
-      location.buckets.forEach(({ status }: { key: string; status: any }) => {
-        const downCount = status.hits.hits[0]._source.summary.down;
-        const upCount = status.hits.hits[0]._source.summary.up;
-        const configId = status.hits.hits[0]._source.config_id;
-        const monitorQueryId = status.hits.hits[0]._source.monitor.id;
-        const locationName = status.hits.hits[0]._source.observer?.geo?.name;
-        if (upCount > 0) {
-          up += 1;
-          upConfigs[`${configId}-${locationName}`] = {
-            configId,
-            monitorQueryId,
-            location: locationName,
-            status: 'up',
-          };
-        } else if (downCount > 0) {
-          down += 1;
-          downConfigs[`${configId}-${locationName}`] = {
-            configId,
-            monitorQueryId,
-            location: locationName,
-            status: 'down',
-          };
-        }
-      });
-    });
-  }
-  return { up, down, upConfigs, downConfigs, enabledIds: ids };
 }
 
 /**
@@ -185,12 +74,13 @@ export async function getStatus(
     );
     page++;
     monitors.saved_objects.forEach((monitor) => {
-      if (monitor.attributes[ConfigKey.ENABLED] === false) {
-        disabledCount += monitor.attributes[ConfigKey.LOCATIONS].length;
+      const attrs = monitor.attributes;
+      if (attrs[ConfigKey.ENABLED] === false) {
+        disabledCount += attrs[ConfigKey.LOCATIONS].length;
       } else {
-        enabledIds.push(monitor.attributes[ConfigKey.MONITOR_QUERY_ID]);
-        maxLocations = Math.max(maxLocations, monitor.attributes[ConfigKey.LOCATIONS].length);
-        maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes[ConfigKey.SCHEDULE]));
+        enabledIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
+        maxLocations = Math.max(maxLocations, attrs[ConfigKey.LOCATIONS].length);
+        maxPeriod = Math.max(maxPeriod, periodToMs(attrs[ConfigKey.SCHEDULE]));
       }
     });
   } while (monitors.saved_objects.length === monitors.per_page);
@@ -198,7 +88,7 @@ export async function getStatus(
   const { up, down, upConfigs, downConfigs } = await queryMonitorStatus(
     uptimeEsClient,
     maxLocations,
-    maxPeriod,
+    { from: maxPeriod, to: 'now' },
     enabledIds
   );
 
