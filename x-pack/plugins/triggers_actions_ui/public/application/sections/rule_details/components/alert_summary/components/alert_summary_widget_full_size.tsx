@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
+import {
+  EUI_CHARTS_THEME_DARK,
+  EUI_CHARTS_THEME_LIGHT,
+  EUI_SPARKLINE_THEME_PARTIAL,
+} from '@elastic/eui/dist/eui_charts_theme';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React from 'react';
 import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import {
   ACTIVE_ALERT_LABEL,
   ACTIVE_COLOR,
@@ -19,7 +24,6 @@ import {
   TOOLTIP_DATE_FORMAT,
 } from './constants';
 import { Alert } from '../../../../../hooks/use_load_alert_summary';
-import { useTheme } from '../../../../../hooks/use_theme';
 
 export interface AlertsSummaryWidgetFullSizeProps {
   activeAlertCount: number;
@@ -34,7 +38,20 @@ export const AlertsSummaryWidgetFullSize = ({
   recoveredAlertCount,
   recoveredAlerts,
 }: AlertsSummaryWidgetFullSizeProps) => {
-  const theme = useTheme();
+  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const { euiTheme } = useEuiTheme();
+  const chartTheme = [
+    EUI_SPARKLINE_THEME_PARTIAL,
+    {
+      ...(isDarkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme),
+      chartMargins: {
+        left: 10,
+        right: 10,
+        top: 10,
+        bottom: 10,
+      },
+    },
+  ];
 
   return (
     <EuiPanel
@@ -49,7 +66,7 @@ export const AlertsSummaryWidgetFullSize = ({
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="xl" alignItems="flexStart" responsive={false}>
                 <EuiFlexItem>
-                  <EuiText color={theme.eui.euiTextColor}>
+                  <EuiText color={euiTheme.colors.text}>
                     <h3 data-test-subj="totalAlertsCount">
                       {activeAlertCount + recoveredAlertCount}
                     </h3>
@@ -59,7 +76,7 @@ export const AlertsSummaryWidgetFullSize = ({
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiText color={theme.eui.euiColorDangerText}>
+                  <EuiText color={euiTheme.colors.dangerText}>
                     <h3 data-test-subj="activeAlertsCount">{activeAlertCount}</h3>
                   </EuiText>
                   <EuiText size="xs" color="subdued">
@@ -68,7 +85,7 @@ export const AlertsSummaryWidgetFullSize = ({
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiText color={theme.eui.euiColorSuccessText}>
+                    <EuiText color={euiTheme.colors.successText}>
                       <h3 data-test-subj="recoveredAlertsCount">{recoveredAlertCount}</h3>
                     </EuiText>
                   </EuiFlexItem>
@@ -86,15 +103,8 @@ export const AlertsSummaryWidgetFullSize = ({
         <Settings
           showLegend
           legendPosition={Position.Right}
-          theme={[
-            EUI_SPARKLINE_THEME_PARTIAL,
-            {
-              ...theme,
-              chartMargins: {
-                top: 10,
-              },
-            },
-          ]}
+          // TODO Use the EUI charts theme https://github.com/elastic/kibana/issues/148297
+          theme={chartTheme}
           tooltip={{
             headerFormatter: (tooltip) => moment(tooltip.value).format(TOOLTIP_DATE_FORMAT),
           }}
