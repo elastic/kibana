@@ -18,7 +18,7 @@ import { TruncatedLabel } from './truncated_label';
 
 interface PhraseValueInputProps extends PhraseSuggestorProps {
   value?: string;
-  onChange: (value: string | number | boolean) => void;
+  onChange: (value: string | number | boolean | undefined) => void;
   intl: InjectedIntl;
   fullWidth?: boolean;
   compressed?: boolean;

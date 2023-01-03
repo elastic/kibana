@@ -20,8 +20,8 @@ import { compressedDatepickerStyle } from './datepicker.styles';
 interface Props {
   value?: string | number;
   field: DataViewField;
-  onChange: (value: string | number | boolean) => void;
-  onBlur?: (value: string | number | boolean) => void;
+  onChange: (value: string | number | boolean | undefined) => void;
+  onBlur?: (value: string | number | boolean | undefined) => void;
   placeholder: string;
   intl: InjectedIntl;
   controlOnly?: boolean;
@@ -88,7 +88,8 @@ class ValueInputTypeUI extends Component<Props> {
         inputElement = (
           <EuiDatePicker
             className={className}
-            onChange={(date) => date && this.onDatePickerChange(date)}
+            onChange={(date) => this.onDatePickerChange(date)}
+            onClear={() => this.onDatePickerChange(null)}
             selected={value ? moment(value) : undefined}
             showTimeSelect
             disabled={this.props.disabled}
@@ -166,8 +167,8 @@ class ValueInputTypeUI extends Component<Props> {
     this.props.onChange(params);
   };
 
-  private onDatePickerChange = (date: Moment) => {
-    this.props.onChange(date.utc().format());
+  private onDatePickerChange = (date: Moment | null) => {
+    this.props.onChange(date ? date.utc().format() : undefined);
   };
 
   private onBlur = (event: React.ChangeEvent<HTMLInputElement>) => {

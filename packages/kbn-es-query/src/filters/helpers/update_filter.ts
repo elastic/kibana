@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { identity, pickBy } from 'lodash';
-
 import type { Filter, FilterMeta } from '..';
 
 type FilterOperator = Pick<FilterMeta, 'type' | 'negate'>;
@@ -88,10 +86,7 @@ function updateWithRangeOperator(
   rawParams: Array<Filter['meta']['params']>,
   field: string
 ) {
-  const params = {
-    ...filter.meta.params,
-    ...pickBy(rawParams, identity),
-  };
+  const params = { ...filter.meta.params, ...rawParams };
 
   params.gte = params.from;
   params.lt = params.to;

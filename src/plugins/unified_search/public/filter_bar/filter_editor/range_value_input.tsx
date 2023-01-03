@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiDatePickerRange, EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import { get } from 'lodash';
-import React from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { ValueInputType } from './value_input_type';
 import { compressedDatepickerStyle } from './datepicker.styles';
@@ -56,29 +55,43 @@ export function isRangeParams(params: any): params is RangeParams {
 }
 
 function RangeValueInputUI(props: Props) {
-  const onFromChange = (value: string | number | boolean) => {
-    if (typeof value !== 'string' && typeof value !== 'number') {
-      throw new Error('Range params must be a string or number');
-    }
-    props.onChange({ from: value, to: get(props, 'value.to') });
-  };
+  const { onChange, value } = props;
 
-  const onToChange = (value: string | number | boolean) => {
-    if (typeof value !== 'string' && typeof value !== 'number') {
-      throw new Error('Range params must be a string or number');
-    }
-    props.onChange({ from: get(props, 'value.from'), to: value });
-  };
+  const onFromChange = useCallback(
+    (v: string | number | boolean | undefined) => {
+      if (v !== undefined && typeof v !== 'string' && typeof v !== 'number') {
+        throw new Error('Range params must be a string, number or undefined');
+      }
+      onChange({ from: v || undefined, to: value?.to });
+    },
+    [onChange, value]
+  );
 
-  const onDatePickerFromChange = (date: Moment) => {
-    props.onChange({ from: date ? date.utc().format() : undefined, to: get(props, 'value.to') });
-  };
+  const onToChange = useCallback(
+    (v: string | number | boolean | undefined) => {
+      if (v !== undefined && typeof v !== 'string' && typeof v !== 'number') {
+        throw new Error('Range params must be a string, number or undefined');
+      }
+      onChange({ from: value?.from, to: v || undefined });
+    },
+    [onChange, value]
+  );
 
-  const onDatePickerToChange = (date: Moment) => {
-    props.onChange({ from: get(props, 'value.from'), to: date ? date.utc().format() : undefined });
-  };
+  const onDatePickerFromChange = useCallback(
+    (date: Moment | null) => {
+      onChange({ from: date ? date.utc().format() : undefined, to: value?.to });
+    },
+    [onChange, value]
+  );
 
-  const { field, value, intl, fullWidth, disabled, compressed } = props;
+  const onDatePickerToChange = useCallback(
+    (date: Moment | null) => {
+      onChange({ from: value?.from, to: date ? date.utc().format() : undefined });
+    },
+    [onChange, value]
+  );
+
+  const { field, intl, fullWidth, disabled, compressed } = props;
 
   const type = field?.type ?? 'string';
   const isInvalid = value && value.from > value.to;
@@ -92,7 +105,7 @@ function RangeValueInputUI(props: Props) {
           startDateControl={
             <EuiDatePicker
               className={compressed ? compressedDatepickerStyle : undefined}
-              selected={value && value.from ? moment(value.from) : undefined}
+              selected={value?.from ? moment(value.from) : null}
               onChange={onDatePickerFromChange}
               placeholder={strings.getRangeStartInputPlaceholder(intl)}
               disabled={disabled}
@@ -106,7 +119,7 @@ function RangeValueInputUI(props: Props) {
           endDateControl={
             <EuiDatePicker
               className={compressed ? compressedDatepickerStyle : undefined}
-              selected={value && value.to ? moment(value.to) : undefined}
+              selected={value && value.to ? moment(value.to) : null}
               onChange={onDatePickerToChange}
               placeholder={strings.getRangeEndInputPlaceholder(intl)}
               disabled={disabled}
