@@ -26,6 +26,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
+import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -198,9 +200,9 @@ export interface DiscoverGridProps {
   services: {
     fieldFormats: FieldFormatsStart;
     addBasePath: DiscoverServices['addBasePath'];
-    uiSettings: DiscoverServices['uiSettings'];
-    dataViewFieldEditor: DiscoverServices['dataViewFieldEditor'];
-    toastNotifications: DiscoverServices['toastNotifications'];
+    uiSettings: IUiSettingsClient;
+    dataViewFieldEditor: DataViewFieldEditorStart;
+    toastNotifications: ToastsStart;
   };
 }
 
@@ -421,8 +423,8 @@ export const DiscoverGrid = ({
         services: {
           uiSettings,
           toastNotifications,
-          hasEditDataViewPermission: () => dataViewFieldEditor.userPermissions.editIndexPattern(),
         },
+        hasEditDataViewPermission: () => dataViewFieldEditor.userPermissions.editIndexPattern(),
         valueToStringConverter,
         onFilter,
         editField,

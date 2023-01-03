@@ -26,9 +26,9 @@ describe('Discover grid columns', function () {
       services: {
         uiSettings: discoverServiceMock.uiSettings,
         toastNotifications: discoverServiceMock.toastNotifications,
-        hasEditDataViewPermission: () =>
-          discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -142,9 +142,9 @@ describe('Discover grid columns', function () {
       services: {
         uiSettings: discoverServiceMock.uiSettings,
         toastNotifications: discoverServiceMock.toastNotifications,
-        hasEditDataViewPermission: () =>
-          discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -252,9 +252,9 @@ describe('Discover grid columns', function () {
       services: {
         uiSettings: discoverServiceMock.uiSettings,
         toastNotifications: discoverServiceMock.toastNotifications,
-        hasEditDataViewPermission: () =>
-          discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -310,7 +310,7 @@ describe('Discover grid columns', function () {
             >
               <React.Fragment>
                 timestamp
-                 
+
                 <EuiIcon
                   type="clock"
                 />

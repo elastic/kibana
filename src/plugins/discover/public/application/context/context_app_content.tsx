@@ -74,14 +74,7 @@ export function ContextAppContent({
   setAppState,
   addFilter,
 }: ContextAppContentProps) {
-  const {
-    uiSettings: config,
-    fieldFormats,
-    addBasePath,
-    uiSettings,
-    dataViewFieldEditor,
-    toastNotifications,
-  } = useDiscoverServices();
+  const services = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const isAnchorLoading =
@@ -93,10 +86,13 @@ export function ContextAppContent({
     successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
 
   const showTimeCol = useMemo(
-    () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
-    [config, dataView]
+    () => !services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
+    [services.uiSettings, dataView]
   );
-  const defaultStepSize = useMemo(() => parseInt(config.get(CONTEXT_STEP_SETTING), 10), [config]);
+  const defaultStepSize = useMemo(
+    () => parseInt(services.uiSettings.get(CONTEXT_STEP_SETTING), 10),
+    [services.uiSettings]
+  );
 
   const loadingFeedback = () => {
     if (isLegacy && isAnchorLoading) {
@@ -169,13 +165,7 @@ export function ContextAppContent({
             onRemoveColumn={onRemoveColumn}
             onSetColumns={onSetColumns}
             DocumentView={DiscoverGridFlyout}
-            services={{
-              fieldFormats,
-              addBasePath,
-              uiSettings,
-              dataViewFieldEditor,
-              toastNotifications,
-            }}
+            services={services}
           />
         </div>
       )}

@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridColumn, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { ToastsStart } from '@kbn/core/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
@@ -65,7 +66,8 @@ function buildEuiGridColumn({
   dataView,
   defaultColumns,
   isSortEnabled,
-  services: { toastNotifications, hasEditDataViewPermission },
+  toastNotifications,
+  hasEditDataViewPermission,
   valueToStringConverter,
   rowsCount,
   onFilter,
@@ -76,10 +78,8 @@ function buildEuiGridColumn({
   dataView: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
-  services: {
-    toastNotifications: DiscoverServices['toastNotifications'];
-    hasEditDataViewPermission: () => boolean;
-  };
+  toastNotifications: ToastsStart;
+  hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
   onFilter?: DocViewFilterFn;
@@ -178,6 +178,7 @@ export function getEuiGridColumns({
   defaultColumns,
   isSortEnabled,
   services,
+  hasEditDataViewPermission,
   valueToStringConverter,
   onFilter,
   editField,
@@ -192,8 +193,8 @@ export function getEuiGridColumns({
   services: {
     uiSettings: DiscoverServices['uiSettings'];
     toastNotifications: DiscoverServices['toastNotifications'];
-    hasEditDataViewPermission: () => boolean;
   };
+  hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
   onFilter: DocViewFilterFn;
   editField?: (fieldName: string) => void;
@@ -213,7 +214,8 @@ export function getEuiGridColumns({
       dataView,
       defaultColumns,
       isSortEnabled,
-      services,
+      toastNotifications: services.toastNotifications,
+      hasEditDataViewPermission,
       valueToStringConverter,
       rowsCount,
       onFilter,
