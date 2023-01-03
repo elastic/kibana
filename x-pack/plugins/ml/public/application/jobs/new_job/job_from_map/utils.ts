@@ -21,9 +21,7 @@ export async function redirectToGeoJobWizard(
   const embeddableQuery = await embeddable.getQuery();
   const embeddableFilters = await embeddable.getFilters();
   const locator = share.url.locators.get(ML_APP_LOCATOR);
-  // TODO: Create a visDescriptor obj with all the properties required for job creation
-  // similar to savedVis from lens - pass this through the url - then in ml the viz extractor uses it
-  // extract fields - load dataview with id
+
   const pageState = {
     dashboard: { query, filters },
     dataViewId,
