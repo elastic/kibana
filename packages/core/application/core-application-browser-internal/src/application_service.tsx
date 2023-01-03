@@ -36,14 +36,14 @@ import { getLeaveAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
 
-interface SetupDeps {
+export interface SetupDeps {
   http: HttpSetup;
   history?: History<any>;
   /** Used to redirect to external urls */
   redirectTo?: (path: string) => void;
 }
 
-interface StartDeps {
+export interface StartDeps {
   http: HttpStart;
   theme: ThemeServiceStart;
   overlays: OverlayStart;

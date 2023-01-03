@@ -16,7 +16,7 @@ import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
-import { AppState, GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
@@ -28,14 +28,13 @@ export interface DiscoverMainContentProps {
   navigateTo: (url: string) => void;
   savedSearchData$: SavedSearchData;
   savedSearchRefetch$: DataRefetch$;
+  stateContainer: DiscoverStateContainer;
   expandedDoc?: DataTableRecord;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
   onFieldEdited: () => Promise<void>;
   columns: string[];
-  state: AppState;
-  stateContainer: GetStateReturn;
 }
 
 export const DiscoverMainContent = ({
@@ -50,7 +49,6 @@ export const DiscoverMainContent = ({
   onAddFilter,
   onFieldEdited,
   columns,
-  state,
   stateContainer,
   savedSearch,
 }: DiscoverMainContentProps) => {
@@ -93,7 +91,6 @@ export const DiscoverMainContent = ({
           onAddFilter={!isPlainRecord ? onAddFilter : undefined}
           savedSearch={savedSearch}
           setExpandedDoc={setExpandedDoc}
-          state={state}
           stateContainer={stateContainer}
           onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
         />
