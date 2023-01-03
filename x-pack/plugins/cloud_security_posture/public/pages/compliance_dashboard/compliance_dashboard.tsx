@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import { EuiEmptyPrompt, EuiLink, EuiPageHeader, EuiSpacer, EuiIcon } from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
+import { EuiEmptyPrompt, EuiIcon, EuiLink, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,12 +45,12 @@ const IntegrationPostureDashboard = ({
 }) => {
   const noFindings = complianceData.stats.totalFindings === 0;
 
-  // the integration is not installed, and there are no findings for this integration
-  if (noFindings && !isIntegrationInstalled && notInstalledConfig) {
+  // integration is not installed, and there are no findings for this integration
+  if (noFindings && !isIntegrationInstalled) {
     return <CspNoDataPage {...notInstalledConfig} />;
   }
 
-  // the integration is installed, but there are no findings for this integration
+  // integration is installed, but there are no findings for this integration
   if (noFindings) {
     return (
       // height is calculated for the screen height minus the kibana header, page title, and tabs
@@ -157,7 +157,7 @@ const getNotInstalledConfig = (
 });
 
 export const ComplianceDashboard = () => {
-  const [selectedTab, setSelectedTab] = useState('kspm');
+  const [selectedTab, setSelectedTab] = useState(CSPM_POLICY_TEMPLATE);
   const getSetupStatus = useCspSetupStatusApi();
   const hasFindings = getSetupStatus.data?.status === 'indexed';
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
@@ -170,10 +170,42 @@ export const ComplianceDashboard = () => {
     enabled: hasFindings,
   });
 
+  useEffect(() => {
+    const preferCspmDashboard = () => {
+      let preferredDashboard = CSPM_POLICY_TEMPLATE;
+
+      // cspm has findings
+      if (!!getCspmDashboardData.data?.stats.totalFindings) {
+        preferredDashboard = CSPM_POLICY_TEMPLATE;
+      }
+      // kspm has findings
+      else if (!!getKspmDashboardData.data?.stats.totalFindings) {
+        preferredDashboard = KSPM_POLICY_TEMPLATE;
+      }
+      // cspm is installed
+      else if (getSetupStatus.data?.installedPolicyTemplates.includes(CSPM_POLICY_TEMPLATE)) {
+        preferredDashboard = CSPM_POLICY_TEMPLATE;
+      }
+      // kspm is installed
+      else if (getSetupStatus.data?.installedPolicyTemplates.includes(KSPM_POLICY_TEMPLATE)) {
+        preferredDashboard = KSPM_POLICY_TEMPLATE;
+      }
+
+      setSelectedTab(preferredDashboard);
+    };
+    preferCspmDashboard();
+  }, [
+    getCspmDashboardData.data?.stats.totalFindings,
+    getKspmDashboardData.data?.stats.totalFindings,
+    getSetupStatus.data?.installedPolicyTemplates,
+  ]);
+
   const tabs = useMemo(
     () => [
       {
-        label: 'Cloud',
+        label: i18n.translate('xpack.csp.dashboardTabs.cloudTab.tabTitle', {
+          defaultMessage: 'Cloud',
+        }),
         isSelected: selectedTab === CSPM_POLICY_TEMPLATE,
         onClick: () => setSelectedTab(CSPM_POLICY_TEMPLATE),
         content: (
@@ -189,7 +221,9 @@ export const ComplianceDashboard = () => {
         ),
       },
       {
-        label: 'Kubernetes',
+        label: i18n.translate('xpack.csp.dashboardTabs.kubernetesTab.tabTitle', {
+          defaultMessage: 'Kubernetes',
+        }),
         isSelected: selectedTab === KSPM_POLICY_TEMPLATE,
         onClick: () => setSelectedTab(KSPM_POLICY_TEMPLATE),
         content: (

@@ -63,6 +63,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
 
         const query: QueryDslQueryContainer = {
           bool: {
+            // TODO: CIS AWS - replace filtered field to `policy_template` when available
             filter: [{ term: { 'rule.benchmark.id': policyTemplate } }],
           },
         };
