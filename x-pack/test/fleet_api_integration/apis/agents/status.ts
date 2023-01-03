@@ -204,7 +204,10 @@ export default function ({ getService }: FtrProviderContext) {
       await superTestWithoutAuth
         .get(`/api/fleet/agent_status`)
         .set('kbn-xsrf', 'xxxx')
-        .auth(testUsers.endpoint_fleet_all_integr_read_policy.username, testUsers.endpoint_fleet_all_integr_read_policy.password)
+        .auth(
+          testUsers.endpoint_fleet_all_integr_read_policy.username,
+          testUsers.endpoint_fleet_all_integr_read_policy.password
+        )
         .expect(200);
     });
 
@@ -212,11 +215,14 @@ export default function ({ getService }: FtrProviderContext) {
       await superTestWithoutAuth
         .get(`/api/fleet/agent_status`)
         .set('kbn-xsrf', 'xxxx')
-        .auth(testUsers.endpoint_fleet_read_integr_none.username, testUsers.endpoint_fleet_read_integr_none.password)
+        .auth(
+          testUsers.endpoint_fleet_read_integr_none.username,
+          testUsers.endpoint_fleet_read_integr_none.password
+        )
         .expect(403, {
           error: 'Forbidden',
           message: 'Forbidden',
-          statusCode: 403
+          statusCode: 403,
         });
     });
   });
