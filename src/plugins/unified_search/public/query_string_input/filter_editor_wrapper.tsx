@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Filter, buildEmptyFilter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -32,12 +32,22 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   closePopover,
   onFiltersUpdated,
 }: FilterEditorWrapperProps) {
+  const fetchIndexAbortController = useRef<AbortController>();
+
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { uiSettings, data, usageCollection, appName } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
   const [dataViews, setDataviews] = useState<DataView[]>([]);
   const [newFilter, setNewFilter] = useState<Filter | undefined>(undefined);
   const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
+
+  useEffect(() => {
+    fetchIndexAbortController.current = new AbortController();
+
+    return () => {
+      fetchIndexAbortController.current?.abort();
+    };
+  }, []);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -48,15 +58,22 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
         (indexPattern) => typeof indexPattern !== 'string'
       ) as DataView[];
 
+      fetchIndexAbortController.current?.abort();
+      fetchIndexAbortController.current = new AbortController();
+      const currentFetchIndexAbortController = fetchIndexAbortController.current;
+
       const objectPatternsFromStrings = (await fetchIndexPatterns(
         data.dataViews,
         stringPatterns.map((value) => ({ type: 'title', value }))
       )) as DataView[];
-      setDataviews([...objectPatterns, ...objectPatternsFromStrings]);
-      const [dataView] = [...objectPatterns, ...objectPatternsFromStrings];
-      const index = dataView && dataView.id;
-      const emptyFilter = buildEmptyFilter(isPinned, index);
-      setNewFilter(emptyFilter);
+
+      if (!currentFetchIndexAbortController.signal.aborted) {
+        setDataviews([...objectPatterns, ...objectPatternsFromStrings]);
+        const [dataView] = [...objectPatterns, ...objectPatternsFromStrings];
+        const index = dataView && dataView.id;
+        const emptyFilter = buildEmptyFilter(isPinned, index);
+        setNewFilter(emptyFilter);
+      }
     };
     if (indexPatterns) {
       fetchDataViews();

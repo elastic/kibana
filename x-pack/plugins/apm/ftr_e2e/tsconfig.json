@@ -8,7 +8,6 @@
     "target/**/*"
   ],
   "compilerOptions": {
-    "target": "es2015",
     "outDir": "target/types",
     "types": [
       "cypress",
@@ -19,6 +18,10 @@
   "kbn_references": [
     { "path": "../../../test/tsconfig.json" },
     { "path": "../../../../test/tsconfig.json" },
-    { "path": "../tsconfig.json" },
+    "@kbn/test",
+    "@kbn/apm-synthtrace",
+    "@kbn/dev-utils",
+    "@kbn/axe-config",
+    "@kbn/cypress-config",
   ]
 }
