@@ -19,7 +19,6 @@ import {
   enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
-  apmOperationsTab,
   apmLabsButton,
   enableAgentExplorerView,
   enableAwsLambdaMetrics,
@@ -28,10 +27,6 @@ import {
   enableCriticalPath,
   enableInfrastructureHostsView,
 } from '../common/ui_settings_keys';
-
-const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
-  defaultMessage: 'beta',
-});
 
 const technicalPreviewLabel = i18n.translate(
   'xpack.observability.uiSettings.technicalPreviewLabel',
