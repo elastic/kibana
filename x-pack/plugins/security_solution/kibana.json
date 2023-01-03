@@ -34,7 +34,8 @@
     "triggersActionsUi",
     "uiActions",
     "unifiedSearch",
-    "files"
+    "files",
+    "controls"
   ],
   "optionalPlugins": [
     "cloudExperiments",
