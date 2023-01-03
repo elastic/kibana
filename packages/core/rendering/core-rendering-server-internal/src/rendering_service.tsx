@@ -33,8 +33,8 @@ import { filterUiPlugins } from './filter_ui_plugins';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
-  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never })
-  | RenderingSetupDeps;
+  | RenderingSetupDeps
+  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never });
 
 /** @internal */
 export class RenderingService {
@@ -84,7 +84,7 @@ export class RenderingService {
   }
 
   private async render(
-    { elasticsearch, http, uiPlugins, status, customBranding }: RenderOptions,
+    renderOptions: RenderOptions,
     request: KibanaRequest,
     uiSettings: {
       client: IUiSettingsClient;
@@ -92,6 +92,11 @@ export class RenderingService {
     },
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
+    const { elasticsearch, http, uiPlugins, status } = renderOptions;
+    let customBranding;
+    if ('customBranding' in renderOptions) {
+      customBranding = renderOptions.customBranding;
+    }
     const env = {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,

@@ -6,72 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
-import { take } from 'rxjs/operators';
+import { CustomBrandingService } from './custom_branding_service';
+import { CustomBrandingSetupDeps } from '@kbn/core-custom-branding-browser';
+import { take } from 'rxjs';
 
-describe('#setup', () => {
-  it('registers plugin correctly', () => {
-    const service = new CustomBrandingService();
-    const { register } = service.setup();
-    register('pluginName');
-    expect(() => {
-      register('anotherPlugin');
-    }).toThrow('Plugin already registered');
-  });
-});
-
-describe('#start', () => {
-  it('throws if plugin not registered', () => {
-    const service = new CustomBrandingService();
-    const { set } = service.start();
-    expect(() => set({ logo: 'logo' })).toThrow(
-      'Plugin needs to register before setting custom branding'
-    );
-  });
-
-  describe('if plugin registered', () => {
+describe('custom branding service', () => {
+  describe('#start', () => {
     let service: CustomBrandingService;
+    const injectedMetadata = {
+      getCustomBranding: () => {
+        return { customizedLogo: 'customizedLogo' };
+      },
+    };
 
     beforeEach(() => {
       service = new CustomBrandingService();
-      const { register } = service.setup();
-      register('customBranding');
+      service.setup({ injectedMetadata } as CustomBrandingSetupDeps);
     });
 
-    it('hasCustomBranding$ returns correct value', async () => {
-      const { set, hasCustomBranding$ } = service.start();
-      let hasCustomBranding = await hasCustomBranding$.pipe(take(1)).toPromise();
-      expect(hasCustomBranding).toEqual(false);
-      set({ customizedLogo: 'customizedLogo' });
-      hasCustomBranding = await hasCustomBranding$.pipe(take(1)).toPromise();
+    it('hasCustomBranding$ returns the correct value', async () => {
+      const { hasCustomBranding$ } = service.start();
+      const hasCustomBranding = await hasCustomBranding$.pipe(take(1)).toPromise();
       expect(hasCustomBranding).toEqual(true);
     });
 
-    it('sets custom branding correctly', async () => {
-      const { set, customBranding$ } = service.start();
-      set({ logo: 'logo' });
+    it('customBranding$ returns the correct value', async () => {
+      const { customBranding$ } = service.start();
       const customBranding = await customBranding$.pipe(take(1)).toPromise();
-      expect(customBranding).toEqual({ logo: 'logo' });
-    });
-
-    it('does not overwrite previously set values', async () => {
-      const { set, customBranding$ } = service.start();
-      set({ logo: 'logo' });
-      let customBranding = await customBranding$.pipe(take(1)).toPromise();
-      expect(customBranding).toEqual({ logo: 'logo' });
-      set({ customizedLogo: 'customizedLogo' });
-      customBranding = await customBranding$.pipe(take(1)).toPromise();
-      expect(customBranding).toEqual({ logo: 'logo', customizedLogo: 'customizedLogo' });
-    });
-
-    it('overwrites previously set values if keys are the same', async () => {
-      const { set, customBranding$ } = service.start();
-      set({ logo: 'logo' });
-      let customBranding = await customBranding$.pipe(take(1)).toPromise();
-      expect(customBranding).toEqual({ logo: 'logo' });
-      set({ logo: 'updatedLogo' });
-      customBranding = await customBranding$.pipe(take(1)).toPromise();
-      expect(customBranding).toEqual({ logo: 'updatedLogo' });
+      expect(customBranding).toEqual({ customizedLogo: 'customizedLogo' });
     });
   });
 

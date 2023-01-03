@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { serviceContractMock } from './service_contract.mock';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
 import { of } from 'rxjs';
+import { serviceContractMock } from './service_contract.mock';
 
 const mockCustomBranding: CustomBranding = {
   logo: 'img.jpg',
@@ -20,13 +19,13 @@ const createCustomBrandingMock = (): CustomBranding => {
 
 const createSetupContractMock = () => {
   return {
-    register: jest.fn(),
+    customBranding$: of(createCustomBrandingMock()),
+    hasCustomBranding$: of(false),
   };
 };
 
 const createStartContractMock = () => {
   return {
-    set: jest.fn(),
     customBranding$: of(createCustomBrandingMock()),
     hasCustomBranding$: of(false),
   };
