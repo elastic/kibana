@@ -163,6 +163,7 @@ export const home = {
                     traceId: t.string,
                     transactionId: t.string,
                     waterfallItemId: t.string,
+                    flyoutDetailTab: t.string,
                     detailTab: t.union([
                       t.literal(TransactionTab.timeline),
                       t.literal(TransactionTab.metadata),
@@ -176,6 +177,7 @@ export const home = {
                     traceId: '',
                     transactionId: '',
                     detailTab: TransactionTab.timeline,
+                    flyoutDetailTab: '',
                   },
                 },
               },

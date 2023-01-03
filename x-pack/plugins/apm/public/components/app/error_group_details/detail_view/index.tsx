@@ -106,6 +106,7 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
       transactionId: '',
       waterfallItemId: '',
       detailTab: TransactionTab.timeline,
+      flyoutDetailTab: '',
     },
   });
 

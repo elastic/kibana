@@ -64,6 +64,7 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
       transactionId: '',
       detailTab: TransactionTab.timeline,
       showCriticalPath: false,
+      flyoutDetailTab: '',
     },
   });
 
