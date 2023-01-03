@@ -32,18 +32,6 @@ export const optionsListReducers = {
       state.explicitInput.selectedOptions = newSelections;
     }
   },
-  deselectOptions: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
-    if (!state.explicitInput.selectedOptions) return;
-    const selectedOptions = state.explicitInput.selectedOptions ?? [];
-    for (const optionToDeselect of action.payload) {
-      const itemIndex = selectedOptions.indexOf(optionToDeselect);
-      if (itemIndex !== -1) {
-        const newSelections: string[] = [...state.explicitInput.selectedOptions];
-        newSelections.splice(itemIndex, 1);
-        state.explicitInput.selectedOptions = newSelections;
-      }
-    }
-  },
   setSearchString: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     state.componentState.searchString.value = action.payload;
     if (
