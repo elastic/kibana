@@ -991,6 +991,7 @@ packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/apm-ui
 packages/kbn-shared-svg @elastic/apm-ui
 packages/kbn-shared-ux-utility @elastic/kibana-global-experience
+packages/kbn-slo-schema @elastic/actionable-observability
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-spec-to-console @elastic/platform-deployment-management
@@ -1071,4 +1072,6 @@ x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
 x-pack/packages/ml/aiops_utils @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
+x-pack/packages/ml/nested_property @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
+x-pack/packages/ml/url_state @elastic/ml-ui
