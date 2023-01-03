@@ -11,19 +11,19 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 // Define fully static CSS outside hook.
 const dataViewTitleHeader = css({
-  'min-width': '300px',
+  minWidth: '300px',
   padding: `${euiThemeVars.euiSizeS} 0`,
   display: 'flex',
-  'flex-direction': 'row',
-  'align-items': 'center',
+  flexDirection: 'row',
+  alignItems: 'center',
 });
 
 export const useCss = () => {
   // Define CSS referencing inline dependencies within hook.
   const aiopsPageHeader = css({
     [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
-      'flex-direction': 'column',
-      'align-items': 'flex-start',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
     },
   });
 
