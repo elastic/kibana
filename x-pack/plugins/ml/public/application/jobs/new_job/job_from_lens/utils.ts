@@ -19,7 +19,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
-import { DataView } from '@kbn/data-views-plugin/common';
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 
@@ -76,40 +75,8 @@ export async function redirectToADJobWizards(
   window.open(url, '_blank');
 }
 
-export async function redirectToGeoJobWizard(
-  embeddable: MapEmbeddable,
-  sourceDataView: DataView,
-  geoField: string,
-  splitField: string | null,
-  bucketSpan: string,
-  share: SharePluginStart
-) {
-  const { query, filters, to, from } = await getJobsItemsFromEmbeddable(embeddable);
-  const locator = share.url.locators.get(ML_APP_LOCATOR);
-
-  const url = await locator?.getUrl({
-    page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_MAP,
-    pageState: {
-      embeddable: {}, // TODO
-      sourceDataView: sourceDataView.id, // TODO
-      geoField,
-      splitField,
-      from,
-      to,
-      query,
-      filters,
-      bucketSpan,
-    },
-  });
-
-  window.open(url, '_blank');
-}
-
-export async function getJobsItemsFromEmbeddable(
-  embeddable: Embeddable | MapEmbeddable,
-  lens?: LensPublicStart
-) {
-  if (isLensEmbeddable(embeddable) && !lens) {
+export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: LensPublicStart) {
+  if (!lens) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.lensNotFound', {
         defaultMessage: 'Lens is not intialized',
@@ -128,39 +95,29 @@ export async function getJobsItemsFromEmbeddable(
     );
   }
   const { to, from } = timeRange;
+
+  const vis = embeddable.getSavedVis();
+
+  if (vis === undefined) {
+    throw Error(
+      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.visNotFound', {
+        defaultMessage: 'Visualization cannot be found.',
+      })
+    );
+  }
+
+  const chartInfo = await getChartInfoFromVisualization(lens, vis);
   const dashboard = embeddable.parent?.type === 'dashboard' ? embeddable.parent : undefined;
 
-  if (isLensEmbeddable(embeddable) && lens) {
-    const vis = embeddable.getSavedVis();
-
-    if (vis === undefined) {
-      throw Error(
-        i18n.translate('xpack.ml.newJob.fromLens.createJob.error.visNotFound', {
-          defaultMessage: 'Visualization cannot be found.',
-        })
-      );
-    }
-
-    const chartInfo = await getChartInfoFromVisualization(lens, vis);
-
-    return {
-      vis,
-      chartInfo,
-      from,
-      to,
-      query,
-      filters,
-      dashboard,
-    };
-  } else {
-    return {
-      from,
-      to,
-      query,
-      filters,
-      dashboard,
-    };
-  }
+  return {
+    vis,
+    chartInfo,
+    from,
+    to,
+    query,
+    filters,
+    dashboard,
+  };
 }
 
 export function lensOperationToMlFunction(operationType: string) {

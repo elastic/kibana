@@ -22,33 +22,13 @@ export const fromMapRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const {
-    embeddable,
-    sourceDataView,
-    geoField,
-    splitField,
-    from,
-    to,
-    query,
-    filters,
-    bucketSpan,
-  }: Record<string, any> = parse(location.search, {
-    sort: false,
-  });
+  const { dashboard, dataViewId, embeddable, geoField, splitField, from, to }: Record<string, any> =
+    parse(location.search, {
+      sort: false,
+    });
 
   const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    redirect: () =>
-      resolver(
-        embeddable,
-        sourceDataView,
-        geoField,
-        splitField,
-        bucketSpan,
-        from,
-        to,
-        query,
-        filters
-      ),
+    redirect: () => resolver(dashboard, dataViewId, embeddable, geoField, splitField, from, to),
   });
   return <PageLoader context={context}>{<Redirect to="/jobs/new_job" />}</PageLoader>;
 };

@@ -190,7 +190,6 @@ export class QuickJobCreator extends QuickJobCreatorBase {
     };
   }
 
-  // MOVE TO PARENT?
   private async createADJobFromLensSavedObject(
     chartInfo: ChartInfo,
     query: Query,

@@ -15,27 +15,34 @@ import { getUiSettings, getTimefilter, getShare } from '../../../util/dependency
 import { getDefaultQuery } from '../utils/new_job_utils';
 
 export async function resolver(
-  embeddable: any,
-  dataView: any,
+  dashboard: string,
+  dataViewId: string,
+  embeddable: string,
   geoField: string,
   splitField: string,
-  bucketSpan: string,
   fromRisonString: string,
-  toRisonString: string,
-  queryRisonString: string,
-  filtersRisonString: string
+  toRisonString: string
 ) {
-  let query: Query;
-  let filters: Filter[];
+  let decodedDashboard;
+  let decodedEmbeddable;
+  let splitFieldDecoded;
+
   try {
-    query = rison.decode(queryRisonString) as Query;
+    decodedDashboard = rison.decode(dashboard) as { query: Query; filters: Filter[] };
   } catch (error) {
-    query = getDefaultQuery();
+    decodedDashboard = { query: getDefaultQuery(), filters: [] };
   }
+
   try {
-    filters = rison.decode(filtersRisonString) as Filter[];
+    decodedEmbeddable = rison.decode(embeddable) as { query: Query; filters: Filter[] };
   } catch (error) {
-    filters = [];
+    decodedEmbeddable = { query: getDefaultQuery(), filters: [] };
+  }
+
+  try {
+    splitFieldDecoded = rison.decode(splitField) as string;
+  } catch (error) {
+    splitFieldDecoded = null;
   }
 
   let from: string;
@@ -52,15 +59,16 @@ export async function resolver(
   }
 
   const jobCreator = new QuickJobCreator(getUiSettings(), getTimefilter(), getShare(), ml);
+
   await jobCreator.createAndStashGeoJob(
-    embeddable,
-    dataView,
+    dataViewId,
     from,
     to,
-    query,
-    filters,
-    bucketSpan,
+    decodedDashboard.query,
+    decodedDashboard.filters,
+    decodedEmbeddable.query,
+    decodedEmbeddable.filters,
     geoField,
-    splitField
+    splitFieldDecoded
   );
 }

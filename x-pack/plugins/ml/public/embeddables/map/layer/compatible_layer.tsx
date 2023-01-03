@@ -21,9 +21,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MapEmbeddable, ILayer } from '@kbn/maps-plugin/public';
-
-import type { DataView } from '@kbn/data-views-plugin/common'; // DataViewField
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { JobDetails } from '../job_details';
+import { categoryFieldTypes } from '../../../../common/util/fields_utils';
 
 interface DropDownLabel {
   label: string;
@@ -41,12 +41,21 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex, sour
   const [selectedSplitField, setSelectedSplitField] = useState<string | null>(null);
 
   const splitFieldOptionsForSelectedGeoField: EuiComboBoxOptionOption[] = useMemo(() => {
-    return (
-      sourceDataView?.fields.map((field) => ({
-        label: field.displayName,
+    const sortedFields =
+      sourceDataView?.fields.getAll().sort((a, b) => a.name.localeCompare(b.name)) ?? [];
+
+    const categoryFields = sortedFields.filter((f) => {
+      return categoryFieldTypes.some((type) => f.esTypes?.includes(type));
+    });
+
+    const optionsFromFields = categoryFields.map((field) => {
+      return {
+        label: field.name,
         field: field.name,
-      })) ?? []
-    );
+      };
+    });
+
+    return optionsFromFields;
   }, [sourceDataView]);
 
   const splitFieldSelection: EuiComboBoxOptionOption[] = useMemo(() => {

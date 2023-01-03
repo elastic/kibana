@@ -10,7 +10,7 @@ import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { QuickJobCreator } from '../../application/jobs/new_job/job_from_map';
-import { redirectToGeoJobWizard } from '../../application/jobs/new_job/job_from_lens';
+import { redirectToGeoJobWizard } from '../../application/jobs/new_job/job_from_map';
 import { useMlFromLensKibanaContext } from '../lens/context';
 import { MlJobAdditionalSettings } from '../common/ml_job_additional_settings';
 
@@ -45,8 +45,7 @@ export const JobDetails: FC<Props> = ({
   );
 
   function createGeoJobInWizard() {
-    // TODO: remove bucketSpan hardcoding
-    redirectToGeoJobWizard(embeddable, sourceDataView, geoField, splitField, '15m', share);
+    redirectToGeoJobWizard(embeddable, sourceDataView.id!, geoField, splitField, share);
   }
 
   async function createADJob({
@@ -62,16 +61,16 @@ export const JobDetails: FC<Props> = ({
     startJob: boolean;
     runInRealTime: boolean;
   }) {
-    const result = await quickJobCreator.createAndSaveGeoJob(
+    const result = await quickJobCreator.createAndSaveGeoJob({
       jobId,
       bucketSpan,
-      mapEmbeddable,
+      embeddable: mapEmbeddable,
       startJob,
       runInRealTime,
       sourceDataView,
       geoField,
-      splitField
-    );
+      splitField,
+    });
 
     return result;
   }
