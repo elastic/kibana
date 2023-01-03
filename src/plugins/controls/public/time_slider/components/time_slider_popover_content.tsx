@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { Ref } from 'react';
 import { EuiButtonIcon, EuiRangeTick, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
@@ -15,6 +14,7 @@ import { EuiDualRangeRef, TimeSliderSlidingWindowRange } from './time_slider_sli
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
 import { getIsAnchored } from '../time_slider_selectors';
+import { TimeSliderStrings } from './time_slider_strings';
 
 interface Props {
   value: [number, number];
@@ -69,12 +69,8 @@ export function TimeSliderPopoverContent(props: Props) {
     />
   );
   const anchorStartToggleButtonLabel = isAnchored
-    ? i18n.translate('controls.timeSlider.settings.unanchorStartSwitchLabel', {
-        defaultMessage: 'Unpin start',
-      })
-    : i18n.translate('controls.timeSlider.settings.anchorStartSwitchLabel', {
-        defaultMessage: 'Pin start',
-      });
+    ? TimeSliderStrings.control.getUnpinStart()
+    : TimeSliderStrings.control.getPinStart();
 
   return (
     <EuiFlexGroup
@@ -102,17 +98,13 @@ export function TimeSliderPopoverContent(props: Props) {
       <EuiFlexItem>{rangeInput}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip
-          content={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
-            defaultMessage: 'Clear time selection',
-          })}
+          content={TimeSliderStrings.control.getClearSelection()}
         >
           <EuiButtonIcon
             iconType="eraser"
             color="danger"
             onClick={props.onClear}
-            aria-label={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
-              defaultMessage: 'Clear time selection',
-            })}
+            aria-label={TimeSliderStrings.control.getClearSelection()}
             data-test-subj="timeSlider__clearTimeButton"
           />
         </EuiToolTip>
