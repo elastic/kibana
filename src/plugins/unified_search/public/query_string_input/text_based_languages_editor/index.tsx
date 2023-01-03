@@ -43,6 +43,7 @@ import {
   parseErrors,
   getInlineEditorText,
   getDocumentationSections,
+  MonacoError,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
@@ -103,9 +104,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isWordWrapped, setIsWordWrapped] = useState(true);
-  const [editorErrors, setEditorErrors] = useState<
-    Array<{ startLineNumber: number; message: string }>
-  >([]);
+  const [editorErrors, setEditorErrors] = useState<MonacoError[]>([]);
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
   const kibana = useKibana<IUnifiedSearchPluginServices>();
@@ -240,6 +239,19 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     256,
     [errors]
   );
+
+  const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoError) => {
+    if (!editor1.current) {
+      return;
+    }
+
+    editor1.current.focus();
+    editor1.current.setPosition({
+      lineNumber: startLineNumber,
+      column: startColumn,
+    });
+    editor1.current.revealLine(startLineNumber);
+  }, []);
 
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
@@ -517,6 +529,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         lines={lines}
                         containerCSS={styles.bottomContainer}
                         errors={editorErrors}
+                        onErrorClick={onErrorClick}
+                        refreshErrors={onTextLangQuerySubmit}
                       />
                     )}
                   </div>
@@ -582,7 +596,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         )}
       </EuiFlexGroup>
       {isCodeEditorExpanded && (
-        <EditorFooter lines={lines} containerCSS={styles.bottomContainer} errors={editorErrors} />
+        <EditorFooter
+          lines={lines}
+          containerCSS={styles.bottomContainer}
+          errors={editorErrors}
+          onErrorClick={onErrorClick}
+          refreshErrors={onTextLangQuerySubmit}
+        />
       )}
       {isCodeEditorExpanded && (
         <ResizableButton
