@@ -85,7 +85,7 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | stats a=max', ['(']);
     testSuggestions('from a | stats a=min(', ['FieldIdentifier']);
     testSuggestions('from a | stats a=min(b', [')', 'FieldIdentifier']);
-    testSuggestions('from a | stats a=min(b) ', ['|', 'by']);
+    testSuggestions('from a | stats a=min(b) ', ['|', 'by', '+', '-', '/', '*']);
     testSuggestions('from a | stats a=min(b) by ', ['FieldIdentifier']);
     testSuggestions('from a | stats a=min(b),', ['var0']);
     testSuggestions('from a | stats a=min(b), b=max(', ['FieldIdentifier']);
@@ -99,8 +99,9 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | eval a=b, ', ['var0']);
     testSuggestions('from a | eval a=avg', ['(']);
     testSuggestions('from a | eval a=min(', ['FieldIdentifier']);
-    testSuggestions('from a | eval a=min(b) ', ['|']);
+    testSuggestions('from a | eval a=min(b) ', ['|', '+', '-', '/', '*']);
     testSuggestions('from a | eval a=min(b),', ['var0']);
+    testSuggestions('from a | eval a=min(b) +', ['FieldIdentifier']);
     testSuggestions('from a | eval a=avg(b', [')', 'FieldIdentifier']);
     testSuggestions('from a | eval a=min(b), b=max(', ['FieldIdentifier']);
     testSuggestions('from a | stats a=min(b), b=max(', ['FieldIdentifier']);

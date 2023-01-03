@@ -10,7 +10,7 @@ import type { AutocompleteCommandDefinition, UserDefinedVariables } from './type
 import { DynamicAutocompleteItem } from './dymanic_item';
 
 import { esql_parserListener as ESQLParserListener } from '../../antlr/esql_parser_listener';
-import { esql_parser as ESQLParser } from '../../antlr/esql_parser';
+import { esql_parser, esql_parser as ESQLParser } from '../../antlr/esql_parser';
 
 import {
   processingCommandsDefinitions,
@@ -22,16 +22,17 @@ import {
   comparisonOperatorsCommandsDefinitions,
   byOperatorDefinition,
   pipeDefinition,
+  openBracketDefinition,
+  closeBracketDefinition,
   mathOperatorsCommandsDefinitions,
   aggregationFunctionsDefinitions,
   assignOperatorDefinition,
-  openBracketDefinition,
-  closeBracketDefinition,
   buildConstantsDefinitions,
   buildNewVarDefinition,
 } from './autocomplete_definitions';
 
 import {
+  EvalCommandContext,
   StatsCommandContext,
   ComparisonContext,
   WhereCommandContext,
@@ -44,6 +45,7 @@ import {
   UserVariableContext,
   BooleanExpressionContext,
   LimitCommandContext,
+  ValueExpressionContext,
 } from '../../antlr/esql_parser';
 
 export class AutocompleteListener implements ESQLParserListener {
@@ -140,6 +142,11 @@ export class AutocompleteListener implements ESQLParserListener {
     this.parentContext = ESQLParser.STATS;
   }
 
+  enterEvalCommand(ctx: EvalCommandContext) {
+    this.suggestions = [];
+    this.parentContext = ESQLParser.EVAL;
+  }
+
   exitStatsCommand(ctx: StatsCommandContext) {
     const qn = ctx.qualifiedNames();
     if (qn && qn.text) {
@@ -171,56 +178,12 @@ export class AutocompleteListener implements ESQLParserListener {
     const hasAssign = this.isTerminalNodeExists(ctx.ASSIGN());
 
     if (ctx.exception) {
-      if (hasAssign) {
-        this.suggestions = [...aggregationFunctionsDefinitions, ...this.fields];
-      } else {
+      if (!hasAssign) {
         this.suggestions = [buildNewVarDefinition(this.getNewVarName())];
-      }
-      return;
-    }
-
-    const sv = ctx.setVariable();
-    if (sv) {
-      try {
-        sv.LP();
-      } catch (e) {
-        this.suggestions = [openBracketDefinition];
         return;
       }
-
-      try {
-        sv.RP();
-        this.suggestions = this.getEndCommandSuggestions();
-        return;
-      } catch (e) {
-        // nothing to be here
-      }
-
-      if (sv.exception) {
-        if (sv.functionExpressionArgument().length) {
-          this.suggestions = [closeBracketDefinition, ...this.fields];
-          return;
-        }
-        this.suggestions = this.fields;
-        return;
-      }
-
-      this.suggestions = this.getEndCommandSuggestions();
-    }
-
-    const be = ctx.booleanExpression();
-    if (!be?.exception) {
-      this.suggestions = this.getEndCommandSuggestions();
-
-      const ve = be?.valueExpression();
-
-      if (ve?.exception) {
-        this.suggestions = this.fields;
-        return;
-      }
-      if (hasAssign) {
-        this.suggestions = [...this.suggestions, ...mathOperatorsCommandsDefinitions];
-      } else {
+    } else {
+      if (!hasAssign) {
         this.suggestions = [assignOperatorDefinition];
       }
     }
@@ -234,6 +197,51 @@ export class AutocompleteListener implements ESQLParserListener {
 
   enterBooleanExpression(ctx: BooleanExpressionContext) {
     this.suggestions = [];
+  }
+
+  exitBooleanExpression(ctx: BooleanExpressionContext) {
+    if (ctx.exception) {
+      const ve = ctx.valueExpression();
+      if (!ve) {
+        this.suggestions = [...aggregationFunctionsDefinitions, ...this.fields];
+        return;
+      }
+    }
+  }
+
+  exitValueExpression(ctx: ValueExpressionContext) {
+    if (this.parentContext && [ESQLParser.EVAL, ESQLParser.STATS].includes(this.parentContext)) {
+      const hasFN = ctx.tryGetToken(esql_parser.UNARY_FUNCTION, 0);
+      const hasLP = ctx.tryGetToken(esql_parser.LP, 0);
+      const hasRP = ctx.tryGetToken(esql_parser.RP, 0);
+
+      if (hasFN) {
+        if (!hasLP) {
+          this.suggestions = [openBracketDefinition];
+          return;
+        }
+        if (!hasRP) {
+          if (ctx.childCount === 3) {
+            this.suggestions = [closeBracketDefinition, ...this.fields];
+            return;
+          }
+        }
+      } else {
+        if (ctx.childCount === 1) {
+          this.suggestions = [
+            ...this.getEndCommandSuggestions(),
+            ...mathOperatorsCommandsDefinitions,
+          ];
+          return;
+        }
+      }
+      this.suggestions = this.fields;
+    }
+  }
+
+  enterWhereCommand(ctx: WhereCommandContext) {
+    this.suggestions = [];
+    this.parentContext = ESQLParser.WHERE;
   }
 
   exitWhereCommand(ctx: WhereCommandContext) {

@@ -20,7 +20,7 @@ import { WhereCommandContext } from "./esql_parser";
 import { BooleanExpressionContext } from "./esql_parser";
 import { ValueExpressionContext } from "./esql_parser";
 import { ComparisonContext } from "./esql_parser";
-import { SetVariableContext } from "./esql_parser";
+import { MathFnContext } from "./esql_parser";
 import { OperatorExpressionContext } from "./esql_parser";
 import { PrimaryExpressionContext } from "./esql_parser";
 import { RowCommandContext } from "./esql_parser";
@@ -248,15 +248,15 @@ export interface esql_parserListener extends ParseTreeListener {
 	exitComparison?: (ctx: ComparisonContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `esql_parser.setVariable`.
+	 * Enter a parse tree produced by `esql_parser.mathFn`.
 	 * @param ctx the parse tree
 	 */
-	enterSetVariable?: (ctx: SetVariableContext) => void;
+	enterMathFn?: (ctx: MathFnContext) => void;
 	/**
-	 * Exit a parse tree produced by `esql_parser.setVariable`.
+	 * Exit a parse tree produced by `esql_parser.mathFn`.
 	 * @param ctx the parse tree
 	 */
-	exitSetVariable?: (ctx: SetVariableContext) => void;
+	exitMathFn?: (ctx: MathFnContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.operatorExpression`.

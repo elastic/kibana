@@ -54,12 +54,13 @@ comparison
     : left=operatorExpression comparisonOperator right=operatorExpression
     ;
 
-setVariable
-    : mathFunction=functionIdentifier LP (functionExpressionArgument (COMMA functionExpressionArgument)*)? RP
+mathFn
+    : functionIdentifier LP (functionExpressionArgument (COMMA functionExpressionArgument)*)? RP
     ;
 
 operatorExpression
     : primaryExpression
+    | mathFn
     | operator=(MINUS | PLUS) operatorExpression
     | left=operatorExpression operator=(ASTERISK | SLASH | PERCENT) right=operatorExpression
     | left=operatorExpression operator=(PLUS | MINUS) right=operatorExpression
@@ -82,7 +83,6 @@ fields
 
 field
     : booleanExpression
-    | userVariable ASSIGN setVariable
     | userVariable ASSIGN booleanExpression
     ;
 
