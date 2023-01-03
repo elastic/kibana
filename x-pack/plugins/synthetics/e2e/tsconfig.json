@@ -7,14 +7,14 @@
     "types": [ "node"],
   },
   "kbn_references": [
-    {
-      "path": "../../apm/tsconfig.json",
-    },
+    "@kbn/apm-plugin",
     {
       "path": "../../observability/e2e/tsconfig.json"
     },
-    {
-      "path": "../tsconfig.json",
-    }
+    "@kbn/test",
+    "@kbn/dev-utils",
+    "@kbn/observability-plugin",
+    "@kbn/ux-plugin",
+    "@kbn/ftr-common-functional-services",
   ]
 }

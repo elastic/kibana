@@ -23,7 +23,7 @@ import {
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
-import type { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   useExistingFieldsFetcher,
   useQuerySubscriber,
@@ -58,10 +58,6 @@ export interface DiscoverSidebarResponsiveProps {
    * hits fetched from ES, displayed in the doc table
    */
   documents$: DataDocuments$;
-  /**
-   * List of available data views
-   */
-  dataViewList: DataViewListItem[];
   /**
    * Has been toggled closed
    */
