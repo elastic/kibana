@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import { useSelector } from '@xstate/react';
 import { LogStreamQueryActorRef } from '../../../log_stream_query_state';
 import { MatchedStateFromActor } from '../../../xstate_helpers';
 import { LogStreamPageActorRef } from './state_machine';
-
-export const useLogStreamQueryChildService = (
-  logStreamPageStateService: LogStreamPageActorRef
-): LogStreamQueryActorRef =>
-  useSelector(logStreamPageStateService, (state) => state.children.logStreamQuery);
 
 type LogStreamPageStateWithLogViewIndices =
   | MatchedStateFromActor<LogStreamPageActorRef, 'hasLogViewIndices'>
