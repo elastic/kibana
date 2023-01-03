@@ -132,7 +132,6 @@ export const AddComment = React.memo(
         onCommentPosted,
         reset,
         draftStorageKey,
-        removeItemFromSessionStorage,
       ]);
 
       /**
