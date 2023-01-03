@@ -13,11 +13,9 @@ import {
   EuiRangeTick,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { SettingsForm } from './settings_form';
 import { AnchoredRange } from './anchored_range';
 import { EuiDualRangeRef, SlidingWindowRange } from './sliding_window_range';
 import { timeSliderReducers } from '../time_slider_reducers';
@@ -49,10 +47,12 @@ export function TimeSliderPopoverContent(props: Props) {
           };
         });
 
-  const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
-    TimeSliderReduxState,
-    typeof timeSliderReducers
-  >();
+  const {
+    useEmbeddableDispatch,
+    useEmbeddableSelector: select,
+    actions: { setIsAnchored },
+  } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
+  const dispatch = useEmbeddableDispatch();
   const isAnchored = select(getIsAnchored);
   const rangeInput = isAnchored ? (
     <AnchoredRange
@@ -74,40 +74,57 @@ export function TimeSliderPopoverContent(props: Props) {
       timeRangeMax={props.timeRangeMax}
     />
   );
+  const anchorStartToggleButtonLabel = isAnchored
+    ? i18n.translate('controls.timeSlider.settings.unanchorStartSwitchLabel', {
+        defaultMessage: 'Unanchor start',
+      })
+    : i18n.translate('controls.timeSlider.settings.anchorStartSwitchLabel', {
+        defaultMessage: 'Anchor start',
+      });
 
   return (
-    <>
-      <EuiFlexGroup
-        className="rangeSlider__actions"
-        gutterSize="none"
-        data-test-subj="timeSlider-popoverContents"
-        responsive={false}
-      >
-        <EuiFlexItem>{rangeInput}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
+    <EuiFlexGroup
+      className="rangeSlider__actions"
+      gutterSize="none"
+      data-test-subj="timeSlider-popoverContents"
+      responsive={false}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={anchorStartToggleButtonLabel}
+        >
+          <EuiButtonIcon
+            iconType={isAnchored ? 'pin' : 'pinFilled'}
+            onClick={() => {
+              const nextIsAnchored = !isAnchored;
+              if (nextIsAnchored) {
+                props.onChange([props.timeRangeMin, props.value[1]]);
+              }
+              dispatch(setIsAnchored({ isAnchored: nextIsAnchored }));
+            }}
+            aria-label={anchorStartToggleButtonLabel}
+            data-test-subj="timeSlider__anchorStartToggleButton"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem>{rangeInput}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
+            defaultMessage: 'Clear time selection',
+          })}
+        >
+          <EuiButtonIcon
+            iconType="eraser"
+            color="danger"
+            onClick={props.onClear}
+            aria-label={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
               defaultMessage: 'Clear time selection',
             })}
-          >
-            <EuiButtonIcon
-              iconType="eraser"
-              color="danger"
-              onClick={props.onClear}
-              aria-label={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
-                defaultMessage: 'Clear time selection',
-              })}
-              data-test-subj="timeSlider__clearTimeButton"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <SettingsForm
-        value={props.value}
-        onChange={props.onChange}
-        timeRangeMin={props.timeRangeMin}
-      />
-    </>
+            data-test-subj="timeSlider__clearTimeButton"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
