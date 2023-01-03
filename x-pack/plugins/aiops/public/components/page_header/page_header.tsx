@@ -14,8 +14,8 @@ import {
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
 } from '@elastic/eui';
+import { useUrlState } from '@kbn/ml-url-state';
 import { FullTimeRangeSelectorProps } from '../full_time_range_selector/full_time_range_selector';
-import { useUrlState } from '../../hooks/use_url_state';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useTimefilter } from '../../hooks/use_time_filter';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
