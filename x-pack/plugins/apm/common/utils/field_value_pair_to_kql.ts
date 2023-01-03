@@ -6,12 +6,15 @@
  */
 
 import { escapeKuery } from '@kbn/es-query';
+import { isEmpty, isNil } from 'lodash';
 
-export function paramQuery<T extends string>(
+export function fieldValuePairToKql<T extends string>(
   field: T,
   value: string | boolean | number | undefined | null
 ) {
-  if (!value) return [];
+  if (isNil(value) || isEmpty(value)) {
+    return [];
+  }
 
   const escapedValue = escapeKuery(value.toString());
 

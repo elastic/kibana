@@ -41,7 +41,7 @@ import { ServiceOverviewDependenciesTable } from '../../service_overview/service
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
 import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
-import { useKueryWithMobileFilters } from '../../../../hooks/use_kuery_with_mobile_filters';
+import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -67,7 +67,7 @@ export function MobileServiceOverview() {
     },
   } = useApmParams('/mobile-services/{serviceName}/overview');
 
-  const kueryWithFilters = useKueryWithMobileFilters({
+  const kueryWithFilters = getKueryWithMobileFilters({
     device,
     osVersion,
     appVersion,

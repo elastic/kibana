@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { getKueryWithMobileFilters } from '../../common/utils/get_kuery_with_mobile_filters';
 import { useApmParams } from './use_apm_params';
 import { useFetcher } from './use_fetcher';
 import { useTimeRange } from './use_time_range';
-import { useKueryWithMobileFilters } from './use_kuery_with_mobile_filters';
 
 export function useFallbackToTransactionsFetcher({ kuery }: { kuery: string }) {
   const { query } = useApmParams('/*');
@@ -21,7 +21,7 @@ export function useFallbackToTransactionsFetcher({ kuery }: { kuery: string }) {
   const netConnectionType =
     'netConnectionType' in query ? query.netConnectionType : undefined;
 
-  const kueryWithFilters = useKueryWithMobileFilters({
+  const kueryWithFilters = getKueryWithMobileFilters({
     device,
     osVersion,
     appVersion,

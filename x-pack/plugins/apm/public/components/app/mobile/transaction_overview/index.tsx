@@ -21,7 +21,7 @@ import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transact
 import { MobileTransactionCharts } from '../../../shared/charts/transaction_charts/mobile_transaction_charts';
 import { TransactionsTable } from '../../../shared/transactions_table';
 import { replace } from '../../../shared/links/url_helpers';
-import { useKueryWithMobileFilters } from '../../../../hooks/use_kuery_with_mobile_filters';
+import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 
 export function MobileTransactionOverview() {
   const {
@@ -38,7 +38,7 @@ export function MobileTransactionOverview() {
     },
   } = useApmParams('/mobile-services/{serviceName}/transactions');
 
-  const kueryWithFilters = useKueryWithMobileFilters({
+  const kueryWithFilters = getKueryWithMobileFilters({
     device,
     osVersion,
     appVersion,
