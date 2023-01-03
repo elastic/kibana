@@ -45,7 +45,7 @@ export const createRuleTypeMocks = () => {
     },
     alertFactory: {
       create: jest.fn(() => ({ scheduleActions })),
-      alertLimit: { trimRecovered: jest.fn().mockReturnValue([]) },
+      alertLimit: { getEarlyRecoveredAlerts: jest.fn().mockReturnValue([]) },
       done: {},
     },
     alertWithLifecycle: jest.fn(),

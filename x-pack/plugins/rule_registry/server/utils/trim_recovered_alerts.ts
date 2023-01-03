@@ -29,7 +29,7 @@ export function trimRecoveredAlerts<
       .map((e, index) => ({ index, flappingHistory: e.flappingHistory, trackedEvents: true })),
   ];
 
-  const earlyRecoveredAlertOpts = alertFactory.alertLimit.trimRecovered(recoveredAlerts);
+  const earlyRecoveredAlertOpts = alertFactory.alertLimit.getEarlyRecoveredAlerts(recoveredAlerts);
   let earlyRecoveredEvents: any[] = [];
   earlyRecoveredAlertOpts.forEach((opts) => {
     let alert;

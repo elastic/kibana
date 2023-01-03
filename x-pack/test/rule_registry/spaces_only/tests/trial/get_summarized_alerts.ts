@@ -170,7 +170,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         services: {
           alertFactory: {
             create: sinon.stub(),
-            alertLimit: { trimRecovered: sinon.stub().returns([]) },
+            alertLimit: { getEarlyRecoveredAlerts: sinon.stub().returns([]) },
           },
           shouldWriteAlerts: sinon.stub().returns(true),
         },
@@ -327,7 +327,10 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           producer: 'observability.test',
         },
         services: {
-          alertFactory: { create: sinon.stub() },
+          alertFactory: {
+            create: sinon.stub(),
+            alertLimit: { getEarlyRecoveredAlerts: sinon.stub().returns([]) },
+          },
           shouldWriteAlerts: sinon.stub().returns(true),
         },
       } as unknown as RuleExecutorOptions<

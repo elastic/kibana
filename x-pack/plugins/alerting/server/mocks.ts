@@ -137,7 +137,7 @@ const createRuleExecutorServicesMock = <
       alertLimit: {
         getValue: jest.fn().mockReturnValue(1000),
         setLimitReached: jest.fn(),
-        trimRecovered: jest.fn().mockReturnValue([]),
+        getEarlyRecoveredAlerts: jest.fn().mockReturnValue([]),
       },
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
