@@ -1370,6 +1370,7 @@ describe('Task Runner', () => {
         executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
         ruleId: '1',
         spaceId: 'default',
+        excludedAlertInstanceIds: [],
       });
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
@@ -1445,6 +1446,7 @@ describe('Task Runner', () => {
         end: new Date(DATE_1970),
         ruleId: '1',
         spaceId: 'default',
+        excludedAlertInstanceIds: [],
       });
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
