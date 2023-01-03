@@ -65,7 +65,6 @@ export const AlertStateInfo = ({
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
         <Chart size={{ height: 50 }}>
-          // TODO Use the EUI charts theme https://github.com/elastic/kibana/issues/148297
           <Settings theme={theme} tooltip={{ type: 'none' }} />
           <Axis
             domain={domain}
