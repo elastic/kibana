@@ -236,7 +236,7 @@ export const NON_ECS_CALLOUT = ({ fieldCount, version }: { fieldCount: number; v
   });
 
 export const NON_ECS_CALLOUT_TITLE = (fieldCount: number) =>
-  i18n.translate('xpack.securitySolution.dataQuality.indexProperties.nonEcsCallout', {
+  i18n.translate('xpack.securitySolution.dataQuality.indexProperties.nonEcsCalloutTitle', {
     values: { fieldCount },
     defaultMessage:
       '{fieldCount} Non ECS {fieldCount, plural, =1 {field mapping} other {field mappings}}',
@@ -271,7 +271,7 @@ export const NOT_ECS_COMPLIANT_CALLOUT = ({
   version: string;
 }) =>
   i18n.translate('xpack.securitySolution.dataQuality.indexProperties.notEcsCompliantCallout', {
-    values: { fieldCount, version },
+    values: { version },
     defaultMessage:
       "Fields are Not ECS Compliant when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version {version}. Sometimes, indices created by older integrations will have mappings or values that were, but are no longer compliant.",
   });

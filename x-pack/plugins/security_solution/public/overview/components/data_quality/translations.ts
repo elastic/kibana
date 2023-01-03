@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 
 export const COLLAPSE_BUTTON_LABEL = (collapsed: boolean) =>
   collapsed
-    ? i18n.translate('xpack.securitySolution.dataQuality.collapseButtonLabel', {
+    ? i18n.translate('xpack.securitySolution.dataQuality.collapseButtonLabelOpen', {
         defaultMessage: 'Open',
       })
-    : i18n.translate('xpack.securitySolution.dataQuality.collapseButtonLabel', {
+    : i18n.translate('xpack.securitySolution.dataQuality.collapseButtonLabelClosed', {
         defaultMessage: 'Closed',
       });
 
