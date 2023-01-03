@@ -229,6 +229,11 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   }> => {
     const { plugins, context, config, request, logger } = resources;
     const cloudApmMigrationEnabled = config.agent.migrations.enabled;
+
+    if (!cloudApmMigrationEnabled) {
+      throw Boom.internal(CLOUD_APM_MIGRATION_DISABLED_MESSAGE);
+    }
+
     if (!plugins.fleet || !plugins.security) {
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
@@ -241,7 +246,8 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
     const fleetPluginStart = await plugins.fleet.start();
     const securityPluginStart = await plugins.security.start();
     const hasRequiredRole = isSuperuser({ securityPluginStart, request });
-    if (!hasRequiredRole || !cloudApmMigrationEnabled) {
+
+    if (!hasRequiredRole) {
       throw Boom.forbidden(CLOUD_SUPERUSER_REQUIRED_MESSAGE);
     }
 
@@ -297,5 +303,12 @@ const CLOUD_SUPERUSER_REQUIRED_MESSAGE = i18n.translate(
   {
     defaultMessage:
       'Operation only permitted by Elastic Cloud users with the superuser role.',
+  }
+);
+
+const CLOUD_APM_MIGRATION_DISABLED_MESSAGE = i18n.translate(
+  'xpack.apm.api.fleet.cloudApmMigrationDisabled',
+  {
+    defaultMessage: 'Cloud APM migration is disabled',
   }
 );
