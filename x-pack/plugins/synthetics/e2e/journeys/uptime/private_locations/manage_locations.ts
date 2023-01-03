@@ -75,6 +75,7 @@ journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
   const addAgentPolicy = async (name: string) => {
     await page.click('[placeholder="Choose a name"]');
     await page.fill('[placeholder="Choose a name"]', name);
+    await page.click('text=Collect system logs and metrics');
     await page.click('div[role="dialog"] button:has-text("Create agent policy")');
   };
 });

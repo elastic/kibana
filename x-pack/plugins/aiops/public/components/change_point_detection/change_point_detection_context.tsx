@@ -16,7 +16,6 @@ import React, {
 } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
-import useMount from 'react-use/lib/useMount';
 import type { Query, Filter } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import {
@@ -129,7 +128,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
 
   const timeRange = useTimeRangeUpdates();
 
-  useMount(function updateIntervalOnTimeBoundsChange() {
+  useEffect(function updateIntervalOnTimeBoundsChange() {
     const timeUpdateSubscription = timefilter
       .getTimeUpdate$()
       .pipe(startWith(timefilter.getTime()))
@@ -145,7 +144,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return () => {
       timeUpdateSubscription.unsubscribe();
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const metricFieldOptions = useMemo<DataViewField[]>(() => {
     return dataView.fields.filter(({ aggregatable, type }) => aggregatable && type === 'number');
@@ -195,7 +195,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     [filterManager]
   );
 
-  useMount(() => {
+  useEffect(() => {
     setResultFilter(filterManager.getFilters());
     const sub = filterManager.getUpdates$().subscribe(() => {
       setResultFilter(filterManager.getFilters());
@@ -203,7 +203,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return () => {
       sub.unsubscribe();
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(
     function syncFilters() {
