@@ -25,6 +25,7 @@ import {
   EuiLoadingContent,
 } from '@elastic/eui';
 
+import { useUrlState } from '@kbn/ml-url-state';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 import { useData } from '../../hooks/use_data';
@@ -33,7 +34,6 @@ import type {
   SearchQueryLanguage,
   SavedSearchSavedObject,
 } from '../../application/utils/search_utils';
-import { useUrlState } from '../../hooks/use_url_state';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { useCategorizeRequest } from './use_categorize_request';
