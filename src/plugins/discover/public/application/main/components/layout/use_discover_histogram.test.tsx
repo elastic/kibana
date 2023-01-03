@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import React, { ReactElement } from 'react';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { esHits } from '../../../../__mocks__/es_hits';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import {
@@ -18,7 +18,7 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../hooks/use_saved_search';
-import type { AppState, GetStateReturn } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../services/discover_state';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
@@ -28,9 +28,12 @@ import {
   CHART_HIDDEN_KEY,
   HISTOGRAM_HEIGHT_KEY,
   useDiscoverHistogram,
+  UseDiscoverHistogramProps,
 } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { calculateBounds } from '@kbn/data-plugin/public';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
@@ -72,6 +75,21 @@ jest.mock('@kbn/unified-field-list-plugin/public', () => {
   };
 });
 
+function getStateContainer() {
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+
+  stateContainer.setAppState({
+    interval: 'auto',
+    hideChart: false,
+    breakdownField: 'extension',
+  });
+
+  const wrappedStateContainer = Object.create(stateContainer);
+  wrappedStateContainer.setAppState = jest.fn((newState) => stateContainer.setAppState(newState));
+
+  return wrappedStateContainer;
+}
+
 jest.mock('../../hooks/use_saved_search_messages', () => {
   const originalModule = jest.requireActual('../../hooks/use_saved_search_messages');
   return {
@@ -89,8 +107,7 @@ describe('useDiscoverHistogram', () => {
     isTimeBased = true,
     canVisualize = true,
     storage = new LocalStorageMock({}) as unknown as Storage,
-    state = { interval: 'auto', hideChart: false, breakdownField: 'extension' },
-    stateContainer = {},
+    stateContainer = getStateContainer(),
     searchSessionManager,
     searchSessionId = '123',
     inspectorAdapters = { requests: new RequestAdapter() },
@@ -108,8 +125,7 @@ describe('useDiscoverHistogram', () => {
     isTimeBased?: boolean;
     canVisualize?: boolean;
     storage?: Storage;
-    state?: AppState;
-    stateContainer?: unknown;
+    stateContainer?: DiscoverStateContainer;
     searchSessionManager?: DiscoverSearchSessionManager;
     searchSessionId?: string | null;
     inspectorAdapters?: InspectorAdapters;
@@ -143,8 +159,7 @@ describe('useDiscoverHistogram', () => {
     }
 
     const initialProps = {
-      stateContainer: stateContainer as GetStateReturn,
-      state,
+      stateContainer,
       savedSearchData$,
       dataView: dataViewWithTimefieldMock,
       savedSearch: savedSearchMock,
@@ -154,9 +169,18 @@ describe('useDiscoverHistogram', () => {
       searchSessionManager: searchSessionManager!,
     };
 
+    const Wrapper: WrapperComponent<UseDiscoverHistogramProps> = ({ children }) => (
+      <DiscoverMainProvider value={stateContainer}>{children as ReactElement}</DiscoverMainProvider>
+    );
+
     const hook = renderHook(
-      (props: Parameters<typeof useDiscoverHistogram>[0]) => useDiscoverHistogram(props),
-      { initialProps }
+      (props: UseDiscoverHistogramProps) => {
+        return useDiscoverHistogram(props);
+      },
+      {
+        wrapper: Wrapper,
+        initialProps,
+      }
     );
 
     await act(() => setTimeout(0));
@@ -299,12 +323,7 @@ describe('useDiscoverHistogram', () => {
     it('should update chartHidden when onChartHiddenChange is called', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       storage.set = jest.fn();
-      const state = { interval: 'auto', hideChart: false, breakdownField: 'extension' };
-      const stateContainer = {
-        setAppState: jest.fn((newState) => {
-          Object.assign(state, newState);
-        }),
-      };
+      const stateContainer = getStateContainer();
       const session = getSessionServiceMock();
       const session$ = new BehaviorSubject('123');
       session.getSession$.mockReturnValue(session$);
@@ -314,7 +333,6 @@ describe('useDiscoverHistogram', () => {
       };
       const { hook } = await renderUseDiscoverHistogram({
         storage,
-        state,
         stateContainer,
         searchSessionManager: createSearchSessionMock(session).searchSessionManager,
         inspectorAdapters,
@@ -354,9 +372,7 @@ describe('useDiscoverHistogram', () => {
     it('should update chart hidden when onChartHiddenChange is called', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       storage.set = jest.fn();
-      const stateContainer = {
-        setAppState: jest.fn(),
-      };
+      const stateContainer = getStateContainer();
       const inspectorAdapters = {
         requests: new RequestAdapter(),
         lensRequests: new RequestAdapter(),
@@ -376,9 +392,7 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should update interval when onTimeIntervalChange is called', async () => {
-      const stateContainer = {
-        setAppState: jest.fn(),
-      };
+      const stateContainer = getStateContainer();
       const {
         hook: { result },
       } = await renderUseDiscoverHistogram({
@@ -391,9 +405,7 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should update breakdownField when onBreakdownFieldChange is called', async () => {
-      const stateContainer = {
-        setAppState: jest.fn(),
-      };
+      const stateContainer = getStateContainer();
       const {
         hook: { result },
       } = await renderUseDiscoverHistogram({

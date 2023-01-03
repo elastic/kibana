@@ -208,7 +208,7 @@ export async function updateTagsBatch(
         getUuidArray(res.version_conflicts!).map((id) => ({
           agentId: id,
           actionId,
-          error: 'version conflict on 3rd retry',
+          error: 'version conflict on last retry',
         }))
       );
     }
