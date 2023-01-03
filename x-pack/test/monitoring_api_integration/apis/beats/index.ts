@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('APM', () => {
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Beats', () => {
     loadTestFile(require.resolve('./overview'));
-    loadTestFile(require.resolve('./instances'));
-    loadTestFile(require.resolve('./instance'));
+    loadTestFile(require.resolve('./beats'));
+    loadTestFile(require.resolve('./beat'));
   });
 }

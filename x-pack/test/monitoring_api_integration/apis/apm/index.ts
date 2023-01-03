@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('APM', () => {
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./instances'));
