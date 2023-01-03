@@ -14,9 +14,7 @@ import {
   EuiFlexItem,
   EuiToolTip,
   EuiSpacer,
-  EuiBadge,
   EuiIcon,
-  useEuiBackgroundColor,
   useEuiTheme,
   EuiText,
 } from '@elastic/eui';
