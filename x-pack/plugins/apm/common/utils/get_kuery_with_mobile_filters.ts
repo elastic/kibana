@@ -10,8 +10,8 @@ import {
   DEVICE_MODEL_NAME,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
-} from '../../common/es_fields/apm';
-import { fieldValuePairToKql } from '../../common/utils/field_value_pair_to_kql';
+} from '../es_fields/apm';
+import { fieldValuePairToKql } from './field_value_pair_to_kql';
 
 export function getKueryWithMobileFilters({
   device,
