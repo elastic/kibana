@@ -8,6 +8,7 @@
 import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
 import { periodToMs } from './current_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
+import times from 'lodash/times';
 
 jest.mock('../common', () => ({
   getMonitors: jest.fn().mockReturnValue({
@@ -166,7 +167,12 @@ describe('current status route', () => {
         ])
       );
       expect(
-        await queryMonitorStatus(uptimeEsClient, 3, { from: 140000, to: 'now' }, ['id1', 'id2'])
+        await queryMonitorStatus(
+          uptimeEsClient,
+          ['Europe - Germany', 'Asia/Pacific - Japan'],
+          { from: 140000, to: 'now' },
+          ['id1', 'id2']
+        )
       ).toEqual({
         down: 1,
         enabledIds: ['id1', 'id2'],
@@ -311,7 +317,12 @@ describe('current status route', () => {
        * The expectation here is we will send the test client two separate "requests", one for each of the two IDs.
        */
       expect(
-        await queryMonitorStatus(uptimeEsClient, 10000, { from: 2500, to: 'now' }, ['id1', 'id2'])
+        await queryMonitorStatus(
+          uptimeEsClient,
+          times(10000).map((n) => 'Europe - Germany' + n),
+          { from: 2500, to: 'now' },
+          ['id1', 'id2']
+        )
       ).toEqual({
         down: 1,
         enabledIds: ['id1', 'id2'],
