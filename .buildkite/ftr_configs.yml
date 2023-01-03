@@ -62,7 +62,14 @@ disabled:
   - x-pack/test/scalability/config.ts
 
   # Failing: browserType.launch: Executable doesn't exist
+  # https://github.com/elastic/kibana/issues/148213
+  # https://github.com/elastic/kibana/issues/148214
+  # https://github.com/elastic/kibana/issues/148215
+  # https://github.com/elastic/kibana/issues/148216
+  # https://github.com/elastic/kibana/issues/148217
+  # https://github.com/elastic/kibana/issues/148218
   # https://github.com/elastic/kibana/issues/148219
+  # https://github.com/elastic/kibana/issues/148220
   - x-pack/performance/journeys/ecommerce_dashboard.ts
   - x-pack/performance/journeys/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys/flight_dashboard.ts
