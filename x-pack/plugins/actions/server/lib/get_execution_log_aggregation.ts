@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
-import { flatMap, get, isEmpty } from 'lodash';
+import { flatMap, isEmpty } from 'lodash';
 import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../actions_client';
-// import { IExecutionLog, IExe, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
+import {
+  buildDslFilterQuery,
+  DEFAULT_MAX_BUCKETS_LIMIT,
+  DEFAULT_MAX_KPI_BUCKETS_LIMIT,
+  EMPTY_EXECUTION_LOG_RESULT,
+  ExcludeExecuteStartAggResult,
+  ExcludeExecuteStartKpiAggResult,
+  formatSortForBucketSort,
+  formatSortForTermSort,
+  getProviderAndActionFilter,
+  IExecutionLogAggOptions,
+} from '@kbn/alerting-plugin/server/lib';
+import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
 
-const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
-const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
-
-const RULE_ID_FIELD = 'rule.id';
 const SPACE_ID_FIELD = 'kibana.space_ids';
-const RULE_NAME_FIELD = 'action.name';
-const PROVIDER_FIELD = 'event.provider';
+const ACTION_NAME_FIELD = 'action.name';
 const START_FIELD = 'event.start';
 const ACTION_FIELD = 'event.action';
 const OUTCOME_FIELD = 'event.outcome';
@@ -32,11 +36,6 @@ const SCHEDULE_DELAY_FIELD = 'kibana.task.schedule_delay';
 const EXECUTION_UUID_FIELD = 'action.uuid';
 
 const Millis2Nanos = 1000 * 1000;
-
-export const EMPTY_EXECUTION_LOG_RESULT = {
-  total: 0,
-  data: [],
-};
 
 interface IActionExecution
   extends estypes.AggregationsTermsAggregateBase<{ key: string; doc_count: number }> {
@@ -63,32 +62,12 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
   };
 }
 
-export interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
-  extends estypes.AggregationsAggregateBase {
-  buckets: TBucket[];
+export interface ExecutionUuidAggResult extends estypes.AggregationsAggregateBase {
+  buckets: IExecutionUuidAggBucket[];
 }
 
-export interface ExecutionUuidKPIAggResult<TBucket = IExecutionUuidKpiAggBucket>
-  extends estypes.AggregationsAggregateBase {
-  buckets: TBucket[];
-}
-
-interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase {
-  executionUuid: ExecutionUuidAggResult;
-  executionUuidCardinality: {
-    executionUuidCardinality: estypes.AggregationsCardinalityAggregate;
-  };
-}
-
-interface ExcludeExecuteStartKpiAggResult extends estypes.AggregationsAggregateBase {
-  executionUuid: ExecutionUuidKPIAggResult;
-}
-
-export interface IExecutionLogAggOptions {
-  filter?: string | KueryNode;
-  page: number;
-  perPage: number;
-  sort: estypes.Sort;
+export interface ExecutionUuidKPIAggResult extends estypes.AggregationsAggregateBase {
+  buckets: IExecutionUuidKpiAggBucket[];
 }
 
 const ExecutionLogSortFields: Record<string, string> = {
@@ -120,7 +99,10 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
           terms: {
             field: EXECUTION_UUID_FIELD,
             size: DEFAULT_MAX_KPI_BUCKETS_LIMIT,
-            order: formatSortForTermSort([{ timestamp: { order: 'desc' } }]),
+            order: formatSortForTermSort(
+              [{ timestamp: { order: 'desc' } }],
+              ExecutionLogSortFields
+            ),
           },
           aggs: {
             executionUuidSorted: {
@@ -233,13 +215,13 @@ export function getExecutionLogAggregation({
           terms: {
             field: EXECUTION_UUID_FIELD,
             size: DEFAULT_MAX_BUCKETS_LIMIT,
-            order: formatSortForTermSort(sort),
+            order: formatSortForTermSort(sort, ExecutionLogSortFields),
           },
           aggs: {
             // Bucket sort to allow paging through executions
             executionUuidSorted: {
               bucket_sort: {
-                sort: formatSortForBucketSort(sort),
+                sort: formatSortForBucketSort(sort, ExecutionLogSortFields),
                 from: (page - 1) * perPage,
                 size: perPage,
                 gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
@@ -277,9 +259,8 @@ export function getExecutionLogAggregation({
                         MESSAGE_FIELD,
                         ERROR_MESSAGE_FIELD,
                         VERSION_FIELD,
-                        RULE_ID_FIELD,
                         SPACE_ID_FIELD,
-                        RULE_NAME_FIELD,
+                        ACTION_NAME_FIELD,
                       ],
                     },
                   },
@@ -300,34 +281,6 @@ export function getExecutionLogAggregation({
           },
         },
       },
-    },
-  };
-}
-
-function buildDslFilterQuery(filter: IExecutionLogAggOptions['filter']) {
-  try {
-    const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
-    return filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
-  } catch (err) {
-    throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
-  }
-}
-
-function getProviderAndActionFilter(provider: string, action: string) {
-  return {
-    bool: {
-      must: [
-        {
-          match: {
-            [ACTION_FIELD]: action,
-          },
-        },
-        {
-          match: {
-            [PROVIDER_FIELD]: provider,
-          },
-        },
-      ],
     },
   };
 }
@@ -417,7 +370,8 @@ export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectRe
   if (!aggregations || !aggregations.excludeExecuteStart) {
     return EMPTY_EXECUTION_KPI_RESULT;
   }
-  const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartKpiAggResult;
+  const aggs =
+    aggregations.excludeExecuteStart as ExcludeExecuteStartKpiAggResult<ExecutionUuidKPIAggResult>;
   const buckets = aggs.executionUuid.buckets;
   return formatExecutionKPIAggBuckets(buckets);
 }
@@ -431,7 +385,8 @@ export function formatExecutionLogResult(
     return EMPTY_EXECUTION_LOG_RESULT;
   }
 
-  const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartAggResult;
+  const aggs =
+    aggregations.excludeExecuteStart as ExcludeExecuteStartAggResult<ExecutionUuidAggResult>;
 
   const total = aggs.executionUuidCardinality.executionUuidCardinality.value;
   const buckets = aggs.executionUuid.buckets;
@@ -440,22 +395,4 @@ export function formatExecutionLogResult(
     total,
     data: buckets.map((bucket: IExecutionUuidAggBucket) => formatExecutionLogAggBucket(bucket)),
   };
-}
-
-export function formatSortForBucketSort(sort: estypes.Sort) {
-  return (sort as estypes.SortCombinations[]).map((s) =>
-    Object.keys(s).reduce(
-      (acc, curr) => ({ ...acc, [ExecutionLogSortFields[curr]]: get(s, curr) }),
-      {}
-    )
-  );
-}
-
-export function formatSortForTermSort(sort: estypes.Sort) {
-  return (sort as estypes.SortCombinations[]).map((s) =>
-    Object.keys(s).reduce(
-      (acc, curr) => ({ ...acc, [ExecutionLogSortFields[curr]]: get(s, `${curr}.order`) }),
-      {}
-    )
-  );
 }

@@ -9,9 +9,12 @@ import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { ActionsRequestHandlerContext } from '../types';
-import { INTERNAL_BASE_ACTION_API_PATH, RewriteRequestCase } from '../../common';
+import {
+  GetGlobalExecutionLogParams,
+  INTERNAL_BASE_ACTION_API_PATH,
+  RewriteRequestCase,
+} from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { GetGlobalExecutionLogParams } from '../actions_client';
 
 const sortOrderSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')]);
 

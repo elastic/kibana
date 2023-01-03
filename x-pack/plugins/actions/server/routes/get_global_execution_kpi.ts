@@ -6,8 +6,11 @@
  */
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_BASE_ACTION_API_PATH, RewriteRequestCase } from '../../common';
-import { GetGlobalExecutionKPIParams } from '../actions_client';
+import {
+  GetGlobalExecutionKPIParams,
+  INTERNAL_BASE_ACTION_API_PATH,
+  RewriteRequestCase,
+} from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { ActionsRequestHandlerContext } from '../types';
 import { ILicenseState } from '../lib';

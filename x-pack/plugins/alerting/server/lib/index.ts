@@ -42,3 +42,18 @@ export { parseIsoOrRelativeDate } from './iso_or_relative_date';
 export { setFlapping } from './set_flapping';
 export { determineAlertsToReturn } from './determine_alerts_to_return';
 export { updateFlappingHistory, isFlapping } from './flapping_utils';
+export {
+  formatSortForTermSort,
+  formatSortForBucketSort,
+  formatExecutionLogResult,
+  getProviderAndActionFilter,
+  buildDslFilterQuery,
+  EMPTY_EXECUTION_LOG_RESULT,
+  DEFAULT_MAX_BUCKETS_LIMIT,
+  DEFAULT_MAX_KPI_BUCKETS_LIMIT,
+} from './get_execution_log_aggregation';
+export type {
+  ExcludeExecuteStartAggResult,
+  ExcludeExecuteStartKpiAggResult,
+  IExecutionLogAggOptions,
+} from './get_execution_log_aggregation';
