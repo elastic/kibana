@@ -541,22 +541,19 @@ async function getUpdatedAttributesFromOperations(
     // the `isAttributesUpdateSkipped` flag to false.
     switch (operation.field) {
       case 'actions': {
-        // Prepare to handle the case of when the rule attributes contain legacy rule-level throttle or notifyWhen,
-        // and we're bulk adding actions with action-level frequency params.
-        let attempts = 0;
-        while (attempts < 2) {
-          attempts++;
-          try {
-            await validateActions(context, ruleType, {
-              ...attributes,
-              actions: operation.value,
-            });
-          } catch (e) {
-            // If validateActions fails on the first attempt, try to remove the rule-level frequency params.
-            // The loop will attempt to validate again. Only allow the error to throw uncaught if it happens twice.
-            if (typeof attributes.notifyWhen !== 'undefined') attributes.notifyWhen = undefined;
-            if (attributes.throttle) attributes.throttle = undefined;
-          }
+        try {
+          await validateActions(context, ruleType, {
+            ...attributes,
+            actions: operation.value,
+          });
+        } catch (e) {
+          // If validateActions fails on the first attempt, it may be because of legacy rule-level frequency params
+          attributes = await attemptToMigrateLegacyFrequency(
+            context,
+            operation,
+            attributes,
+            ruleType
+          );
         }
 
         const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
@@ -567,15 +564,15 @@ async function getUpdatedAttributesFromOperations(
           ruleActions = modifiedAttributes;
           isAttributesUpdateSkipped = false;
         }
-        if (operation.syncFrequency) {
-          const frequency = operation.value[0]?.frequency;
-          if (frequency) {
-            ruleActions.actions = ruleActions.actions.map((action) => ({
-              ...action,
-              frequency,
-            }));
-          }
+
+        const firstFrequency = operation.value[0]?.frequency;
+        if (operation.syncFrequency && firstFrequency) {
+          ruleActions.actions = ruleActions.actions.map((action) => ({
+            ...action,
+            frequency: firstFrequency,
+          }));
         }
+
         break;
       }
       case 'snoozeSchedule': {
@@ -779,4 +776,22 @@ async function saveBulkUpdatedRules(
   });
 
   return { result, apiKeysToInvalidate };
+}
+
+async function attemptToMigrateLegacyFrequency(
+  context: RulesClientContext,
+  operation: BulkEditOperation,
+  attributes: SavedObjectsFindResult<RawRule>['attributes'],
+  ruleType: RuleType
+) {
+  if (operation.field !== 'actions')
+    throw new Error('Can only perform frequency migration on an action operation');
+  // Try to remove the rule-level frequency params, and then validate actions
+  if (typeof attributes.notifyWhen !== 'undefined') attributes.notifyWhen = undefined;
+  if (attributes.throttle) attributes.throttle = undefined;
+  await validateActions(context, ruleType, {
+    ...attributes,
+    actions: operation.value,
+  });
+  return attributes;
 }

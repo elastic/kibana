@@ -71,10 +71,7 @@ export const transformFromAlertThrottle = (
     if (rule.muteAll || rule.actions.length === 0) {
       return NOTIFICATION_THROTTLE_NO_ACTIONS;
     } else if (rule.notifyWhen == null) {
-      const frequency = rule.actions[0].frequency ?? null;
-      if (!frequency || frequency.notifyWhen !== 'onThrottleInterval' || frequency.throttle == null)
-        return NOTIFICATION_THROTTLE_RULE;
-      return frequency.throttle;
+      return transformFromFirstActionThrottle(rule);
     } else if (rule.notifyWhen === 'onActiveAlert') {
       return NOTIFICATION_THROTTLE_RULE;
     } else if (rule.throttle == null) {
@@ -86,6 +83,13 @@ export const transformFromAlertThrottle = (
     return legacyRuleActions.ruleThrottle;
   }
 };
+
+function transformFromFirstActionThrottle(rule: RuleAlertType) {
+  const frequency = rule.actions[0].frequency ?? null;
+  if (!frequency || frequency.notifyWhen !== 'onThrottleInterval' || frequency.throttle == null)
+    return NOTIFICATION_THROTTLE_RULE;
+  return frequency.throttle;
+}
 
 /**
  * Given a set of actions from an "alerting" Saved Object (SO) this will transform it into a "security_solution" alert action.

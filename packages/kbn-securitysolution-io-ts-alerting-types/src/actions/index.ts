@@ -38,15 +38,15 @@ export const RuleActionFrequency = t.type({
 
 export type RuleAction = t.TypeOf<typeof RuleAction>;
 export const RuleAction = t.exact(
-  t.intersection([
-    t.type({
-      group: RuleActionGroup,
-      id: RuleActionId,
-      action_type_id: RuleActionTypeId,
-      params: RuleActionParams,
-    }),
-    t.partial({ frequency: RuleActionFrequency }),
-  ])
+  // t.intersection([
+  t.type({
+    group: RuleActionGroup,
+    id: RuleActionId,
+    action_type_id: RuleActionTypeId,
+    params: RuleActionParams,
+  })
+  // t.partial({ frequency: RuleActionFrequency }),
+  // ])
 );
 
 export type RuleActionArray = t.TypeOf<typeof RuleActionArray>;
@@ -54,15 +54,15 @@ export const RuleActionArray = t.array(RuleAction);
 
 export type RuleActionCamel = t.TypeOf<typeof RuleActionCamel>;
 export const RuleActionCamel = t.exact(
-  t.intersection([
-    t.type({
-      group: RuleActionGroup,
-      id: RuleActionId,
-      actionTypeId: RuleActionTypeId,
-      params: RuleActionParams,
-    }),
-    t.partial({ frequency: RuleActionFrequency }),
-  ])
+  // t.intersection([
+  t.type({
+    group: RuleActionGroup,
+    id: RuleActionId,
+    actionTypeId: RuleActionTypeId,
+    params: RuleActionParams,
+  })
+  // t.partial({ frequency: RuleActionFrequency }),
+  // ])
 );
 
 export type RuleActionArrayCamel = t.TypeOf<typeof RuleActionArrayCamel>;

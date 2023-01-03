@@ -33,8 +33,8 @@ export const transformAlertToRuleAction = ({
     id,
     params,
     action_type_id: actionTypeId,
+    frequency,
   } as RuleAlertAction;
-  if (frequency) action.frequency = frequency;
   return action;
 };
 
