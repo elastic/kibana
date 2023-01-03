@@ -64,7 +64,7 @@ export function SloEditFormDescription({ control }: Props) {
         </EuiFormLabel>
 
         <Controller
-          name="name"
+          name="description"
           control={control}
           render={({ field }) => (
             <EuiTextArea

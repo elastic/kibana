@@ -27,18 +27,19 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
         <Controller
           name="objective.timesliceTarget"
           control={control}
+          defaultValue={95}
           rules={{
             required: true,
-            min: 0.0001,
-            max: 100,
+            min: 0.001,
+            max: 99.999,
           }}
           render={({ field }) => (
             <EuiFieldNumber
               {...field}
               data-test-subj="sloFormObjectiveTimesliceTargetInput"
-              min={0}
-              max={100}
-              step={0.0001}
+              min={0.001}
+              max={99.999}
+              step={0.001}
               onChange={(event) => field.onChange(Number(event.target.value))}
             />
           )}

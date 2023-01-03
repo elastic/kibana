@@ -104,14 +104,13 @@ export function SloEditFormObjectives({ control, watch }: Props) {
             rules={{
               required: true,
               min: 0.001,
-              max: 100,
-              validate: (value) => value > 0 && value < 100,
+              max: 99.999,
             }}
             render={({ field }) => (
               <EuiFieldNumber
                 data-test-subj="sloFormObjectiveTargetInput"
                 {...field}
-                min={0}
+                min={0.001}
                 max={99.999}
                 step={0.001}
                 onChange={(event) => field.onChange(Number(event.target.value))}
