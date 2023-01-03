@@ -53,6 +53,7 @@
     "@kbn/logging-mocks",
     "@kbn/field-types",
     "@kbn/es-types",
+    "@kbn/cloud-experiments-plugin",
   ],
   "exclude": [
     "target/**/*",
