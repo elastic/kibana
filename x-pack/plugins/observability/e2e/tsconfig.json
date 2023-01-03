@@ -7,11 +7,7 @@
     "types": [ "node"],
   },
   "kbn_references": [
-    {
-      "path": "../../apm/tsconfig.json",
-    },
-    {
-      "path": "../tsconfig.json",
-    }
+    "@kbn/apm-plugin",
+    "@kbn/test",
   ]
 }

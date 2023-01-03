@@ -16,7 +16,6 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { getSettingsRouteConfig } from './components/settings/route_config';
 import { TestRunDetails } from './components/test_run_details/test_run_details';
 import { ErrorDetailsPage } from './components/error_details/error_details_page';
@@ -59,14 +58,12 @@ import { MonitorSummary } from './components/monitor_details/monitor_summary/mon
 import { MonitorHistory } from './components/monitor_details/monitor_history/monitor_history';
 import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
 import { StepDetailPage } from './components/step_details_page/step_detail_page';
-import { useSelectedMonitor } from './components/monitor_details/hooks/use_selected_monitor';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
   component: React.FC;
   dataTestSubj: string;
   title: string;
-  is404?: () => boolean;
 };
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
@@ -106,10 +103,6 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_ROUTE,
-      is404: function useIs404() {
-        const { error } = useSelectedMonitor();
-        return error?.body.statusCode === 404;
-      },
       component: () => (
         <MonitorDetailsPage>
           <MonitorSummary />
@@ -124,10 +117,6 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_HISTORY_ROUTE,
-      is404: function useIs404() {
-        const { error } = useSelectedMonitor();
-        return error?.body.statusCode === 404;
-      },
       component: () => (
         <MonitorDetailsPage>
           <MonitorHistory />
@@ -142,10 +131,6 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_ERRORS_ROUTE,
-      is404: function useIs404() {
-        const { error } = useSelectedMonitor();
-        return error?.body.statusCode === 404;
-      },
       component: () => (
         <MonitorDetailsPage>
           <MonitorErrors />
@@ -174,6 +159,7 @@ const getRoutes = (
               />
             ),
             isSelected: true,
+            'data-test-subj': 'syntheticsMonitorOverviewTab',
           },
           {
             label: (
@@ -183,6 +169,7 @@ const getRoutes = (
               />
             ),
             href: `${syntheticsPath}${MONITORS_ROUTE}`,
+            'data-test-subj': 'syntheticsMonitorManagementTab',
           },
         ],
       },
@@ -207,6 +194,7 @@ const getRoutes = (
               />
             ),
             href: `${syntheticsPath}${OVERVIEW_ROUTE}`,
+            'data-test-subj': 'syntheticsMonitorOverviewTab',
           },
           {
             label: (
@@ -216,6 +204,7 @@ const getRoutes = (
               />
             ),
             isSelected: true,
+            'data-test-subj': 'syntheticsMonitorManagementTab',
           },
         ],
       },
@@ -379,6 +368,7 @@ const getMonitorSummaryHeader = (
         }),
         isSelected: selectedTab === 'overview',
         href: `${syntheticsPath}${MONITOR_ROUTE.replace(':monitorId?', monitorId)}${search}`,
+        'data-test-subj': 'syntheticsMonitorOverviewTab',
       },
       {
         label: i18n.translate('xpack.synthetics.monitorHistoryTab.title', {
@@ -386,6 +376,7 @@ const getMonitorSummaryHeader = (
         }),
         isSelected: selectedTab === 'history',
         href: `${syntheticsPath}${MONITOR_HISTORY_ROUTE.replace(':monitorId', monitorId)}${search}`,
+        'data-test-subj': 'syntheticsMonitorHistoryTab',
       },
       {
         label: i18n.translate('xpack.synthetics.monitorErrorsTab.title', {
@@ -394,6 +385,7 @@ const getMonitorSummaryHeader = (
         prepend: <EuiIcon type="alert" color="danger" />,
         isSelected: selectedTab === 'errors',
         href: `${syntheticsPath}${MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId)}${search}`,
+        'data-test-subj': 'syntheticsMonitorErrorsTab',
       },
     ],
   };
@@ -428,25 +420,18 @@ export const PageRouter: FC = () => {
           component: RouteComponent,
           dataTestSubj,
           pageHeader,
-          is404,
           ...pageTemplateProps
         }: RouteProps) => (
           <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
-              {is404?.() ? (
-                <SyntheticsPageTemplateComponent path={path} {...pageTemplateProps}>
-                  <NotFoundPrompt />
-                </SyntheticsPageTemplateComponent>
-              ) : (
-                <SyntheticsPageTemplateComponent
-                  path={path}
-                  pageHeader={pageHeader}
-                  {...pageTemplateProps}
-                >
-                  <RouteComponent />
-                </SyntheticsPageTemplateComponent>
-              )}
+              <SyntheticsPageTemplateComponent
+                path={path}
+                pageHeader={pageHeader}
+                {...pageTemplateProps}
+              >
+                <RouteComponent />
+              </SyntheticsPageTemplateComponent>
             </div>
           </Route>
         )
