@@ -67,10 +67,10 @@ export async function getErrorGroupSampleIds({
     'get_error_group_sample_ids',
     params
   );
-  const errorSamples = resp.hits.hits.map((item) => item._source.error.id);
+  const errorSampleIds = resp.hits.hits.map((item) => item._source.error.id);
 
   return {
-    errorSamples,
+    errorSampleIds,
     occurrencesCount: resp.hits.total.value,
   };
 }

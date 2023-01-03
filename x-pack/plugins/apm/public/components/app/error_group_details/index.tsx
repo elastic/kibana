@@ -174,13 +174,13 @@ export function ErrorGroupDetails() {
     });
 
   useEffect(() => {
-    const selectedSample = errorSamplesData?.errorSamples.find(
+    const selectedSample = errorSamplesData?.errorSampleIds.find(
       (sample) => sample === errorId
     );
 
     if (errorSamplesFetchStatus === FETCH_STATUS.SUCCESS && !selectedSample) {
       // selected sample was not found. select a new one:
-      const selectedErrorId = maybe(errorSamplesData?.errorSamples[0]);
+      const selectedErrorId = maybe(errorSamplesData?.errorSampleIds[0]);
 
       history.replace({
         ...history.location,
@@ -244,7 +244,7 @@ export function ErrorGroupDetails() {
       <EuiSpacer size="s" />
       {showDetails && (
         <ErrorSampler
-          errorSamples={errorSamplesData.errorSamples}
+          errorSampleIds={errorSamplesData.errorSampleIds}
           errorSamplesFetchStatus={errorSamplesFetchStatus}
           occurrencesCount={errorSamplesData.occurrencesCount}
         />

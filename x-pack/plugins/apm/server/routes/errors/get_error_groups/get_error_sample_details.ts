@@ -12,7 +12,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../../transactions/get_transaction';
 
-export async function getErrorGroupSampleDetails({
+export async function getErrorSampleDetails({
   environment,
   kuery,
   serviceName,
@@ -50,10 +50,7 @@ export async function getErrorGroupSampleDetails({
     },
   };
 
-  const resp = await apmEventClient.search(
-    'get_error_group_sample_details',
-    params
-  );
+  const resp = await apmEventClient.search('get_error_sample_details', params);
   const error = resp.hits.hits[0]?._source;
   const transactionId = error?.transaction?.id;
   const traceId = error?.trace?.id;

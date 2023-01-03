@@ -19,13 +19,13 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { ErrorSampleDetails } from './error_sample_detail';
 
 interface Props {
-  errorSamples: string[];
+  errorSampleIds: string[];
   errorSamplesFetchStatus: FETCH_STATUS;
   occurrencesCount: number;
 }
 
 export function ErrorSampler({
-  errorSamples,
+  errorSampleIds,
   errorSamplesFetchStatus,
   occurrencesCount,
 }: Props) {
@@ -89,7 +89,7 @@ export function ErrorSampler({
   return (
     <ErrorSampleDetails
       onSampleClick={onSampleClick}
-      errorSamples={errorSamples}
+      errorSampleIds={errorSampleIds}
       errorSamplesFetchStatus={errorSamplesFetchStatus}
       errorData={errorData}
       errorFetchStatus={errorFetchStatus}

@@ -62,7 +62,7 @@ const TransactionLinkName = euiStyled.div`
 
 interface Props {
   onSampleClick: (sample: string) => void;
-  errorSamples: string[];
+  errorSampleIds: string[];
   errorSamplesFetchStatus: FETCH_STATUS;
   errorData: APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}'>;
   errorFetchStatus: FETCH_STATUS;
@@ -79,7 +79,7 @@ function getCurrentTab(
 
 export function ErrorSampleDetails({
   onSampleClick,
-  errorSamples,
+  errorSampleIds,
   errorSamplesFetchStatus,
   errorData,
   errorFetchStatus,
@@ -112,17 +112,17 @@ export function ErrorSampleDetails({
 
   useEffect(() => {
     setSampleActivePage(0);
-  }, [errorSamples]);
+  }, [errorSampleIds]);
 
   const goToSample = (index: number) => {
-    const sample = errorSamples[index];
+    const sample = errorSampleIds[index];
     setSampleActivePage(index);
     onSampleClick(sample);
   };
 
   const { error, transaction } = errorData;
 
-  if (!error && errorSamples?.length === 0 && isSucceded) {
+  if (!error && errorSampleIds?.length === 0 && isSucceded) {
     return (
       <EuiEmptyPrompt
         title={
@@ -175,9 +175,9 @@ export function ErrorSampleDetails({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          {!!errorSamples?.length && (
+          {!!errorSampleIds?.length && (
             <EuiPagination
-              pageCount={errorSamples.length}
+              pageCount={errorSampleIds.length}
               activePage={sampleActivePage}
               onPageClick={goToSample}
               compressed
