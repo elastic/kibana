@@ -8,6 +8,10 @@
       "node"
     ]
   },
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/config-mocks",
+  ],
   "include": [
     "**/*.ts",
   ]

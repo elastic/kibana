@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
@@ -9,6 +9,13 @@
       "node",
     ]
   },
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/config-mocks",
+    "@kbn/core-test-helpers-deprecations-getters",
+    "@kbn/core-injected-metadata-browser-internal",
+    "@kbn/core-custom-branding-common"
+  ],
   "include": [
     "**/*.ts",
     "**/*.tsx",
