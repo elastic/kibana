@@ -88,16 +88,19 @@ describe('EnginesListLogic', () => {
         EnginesListLogic.actions.apiSuccess({
           enginesList,
           meta: newPageMeta,
+          searchQuery: 'k',
         });
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
             enginesList,
             meta: newPageMeta,
+            searchQuery: 'k',
           },
           meta: newPageMeta,
           parameters: {
             meta: newPageMeta,
+            searchQuery: 'k',
           },
           status: Status.SUCCESS,
         });

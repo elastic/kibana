@@ -7,7 +7,12 @@
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 
-import { EnginesListAPIResponse, Meta } from '../../components/engines/types';
+import { EngineListDetails, Meta } from '../../components/engines/types';
+
+interface EnginesListAPIResponse {
+  results: EngineListDetails[];
+  meta: Meta;
+}
 
 const metaValue: Meta = {
   from: 1,

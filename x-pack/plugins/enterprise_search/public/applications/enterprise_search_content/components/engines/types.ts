@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { CriteriaWithPagination } from '@elastic/eui';
-
 export interface Meta {
   from: number;
   size: number;
@@ -31,18 +29,5 @@ export const convertMetaToPagination = (meta: Meta) => ({
   totalItemCount: meta.total,
 });
 export const updateMetaPageIndex = (oldState: Meta, newPageIndex: number) => {
-  const newMetaState = { ...oldState };
-  newMetaState.from = newPageIndex;
-  return newMetaState;
+  return { ...oldState, from: newPageIndex };
 };
-export interface EnginesListTableProps {
-  enginesList: EngineListDetails[];
-  loading: boolean;
-  isLoading?: boolean;
-  meta: Meta;
-  onChange: (criteria: CriteriaWithPagination<EngineListDetails>) => void;
-}
-export interface EnginesListAPIResponse {
-  results: EngineListDetails[];
-  meta: Meta;
-}

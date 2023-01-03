@@ -7,17 +7,23 @@
 
 import React from 'react';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { CriteriaWithPagination, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 
 import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
 
-import { convertMetaToPagination, EngineListDetails, EnginesListTableProps } from '../../types';
+import { convertMetaToPagination, EngineListDetails, Meta } from '../../types';
 
 // add health status
-
+interface EnginesListTableProps {
+  enginesList: EngineListDetails[];
+  loading: boolean;
+  meta: Meta;
+  isLoading?: boolean;
+  onChange: (criteria: CriteriaWithPagination<EngineListDetails>) => void;
+}
 export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   enginesList,
   meta,
