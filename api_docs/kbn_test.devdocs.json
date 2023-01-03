@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.Config",
+        "id": "def-common.Config",
         "type": "Class",
         "tags": [],
         "label": "Config",
@@ -23,7 +31,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Config.path",
+            "id": "def-common.Config.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -34,7 +42,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Config.module",
+            "id": "def-common.Config.module",
             "type": "CompoundType",
             "tags": [],
             "label": "module",
@@ -43,17 +51,17 @@
               "{ type: \"config\"; path: string; provider: ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.FtrConfigProvider",
+                "section": "def-common.FtrConfigProvider",
                 "text": "FtrConfigProvider"
               },
               "; } | { type: \"journey\"; path: string; provider: ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.FtrConfigProvider",
+                "section": "def-common.FtrConfigProvider",
                 "text": "FtrConfigProvider"
               },
               "; journey: Journey; }"
@@ -64,7 +72,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Config.Unnamed",
+            "id": "def-common.Config.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -78,7 +86,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.Config.Unnamed.$1",
+                "id": "def-common.Config.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -96,7 +104,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Config.has",
+            "id": "def-common.Config.has",
             "type": "Function",
             "tags": [],
             "label": "has",
@@ -110,7 +118,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.Config.has.$1",
+                "id": "def-common.Config.has.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "key",
@@ -128,7 +136,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Config.get",
+            "id": "def-common.Config.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -142,7 +150,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.Config.get.$1",
+                "id": "def-common.Config.get.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "key",
@@ -157,7 +165,7 @@
               },
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.Config.get.$2",
+                "id": "def-common.Config.get.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "defaultValue",
@@ -175,7 +183,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Config.getAll",
+            "id": "def-common.Config.getAll",
             "type": "Function",
             "tags": [],
             "label": "getAll",
@@ -194,7 +202,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.DockerServersService",
+        "id": "def-common.DockerServersService",
         "type": "Class",
         "tags": [],
         "label": "DockerServersService",
@@ -205,7 +213,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServersService.Unnamed",
+            "id": "def-common.DockerServersService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -219,7 +227,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.DockerServersService.Unnamed.$1",
+                "id": "def-common.DockerServersService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "configs",
@@ -230,7 +238,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/test",
-                    "id": "def-server.DockerServersService.Unnamed.$1.Unnamed",
+                    "id": "def-common.DockerServersService.Unnamed.$1.Unnamed",
                     "type": "IndexSignature",
                     "tags": [],
                     "label": "[name: string]: DockerServerSpec",
@@ -239,9 +247,9 @@
                       "[name: string]:  ",
                       {
                         "pluginId": "@kbn/test",
-                        "scope": "server",
+                        "scope": "common",
                         "docId": "kibKbnTestPluginApi",
-                        "section": "def-server.DockerServerSpec",
+                        "section": "def-common.DockerServerSpec",
                         "text": "DockerServerSpec"
                       }
                     ],
@@ -253,7 +261,7 @@
               },
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.DockerServersService.Unnamed.$2",
+                "id": "def-common.DockerServersService.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "log",
@@ -261,9 +269,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnToolingLogPluginApi",
-                    "section": "def-server.ToolingLog",
+                    "section": "def-common.ToolingLog",
                     "text": "ToolingLog"
                   }
                 ],
@@ -274,7 +282,7 @@
               },
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.DockerServersService.Unnamed.$3",
+                "id": "def-common.DockerServersService.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "lifecycle",
@@ -282,9 +290,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.Lifecycle",
+                    "section": "def-common.Lifecycle",
                     "text": "Lifecycle"
                   }
                 ],
@@ -298,7 +306,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServersService.isEnabled",
+            "id": "def-common.DockerServersService.isEnabled",
             "type": "Function",
             "tags": [],
             "label": "isEnabled",
@@ -312,7 +320,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.DockerServersService.isEnabled.$1",
+                "id": "def-common.DockerServersService.isEnabled.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -330,7 +338,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServersService.has",
+            "id": "def-common.DockerServersService.has",
             "type": "Function",
             "tags": [],
             "label": "has",
@@ -344,7 +352,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.DockerServersService.has.$1",
+                "id": "def-common.DockerServersService.has.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -362,7 +370,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServersService.get",
+            "id": "def-common.DockerServersService.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -371,9 +379,9 @@
               "(name: string) => { name: string; url: string; enabled: boolean; portInContainer: number; port: number; image: string; waitForLogLine?: string | RegExp | undefined; waitForLogLineTimeoutMs?: number | undefined; waitFor?: ((server: ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.DockerServer",
+                "section": "def-common.DockerServer",
                 "text": "DockerServer"
               },
               ", logLine$: ",
@@ -388,7 +396,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.DockerServersService.get.$1",
+                "id": "def-common.DockerServersService.get.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -409,7 +417,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.EsVersion",
+        "id": "def-common.EsVersion",
         "type": "Class",
         "tags": [],
         "label": "EsVersion",
@@ -420,7 +428,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.EsVersion.getDefault",
+            "id": "def-common.EsVersion.getDefault",
             "type": "Function",
             "tags": [],
             "label": "getDefault",
@@ -429,9 +437,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
+                "section": "def-common.EsVersion",
                 "text": "EsVersion"
               }
             ],
@@ -443,7 +451,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.EsVersion.parsed",
+            "id": "def-common.EsVersion.parsed",
             "type": "Object",
             "tags": [],
             "label": "parsed",
@@ -457,7 +465,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.EsVersion.Unnamed",
+            "id": "def-common.EsVersion.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -471,7 +479,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.EsVersion.Unnamed.$1",
+                "id": "def-common.EsVersion.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "version",
@@ -489,7 +497,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.EsVersion.toJSON",
+            "id": "def-common.EsVersion.toJSON",
             "type": "Function",
             "tags": [],
             "label": "toJSON",
@@ -505,7 +513,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.EsVersion.toString",
+            "id": "def-common.EsVersion.toString",
             "type": "Function",
             "tags": [],
             "label": "toString",
@@ -521,7 +529,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.EsVersion.matchRange",
+            "id": "def-common.EsVersion.matchRange",
             "type": "Function",
             "tags": [],
             "label": "matchRange",
@@ -537,7 +545,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.EsVersion.matchRange.$1",
+                "id": "def-common.EsVersion.matchRange.$1",
                 "type": "string",
                 "tags": [],
                 "label": "range",
@@ -555,7 +563,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.EsVersion.eql",
+            "id": "def-common.EsVersion.eql",
             "type": "Function",
             "tags": [],
             "label": "eql",
@@ -571,7 +579,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.EsVersion.eql.$1",
+                "id": "def-common.EsVersion.eql.$1",
                 "type": "string",
                 "tags": [],
                 "label": "version",
@@ -592,7 +600,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.FunctionalTestRunner",
+        "id": "def-common.FunctionalTestRunner",
         "type": "Class",
         "tags": [],
         "label": "FunctionalTestRunner",
@@ -603,7 +611,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.FunctionalTestRunner.Unnamed",
+            "id": "def-common.FunctionalTestRunner.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -617,7 +625,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.FunctionalTestRunner.Unnamed.$1",
+                "id": "def-common.FunctionalTestRunner.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "log",
@@ -625,9 +633,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnToolingLogPluginApi",
-                    "section": "def-server.ToolingLog",
+                    "section": "def-common.ToolingLog",
                     "text": "ToolingLog"
                   }
                 ],
@@ -638,7 +646,7 @@
               },
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.FunctionalTestRunner.Unnamed.$2",
+                "id": "def-common.FunctionalTestRunner.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "config",
@@ -646,9 +654,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.Config",
+                    "section": "def-common.Config",
                     "text": "Config"
                   }
                 ],
@@ -659,7 +667,7 @@
               },
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.FunctionalTestRunner.Unnamed.$3",
+                "id": "def-common.FunctionalTestRunner.Unnamed.$3",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "esVersion",
@@ -668,9 +676,9 @@
                   "string | ",
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.EsVersion",
+                    "section": "def-common.EsVersion",
                     "text": "EsVersion"
                   },
                   " | undefined"
@@ -685,7 +693,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.FunctionalTestRunner.run",
+            "id": "def-common.FunctionalTestRunner.run",
             "type": "Function",
             "tags": [],
             "label": "run",
@@ -699,7 +707,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.FunctionalTestRunner.run.$1",
+                "id": "def-common.FunctionalTestRunner.run.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "abortSignal",
@@ -717,7 +725,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.FunctionalTestRunner.getTestStats",
+            "id": "def-common.FunctionalTestRunner.getTestStats",
             "type": "Function",
             "tags": [],
             "label": "getTestStats",
@@ -733,7 +741,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.FunctionalTestRunner.simulateMochaDryRun",
+            "id": "def-common.FunctionalTestRunner.simulateMochaDryRun",
             "type": "Function",
             "tags": [],
             "label": "simulateMochaDryRun",
@@ -747,7 +755,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.FunctionalTestRunner.simulateMochaDryRun.$1",
+                "id": "def-common.FunctionalTestRunner.simulateMochaDryRun.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "mocha",
@@ -768,7 +776,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.GenericFtrService",
+        "id": "def-common.GenericFtrService",
         "type": "Class",
         "tags": [],
         "label": "GenericFtrService",
@@ -776,9 +784,9 @@
         "signature": [
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.GenericFtrService",
+            "section": "def-common.GenericFtrService",
             "text": "GenericFtrService"
           },
           "<ProviderContext>"
@@ -789,7 +797,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrService.Unnamed",
+            "id": "def-common.GenericFtrService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -803,7 +811,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrService.Unnamed.$1",
+                "id": "def-common.GenericFtrService.Unnamed.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "ctx",
@@ -824,7 +832,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.KbnClient",
+        "id": "def-common.KbnClient",
         "type": "Class",
         "tags": [],
         "label": "KbnClient",
@@ -835,7 +843,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClient.status",
+            "id": "def-common.KbnClient.status",
             "type": "Object",
             "tags": [],
             "label": "status",
@@ -849,7 +857,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClient.plugins",
+            "id": "def-common.KbnClient.plugins",
             "type": "Object",
             "tags": [],
             "label": "plugins",
@@ -863,7 +871,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClient.version",
+            "id": "def-common.KbnClient.version",
             "type": "Object",
             "tags": [],
             "label": "version",
@@ -877,7 +885,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClient.savedObjects",
+            "id": "def-common.KbnClient.savedObjects",
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
@@ -891,7 +899,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClient.spaces",
+            "id": "def-common.KbnClient.spaces",
             "type": "Object",
             "tags": [],
             "label": "spaces",
@@ -905,7 +913,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClient.uiSettings",
+            "id": "def-common.KbnClient.uiSettings",
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
@@ -919,7 +927,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClient.importExport",
+            "id": "def-common.KbnClient.importExport",
             "type": "Object",
             "tags": [],
             "label": "importExport",
@@ -933,7 +941,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClient.Unnamed",
+            "id": "def-common.KbnClient.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -949,7 +957,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.KbnClient.Unnamed.$1",
+                "id": "def-common.KbnClient.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -957,9 +965,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.KbnClientOptions",
+                    "section": "def-common.KbnClientOptions",
                     "text": "KbnClientOptions"
                   }
                 ],
@@ -973,7 +981,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClient.request",
+            "id": "def-common.KbnClient.request",
             "type": "Function",
             "tags": [],
             "label": "request",
@@ -993,7 +1001,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.KbnClient.request.$1",
+                "id": "def-common.KbnClient.request.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1011,7 +1019,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClient.resolveUrl",
+            "id": "def-common.KbnClient.resolveUrl",
             "type": "Function",
             "tags": [],
             "label": "resolveUrl",
@@ -1025,7 +1033,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.KbnClient.resolveUrl.$1",
+                "id": "def-common.KbnClient.resolveUrl.$1",
                 "type": "string",
                 "tags": [],
                 "label": "relativeUrl",
@@ -1046,7 +1054,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.KbnClientRequesterError",
+        "id": "def-common.KbnClientRequesterError",
         "type": "Class",
         "tags": [],
         "label": "KbnClientRequesterError",
@@ -1054,9 +1062,9 @@
         "signature": [
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.KbnClientRequesterError",
+            "section": "def-common.KbnClientRequesterError",
             "text": "KbnClientRequesterError"
           },
           " extends Error"
@@ -1067,7 +1075,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClientRequesterError.axiosError",
+            "id": "def-common.KbnClientRequesterError.axiosError",
             "type": "Object",
             "tags": [],
             "label": "axiosError",
@@ -1082,7 +1090,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClientRequesterError.Unnamed",
+            "id": "def-common.KbnClientRequesterError.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -1096,7 +1104,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.KbnClientRequesterError.Unnamed.$1",
+                "id": "def-common.KbnClientRequesterError.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "message",
@@ -1111,7 +1119,7 @@
               },
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.KbnClientRequesterError.Unnamed.$2",
+                "id": "def-common.KbnClientRequesterError.Unnamed.$2",
                 "type": "Unknown",
                 "tags": [],
                 "label": "error",
@@ -1132,7 +1140,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.Lifecycle",
+        "id": "def-common.Lifecycle",
         "type": "Class",
         "tags": [],
         "label": "Lifecycle",
@@ -1143,7 +1151,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Lifecycle.beforeTests",
+            "id": "def-common.Lifecycle.beforeTests",
             "type": "Object",
             "tags": [],
             "label": "beforeTests",
@@ -1153,17 +1161,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.LifecyclePhase",
+                "section": "def-common.LifecyclePhase",
                 "text": "LifecyclePhase"
               },
               "<[",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Suite",
+                "section": "def-common.Suite",
                 "text": "Suite"
               },
               "]>"
@@ -1174,7 +1182,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Lifecycle.beforeEachRunnable",
+            "id": "def-common.Lifecycle.beforeEachRunnable",
             "type": "Object",
             "tags": [],
             "label": "beforeEachRunnable",
@@ -1184,17 +1192,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.LifecyclePhase",
+                "section": "def-common.LifecyclePhase",
                 "text": "LifecyclePhase"
               },
               "<[",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Test",
+                "section": "def-common.Test",
                 "text": "Test"
               },
               "]>"
@@ -1205,7 +1213,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Lifecycle.beforeTestSuite",
+            "id": "def-common.Lifecycle.beforeTestSuite",
             "type": "Object",
             "tags": [],
             "label": "beforeTestSuite",
@@ -1215,17 +1223,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.LifecyclePhase",
+                "section": "def-common.LifecyclePhase",
                 "text": "LifecyclePhase"
               },
               "<[",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Suite",
+                "section": "def-common.Suite",
                 "text": "Suite"
               },
               "]>"
@@ -1236,7 +1244,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Lifecycle.beforeEachTest",
+            "id": "def-common.Lifecycle.beforeEachTest",
             "type": "Object",
             "tags": [],
             "label": "beforeEachTest",
@@ -1246,17 +1254,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.LifecyclePhase",
+                "section": "def-common.LifecyclePhase",
                 "text": "LifecyclePhase"
               },
               "<[",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Test",
+                "section": "def-common.Test",
                 "text": "Test"
               },
               "]>"
@@ -1267,7 +1275,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Lifecycle.afterTestSuite",
+            "id": "def-common.Lifecycle.afterTestSuite",
             "type": "Object",
             "tags": [],
             "label": "afterTestSuite",
@@ -1277,17 +1285,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.LifecyclePhase",
+                "section": "def-common.LifecyclePhase",
                 "text": "LifecyclePhase"
               },
               "<[",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Suite",
+                "section": "def-common.Suite",
                 "text": "Suite"
               },
               "]>"
@@ -1298,7 +1306,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Lifecycle.testFailure",
+            "id": "def-common.Lifecycle.testFailure",
             "type": "Object",
             "tags": [],
             "label": "testFailure",
@@ -1308,17 +1316,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.LifecyclePhase",
+                "section": "def-common.LifecyclePhase",
                 "text": "LifecyclePhase"
               },
               "<[Error, ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Test",
+                "section": "def-common.Test",
                 "text": "Test"
               },
               "]>"
@@ -1329,7 +1337,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Lifecycle.testHookFailure",
+            "id": "def-common.Lifecycle.testHookFailure",
             "type": "Object",
             "tags": [],
             "label": "testHookFailure",
@@ -1339,17 +1347,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.LifecyclePhase",
+                "section": "def-common.LifecyclePhase",
                 "text": "LifecyclePhase"
               },
               "<[Error, ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Test",
+                "section": "def-common.Test",
                 "text": "Test"
               },
               "]>"
@@ -1360,7 +1368,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Lifecycle.cleanup",
+            "id": "def-common.Lifecycle.cleanup",
             "type": "Object",
             "tags": [],
             "label": "cleanup",
@@ -1370,9 +1378,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.LifecyclePhase",
+                "section": "def-common.LifecyclePhase",
                 "text": "LifecyclePhase"
               },
               "<[]>"
@@ -1383,7 +1391,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Lifecycle.Unnamed",
+            "id": "def-common.Lifecycle.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -1397,7 +1405,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.Lifecycle.Unnamed.$1",
+                "id": "def-common.Lifecycle.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "log",
@@ -1405,9 +1413,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnToolingLogPluginApi",
-                    "section": "def-server.ToolingLog",
+                    "section": "def-common.ToolingLog",
                     "text": "ToolingLog"
                   }
                 ],
@@ -1424,7 +1432,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.LifecyclePhase",
+        "id": "def-common.LifecyclePhase",
         "type": "Class",
         "tags": [],
         "label": "LifecyclePhase",
@@ -1432,9 +1440,9 @@
         "signature": [
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.LifecyclePhase",
+            "section": "def-common.LifecyclePhase",
             "text": "LifecyclePhase"
           },
           "<Args>"
@@ -1445,7 +1453,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.LifecyclePhase.triggered",
+            "id": "def-common.LifecyclePhase.triggered",
             "type": "boolean",
             "tags": [],
             "label": "triggered",
@@ -1456,7 +1464,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.LifecyclePhase.before$",
+            "id": "def-common.LifecyclePhase.before$",
             "type": "Object",
             "tags": [],
             "label": "before$",
@@ -1471,7 +1479,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.LifecyclePhase.after$",
+            "id": "def-common.LifecyclePhase.after$",
             "type": "Object",
             "tags": [],
             "label": "after$",
@@ -1486,7 +1494,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.LifecyclePhase.Unnamed",
+            "id": "def-common.LifecyclePhase.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -1500,7 +1508,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.LifecyclePhase.Unnamed.$1",
+                "id": "def-common.LifecyclePhase.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "sub",
@@ -1515,7 +1523,7 @@
               },
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.LifecyclePhase.Unnamed.$2",
+                "id": "def-common.LifecyclePhase.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1526,7 +1534,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/test",
-                    "id": "def-server.LifecyclePhase.Unnamed.$2.singular",
+                    "id": "def-common.LifecyclePhase.Unnamed.$2.singular",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "singular",
@@ -1545,7 +1553,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.LifecyclePhase.add",
+            "id": "def-common.LifecyclePhase.add",
             "type": "Function",
             "tags": [],
             "label": "add",
@@ -1559,7 +1567,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.LifecyclePhase.add.$1",
+                "id": "def-common.LifecyclePhase.add.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "fn",
@@ -1577,7 +1585,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.LifecyclePhase.addSub",
+            "id": "def-common.LifecyclePhase.addSub",
             "type": "Function",
             "tags": [],
             "label": "addSub",
@@ -1593,7 +1601,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.LifecyclePhase.addSub.$1",
+                "id": "def-common.LifecyclePhase.addSub.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "sub",
@@ -1611,7 +1619,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.LifecyclePhase.trigger",
+            "id": "def-common.LifecyclePhase.trigger",
             "type": "Function",
             "tags": [],
             "label": "trigger",
@@ -1625,7 +1633,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.LifecyclePhase.trigger.$1",
+                "id": "def-common.LifecyclePhase.trigger.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "args",
@@ -1648,7 +1656,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.createAsyncInstance",
+        "id": "def-common.createAsyncInstance",
         "type": "Function",
         "tags": [],
         "label": "createAsyncInstance",
@@ -1662,7 +1670,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.createAsyncInstance.$1",
+            "id": "def-common.createAsyncInstance.$1",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -1677,7 +1685,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.createAsyncInstance.$2",
+            "id": "def-common.createAsyncInstance.$2",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -1692,7 +1700,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.createAsyncInstance.$3",
+            "id": "def-common.createAsyncInstance.$3",
             "type": "Object",
             "tags": [],
             "label": "promiseForValue",
@@ -1711,7 +1719,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.createEsClientForFtrConfig",
+        "id": "def-common.createEsClientForFtrConfig",
         "type": "Function",
         "tags": [],
         "label": "createEsClientForFtrConfig",
@@ -1720,17 +1728,17 @@
           "(config: ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.Config",
+            "section": "def-common.Config",
             "text": "Config"
           },
           ", overrides: Omit<",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.EsClientForTestingOptions",
+            "section": "def-common.EsClientForTestingOptions",
             "text": "EsClientForTestingOptions"
           },
           ", \"esUrl\"> | undefined) => ",
@@ -1742,7 +1750,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.createEsClientForFtrConfig.$1",
+            "id": "def-common.createEsClientForFtrConfig.$1",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -1750,9 +1758,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Config",
+                "section": "def-common.Config",
                 "text": "Config"
               }
             ],
@@ -1763,7 +1771,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.createEsClientForFtrConfig.$2",
+            "id": "def-common.createEsClientForFtrConfig.$2",
             "type": "Object",
             "tags": [],
             "label": "overrides",
@@ -1772,9 +1780,9 @@
               "Omit<",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsClientForTestingOptions",
+                "section": "def-common.EsClientForTestingOptions",
                 "text": "EsClientForTestingOptions"
               },
               ", \"esUrl\"> | undefined"
@@ -1790,7 +1798,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.createEsClientForTesting",
+        "id": "def-common.createEsClientForTesting",
         "type": "Function",
         "tags": [],
         "label": "createEsClientForTesting",
@@ -1799,9 +1807,9 @@
           "(options: ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.EsClientForTestingOptions",
+            "section": "def-common.EsClientForTestingOptions",
             "text": "EsClientForTestingOptions"
           },
           ") => ",
@@ -1813,7 +1821,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.createEsClientForTesting.$1",
+            "id": "def-common.createEsClientForTesting.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -1821,9 +1829,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsClientForTestingOptions",
+                "section": "def-common.EsClientForTestingOptions",
                 "text": "EsClientForTestingOptions"
               }
             ],
@@ -1838,7 +1846,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.createRemoteEsClientForFtrConfig",
+        "id": "def-common.createRemoteEsClientForFtrConfig",
         "type": "Function",
         "tags": [],
         "label": "createRemoteEsClientForFtrConfig",
@@ -1847,17 +1855,17 @@
           "(config: ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.Config",
+            "section": "def-common.Config",
             "text": "Config"
           },
           ", overrides: Omit<",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.EsClientForTestingOptions",
+            "section": "def-common.EsClientForTestingOptions",
             "text": "EsClientForTestingOptions"
           },
           ", \"esUrl\"> | undefined) => ",
@@ -1869,7 +1877,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.createRemoteEsClientForFtrConfig.$1",
+            "id": "def-common.createRemoteEsClientForFtrConfig.$1",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -1877,9 +1885,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Config",
+                "section": "def-common.Config",
                 "text": "Config"
               }
             ],
@@ -1890,7 +1898,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.createRemoteEsClientForFtrConfig.$2",
+            "id": "def-common.createRemoteEsClientForFtrConfig.$2",
             "type": "Object",
             "tags": [],
             "label": "overrides",
@@ -1899,9 +1907,9 @@
               "Omit<",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsClientForTestingOptions",
+                "section": "def-common.EsClientForTestingOptions",
                 "text": "EsClientForTestingOptions"
               },
               ", \"esUrl\"> | undefined"
@@ -1917,7 +1925,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.createTestEsCluster",
+        "id": "def-common.createTestEsCluster",
         "type": "Function",
         "tags": [],
         "label": "createTestEsCluster",
@@ -1926,9 +1934,9 @@
           "(options: Options) => ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.EsTestCluster",
+            "section": "def-common.EsTestCluster",
             "text": "EsTestCluster"
           },
           "<Options>"
@@ -1939,7 +1947,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.createTestEsCluster.$1",
+            "id": "def-common.createTestEsCluster.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "options",
@@ -1958,7 +1966,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.defineDockerServersConfig",
+        "id": "def-common.defineDockerServersConfig",
         "type": "Function",
         "tags": [],
         "label": "defineDockerServersConfig",
@@ -1969,17 +1977,17 @@
           "(config: {} | { [name: string]: ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.DockerServerSpec",
+            "section": "def-common.DockerServerSpec",
             "text": "DockerServerSpec"
           },
           "; }) => {} | { [name: string]: ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.DockerServerSpec",
+            "section": "def-common.DockerServerSpec",
             "text": "DockerServerSpec"
           },
           "; }"
@@ -1990,7 +1998,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.defineDockerServersConfig.$1",
+            "id": "def-common.defineDockerServersConfig.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "config",
@@ -1999,9 +2007,9 @@
               "{} | { [name: string]: ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.DockerServerSpec",
+                "section": "def-common.DockerServerSpec",
                 "text": "DockerServerSpec"
               },
               "; }"
@@ -2017,7 +2025,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.escapeCdata",
+        "id": "def-common.escapeCdata",
         "type": "Function",
         "tags": [],
         "label": "escapeCdata",
@@ -2031,7 +2039,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.escapeCdata.$1",
+            "id": "def-common.escapeCdata.$1",
             "type": "string",
             "tags": [],
             "label": "input",
@@ -2050,7 +2058,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.getKibanaCliArg",
+        "id": "def-common.getKibanaCliArg",
         "type": "Function",
         "tags": [],
         "label": "getKibanaCliArg",
@@ -2070,7 +2078,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.getKibanaCliArg.$1",
+            "id": "def-common.getKibanaCliArg.$1",
             "type": "Array",
             "tags": [],
             "label": "rawFlags",
@@ -2085,7 +2093,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.getKibanaCliArg.$2",
+            "id": "def-common.getKibanaCliArg.$2",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -2104,7 +2112,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.getKibanaCliLoggers",
+        "id": "def-common.getKibanaCliLoggers",
         "type": "Function",
         "tags": [],
         "label": "getKibanaCliLoggers",
@@ -2120,7 +2128,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.getKibanaCliLoggers.$1",
+            "id": "def-common.getKibanaCliLoggers.$1",
             "type": "Array",
             "tags": [],
             "label": "rawFlags",
@@ -2139,7 +2147,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.getUrl",
+        "id": "def-common.getUrl",
         "type": "Function",
         "tags": [
           "return"
@@ -2157,7 +2165,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.getUrl.$1",
+            "id": "def-common.getUrl.$1",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -2174,7 +2182,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.getUrl.$2",
+            "id": "def-common.getUrl.$2",
             "type": "Object",
             "tags": [],
             "label": "app",
@@ -2195,7 +2203,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.readConfigFile",
+        "id": "def-common.readConfigFile",
         "type": "Function",
         "tags": [],
         "label": "readConfigFile",
@@ -2204,25 +2212,25 @@
           "(log: ",
           {
             "pluginId": "@kbn/tooling-log",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnToolingLogPluginApi",
-            "section": "def-server.ToolingLog",
+            "section": "def-common.ToolingLog",
             "text": "ToolingLog"
           },
           ", esVersion: ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.EsVersion",
+            "section": "def-common.EsVersion",
             "text": "EsVersion"
           },
           ", path: string, settingOverrides: any, extendSettings: (vars: any) => any) => Promise<",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.Config",
+            "section": "def-common.Config",
             "text": "Config"
           },
           ">"
@@ -2233,7 +2241,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.readConfigFile.$1",
+            "id": "def-common.readConfigFile.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -2241,9 +2249,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               }
             ],
@@ -2254,7 +2262,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.readConfigFile.$2",
+            "id": "def-common.readConfigFile.$2",
             "type": "Object",
             "tags": [],
             "label": "esVersion",
@@ -2262,9 +2270,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
+                "section": "def-common.EsVersion",
                 "text": "EsVersion"
               }
             ],
@@ -2275,7 +2283,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.readConfigFile.$3",
+            "id": "def-common.readConfigFile.$3",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -2290,7 +2298,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.readConfigFile.$4",
+            "id": "def-common.readConfigFile.$4",
             "type": "Any",
             "tags": [],
             "label": "settingOverrides",
@@ -2305,7 +2313,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.readConfigFile.$5",
+            "id": "def-common.readConfigFile.$5",
             "type": "Function",
             "tags": [],
             "label": "extendSettings",
@@ -2324,7 +2332,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.runCheckFtrConfigsCli",
+        "id": "def-common.runCheckFtrConfigsCli",
         "type": "Function",
         "tags": [],
         "label": "runCheckFtrConfigsCli",
@@ -2341,7 +2349,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.runCheckJestConfigsCli",
+        "id": "def-common.runCheckJestConfigsCli",
         "type": "Function",
         "tags": [],
         "label": "runCheckJestConfigsCli",
@@ -2358,7 +2366,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.runFtrCli",
+        "id": "def-common.runFtrCli",
         "type": "Function",
         "tags": [],
         "label": "runFtrCli",
@@ -2375,7 +2383,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.runJest",
+        "id": "def-common.runJest",
         "type": "Function",
         "tags": [],
         "label": "runJest",
@@ -2389,7 +2397,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.runJest.$1",
+            "id": "def-common.runJest.$1",
             "type": "string",
             "tags": [],
             "label": "configName",
@@ -2408,7 +2416,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.runKbnArchiverCli",
+        "id": "def-common.runKbnArchiverCli",
         "type": "Function",
         "tags": [],
         "label": "runKbnArchiverCli",
@@ -2425,7 +2433,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.runTests",
+        "id": "def-common.runTests",
         "type": "Function",
         "tags": [],
         "label": "runTests",
@@ -2436,17 +2444,17 @@
           "(log: ",
           {
             "pluginId": "@kbn/tooling-log",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnToolingLogPluginApi",
-            "section": "def-server.ToolingLog",
+            "section": "def-common.ToolingLog",
             "text": "ToolingLog"
           },
           ", options: { configs: string[]; esVersion: ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.EsVersion",
+            "section": "def-common.EsVersion",
             "text": "EsVersion"
           },
           "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\"; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[] | undefined; exclude: string[] | undefined; }; suiteFilters: { include: string[] | undefined; exclude: string[] | undefined; }; }) => Promise<void>"
@@ -2457,7 +2465,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.runTests.$1",
+            "id": "def-common.runTests.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -2465,9 +2473,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               }
             ],
@@ -2478,7 +2486,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.runTests.$2",
+            "id": "def-common.runTests.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -2487,9 +2495,9 @@
               "{ configs: string[]; esVersion: ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
+                "section": "def-common.EsVersion",
                 "text": "EsVersion"
               },
               "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\"; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[] | undefined; exclude: string[] | undefined; }; suiteFilters: { include: string[] | undefined; exclude: string[] | undefined; }; }"
@@ -2505,7 +2513,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.runTestsCli",
+        "id": "def-common.runTestsCli",
         "type": "Function",
         "tags": [],
         "label": "runTestsCli",
@@ -2522,7 +2530,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.setupJUnitReportGeneration",
+        "id": "def-common.setupJUnitReportGeneration",
         "type": "Function",
         "tags": [],
         "label": "setupJUnitReportGeneration",
@@ -2536,7 +2544,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.setupJUnitReportGeneration.$1",
+            "id": "def-common.setupJUnitReportGeneration.$1",
             "type": "Any",
             "tags": [],
             "label": "runner",
@@ -2551,7 +2559,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.setupJUnitReportGeneration.$2",
+            "id": "def-common.setupJUnitReportGeneration.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -2570,7 +2578,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.startServers",
+        "id": "def-common.startServers",
         "type": "Function",
         "tags": [],
         "label": "startServers",
@@ -2579,17 +2587,17 @@
           "(log: ",
           {
             "pluginId": "@kbn/tooling-log",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnToolingLogPluginApi",
-            "section": "def-server.ToolingLog",
+            "section": "def-common.ToolingLog",
             "text": "ToolingLog"
           },
           ", options: { config: string; esFrom: \"source\" | \"snapshot\" | undefined; esVersion: ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.EsVersion",
+            "section": "def-common.EsVersion",
             "text": "EsVersion"
           },
           "; installDir: string | undefined; logsDir: string | undefined; }) => Promise<void>"
@@ -2600,7 +2608,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.startServers.$1",
+            "id": "def-common.startServers.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -2608,9 +2616,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               }
             ],
@@ -2621,7 +2629,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.startServers.$2",
+            "id": "def-common.startServers.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -2630,9 +2638,9 @@
               "{ config: string; esFrom: \"source\" | \"snapshot\" | undefined; esVersion: ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
+                "section": "def-common.EsVersion",
                 "text": "EsVersion"
               },
               "; installDir: string | undefined; logsDir: string | undefined; }"
@@ -2648,7 +2656,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.startServersCli",
+        "id": "def-common.startServersCli",
         "type": "Function",
         "tags": [],
         "label": "startServersCli",
@@ -2667,7 +2675,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.uriencode",
+        "id": "def-common.uriencode",
         "type": "Function",
         "tags": [],
         "label": "uriencode",
@@ -2681,7 +2689,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.uriencode.$1",
+            "id": "def-common.uriencode.$1",
             "type": "Object",
             "tags": [],
             "label": "strings",
@@ -2696,7 +2704,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.uriencode.$2",
+            "id": "def-common.uriencode.$2",
             "type": "Array",
             "tags": [],
             "label": "values",
@@ -2717,7 +2725,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.AsyncInstance",
+        "id": "def-common.AsyncInstance",
         "type": "Interface",
         "tags": [],
         "label": "AsyncInstance",
@@ -2725,9 +2733,9 @@
         "signature": [
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.AsyncInstance",
+            "section": "def-common.AsyncInstance",
             "text": "AsyncInstance"
           },
           "<T>"
@@ -2738,7 +2746,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.AsyncInstance.init",
+            "id": "def-common.AsyncInstance.init",
             "type": "Function",
             "tags": [],
             "label": "init",
@@ -2759,7 +2767,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.CreateTestEsClusterOptions",
+        "id": "def-common.CreateTestEsClusterOptions",
         "type": "Interface",
         "tags": [],
         "label": "CreateTestEsClusterOptions",
@@ -2770,7 +2778,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.basePath",
+            "id": "def-common.CreateTestEsClusterOptions.basePath",
             "type": "string",
             "tags": [],
             "label": "basePath",
@@ -2784,7 +2792,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.clusterName",
+            "id": "def-common.CreateTestEsClusterOptions.clusterName",
             "type": "string",
             "tags": [],
             "label": "clusterName",
@@ -2798,7 +2806,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.dataArchive",
+            "id": "def-common.CreateTestEsClusterOptions.dataArchive",
             "type": "string",
             "tags": [],
             "label": "dataArchive",
@@ -2814,7 +2822,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.esArgs",
+            "id": "def-common.CreateTestEsClusterOptions.esArgs",
             "type": "Array",
             "tags": [],
             "label": "esArgs",
@@ -2830,7 +2838,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.esFrom",
+            "id": "def-common.CreateTestEsClusterOptions.esFrom",
             "type": "string",
             "tags": [],
             "label": "esFrom",
@@ -2844,7 +2852,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.esJavaOpts",
+            "id": "def-common.CreateTestEsClusterOptions.esJavaOpts",
             "type": "string",
             "tags": [],
             "label": "esJavaOpts",
@@ -2858,7 +2866,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.license",
+            "id": "def-common.CreateTestEsClusterOptions.license",
             "type": "CompoundType",
             "tags": [],
             "label": "license",
@@ -2874,7 +2882,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.log",
+            "id": "def-common.CreateTestEsClusterOptions.log",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -2882,9 +2890,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               }
             ],
@@ -2894,7 +2902,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.writeLogsToPath",
+            "id": "def-common.CreateTestEsClusterOptions.writeLogsToPath",
             "type": "string",
             "tags": [],
             "label": "writeLogsToPath",
@@ -2908,7 +2916,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.nodes",
+            "id": "def-common.CreateTestEsClusterOptions.nodes",
             "type": "Array",
             "tags": [],
             "label": "nodes",
@@ -2924,7 +2932,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.password",
+            "id": "def-common.CreateTestEsClusterOptions.password",
             "type": "string",
             "tags": [],
             "label": "password",
@@ -2940,7 +2948,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.port",
+            "id": "def-common.CreateTestEsClusterOptions.port",
             "type": "number",
             "tags": [],
             "label": "port",
@@ -2956,7 +2964,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.ssl",
+            "id": "def-common.CreateTestEsClusterOptions.ssl",
             "type": "CompoundType",
             "tags": [],
             "label": "ssl",
@@ -2972,7 +2980,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.transportPort",
+            "id": "def-common.CreateTestEsClusterOptions.transportPort",
             "type": "CompoundType",
             "tags": [],
             "label": "transportPort",
@@ -2988,7 +2996,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.CreateTestEsClusterOptions.onEarlyExit",
+            "id": "def-common.CreateTestEsClusterOptions.onEarlyExit",
             "type": "Function",
             "tags": [],
             "label": "onEarlyExit",
@@ -3004,7 +3012,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.CreateTestEsClusterOptions.onEarlyExit.$1",
+                "id": "def-common.CreateTestEsClusterOptions.onEarlyExit.$1",
                 "type": "string",
                 "tags": [],
                 "label": "msg",
@@ -3025,7 +3033,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.DockerServer",
+        "id": "def-common.DockerServer",
         "type": "Interface",
         "tags": [],
         "label": "DockerServer",
@@ -3033,17 +3041,17 @@
         "signature": [
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.DockerServer",
+            "section": "def-common.DockerServer",
             "text": "DockerServer"
           },
           " extends ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.DockerServerSpec",
+            "section": "def-common.DockerServerSpec",
             "text": "DockerServerSpec"
           }
         ],
@@ -3053,7 +3061,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServer.name",
+            "id": "def-common.DockerServer.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -3064,7 +3072,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServer.url",
+            "id": "def-common.DockerServer.url",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -3078,7 +3086,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.DockerServerSpec",
+        "id": "def-common.DockerServerSpec",
         "type": "Interface",
         "tags": [],
         "label": "DockerServerSpec",
@@ -3089,7 +3097,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServerSpec.enabled",
+            "id": "def-common.DockerServerSpec.enabled",
             "type": "boolean",
             "tags": [],
             "label": "enabled",
@@ -3100,7 +3108,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServerSpec.portInContainer",
+            "id": "def-common.DockerServerSpec.portInContainer",
             "type": "number",
             "tags": [],
             "label": "portInContainer",
@@ -3111,7 +3119,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServerSpec.port",
+            "id": "def-common.DockerServerSpec.port",
             "type": "number",
             "tags": [],
             "label": "port",
@@ -3122,7 +3130,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServerSpec.image",
+            "id": "def-common.DockerServerSpec.image",
             "type": "string",
             "tags": [],
             "label": "image",
@@ -3133,7 +3141,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServerSpec.waitForLogLine",
+            "id": "def-common.DockerServerSpec.waitForLogLine",
             "type": "CompoundType",
             "tags": [],
             "label": "waitForLogLine",
@@ -3147,7 +3155,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServerSpec.waitForLogLineTimeoutMs",
+            "id": "def-common.DockerServerSpec.waitForLogLineTimeoutMs",
             "type": "number",
             "tags": [],
             "label": "waitForLogLineTimeoutMs",
@@ -3161,7 +3169,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServerSpec.waitFor",
+            "id": "def-common.DockerServerSpec.waitFor",
             "type": "Function",
             "tags": [],
             "label": "waitFor",
@@ -3172,9 +3180,9 @@
               "((server: ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.DockerServer",
+                "section": "def-common.DockerServer",
                 "text": "DockerServer"
               },
               ", logLine$: ",
@@ -3189,7 +3197,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.DockerServerSpec.waitFor.$1",
+                "id": "def-common.DockerServerSpec.waitFor.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "server",
@@ -3197,9 +3205,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.DockerServer",
+                    "section": "def-common.DockerServer",
                     "text": "DockerServer"
                   }
                 ],
@@ -3210,7 +3218,7 @@
               },
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.DockerServerSpec.waitFor.$2",
+                "id": "def-common.DockerServerSpec.waitFor.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "logLine$",
@@ -3229,7 +3237,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.DockerServerSpec.args",
+            "id": "def-common.DockerServerSpec.args",
             "type": "Array",
             "tags": [],
             "label": "args",
@@ -3246,7 +3254,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.EsClientForTestingOptions",
+        "id": "def-common.EsClientForTestingOptions",
         "type": "Interface",
         "tags": [],
         "label": "EsClientForTestingOptions",
@@ -3256,9 +3264,9 @@
         "signature": [
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.EsClientForTestingOptions",
+            "section": "def-common.EsClientForTestingOptions",
             "text": "EsClientForTestingOptions"
           },
           " extends Omit<",
@@ -3271,7 +3279,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.EsClientForTestingOptions.esUrl",
+            "id": "def-common.EsClientForTestingOptions.esUrl",
             "type": "string",
             "tags": [],
             "label": "esUrl",
@@ -3284,7 +3292,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.EsClientForTestingOptions.authOverride",
+            "id": "def-common.EsClientForTestingOptions.authOverride",
             "type": "Object",
             "tags": [],
             "label": "authOverride",
@@ -3300,7 +3308,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.EsClientForTestingOptions.isCloud",
+            "id": "def-common.EsClientForTestingOptions.isCloud",
             "type": "CompoundType",
             "tags": [],
             "label": "isCloud",
@@ -3319,7 +3327,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.FtrConfigProviderContext",
+        "id": "def-common.FtrConfigProviderContext",
         "type": "Interface",
         "tags": [],
         "label": "FtrConfigProviderContext",
@@ -3330,7 +3338,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.FtrConfigProviderContext.log",
+            "id": "def-common.FtrConfigProviderContext.log",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -3338,9 +3346,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               }
             ],
@@ -3350,7 +3358,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.FtrConfigProviderContext.esVersion",
+            "id": "def-common.FtrConfigProviderContext.esVersion",
             "type": "Object",
             "tags": [],
             "label": "esVersion",
@@ -3358,9 +3366,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
+                "section": "def-common.EsVersion",
                 "text": "EsVersion"
               }
             ],
@@ -3370,7 +3378,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.FtrConfigProviderContext.readConfigFile",
+            "id": "def-common.FtrConfigProviderContext.readConfigFile",
             "type": "Function",
             "tags": [],
             "label": "readConfigFile",
@@ -3379,9 +3387,9 @@
               "(path: string) => Promise<",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Config",
+                "section": "def-common.Config",
                 "text": "Config"
               },
               ">"
@@ -3392,7 +3400,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.FtrConfigProviderContext.readConfigFile.$1",
+                "id": "def-common.FtrConfigProviderContext.readConfigFile.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -3413,7 +3421,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.GenericFtrProviderContext",
+        "id": "def-common.GenericFtrProviderContext",
         "type": "Interface",
         "tags": [],
         "label": "GenericFtrProviderContext",
@@ -3421,9 +3429,9 @@
         "signature": [
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.GenericFtrProviderContext",
+            "section": "def-common.GenericFtrProviderContext",
             "text": "GenericFtrProviderContext"
           },
           "<ServiceProviders, PageObjectProviders, ServiceMap, PageObjectMap>"
@@ -3434,7 +3442,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.hasService",
+            "id": "def-common.GenericFtrProviderContext.hasService",
             "type": "Function",
             "tags": [],
             "label": "hasService",
@@ -3450,7 +3458,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.hasService.$1",
+                "id": "def-common.GenericFtrProviderContext.hasService.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "serviceName",
@@ -3468,7 +3476,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.hasService",
+            "id": "def-common.GenericFtrProviderContext.hasService",
             "type": "Function",
             "tags": [],
             "label": "hasService",
@@ -3482,7 +3490,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.hasService.$1",
+                "id": "def-common.GenericFtrProviderContext.hasService.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "serviceName",
@@ -3500,7 +3508,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.hasService",
+            "id": "def-common.GenericFtrProviderContext.hasService",
             "type": "Function",
             "tags": [],
             "label": "hasService",
@@ -3514,7 +3522,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.hasService.$1",
+                "id": "def-common.GenericFtrProviderContext.hasService.$1",
                 "type": "string",
                 "tags": [],
                 "label": "serviceName",
@@ -3532,7 +3540,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.getService",
+            "id": "def-common.GenericFtrProviderContext.getService",
             "type": "Function",
             "tags": [],
             "label": "getService",
@@ -3543,41 +3551,41 @@
               "{ (serviceName: \"config\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Config",
+                "section": "def-common.Config",
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Lifecycle",
+                "section": "def-common.Lifecycle",
                 "text": "Lifecycle"
               },
               "; (serviceName: \"dockerServers\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.DockerServersService",
+                "section": "def-common.DockerServersService",
                 "text": "DockerServersService"
               },
               "; (serviceName: \"esVersion\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
+                "section": "def-common.EsVersion",
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
@@ -3590,7 +3598,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.getService.$1",
+                "id": "def-common.GenericFtrProviderContext.getService.$1",
                 "type": "string",
                 "tags": [],
                 "label": "serviceName",
@@ -3608,7 +3616,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.getService",
+            "id": "def-common.GenericFtrProviderContext.getService",
             "type": "Function",
             "tags": [],
             "label": "getService",
@@ -3617,41 +3625,41 @@
               "{ (serviceName: \"config\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Config",
+                "section": "def-common.Config",
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Lifecycle",
+                "section": "def-common.Lifecycle",
                 "text": "Lifecycle"
               },
               "; (serviceName: \"dockerServers\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.DockerServersService",
+                "section": "def-common.DockerServersService",
                 "text": "DockerServersService"
               },
               "; (serviceName: \"esVersion\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
+                "section": "def-common.EsVersion",
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
@@ -3664,7 +3672,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.getService.$1",
+                "id": "def-common.GenericFtrProviderContext.getService.$1",
                 "type": "string",
                 "tags": [],
                 "label": "serviceName",
@@ -3682,7 +3690,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.getService",
+            "id": "def-common.GenericFtrProviderContext.getService",
             "type": "Function",
             "tags": [],
             "label": "getService",
@@ -3691,41 +3699,41 @@
               "{ (serviceName: \"config\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Config",
+                "section": "def-common.Config",
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Lifecycle",
+                "section": "def-common.Lifecycle",
                 "text": "Lifecycle"
               },
               "; (serviceName: \"dockerServers\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.DockerServersService",
+                "section": "def-common.DockerServersService",
                 "text": "DockerServersService"
               },
               "; (serviceName: \"esVersion\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
+                "section": "def-common.EsVersion",
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
@@ -3738,7 +3746,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.getService.$1",
+                "id": "def-common.GenericFtrProviderContext.getService.$1",
                 "type": "string",
                 "tags": [],
                 "label": "serviceName",
@@ -3756,7 +3764,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.getService",
+            "id": "def-common.GenericFtrProviderContext.getService",
             "type": "Function",
             "tags": [],
             "label": "getService",
@@ -3765,41 +3773,41 @@
               "{ (serviceName: \"config\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Config",
+                "section": "def-common.Config",
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Lifecycle",
+                "section": "def-common.Lifecycle",
                 "text": "Lifecycle"
               },
               "; (serviceName: \"dockerServers\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.DockerServersService",
+                "section": "def-common.DockerServersService",
                 "text": "DockerServersService"
               },
               "; (serviceName: \"esVersion\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
+                "section": "def-common.EsVersion",
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
@@ -3812,7 +3820,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.getService.$1",
+                "id": "def-common.GenericFtrProviderContext.getService.$1",
                 "type": "string",
                 "tags": [],
                 "label": "serviceName",
@@ -3830,7 +3838,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.getService",
+            "id": "def-common.GenericFtrProviderContext.getService",
             "type": "Function",
             "tags": [],
             "label": "getService",
@@ -3839,41 +3847,41 @@
               "{ (serviceName: \"config\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Config",
+                "section": "def-common.Config",
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Lifecycle",
+                "section": "def-common.Lifecycle",
                 "text": "Lifecycle"
               },
               "; (serviceName: \"dockerServers\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.DockerServersService",
+                "section": "def-common.DockerServersService",
                 "text": "DockerServersService"
               },
               "; (serviceName: \"esVersion\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
+                "section": "def-common.EsVersion",
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
@@ -3886,7 +3894,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.getService.$1",
+                "id": "def-common.GenericFtrProviderContext.getService.$1",
                 "type": "string",
                 "tags": [],
                 "label": "serviceName",
@@ -3904,7 +3912,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.getService",
+            "id": "def-common.GenericFtrProviderContext.getService",
             "type": "Function",
             "tags": [],
             "label": "getService",
@@ -3913,41 +3921,41 @@
               "{ (serviceName: \"config\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Config",
+                "section": "def-common.Config",
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Lifecycle",
+                "section": "def-common.Lifecycle",
                 "text": "Lifecycle"
               },
               "; (serviceName: \"dockerServers\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.DockerServersService",
+                "section": "def-common.DockerServersService",
                 "text": "DockerServersService"
               },
               "; (serviceName: \"esVersion\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
+                "section": "def-common.EsVersion",
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
@@ -3960,7 +3968,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.getService.$1",
+                "id": "def-common.GenericFtrProviderContext.getService.$1",
                 "type": "string",
                 "tags": [],
                 "label": "serviceName",
@@ -3978,7 +3986,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.getService",
+            "id": "def-common.GenericFtrProviderContext.getService",
             "type": "Function",
             "tags": [],
             "label": "getService",
@@ -3987,41 +3995,41 @@
               "{ (serviceName: \"config\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Config",
+                "section": "def-common.Config",
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               },
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Lifecycle",
+                "section": "def-common.Lifecycle",
                 "text": "Lifecycle"
               },
               "; (serviceName: \"dockerServers\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.DockerServersService",
+                "section": "def-common.DockerServersService",
                 "text": "DockerServersService"
               },
               "; (serviceName: \"esVersion\"): ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.EsVersion",
+                "section": "def-common.EsVersion",
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
@@ -4034,7 +4042,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.getService.$1",
+                "id": "def-common.GenericFtrProviderContext.getService.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "serviceName",
@@ -4052,7 +4060,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.getPageObject",
+            "id": "def-common.GenericFtrProviderContext.getPageObject",
             "type": "Function",
             "tags": [],
             "label": "getPageObject",
@@ -4068,7 +4076,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.getPageObject.$1",
+                "id": "def-common.GenericFtrProviderContext.getPageObject.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "pageObjectName",
@@ -4086,7 +4094,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.getPageObjects",
+            "id": "def-common.GenericFtrProviderContext.getPageObjects",
             "type": "Function",
             "tags": [],
             "label": "getPageObjects",
@@ -4102,7 +4110,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.getPageObjects.$1",
+                "id": "def-common.GenericFtrProviderContext.getPageObjects.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "pageObjects",
@@ -4120,7 +4128,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.loadTestFile",
+            "id": "def-common.GenericFtrProviderContext.loadTestFile",
             "type": "Function",
             "tags": [],
             "label": "loadTestFile",
@@ -4136,7 +4144,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.GenericFtrProviderContext.loadTestFile.$1",
+                "id": "def-common.GenericFtrProviderContext.loadTestFile.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -4154,7 +4162,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.GenericFtrProviderContext.updateBaselines",
+            "id": "def-common.GenericFtrProviderContext.updateBaselines",
             "type": "boolean",
             "tags": [],
             "label": "updateBaselines",
@@ -4170,7 +4178,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.ICluster",
+        "id": "def-common.ICluster",
         "type": "Interface",
         "tags": [],
         "label": "ICluster",
@@ -4181,7 +4189,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.ICluster.ports",
+            "id": "def-common.ICluster.ports",
             "type": "Array",
             "tags": [],
             "label": "ports",
@@ -4195,13 +4203,20 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.ICluster.nodes",
+            "id": "def-common.ICluster.nodes",
             "type": "Array",
             "tags": [],
             "label": "nodes",
             "description": [],
             "signature": [
-              "Node[]"
+              {
+                "pluginId": "@kbn/es",
+                "scope": "common",
+                "docId": "kibKbnEsPluginApi",
+                "section": "def-common.Cluster",
+                "text": "Cluster"
+              },
+              "[]"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
@@ -4209,7 +4224,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.ICluster.getStartTimeout",
+            "id": "def-common.ICluster.getStartTimeout",
             "type": "Function",
             "tags": [],
             "label": "getStartTimeout",
@@ -4225,7 +4240,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.ICluster.start",
+            "id": "def-common.ICluster.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -4241,7 +4256,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.ICluster.stop",
+            "id": "def-common.ICluster.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -4257,7 +4272,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.ICluster.cleanup",
+            "id": "def-common.ICluster.cleanup",
             "type": "Function",
             "tags": [],
             "label": "cleanup",
@@ -4273,7 +4288,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.ICluster.getClient",
+            "id": "def-common.ICluster.getClient",
             "type": "Function",
             "tags": [],
             "label": "getClient",
@@ -4290,7 +4305,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.ICluster.getHostUrls",
+            "id": "def-common.ICluster.getHostUrls",
             "type": "Function",
             "tags": [],
             "label": "getHostUrls",
@@ -4309,7 +4324,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.KbnClientOptions",
+        "id": "def-common.KbnClientOptions",
         "type": "Interface",
         "tags": [],
         "label": "KbnClientOptions",
@@ -4320,7 +4335,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClientOptions.url",
+            "id": "def-common.KbnClientOptions.url",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -4331,7 +4346,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClientOptions.certificateAuthorities",
+            "id": "def-common.KbnClientOptions.certificateAuthorities",
             "type": "Array",
             "tags": [],
             "label": "certificateAuthorities",
@@ -4345,7 +4360,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClientOptions.log",
+            "id": "def-common.KbnClientOptions.log",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -4353,9 +4368,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/tooling-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-server.ToolingLog",
+                "section": "def-common.ToolingLog",
                 "text": "ToolingLog"
               }
             ],
@@ -4365,7 +4380,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClientOptions.uiSettingDefaults",
+            "id": "def-common.KbnClientOptions.uiSettingDefaults",
             "type": "Object",
             "tags": [],
             "label": "uiSettingDefaults",
@@ -4380,7 +4395,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.KbnClientOptions.importExportBaseDir",
+            "id": "def-common.KbnClientOptions.importExportBaseDir",
             "type": "string",
             "tags": [],
             "label": "importExportBaseDir",
@@ -4397,18 +4412,89 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.Suite",
+        "id": "def-common.Suite",
         "type": "Interface",
         "tags": [],
         "label": "Suite",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.Suite",
+            "text": "Suite"
+          },
+          " extends ",
+          "Runnable"
+        ],
         "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Suite.currentTest",
+            "id": "def-common.Suite._beforeAll",
+            "type": "Array",
+            "tags": [],
+            "label": "_beforeAll",
+            "description": [],
+            "signature": [
+              "Runnable",
+              "[]"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.Suite._beforeEach",
+            "type": "Array",
+            "tags": [],
+            "label": "_beforeEach",
+            "description": [],
+            "signature": [
+              "Runnable",
+              "[]"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.Suite._afterEach",
+            "type": "Array",
+            "tags": [],
+            "label": "_afterEach",
+            "description": [],
+            "signature": [
+              "Runnable",
+              "[]"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.Suite._afterAll",
+            "type": "Array",
+            "tags": [],
+            "label": "_afterAll",
+            "description": [],
+            "signature": [
+              "Runnable",
+              "[]"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.Suite.currentTest",
             "type": "Object",
             "tags": [],
             "label": "currentTest",
@@ -4416,9 +4502,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Test",
+                "section": "def-common.Test",
                 "text": "Test"
               },
               " | undefined"
@@ -4429,7 +4515,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Suite.suites",
+            "id": "def-common.Suite.suites",
             "type": "Array",
             "tags": [],
             "label": "suites",
@@ -4437,9 +4523,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Suite",
+                "section": "def-common.Suite",
                 "text": "Suite"
               },
               "[]"
@@ -4450,7 +4536,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Suite.tests",
+            "id": "def-common.Suite.tests",
             "type": "Array",
             "tags": [],
             "label": "tests",
@@ -4458,9 +4544,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Test",
+                "section": "def-common.Test",
                 "text": "Test"
               },
               "[]"
@@ -4471,7 +4557,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Suite.title",
+            "id": "def-common.Suite.title",
             "type": "string",
             "tags": [],
             "label": "title",
@@ -4482,7 +4568,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Suite.file",
+            "id": "def-common.Suite.file",
             "type": "string",
             "tags": [],
             "label": "file",
@@ -4493,7 +4579,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Suite.parent",
+            "id": "def-common.Suite.parent",
             "type": "Object",
             "tags": [],
             "label": "parent",
@@ -4501,9 +4587,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Suite",
+                "section": "def-common.Suite",
                 "text": "Suite"
               },
               " | undefined"
@@ -4514,7 +4600,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Suite.eachTest",
+            "id": "def-common.Suite.eachTest",
             "type": "Function",
             "tags": [],
             "label": "eachTest",
@@ -4523,9 +4609,9 @@
               "(cb: (test: ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Test",
+                "section": "def-common.Test",
                 "text": "Test"
               },
               ") => void) => void"
@@ -4536,7 +4622,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-server.Suite.eachTest.$1",
+                "id": "def-common.Suite.eachTest.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "cb",
@@ -4545,9 +4631,9 @@
                   "(test: ",
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.Test",
+                    "section": "def-common.Test",
                     "text": "Test"
                   },
                   ") => void"
@@ -4562,7 +4648,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Suite.root",
+            "id": "def-common.Suite.root",
             "type": "boolean",
             "tags": [],
             "label": "root",
@@ -4573,7 +4659,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Suite.suiteTag",
+            "id": "def-common.Suite.suiteTag",
             "type": "string",
             "tags": [],
             "label": "suiteTag",
@@ -4587,18 +4673,29 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.Test",
+        "id": "def-common.Test",
         "type": "Interface",
         "tags": [],
         "label": "Test",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.Test",
+            "text": "Test"
+          },
+          " extends ",
+          "Runnable"
+        ],
         "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Test.fullTitle",
+            "id": "def-common.Test.fullTitle",
             "type": "Function",
             "tags": [],
             "label": "fullTitle",
@@ -4614,7 +4711,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Test.title",
+            "id": "def-common.Test.title",
             "type": "string",
             "tags": [],
             "label": "title",
@@ -4625,7 +4722,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Test.file",
+            "id": "def-common.Test.file",
             "type": "string",
             "tags": [],
             "label": "file",
@@ -4639,7 +4736,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Test.parent",
+            "id": "def-common.Test.parent",
             "type": "Object",
             "tags": [],
             "label": "parent",
@@ -4647,9 +4744,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.Suite",
+                "section": "def-common.Suite",
                 "text": "Suite"
               },
               " | undefined"
@@ -4660,7 +4757,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Test.isPassed",
+            "id": "def-common.Test.isPassed",
             "type": "Function",
             "tags": [],
             "label": "isPassed",
@@ -4676,7 +4773,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.Test.pending",
+            "id": "def-common.Test.pending",
             "type": "CompoundType",
             "tags": [],
             "label": "pending",
@@ -4696,7 +4793,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.CI_PARALLEL_PROCESS_PREFIX",
+        "id": "def-common.CI_PARALLEL_PROCESS_PREFIX",
         "type": "string",
         "tags": [],
         "label": "CI_PARALLEL_PROCESS_PREFIX",
@@ -4710,7 +4807,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.EsTestCluster",
+        "id": "def-common.EsTestCluster",
         "type": "Type",
         "tags": [],
         "label": "EsTestCluster",
@@ -4719,17 +4816,17 @@
           "Options[\"nodes\"] extends TestEsClusterNodesOptions[] ? ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.ICluster",
+            "section": "def-common.ICluster",
             "text": "ICluster"
           },
           " : ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.ICluster",
+            "section": "def-common.ICluster",
             "text": "ICluster"
           },
           " & { getUrl: () => string; }"
@@ -4741,7 +4838,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.FtrConfigProvider",
+        "id": "def-common.FtrConfigProvider",
         "type": "Type",
         "tags": [],
         "label": "FtrConfigProvider",
@@ -4750,9 +4847,9 @@
           "<T>(ctx: ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.FtrConfigProviderContext",
+            "section": "def-common.FtrConfigProviderContext",
             "text": "FtrConfigProviderContext"
           },
           ") => T | Promise<T>"
@@ -4764,7 +4861,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.FtrConfigProvider.$1",
+            "id": "def-common.FtrConfigProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "ctx",
@@ -4772,9 +4869,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.FtrConfigProviderContext",
+                "section": "def-common.FtrConfigProviderContext",
                 "text": "FtrConfigProviderContext"
               }
             ],
@@ -4787,7 +4884,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.ProvidedType",
+        "id": "def-common.ProvidedType",
         "type": "Type",
         "tags": [],
         "label": "ProvidedType",
@@ -4798,9 +4895,9 @@
           "ReturnType<T> extends Promise<infer X> ? ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.AsyncInstance",
+            "section": "def-common.AsyncInstance",
             "text": "AsyncInstance"
           },
           "<X> & X : ReturnType<T>"
@@ -4814,7 +4911,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.adminTestUser",
+        "id": "def-common.adminTestUser",
         "type": "Object",
         "tags": [],
         "label": "adminTestUser",
@@ -4825,7 +4922,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.adminTestUser.username",
+            "id": "def-common.adminTestUser.username",
             "type": "string",
             "tags": [],
             "label": "username",
@@ -4836,7 +4933,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.adminTestUser.password",
+            "id": "def-common.adminTestUser.password",
             "type": "string",
             "tags": [],
             "label": "password",
@@ -4850,7 +4947,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.esTestConfig",
+        "id": "def-common.esTestConfig",
         "type": "Object",
         "tags": [],
         "label": "esTestConfig",
@@ -4865,7 +4962,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.kbnTestConfig",
+        "id": "def-common.kbnTestConfig",
         "type": "Object",
         "tags": [],
         "label": "kbnTestConfig",
@@ -4880,7 +4977,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.kibanaServerTestUser",
+        "id": "def-common.kibanaServerTestUser",
         "type": "Object",
         "tags": [],
         "label": "kibanaServerTestUser",
@@ -4891,7 +4988,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.kibanaServerTestUser.username",
+            "id": "def-common.kibanaServerTestUser.username",
             "type": "string",
             "tags": [],
             "label": "username",
@@ -4902,7 +4999,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.kibanaServerTestUser.password",
+            "id": "def-common.kibanaServerTestUser.password",
             "type": "string",
             "tags": [],
             "label": "password",
@@ -4916,7 +5013,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.kibanaTestUser",
+        "id": "def-common.kibanaTestUser",
         "type": "Object",
         "tags": [],
         "label": "kibanaTestUser",
@@ -4927,7 +5024,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.kibanaTestUser.username",
+            "id": "def-common.kibanaTestUser.username",
             "type": "string",
             "tags": [],
             "label": "username",
@@ -4938,7 +5035,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.kibanaTestUser.password",
+            "id": "def-common.kibanaTestUser.password",
             "type": "string",
             "tags": [],
             "label": "password",
@@ -4952,7 +5049,7 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-server.systemIndicesSuperuser",
+        "id": "def-common.systemIndicesSuperuser",
         "type": "Object",
         "tags": [],
         "label": "systemIndicesSuperuser",
@@ -4965,7 +5062,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.systemIndicesSuperuser.username",
+            "id": "def-common.systemIndicesSuperuser.username",
             "type": "string",
             "tags": [],
             "label": "username",
@@ -4976,7 +5073,7 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-server.systemIndicesSuperuser.password",
+            "id": "def-common.systemIndicesSuperuser.password",
             "type": "string",
             "tags": [],
             "label": "password",
@@ -4989,13 +5086,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }
