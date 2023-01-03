@@ -42,6 +42,7 @@
     "@kbn/logging",
     "@kbn/core-elasticsearch-server",
     "@kbn/es-types",
+    "@kbn/ml-url-state",
   ],
   "exclude": [
     "target/**/*",

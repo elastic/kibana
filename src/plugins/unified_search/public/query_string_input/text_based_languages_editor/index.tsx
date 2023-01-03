@@ -55,7 +55,7 @@ import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 
 import './overwrite.scss';
-import { IUnifiedSearchPluginServices } from '../../types';
+import type { IUnifiedSearchPluginServices } from '../../types';
 
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
@@ -384,8 +384,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     overviewRulerLanes: 0,
     hideCursorInOverviewRuler: true,
     scrollbar: {
-      vertical: 'hidden',
       horizontal: 'hidden',
+      vertical: 'auto',
     },
     overviewRulerBorder: false,
     readOnly: isDisabled,

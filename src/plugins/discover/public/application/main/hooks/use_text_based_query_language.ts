@@ -14,9 +14,9 @@ import {
   Query,
 } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
-import type { DataViewListItem, DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { GetStateReturn } from '../services/discover_state';
+import type { DiscoverStateContainer } from '../services/discover_state';
 import type { DataDocuments$ } from './use_saved_search';
 import { FetchStatus } from '../../types';
 
@@ -30,13 +30,11 @@ export function useTextBasedQueryLanguage({
   documents$,
   dataViews,
   stateContainer,
-  dataViewList,
   savedSearch,
 }: {
   documents$: DataDocuments$;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   dataViews: DataViewsContract;
-  dataViewList: Array<DataViewListItem | DataView>;
   savedSearch: SavedSearch;
 }) {
   const prev = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] }>({
@@ -60,7 +58,7 @@ export function useTextBasedQueryLanguage({
       if (!query || next.fetchStatus === FetchStatus.ERROR) {
         return;
       }
-      const { columns: stateColumns, index } = stateContainer.appStateContainer.getState();
+      const { columns: stateColumns, index } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' &&
@@ -91,6 +89,8 @@ export function useTextBasedQueryLanguage({
           'sql' in query
             ? getIndexPatternFromSQLQuery(query.sql)
             : getIndexPatternFromESQLQuery(query.esql);
+        const internalState = stateContainer.internalState.getState();
+        const dataViewList = [...internalState.savedDataViews, ...internalState.adHocDataViews];
         let dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
         // no dataview found but the index pattern is valid
@@ -99,6 +99,7 @@ export function useTextBasedQueryLanguage({
           dataViewObj = await dataViews.create({
             title: indexPatternFromQuery,
           });
+          stateContainer.internalState.transitions.setAdHocDataViews([dataViewObj]);
 
           if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
             dataViewObj.timeFieldName = '@timestamp';
@@ -120,7 +121,7 @@ export function useTextBasedQueryLanguage({
 
         const nextState = {
           ...(addDataViewToState && { index: dataViewObj.id }),
-          columns: nextColumns,
+          ...(addColumnsToState && { columns: nextColumns }),
         };
         stateContainer.replaceUrlAppState(nextState);
       } else {
@@ -133,5 +134,5 @@ export function useTextBasedQueryLanguage({
       cleanup();
       subscription.unsubscribe();
     };
-  }, [documents$, dataViews, stateContainer, dataViewList, savedSearch, cleanup]);
+  }, [documents$, dataViews, stateContainer, savedSearch, cleanup]);
 }
