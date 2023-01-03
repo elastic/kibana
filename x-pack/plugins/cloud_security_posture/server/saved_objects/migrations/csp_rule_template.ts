@@ -37,20 +37,19 @@ function migrateCspRuleMetadata(
   };
 }
 
-function deprecateCspRuleTemplateState(
+function migrateCspRuleTemplateDeprecateState(
   doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV840>,
   context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<CspRuleTemplateV870> {
-  const { ...metadata } = doc.attributes.metadata;
+  // Keeps only metadata, deprecated state
+  const { muted, enabled, ...attributes } = doc.attributes;
   return {
     ...doc,
-    attributes: {
-      metadata,
-    },
+    attributes,
   };
 }
 
 export const cspRuleTemplateMigrations: SavedObjectMigrationMap = {
   '8.4.0': migrateCspRuleMetadata,
-  '8.7.0': deprecateCspRuleTemplateState,
+  '8.7.0': migrateCspRuleTemplateDeprecateState,
 };
