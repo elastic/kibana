@@ -9,26 +9,26 @@ import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { verifyAccessAndContext } from './lib';
+import { API_PRIVILEGES } from '../../common';
 
-export const getRulesConfigurationRoute = (
+export const getFlappingSettingsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/_rules_configuration`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_flapping`,
       validate: false,
       options: {
-        tags: ['access:get-rules-configuration'],
+        tags: [`access:${API_PRIVILEGES.READ_FLAPPING_SETTINGS}`],
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesConfigurationClient = (
-          await context.alerting
-        ).getScopedRulesConfigurationClient();
-        const rulesConfiguration = await rulesConfigurationClient.getOrCreate();
-        return res.ok({ body: rulesConfiguration.attributes });
+        const rulesSettingsClient = (await context.alerting).getRulesSettingsClient();
+        const flappingSettings = await rulesSettingsClient.flapping.get();
+
+        return res.ok({ body: flappingSettings });
       })
     )
   );

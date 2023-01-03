@@ -22,7 +22,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import {
-  RulesConfiguration,
+  RulesSettingsFlappingProperties,
   MIN_LOOK_BACK_WINDOW,
   MIN_STATUS_CHANGE_THRESHOLD,
   MAX_LOOK_BACK_WINDOW,
@@ -30,24 +30,23 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 
-type FlappingConfiguration = RulesConfiguration['flapping'];
-type OnChangeKey = keyof Omit<FlappingConfiguration, 'enabled'>;
+type OnChangeKey = keyof Omit<RulesSettingsFlappingProperties, 'enabled'>;
 
 const lookBackWindowLabel = i18n.translate(
-  'xpack.triggersActionsUI.rulesConfiguration.flapping.lookBackWindowLabel',
+  'xpack.triggersActionsUI.rulesSettings.flapping.lookBackWindowLabel',
   {
     defaultMessage: 'Rule run look back window',
   }
 );
 
 const statusChangeThresholdLabel = i18n.translate(
-  'xpack.triggersActionsUI.rulesConfiguration.flapping.statusChangeThresholdLabel',
+  'xpack.triggersActionsUI.rulesSettings.flapping.statusChangeThresholdLabel',
   {
     defaultMessage: 'Alert status change threshold',
   }
 );
 
-export interface RulesConfigurationRangeProps {
+export interface RulesSettingsRangeProps {
   label: EuiFormRowProps['label'];
   labelPopoverText?: string;
   min: number;
@@ -57,12 +56,12 @@ export interface RulesConfigurationRangeProps {
   onChange?: EuiRangeProps['onChange'];
 }
 
-export const RulesConfigurationFlappingTitle = () => {
+export const RulesSettingsFlappingTitle = () => {
   return (
     <EuiTitle size="xs">
       <h5>
         <FormattedMessage
-          id="xpack.triggersActionsUI.rulesConfiguration.flapping.alertFlappingDetection"
+          id="xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetection"
           defaultMessage="Alert Flapping Detection"
         />
       </h5>
@@ -70,7 +69,7 @@ export const RulesConfigurationFlappingTitle = () => {
   );
 };
 
-export const RulesConfigurationRange = (props: RulesConfigurationRangeProps) => {
+export const RulesSettingsRange = (props: RulesSettingsRangeProps) => {
   const { label, labelPopoverText, min, max, value, disabled, onChange } = props;
 
   const renderLabel = () => {
@@ -99,23 +98,23 @@ export const RulesConfigurationRange = (props: RulesConfigurationRangeProps) => 
   );
 };
 
-interface RulesConfigurationFlappingProps {
-  flappingConfiguration: FlappingConfiguration;
+interface RulesSettingsFlappingProps {
+  flappingSettings: RulesSettingsFlappingProperties;
   compressed?: boolean;
   onChange: (key: OnChangeKey, value: number) => void;
 }
 
-export const RulesConfigurationFlapping = (props: RulesConfigurationFlappingProps) => {
-  const { flappingConfiguration, compressed = false, onChange } = props;
+export const RulesSettingsFlapping = (props: RulesSettingsFlappingProps) => {
+  const { flappingSettings, compressed = false, onChange } = props;
 
-  const { lookBackWindow, statusChangeThreshold } = flappingConfiguration;
+  const { lookBackWindow, statusChangeThreshold } = flappingSettings;
 
   const {
     application: { capabilities },
   } = useKibana().services;
 
   const {
-    rules_configuration: { flappingDetection },
+    rulesSettings: { writeFlappingSettingsUI },
   } = capabilities;
 
   const renderTitle = () => {
@@ -124,7 +123,7 @@ export const RulesConfigurationFlapping = (props: RulesConfigurationFlappingProp
         <EuiTitle size="xs">
           <h5>
             <FormattedMessage
-              id="xpack.triggersActionsUI.rulesConfiguration.flapping.alertFlappingDetectionTitle"
+              id="xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetectionTitle"
               defaultMessage="Alert Flapping Detection"
             />
           </h5>
@@ -138,7 +137,7 @@ export const RulesConfigurationFlapping = (props: RulesConfigurationFlappingProp
       <EuiFlexItem>
         <EuiText color="subdued" size="s">
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesConfiguration.flapping.alertFlappingDetectionDescription"
+            id="xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetectionDescription"
             defaultMessage="Modify the frequency that an alert can go between active and recovered over a period of rule runs."
           />
         </EuiText>
@@ -160,32 +159,32 @@ export const RulesConfigurationFlapping = (props: RulesConfigurationFlappingProp
         </>
       )}
       <EuiFlexItem grow={false}>
-        <RulesConfigurationRange
+        <RulesSettingsRange
           min={MIN_LOOK_BACK_WINDOW}
           max={MAX_LOOK_BACK_WINDOW}
           value={lookBackWindow}
           onChange={(e) => onChange('lookBackWindow', parseInt(e.currentTarget.value, 10))}
           label={lookBackWindowLabel}
           labelPopoverText="TODO: look back window helper text"
-          disabled={!flappingDetection}
+          disabled={!writeFlappingSettingsUI}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <RulesConfigurationRange
+        <RulesSettingsRange
           min={MIN_STATUS_CHANGE_THRESHOLD}
           max={MAX_STATUS_CHANGE_THRESHOLD}
           value={statusChangeThreshold}
           onChange={(e) => onChange('statusChangeThreshold', parseInt(e.currentTarget.value, 10))}
           label={statusChangeThresholdLabel}
           labelPopoverText="TODO: status threshold helper text"
-          disabled={!flappingDetection}
+          disabled={!writeFlappingSettingsUI}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel borderRadius="none" color="subdued">
           <EuiText size="s">
             <FormattedMessage
-              id="xpack.triggersActionsUI.rulesConfiguration.flapping.flappingConfigurationDescription"
+              id="xpack.triggersActionsUI.rulesSettings.flapping.flappingSettingsDescription"
               defaultMessage="An alert will be considered flapping if it changes status {lookBackWindow} within the last {statusChangeThreshold}."
               values={{
                 lookBackWindow: <b>{lookBackWindow} times</b>,

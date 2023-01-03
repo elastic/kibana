@@ -42,8 +42,8 @@ import { bulkDeleteRulesRoute } from './bulk_delete_rules';
 import { bulkEnableRulesRoute } from './bulk_enable_rules';
 import { bulkDisableRulesRoute } from './bulk_disable_rules';
 import { cloneRuleRoute } from './clone_rule';
-import { getRulesConfigurationRoute } from './get_rules_configuration';
-import { updateRulesConfigurationRoute } from './update_rules_configuration';
+import { getFlappingSettingsRoute } from './get_flapping_settings';
+import { updateFlappingSettingsRoute } from './update_flapping_settings';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -89,6 +89,6 @@ export function defineRoutes(opts: RouteOptions) {
   unsnoozeRuleRoute(router, licenseState);
   runSoonRoute(router, licenseState);
   cloneRuleRoute(router, licenseState);
-  getRulesConfigurationRoute(router, licenseState);
-  updateRulesConfigurationRoute(router, licenseState);
+  getFlappingSettingsRoute(router, licenseState);
+  updateFlappingSettingsRoute(router, licenseState);
 }

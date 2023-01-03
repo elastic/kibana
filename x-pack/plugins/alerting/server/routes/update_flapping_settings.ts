@@ -10,37 +10,36 @@ import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { API_PRIVILEGES } from '../../common';
 
 const bodySchema = schema.object({
-  flapping: schema.object({
-    enabled: schema.boolean(),
-    lookBackWindow: schema.number(),
-    statusChangeThreshold: schema.number(),
-  }),
+  enabled: schema.boolean(),
+  lookBackWindow: schema.number(),
+  statusChangeThreshold: schema.number(),
 });
 
-export const updateRulesConfigurationRoute = (
+export const updateFlappingSettingsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/_rules_configuration`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_flapping`,
       validate: {
         body: bodySchema,
       },
       options: {
-        tags: ['access:update-rules-configuration'],
+        tags: [`access:${API_PRIVILEGES.WRITE_FLAPPING_SETTINGS}`],
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesConfigurationClient = (
-          await context.alerting
-        ).getScopedRulesConfigurationClient();
-        const updateResults = await rulesConfigurationClient.updateOrCreate(req.body);
+        const rulesSettingsClient = (await context.alerting).getRulesSettingsClient();
+
+        const updatedFlappingSettings = await rulesSettingsClient.flapping.update(req.body);
+
         return res.ok({
-          body: updateResults.attributes,
+          body: updatedFlappingSettings,
         });
       })
     )

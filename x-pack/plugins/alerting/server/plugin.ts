@@ -55,7 +55,7 @@ import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/ser
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
-import { RulesConfigurationClientFactory } from './rules_configuration_client_factory';
+import { RulesSettingsClientFactory } from './rules_settings_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
 import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
 import { defineRoutes } from './routes';
@@ -174,7 +174,7 @@ export class AlertingPlugin {
   private security?: SecurityPluginSetup;
   private readonly rulesClientFactory: RulesClientFactory;
   private readonly alertingAuthorizationClientFactory: AlertingAuthorizationClientFactory;
-  private readonly rulesConfigurationClientFactory: RulesConfigurationClientFactory;
+  private readonly rulesSettingsClientFactory: RulesSettingsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
@@ -189,7 +189,7 @@ export class AlertingPlugin {
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
-    this.rulesConfigurationClientFactory = new RulesConfigurationClientFactory();
+    this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
@@ -374,7 +374,7 @@ export class AlertingPlugin {
       ruleTypeRegistry,
       rulesClientFactory,
       alertingAuthorizationClientFactory,
-      rulesConfigurationClientFactory,
+      rulesSettingsClientFactory,
       security,
       licenseState,
     } = this;
@@ -423,9 +423,10 @@ export class AlertingPlugin {
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
     });
 
-    rulesConfigurationClientFactory.initialize({
+    rulesSettingsClientFactory.initialize({
       logger: this.logger,
       savedObjectsService: core.savedObjects,
+      securityPluginStart: plugins.security,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {
@@ -493,18 +494,15 @@ export class AlertingPlugin {
   private createRouteHandlerContext = (
     core: CoreSetup<AlertingPluginsStart, unknown>
   ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
-    const { ruleTypeRegistry, rulesClientFactory, rulesConfigurationClientFactory } = this;
+    const { ruleTypeRegistry, rulesClientFactory, rulesSettingsClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
         getRulesClient: () => {
           return rulesClientFactory!.create(request, savedObjects);
         },
-        getScopedRulesConfigurationClient: () => {
-          return rulesConfigurationClientFactory.asScoped(request);
-        },
-        getInternalRulesConfigurationClient: () => {
-          return rulesConfigurationClientFactory.asInternal();
+        getRulesSettingsClient: () => {
+          return rulesSettingsClientFactory.create(request);
         },
         listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>

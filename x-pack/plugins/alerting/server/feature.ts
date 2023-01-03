@@ -8,11 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import {
+  RULES_SETTINGS_FEATURE_ID,
+  READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
+  ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
+  API_PRIVILEGES,
+  RULES_SETTINGS_SAVED_OBJECT_TYPE,
+} from '../common';
 
 export const alertingFeatures: KibanaFeatureConfig = {
-  id: 'rules_configuration',
-  name: i18n.translate('xpack.alerting.feature.rulesConfigurationFeatureName', {
-    defaultMessage: 'Rules Configuration',
+  id: RULES_SETTINGS_FEATURE_ID,
+  name: i18n.translate('xpack.alerting.feature.rulesSettingsFeatureName', {
+    defaultMessage: 'Rules Settings',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],
@@ -22,50 +29,59 @@ export const alertingFeatures: KibanaFeatureConfig = {
   privileges: {
     all: {
       app: [],
-      api: ['get-rules-configuration', 'update-rules-configuration'],
+      api: [API_PRIVILEGES.READ_FLAPPING_SETTINGS, API_PRIVILEGES.WRITE_FLAPPING_SETTINGS],
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
       savedObject: {
-        all: ['rules_configuration'],
+        all: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
         read: [],
       },
       ui: ['show', 'save'],
     },
     read: {
       app: [],
-      api: ['get-rules-configuration'],
+      api: [API_PRIVILEGES.READ_FLAPPING_SETTINGS],
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
       savedObject: {
         all: [],
-        read: ['rules_configuration'],
+        read: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
       },
       ui: ['show'],
     },
   },
   subFeatures: [
     {
-      name: i18n.translate('xpack.alerting.feature.flappingDetectionSubFeatureName', {
+      name: i18n.translate('xpack.alerting.feature.flappingSettingsSubFeatureName', {
         defaultMessage: 'Flapping Detection',
       }),
       privilegeGroups: [
         {
-          groupType: 'independent',
+          groupType: 'mutually_exclusive',
           privileges: [
             {
-              id: 'flapping_detection',
-              name: i18n.translate('xpack.alerting.feature.flappingDetectionSubFeature', {
-                defaultMessage: 'Alert Flapping Detection',
-              }),
+              api: [API_PRIVILEGES.READ_FLAPPING_SETTINGS, API_PRIVILEGES.WRITE_FLAPPING_SETTINGS],
+              name: 'All',
+              id: ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
               includeIn: 'all',
-              api: [],
               savedObject: {
                 all: [],
                 read: [],
               },
-              ui: ['flappingDetection'],
+              ui: ['writeFlappingSettingsUI', 'readFlappingSettingsUI'],
+            },
+            {
+              api: [API_PRIVILEGES.READ_FLAPPING_SETTINGS],
+              name: 'Read',
+              id: READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
+              includeIn: 'read',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['readFlappingSettingsUI'],
             },
           ],
         },

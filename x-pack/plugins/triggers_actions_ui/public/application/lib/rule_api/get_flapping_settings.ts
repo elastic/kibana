@@ -6,9 +6,11 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { RulesConfiguration } from '@kbn/alerting-plugin/common';
+import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
-export const getRulesConfiguration = ({ http }: { http: HttpSetup }) => {
-  return http.get<RulesConfiguration>(`${INTERNAL_BASE_ALERTING_API_PATH}/_rules_configuration`);
+export const getFlappingSettings = ({ http }: { http: HttpSetup }) => {
+  return http.get<RulesSettingsFlapping>(
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_flapping`
+  );
 };

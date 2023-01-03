@@ -8,10 +8,10 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RulesConfigurationModal } from './rules_configuration_modal';
+import { RulesSettingsModal } from './rules_settings_modal';
 import { useKibana } from '../../../common/lib/kibana';
 
-export const RulesConfigurationLink = () => {
+export const RulesSettingsLink = () => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const {
     application: { capabilities },
@@ -22,15 +22,15 @@ export const RulesConfigurationLink = () => {
       <EuiButtonEmpty
         onClick={() => setIsVisible(true)}
         iconType="gear"
-        data-test-subj="rulesConfigurationLink"
-        disabled={!capabilities.rules_configuration.show}
+        data-test-subj="rulesSettingsLink"
+        disabled={!capabilities.rulesSettings.show}
       >
         <FormattedMessage
-          id="xpack.triggersActionsUI.rulesConfiguration.link.title"
+          id="xpack.triggersActionsUI.rulesSettings.link.title"
           defaultMessage="Settings"
         />
       </EuiButtonEmpty>
-      <RulesConfigurationModal isVisible={isVisible} onClose={() => setIsVisible(false)} />
+      <RulesSettingsModal isVisible={isVisible} onClose={() => setIsVisible(false)} />
     </>
   );
 };

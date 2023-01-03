@@ -342,7 +342,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
   },
 };
 
-export const rulesConfigurationMappings: SavedObjectsTypeMappingDefinition = {
+export const rulesSettingsMappings: SavedObjectsTypeMappingDefinition = {
   properties: {
     flapping: {
       properties: {
@@ -354,6 +354,18 @@ export const rulesConfigurationMappings: SavedObjectsTypeMappingDefinition = {
         },
         statusChangeThreshold: {
           type: 'long',
+        },
+        createdBy: {
+          type: 'keyword',
+        },
+        updatedBy: {
+          type: 'keyword',
+        },
+        createdAt: {
+          type: 'date',
+        },
+        updatedAt: {
+          type: 'date',
         },
       },
     },

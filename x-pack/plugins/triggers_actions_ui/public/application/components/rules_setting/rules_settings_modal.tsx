@@ -8,7 +8,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import React, { useState, useEffect } from 'react';
-import { RulesConfiguration } from '@kbn/alerting-plugin/common';
+import { RulesSettings, RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -31,16 +31,13 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
-import { getRulesConfiguration } from '../../lib/rule_api/get_rules_configuration';
-import { updateRulesConfiguration } from '../../lib/rule_api/update_rules_configuration';
-import {
-  RulesConfigurationFlapping,
-  RulesConfigurationFlappingTitle,
-} from './rules_configuration_flapping';
+import { getFlappingSettings } from '../../lib/rule_api/get_flapping_settings';
+import { updateFlappingSettings } from '../../lib/rule_api/update_flapping_settings';
+import { RulesSettingsFlapping, RulesSettingsFlappingTitle } from './rules_settings_flapping';
 import { CenterJustifiedSpinner } from '../center_justified_spinner';
 
 const flappingDescription = i18n.translate(
-  'xpack.triggersActionsUI.rulesConfiguration.modal.flappingDetectionDescription',
+  'xpack.triggersActionsUI.rulesSettings.modal.flappingDetectionDescription',
   {
     defaultMessage:
       'Alerts that go quickly go between active and recovered are considered flapping. Detecting these changes and minimizing new alert generation can help reduce unwanted noise in your alerting system.',
@@ -48,13 +45,13 @@ const flappingDescription = i18n.translate(
 );
 
 const flappingEnableLabel = i18n.translate(
-  'xpack.triggersActionsUI.rulesConfiguration.modal.enableFlappingLabel',
+  'xpack.triggersActionsUI.rulesSettings.modal.enableFlappingLabel',
   {
     defaultMessage: 'Enabled flapping detection (recommended)',
   }
 );
 
-export const RulesConfigurationErrorPrompt = () => {
+export const RulesSettingsErrorPrompt = () => {
   return (
     <EuiEmptyPrompt
       color="danger"
@@ -62,16 +59,16 @@ export const RulesConfigurationErrorPrompt = () => {
       title={
         <h4>
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesConfiguration.modal.errorPromptTitle"
-            defaultMessage="Unable to load your rules configuration"
+            id="xpack.triggersActionsUI.rulesSettings.modal.errorPromptTitle"
+            defaultMessage="Unable to load your rules settings"
           />
         </h4>
       }
       body={
         <p>
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesConfiguration.modal.errorPromptBody"
-            defaultMessage="There was an error loading your rules configurations. Contact your administrator for help"
+            id="xpack.triggersActionsUI.rulesSettings.modal.errorPromptBody"
+            defaultMessage="There was an error loading your rules settings. Contact your administrator for help"
           />
         </p>
       }
@@ -79,17 +76,17 @@ export const RulesConfigurationErrorPrompt = () => {
   );
 };
 
-export interface RulesConfigurationModalProps {
+export interface RulesSettingsModalProps {
   isVisible: boolean;
-  setUpdatingRulesConfiguration?: (isUpdating: boolean) => void;
+  setUpdatingRulesSettings?: (isUpdating: boolean) => void;
   onClose: () => void;
   onSave?: () => void;
 }
 
-export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => {
-  const { isVisible, onClose, setUpdatingRulesConfiguration, onSave } = props;
+export const RulesSettingsModal = (props: RulesSettingsModalProps) => {
+  const { isVisible, onClose, setUpdatingRulesSettings, onSave } = props;
 
-  const [configuration, setConfiguration] = useState<RulesConfiguration['flapping']>();
+  const [settings, setSettings] = useState<RulesSettingsFlappingProperties>();
   const [hasError, setHasError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -100,54 +97,43 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
   } = useKibana().services;
 
   const {
-    rules_configuration: { save, flappingDetection },
+    rulesSettings: { save, writeFlappingSettingsUI },
   } = capabilities;
 
-  const handleConfigurationChange = (
-    key: keyof RulesConfiguration['flapping'],
-    value: number | boolean
-  ) => {
-    if (!configuration) {
+  const handleSettingsChange = (key: keyof RulesSettings['flapping'], value: number | boolean) => {
+    if (!settings) {
       return;
     }
-    setConfiguration({
-      ...configuration,
+    setSettings({
+      ...settings,
       [key]: value,
     });
   };
 
   const handleUpdate = async () => {
-    if (!configuration) {
+    if (!settings) {
       return;
     }
     onClose();
     try {
-      setUpdatingRulesConfiguration?.(true);
-      await updateRulesConfiguration({
+      setUpdatingRulesSettings?.(true);
+      await updateFlappingSettings({
         http,
-        rulesConfiguration: {
-          flapping: configuration,
-        },
+        flappingSettings: settings,
       });
       toasts.addSuccess(
-        i18n.translate(
-          'xpack.triggersActionsUI.rulesConfiguration.modal.updateRulesConfigurationSuccess',
-          {
-            defaultMessage: 'Rules configuration updated successfully.',
-          }
-        )
+        i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.updateRulesSettingsSuccess', {
+          defaultMessage: 'Rules settings updated successfully.',
+        })
       );
     } catch (e) {
       toasts.addDanger(
-        i18n.translate(
-          'xpack.triggersActionsUI.rulesConfiguration.modal.updateRulesConfigurationFailure',
-          {
-            defaultMessage: 'Failed to update rules configuration.',
-          }
-        )
+        i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.updateRulesSettingsFailure', {
+          defaultMessage: 'Failed to update rules settings.',
+        })
       );
     }
-    setUpdatingRulesConfiguration?.(false);
+    setUpdatingRulesSettings?.(false);
     onSave?.();
   };
 
@@ -158,17 +144,18 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
     (async () => {
       setIsLoading(true);
       try {
-        const rulesConfiguration = await getRulesConfiguration({ http });
-        setConfiguration(rulesConfiguration.flapping);
+        const flappingSettings = await getFlappingSettings({ http });
+        setSettings({
+          enabled: flappingSettings.enabled,
+          lookBackWindow: flappingSettings.lookBackWindow,
+          statusChangeThreshold: flappingSettings.statusChangeThreshold,
+        });
       } catch (e) {
         setHasError(true);
         toasts.addDanger(
-          i18n.translate(
-            'xpack.triggersActionsUI.rulesConfiguration.modal.getRulesConfigurationError',
-            {
-              defaultMessage: 'Failed to get rules configuration.',
-            }
-          )
+          i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.getRulesSettingsError', {
+            defaultMessage: 'Failed to get rules Settings.',
+          })
         );
       } finally {
         setIsLoading(false);
@@ -193,15 +180,15 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
           <EuiFlexItem grow={false}>
             <EuiSwitch
               label={flappingEnableLabel}
-              checked={configuration!.enabled}
-              disabled={!flappingDetection}
-              onChange={(e) => handleConfigurationChange('enabled', e.target.checked)}
+              checked={settings!.enabled}
+              disabled={!writeFlappingSettingsUI}
+              onChange={(e) => handleSettingsChange('enabled', e.target.checked)}
             />
             <EuiSpacer size="s" />
             <EuiText color="subdued" size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.rulesConfiguration.modal.enableFlappingHelpText"
+                  id="xpack.triggersActionsUI.rulesSettings.modal.enableFlappingHelpText"
                   defaultMessage="Only affects rules whose alerts can self-recover."
                 />
               </p>
@@ -213,16 +200,16 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
   };
 
   const renderFormRight = () => {
-    if (!configuration) {
+    if (!settings) {
       return null;
     }
-    if (!configuration.enabled) {
+    if (!settings.enabled) {
       return (
         <EuiFlexItem>
           <EuiPanel borderRadius="none" color="subdued" grow={false}>
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.triggersActionsUI.rulesConfiguration.flapping.flappingConfigurationOffDescription"
+                id="xpack.triggersActionsUI.rulesSettings.flapping.flappingSettingsOffDescription"
                 defaultMessage="Alert flapping detection is off. Alerts will be generated based on the rule interval. This may result in higher alert volume."
               />
             </EuiText>
@@ -233,9 +220,9 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
 
     return (
       <EuiFlexItem>
-        <RulesConfigurationFlapping
-          flappingConfiguration={configuration}
-          onChange={(key, value) => handleConfigurationChange(key, value)}
+        <RulesSettingsFlapping
+          flappingSettings={settings}
+          onChange={(key, value) => handleSettingsChange(key, value)}
         />
       </EuiFlexItem>
     );
@@ -243,16 +230,16 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
 
   const renderForm = () => {
     if (hasError) {
-      return <RulesConfigurationErrorPrompt />;
+      return <RulesSettingsErrorPrompt />;
     }
-    if (!configuration || isLoading) {
+    if (!settings || isLoading) {
       return <CenterJustifiedSpinner />;
     }
     return (
       <EuiForm>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <RulesConfigurationFlappingTitle />
+            <RulesSettingsFlappingTitle />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
@@ -270,7 +257,7 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
         <EuiModalHeaderTitle>
           <h3>
             <FormattedMessage
-              id="xpack.triggersActionsUI.rulesConfiguration.modal.title"
+              id="xpack.triggersActionsUI.rulesSettings.modal.title"
               defaultMessage="Rule Settings"
             />
           </h3>
@@ -279,7 +266,7 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
       <EuiModalBody>
         <EuiCallOut
           size="s"
-          title={i18n.translate('xpack.triggersActionsUI.rulesConfiguration.modal.calloutMessage', {
+          title={i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.calloutMessage', {
             defaultMessage: 'Applies to all rules within the current space',
           })}
         />
@@ -291,13 +278,13 @@ export const RulesConfigurationModal = (props: RulesConfigurationModalProps) => 
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose}>
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesConfiguration.modal.cancelButton"
+            id="xpack.triggersActionsUI.rulesSettings.modal.cancelButton"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
         <EuiButton fill onClick={handleUpdate} disabled={!save || hasError}>
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesConfiguration.modal.saveButton"
+            id="xpack.triggersActionsUI.rulesSettings.modal.saveButton"
             defaultMessage="Save"
           />
         </EuiButton>
