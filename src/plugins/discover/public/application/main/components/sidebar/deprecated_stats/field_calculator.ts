@@ -8,15 +8,27 @@
 
 import { map, sortBy, without, each, defaults, isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '../../../../../types';
+import { Bucket, FieldDetails } from './types';
 
-function getFieldValues(hits, field) {
-  const name = field.name;
-  return map(hits, function (hit) {
-    return hit.flattened[name];
-  });
+export interface FieldCountsParams {
+  hits: DataTableRecord[];
+  field: DataViewField;
+  dataView: DataView;
+  count?: number;
+  grouped?: boolean;
 }
 
-function getFieldValueCounts(params) {
+interface FieldCountsBucket {
+  count: number;
+  value: string;
+}
+
+const getFieldValues = (hits: DataTableRecord[], field: DataViewField): unknown[] =>
+  map(hits, (hit) => hit.flattened[field.name]);
+
+const getFieldValueCounts = (params: FieldCountsParams): FieldDetails => {
   params = defaults(params, {
     count: 5,
     grouped: false,
@@ -38,18 +50,19 @@ function getFieldValueCounts(params) {
   }
 
   const allValues = getFieldValues(params.hits, params.field);
-  let counts;
   const missing = _countMissing(allValues);
 
   try {
     const groups = _groupValues(allValues, params);
-    counts = map(sortBy(groups, 'count').reverse().slice(0, params.count), function (bucket) {
-      return {
+    const counts: Bucket[] = sortBy(groups, 'count')
+      .reverse()
+      .slice(0, params.count)
+      .map((bucket: FieldCountsBucket) => ({
         value: bucket.value,
-        count: bucket.count,
-        percent: ((bucket.count / (params.hits.length - missing)) * 100).toFixed(1),
-      };
-    });
+        count: bucket.count as number,
+        percent: Number(((bucket.count / (params.hits.length - missing)) * 100).toFixed(1)),
+        display: params.dataView.getFormatterForField(params.field).convert(bucket.value),
+      }));
 
     if (params.hits.length - missing === 0) {
       return {
@@ -69,24 +82,22 @@ function getFieldValueCounts(params) {
     return {
       total: params.hits.length,
       exists: params.hits.length - missing,
-      missing: missing,
+      missing,
       buckets: counts,
     };
   } catch (e) {
     return { error: e.message };
   }
-}
+};
 
 // returns a count of fields in the array that are undefined or null
-function _countMissing(array) {
-  return array.length - without(array, undefined, null).length;
-}
+const _countMissing = (array: unknown[]) => array.length - without(array, undefined, null).length;
 
-function _groupValues(allValues, params) {
-  const groups = {};
+const _groupValues = (allValues: unknown[], params: FieldCountsParams) => {
+  const groups: Record<string, FieldCountsBucket> = {};
   let k;
 
-  allValues.forEach(function (value) {
+  allValues.forEach((value: unknown) => {
     if (isObject(value) && !Array.isArray(value)) {
       throw new Error(
         i18n.translate(
@@ -104,12 +115,12 @@ function _groupValues(allValues, params) {
       k = value == null ? undefined : [value];
     }
 
-    each(k, function (key) {
+    each(k, (key: string) => {
       if (groups.hasOwnProperty(key)) {
-        groups[key].count++;
+        (groups[key] as FieldCountsBucket).count++;
       } else {
         groups[key] = {
-          value: params.grouped ? value : key,
+          value: params.grouped ? (value as string) : key,
           count: 1,
         };
       }
@@ -117,11 +128,11 @@ function _groupValues(allValues, params) {
   });
 
   return groups;
-}
+};
 
 export const fieldCalculator = {
-  _groupValues: _groupValues,
-  _countMissing: _countMissing,
-  getFieldValues: getFieldValues,
-  getFieldValueCounts: getFieldValueCounts,
+  _groupValues,
+  _countMissing,
+  getFieldValues,
+  getFieldValueCounts,
 };
