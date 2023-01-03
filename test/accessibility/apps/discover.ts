@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const TEST_COLUMN_NAMES = ['dayOfWeek', 'DestWeather'];
   const toasts = getService('toasts');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('Discover a11y tests', () => {
     before(async () => {
@@ -127,10 +128,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for data-grid table with columns', async () => {
-      await dataGrid.clickFieldActionInFlyout('Cancelled', 'toggleColumnButton');
-      await dataGrid.clickFieldActionInFlyout('Carrier', 'toggleColumnButton');
-      await testSubjects.click('euiFlyoutCloseButton');
-      await toasts.dismissAllToasts();
+      await retry.try(async () => {
+        await dataGrid.clickFieldActionInFlyout('Cancelled', 'toggleColumnButton');
+      });
+
+      await retry.try(async () => {
+        await dataGrid.clickFieldActionInFlyout('Carrier', 'toggleColumnButton');
+      });
+
+      await retry.try(async () => {
+        await testSubjects.click('euiFlyoutCloseButton');
+        await toasts.dismissAllToasts();
+      });
+
       await a11y.testAppSnapshot();
     });
 
