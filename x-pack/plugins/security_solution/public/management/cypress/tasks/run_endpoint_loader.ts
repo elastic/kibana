@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-export enum ArchiverMethod {
-  SAVE = 'save',
-  LOAD = 'load',
-  UNLOAD = 'unload',
-}
-
-export const runResolverGeneratorScript = () => {
+export const runEndpointLoaderScript = () => {
   const {
     ELASTICSEARCH_USERNAME,
     ELASTICSEARCH_PASSWORD,
     hostname: HOSTNAME,
     configport: PORT,
   } = Cypress.env();
-  const script = `node scripts/endpoint/resolver_generator.js --node="http://${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD}@${HOSTNAME}:9220" --kibana="http://${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD}@${HOSTNAME}:${PORT}" --delete --numHosts=3 --numDocs=1 --fleet --withNewUser=santaEndpoint:changeme`;
+  const script = `node scripts/endpoint/resolver_generator.js --node="http://${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD}@${HOSTNAME}:9220" --kibana="http://${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD}@${HOSTNAME}:${PORT}" --delete --numHosts=1 --numDocs=1 --fleet --withNewUser=santaEndpoint:changeme`;
 
   cy.exec(script, { env: { NODE_TLS_REJECT_UNAUTHORIZED: 1 } });
 };

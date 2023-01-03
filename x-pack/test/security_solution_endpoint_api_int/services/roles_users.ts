@@ -30,7 +30,7 @@ export enum ROLE {
   endpoint_security_policy_manager = 'endpointSecurityPolicyManager',
 }
 
-export const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
+const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
   t1Analyst: getT1Analyst(),
   t2Analyst: getT2Analyst(),
   hunter: getHunter(),

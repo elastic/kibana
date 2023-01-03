@@ -6,11 +6,11 @@
  */
 
 import { login } from '../tasks/login';
-import { runResolverGeneratorScript } from '../tasks/resolver_generator';
+import { runEndpointLoaderScript } from '../tasks/run_endpoint_loader';
 
 describe('Endpoints page', () => {
   before(() => {
-    runResolverGeneratorScript();
+    runEndpointLoaderScript();
   });
 
   beforeEach(() => {
