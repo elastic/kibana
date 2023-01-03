@@ -7,13 +7,12 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useMemo } from 'react';
-import { toSLO } from '../../utils/slo/slo';
+import { GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useDataFetcher } from '../use_data_fetcher';
-import { SLO } from '../../typings';
 
 interface UseFetchSloDetailsResponse {
   loading: boolean;
-  slo: SLO | undefined;
+  slo: SLOWithSummaryResponse | undefined;
 }
 
 function useFetchSloDetails(sloId?: string): UseFetchSloDetailsResponse {
@@ -23,7 +22,10 @@ function useFetchSloDetails(sloId?: string): UseFetchSloDetailsResponse {
     [params]
   );
 
-  const { loading, data: slo } = useDataFetcher<{ sloId?: string }, SLO | undefined>({
+  const { loading, data: slo } = useDataFetcher<
+    { sloId?: string },
+    SLOWithSummaryResponse | undefined
+  >({
     paramsForApiCall: params,
     initialDataState: undefined,
     executeApiCall: fetchSlo,
@@ -37,22 +39,18 @@ const fetchSlo = async (
   params: { sloId?: string },
   abortController: AbortController,
   http: HttpSetup
-): Promise<SLO | undefined> => {
+): Promise<SLOWithSummaryResponse | undefined> => {
   if (params.sloId === undefined) {
     return undefined;
   }
 
   try {
-    const response = await http.get<Record<string, unknown>>(
-      `/api/observability/slos/${params.sloId}`,
-      {
-        query: {},
-        signal: abortController.signal,
-      }
-    );
-    if (response !== undefined) {
-      return toSLO(response);
-    }
+    const response = await http.get<GetSLOResponse>(`/api/observability/slos/${params.sloId}`, {
+      query: {},
+      signal: abortController.signal,
+    });
+
+    return response;
   } catch (error) {
     // ignore error for retrieving slos
   }
