@@ -13,7 +13,7 @@ import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
 import { TimeSliderPopoverButton } from './time_slider_popover_button';
 import { TimeSliderPopoverContent } from './time_slider_popover_content';
-import { EuiDualRangeRef } from './sliding_window_range';
+import { EuiDualRangeRef } from './time_slider_sliding_window_range';
 import { FROM_INDEX, TO_INDEX } from '../time_utils';
 import { getRoundedTimeRangeBounds } from '../time_slider_selectors';
 
