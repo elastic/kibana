@@ -9,13 +9,13 @@ import React, { useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSuggest } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Control, Controller, UseFormTrigger } from 'react-hook-form';
-import type { CreateSLOParams } from '@kbn/slo-schema';
+import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { useFetchIndices } from '../../../hooks/use_fetch_indices';
 
 export interface Props {
-  control: Control<CreateSLOParams>;
-  trigger: UseFormTrigger<CreateSLOParams>;
+  control: Control<CreateSLOInput>;
+  trigger: UseFormTrigger<CreateSLOInput>;
 }
 
 export function SloEditFormDefinitionCustomKql({ control, trigger }: Props) {

@@ -30,7 +30,7 @@ import { SloEditFormDescription } from './slo_edit_form_description';
 import { SloEditFormObjectives } from './slo_edit_form_objectives';
 import {
   processValues,
-  transformGetSloToCreateSloParams,
+  transformSloResponseToCreateSloInput,
 } from '../helpers/process_slo_form_values';
 import { paths } from '../../../config';
 import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
@@ -50,7 +50,7 @@ export function SloEditForm({ slo }: Props) {
 
   const { control, watch, getFieldState, getValues, formState, trigger } = useForm({
     defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
-    values: transformGetSloToCreateSloParams(slo),
+    values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
   });
 

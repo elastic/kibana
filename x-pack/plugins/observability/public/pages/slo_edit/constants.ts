@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CreateSLOParams } from '@kbn/slo-schema';
+import { CreateSLOInput } from '@kbn/slo-schema';
 
 import {
   BUDGETING_METHOD_OPTIONS,
@@ -22,7 +22,7 @@ export const SLI_OPTIONS = [
   },
 ];
 
-export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOParams = {
+export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
   name: '',
   description: '',
   indicator: {
@@ -35,7 +35,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOParams = {
     },
   },
   timeWindow: {
-    duration: TIMEWINDOW_OPTIONS[0].value as any, // Get this to be a proper Duration
+    duration: TIMEWINDOW_OPTIONS[0].value,
     isRolling: true,
   },
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,

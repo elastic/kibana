@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CreateSLOParams, GetSLOResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-export function transformGetSloToCreateSloParams(
-  values: GetSLOResponse | undefined
-): CreateSLOParams | undefined {
+export function transformSloResponseToCreateSloInput(
+  values: SLOWithSummaryResponse | undefined
+): CreateSLOInput | undefined {
   if (!values) return undefined;
 
   return {
@@ -20,16 +20,19 @@ export function transformGetSloToCreateSloParams(
         timesliceTarget: values.objective.timesliceTarget * 100,
       }),
     },
-  } as unknown as CreateSLOParams;
+  };
 }
 
-export function processValues(values: CreateSLOParams): CreateSLOParams {
+export function processValues(values: CreateSLOInput): CreateSLOInput {
   return {
     ...values,
     objective: {
       target: values.objective.target / 100,
       ...(values.objective.timesliceTarget && {
         timesliceTarget: values.objective.timesliceTarget / 100,
+      }),
+      ...(values.objective.timesliceWindow && {
+        timesliceWindow: `${values.objective.timesliceWindow}m`,
       }),
     },
   };

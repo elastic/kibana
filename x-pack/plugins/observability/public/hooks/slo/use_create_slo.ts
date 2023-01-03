@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import type { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, CreateSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 
@@ -14,7 +14,7 @@ interface UseCreateSlo {
   loading: boolean;
   success: boolean;
   error: string | undefined;
-  createSlo: (slo: CreateSLOParams) => void;
+  createSlo: (slo: CreateSLOInput) => void;
 }
 
 export function useCreateSlo(): UseCreateSlo {
@@ -24,7 +24,7 @@ export function useCreateSlo(): UseCreateSlo {
   const [error, setError] = useState<string | undefined>(undefined);
 
   const createSlo = useCallback(
-    async (slo: CreateSLOParams) => {
+    async (slo: CreateSLOInput) => {
       setLoading(true);
       setError('');
       setSuccess(false);

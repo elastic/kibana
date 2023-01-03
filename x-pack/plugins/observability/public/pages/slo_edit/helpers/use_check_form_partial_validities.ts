@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { CreateSLOInput } from '@kbn/slo-schema';
 import { FormState, UseFormGetFieldState } from 'react-hook-form';
-import type { CreateSLOParams } from '@kbn/slo-schema';
 
 interface Props {
-  getFieldState: UseFormGetFieldState<CreateSLOParams>;
-  formState: FormState<CreateSLOParams>;
+  getFieldState: UseFormGetFieldState<CreateSLOInput>;
+  formState: FormState<CreateSLOInput>;
 }
 
 export function useCheckFormPartialValidities({ getFieldState, formState }: Props) {

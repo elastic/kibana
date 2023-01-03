@@ -112,8 +112,9 @@ const findSLOResponseSchema = t.type({
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
-type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
-type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
+type CreateSLOInput = t.OutputOf<typeof createSLOParamsSchema.props.body>; // Raw payload sent by the frontend
+type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Parsed payload used by the backend
+type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw response sent to the frontend
 
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
@@ -139,6 +140,7 @@ export {
 };
 export type {
   BudgetingMethod,
+  CreateSLOInput,
   CreateSLOParams,
   CreateSLOResponse,
   FindSLOParams,
