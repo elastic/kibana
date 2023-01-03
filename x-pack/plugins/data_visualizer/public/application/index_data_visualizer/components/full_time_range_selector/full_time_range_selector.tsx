@@ -8,7 +8,7 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TimefilterContract } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 
 import {
   EuiButton,

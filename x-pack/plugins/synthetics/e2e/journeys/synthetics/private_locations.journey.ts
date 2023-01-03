@@ -14,7 +14,7 @@ import {
   cleanTestMonitors,
   getPrivateLocations,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey(`PrivateLocationsSettings`, async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
@@ -72,7 +72,7 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
   });
   let locationId: string;
   step('Click text=AlertingPrivate LocationsData Retention', async () => {
-    await page.click('text=AlertingPrivate LocationsData Retention');
+    await page.click('text=Private Locations');
     await page.click('h1:has-text("Settings")');
 
     const privateLocations = await getPrivateLocations(params);

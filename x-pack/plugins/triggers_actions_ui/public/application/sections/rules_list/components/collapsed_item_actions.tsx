@@ -44,14 +44,17 @@ export type ComponentOpts = {
   onUpdateAPIKey: (id: string[]) => void;
   onRunRule: (item: RuleTableItem) => void;
   onCloneRule: (ruleId: string) => void;
-} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
+} & Pick<
+  BulkOperationsComponentOpts,
+  'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'
+>;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   item,
   onLoading,
   onRuleChanged,
-  disableRule,
-  enableRule,
+  bulkDisableRules,
+  bulkEnableRules,
   setRulesToDelete,
   onEditRule,
   onUpdateAPIKey,
@@ -192,9 +195,9 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             const enabled = !isDisabled;
             asyncScheduler.schedule(async () => {
               if (enabled) {
-                await disableRule({ ...item, enabled });
+                await bulkDisableRules({ ids: [item.id] });
               } else {
-                await enableRule({ ...item, enabled });
+                await bulkEnableRules({ ids: [item.id] });
               }
               onRuleChanged();
             }, 10);
