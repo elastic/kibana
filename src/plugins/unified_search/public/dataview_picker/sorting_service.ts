@@ -41,7 +41,10 @@ export class SortingService<T = unknown> {
       parsedSorting = undefined;
     }
 
-    return parsedSorting ?? { sortingStrategyType: ALPHABETICALLY, direction: SortDirection.ASC };
+    return {
+      sortingStrategyType: parsedSorting?.sortingStrategyType || ALPHABETICALLY,
+      direction: parsedSorting?.direction || SortDirection.ASC,
+    };
   }
 
   setDirection(direction: Sorting['direction']) {
@@ -64,8 +67,9 @@ export class SortingService<T = unknown> {
 
   sortData(data: T[]) {
     return [...data].sort((a, b) => {
-      const firstComparableField = this.sortingStrategies[this.sortingStrategyType](a);
-      const secondComparableField = this.sortingStrategies[this.sortingStrategyType](b);
+      const fn = this.sortingStrategies[this.sortingStrategyType];
+      const firstComparableField = fn(a);
+      const secondComparableField = fn(b);
 
       return this.compare(firstComparableField, secondComparableField);
     });
