@@ -14,8 +14,8 @@ import {
 } from '@elastic/charts';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { i18n } from '@kbn/i18n';
+import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
