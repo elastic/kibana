@@ -196,9 +196,9 @@ export function inferTimeField(
       ? context.data
       : // if it's a negated filter, never respect bound time field
         [];
-  return Array.isArray(tablesAndColumns)
-    ? tablesAndColumns
-    : [tablesAndColumns]
+  return !Array.isArray(tablesAndColumns)
+    ? [tablesAndColumns]
+    : tablesAndColumns
         .map(({ table, column }) => {
           const tableColumn = table.columns[column];
           const hasTimeRange = Boolean(
