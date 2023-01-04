@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getUploadCommand } from './dev_only';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
   EndpointCapabilities,
@@ -369,6 +370,14 @@ export const getEndpointConsoleCommands = ({
       helpHidden: !getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }),
     },
   ];
+
+  // FIXME: DELETE PRIOR TO MERGE
+  // for dev purposes only - command only shown if url has `show_upload=`
+  if (location.search.includes('show_upload=')) {
+    consoleCommands.push(
+      getUploadCommand({ endpointAgentId, endpointPrivileges, endpointCapabilities })
+    );
+  }
 
   // `get-file` is currently behind feature flag
   if (isGetFileEnabled) {
