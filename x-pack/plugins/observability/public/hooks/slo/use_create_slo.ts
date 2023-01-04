@@ -6,18 +6,24 @@
  */
 
 import { useCallback, useState } from 'react';
-import type { CreateSLOInput, CreateSLOResponse } from '@kbn/slo-schema';
+import type {
+  CreateSLOInput,
+  CreateSLOResponse,
+  UpdateSLOInput,
+  UpdateSLOResponse,
+} from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 
-interface UseCreateSlo {
+interface UseCreateOrUpdateSlo {
   loading: boolean;
   success: boolean;
   error: string | undefined;
   createSlo: (slo: CreateSLOInput) => void;
+  updateSlo: (sloId: string, slo: UpdateSLOInput) => void;
 }
 
-export function useCreateSlo(): UseCreateSlo {
+export function useCreateOrUpdateSlo(): UseCreateOrUpdateSlo {
   const { http } = useKibana().services;
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);

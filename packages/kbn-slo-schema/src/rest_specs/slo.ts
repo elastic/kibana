@@ -96,7 +96,7 @@ const updateSLOParamsSchema = t.type({
     timeWindow: timeWindowSchema,
     budgetingMethod: budgetingMethodSchema,
     objective: objectiveSchema,
-    settings: settingsSchema,
+    settings: optionalSettingsSchema,
   }),
 });
 
@@ -118,6 +118,7 @@ type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw respon
 
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
+type UpdateSLOInput = t.OutputOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 
@@ -148,6 +149,7 @@ export type {
   GetSLOResponse,
   SLOResponse,
   SLOWithSummaryResponse,
+  UpdateSLOInput,
   UpdateSLOParams,
   UpdateSLOResponse,
 };
