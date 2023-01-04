@@ -94,7 +94,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
       />
       <ControlsContent
         timeRange={unifiedSearchDateRange}
-        dataViewId={dataView.id ?? ''}
+        dataView={dataView}
         query={unifiedSearchQuery}
         filters={unifiedSearchFilters}
         onFilterChange={onPanelFiltersChange}

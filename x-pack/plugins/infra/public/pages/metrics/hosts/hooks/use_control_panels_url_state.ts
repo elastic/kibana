@@ -9,41 +9,59 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { ControlGroupInput } from '@kbn/controls-plugin/common';
+import { ControlPanelState } from '@kbn/controls-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { DataControlInput } from '@kbn/controls-plugin/public';
 import { useUrlState } from '../../../../utils/use_url_state';
 
-export const getDefaultPanels = (dataViewId: string): ControlGroupInput['panels'] =>
-  ({
-    osPanel: {
-      order: 0,
-      width: 'medium',
-      grow: false,
-      type: 'optionsListControl',
-      explicitInput: {
-        id: 'osPanel',
-        dataViewId,
-        fieldName: 'host.os.name',
-        title: 'Operating System',
-      },
+export const getDefaultPanels = (
+  dataViewId: string
+): Record<string, ControlPanelState<DataControlInput>> => ({
+  'host.os.name': {
+    order: 0,
+    width: 'medium',
+    grow: false,
+    type: 'optionsListControl',
+    explicitInput: {
+      id: 'host.os.name',
+      dataViewId,
+      fieldName: 'host.os.name',
+      title: 'Operating System',
     },
-    cloudProviderPanel: {
-      order: 1,
-      width: 'medium',
-      grow: false,
-      type: 'optionsListControl',
-      explicitInput: {
-        id: 'cloudProviderPanel',
-        dataViewId,
-        fieldName: 'cloud.provider',
-        title: 'Cloud Provider',
-      },
+  },
+  'cloud.provider': {
+    order: 1,
+    width: 'medium',
+    grow: false,
+    type: 'optionsListControl',
+    explicitInput: {
+      id: 'cloud.provider',
+      dataViewId,
+      fieldName: 'cloud.provider',
+      title: 'Cloud Provider',
     },
-  } as unknown as ControlGroupInput['panels']);
+  },
+});
+
+const getAvailableControlPanels = (dataView: DataView) => {
+  const defaultPanels = getDefaultPanels(dataView.id ?? '');
+
+  return Object.entries(defaultPanels).reduce((panels, [panelName, config], pos) => {
+    if (dataView.fields.getByName(panelName) === undefined) {
+      return panels;
+    }
+
+    return { ...panels, [panelName]: { ...config, order: pos } };
+  }, {});
+};
+
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
 
-export const useControlPanels = (dataViewId: string) => {
+export const useControlPanels = (dataView: DataView) => {
+  const defaultState = getAvailableControlPanels(dataView);
+
   return useUrlState<ControlPanels>({
-    defaultState: getDefaultPanels(dataViewId),
+    defaultState,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: HOST_FILTERS_URL_STATE_KEY,
