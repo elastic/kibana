@@ -17,32 +17,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Control, Controller, UseFormWatch } from 'react-hook-form';
-import type { BudgetingMethod, CreateSLOInput } from '@kbn/slo-schema';
+import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { SloEditFormObjectivesTimeslices } from './slo_edit_form_objectives_timeslices';
-
-export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: string }> = [
-  {
-    value: 'occurrences',
-    text: i18n.translate('xpack.observability.slos.sloEdit.budgetingMethod.occurrences', {
-      defaultMessage: 'Occurrences',
-    }),
-  },
-  {
-    value: 'timeslices',
-    text: i18n.translate('xpack.observability.slos.sloEdit.budgetingMethod.timeslices', {
-      defaultMessage: 'Timeslices',
-    }),
-  },
-];
-
-export const TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
-  value: `${number}d`,
-  text: i18n.translate('xpack.observability.slos.sloEdit.timeWindow.days', {
-    defaultMessage: '{number} days',
-    values: { number },
-  }),
-}));
+import { BUDGETING_METHOD_OPTIONS, TIMEWINDOW_OPTIONS } from '../constants';
 
 export interface Props {
   control: Control<CreateSLOInput>;

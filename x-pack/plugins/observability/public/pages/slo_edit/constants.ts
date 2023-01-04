@@ -6,12 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CreateSLOInput } from '@kbn/slo-schema';
-
-import {
-  BUDGETING_METHOD_OPTIONS,
-  TIMEWINDOW_OPTIONS,
-} from './components/slo_edit_form_objectives';
+import { BudgetingMethod, CreateSLOInput } from '@kbn/slo-schema';
 
 export const SLI_OPTIONS = [
   {
@@ -21,6 +16,29 @@ export const SLI_OPTIONS = [
     }),
   },
 ];
+
+export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: string }> = [
+  {
+    value: 'occurrences',
+    text: i18n.translate('xpack.observability.slos.sloEdit.budgetingMethod.occurrences', {
+      defaultMessage: 'Occurrences',
+    }),
+  },
+  {
+    value: 'timeslices',
+    text: i18n.translate('xpack.observability.slos.sloEdit.budgetingMethod.timeslices', {
+      defaultMessage: 'Timeslices',
+    }),
+  },
+];
+
+export const TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
+  value: `${number}d`,
+  text: i18n.translate('xpack.observability.slos.sloEdit.timeWindow.days', {
+    defaultMessage: '{number} days',
+    values: { number },
+  }),
+}));
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
   name: '',
