@@ -60,7 +60,7 @@ export const getTestRunDetailLink = ({
   basePath?: string;
   locationId?: string;
 }) => {
-	const testRunUrl = `/monitor/${monitorId}/test-run/${checkGroup}?locationId=${locationId}`;
+  const testRunUrl = `/monitor/${monitorId}/test-run/${checkGroup}?locationId=${locationId}`;
   if (basePath) {
     return `${basePath}/app/synthetics${testRunUrl}`;
   } else {
