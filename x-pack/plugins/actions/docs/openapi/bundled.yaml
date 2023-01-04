@@ -33,7 +33,47 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: true
+                required:
+                  - config
+                  - connector_type_id
+                  - id
+                  - is_deprecated
+                  - is_missing_secrets
+                  - is_preconfigured
+                  - name
+                properties:
+                  config:
+                    type: object
+                    description: The configuration for the connector. Configuration properties vary depending on the connector type.
+                    additionalProperties: true
+                    nullable: true
+                  connector_type_id:
+                    type: string
+                    description: The connector type ID for the connector. For example, `.cases-webhook`, `.index`, `.jira`, `.opsgenie`, `.server-log`, or `.servicenow-itom`.
+                    example: .server-log
+                  id:
+                    type: string
+                    description: The identifier for the connector.
+                    example: b0766e10-d190-11ec-b04c-776c77d14fca
+                  is_deprecated:
+                    type: boolean
+                    description: Indicates whether the connector type is deprecated.
+                    example: false
+                  is_missing_secrets:
+                    type: boolean
+                    description: Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type.
+                    example: false
+                  is_preconfigured:
+                    type: boolean
+                    description: Indicates whether it is a preconfigured connector.
+                    example: false
+                  name:
+                    type: string
+                    description: The display name for the connector.
+                    example: my-connector
+              examples:
+                getConnectorResponse:
+                  $ref: '#/components/examples/get_connector_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -129,17 +169,17 @@ components:
       schema:
         type: string
         example: default
-  schemas:
-    features:
-      type: string
-      description: |
-        The feature that uses the connector. Valid values are `alerting`, `cases`, `uptime`, and `siem`.
-      enum:
-        - alerting
-        - cases
-        - uptime
-        - siem
   examples:
+    get_connector_response:
+      summary: A list of connector types
+      value:
+        id: df770e30-8b8b-11ed-a780-3b746c987a81
+        name: my_server_log_connector
+        config: {}
+        connector_type_id: .server-log
+        is_preconfigured: false
+        is_deprecated: false
+        is_missing_secrets: false
     get_connector_types_response:
       summary: A list of connector types
       value:
@@ -172,6 +212,16 @@ components:
           supported_feature_ids:
             - alerting
             - uptime
+  schemas:
+    features:
+      type: string
+      description: |
+        The feature that uses the connector. Valid values are `alerting`, `cases`, `uptime`, and `siem`.
+      enum:
+        - alerting
+        - cases
+        - uptime
+        - siem
 security:
   - basicAuth: []
   - apiKeyAuth: []
