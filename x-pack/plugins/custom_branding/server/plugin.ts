@@ -55,7 +55,6 @@ export class CustomBrandingPlugin implements Plugin {
       },
     });
     core.customBranding.register();
-    core.customBranding.setUiSettingsKeys(['logo', 'pageTitle', 'faviconPNG']);
     return {};
   }
 

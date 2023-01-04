@@ -153,9 +153,9 @@ export class RenderingService {
       themeVersion,
       stylesheetPaths,
       customBranding: {
-        faviconSVG: branding.faviconSVG,
-        faviconPNG: branding.faviconPNG,
-        pageTitle: branding.pageTitle,
+        faviconSVG: branding?.faviconSVG,
+        faviconPNG: branding?.faviconPNG,
+        pageTitle: branding?.pageTitle,
       },
       injectedMetadata: {
         version: env.packageInfo.version,
@@ -175,8 +175,8 @@ export class RenderingService {
           version: themeVersion,
         },
         customBranding: {
-          logo: branding.logo,
-          customizedLogo: branding.customizedLogo,
+          logo: branding?.logo,
+          customizedLogo: branding?.customizedLogo,
         },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,

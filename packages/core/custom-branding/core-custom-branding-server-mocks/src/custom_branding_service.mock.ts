@@ -11,7 +11,6 @@ import { serviceContractMock } from './service_contract.mock';
 const createSetupContractMock = () => {
   return {
     register: jest.fn(),
-    setUiSettingsKeys: jest.fn(),
   };
 };
 

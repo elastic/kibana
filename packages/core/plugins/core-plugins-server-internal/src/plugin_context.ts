@@ -198,7 +198,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       register: () => {
         deps.customBranding.register(plugin.name);
       },
-      setUiSettingsKeys: (uiSettingsKeys) => deps.customBranding.setUiSettingsKeys(uiSettingsKeys),
     },
     docLinks: deps.docLinks,
     elasticsearch: {

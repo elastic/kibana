@@ -21,5 +21,4 @@ export interface CustomBrandingStartDeps {
 /** @public */
 export interface CustomBrandingSetup {
   register: () => void;
-  setUiSettingsKeys: (uiSettingsKeys: string[]) => void;
 }
