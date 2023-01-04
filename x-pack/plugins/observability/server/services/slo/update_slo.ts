@@ -41,7 +41,7 @@ export class UpdateSLO {
 
   private updateSLO(originalSlo: SLO, params: UpdateSLOParams) {
     let hasBreakingChange = false;
-    const updatedSlo: SLO = Object.assign({}, originalSlo, params, { updated_at: new Date() });
+    const updatedSlo: SLO = Object.assign({}, originalSlo, params, { updatedAt: new Date() });
     validateSLO(updatedSlo);
 
     if (!deepEqual(originalSlo.indicator, updatedSlo.indicator)) {
