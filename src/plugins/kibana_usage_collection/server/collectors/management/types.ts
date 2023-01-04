@@ -143,7 +143,6 @@ export interface UsageStats {
   isDefaultIndexMigrated: boolean;
   'lens:useFieldExistenceSampling': boolean;
   'metrics:allowCheckingForFailedShards': boolean;
-  'observability:apmOperationsTab': boolean;
   'observability:apmLabsButton': boolean;
   'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;

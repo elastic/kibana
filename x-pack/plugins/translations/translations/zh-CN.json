@@ -24830,7 +24830,6 @@
     "xpack.observability.apmAWSLambdaRequestCostPerMillion": "AWS lambda 每 1M 请求的价格",
     "xpack.observability.apmLabs": "在 APM 中启用“实验”按钮",
     "xpack.observability.apmLabsDescription": "此标志决定查看者是否有权访问用于在 APM 中快速启用和禁用技术预览功能的“实验”按钮。",
-    "xpack.observability.apmOperationsBreakdown": "APM Operations Breakdown",
     "xpack.observability.apmProgressiveLoading": "使用渐进方式加载选定 APM 视图",
     "xpack.observability.apmProgressiveLoadingQualityHigh": "高采样速率（更慢，最准确）",
     "xpack.observability.apmProgressiveLoadingQualityLow": "低采样速率（最快，最不准确）",
