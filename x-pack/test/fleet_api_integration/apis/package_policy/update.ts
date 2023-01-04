@@ -36,6 +36,35 @@ export default function (providerContext: FtrProviderContext) {
     let packagePolicyId2: string;
     let packagePolicyId3: string;
     let endpointPackagePolicyId: string;
+    let inputOnlyPackagePolicyId: string;
+
+    const inputOnlyBasePackagePolicy = {
+      name: 'input-only-test-1',
+      description: '',
+      namespace: 'default',
+      policy_id: agentPolicyId,
+      inputs: [
+        {
+          type: 'logfile',
+          policy_template: 'logs',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'input_package.logs' },
+              vars: {
+                paths: { type: 'text', value: ['/tmp/test.log'] },
+                tags: { type: 'text', value: ['tag1'] },
+                ignore_older: { value: '72h', type: 'text' },
+                'data_stream.dataset': { type: 'text', value: 'generic' },
+              },
+            },
+          ],
+        },
+      ],
+      package: { name: 'input_package', title: 'Input only package', version: '1.0.0' },
+    };
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -160,6 +189,12 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
       endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
+
+      const { body: inputOnlyPolicyResponse } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send(inputOnlyBasePackagePolicy);
+      inputOnlyPackagePolicyId = inputOnlyPolicyResponse.item.id;
     });
 
     after(async function () {
@@ -437,6 +472,34 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(body.message).eql('Input not found: with_required_variables-i-do-not-exists');
+      });
+
+      it('should return a 400 if namespace is edited on input only package policy', async function () {
+        const { body } = await supertest
+          .put(`/api/fleet/package_policies/${inputOnlyPackagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            ...inputOnlyBasePackagePolicy,
+            namespace: 'updated_namespace',
+          })
+          .expect(400);
+        expect(body.message).eql(
+          'Package policy namespace cannot be modified for input only packages, please create a new package policy.'
+        );
+      });
+      it.only('should return a 400 if dataset is edited on input only package policy', async function () {
+        const updatedPolicy = JSON.parse(JSON.stringify(inputOnlyBasePackagePolicy));
+
+        updatedPolicy.inputs[0].streams[0].vars['data_stream.dataset'].value = 'updated_dataset';
+
+        const { body } = await supertest
+          .put(`/api/fleet/package_policies/${inputOnlyPackagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updatedPolicy)
+          .expect(400);
+        expect(body.message).eql(
+          'Package policy dataset cannot be modified for input only packages, please create a new package policy.'
+        );
       });
     });
   });
