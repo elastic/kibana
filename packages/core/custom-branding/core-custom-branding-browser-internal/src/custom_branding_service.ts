@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { of, Subject, Observable } from 'rxjs';
-import { shareReplay, takeUntil } from 'rxjs/operators';
+import { Subject, BehaviorSubject } from 'rxjs';
+import { shareReplay, takeUntil, map } from 'rxjs/operators';
 import type {
   CustomBrandingStart,
   CustomBrandingSetup,
@@ -16,25 +16,25 @@ import type {
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 export class CustomBrandingService {
-  private customBranding: CustomBranding = {};
-  private hasCustomBranding$: Observable<boolean> = new Observable<boolean>();
-  private customBranding$: Observable<CustomBranding> = new Observable<CustomBranding>();
+  private customBranding$: BehaviorSubject<CustomBranding> = new BehaviorSubject<CustomBranding>(
+    {}
+  );
   private stop$ = new Subject<void>();
-
-  private hasCustomBranding() {
-    return Object.keys(this.customBranding).length > 0;
-  }
 
   /**
    * @public
    */
   public start(): CustomBrandingStart {
-    if (!this.hasCustomBranding$ || !this.customBranding$) {
+    if (!this.customBranding$) {
       throw new Error('Setup needs to be called before start');
     }
     return {
       customBranding$: this.customBranding$.pipe(takeUntil(this.stop$), shareReplay(1)),
-      hasCustomBranding$: this.hasCustomBranding$.pipe(takeUntil(this.stop$), shareReplay(1)),
+      hasCustomBranding$: this.customBranding$.pipe(
+        takeUntil(this.stop$),
+        map((cb) => Object.keys(cb).length > 0),
+        shareReplay(1)
+      ),
     };
   }
 
@@ -43,13 +43,14 @@ export class CustomBrandingService {
    */
   public setup({ injectedMetadata }: CustomBrandingSetupDeps): CustomBrandingSetup {
     const customBranding = injectedMetadata.getCustomBranding() as CustomBranding;
-    this.customBranding = customBranding;
-    this.customBranding$ = of(customBranding);
-    this.hasCustomBranding$ = of(this.hasCustomBranding());
-
+    this.customBranding$ = new BehaviorSubject<CustomBranding>(customBranding);
     return {
       customBranding$: this.customBranding$.pipe(takeUntil(this.stop$), shareReplay(1)),
-      hasCustomBranding$: this.hasCustomBranding$.pipe(takeUntil(this.stop$), shareReplay(1)),
+      hasCustomBranding$: this.customBranding$.pipe(
+        takeUntil(this.stop$),
+        map((cb) => Object.keys(cb).length > 0),
+        shareReplay(1)
+      ),
     };
   }
 
