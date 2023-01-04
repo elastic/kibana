@@ -37,8 +37,8 @@ jobs:
     # - name: Autobuild
     #   uses: github/codeql-action/autobuild@v2
 
-    - run: yarn install
-    # - run: yarn kbn bootstrap
+    # - run: yarn install # <-- this works fine
+    - run: yarn kbn bootstrap
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
