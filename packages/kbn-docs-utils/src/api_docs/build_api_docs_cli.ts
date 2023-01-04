@@ -13,7 +13,7 @@ import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Project } from 'ts-morph';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
@@ -29,6 +29,7 @@ import { countEslintDisableLines, EslintDisableCounts } from './count_eslint_dis
 import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
 import { trimDeletedDocsFromNav } from './trim_deleted_docs_from_nav';
 import { getAllDocFileIds } from './mdx/get_all_doc_file_ids';
+import { getPathsByPackage } from './get_paths_by_package';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -89,14 +90,16 @@ export function runBuildApiDocsCli() {
       } = getPluginApiMap(project, plugins, log, { collectReferences, pluginFilter });
 
       const reporter = CiStatsReporter.fromEnv(log);
+      const pathsByPlugin = await getPathsByPackage(plugins);
 
       const allPluginStats: { [key: string]: PluginMetaInfo & ApiStats & EslintDisableCounts } = {};
       for (const plugin of plugins) {
         const id = plugin.manifest.id;
         const pluginApi = pluginApiMap[id];
+        const paths = pathsByPlugin.get(plugin) ?? [];
 
         allPluginStats[id] = {
-          ...(await countEslintDisableLines(plugin.directory)),
+          ...(await countEslintDisableLines(paths)),
           ...collectApiStatsForPlugin(
             pluginApi,
             missingApiItems,
