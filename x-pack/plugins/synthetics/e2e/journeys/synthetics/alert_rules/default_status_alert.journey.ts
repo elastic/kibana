@@ -9,11 +9,14 @@ import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import uuid from 'uuid';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { getReasonMessage } from '../../../../server/legacy_uptime/lib/alerts/status_check';
 import { syntheticsAppPageProvider } from '../../../page_objects/synthetics/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 
 journey(`DefaultStatusAlert`, async ({ page, params }) => {
+  recordVideo(page);
+
   page.setDefaultTimeout(60 * 1000);
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
