@@ -11,23 +11,43 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../common/types/api';
 
-import { FetchEnginesAPILogic, mockedEngines } from '../../api/engines/fetch_engines_api_logic';
+import { FetchEnginesAPILogic } from '../../api/engines/fetch_engines_api_logic';
 
 import { EnginesListLogic } from './engines_list_logic';
-import { DEFAULT_META } from './types';
+import { DEFAULT_META, EngineListDetails } from './types';
 
 const DEFAULT_VALUES = {
   data: undefined,
-  results: [], // meta is not added for jest case, pagination is yet to be implemented
+  results: [],
   meta: DEFAULT_META,
   parameters: { meta: DEFAULT_META },
-  status: 0,
+  status: Status.IDLE,
 };
 
 // sample engines list
-const results = mockedEngines[0].results;
 
-// const enginesList: EngineListDetails[] = mockedEngines[0];
+const results: EngineListDetails[] = [
+  {
+    name: 'engine-name-1',
+    indices: ['index-18', 'index-23'],
+    last_updated: '21 March 2021',
+    document_count: 18,
+  },
+  {
+    name: 'engine-name-2',
+    indices: ['index-180', 'index-230', 'index-8', 'index-2'],
+    last_updated: '10 Jul 2018',
+    document_count: 10,
+  },
+
+  {
+    name: 'engine-name-3',
+    indices: ['index-2', 'index-3'],
+    last_updated: '21 December 2022',
+    document_count: 8,
+  },
+];
+
 describe('EnginesListLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(FetchEnginesAPILogic);
   const { mount } = new LogicMounter(EnginesListLogic);
@@ -67,8 +87,8 @@ describe('EnginesListLogic', () => {
         };
         expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
         EnginesListLogic.actions.apiSuccess({
-          results,
           meta: newPageMeta,
+          results,
           searchQuery: 'k',
         });
         expect(EnginesListLogic.values).toEqual({
@@ -83,6 +103,7 @@ describe('EnginesListLogic', () => {
             meta: newPageMeta,
             searchQuery: 'k',
           },
+          results,
           status: Status.SUCCESS,
         });
       });
@@ -123,6 +144,7 @@ describe('EnginesListLogic', () => {
           parameters: {
             meta: DEFAULT_META,
           },
+          results,
           status: Status.SUCCESS,
         });
       });
