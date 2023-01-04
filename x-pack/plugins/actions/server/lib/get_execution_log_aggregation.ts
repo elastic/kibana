@@ -227,7 +227,7 @@ export function getExecutionLogAggregation({
                 gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
               },
             },
-            // Filter by rule execute doc and get information from this event
+            // Filter by action execute doc and get information from this event
             actionExecution: {
               filter: {
                 bool: {
@@ -305,9 +305,8 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     status === 'failure' ? `${outcomeMessage} - ${outcomeErrorMessage}` : outcomeMessage;
   const version = outcomeAndMessage.kibana?.version ?? '';
 
-  const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
   const spaceIds = outcomeAndMessage ? outcomeAndMessage?.kibana?.space_ids ?? [] : [];
-  const ruleName = outcomeAndMessage ? outcomeAndMessage.action?.name ?? '' : '';
+  const actionName = outcomeAndMessage ? outcomeAndMessage.action?.name ?? '' : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.actionExecution?.executeStartTime.value_as_string ?? '',
@@ -316,9 +315,8 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     message,
     version,
     schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
-    connector_id: ruleId,
     space_ids: spaceIds,
-    connector_name: ruleName,
+    connector_name: actionName,
   };
 }
 

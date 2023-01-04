@@ -6,12 +6,11 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
+import { IExecutionKPIResult } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
 import { getFilter } from '../rule_api';
 
 export interface LoadGlobalExecutionKPIAggregationsProps {
-  id: string;
   outcomeFilter?: string[];
   message?: string;
   dateStart: string;
@@ -20,7 +19,6 @@ export interface LoadGlobalExecutionKPIAggregationsProps {
 }
 
 export const loadGlobalConnectorExecutionKPIAggregations = ({
-  id,
   http,
   outcomeFilter,
   message,

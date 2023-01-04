@@ -24,7 +24,7 @@ import {
 import { IExecutionErrors } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
-import { RefineSearchPrompt } from '../refine_search_prompt';
+import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,

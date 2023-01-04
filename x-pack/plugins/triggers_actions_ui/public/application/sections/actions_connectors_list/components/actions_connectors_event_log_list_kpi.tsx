@@ -8,15 +8,15 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiIconTip, EuiStat, EuiSpacer } from '@elastic/eui';
-import { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiSpacer } from '@elastic/eui';
+import { IExecutionKPIResult } from '@kbn/actions-plugin/common';
 import {
   ComponentOpts as ConnectorApis,
   withActionOperations,
 } from '../../common/components/with_actions_api_operations';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
-import { EventLogListStatus } from '../../common/components/event_log';
+import { EventLogListStatus, EventLogStat } from '../../common/components/event_log';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -26,46 +26,20 @@ const getParsedDate = (date: string) => {
 };
 
 const API_FAILED_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.apiError',
+  'xpack.triggersActionsUI.sections.connectorEventLogListKpi.apiError',
   {
     defaultMessage: 'Failed to fetch event log KPI.',
   }
 );
 
 const RESPONSE_TOOLTIP = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.responseTooltip',
+  'xpack.triggersActionsUI.sections.connectorEventLogListKpi.responseTooltip',
   {
     defaultMessage: 'The responses for up to 10,000 most recent actions triggered.',
   }
 );
 
-const Stat = ({
-  title,
-  tooltip,
-  children,
-}: {
-  title: string;
-  tooltip: string;
-  children?: JSX.Element;
-}) => {
-  return (
-    <EuiPanel color="subdued">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <b>{title}</b>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={tooltip} position="top" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      {children}
-    </EuiPanel>
-  );
-};
-
 export type ConnectorEventLogListKPIProps = {
-  ruleId: string;
   dateStart: string;
   dateEnd: string;
   outcomeFilter?: string[];
@@ -76,7 +50,6 @@ export type ConnectorEventLogListKPIProps = {
 
 export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) => {
   const {
-    ruleId,
     dateStart,
     dateEnd,
     outcomeFilter,
@@ -90,7 +63,7 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
   } = useKibana().services;
 
   const isInitialized = useRef(false);
-  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
+  const isUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [kpi, setKpi] = useState<IExecutionKPIResult>();
@@ -103,7 +76,6 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
     setIsLoading(true);
     try {
       const newKpi = await loadKPIFn({
-        id: ruleId,
         dateStart: getParsedDate(dateStart),
         dateEnd: getParsedDate(dateEnd),
         outcomeFilter,
@@ -123,7 +95,7 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
   useEffect(() => {
     loadKPIs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleId, dateStart, dateEnd, outcomeFilter, message, namespaces]);
+  }, [dateStart, dateEnd, outcomeFilter, message, namespaces]);
 
   useEffect(() => {
     if (isInitialized.current) {
@@ -147,15 +119,15 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={4}>
-        <Stat title="Response" tooltip={RESPONSE_TOOLTIP}>
+        <EventLogStat title="Response" tooltip={RESPONSE_TOOLTIP}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiStat
-                data-test-subj="ruleEventLogKpi-successOutcome"
+                data-test-subj="connectorEventLogKpi-successOutcome"
                 description={getStatDescription(
                   <EventLogListStatus
                     status="success"
-                    useExecutionStatus={isRuleUsingExecutionStatus}
+                    useExecutionStatus={isUsingExecutionStatus}
                   />
                 )}
                 titleSize="s"
@@ -165,11 +137,11 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
-                data-test-subj="ruleEventLogKpi-warningOutcome"
+                data-test-subj="connectorEventLogKpi-warningOutcome"
                 description={getStatDescription(
                   <EventLogListStatus
                     status="warning"
-                    useExecutionStatus={isRuleUsingExecutionStatus}
+                    useExecutionStatus={isUsingExecutionStatus}
                   />
                 )}
                 titleSize="s"
@@ -179,11 +151,11 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
-                data-test-subj="ruleEventLogKpi-failureOutcome"
+                data-test-subj="connectorEventLogKpi-failureOutcome"
                 description={getStatDescription(
                   <EventLogListStatus
                     status="failure"
-                    useExecutionStatus={isRuleUsingExecutionStatus}
+                    useExecutionStatus={isUsingExecutionStatus}
                   />
                 )}
                 titleSize="s"
@@ -193,11 +165,11 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
-                data-test-subj="ruleEventLogKpi-unknownOutcome"
+                data-test-subj="connectorEventLogKpi-unknownOutcome"
                 description={getStatDescription(
                   <EventLogListStatus
                     status="unknown"
-                    useExecutionStatus={isRuleUsingExecutionStatus}
+                    useExecutionStatus={isUsingExecutionStatus}
                   />
                 )}
                 titleSize="s"
@@ -206,7 +178,7 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </Stat>
+        </EventLogStat>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

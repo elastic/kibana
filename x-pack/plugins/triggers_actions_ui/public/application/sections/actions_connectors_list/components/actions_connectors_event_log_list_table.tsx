@@ -19,6 +19,7 @@ import {
   EuiSuperDatePicker,
   OnTimeChangeProps,
   EuiSwitch,
+  EuiDataGridColumn,
 } from '@elastic/eui';
 import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { IExecutionLog } from '@kbn/actions-plugin/common';
@@ -27,22 +28,19 @@ import {
   GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
   CONNECTOR_LOCKED_COLUMNS,
 } from '../../../constants';
-// import { RuleEventLogDataGrid } from './rule_event_log_data_grid';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
-// import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
-// import {
-//   ComponentOpts as RuleApis,
-//   withBulkRuleOperations,
-// } from '../../common/components/with_bulk_rule_api_operations';
+import { LoadExecutionLogAggregationsProps } from '../../../lib/action_connector_api';
 import {
   ComponentOpts as ConnectorApis,
   withActionOperations,
 } from '../../common/components/with_actions_api_operations';
-import { RefineSearchPrompt } from '../../rule_details/refine_search_prompt';
+import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
 import { ConnectorEventLogListKPIWithApi as ConnectorEventLogListKPI } from './actions_connectors_event_log_list_kpi';
-import { ConnectorEventLogDataGrid } from './actions_connectors_event_log_data_grid';
-import { EventLogListStatusFilter } from '../../common/components/event_log';
+import {
+  EventLogDataGrid,
+  EventLogListStatusFilter,
+  getIsColumnSortable,
+} from '../../common/components/event_log';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
@@ -54,14 +52,14 @@ const getParsedDate = (date: string) => {
 };
 
 const API_FAILED_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.apiError',
+  'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.apiError',
   {
     defaultMessage: 'Failed to fetch execution history',
   }
 );
 
 const SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.searchPlaceholder',
+  'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.searchPlaceholder',
   {
     defaultMessage: 'Search event log message',
   }
@@ -80,7 +78,7 @@ const getDefaultColumns = (columns: string[]) => {
 const ALL_SPACES_LABEL = i18n.translate(
   'xpack.triggersActionsUI.connectorEventLogList.showAllSpacesToggle',
   {
-    defaultMessage: 'Show rules from all spaces',
+    defaultMessage: 'Show connectors from all spaces',
   }
 );
 
@@ -94,14 +92,10 @@ const MAX_RESULTS = 1000;
 export type ConnectorEventLogListOptions = 'stackManagement' | 'default';
 
 export type ConnectorEventLogListCommonProps = {
-  ruleId: string;
   localStorageKey?: string;
   refreshToken?: number;
   initialPageSize?: number;
-  // Duplicating these properties is extremely silly but it's the only way to get Jest to cooperate with the way this component is structured
-  // overrideLoadExecutionLogAggregations?: ConnectorApis['loadExecutionLogAggregations'];
-  overrideLoadGlobalExecutionLogAggregations?: ConnectorApis['loadGlobalExecutionLogAggregations'];
-  hasRuleNames?: boolean;
+  hasConnectorNames?: boolean;
   hasAllSpaceSwitch?: boolean;
 } & Pick<ConnectorApis, 'loadGlobalExecutionLogAggregations'>;
 
@@ -116,13 +110,11 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   props: ConnectorEventLogListTableProps<T>
 ) => {
   const {
-    ruleId,
     localStorageKey = CONNECTOR_EVENT_LOG_LIST_STORAGE_KEY,
     refreshToken,
     loadGlobalExecutionLogAggregations,
-    overrideLoadGlobalExecutionLogAggregations,
     initialPageSize = 10,
-    hasRuleNames = false,
+    hasConnectorNames = false,
     hasAllSpaceSwitch = false,
   } = props;
 
@@ -196,17 +188,13 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
     }));
   }, [sortingColumns]);
 
-  const loadLogsFn = useMemo(() => {
-    return overrideLoadGlobalExecutionLogAggregations ?? loadGlobalExecutionLogAggregations;
-  }, [overrideLoadGlobalExecutionLogAggregations, loadGlobalExecutionLogAggregations]);
-
   const loadEventLogs = async () => {
-    if (!loadLogsFn) {
+    if (!loadGlobalExecutionLogAggregations) {
       return;
     }
     setIsLoading(true);
     try {
-      const result = await loadLogsFn({
+      const result = await loadGlobalExecutionLogAggregations({
         sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
         outcomeFilter: filter,
         message: searchText,
@@ -312,6 +300,141 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
     }
   }, [setShowFromAllSpaces, showFromAllSpaces, visibleColumns]);
 
+  const columns: EuiDataGridColumn[] = useMemo(
+    () => [
+      ...(hasConnectorNames
+        ? [
+            {
+              id: 'connector_name',
+              displayAsText: i18n.translate(
+                'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.connectorName',
+                {
+                  defaultMessage: 'Connector',
+                }
+              ),
+              isSortable: getIsColumnSortable('connector_name'),
+              actions: {
+                showSortAsc: false,
+                showSortDesc: false,
+                showHide: false,
+              },
+            },
+          ]
+        : []),
+      ...(showFromAllSpaces
+        ? [
+            {
+              id: 'space_ids',
+              displayAsText: i18n.translate(
+                'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.spaceIds',
+                {
+                  defaultMessage: 'Space',
+                }
+              ),
+              isSortable: getIsColumnSortable('space_ids'),
+              actions: {
+                showSortAsc: false,
+                showSortDesc: false,
+                showHide: false,
+              },
+            },
+          ]
+        : []),
+      {
+        id: 'id',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.id',
+          {
+            defaultMessage: 'Id',
+          }
+        ),
+        isSortable: getIsColumnSortable('id'),
+      },
+      {
+        id: 'timestamp',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.timestamp',
+          {
+            defaultMessage: 'Timestamp',
+          }
+        ),
+        isSortable: getIsColumnSortable('timestamp'),
+        isResizable: false,
+        actions: {
+          showHide: false,
+        },
+        initialWidth: 250,
+      },
+      {
+        id: 'status',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.response',
+          {
+            defaultMessage: 'Response',
+          }
+        ),
+        actions: {
+          showHide: false,
+          showSortAsc: false,
+          showSortDesc: false,
+          additional: [
+            {
+              iconType: 'annotation',
+              label: i18n.translate(
+                'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.showOnlyFailures',
+                {
+                  defaultMessage: 'Show only failures',
+                }
+              ),
+              onClick: () => onFilterChange(['failure']),
+              size: 'xs',
+            },
+            {
+              iconType: 'annotation',
+              label: i18n.translate(
+                'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.showAll',
+                {
+                  defaultMessage: 'Show all',
+                }
+              ),
+              onClick: () => onFilterChange([]),
+              size: 'xs',
+            },
+          ],
+        },
+        isSortable: getIsColumnSortable('status'),
+        isResizable: false,
+        initialWidth: 150,
+      },
+      {
+        id: 'message',
+        actions: {
+          showSortAsc: false,
+          showSortDesc: false,
+        },
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.message',
+          {
+            defaultMessage: 'Message',
+          }
+        ),
+        isSortable: getIsColumnSortable('message'),
+        cellActions: [],
+      },
+      {
+        id: 'schedule_delay',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.scheduleDelay',
+          {
+            defaultMessage: 'Schedule delay',
+          }
+        ),
+        isSortable: getIsColumnSortable('schedule_delay'),
+      },
+    ],
+    [onFilterChange, hasConnectorNames, showFromAllSpaces]
+  );
+
   const renderList = () => {
     if (!logs) {
       return <CenterJustifiedSpinner />;
@@ -321,17 +444,15 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         {isLoading && (
           <EuiProgress size="xs" color="accent" data-test-subj="connectorEventLogListProgressBar" />
         )}
-        <ConnectorEventLogDataGrid
+        <EventLogDataGrid
+          columns={columns}
           logs={logs}
           pagination={pagination}
           sortingColumns={sortingColumns}
           visibleColumns={visibleColumns}
           dateFormat={dateFormat}
-          showRuleNameAndIdColumns={hasRuleNames}
-          showSpaceColumns={showFromAllSpaces}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
-          onFilterChange={setFilter}
           setVisibleColumns={setVisibleColumns}
           setSortingColumns={setSortingColumns}
         />
@@ -414,7 +535,6 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ConnectorEventLogListKPI
-          ruleId={ruleId}
           dateStart={dateStart}
           dateEnd={dateEnd}
           outcomeFilter={filter}
@@ -430,7 +550,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           <RefineSearchPrompt
             documentSize={actualTotalItemCount}
             visibleDocumentSize={MAX_RESULTS}
-            backToTopAnchor="rule_event_log_list"
+            backToTopAnchor="logs"
           />
         )}
       </EuiFlexItem>

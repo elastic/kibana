@@ -7,8 +7,7 @@
 
 import React from 'react';
 
-import { IExecutionLogResult } from '@kbn/actions-plugin/common';
-import { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
+import { IExecutionLogResult, IExecutionKPIResult } from '@kbn/actions-plugin/common';
 import { ActionType } from '../../../../types';
 import {
   loadActionTypes,

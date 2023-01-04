@@ -43,7 +43,7 @@ const rewriteBodyReq: RewriteRequestCase<GetGlobalExecutionLogParams> = ({
   date_start: dateStart,
   date_end: dateEnd,
   per_page: perPage,
-  // namespaces,
+  namespaces,
   ...rest
 }) => ({ ...rest, dateStart, dateEnd, perPage });
 

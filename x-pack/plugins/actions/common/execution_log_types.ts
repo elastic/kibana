@@ -15,7 +15,6 @@ export interface IExecutionLog {
   message: string;
   version: string;
   schedule_delay_ms: number;
-  connector_id: string;
   space_ids: string[];
   connector_name: string;
 }
@@ -32,7 +31,7 @@ export interface GetGlobalExecutionLogParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
-  // namespaces?: Array<string | undefined>;
+  namespaces?: Array<string | undefined>;
 }
 
 export interface GetGlobalExecutionKPIParams {
@@ -48,3 +47,5 @@ export const EMPTY_EXECUTION_KPI_RESULT = {
   failure: 0,
   warning: 0,
 };
+
+export type IExecutionKPIResult = typeof EMPTY_EXECUTION_KPI_RESULT;

@@ -755,8 +755,8 @@ export class ActionsClient {
     page,
     perPage,
     sort,
-  }: // namespaces,
-  GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
+    namespaces,
+  }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
     const authorizationTuple = {} as KueryNode;
@@ -796,7 +796,8 @@ export class ActionsClient {
             perPage,
             sort,
           }),
-        }
+        },
+        namespaces
       );
 
       return formatExecutionLogResult(aggResult);
