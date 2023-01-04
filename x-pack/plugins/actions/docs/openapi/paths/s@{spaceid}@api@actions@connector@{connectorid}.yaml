@@ -16,11 +16,9 @@ get:
           schema:
             type: object
             required:
-              - config
               - connector_type_id
               - id
               - is_deprecated
-              - is_missing_secrets
               - is_preconfigured
               - name
             properties:
@@ -30,25 +28,17 @@ get:
                 additionalProperties: true
                 nullable: true
               connector_type_id:
-                type: string
-                description: The connector type ID for the connector. For example, `.cases-webhook`, `.index`, `.jira`, `.opsgenie`, `.server-log`, or `.servicenow-itom`.
-                example: .server-log
+                $ref: '../components/schemas/connector_types.yaml'
               id:
                 type: string
                 description: The identifier for the connector.
                 example: b0766e10-d190-11ec-b04c-776c77d14fca
               is_deprecated:
-                type: boolean
-                description: Indicates whether the connector type is deprecated.
-                example: false
+                $ref: '../components/schemas/is_deprecated.yaml'
               is_missing_secrets:
-                type: boolean
-                description: Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type.
-                example: false
+                $ref: '../components/schemas/is_missing_secrets.yaml'
               is_preconfigured:
-                type: boolean
-                description: Indicates whether it is a preconfigured connector.
-                example: false
+                $ref: '../components/schemas/is_preconfigured.yaml'
               name:
                 type: string
                 description: The display name for the connector.
