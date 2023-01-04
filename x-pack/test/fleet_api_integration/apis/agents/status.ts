@@ -9,11 +9,13 @@ import expect from '@kbn/expect';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { testUsers } from '../test_users';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const superTestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('fleet_agents_status', () => {
     before(async () => {
@@ -196,6 +198,32 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should work with deprecated api', async () => {
       await supertest.get(`/api/fleet/agent-status`).expect(200);
+    });
+
+    it('should work with adequate package privileges', async () => {
+      await superTestWithoutAuth
+        .get(`/api/fleet/agent_status`)
+        .set('kbn-xsrf', 'xxxx')
+        .auth(
+          testUsers.endpoint_fleet_all_integr_read_policy.username,
+          testUsers.endpoint_fleet_all_integr_read_policy.password
+        )
+        .expect(200);
+    });
+
+    it('should not work without adequate package privileges', async () => {
+      await superTestWithoutAuth
+        .get(`/api/fleet/agent_status`)
+        .set('kbn-xsrf', 'xxxx')
+        .auth(
+          testUsers.endpoint_fleet_read_integr_none.username,
+          testUsers.endpoint_fleet_read_integr_none.password
+        )
+        .expect(403, {
+          error: 'Forbidden',
+          message: 'Forbidden',
+          statusCode: 403,
+        });
     });
   });
 }
