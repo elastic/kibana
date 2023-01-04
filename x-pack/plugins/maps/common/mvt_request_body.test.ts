@@ -91,11 +91,10 @@ describe('getAggsTileRequest', () => {
       runtime_mappings: {},
       query: {},
     };
-
-    const encodedSearchRequest = encodeMvtResponseBody(searchRequest);
     const { path } = getAggsTileRequest({
       encodedRequestBody: encodeMvtResponseBody(searchRequest),
       geometryFieldName: 'my location',
+      gridPrecision: 8,
       hasLabels: true,
       index: 'my index',
       renderAs: RENDER_AS.POINT,
@@ -114,7 +113,6 @@ describe('getHitsTileRequest', () => {
       runtime_mappings: {},
       query: {},
     };
-    const encodedSearchRequest = encodeMvtResponseBody(searchRequest);
     const { path } = getHitsTileRequest({
       encodedRequestBody: encodeMvtResponseBody(searchRequest),
       geometryFieldName: 'my location',
