@@ -9,7 +9,7 @@ import { deepFreeze } from '@kbn/std';
 
 import type { RouteMethod } from '@kbn/core-http-server';
 
-import { PACKAGE_POLICY_API_ROUTES } from '../../../common';
+import { PACKAGE_POLICY_API_ROUTES, AGENT_API_ROUTES } from '../../../common';
 
 import type { FleetRouteRequiredAuthz } from './types';
 
@@ -119,6 +119,24 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
               executePackageAction: true,
             },
             readBlocklist: {
+              executePackageAction: true,
+            },
+          },
+        },
+      },
+    },
+  },
+
+  // agent status fo policy API
+  [`get:${AGENT_API_ROUTES.STATUS_PATTERN}`]: {
+    any: {
+      fleet: {
+        all: true,
+      },
+      packagePrivileges: {
+        endpoint: {
+          actions: {
+            readPolicyManagement: {
               executePackageAction: true,
             },
           },

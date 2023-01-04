@@ -59,7 +59,7 @@ export async function waitForActiveAlert({
 
   const message = `waitForActiveAlert(${ruleId}): got ${hits} hits.`;
 
-  log.debug(`${message}, retrying`);
+  log.info(`${message}, retrying`);
 
   await delay(WAIT_FOR_STATUS_INCREMENT);
   return await waitForActiveAlert({
