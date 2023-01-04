@@ -18,32 +18,42 @@ import type {
   PossibleArgDataTypes,
 } from './service/parsed_command_input';
 
-export interface CommandArgs {
-  [longName: string]: {
-    required: boolean;
-    allowMultiples: boolean;
-    exclusiveOr?: boolean;
-    about: string;
-    /**
-     * Validate the individual values given to this argument.
-     * Should return `true` if valid or a string with the error message
-     */
-    validate?: (argData: ParsedArgData) => true | string;
+export interface CommandArgDefinition {
+  required: boolean;
+  allowMultiples: boolean;
+  exclusiveOr?: boolean;
+  about: string;
+  /**
+   * Validate the individual values given to this argument.
+   * Should return `true` if valid or a string with the error message
+   */
+  validate?: (argData: ParsedArgData) => true | string;
 
-    // Selector: Idea is that the schema can plugin in a rich component for the
-    // user to select something (ex. a file)
-    // FIXME: implement selector
-    selector?: ComponentType;
-  };
+  /**
+   * If defined, the provided Component will be rendered in place of this argument's value and
+   * it will be up to the Selector to provide the desired interface to the user for selecting
+   * the argument's value.
+   */
+  SelectorComponent?: CommandArgumentValueSelectorComponent;
+}
+
+/** List of arguments for a Command */
+export interface CommandArgs {
+  [longName: string]: CommandArgDefinition;
 }
 
 export interface CommandDefinition<TMeta = any> {
+  /** Name of the command. This will be the value that the user will enter on the console to access this command */
   name: string;
+
+  /** Some information about the command */
   about: ReactNode;
+
   /**
    * The Component that will be used to render the Command
    */
   RenderComponent: CommandExecutionComponent;
+
   /** Will be used to sort the commands when building the output for the `help` command */
   helpCommandPosition?: number;
 
@@ -57,14 +67,17 @@ export interface CommandDefinition<TMeta = any> {
    * the console's built in output.
    */
   HelpComponent?: CommandExecutionComponent;
+
   /**
    * If defined, the button to add to the text bar will be disabled and the user will not be able to use this command if entered into the console.
    */
   helpDisabled?: boolean;
+
   /**
    * If defined, the command will be hidden from in the Help menu and help text. It will warn the user and not execute the command if manually typed in.
    */
   helpHidden?: boolean;
+
   /**
    * A store for any data needed when the command is executed.
    * The entire `CommandDefinition` is passed along to the component
@@ -176,6 +189,38 @@ export type CommandExecutionComponent<
   /** The metadata defined on the Command Definition */
   TMeta = any
 > = ComponentType<CommandExecutionComponentProps<TArgs, TStore, TMeta>>;
+
+/**
+ * The component props for an argument `SelectorComponent`
+ */
+export interface CommandArgumentValueSelectorProps<TSelection = any> {
+  /**
+   * The current value that was selected. This will not be displayed in the UI, but will
+   * be passed on to the command execution as part of the argument's value
+   */
+  value: TSelection | undefined;
+
+  /**
+   * A string value for display purposes only that describes the selected value. This
+   * will be used when the command is entered and displayed in the console as well as in
+   * the command input history popover
+   */
+  valueText: string;
+
+  /**
+   * callback for the Value Selector to call and provide the selection value.
+   * This selection value will then be passed along with the argument to the command execution
+   * component.
+   * @param newData
+   */
+  onChange: (newData: { value: TSelection | undefined; valueText: string }) => void;
+}
+
+/**
+ * Component for rendering an argument's value selector
+ */
+export type CommandArgumentValueSelectorComponent =
+  ComponentType<CommandArgumentValueSelectorProps>;
 
 export interface ConsoleProps extends CommonProps {
   /**
