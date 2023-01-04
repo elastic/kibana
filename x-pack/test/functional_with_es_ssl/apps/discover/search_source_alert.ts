@@ -308,6 +308,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // Failing: See https://github.com/elastic/kibana/issues/148388
   // Failing: See https://github.com/elastic/kibana/issues/148386
+  // Failing: https://github.com/elastic/kibana/issues/147958
   describe.skip('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
