@@ -512,6 +512,28 @@ describe('Perform bulk action request schema', () => {
         expect(message.schema).toEqual({});
       });
 
+      test('invalid request: missing throttle in payload', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkActionType.edit,
+          [BulkActionType.edit]: [
+            {
+              type: BulkActionEditType.add_rule_actions,
+              value: {
+                actions: [],
+              },
+            },
+          ],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining(['Invalid value "undefined" supplied to "edit,value,throttle"'])
+        );
+        expect(message.schema).toEqual({});
+      });
+
       test('invalid request: missing actions in payload', () => {
         const payload = {
           query: 'name: test',
@@ -542,6 +564,7 @@ describe('Perform bulk action request schema', () => {
             {
               type: BulkActionEditType.add_rule_actions,
               value: {
+                throttle: '1h',
                 actions: [
                   {
                     action_type_id: '.webhook',
@@ -551,11 +574,6 @@ describe('Perform bulk action request schema', () => {
                       body: {
                         rule_id: '{{rule.id}}',
                       },
-                    },
-                    frequency: {
-                      notifyWhen: 'onThrottleInterval',
-                      throttle: '1h',
-                      summary: false,
                     },
                   },
                 ],
@@ -579,6 +597,7 @@ describe('Perform bulk action request schema', () => {
             {
               type: BulkActionEditType.add_rule_actions,
               value: {
+                throttle: '1h',
                 actions: [
                   {
                     group: 'default',
@@ -587,11 +606,6 @@ describe('Perform bulk action request schema', () => {
                       body: {
                         rule_id: '{{rule.id}}',
                       },
-                    },
-                    frequency: {
-                      notifyWhen: 'onThrottleInterval',
-                      throttle: '1h',
-                      summary: false,
                     },
                   },
                 ],
@@ -614,6 +628,7 @@ describe('Perform bulk action request schema', () => {
             {
               type: BulkActionEditType.set_rule_actions,
               value: {
+                throttle: '1h',
                 actions: [
                   {
                     group: 'default',
@@ -624,11 +639,6 @@ describe('Perform bulk action request schema', () => {
                           rule_id: '{{rule.id}}',
                         },
                       ],
-                    },
-                    frequency: {
-                      notifyWhen: 'onThrottleInterval',
-                      throttle: '1h',
-                      summary: false,
                     },
                   },
                 ],

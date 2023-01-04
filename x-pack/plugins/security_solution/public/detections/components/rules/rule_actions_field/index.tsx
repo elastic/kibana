@@ -14,7 +14,6 @@ import styled from 'styled-components';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleAction, RuleActionParam } from '@kbn/alerting-plugin/common';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
@@ -29,12 +28,6 @@ interface Props {
 const DEFAULT_ACTION_GROUP_ID = 'default';
 const DEFAULT_ACTION_MESSAGE =
   'Rule {{context.rule.name}} generated {{state.signals_count}} alerts';
-
-const DEFAULT_ACTION_FREQUENCY = {
-  notifyWhen: RuleNotifyWhen.CHANGE,
-  throttle: null,
-  summary: false,
-};
 
 const FieldErrorsContainer = styled.div`
   p {
@@ -125,27 +118,6 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     [field]
   );
 
-  const setActionFrequencyProperty = useCallback(
-    (key: string, value: RuleActionParam, index: number) => {
-      setTimeout(
-        () =>
-          field.setValue((prevValue: RuleAction[]) => {
-            const updatedActions = [...prevValue];
-            updatedActions[index] = {
-              ...updatedActions[index],
-              frequency: {
-                ...(updatedActions[index].frequency ?? DEFAULT_ACTION_FREQUENCY),
-                [key]: value,
-              },
-            };
-            return updatedActions;
-          }),
-        0
-      );
-    },
-    [field]
-  );
-
   const actionForm = useMemo(
     () =>
       getActionForm({
@@ -155,7 +127,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         setActionIdByIndex,
         setActions: setAlertActionsProperty,
         setActionParamsProperty,
-        setActionFrequencyProperty,
+        setActionFrequencyProperty: () => {},
         featureId: SecurityConnectorFeatureId,
         defaultActionMessage: DEFAULT_ACTION_MESSAGE,
         hideActionHeader: true,
@@ -168,7 +140,6 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       setActionIdByIndex,
       setActionParamsProperty,
       setAlertActionsProperty,
-      setActionFrequencyProperty,
     ]
   );
 

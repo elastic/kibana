@@ -26,17 +26,12 @@ export const transformAlertToRuleAction = ({
   id,
   actionTypeId,
   params,
-  frequency,
-}: RuleAction): RuleAlertAction => {
-  const action = {
-    group,
-    id,
-    params,
-    action_type_id: actionTypeId,
-    frequency,
-  } as RuleAlertAction;
-  return action;
-};
+}: RuleAction): RuleAlertAction => ({
+  group,
+  id,
+  params,
+  action_type_id: actionTypeId,
+});
 
 export const transformRuleToAlertResponseAction = ({
   action_type_id: actionTypeId,

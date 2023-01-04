@@ -78,7 +78,6 @@ export type BulkEditOperation =
       operation: 'add' | 'set';
       field: Extract<BulkEditFields, 'actions'>;
       value: NormalizedAlertAction[];
-      syncFrequency?: boolean;
     }
   | {
       operation: 'set';
@@ -565,8 +564,10 @@ async function getUpdatedAttributesFromOperations(
           isAttributesUpdateSkipped = false;
         }
 
+        // TODO https://github.com/elastic/kibana/issues/148414
+        // If any action-level frequencies get pushed into a SIEM rule, sync up their frequencies
         const firstFrequency = operation.value[0]?.frequency;
-        if (operation.syncFrequency && firstFrequency) {
+        if (rule.attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
           ruleActions.actions = ruleActions.actions.map((action) => ({
             ...action,
             frequency: firstFrequency,

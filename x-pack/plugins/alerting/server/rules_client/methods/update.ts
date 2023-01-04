@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   PartialRule,
   RawRule,
@@ -141,6 +142,13 @@ async function updateAlert<Params extends RuleTypeParams>(
   { attributes, version }: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+
+  // TODO https://github.com/elastic/kibana/issues/148414
+  // If any action-level frequencies get pushed into a SIEM rule, sync up their frequencies
+  if (attributes.consumer === AlertConsumers.SIEM && data.actions[0]?.frequency) {
+    const firstFrequency = data.actions[0].frequency;
+    data.actions = data.actions.map((a) => ({ ...a, frequency: firstFrequency }));
+  }
 
   // Validate
   const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);

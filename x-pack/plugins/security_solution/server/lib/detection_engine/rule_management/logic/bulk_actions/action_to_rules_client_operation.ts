@@ -13,14 +13,14 @@ import { assertUnreachable } from '../../../../../../common/utility_types';
 
 import { transformToAlertThrottle, transformToNotifyWhen } from '../../normalization/rule_actions';
 
-const getThrottleOperation = (throttle?: string) =>
+const getThrottleOperation = (throttle: string) =>
   ({
     field: 'throttle',
     operation: 'set',
     value: transformToAlertThrottle(throttle),
   } as const);
 
-const getNotifyWhenOperation = (throttle?: string) =>
+const getNotifyWhenOperation = (throttle: string) =>
   ({
     field: 'notifyWhen',
     operation: 'set',
@@ -71,7 +71,6 @@ export const bulkEditActionToRulesClientOperation = (
           field: 'actions',
           operation: 'add',
           value: action.value.actions,
-          syncFrequency: true,
         },
         getThrottleOperation(action.value.throttle),
         getNotifyWhenOperation(action.value.throttle),

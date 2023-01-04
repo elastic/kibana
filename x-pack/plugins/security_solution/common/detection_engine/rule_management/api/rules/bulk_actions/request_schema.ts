@@ -12,7 +12,6 @@ import {
   RuleActionGroup,
   RuleActionId,
   RuleActionParams,
-  RuleActionFrequency,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
@@ -97,14 +96,11 @@ const BulkActionEditPayloadTimeline = t.type({
  */
 type NormalizedRuleAction = t.TypeOf<typeof NormalizedRuleAction>;
 const NormalizedRuleAction = t.exact(
-  t.intersection([
-    t.type({
-      group: RuleActionGroup,
-      id: RuleActionId,
-      params: RuleActionParams,
-    }),
-    t.partial({ frequency: RuleActionFrequency }),
-  ])
+  t.type({
+    group: RuleActionGroup,
+    id: RuleActionId,
+    params: RuleActionParams,
+  })
 );
 
 export type BulkActionEditPayloadRuleActions = t.TypeOf<typeof BulkActionEditPayloadRuleActions>;
@@ -113,14 +109,10 @@ export const BulkActionEditPayloadRuleActions = t.type({
     t.literal(BulkActionEditType.add_rule_actions),
     t.literal(BulkActionEditType.set_rule_actions),
   ]),
-  value: t.intersection([
-    t.type({
-      actions: t.array(NormalizedRuleAction),
-    }),
-    t.partial({
-      throttle: ThrottleForBulkActions,
-    }),
-  ]),
+  value: t.type({
+    throttle: ThrottleForBulkActions,
+    actions: t.array(NormalizedRuleAction),
+  }),
 });
 
 type BulkActionEditPayloadSchedule = t.TypeOf<typeof BulkActionEditPayloadSchedule>;

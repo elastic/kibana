@@ -50,7 +50,7 @@ export function computeDryRunEditPayload(editAction: BulkActionEditType): BulkAc
       return [
         {
           type: editAction,
-          value: { actions: [] },
+          value: { throttle: '1h', actions: [] },
         },
       ];
     case BulkActionEditType.set_schedule:
