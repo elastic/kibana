@@ -190,5 +190,58 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           expect(task._source?.task.enabled).to.be(undefined);
         });
     });
+
+    it('8.7.0 migrates rule alert start/end/duration from state to meta', async () => {
+      const response = await es.get<{ task: ConcreteTaskInstance }>(
+        {
+          index: '.kibana_task_manager',
+          id: 'task:24faa970-928b-11ed-b5c4-27d1f241d08e',
+        },
+        {
+          meta: true,
+        }
+      );
+      const task = response.body._source?.task!;
+      expect(task).to.be.ok();
+      expect(response.statusCode).to.eql(200);
+      expect(task.taskType).to.eql(`alerting:.index-threshold`);
+      expect(task.state).to.be.ok();
+
+      const taskState = JSON.parse(`${task.state}`);
+      const alertInstances = taskState.alertInstances;
+
+      const expectedAlertInstances = {
+        'host-1': {
+          state: {
+            start: '2023-01-18T14:59:57.596Z',
+            duration: '90264000000',
+          },
+          meta: {
+            start: '2023-01-18T14:59:57.596Z',
+            duration: '90264000000',
+            lastScheduledActions: {
+              group: 'threshold met',
+              date: '2023-01-18T15:01:27.881Z',
+            },
+          },
+        },
+        'host-2': {
+          state: {
+            start: '2023-01-18T14:59:57.596Z',
+            duration: '90264000000',
+          },
+          meta: {
+            start: '2023-01-18T14:59:57.596Z',
+            duration: '90264000000',
+            lastScheduledActions: {
+              group: 'threshold met',
+              date: '2023-01-18T15:01:27.889Z',
+            },
+          },
+        },
+      };
+
+      expect(alertInstances).to.eql(expectedAlertInstances);
+    });
   });
 }

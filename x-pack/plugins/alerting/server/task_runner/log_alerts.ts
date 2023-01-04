@@ -92,42 +92,42 @@ export function logAlerts<
     ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
     for (const id of recoveredAlertIds) {
       const { group: actionGroup } = recoveredAlerts[id].getLastScheduledActions() ?? {};
-      const state = recoveredAlerts[id].getState();
+      const meta = recoveredAlerts[id].getMeta();
       const message = `${ruleLogPrefix} alert '${id}' has recovered`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         id,
         group: actionGroup,
         message,
-        state,
+        meta,
         flapping: recoveredAlerts[id].getFlapping(),
       });
     }
 
     for (const id of newAlertIds) {
       const { actionGroup } = activeAlerts[id].getScheduledActionOptions() ?? {};
-      const state = activeAlerts[id].getState();
+      const meta = activeAlerts[id].getMeta();
       const message = `${ruleLogPrefix} created new alert: '${id}'`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.newInstance,
         id,
         group: actionGroup,
         message,
-        state,
+        meta,
         flapping: activeAlerts[id].getFlapping(),
       });
     }
 
     for (const id of activeAlertIds) {
       const { actionGroup } = activeAlerts[id].getScheduledActionOptions() ?? {};
-      const state = activeAlerts[id].getState();
+      const meta = activeAlerts[id].getMeta();
       const message = `${ruleLogPrefix} active alert: '${id}' in actionGroup: '${actionGroup}'`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.activeInstance,
         id,
         group: actionGroup,
         message,
-        state,
+        meta,
         flapping: activeAlerts[id].getFlapping(),
       });
     }

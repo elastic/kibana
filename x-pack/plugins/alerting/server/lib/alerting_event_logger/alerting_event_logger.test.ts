@@ -61,9 +61,10 @@ const alert = {
   id: 'aaabbb',
   message: `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup';`,
   group: 'aGroup',
-  state: {
-    start: '2020-01-01T02:00:00.000Z',
-    end: '2020-01-01T03:00:00.000Z',
+  state: {},
+  meta: {
+    start: new Date('2020-01-01T02:00:00.000Z'),
+    end: new Date('2020-01-01T03:00:00.000Z'),
     duration: '2343252346',
   },
   flapping: false,
@@ -1019,9 +1020,9 @@ describe('createAlertRecord', () => {
     expect(record.event?.action).toEqual('active-instance');
     expect(record.event?.kind).toEqual('alert');
     expect(record.event?.category).toEqual([contextWithName.ruleType.producer]);
-    expect(record.event?.start).toEqual(alert.state.start);
-    expect(record.event?.end).toEqual(alert.state.end);
-    expect(record.event?.duration).toEqual(alert.state.duration);
+    expect(record.event?.start).toEqual(alert.meta.start.toISOString());
+    expect(record.event?.end).toEqual(alert.meta.end.toISOString());
+    expect(record.event?.duration).toEqual(alert.meta.duration);
     expect(record.message).toEqual(
       `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup';`
     );

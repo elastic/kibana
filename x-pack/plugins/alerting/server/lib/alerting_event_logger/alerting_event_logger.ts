@@ -14,7 +14,7 @@ import {
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
-import { AlertInstanceState, RuleExecutionStatus } from '../../types';
+import { AlertInstanceMeta, RuleExecutionStatus } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
 import { RuleRunMetrics } from '../rule_run_metrics_store';
 
@@ -47,7 +47,7 @@ interface AlertOpts {
   id: string;
   message: string;
   group?: string;
-  state?: AlertInstanceState;
+  meta?: AlertInstanceMeta;
   flapping: boolean;
 }
 
@@ -235,7 +235,7 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     spaceId: context.spaceId,
     executionId: context.executionId,
     action: alert.action,
-    state: alert.state,
+    meta: alert.meta,
     instanceId: alert.id,
     group: alert.group,
     message: alert.message,

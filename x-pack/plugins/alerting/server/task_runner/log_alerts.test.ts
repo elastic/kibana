@@ -157,56 +157,56 @@ describe('logAlerts', () => {
       action: 'recovered-instance',
       id: '7',
       message: "test-rule-type-id:123: 'test rule' alert '7' has recovered",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
       action: 'recovered-instance',
       id: '8',
       message: "test-rule-type-id:123: 'test rule' alert '8' has recovered",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
       action: 'recovered-instance',
       id: '9',
       message: "test-rule-type-id:123: 'test rule' alert '9' has recovered",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
       action: 'recovered-instance',
       id: '10',
       message: "test-rule-type-id:123: 'test rule' alert '10' has recovered",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(5, {
       action: 'new-instance',
       id: '4',
       message: "test-rule-type-id:123: 'test rule' created new alert: '4'",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(6, {
       action: 'active-instance',
       id: '1',
       message: "test-rule-type-id:123: 'test rule' active alert: '1' in actionGroup: 'undefined'",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(7, {
       action: 'active-instance',
       id: '2',
       message: "test-rule-type-id:123: 'test rule' active alert: '2' in actionGroup: 'undefined'",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(8, {
       action: 'active-instance',
       id: '4',
       message: "test-rule-type-id:123: 'test rule' active alert: '4' in actionGroup: 'undefined'",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
   });
@@ -270,56 +270,56 @@ describe('logAlerts', () => {
       action: 'recovered-instance',
       id: '7',
       message: "test-rule-type-id:123: 'test rule' alert '7' has recovered",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(2, {
       action: 'recovered-instance',
       id: '8',
       message: "test-rule-type-id:123: 'test rule' alert '8' has recovered",
-      state: {},
+      meta: { flapping: true, flappingHistory: [] },
       flapping: true,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(3, {
       action: 'recovered-instance',
       id: '9',
       message: "test-rule-type-id:123: 'test rule' alert '9' has recovered",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(4, {
       action: 'recovered-instance',
       id: '10',
       message: "test-rule-type-id:123: 'test rule' alert '10' has recovered",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(5, {
       action: 'new-instance',
       id: '4',
       message: "test-rule-type-id:123: 'test rule' created new alert: '4'",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(6, {
       action: 'active-instance',
       id: '1',
       message: "test-rule-type-id:123: 'test rule' active alert: '1' in actionGroup: 'undefined'",
-      state: {},
+      meta: { flapping: true, flappingHistory: [] },
       flapping: true,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(7, {
       action: 'active-instance',
       id: '2',
       message: "test-rule-type-id:123: 'test rule' active alert: '2' in actionGroup: 'undefined'",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(8, {
       action: 'active-instance',
       id: '4',
       message: "test-rule-type-id:123: 'test rule' active alert: '4' in actionGroup: 'undefined'",
-      state: {},
+      meta: { flappingHistory: [] },
       flapping: false,
     });
   });

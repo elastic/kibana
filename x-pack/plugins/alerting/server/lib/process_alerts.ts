@@ -88,7 +88,7 @@ function processAlertsHelper<
   const existingAlertIds = new Set(Object.keys(existingAlerts));
   const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
 
-  const currentTime = new Date().toISOString();
+  const currentTime = new Date();
   const newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
   const activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
   const currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {};
@@ -99,12 +99,12 @@ function processAlertsHelper<
       // alerts with scheduled actions are considered "active"
       if (alerts[id].hasScheduledActions()) {
         activeAlerts[id] = alerts[id];
+        const alertMeta = alerts[id].getMeta();
 
         // if this alert was not active in the previous run, we need to inject start time into the alert state
         if (!existingAlertIds.has(id)) {
           newAlerts[id] = alerts[id];
-          const state = newAlerts[id].getState();
-          newAlerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
+          newAlerts[id].replaceMeta({ ...alertMeta, start: currentTime, duration: '0' });
 
           if (setFlapping) {
             if (previouslyRecoveredAlertsIds.has(id)) {
@@ -117,15 +117,12 @@ function processAlertsHelper<
         } else {
           // this alert did exist in previous run
           // calculate duration to date for active alerts
-          const state = existingAlerts[id].getState();
-          const durationInMs =
-            new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
-          const duration = state.start ? millisToNanos(durationInMs) : undefined;
-          activeAlerts[id].replaceState({
-            ...state,
-            ...(state.start ? { start: state.start } : {}),
-            ...(duration !== undefined ? { duration } : {}),
-          });
+
+          if (alertMeta.start) {
+            const durationInMs = currentTime.valueOf() - alertMeta.start.valueOf();
+            alertMeta.duration = millisToNanos(durationInMs);
+            activeAlerts[id].replaceMeta(alertMeta);
+          }
 
           // this alert is still active
           if (setFlapping) {
@@ -135,17 +132,16 @@ function processAlertsHelper<
       } else if (existingAlertIds.has(id) && autoRecoverAlerts) {
         recoveredAlerts[id] = alerts[id];
         currentRecoveredAlerts[id] = alerts[id];
+        const alertMeta = alerts[id].getMeta();
 
         // Inject end time into alert state of recovered alerts
-        const state = recoveredAlerts[id].getState();
-        const durationInMs =
-          new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
-        const duration = state.start ? millisToNanos(durationInMs) : undefined;
-        recoveredAlerts[id].replaceState({
-          ...state,
-          ...(duration ? { duration } : {}),
-          ...(state.start ? { end: currentTime } : {}),
-        });
+        if (alertMeta.start) {
+          const durationInMs = currentTime.valueOf() - alertMeta.start.valueOf();
+          alertMeta.duration = millisToNanos(durationInMs);
+          alertMeta.end = currentTime;
+          recoveredAlerts[id].replaceMeta(alertMeta);
+        }
+
         // this alert has flapped from active to recovered
         if (setFlapping) {
           updateAlertFlappingHistory(recoveredAlerts[id], true);
@@ -185,7 +181,7 @@ function processAlertsLimitReached<
   // - pass through all existing alerts as active
   // - add any new alerts, up to the max allowed
 
-  const currentTime = new Date().toISOString();
+  const currentTime = new Date();
   const newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
 
   // all existing alerts stay active
@@ -199,13 +195,15 @@ function processAlertsLimitReached<
       if (alerts.hasOwnProperty(id)) {
         activeAlerts[id] = alerts[id];
       }
-      const state = existingAlerts[id].getState();
-      const durationInMs =
-        new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
-      const duration = state.start ? millisToNanos(durationInMs) : undefined;
-      activeAlerts[id].replaceState({
-        ...state,
-        ...(state.start ? { start: state.start } : {}),
+      const alertMeta = existingAlerts[id].getMeta();
+      // const state = existingAlerts[id].getState();
+      const startDate = alertMeta.start || currentTime;
+
+      const durationInMs = currentTime.valueOf() - startDate.valueOf();
+      const duration = alertMeta.start ? millisToNanos(durationInMs) : undefined;
+      activeAlerts[id].replaceMeta({
+        ...alertMeta,
+        ...(alertMeta.start ? { start: alertMeta.start } : {}),
         ...(duration !== undefined ? { duration } : {}),
       });
 
@@ -233,8 +231,8 @@ function processAlertsLimitReached<
         activeAlerts[id] = alerts[id];
         newAlerts[id] = alerts[id];
         // if this alert was not active in the previous run, we need to inject start time into the alert state
-        const state = newAlerts[id].getState();
-        newAlerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
+        const alertMeta = newAlerts[id].getMeta();
+        newAlerts[id].replaceMeta({ ...alertMeta, start: currentTime, duration: '0' });
 
         if (setFlapping) {
           if (previouslyRecoveredAlertsIds.has(id)) {

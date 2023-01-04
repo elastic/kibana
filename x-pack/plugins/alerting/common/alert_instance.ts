@@ -37,6 +37,12 @@ const metaSchema = t.partial({
   // flapping flag that indicates whether the alert is flapping
   flapping: t.boolean,
   pendingRecoveredCount: t.number,
+  // when alert started
+  start: DateFromString,
+  // when alert recovered
+  end: DateFromString,
+  // string version of millisecond duration of alert
+  duration: t.string,
 });
 export type AlertInstanceMeta = t.TypeOf<typeof metaSchema>;
 

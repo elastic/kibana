@@ -14,15 +14,15 @@ import {
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import { REMOVED_TYPES } from '../task_type_dictionary';
-import { ConcreteTaskInstance, TaskStatus } from '../task';
+import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
 
 interface TaskInstanceLogMeta extends LogMeta {
-  migrations: { taskInstanceDocument: SavedObjectUnsanitizedDoc<ConcreteTaskInstance> };
+  migrations: { taskInstanceDocument: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> };
 }
 
 type TaskInstanceMigration = (
-  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
-) => SavedObjectUnsanitizedDoc<ConcreteTaskInstance>;
+  doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>
+) => SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>;
 
 export function getMigrations(): SavedObjectMigrationMap {
   return {
@@ -43,15 +43,19 @@ export function getMigrations(): SavedObjectMigrationMap {
       '8.2.0'
     ),
     '8.5.0': executeMigrationWithErrorHandling(pipeMigrations(addEnabledField), '8.5.0'),
+    '8.7.0': executeMigrationWithErrorHandling(pipeMigrations(moveRuleStateToMeta), '8.7.0'),
   };
 }
 
 function executeMigrationWithErrorHandling(
-  migrationFunc: SavedObjectMigrationFn<ConcreteTaskInstance, ConcreteTaskInstance>,
+  migrationFunc: SavedObjectMigrationFn<
+    SerializedConcreteTaskInstance,
+    SerializedConcreteTaskInstance
+  >,
   version: string
 ) {
   return (
-    doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>,
+    doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>,
     context: SavedObjectMigrationContext
   ) => {
     try {
@@ -71,8 +75,8 @@ function executeMigrationWithErrorHandling(
 }
 
 function alertingTaskLegacyIdToSavedObjectIds(
-  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
-): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+  doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> {
   if (doc.attributes.taskType.startsWith('alerting:')) {
     let params: { spaceId?: string; alertId?: string } = {};
     params = JSON.parse(doc.attributes.params as unknown as string);
@@ -97,8 +101,8 @@ function alertingTaskLegacyIdToSavedObjectIds(
 }
 
 function actionsTasksLegacyIdToSavedObjectIds(
-  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
-): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+  doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> {
   if (doc.attributes.taskType.startsWith('actions:')) {
     let params: { spaceId?: string; actionTaskParamsId?: string } = {};
     params = JSON.parse(doc.attributes.params as unknown as string);
@@ -129,7 +133,7 @@ function actionsTasksLegacyIdToSavedObjectIds(
 function moveIntervalIntoSchedule({
   attributes: { interval, ...attributes },
   ...doc
-}: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+}: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>): SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> {
   return {
     ...doc,
     attributes: {
@@ -146,8 +150,8 @@ function moveIntervalIntoSchedule({
 }
 
 function resetUnrecognizedStatus(
-  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
-): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+  doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> {
   const status = doc?.attributes?.status;
   if (status && status === 'unrecognized') {
     const taskType = doc.attributes.taskType;
@@ -162,20 +166,20 @@ function resetUnrecognizedStatus(
         ...doc.attributes,
         status: 'idle',
       },
-    } as SavedObjectUnsanitizedDoc<ConcreteTaskInstance>;
+    } as SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>;
   }
 
   return doc;
 }
 
 function pipeMigrations(...migrations: TaskInstanceMigration[]): TaskInstanceMigration {
-  return (doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>) =>
+  return (doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>) =>
     migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
 }
 
 function resetAttemptsAndStatusForTheTasksWithoutSchedule(
-  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
-): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+  doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> {
   if (doc.attributes.taskType.startsWith('alerting:')) {
     if (
       !doc.attributes.schedule?.interval &&
@@ -195,7 +199,7 @@ function resetAttemptsAndStatusForTheTasksWithoutSchedule(
   return doc;
 }
 
-function addEnabledField(doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>) {
+function addEnabledField(doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>) {
   if (
     doc.attributes.status === TaskStatus.Failed ||
     doc.attributes.status === TaskStatus.Unrecognized
@@ -210,4 +214,79 @@ function addEnabledField(doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>) {
       enabled: true,
     },
   };
+}
+
+// move start/end/duration from alert instance state to meta
+function moveRuleStateToMeta(doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance>) {
+  // see: x-pack/plugins/alerting/common/alert_instance.ts
+  // old fields we're copying from
+  interface AlertState {
+    start?: string;
+    end?: string;
+    duration?: string;
+  }
+  // new fields we're copying to
+  interface AlertMeta {
+    start?: string;
+    end?: string;
+    duration?: string;
+  }
+  interface AlertInstance {
+    state?: AlertState;
+    meta?: AlertMeta;
+  }
+  type AlertInstances = Record<string, AlertInstance>;
+
+  // see x-pack/plugins/alerting/common/rule_task_instance.ts for this shape
+  interface RuleState {
+    alertInstances?: AlertInstances;
+    alertRecoveredInstances?: AlertInstances;
+  }
+
+  if (!doc.attributes.taskType.startsWith('alerting:')) return doc;
+  if (!doc.attributes.state) return doc;
+
+  const ruleState: RuleState = JSON.parse(doc.attributes.state);
+
+  fixAlerts(ruleState.alertInstances);
+  fixAlerts(ruleState.alertRecoveredInstances);
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      state: JSON.stringify(ruleState),
+    },
+  };
+
+  // mutates alerts passed in
+  function fixAlerts(alerts?: AlertInstances): void {
+    if (!alerts) return;
+
+    for (const id of Object.keys(alerts)) {
+      const alert = alerts[id];
+      const { state } = alert;
+
+      // if no state, or no state.start/end/duration, return
+      if (!state) continue;
+      if (!state.start && !state.end && !state.duration) continue;
+
+      alert.meta = alert.meta || {};
+
+      // We only copy the fields to their right place; in case
+      // some rule type was using the values in their old place,
+      // we'll leave them where they are, though won't be updating them.
+      if (state.start) {
+        alert.meta.start = state.start;
+      }
+      if (state.end) {
+        alert.meta.end = state.end;
+      }
+      if (state.duration) {
+        // duration needs to be a string, but previously stored as a number un-migrated,
+        // before we changed to store as strings in https://github.com/elastic/kibana/pull/130819
+        alert.meta.duration = BigInt(state.duration).toString();
+      }
+    }
+  }
 }

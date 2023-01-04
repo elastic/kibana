@@ -134,6 +134,10 @@ export class Alert<
     return this.state;
   }
 
+  getMeta() {
+    return this.meta;
+  }
+
   getContext() {
     return this.context;
   }
@@ -166,6 +170,11 @@ export class Alert<
 
   replaceState(state: State) {
     this.state = state;
+    return this;
+  }
+
+  replaceMeta(meta: AlertInstanceMeta) {
+    this.meta = meta;
     return this;
   }
 

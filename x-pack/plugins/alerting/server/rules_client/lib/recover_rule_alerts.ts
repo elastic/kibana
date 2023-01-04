@@ -36,7 +36,7 @@ export const recoverRuleAlerts = async (
 
       for (const alertId of recoveredAlertIds) {
         const { group: actionGroup } = recoveredAlerts[alertId].getLastScheduledActions() ?? {};
-        const instanceState = recoveredAlerts[alertId].getState();
+        const instanceMeta = recoveredAlerts[alertId].getMeta();
         const message = `instance '${alertId}' has recovered due to the rule was disabled`;
 
         const event = createAlertEventLogRecordObject({
@@ -47,7 +47,7 @@ export const recoverRuleAlerts = async (
           instanceId: alertId,
           action: EVENT_LOG_ACTIONS.recoveredInstance,
           message,
-          state: instanceState,
+          meta: instanceMeta,
           group: actionGroup,
           namespace: context.namespace,
           spaceId: context.spaceId,

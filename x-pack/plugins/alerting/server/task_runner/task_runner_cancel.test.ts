@@ -46,7 +46,6 @@ import {
   ruleType,
   mockedRuleTypeSavedObject,
   generateAlertOpts,
-  DATE_1970,
   generateActionOpts,
 } from './fixtures';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -72,6 +71,17 @@ const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemM
 const dataViewsMock = {
   dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
 } as DataViewsServerPluginStart;
+
+const DefaultAlertMeta = {
+  duration: '0',
+  flapping: false,
+  flappingHistory: [true],
+  lastScheduledActions: {
+    date: new Date('1970-01-01T00:00:00.000Z'),
+    group: 'default',
+  },
+  start: new Date('1970-01-01T00:00:00.000Z'),
+};
 
 describe('Task Runner Cancel', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
@@ -309,7 +319,7 @@ describe('Task Runner Cancel', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.newInstance,
         group: 'default',
-        state: { start: DATE_1970, duration: '0' },
+        meta: { ...DefaultAlertMeta, pendingRecoveredCount: 0 },
       })
     );
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
@@ -317,7 +327,7 @@ describe('Task Runner Cancel', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.activeInstance,
         group: 'default',
-        state: { start: DATE_1970, duration: '0' },
+        meta: { ...DefaultAlertMeta, pendingRecoveredCount: 0 },
       })
     );
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
@@ -376,7 +386,7 @@ describe('Task Runner Cancel', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.newInstance,
         group: 'default',
-        state: { start: DATE_1970, duration: '0' },
+        meta: { ...DefaultAlertMeta, pendingRecoveredCount: 0 },
       })
     );
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
@@ -384,7 +394,7 @@ describe('Task Runner Cancel', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.activeInstance,
         group: 'default',
-        state: { start: DATE_1970, duration: '0' },
+        meta: { ...DefaultAlertMeta, pendingRecoveredCount: 0 },
       })
     );
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
