@@ -98,6 +98,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
               <EuiFieldNumber
                 data-test-subj="sloFormObjectiveTargetInput"
                 {...field}
+                value={String(field.value)}
                 min={0.001}
                 max={99.999}
                 step={0.001}
