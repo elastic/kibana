@@ -87,17 +87,9 @@ describe('decodeMvtResponseBody', () => {
 describe('getAggsTileRequest', () => {
   test(`Should URL encode path parameters`, () => {
     const searchRequest = {
-      size: 10000,
-      _source: false,
+      aggs: {},
       runtime_mappings: {},
-      query: {
-        bool: {
-          must: [],
-          filter: [],
-          should: [],
-          must_not: [],
-        },
-      },
+      query: {},
     };
 
     const encodedSearchRequest = encodeMvtResponseBody(searchRequest);
@@ -119,16 +111,8 @@ describe('getHitsTileRequest', () => {
   test(`Should URL encode path parameters`, () => {
     const searchRequest = {
       size: 10000,
-      _source: false,
       runtime_mappings: {},
-      query: {
-        bool: {
-          must: [],
-          filter: [],
-          should: [],
-          must_not: [],
-        },
-      },
+      query: {},
     };
     const encodedSearchRequest = encodeMvtResponseBody(searchRequest);
     const { path } = getHitsTileRequest({
