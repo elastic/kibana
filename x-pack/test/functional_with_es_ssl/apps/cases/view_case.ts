@@ -271,7 +271,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           expect(await newComment.getVisibleText()).equal('Test comment from automation');
         });
 
-        it('shows unsaved comment message when user goes to case list table and comes back to the case', async () => {
+        it('shows unsaved comment message when page is refreshed', async () => {
           const commentArea = await find.byCssSelector(
             '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
           );
@@ -312,6 +312,39 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await header.waitUntilLoadingHasFinished();
 
           await testSubjects.existOrFail('user-action-comment-unsaved-draft');
+        });
+
+        it('shows unsaved description message when page is refreshed', async () => {
+          const propertyActions = await find.allByCssSelector(
+            '[data-test-subj*="property-actions-ellipses"]'
+          );
+
+          propertyActions[1].click();
+
+          await header.waitUntilLoadingHasFinished();
+
+          const editAction = await find.byCssSelector(
+            '[data-test-subj*="property-actions-pencil"]'
+          );
+
+          await header.waitUntilLoadingHasFinished();
+
+          await editAction.click();
+
+          const editCommentTextArea = await find.byCssSelector(
+            '[data-test-subj*="user-action-markdown-form"] textarea.euiMarkdownEditorTextArea'
+          );
+
+          await header.waitUntilLoadingHasFinished();
+
+          await editCommentTextArea.focus();
+          await editCommentTextArea.type('Edited description');
+
+          await browser.refresh();
+
+          await header.waitUntilLoadingHasFinished();
+
+          await testSubjects.existOrFail('description-unsaved-draft');
         });
       });
     });

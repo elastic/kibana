@@ -98,6 +98,6 @@ export const AND = i18n.translate('xpack.cases.caseView.assignee.and', {
 export const UNSAVED_DRAFT_DESCRIPTION = i18n.translate(
   'xpack.cases.caseView.description.unsavedDraftDescription',
   {
-    defaultMessage: 'You have unsaved edits for description',
+    defaultMessage: 'You have unsaved edits for the description',
   }
 );
