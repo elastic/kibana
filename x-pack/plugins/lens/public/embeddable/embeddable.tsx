@@ -776,7 +776,7 @@ export class Embeddable
   ): Promise<boolean> => {
     if (
       isLensTableRowContextMenuClickEvent(event) ||
-      isLensTableRowContextMenuClickEvent(event) ||
+      isLensMultiFilterEvent(event) ||
       isLensFilterEvent(event)
     ) {
       const { getTriggerCompatibleActions } = this.deps;
