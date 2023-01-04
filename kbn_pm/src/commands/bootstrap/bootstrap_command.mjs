@@ -61,14 +61,10 @@ export const command = {
     const forceInstall =
       args.getBooleanValue('force-install') ?? (await haveNodeModulesBeenManuallyDeleted());
 
-    console.log('-- Bazel.tryRemovingBazeliskFromYarnGlobal: START')
     await Bazel.tryRemovingBazeliskFromYarnGlobal(log);
-    console.log('-- Bazel.tryRemovingBazeliskFromYarnGlobal: END')
 
-    console.log('-- Bazel.ensureInstalled: START')
     // Install bazel machinery tools if needed
     await Bazel.ensureInstalled(log);
-    console.log('-- Bazel.ensureInstalled: END')
 
     // Setup remote cache settings in .bazelrc.cache if needed
     await setupRemoteCache(log);
