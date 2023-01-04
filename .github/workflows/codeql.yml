@@ -9,7 +9,7 @@ on:
       - '**/*.json'
       - '**/*.md'
       - '**/*.png'
-      - '**/*.yml'
+      # - '**/*.yml'
       - '**/*.asciidoc'
       - '**/*.test.*'
       - test
