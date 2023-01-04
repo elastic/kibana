@@ -113,12 +113,11 @@ const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObj
         `Type ${name}: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement'`
       );
     }
-    // throw error if a type is registered as `hidden:true` and `hiddenFromHttpApis:false` (if defined)
-    // as it makes the interaction between `hidden` and `hiddenFromHttpApis` complicated
-    if (hidden && hiddenFromHttpApis !== undefined) {
-      throw new Error(
-        `Type ${name}: 'hiddenFromHttpApis' cannot be defined when specifying 'hidden: true'`
-      );
-    }
+  }
+  // throw error if a type is registered as `hidden:true` and `hiddenFromHttpApis:false` explicitly
+  if (hidden && hiddenFromHttpApis === false) {
+    throw new Error(
+      `Type ${name}: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden:true'`
+    );
   }
 };

@@ -27,20 +27,18 @@ export interface SavedObjectsType<Attributes = any> {
    * Is the type hidden by default. If true, repositories will not have access to this type unless explicitly
    * declared as an `extraType` when creating the repository.
    * It is recommended to hide the type for better backward compatibility.
-   * The hidden types will not be automatically exposed via the HTTP API. (Tina: Open question:x how is exposure blocked?)
+   * The hidden types will not be automatically exposed via the HTTP API.
    * Therefore, that should prevent unexpected behavior in the client code, as all the interactions will be done via the plugin API.
    *
    * See {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}.
    */
   hidden: boolean;
   /**
-   * Is the type hidden from the http APIs. If true, repositories will have access to the type but the type is not exposed via the HTTP APIs.
+   * Is the type hidden from the http APIs. If `hiddenFromHttpApis:true`, repositories will have access to the type but the type is not exposed via the HTTP APIs.
+   * It is recommended to hide types registered with 'hidden=false' from the httpApis for backward compatibility in the HTTP layer.
    *
-   * It is recommended to hide types specified as 'hidden=false' from the httpApis for backward compatibility in the HTTP layer.
-   *
-   * @remarks `hidden` must be `false` to specify this property.
-   *
-   * @internalRemarks Using 'hiddenFromHttpApis' is a shortcut to the alternative of defining a type as `hidden=true`.
+   * @remarks Setting this property for hidden types is not recommended and will fail validation if set to `false`.
+   * @internalRemarks Using 'hiddenFromHttpApis' is an alternative to registering types as `hidden:true` to hide a type from the HTTP APIs without effecting repositories access.
    */
   hiddenFromHttpApis?: boolean;
   /**
