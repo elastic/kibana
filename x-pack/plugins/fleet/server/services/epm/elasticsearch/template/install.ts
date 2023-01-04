@@ -281,10 +281,15 @@ export function buildComponentTemplates(params: {
     (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
   );
 
+  const isTimeSeriesEnabledByDefault = registryElasticsearch?.index_mode === 'time_series';
+  const isSyntheticSourceEnabledByDefault = registryElasticsearch?.source_mode === 'synthetic';
+
   const sourceModeSynthetic =
     params.experimentalDataStreamFeature?.features.synthetic_source !== false &&
     (params.experimentalDataStreamFeature?.features.synthetic_source === true ||
-      registryElasticsearch?.source_mode === 'synthetic');
+      isSyntheticSourceEnabledByDefault ||
+      isTimeSeriesEnabledByDefault);
+
   templatesMap[packageTemplateName] = {
     template: {
       settings: {
@@ -517,6 +522,8 @@ export function prepareTemplate({
     composedOfTemplates: Object.keys(componentTemplates),
     templatePriority,
     hidden: dataStream.hidden,
+    registryElasticsearch: dataStream.elasticsearch,
+    mappings,
   });
 
   return {

@@ -15,6 +15,7 @@ import {
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { AnomaliesTableRecord } from '@kbn/ml-plugin/common/types/anomalies';
 import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
+import { UptimeEsClient } from '../lib';
 import {
   updateState,
   generateAlertMessage,
@@ -31,7 +32,6 @@ import { getMLJobId } from '../../../../common/lib';
 import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../../common/translations';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
 
-import { createUptimeESClient } from '../lib';
 import { ALERT_REASON_MSG, ACTION_VARIABLES, VIEW_IN_APP_URL } from './action_variables';
 import { alertRegistration } from './get_alert_registration';
 
@@ -127,10 +127,10 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
     state,
     startedAt,
   }) {
-    const uptimeEsClient = createUptimeESClient({
-      esClient: scopedClusterClient.asCurrentUser,
+    const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-    });
+      scopedClusterClient.asCurrentUser
+    );
     const { basePath } = server;
 
     const { anomalies } =
