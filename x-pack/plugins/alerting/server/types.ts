@@ -23,7 +23,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
-import { RulesSettingsClient } from './rules_settings/rules_settings_client';
+import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
 export * from '../common';
 import {
   Rule,
@@ -316,6 +316,9 @@ export interface InvalidatePendingApiKey {
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
+export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
 
 export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;

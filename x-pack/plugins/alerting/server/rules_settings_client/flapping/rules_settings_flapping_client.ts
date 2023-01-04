@@ -38,7 +38,7 @@ const verifyFlappingSettings = (flappingSettings: RulesSettingsFlappingPropertie
   }
 };
 
-export interface ConstructorOptions {
+export interface RulesSettingsFlappingClientConstructorOptions {
   readonly logger: Logger;
   readonly savedObjectsClient: SavedObjectsClientContract;
   readonly persist: () => Promise<SavedObject<RulesSettings>>;
@@ -46,12 +46,12 @@ export interface ConstructorOptions {
 }
 
 export class RulesSettingsFlappingClient {
-  readonly logger: Logger;
-  readonly savedObjectsClient: SavedObjectsClientContract;
-  readonly persist: () => Promise<SavedObject<RulesSettings>>;
-  readonly getModificationMetadata: () => Promise<RulesSettingsModificationMetadata>;
+  private readonly logger: Logger;
+  private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly persist: () => Promise<SavedObject<RulesSettings>>;
+  private readonly getModificationMetadata: () => Promise<RulesSettingsModificationMetadata>;
 
-  constructor(options: ConstructorOptions) {
+  constructor(options: RulesSettingsFlappingClientConstructorOptions) {
     this.logger = options.logger;
     this.savedObjectsClient = options.savedObjectsClient;
     this.persist = options.persist;

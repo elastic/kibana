@@ -12,7 +12,7 @@ import {
   SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { RulesSettingsClient } from './rules_settings/rules_settings_client';
+import { RulesSettingsClient } from './rules_settings_client';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../common';
 
 export interface RulesSettingsClientFactoryOpts {
@@ -39,10 +39,6 @@ export class RulesSettingsClientFactory {
 
   public create(request: KibanaRequest) {
     const { securityPluginStart } = this;
-    if (!this.isInitialized) {
-      throw new Error('RulesSettingsClientFactory has not been initialized');
-    }
-
     const savedObjectsClient = this.savedObjectsService.getScopedClient(request, {
       excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes: [RULES_SETTINGS_SAVED_OBJECT_TYPE],

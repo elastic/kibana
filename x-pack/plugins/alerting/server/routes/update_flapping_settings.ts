@@ -36,7 +36,7 @@ export const updateFlappingSettingsRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesSettingsClient = (await context.alerting).getRulesSettingsClient();
 
-        const updatedFlappingSettings = await rulesSettingsClient.flapping.update(req.body);
+        const updatedFlappingSettings = await rulesSettingsClient.flapping().update(req.body);
 
         return res.ok({
           body: updatedFlappingSettings,

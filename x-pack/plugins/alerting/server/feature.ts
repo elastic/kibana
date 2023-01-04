@@ -29,7 +29,7 @@ export const alertingFeatures: KibanaFeatureConfig = {
   privileges: {
     all: {
       app: [],
-      api: [API_PRIVILEGES.READ_FLAPPING_SETTINGS, API_PRIVILEGES.WRITE_FLAPPING_SETTINGS],
+      api: [],
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
@@ -41,7 +41,7 @@ export const alertingFeatures: KibanaFeatureConfig = {
     },
     read: {
       app: [],
-      api: [API_PRIVILEGES.READ_FLAPPING_SETTINGS],
+      api: [],
       management: {
         insightsAndAlerting: ['triggersActions'],
       },

@@ -8,7 +8,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import React, { useState, useEffect } from 'react';
-import { RulesSettings, RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
+import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -54,6 +54,7 @@ const flappingEnableLabel = i18n.translate(
 export const RulesSettingsErrorPrompt = () => {
   return (
     <EuiEmptyPrompt
+      data-test-subj="rulesSettingsErrorPrompt"
       color="danger"
       iconType="alert"
       title={
@@ -97,10 +98,16 @@ export const RulesSettingsModal = (props: RulesSettingsModalProps) => {
   } = useKibana().services;
 
   const {
-    rulesSettings: { save, writeFlappingSettingsUI },
+    rulesSettings: { show, save, writeFlappingSettingsUI, readFlappingSettingsUI },
   } = capabilities;
 
-  const handleSettingsChange = (key: keyof RulesSettings['flapping'], value: number | boolean) => {
+  const canWriteFlappingSettings = save && writeFlappingSettingsUI && !hasError;
+  const canShowFlappingSettings = show && readFlappingSettingsUI;
+
+  const handleSettingsChange = (
+    key: keyof RulesSettingsFlappingProperties,
+    value: number | boolean
+  ) => {
     if (!settings) {
       return;
     }
@@ -110,7 +117,7 @@ export const RulesSettingsModal = (props: RulesSettingsModalProps) => {
     });
   };
 
-  const handleUpdate = async () => {
+  const handleSave = async () => {
     if (!settings) {
       return;
     }
@@ -137,6 +144,7 @@ export const RulesSettingsModal = (props: RulesSettingsModalProps) => {
     onSave?.();
   };
 
+  // tech-debt: Replace this with react query once that is available
   useEffect(() => {
     if (!isVisible) {
       return;
@@ -179,9 +187,10 @@ export const RulesSettingsModal = (props: RulesSettingsModalProps) => {
           <EuiSpacer size="s" />
           <EuiFlexItem grow={false}>
             <EuiSwitch
+              data-test-subj="rulesSettingsModalEnableSwitch"
               label={flappingEnableLabel}
               checked={settings!.enabled}
-              disabled={!writeFlappingSettingsUI}
+              disabled={!canWriteFlappingSettings}
               onChange={(e) => handleSettingsChange('enabled', e.target.checked)}
             />
             <EuiSpacer size="s" />
@@ -205,7 +214,7 @@ export const RulesSettingsModal = (props: RulesSettingsModalProps) => {
     }
     if (!settings.enabled) {
       return (
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="rulesSettingsModalFlappingOffPrompt">
           <EuiPanel borderRadius="none" color="subdued" grow={false}>
             <EuiText size="s">
               <FormattedMessage
@@ -229,7 +238,7 @@ export const RulesSettingsModal = (props: RulesSettingsModalProps) => {
   };
 
   const renderForm = () => {
-    if (hasError) {
+    if (hasError || !canShowFlappingSettings) {
       return <RulesSettingsErrorPrompt />;
     }
     if (!settings || isLoading) {
@@ -252,7 +261,7 @@ export const RulesSettingsModal = (props: RulesSettingsModalProps) => {
   };
 
   return (
-    <EuiModal onClose={onClose} maxWidth={880}>
+    <EuiModal data-test-subj="rulesSettingsModal" onClose={onClose} maxWidth={880}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>
@@ -276,13 +285,18 @@ export const RulesSettingsModal = (props: RulesSettingsModalProps) => {
         <EuiHorizontalRule margin="none" />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>
+        <EuiButtonEmpty data-test-subj="rulesSettingsModalCancelButton" onClick={onClose}>
           <FormattedMessage
             id="xpack.triggersActionsUI.rulesSettings.modal.cancelButton"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
-        <EuiButton fill onClick={handleUpdate} disabled={!save || hasError}>
+        <EuiButton
+          fill
+          data-test-subj="rulesSettingsModalSaveButton"
+          onClick={handleSave}
+          disabled={!canWriteFlappingSettings}
+        >
           <FormattedMessage
             id="xpack.triggersActionsUI.rulesSettings.modal.saveButton"
             defaultMessage="Save"

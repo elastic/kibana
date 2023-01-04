@@ -19,7 +19,7 @@ import {
   RULES_SETTINGS_SAVED_OBJECT_ID,
 } from '../../common';
 
-export interface ConstructorOptions {
+export interface RulesSettingsClientConstructorOptions {
   readonly logger: Logger;
   readonly savedObjectsClient: SavedObjectsClientContract;
   readonly getUserName: () => Promise<string | null>;
@@ -29,14 +29,14 @@ export class RulesSettingsClient {
   private readonly logger: Logger;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly getUserName: () => Promise<string | null>;
-  public readonly flapping: RulesSettingsFlappingClient;
+  private readonly _flapping: RulesSettingsFlappingClient;
 
-  constructor(options: ConstructorOptions) {
+  constructor(options: RulesSettingsClientConstructorOptions) {
     this.logger = options.logger;
     this.savedObjectsClient = options.savedObjectsClient;
     this.getUserName = options.getUserName;
 
-    this.flapping = new RulesSettingsFlappingClient({
+    this._flapping = new RulesSettingsFlappingClient({
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
       persist: this.persist.bind(this),
@@ -46,17 +46,17 @@ export class RulesSettingsClient {
 
   private async getModificationMetadata() {
     const createTime = Date.now();
-    const username = await this.getUserName();
+    const userName = await this.getUserName();
 
     return {
-      createdBy: username,
-      updatedBy: username,
+      createdBy: userName,
+      updatedBy: userName,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
     };
   }
 
-  private async get(): Promise<SavedObject<RulesSettings>> {
+  public async get(): Promise<SavedObject<RulesSettings>> {
     try {
       return await this.savedObjectsClient.get<RulesSettings>(
         RULES_SETTINGS_SAVED_OBJECT_TYPE,
@@ -68,7 +68,7 @@ export class RulesSettingsClient {
     }
   }
 
-  private async create(): Promise<SavedObject<RulesSettings>> {
+  public async create(): Promise<SavedObject<RulesSettings>> {
     const modificationMetadata = await this.getModificationMetadata();
 
     try {
@@ -101,5 +101,9 @@ export class RulesSettingsClient {
       }
       throw e;
     }
+  }
+
+  public flapping(): RulesSettingsFlappingClient {
+    return this._flapping;
   }
 }

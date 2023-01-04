@@ -70,7 +70,7 @@ export const RulesSettingsFlappingTitle = () => {
 };
 
 export const RulesSettingsRange = (props: RulesSettingsRangeProps) => {
-  const { label, labelPopoverText, min, max, value, disabled, onChange } = props;
+  const { label, labelPopoverText, min, max, value, disabled, onChange, ...rest } = props;
 
   const renderLabel = () => {
     return (
@@ -93,6 +93,7 @@ export const RulesSettingsRange = (props: RulesSettingsRangeProps) => {
         onChange={onChange}
         showLabels
         showValue
+        {...rest}
       />
     </EuiFormRow>
   );
@@ -114,8 +115,10 @@ export const RulesSettingsFlapping = (props: RulesSettingsFlappingProps) => {
   } = useKibana().services;
 
   const {
-    rulesSettings: { writeFlappingSettingsUI },
+    rulesSettings: { save, writeFlappingSettingsUI },
   } = capabilities;
+
+  const canWriteFlappingSettings = save && writeFlappingSettingsUI;
 
   const renderTitle = () => {
     return (
@@ -160,24 +163,26 @@ export const RulesSettingsFlapping = (props: RulesSettingsFlappingProps) => {
       )}
       <EuiFlexItem grow={false}>
         <RulesSettingsRange
+          data-test-subj="lookBackWindowRangeInput"
           min={MIN_LOOK_BACK_WINDOW}
           max={MAX_LOOK_BACK_WINDOW}
           value={lookBackWindow}
           onChange={(e) => onChange('lookBackWindow', parseInt(e.currentTarget.value, 10))}
           label={lookBackWindowLabel}
           labelPopoverText="TODO: look back window helper text"
-          disabled={!writeFlappingSettingsUI}
+          disabled={!canWriteFlappingSettings}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <RulesSettingsRange
+          data-test-subj="statusChangeThresholdRangeInput"
           min={MIN_STATUS_CHANGE_THRESHOLD}
           max={MAX_STATUS_CHANGE_THRESHOLD}
           value={statusChangeThreshold}
           onChange={(e) => onChange('statusChangeThreshold', parseInt(e.currentTarget.value, 10))}
           label={statusChangeThresholdLabel}
           labelPopoverText="TODO: status threshold helper text"
-          disabled={!writeFlappingSettingsUI}
+          disabled={!canWriteFlappingSettings}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

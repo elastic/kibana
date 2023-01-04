@@ -26,8 +26,7 @@ export const getFlappingSettingsRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesSettingsClient = (await context.alerting).getRulesSettingsClient();
-        const flappingSettings = await rulesSettingsClient.flapping.get();
-
+        const flappingSettings = await rulesSettingsClient.flapping().get();
         return res.ok({ body: flappingSettings });
       })
     )
