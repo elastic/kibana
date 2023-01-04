@@ -6,7 +6,6 @@
  */
 
 const apmIndexConfigs = [
-  ['sourcemap', 'apm_oss.sourcemapIndices'],
   ['error', 'apm_oss.errorIndices'],
   ['onboarding', 'apm_oss.onboardingIndices'],
   ['span', 'apm_oss.spanIndices'],

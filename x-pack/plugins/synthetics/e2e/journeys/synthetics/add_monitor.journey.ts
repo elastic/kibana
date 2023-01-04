@@ -6,8 +6,9 @@
  */
 import uuid from 'uuid';
 import { journey, step, expect, Page } from '@elastic/synthetics';
-import { FormMonitorType } from '../../../common/runtime_types/monitor_management';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { FormMonitorType } from '../../../common/runtime_types';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 const customLocation = process.env.SYNTHETICS_TEST_LOCATION;
 
@@ -146,6 +147,8 @@ const createMonitorJourney = ({
   journey(
     `SyntheticsAddMonitor - ${monitorName}`,
     async ({ page, params }: { page: Page; params: any }) => {
+      recordVideo(page);
+
       const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
       step('Go to monitor management', async () => {
@@ -201,7 +204,7 @@ const createMonitorJourney = ({
 
       step('delete monitor', async () => {
         await syntheticsApp.navigateToMonitorManagement();
-        await syntheticsApp.findByText('Monitor name');
+        await syntheticsApp.findByText('Monitor');
         const isSuccessful = await syntheticsApp.deleteMonitors();
         expect(isSuccessful).toBeTruthy();
       });

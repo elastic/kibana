@@ -73,6 +73,7 @@
 /src/plugins/ui_actions/ @elastic/kibana-global-experience
 /src/plugins/ui_actions_enhanced/ @elastic/kibana-global-experience
 /src/plugins/navigation/ @elastic/kibana-global-experience
+/src/plugins/image_embeddable/ @elastic/kibana-global-experience
 /x-pack/plugins/notifications/ @elastic/kibana-global-experience
 
 ## Examples
@@ -310,7 +311,11 @@
 /x-pack/plugins/licensing/  @elastic/kibana-core
 /x-pack/plugins/global_search/  @elastic/kibana-core
 /x-pack/plugins/cloud/ @elastic/kibana-core
-/x-pack/plugins/cloud_integrations/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_chat/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_experiments/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_full_story/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_gain_sight/ @elastic/kibana-core
+/x-pack/plugins/cloud_integrations/cloud_links/ @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
@@ -424,9 +429,10 @@
 /x-pack/plugins/ingest_pipelines/  @elastic/platform-deployment-management
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/platform-deployment-management
 
-# Management Experience - Platform Onboarding
+# Platform Onboarding
 /src/plugins/guided_onboarding/ @elastic/platform-onboarding
 /examples/guided_onboarding_example/ @elastic/platform-onboarding
+/x-pack/plugins/cloud_integrations/cloud_data_migration/ @elastic/platform-onboarding
 
 # Security Solution
 /x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
@@ -497,20 +503,15 @@
 /x-pack/plugins/security_solution/public/common/components/navigation @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/news_feed @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/overview_description_list @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/paginated_table @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/sidebar_header @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/stat_items @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/tables @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/top_n @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/with_hover_actions @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/containers/hosts_risk @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/containers/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/lib/cell_actions @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/cases @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/hosts @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/network @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/public/explore @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/overview @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/users @elastic/security-threat-hunting-explore
 
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-explore
@@ -700,7 +701,7 @@ packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/analytics/shippers/gainsight @elastic/kibana-core
-packages/content-management/inspector @elastic/kibana-global-experience
+packages/content-management/content_editor @elastic/kibana-global-experience
 packages/content-management/table_list @elastic/kibana-global-experience
 packages/core/analytics/core-analytics-browser @elastic/kibana-core
 packages/core/analytics/core-analytics-browser-internal @elastic/kibana-core
@@ -783,7 +784,6 @@ packages/core/i18n/core-i18n-browser-mocks @elastic/kibana-core
 packages/core/i18n/core-i18n-server @elastic/kibana-core
 packages/core/i18n/core-i18n-server-internal @elastic/kibana-core
 packages/core/i18n/core-i18n-server-mocks @elastic/kibana-core
-packages/core/injected-metadata/core-injected-metadata-browser @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-browser-internal @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-browser-mocks @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-common-internal @elastic/kibana-core
@@ -881,15 +881,19 @@ packages/home/sample_data_types @elastic/kibana-global-experience
 packages/kbn-ace @elastic/platform-deployment-management
 packages/kbn-alerts @elastic/security-solution
 packages/kbn-ambient-common-types @elastic/kibana-operations
+packages/kbn-ambient-ftr-types @elastic/kibana-operations
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 packages/kbn-apm-synthtrace @elastic/apm-ui
+packages/kbn-apm-synthtrace-client @elastic/apm-ui
 packages/kbn-apm-utils @elastic/apm-ui
 packages/kbn-axe-config @elastic/kibana-qa
-packages/kbn-babel-plugin-synthetic-packages @elastic/kibana-operations
+packages/kbn-babel-plugin-package-imports @elastic/kibana-operations
 packages/kbn-babel-preset @elastic/kibana-operations
+packages/kbn-babel-register @elastic/kibana-operations
+packages/kbn-babel-transform @elastic/kibana-operations
 packages/kbn-bazel-packages @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-cases-components @elastic/response-ops
@@ -904,6 +908,7 @@ packages/kbn-config-mocks @elastic/kibana-core
 packages/kbn-config-schema @elastic/kibana-core
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
+packages/kbn-cypress-config @elastic/kibana-operations
 packages/kbn-datemath @elastic/kibana-app-services
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
@@ -912,6 +917,7 @@ packages/kbn-dev-utils @elastic/kibana-operations
 packages/kbn-doc-links @elastic/kibana-docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-ebt-tools @elastic/kibana-core
+packages/kbn-ecs @elastic/kibana-core
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations
 packages/kbn-es-errors @elastic/kibana-core
@@ -952,6 +958,7 @@ packages/kbn-monaco @elastic/kibana-global-experience
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-osquery-io-ts-types @elastic/security-asset-management
+packages/kbn-package-map @elastic/kibana-operations
 packages/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
@@ -959,6 +966,8 @@ packages/kbn-plugin-discovery @elastic/kibana-operations
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-react-field @elastic/kibana-app-services
+packages/kbn-repo-info @elastic/kibana-operations
+packages/kbn-repo-path @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-rison @elastic/kibana-operations
@@ -983,13 +992,13 @@ packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/apm-ui
 packages/kbn-shared-svg @elastic/apm-ui
 packages/kbn-shared-ux-utility @elastic/kibana-global-experience
+packages/kbn-slo-schema @elastic/actionable-observability
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-spec-to-console @elastic/platform-deployment-management
 packages/kbn-std @elastic/kibana-core
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
-packages/kbn-synthetic-package-map @elastic/kibana-operations
 packages/kbn-telemetry-tools @elastic/kibana-core
 packages/kbn-test @elastic/kibana-operations
 packages/kbn-test-jest-helpers @elastic/kibana-operations
@@ -997,9 +1006,10 @@ packages/kbn-test-subj-selector @elastic/kibana-operations
 packages/kbn-timelion-grammar @elastic/kibana-visualizations
 packages/kbn-tinymath @elastic/kibana-visualizations
 packages/kbn-tooling-log @elastic/kibana-operations
-packages/kbn-type-summarizer @elastic/kibana-operations
-packages/kbn-type-summarizer-cli @elastic/kibana-operations
-packages/kbn-type-summarizer-core @elastic/kibana-operations
+packages/kbn-ts-project-linter @elastic/kibana-operations
+packages/kbn-ts-project-linter-cli @elastic/kibana-operations
+packages/kbn-ts-projects @elastic/kibana-operations
+packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-typed-react-router-config @elastic/apm-ui
 packages/kbn-ui-framework @elastic/kibana-design
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
@@ -1009,6 +1019,7 @@ packages/kbn-user-profile-components @elastic/kibana-security
 packages/kbn-utility-types @elastic/kibana-core
 packages/kbn-utility-types-jest @elastic/kibana-operations
 packages/kbn-utils @elastic/kibana-operations
+packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/shared-ux/avatar/solution @elastic/kibana-global-experience
 packages/shared-ux/avatar/user_profile/impl @elastic/kibana-global-experience
@@ -1062,4 +1073,6 @@ x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
 x-pack/packages/ml/aiops_utils @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
+x-pack/packages/ml/nested_property @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
+x-pack/packages/ml/url_state @elastic/ml-ui
