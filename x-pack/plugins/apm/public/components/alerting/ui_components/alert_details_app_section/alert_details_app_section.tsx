@@ -306,12 +306,20 @@ export function AlertDetailsAppSection({
     if (isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID])) {
       return [
         <AlertThresholdRect
+          key={'alertThresholdRect'}
           threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
           alertStarted={alert.start}
         />,
-        <AlertAnnotation alertStarted={alert.start} />,
-        <AlertActiveRect alertStarted={alert.start} />,
+        <AlertAnnotation
+          key={'alertAnnotationStart'}
+          alertStarted={alert.start}
+        />,
+        <AlertActiveRect
+          key={'alertAnnotationActiveRect'}
+          alertStarted={alert.start}
+        />,
         <AlertThresholdAnnotation
+          key={'alertThresholdAnnotation'}
           threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
         />,
       ];
@@ -339,7 +347,7 @@ export function AlertDetailsAppSection({
             </EuiFlexGroup>
             <TimeseriesChart
               id="latencyChart"
-              alertDetailsAdditionalData={getLatencyChartAdditionalData()}
+              annotations={getLatencyChartAdditionalData()}
               height={200}
               comparisonEnabled={comparisonEnabled}
               offset={offset}

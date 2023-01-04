@@ -6,7 +6,6 @@
  */
 
 import {
-  AnnotationDomainType,
   AreaSeries,
   Axis,
   BarSeries,
@@ -30,8 +29,7 @@ import React, { ReactElement } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
-import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
-import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
+
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { unit } from '../../../utils/style';
@@ -51,7 +49,7 @@ interface TimeseriesChartProps extends TimeseriesChartWithContextProps {
   comparisonEnabled: boolean;
   offset?: string;
   timeZone: string;
-  alertDetailsAdditionalData?: Array<
+  annotations?: Array<
     ReactElement<typeof RectAnnotation | typeof LineAnnotation>
   >;
 }
@@ -70,10 +68,9 @@ export function TimeseriesChart({
   comparisonEnabled,
   offset,
   timeZone,
-  alertDetailsAdditionalData,
+  annotations,
 }: TimeseriesChartProps) {
   const history = useHistory();
-  const { annotations } = useAnnotationsContext();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
@@ -83,7 +80,6 @@ export function TimeseriesChart({
     anomalyTimeseriesColor: anomalyTimeseries?.color,
   });
   const isEmpty = isTimeseriesEmpty(timeseries);
-  const annotationColor = theme.eui.euiColorSuccess;
   const isComparingExpectedBounds =
     comparisonEnabled && isExpectedBoundsComparison(offset);
   const allSeries = [
@@ -223,26 +219,7 @@ export function TimeseriesChart({
           tickFormat={yTickFormat ? yTickFormat : yLabelFormat}
           labelFormat={yLabelFormat}
         />
-        {alertDetailsAdditionalData}
-        {showAnnotations && (
-          <LineAnnotation
-            id="annotations"
-            domainType={AnnotationDomainType.XDomain}
-            dataValues={annotations.map((annotation) => ({
-              dataValue: annotation['@timestamp'],
-              header: asAbsoluteDateTime(annotation['@timestamp']),
-              details: `${i18n.translate('xpack.apm.chart.annotation.version', {
-                defaultMessage: 'Version',
-              })} ${annotation.text}`,
-            }))}
-            style={{
-              line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
-            }}
-            marker={<EuiIcon type="dot" color={annotationColor} />}
-            markerPosition={Position.Top}
-          />
-        )}
-
+        {showAnnotations && annotations}
         <RectAnnotation
           id="__endzones__"
           zIndex={2}
