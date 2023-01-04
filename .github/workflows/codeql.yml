@@ -17,11 +17,6 @@ on:
   schedule:
     - cron: '27 21 * * 0'
 
-# paths-ignore:
-#   - '**/*.test.*'
-#   - test
-#   - x-pack/test
-
 jobs:
   analyze:
     name: Analyze
@@ -44,6 +39,7 @@ jobs:
       uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
+        config-file: ./.github/codeql/codeql-config.yml
 
     - name: Autobuild
       uses: github/codeql-action/autobuild@v2

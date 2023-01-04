@@ -1,0 +1,4 @@
+paths-ignore:
+  - '**/*.test.*'
+  - test
+  - x-pack/test
