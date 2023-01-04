@@ -18,7 +18,7 @@ import './loading_indicator.scss';
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
-  customLogo?: string;
+  showPlainSpinner?: boolean;
 }
 
 export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
@@ -58,9 +58,16 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
   render() {
     const className = classNames(!this.state.visible && 'kbnLoadingIndicator-hidden');
 
-    const testSubj = this.state.visible
-      ? 'globalLoadingIndicator'
-      : 'globalLoadingIndicator-hidden';
+    const testSubj = () => {
+      if (this.state.visible && this.props.showPlainSpinner) {
+        return 'globalLoadingIndicator';
+      } else if (this.state.visible) {
+        return 'globalElasticLoadingIndicator';
+      } else if (this.props.showPlainSpinner) {
+        return 'globalLoadingIndicator-hidden';
+      }
+      return 'globalElasticLoadingIndicator-hidden';
+    };
 
     const ariaHidden = this.state.visible ? false : true;
 
@@ -68,31 +75,32 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       defaultMessage: 'Loading content',
     });
 
-    const logo = this.state.visible ? (
-      <EuiLoadingSpinner
-        size="l"
-        data-test-subj={testSubj}
-        aria-hidden={false}
-        aria-label={ariaLabel}
-      />
-    ) : (
-      <EuiIcon
-        type={this.props.customLogo ?? 'logoElastic'}
-        size="l"
-        data-test-subj={testSubj}
-        className="chrHeaderLogo__cluster"
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
-          defaultMessage: 'Elastic Logo',
-        })}
-      />
-    );
+    const logo =
+      this.state.visible || this.props.showPlainSpinner ? (
+        <EuiLoadingSpinner
+          size="l"
+          data-test-subj={testSubj()}
+          aria-hidden={false}
+          aria-label={ariaLabel}
+        />
+      ) : (
+        <EuiIcon
+          type={'logoElastic'}
+          size="l"
+          data-test-subj={testSubj()}
+          className="chrHeaderLogo__cluster"
+          aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
+            defaultMessage: 'Elastic Logo',
+          })}
+        />
+      );
 
     return !this.props.showAsBar ? (
       logo
     ) : (
       <EuiProgress
         className={className}
-        data-test-subj={testSubj}
+        data-test-subj={testSubj()}
         aria-hidden={ariaHidden}
         aria-label={ariaLabel}
         position="fixed"

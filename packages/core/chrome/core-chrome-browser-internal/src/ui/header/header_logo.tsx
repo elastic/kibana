@@ -102,7 +102,10 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
         defaultMessage: 'Elastic home',
       })}
     >
-      <LoadingIndicator loadingCount$={loadingCount$!} customLogo={logo} />
+      <LoadingIndicator
+        loadingCount$={loadingCount$!}
+        showPlainSpinner={Boolean(logo || customizedLogo)}
+      />
       {customizedLogo ? (
         <img src={customizedLogo} width="200" height="84" alt="custom mark" />
       ) : (
