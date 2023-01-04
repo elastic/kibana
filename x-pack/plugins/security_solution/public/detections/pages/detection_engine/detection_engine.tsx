@@ -8,7 +8,13 @@
 // No bueno, I know! Encountered when reverting RBAC work post initial BCs
 // Don't want to include large amounts of refactor in this temporary workaround
 // TODO: Refactor code - component can be broken apart
-import { EuiFlexGroup, EuiLoadingSpinner, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiWindowEvent,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
@@ -307,6 +313,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                   {i18n.BUTTON_MANAGE_RULES}
                 </SecuritySolutionLinkButton>
               </HeaderPage>
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="l" />
               <DetectionPageFilterSet
                 dataViewId={dataViewId}
                 onFilterChange={pageFiltersUpdateHandler}
@@ -320,7 +328,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                 chainingSystem="HIERARCHICAL"
               />
 
-              <EuiSpacer size="m" />
+              <EuiSpacer size="l" />
               <ChartPanels
                 addFilter={addFilter}
                 alertsHistogramDefaultFilters={alertsHistogramDefaultFilters}
