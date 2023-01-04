@@ -5,15 +5,15 @@ on:
     branches: [ "main", "7.17" ]
   pull_request:
     branches: [ "main" ]
-    # paths-ignore:
-    #   - '**/*.json'
-    #   - '**/*.md'
-    #   - '**/*.png'
-    #   # - '**/*.yml'
-    #   - '**/*.asciidoc'
-    #   - '**/*.test.*'
-    #   - test
-    #   - x-pack/test
+    paths-ignore:
+      - '**/*.json'
+      - '**/*.md'
+      - '**/*.png'
+      # - '**/*.yml'
+      - '**/*.asciidoc'
+      - '**/*.test.*'
+      - test
+      - x-pack/test
   schedule:
     - cron: '27 21 * * 0'
 
