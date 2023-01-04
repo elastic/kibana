@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/eslint-plugin-imports",
-        "id": "def-server.getImportResolver",
+        "id": "def-common.getImportResolver",
         "type": "Function",
         "tags": [],
         "label": "getImportResolver",
@@ -26,9 +34,9 @@
           ".RuleContext) => ",
           {
             "pluginId": "@kbn/import-resolver",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnImportResolverPluginApi",
-            "section": "def-server.ImportResolver",
+            "section": "def-common.ImportResolver",
             "text": "ImportResolver"
           }
         ],
@@ -38,7 +46,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/eslint-plugin-imports",
-            "id": "def-server.getImportResolver.$1",
+            "id": "def-common.getImportResolver.$1",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -57,14 +65,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],
