@@ -29,9 +29,10 @@ interface ExceptionListHeaderComponentProps {
   canUserEditList?: boolean;
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onEditListDetails: (listDetails: ListDetails) => void;
-  onExportList: () => void;
+  onExportList: (includeExpiredExceptions: boolean) => void;
   onDeleteList: () => void;
   onManageRules: () => void;
+  onExportModalOpen: () => void;
 }
 
 export interface BackOptions {
@@ -54,6 +55,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   onExportList,
   onDeleteList,
   onManageRules,
+  onExportModalOpen,
 }) => {
   const { isModalVisible, listDetails, onEdit, onSave, onCancel } = useExceptionListHeader({
     name,
@@ -100,6 +102,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
             onExportList={onExportList}
             onDeleteList={onDeleteList}
             onManageRules={onManageRules}
+            onExportModalOpen={onExportModalOpen}
           />,
         ]}
         breadcrumbs={[

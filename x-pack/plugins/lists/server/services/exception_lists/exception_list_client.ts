@@ -978,6 +978,7 @@ export class ExceptionListClient {
     listId,
     id,
     namespaceType,
+    includeExpiredExceptions,
   }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
     const { savedObjectsClient } = this;
 
@@ -986,6 +987,7 @@ export class ExceptionListClient {
         'exceptionsListPreExport',
         {
           id,
+          includeExpiredExceptions,
           listId,
           namespaceType,
         },
@@ -995,6 +997,7 @@ export class ExceptionListClient {
 
     return exportExceptionListAndItems({
       id,
+      includeExpiredExceptions,
       listId,
       namespaceType,
       savedObjectsClient,

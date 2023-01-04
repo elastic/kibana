@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { FC } from 'react';
 
 import {
@@ -24,6 +24,7 @@ import { AutoDownload } from '../../../common/components/auto_download/auto_down
 import { ListWithSearch, ManageRules, ListDetailsLinkAnchor } from '../../components';
 import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
+import { ExportExceptionsListModal } from '../../components/export_exceptions_list_modal';
 
 export const ListsDetailViewComponent: FC = () => {
   const { detailName: exceptionListId } = useParams<{
@@ -59,6 +60,12 @@ export const ListsDetailViewComponent: FC = () => {
     handleReferenceDelete,
   } = useListDetailsView(exceptionListId);
 
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  const onModalClose = useCallback(() => setShowExportModal(false), [setShowExportModal]);
+
+  const onModalOpen = useCallback(() => setShowExportModal(true), [setShowExportModal]);
+
   const detailsViewContent = useMemo(() => {
     if (viewerStatus === ViewerStatus.ERROR)
       return <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />;
@@ -80,6 +87,7 @@ export const ListsDetailViewComponent: FC = () => {
           securityLinkAnchorComponent={ListDetailsLinkAnchor}
           onEditListDetails={onEditListDetails}
           onExportList={onExportList}
+          onExportModalOpen={onModalOpen}
           onDeleteList={handleDelete}
           onManageRules={onManageRules}
         />
@@ -107,6 +115,12 @@ export const ListsDetailViewComponent: FC = () => {
             onRuleSelectionChange={onRuleSelectionChange}
           />
         ) : null}
+        {showExportModal && (
+          <ExportExceptionsListModal
+            onModalConfirm={onExportList}
+            handleCloseModal={onModalClose}
+          />
+        )}
       </>
     );
   }, [
@@ -128,6 +142,7 @@ export const ListsDetailViewComponent: FC = () => {
     showManageButtonLoader,
     showManageRulesFlyout,
     showReferenceErrorModal,
+    showExportModal,
     viewerStatus,
     onCancelManageRules,
     onEditListDetails,
@@ -138,6 +153,8 @@ export const ListsDetailViewComponent: FC = () => {
     handleCloseReferenceErrorModal,
     handleDelete,
     handleReferenceDelete,
+    onModalClose,
+    onModalOpen,
   ]);
   return (
     <>

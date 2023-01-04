@@ -28,11 +28,17 @@ export const exportExceptionsRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const { id, list_id: listId, namespace_type: namespaceType } = request.query;
+        const {
+          id,
+          list_id: listId,
+          namespace_type: namespaceType,
+          include_expired_exceptions: includeExpiredExceptionsString,
+        } = request.query;
         const exceptionListsClient = await getExceptionListClient(context);
-
+        const includeExpiredExceptions = includeExpiredExceptionsString === 'true';
         const exportContent = await exceptionListsClient.exportExceptionListAndItems({
           id,
+          includeExpiredExceptions,
           listId,
           namespaceType,
         });

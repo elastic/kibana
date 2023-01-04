@@ -499,6 +499,8 @@ export interface ExportExceptionListAndItemsOptions {
   id: IdOrUndefined;
   /** saved object namespace (single | agnostic) */
   namespaceType: NamespaceType;
+  /** whether or not to include expired exceptions */
+  includeExpiredExceptions: boolean;
 }
 
 /**

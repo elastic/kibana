@@ -18,9 +18,10 @@ interface MenuItemsProps {
   linkedRules: Rule[];
   canUserEditList?: boolean;
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
-  onExportList: () => void;
+  onExportList: (includeExpiredExceptions: boolean) => void;
   onDeleteList: () => void;
   onManageRules: () => void;
+  onExportModalOpen: () => void;
 }
 
 const MenuItemsComponent: FC<MenuItemsProps> = ({
@@ -32,6 +33,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
   onExportList,
   onDeleteList,
   onManageRules,
+  onExportModalOpen,
 }) => {
   const referencedLinks = useMemo(
     () =>
@@ -95,7 +97,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
               icon: 'exportAction',
               label: i18n.EXCEPTION_LIST_HEADER_EXPORT_ACTION,
               onClick: () => {
-                if (typeof onExportList === 'function') onExportList();
+                if (typeof onExportList === 'function') onExportModalOpen();
               },
             },
             {
