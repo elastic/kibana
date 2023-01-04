@@ -7,7 +7,14 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useController } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
-import { EuiFieldText, EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFormRow,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface BuilderFormProps {
@@ -24,76 +31,91 @@ const InsightFormBuilderRow = ({}: {}) => {
   });
   const hasError = useMemo(() => !!error?.message, [error?.message]);
   return (
-    <EuiFlexGroup direction="row">
-      <EuiFormRow
-        label={i18n.translate('xpack.securitySolution.markdown.insight.fieldText', {
-          defaultMessage: 'Field',
-        })}
-        error={error?.message}
-        isInvalid={hasError}
-        fullWidth
-      >
-        <EuiFieldText
+    <>
+      <EuiFlexGroup direction="row">
+        <EuiFormRow
+          label={i18n.translate('xpack.securitySolution.markdown.insight.fieldText', {
+            defaultMessage: 'Field',
+          })}
+          error={error?.message}
           isInvalid={hasError}
-          onChange={onChange}
-          value={value}
-          name={fieldName}
           fullWidth
-          data-test-subj="input"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('xpack.securitySolution.markdown.insight.operatorText', {
-          defaultMessage: 'Operator',
-        })}
-        error={error?.message}
-        isInvalid={hasError}
-        fullWidth
-      >
-        <EuiFieldText
+        >
+          <EuiFieldText
+            isInvalid={hasError}
+            onChange={onChange}
+            value={value}
+            name={fieldName}
+            fullWidth
+            data-test-subj="input"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.securitySolution.markdown.insight.operatorText', {
+            defaultMessage: 'Operator',
+          })}
+          error={error?.message}
           isInvalid={hasError}
-          onChange={onChange}
-          value={value}
-          name={fieldName}
           fullWidth
-          data-test-subj="input"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('xpack.securitySolution.markdown.insight.typeText', {
-          defaultMessage: 'Type',
-        })}
-        error={error?.message}
-        isInvalid={hasError}
-        fullWidth
-      >
-        <EuiFieldText
+        >
+          <EuiFieldText
+            isInvalid={hasError}
+            onChange={onChange}
+            value={value}
+            name={fieldName}
+            fullWidth
+            data-test-subj="input"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.securitySolution.markdown.insight.typeText', {
+            defaultMessage: 'Type',
+          })}
+          error={error?.message}
           isInvalid={hasError}
-          onChange={onChange}
-          value={value}
-          name={fieldName}
           fullWidth
-          data-test-subj="input"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('xpack.securitySolution.markdown.insight.valueText', {
-          defaultMessage: 'Value',
-        })}
-        error={error?.message}
-        isInvalid={hasError}
-        fullWidth
-      >
-        <EuiFieldText
+        >
+          <EuiFieldText
+            isInvalid={hasError}
+            onChange={onChange}
+            value={value}
+            name={fieldName}
+            fullWidth
+            data-test-subj="input"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.securitySolution.markdown.insight.valueText', {
+            defaultMessage: 'Value',
+          })}
+          error={error?.message}
           isInvalid={hasError}
-          onChange={onChange}
-          value={value}
-          name={fieldName}
           fullWidth
-          data-test-subj="input"
-        />
-      </EuiFormRow>
-    </EuiFlexGroup>
+        >
+          <EuiFieldText
+            isInvalid={hasError}
+            onChange={onChange}
+            value={value}
+            name={fieldName}
+            fullWidth
+            data-test-subj="input"
+          />
+        </EuiFormRow>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiButton onClick={addField} iconType="plusInCircle">
+            {'AND'}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton onClick={() => {}} iconType="plusInCircle" fill>
+            {'OR'}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
 
@@ -109,37 +131,24 @@ const InsightBuilderFormComponent = ({
     ecs_mapping: Record<string, unknown>;
   }>;
 }) => {
-  const {
-    field: { onChange, value, name: fieldName },
-    fieldState: { error },
-  } = useController({
-    name: 'label',
-    defaultValue: '',
-  });
   console.log(formMethods);
-  const [visibleRows, setVisibleRows] = useState<VisibleRows>([[1, 0]]);
-  const hasError = useMemo(() => !!error?.message, [error?.message]);
+  const [visibleOuterRows, setVisibleOuterRows] = useState<number>(1);
+  const addField = useCallback(() => {
+    setVisibleOuterRows(visibleOuterRows + 1);
+  }, [visibleOuterRows]);
 
-  const addField = useCallback(
-    (rowAddLocation: VisibleRows | number) => {
-      if (typeof rowAddLocation === 'number') {
-        
-        setVisibleRows()
-      }
-      const newLocation = rowAddLocation;
-      setVisibleRows(rowAddLocation)
-    },
-    []
-  );
+  const outerRows = useMemo(() => {
+    return Array.from({ length: visibleOuterRows }, (_, index) => {
+      return <InsightFormBuilderRow key={index} />;
+    });
+  }, [visibleOuterRows]);
 
   return (
     <>
-      {visibleRows.map((row) => {
-        return <InsightFormBuilderRow />;
-      })}
+      {outerRows}
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiButton onClick={() => {}} iconType="plusInCircle">
+          <EuiButton onClick={addField} iconType="plusInCircle">
             {'AND'}
           </EuiButton>
         </EuiFlexItem>
