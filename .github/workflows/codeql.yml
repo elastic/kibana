@@ -34,11 +34,11 @@ jobs:
         config-file: ./.github/codeql/codeql-config.yml
 
     # TODO: This step can most likely be removed as it has no function for a dynamic language
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
+    # - name: Autobuild
+    #   uses: github/codeql-action/autobuild@v2
 
-    # - name: Bootstrap
-    #   run: yarn kbn bootstrap
+    - run: yarn install
+    # - run: yarn kbn bootstrap
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
