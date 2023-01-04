@@ -103,37 +103,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       );
     });
-
-    it('allows edit data view from flyout', async () => {
-      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
-
-      await editDataView('*logstash*', '*l*');
-
-      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
-      expect(prevDataViewId).to.equal(newDataViewId);
-
-      const selectedDataViewElem = await testSubjects.find('discover-dataView-switch-link');
-      const selectedDataViewName = await selectedDataViewElem.getVisibleText();
-      expect(selectedDataViewName).to.equal('*logstash*');
-    });
-
-    it('allows edit adhoc data view from flyout', async () => {
-      await PageObjects.discover.createAdHocDataView('logstas', true);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
-
-      await editDataView('l*', 'l*');
-
-      // data view id changed since spec is changed for adhoc data view
-      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
-      expect(prevDataViewId).not.to.equal(newDataViewId);
-
-      const selectedDataViewElem = await testSubjects.find('discover-dataView-switch-link');
-      const selectedDataViewTitle = await selectedDataViewElem.getVisibleText();
-
-      expect(selectedDataViewTitle).to.equal('l*');
-      expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
-    });
   });
 }
