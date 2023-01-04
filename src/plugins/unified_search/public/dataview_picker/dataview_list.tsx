@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiSelectable,
   EuiSelectableProps,
@@ -14,14 +14,50 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiButtonGroup,
+  toSentenceCase,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
 
-import { optionsListStrings } from './dataview_list_strings';
 import { SortingService } from './sorting_service';
-import { SortingPopover } from './sorting_popover';
+
+const strings = {
+  sortOrder: {
+    asc: {
+      getSortOrderLabel: () =>
+        i18n.translate('unifiedSearch.optionsList.popover.sortOrder.asc', {
+          defaultMessage: 'Ascending',
+        }),
+    },
+    desc: {
+      getSortOrderLabel: () =>
+        i18n.translate('unifiedSearch.optionsList.popover.sortOrder.desc', {
+          defaultMessage: 'Descending',
+        }),
+    },
+  },
+  editorAndPopover: {
+    getSortDirectionLegend: () =>
+      i18n.translate('unifiedSearch.optionsList.popover.sortDirections', {
+        defaultMessage: 'Sort directions',
+      }),
+    adhoc: {
+      getTemporaryDataviewLabel: () =>
+        i18n.translate('unifiedSearch.query.queryBar.indexPattern.temporaryDataviewLabel', {
+          defaultMessage: 'Temporary',
+        }),
+    },
+    search: {
+      getSearchPlaceholder: () =>
+        i18n.translate('unifiedSearch.query.queryBar.indexPattern.findDataView', {
+          defaultMessage: 'Find a data view',
+        }),
+    },
+  },
+};
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
@@ -56,9 +92,25 @@ export function DataViewsList({
     sortingService.sortData(dataViewsList)
   );
 
-  const handleSortingChange = () => {
-    setSortedDataViewsList((dataViews) => sortingService.sortData(dataViews));
-  };
+  const sortOrderOptions = useMemo(
+    () =>
+      sortingService.getOrderDirections().map((key) => {
+        return {
+          id: key,
+          iconType: `sort${toSentenceCase(key)}ending`,
+          label: strings.sortOrder[key].getSortOrderLabel(),
+        };
+      }),
+    [sortingService]
+  );
+
+  const onChangeSortDirection = useCallback(
+    (value) => {
+      sortingService.setDirection(value);
+      setSortedDataViewsList((dataViews) => sortingService.sortData(dataViews));
+    },
+    [sortingService]
+  );
 
   return (
     <EuiSelectable<{
@@ -78,7 +130,7 @@ export function DataViewsList({
         checked: id === currentDataViewId && !Boolean(isTextBasedLangSelected) ? 'on' : undefined,
         append: isAdhoc ? (
           <EuiBadge color="hollow" data-test-subj={`dataViewItemTempBadge-${name}`}>
-            {optionsListStrings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
+            {strings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
           </EuiBadge>
         ) : null,
       }))}
@@ -91,7 +143,7 @@ export function DataViewsList({
       searchProps={{
         id: searchListInputId,
         compressed: true,
-        placeholder: optionsListStrings.editorAndPopover.search.getSearchPlaceholder(),
+        placeholder: strings.editorAndPopover.search.getSearchPlaceholder(),
         'data-test-subj': 'indexPattern-switcher--input',
         ...(selectableProps ? selectableProps.searchProps : undefined),
       }}
@@ -115,9 +167,13 @@ export function DataViewsList({
               <EuiFlexItem>{search}</EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <SortingPopover
-                  sortingService={sortingService}
-                  handleSortingChange={handleSortingChange}
+                <EuiButtonGroup
+                  isIconOnly
+                  buttonSize="compressed"
+                  options={sortOrderOptions}
+                  legend={strings.editorAndPopover.getSortDirectionLegend()}
+                  idSelected={sortingService.direction}
+                  onChange={onChangeSortDirection}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
