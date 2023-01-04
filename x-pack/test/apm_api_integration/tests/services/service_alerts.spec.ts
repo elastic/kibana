@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { waitForActiveAlert } from '../../common/utils/wait_for_active_alert';
 
