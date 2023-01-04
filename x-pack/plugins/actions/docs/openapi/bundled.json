@@ -29,7 +29,7 @@
       "get": {
         "summary": "Retrieves a connector by ID.",
         "operationId": "getConnector",
-        "description": "You must have `read` privileges for the *Actions and Connectors* feature in the *Management* section of the Kibana feature privileges.\n",
+        "description": "You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
         "tags": [
           "connectors"
         ],
