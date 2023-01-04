@@ -1966,7 +1966,7 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
 
   const { namespace, inputs } = packagePolicyUpdate;
   if (namespace && namespace !== oldPackagePolicy.namespace) {
-    throw new Error(
+    throw new PackagePolicyValidationError(
       i18n.translate('xpack.fleet.updatePackagePolicy.namespaceCannotBeModified', {
         defaultMessage:
           'Package policy namespace cannot be modified for input only packages, please create a new package policy.',
@@ -1987,7 +1987,7 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             oldStream?.vars?.['data_stream.dataset'] &&
             oldStream?.vars['data_stream.dataset'] !== stream?.vars?.['data_stream.dataset']
           ) {
-            throw new Error(
+            throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
                 defaultMessage:
                   'Package policy dataset cannot be modified for input only packages, please create a new package policy.',
