@@ -108,6 +108,24 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
     uniqueQueryId: uniqueHostsQueryId,
   });
 
+  const { items: detectionsData, isLoading: isDetectionsLoading } = useDetectionsChartData({
+    filters,
+    query,
+    signalIndexName,
+    runtimeMappings,
+    skip: querySkip,
+    uniqueQueryId,
+  });
+
+  const { items: hostData, isLoading: isHostsLoading } = useHostNameChartData({
+    filters,
+    query,
+    signalIndexName,
+    runtimeMappings,
+    skip: querySkip,
+    uniqueQueryId: uniqueHostsQueryId,
+  });
+
   return (
     <>
       <EuiFlexGroup gutterSize="s">

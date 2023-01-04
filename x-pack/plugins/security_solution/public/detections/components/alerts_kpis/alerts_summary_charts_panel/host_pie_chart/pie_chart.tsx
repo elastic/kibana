@@ -66,7 +66,6 @@ export const PieChart = ({
   total,
 }: PieChartProps) => {
   const theme = useTheme();
-
   return (
     <EuiFlexGroup
       alignItems="center"

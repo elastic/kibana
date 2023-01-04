@@ -27,6 +27,7 @@ import { EVENT_TYPE_COLOUR } from './helpers';
 import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 
 export const getSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityData>> => [
+export const getSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityData>> => [
   {
     field: 'key',
     name: i18n.SEVERITY_LEVEL_COLUMN_TITLE,

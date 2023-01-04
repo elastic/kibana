@@ -15,6 +15,7 @@ export const CHARTS_TITLE = i18n.translate(
 
 export const SEVERITY_LEVELS_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.severity.severityDonutTitle',
+  'xpack.securitySolution.detectionEngine.alerts.severity.severityDonutTitle',
   {
     defaultMessage: 'Severity levels',
   }
@@ -22,12 +23,14 @@ export const SEVERITY_LEVELS_TITLE = i18n.translate(
 
 export const UNKNOWN_SEVERITY = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.severity.unknown',
+  'xpack.securitySolution.detectionEngine.alerts.severity.unknown',
   {
     defaultMessage: 'Unknown',
   }
 );
 
 export const SEVERITY_LEVEL_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.severity.severityTableLevelColumn',
   'xpack.securitySolution.detectionEngine.alerts.severity.severityTableLevelColumn',
   {
     defaultMessage: 'Levels',
@@ -62,7 +65,22 @@ export const DETECTIONS_PREVENTIONS_COLUMN_TITLE = i18n.translate(
   }
 );
 
+export const DETECTIONS_TYPE_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.detections.detectionTableTypeColumn',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
+export const DETECTIONS_PREVENTIONS_COLUMN_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.detections.detectionTablePreventionsColumn',
+  {
+    defaultMessage: 'Preventions',
+  }
+);
+
 export const ALERT_BY_HOST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsBySeverity.chartAlertHostTitle',
   'xpack.securitySolution.detectionEngine.alerts.alertsBySeverity.chartAlertHostTitle',
   {
     defaultMessage: 'Top 10 hosts by alerts',
