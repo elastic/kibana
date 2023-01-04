@@ -261,7 +261,7 @@ export function getFormBasedDatasource({
           ...state,
           layers: {
             ...newLayers,
-            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId].linkToLayers),
+            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId]?.linkToLayers),
           },
         },
       };
@@ -416,8 +416,8 @@ export function getFormBasedDatasource({
       return fields;
     },
 
-    toExpression: (state, layerId, indexPatterns, searchSessionId) =>
-      toExpression(state, layerId, indexPatterns, uiSettings, searchSessionId),
+    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) =>
+      toExpression(state, layerId, indexPatterns, uiSettings, dateRange, searchSessionId),
 
     renderLayerSettings(
       domElement: Element,
@@ -513,10 +513,10 @@ export function getFormBasedDatasource({
       return columnLabelMap;
     },
 
-    isValidColumn: (state, indexPatterns, layerId, columnId) => {
+    isValidColumn: (state, indexPatterns, layerId, columnId, dateRange) => {
       const layer = state.layers[layerId];
 
-      return !isColumnInvalid(layer, columnId, indexPatterns[layer.indexPatternId]);
+      return !isColumnInvalid(layer, columnId, indexPatterns[layer.indexPatternId], dateRange);
     },
 
     renderDimensionTrigger: (

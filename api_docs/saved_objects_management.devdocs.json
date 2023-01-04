@@ -294,7 +294,7 @@
             "label": "euiColumn",
             "description": [],
             "signature": [
-              "{ children?: React.ReactNode; name: React.ReactNode; description?: string | undefined; onError?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; render?: ((value: any, record: ",
+              "{ children?: React.ReactNode; name: React.ReactNode; description?: string | undefined; scope?: string | undefined; onError?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; render?: ((value: any, record: ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
@@ -302,7 +302,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ") => React.ReactNode) | undefined; hidden?: boolean | undefined; color?: string | undefined; id?: string | undefined; className?: string | undefined; title?: string | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; security?: string | undefined; field: (string & {}) | keyof ",
+              ") => React.ReactNode) | undefined; hidden?: boolean | undefined; color?: string | undefined; id?: string | undefined; className?: string | undefined; title?: string | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; width?: string | undefined; security?: string | undefined; field: (string & {}) | keyof ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
@@ -314,7 +314,7 @@
               "Interpolation",
               "<",
               "Theme",
-              ">; height?: string | number | undefined; width?: string | undefined; readOnly?: boolean | undefined; align?: ",
+              ">; height?: string | number | undefined; readOnly?: boolean | undefined; align?: ",
               "HorizontalAlignment",
               " | undefined; abbr?: string | undefined; footer?: string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | ((props: ",
               "EuiTableFooterProps",
@@ -326,7 +326,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">) => React.ReactNode) | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; scope?: string | undefined; valign?: \"top\" | \"bottom\" | \"middle\" | \"baseline\" | undefined; dataType?: ",
+              ">) => React.ReactNode) | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"middle\" | \"baseline\" | undefined; dataType?: ",
               "EuiTableDataType",
               " | undefined; isExpander?: boolean | undefined; textOnly?: boolean | undefined; truncateText?: boolean | undefined; mobileOptions?: (Omit<",
               "EuiTableRowCellMobileOptionsShape",
@@ -1686,9 +1686,9 @@
             " | undefined; }) => ",
             {
               "pluginId": "@kbn/core-saved-objects-api-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-              "section": "def-server.SavedObjectsFindOptionsReference",
+              "section": "def-common.SavedObjectsFindOptionsReference",
               "text": "SavedObjectsFindOptionsReference"
             },
             "[] | undefined"

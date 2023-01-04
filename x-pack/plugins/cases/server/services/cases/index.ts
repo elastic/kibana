@@ -15,6 +15,8 @@ import type {
   SavedObjectsUpdateResponse,
   SavedObjectsResolveResponse,
   SavedObjectsFindOptions,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -49,6 +51,7 @@ import {
   transformFindResponseToExternalModel,
 } from './transform';
 import type { ESCaseAttributes } from './types';
+import { ESCaseStatus } from './types';
 import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError } from '../../common/error';
@@ -283,19 +286,19 @@ export class CasesService {
 
     const statusBuckets = CasesService.getStatusBuckets(cases.aggregations?.statuses.buckets);
     return {
-      open: statusBuckets?.get('open') ?? 0,
-      'in-progress': statusBuckets?.get('in-progress') ?? 0,
-      closed: statusBuckets?.get('closed') ?? 0,
+      open: statusBuckets?.get(ESCaseStatus.OPEN) ?? 0,
+      'in-progress': statusBuckets?.get(ESCaseStatus.IN_PROGRESS) ?? 0,
+      closed: statusBuckets?.get(ESCaseStatus.CLOSED) ?? 0,
     };
   }
 
   private static getStatusBuckets(
     buckets: Array<{ key: string; doc_count: number }> | undefined
-  ): Map<string, number> | undefined {
+  ): Map<number, number> | undefined {
     return buckets?.reduce((acc, bucket) => {
-      acc.set(bucket.key, bucket.doc_count);
+      acc.set(Number(bucket.key), bucket.doc_count);
       return acc;
-    }, new Map<string, number>());
+    }, new Map<number, number>());
   }
 
   public async deleteCase({ id: caseId, refresh }: DeleteCaseArgs) {
@@ -305,6 +308,21 @@ export class CasesService {
     } catch (error) {
       this.log.error(`Error on DELETE case ${caseId}: ${error}`);
       throw error;
+    }
+  }
+
+  public async bulkDeleteCaseEntities({
+    entities,
+    options,
+  }: {
+    entities: SavedObjectsBulkDeleteObject[];
+    options?: SavedObjectsBulkDeleteOptions;
+  }) {
+    try {
+      this.log.debug(`Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
+      return await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
+    } catch (error) {
+      this.log.error(`Error bulk deleting case entities ${JSON.stringify(entities)}: ${error}`);
     }
   }
 
@@ -609,6 +627,7 @@ export class CasesService {
         bulkUpdate,
         { refresh }
       );
+
       return transformUpdateResponsesToExternalModels(updatedCases);
     } catch (error) {
       this.log.error(`Error on UPDATE case ${cases.map((c) => c.caseId).join(', ')}: ${error}`);

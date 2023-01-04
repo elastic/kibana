@@ -43,6 +43,7 @@ import {
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
+import { RulesListDocLink } from '../../rules_list/components/rules_list_doc_link';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
 import {
@@ -106,6 +107,7 @@ export type RuleEventLogListCommonProps = {
   overrideLoadGlobalExecutionLogAggregations?: RuleApis['loadGlobalExecutionLogAggregations'];
   hasRuleNames?: boolean;
   hasAllSpaceSwitch?: boolean;
+  setHeaderActions?: (components?: React.ReactNode[]) => void;
 } & Pick<RuleApis, 'loadExecutionLogAggregations' | 'loadGlobalExecutionLogAggregations'>;
 
 export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'default'> =
@@ -129,6 +131,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     initialPageSize = 10,
     hasRuleNames = false,
     hasAllSpaceSwitch = false,
+    setHeaderActions,
   } = props;
 
   const { uiSettings, notifications } = useKibana().services;
@@ -210,6 +213,12 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
       },
     }));
   }, [sortingColumns]);
+
+  useEffect(() => {
+    setHeaderActions?.([<RulesListDocLink />]);
+    return () => setHeaderActions?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const loadLogsFn = useMemo(() => {
     if (ruleId === '*') {

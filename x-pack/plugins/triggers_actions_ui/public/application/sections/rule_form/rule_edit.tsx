@@ -78,6 +78,7 @@ export const RuleEdit = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
+
   const setRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };
@@ -93,11 +94,11 @@ export const RuleEdit = ({
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      const res = await getRuleActionErrors(rule as Rule, actionTypeRegistry);
+      const res = await getRuleActionErrors(rule.actions, actionTypeRegistry);
       setRuleActionsErrors([...res]);
       setIsLoading(false);
     })();
-  }, [rule, actionTypeRegistry]);
+  }, [rule.actions, actionTypeRegistry]);
 
   useEffect(() => {
     if (!props.ruleType && !serverRuleType) {

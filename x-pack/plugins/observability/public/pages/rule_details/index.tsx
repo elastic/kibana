@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useHistory, useParams, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +26,7 @@ import {
 } from '@elastic/eui';
 
 import {
-  deleteRules,
+  bulkDeleteRules,
   useLoadRuleTypes,
   RuleType,
   getNotifyWhenOptions,
@@ -34,19 +35,21 @@ import {
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { Query, BoolQuery } from '@kbn/es-query';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { fromQuery, toQuery } from '../../utils/url';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+import { getDefaultAlertSummaryTimeRange } from './helpers';
+
 import {
   EXECUTION_TAB,
   ALERTS_TAB,
   RULE_DETAILS_PAGE_ID,
   RULE_DETAILS_ALERTS_SEARCH_BAR_ID,
-  URL_STORAGE_KEY,
+  SEARCH_BAR_URL_STORAGE_KEY,
 } from './constants';
 import { RuleDetailsPathParams, TabId } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -57,7 +60,9 @@ import { PageTitle } from './components';
 import { getHealthColor } from './config';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
-import { observabilityFeatureId } from '../../../common';
+import { ALERT_STATUS_ALL } from '../../../common/constants';
+import { AlertStatus } from '../../../common/typings';
+import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
 import { ObservabilityAppServices } from '../../application/types';
 
@@ -70,12 +75,15 @@ export function RuleDetailsPage() {
       getEditAlertFlyout,
       getRuleEventLogList,
       getAlertsStateTable: AlertsStateTable,
-      getRuleAlertsSummary,
+      getAlertSummaryWidget: AlertSummaryWidget,
       getRuleStatusPanel,
       getRuleDefinition,
     },
     application: { capabilities, navigateToUrl },
     notifications: { toasts },
+    share: {
+      url: { locators },
+    },
   } = useKibana<ObservabilityAppServices>().services;
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
@@ -96,16 +104,38 @@ export function RuleDetailsPage() {
     const urlTabId = (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB;
     return [EXECUTION_TAB, ALERTS_TAB].includes(urlTabId) ? urlTabId : EXECUTION_TAB;
   });
-  const [features, setFeatures] = useState<string>('');
+  const [featureIds, setFeatureIds] = useState<ValidFeatureId[]>();
   const [ruleType, setRuleType] = useState<RuleType<string, string>>();
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const ruleQuery = useRef([
+  const [defaultAlertTimeRange] = useState(getDefaultAlertSummaryTimeRange);
+  const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
-  ] as Query[]);
+  ]);
+  const alertSummaryWidgetFilter = useRef<estypes.QueryDslQueryContainer>({
+    term: {
+      'kibana.alert.rule.uuid': ruleId,
+    },
+  });
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
+    await locators.get(ruleDetailsLocatorID)?.navigate(
+      {
+        ruleId,
+        tabId: ALERTS_TAB,
+        status,
+      },
+      {
+        replace: true,
+      }
+    );
+    setTabId(ALERTS_TAB);
+    tabsRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const updateUrl = (nextQuery: { tabId: TabId }) => {
     const newTabId = nextQuery.tabId;
@@ -157,8 +187,8 @@ export function RuleDetailsPage() {
       setRuleType(matchedRuleType);
 
       if (rule.consumer === ALERTS_FEATURE_ID && matchedRuleType && matchedRuleType.producer) {
-        setFeatures(matchedRuleType.producer);
-      } else setFeatures(rule.consumer);
+        setFeatureIds([matchedRuleType.producer] as ValidFeatureId[]);
+      } else setFeatureIds([rule.consumer] as ValidFeatureId[]);
     }
   }, [rule, ruleTypes]);
 
@@ -223,20 +253,20 @@ export function RuleDetailsPage() {
           <EuiSpacer size="m" />
           <ObservabilityAlertSearchbarWithUrlSync
             appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
-            setEsQuery={setEsQuery}
-            urlStorageKey={URL_STORAGE_KEY}
-            queries={ruleQuery.current}
+            onEsQueryChange={setEsQuery}
+            urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
+            defaultSearchQueries={ruleQuery.current}
           />
           <EuiSpacer size="s" />
           <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
-              {esQuery && features && (
+              {esQuery && featureIds && (
                 <AlertsStateTable
                   alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                   configurationId={observabilityFeatureId}
                   id={RULE_DETAILS_PAGE_ID}
                   flyoutSize={'s' as EuiFlyoutSize}
-                  featureIds={[features] as AlertConsumers[]}
+                  featureIds={featureIds}
                   query={esQuery}
                   showExpandToDetails={false}
                 />
@@ -342,7 +372,7 @@ export function RuleDetailsPage() {
           : [],
       }}
     >
-      <EuiFlexGroup wrap={true} gutterSize="m">
+      <EuiFlexGroup wrap gutterSize="m">
         <EuiFlexItem style={{ minWidth: 350 }}>
           {getRuleStatusPanel({
             rule,
@@ -352,18 +382,19 @@ export function RuleDetailsPage() {
             statusMessage,
           })}
         </EuiFlexItem>
-        <EuiSpacer size="m" />
         <EuiFlexItem style={{ minWidth: 350 }}>
-          {getRuleAlertsSummary({
-            rule,
-            filteredRuleTypes,
-          })}
+          <AlertSummaryWidget
+            featureIds={featureIds}
+            onClick={onAlertSummaryWidgetClick}
+            timeRange={defaultAlertTimeRange}
+            filter={alertSummaryWidgetFilter.current}
+          />
         </EuiFlexItem>
-        <EuiSpacer size="m" />
-        {getRuleDefinition({ rule, onEditRule: () => reloadRule() } as RuleDefinitionProps)}
+        {getRuleDefinition({ rule, onEditRule: reloadRule } as RuleDefinitionProps)}
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />
+      <div ref={tabsRef} />
       <EuiTabbedContent
         data-test-subj="ruleDetailsTabbedContent"
         tabs={tabs}
@@ -390,7 +421,7 @@ export function RuleDetailsPage() {
           navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
         onCancel={() => setRuleToDelete([])}
-        apiDeleteCall={deleteRules}
+        apiDeleteCall={bulkDeleteRules}
         idsToDelete={ruleToDelete}
         singleTitle={rule.name}
         multipleTitle={rule.name}

@@ -8,7 +8,8 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import fs from 'fs';
 import path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { ScalabilityTestRunner } from './runner';
@@ -62,8 +63,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...(!!AGGS_SHARD_DELAY ? ['--data.search.aggs.shardDelay.enabled=true'] : []),
         ...(!!DISABLE_PLUGINS ? ['--plugins.initialize=false'] : []),
       ],
-      // delay shutdown to ensure that APM can report the data it collects during test execution
-      delayShutdown: 90_000,
     },
   };
 }
