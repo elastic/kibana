@@ -26,4 +26,6 @@ export const dataViewsServiceFactory: DataViewsServiceFactory = () => ({
       setTimeout(() => r([{ id: currentDataView.id, title: currentDataView.title }]), 100)
     ) as unknown) as DataViewsPublicPluginStart['getIdsWithTitle'],
   getDefaultId: () => Promise.resolve(currentDataView?.id ?? null),
+  clearCache: () => {},
+  clearInstanceCache: () => {},
 });
