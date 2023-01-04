@@ -17,10 +17,10 @@ on:
   schedule:
     - cron: '27 21 * * 0'
 
-paths-ignore:
-  - '**/*.test.*'
-  - test
-  - x-pack/test
+# paths-ignore:
+#   - '**/*.test.*'
+#   - test
+#   - x-pack/test
 
 jobs:
   analyze:
