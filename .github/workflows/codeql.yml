@@ -24,15 +24,15 @@ on:
       - '**/*.yml'
       - '**/*.asciidoc'
       - '**/*.test.*'
-      - 'test'
-      - 'x-pack/test'
+      - test
+      - x-pack/test
   schedule:
     - cron: '27 21 * * 0'
 
 paths-ignore:
   - '**/*.test.*'
-  - 'test'
-  - 'x-pack/test'
+  - test
+  - x-pack/test
 
 jobs:
   analyze:
