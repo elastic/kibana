@@ -120,7 +120,7 @@ export const EmbeddedMapComponent = ({
   const { kibanaDataViews } = useDeepEqualSelector((state) => getDataViewsSelector(state));
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.default);
 
-  const { isFieldInIndexPattern } = useIsFieldInIndexPattern();
+  const isFieldInIndexPattern = useIsFieldInIndexPattern();
 
   const [mapDataViews, setMapDataViews] = useState<SourcererDataView[]>([]);
 

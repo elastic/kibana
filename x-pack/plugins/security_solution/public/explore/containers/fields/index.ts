@@ -8,11 +8,11 @@
 import { useCallback } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 
-export const useIsFieldInIndexPattern = (): {
-  isFieldInIndexPattern: (pattern: string, fieldsList: string[]) => Promise<boolean>;
-} => {
+type FieldValidationCheck = (pattern: string, fieldsList: string[]) => Promise<boolean>;
+
+export const useIsFieldInIndexPattern = (): FieldValidationCheck => {
   const { dataViews } = useKibana().services.data;
-  const isFieldInIndexPattern = useCallback(
+  return useCallback(
     async (pattern: string, fieldsList: string[]) => {
       const fields = await dataViews.getFieldsForWildcard({
         pattern,
@@ -23,5 +23,4 @@ export const useIsFieldInIndexPattern = (): {
     },
     [dataViews]
   );
-  return { isFieldInIndexPattern };
 };
