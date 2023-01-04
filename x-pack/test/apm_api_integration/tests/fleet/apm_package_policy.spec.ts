@@ -58,9 +58,9 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
 
       it('sets default values for agent configs and source mapping in a new package policy', async () => {
-        const { rum, agent_config } = apmPackagePolicy.inputs[0].config['apm-server'].value;
-        expect(rum.source_mapping).to.eql({ metadata: [] });
-        expect(agent_config).to.eql([]);
+        const apmPackageConfig = apmPackagePolicy.inputs[0].config['apm-server'].value;
+        expect(apmPackageConfig.rum.source_mapping).to.eql({ metadata: [] });
+        expect(apmPackageConfig.agent_config).to.eql([]);
       });
 
       describe('Agent config', () => {
