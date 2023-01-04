@@ -31,15 +31,15 @@ export const initiateState = (
   managedConsolePriorState?: ConsoleDataState
 ): ConsoleDataState => {
   const commands = getBuiltinCommands().concat(userCommandList);
-  const state = managedConsolePriorState ?? {
+  const state: ConsoleDataState = managedConsolePriorState ?? {
     commands,
     ...otherOptions,
     commandHistory: [],
     sidePanel: { show: null },
     footerContent: '',
     input: {
-      textEntered: '',
-      rightOfCursor: { text: '' },
+      leftOfCursorText: '',
+      rightOfCursorText: '',
       enteredCommand: undefined,
       placeholder: INPUT_DEFAULT_PLACEHOLDER_TEXT,
       showPopover: undefined,

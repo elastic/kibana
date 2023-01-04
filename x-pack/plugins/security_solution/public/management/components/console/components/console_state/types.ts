@@ -48,14 +48,17 @@ export interface ConsoleDataState {
   /** state for the command input area */
   input: {
     /**
-     * The text the user is typing into the console input area. By default, this
-     * value goes into the left of the cursor position
+     * The left side of the cursor text entered by the user
      */
-    textEntered: string; // FIXME:PT convert this to same structure as `rightOfCursor`
+    leftOfCursorText: string;
 
-    rightOfCursor: {
-      text: string;
-    };
+    /**
+     * The right side of the cursor text entered by the user
+     */
+    rightOfCursorText: string;
+
+    // FIXME:PT add parsedInput to store
+    // parsedInput: ParsedCommandInterface;
 
     /** The entered command. Only defined if the command is "known" */
     enteredCommand: undefined | EnteredCommand;
@@ -132,11 +135,9 @@ export type ConsoleDataAction =
     }
   | {
       type: 'updateInputTextEnteredState';
-      payload: PayloadValueOrFunction<{
-        textEntered: string;
-        /** When omitted, the right side of the cursor value will be blanked out */
-        rightOfCursor?: ConsoleDataState['input']['rightOfCursor'];
-      }>;
+      payload: PayloadValueOrFunction<
+        Pick<ConsoleDataState['input'], 'leftOfCursorText' | 'rightOfCursorText'>
+      >;
     }
   | {
       type: 'updateInputPopoverState';

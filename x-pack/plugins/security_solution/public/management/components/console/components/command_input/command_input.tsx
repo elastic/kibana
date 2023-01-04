@@ -89,7 +89,7 @@ export interface CommandInputProps extends CommonProps {
 export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
   useInputHints();
   const dispatch = useConsoleStateDispatch();
-  const { rightOfCursor, textEntered, fullTextEntered } = useWithInputTextEntered();
+  const { rightOfCursorText, leftOfCursorText, fullTextEntered } = useWithInputTextEntered();
   const visibleState = useWithInputVisibleState();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
@@ -118,15 +118,15 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   }, []);
 
   const handleSubmitButton = useCallback<MouseEventHandler>(() => {
-    setCommandToExecute(textEntered + rightOfCursor.text);
+    setCommandToExecute(leftOfCursorText + rightOfCursorText);
     dispatch({
       type: 'updateInputTextEnteredState',
       payload: {
-        textEntered: '',
-        rightOfCursor: undefined,
+        leftOfCursorText: '',
+        rightOfCursorText: '',
       },
     });
-  }, [dispatch, textEntered, rightOfCursor.text]);
+  }, [dispatch, leftOfCursorText, rightOfCursorText]);
 
   const handleOnChangeFocus = useCallback<NonNullable<InputCaptureProps['onChangeFocus']>>(
     (hasFocus) => {
@@ -163,8 +163,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       // Update the store with the updated text that was entered
       dispatch({
         type: 'updateInputTextEnteredState',
-        payload: ({ textEntered: prevLeftOfCursor, rightOfCursor: prevRightOfCursor }) => {
-          let inputText = new EnteredInput(prevLeftOfCursor, prevRightOfCursor.text);
+        payload: ({ leftOfCursorText: prevLeftOfCursor, rightOfCursorText: prevRightOfCursor }) => {
+          let inputText = new EnteredInput(prevLeftOfCursor, prevRightOfCursor);
 
           inputText.addValue(value ?? '', selection);
 
@@ -207,8 +207,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           }
 
           return {
-            textEntered: inputText.getLeftOfCursorText(),
-            rightOfCursor: { text: inputText.getRightOfCursorText() },
+            leftOfCursorText: inputText.getLeftOfCursorText(),
+            rightOfCursorText: inputText.getRightOfCursorText(),
           };
         },
       });
@@ -250,14 +250,16 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                   >
                     <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
                       <EuiFlexItem grow={false}>
-                        <div data-test-subj={getTestId('cmdInput-leftOfCursor')}>{textEntered}</div>
+                        <div data-test-subj={getTestId('cmdInput-leftOfCursor')}>
+                          {leftOfCursorText}
+                        </div>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <span className="cursor essentialAnimation" />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>
-                          {rightOfCursor.text}
+                          {rightOfCursorText}
                         </div>
                       </EuiFlexItem>
                     </EuiFlexGroup>
