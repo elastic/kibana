@@ -313,7 +313,11 @@ Possible values:
 `deletion`
 
 | [[field-event-outcome]] `event.outcome`
-| Denotes whether the event represents a success or failure. 
+a| Denotes whether the event represents a success or failure: 
+
+* Any actions that the user is not authorized to perform are logged with outcome:  `failure`
+* Authorized read operations are only logged after successfully fetching the data from {es} with outcome: `success`
+* Authorized create, update, or delete operations are logged before attempting the operation in {es} with outcome: `unknown`
 
 Possible values:
 `success`,
@@ -407,10 +411,18 @@ Example: `[marketing]`
 | *Field*
 | *Description*
 
+| `client.ip`
+| Client IP address.
+
 | `http.request.method`
 | HTTP request method.
 
 Example: `get`, `post`, `put`, `delete`
+
+| `http.request.headers.x-forwarded-for`
+| `X-Forwarded-For` request header used to identify the originating client IP address when connecting through proxy servers.
+
+Example: `161.66.20.177, 236.198.214.101`
 
 | `url.domain`
 | Domain of the URL.
