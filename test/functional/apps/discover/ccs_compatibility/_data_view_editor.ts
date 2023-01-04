@@ -107,14 +107,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('allows edit data view from flyout', async () => {
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
-      await editDataView('*logstash*', '*logstash*');
+      await editDataView('*logstash*', 'logstash*');
 
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(prevDataViewId).to.equal(newDataViewId);
 
       const selectedDataViewElem = await testSubjects.find('discover-dataView-switch-link');
-      const selectedDataViewTitle = await selectedDataViewElem.getVisibleText();
-      expect(selectedDataViewTitle).to.equal('*logstash*');
+      const selectedDataViewName = await selectedDataViewElem.getVisibleText();
+      expect(selectedDataViewName).to.equal('*logstash*');
     });
 
     it('allows edit adhoc data view from flyout', async () => {
