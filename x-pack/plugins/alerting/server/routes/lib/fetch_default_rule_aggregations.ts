@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AggregateOptions, RulesClient } from '../../rules_client';
+import { RulesClient } from '../..';
+import { AggregateOptions } from '../../rules_client';
 import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '../../types';
 
 interface AggregateResult {
