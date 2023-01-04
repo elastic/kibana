@@ -26,11 +26,11 @@ const strings = {
     }),
   getConfirmButton: () =>
     i18n.translate('unifiedSearch.filter.closeEditorConfirmModal.confirmButton', {
-      defaultMessage: 'Dismiss changes',
+      defaultMessage: 'Discard changes',
     }),
   getWarningLabel: () =>
     i18n.translate('unifiedSearch.filter.closeEditorConfirmModal.warningLabel', {
-      defaultMessage: 'If you leave now, your unsaved filter changes will be lost.',
+      defaultMessage: 'If you leave now, your unsaved filters will be lost.',
     }),
 };
 
