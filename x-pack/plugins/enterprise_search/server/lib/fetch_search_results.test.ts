@@ -98,16 +98,20 @@ describe('fetchSearchResults lib function', () => {
     );
 
     await expect(
-      fetchSearchResults(mockClient as unknown as IScopedClusterClient, indexName, "\"yellow banana\"")
+      fetchSearchResults(
+        mockClient as unknown as IScopedClusterClient,
+        indexName,
+        '"yellow banana"'
+      )
     ).resolves.toEqual(regularSearchResultsResponse);
 
     expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
       from: DEFAULT_FROM_VALUE,
       index: indexName,
-      q: "\\\"yellow banana\\\"",
+      q: '\\"yellow banana\\"',
       size: ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT,
     });
-  })
+  });
 
   it('should return search results with hits when no query is passed', async () => {
     mockClient.asCurrentUser.search.mockImplementation(
