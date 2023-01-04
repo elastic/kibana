@@ -43,7 +43,9 @@ export function getAggsTileRequest({
 }) {
   const requestBody = decodeMvtResponseBody(encodedRequestBody) as any;
   return {
-    path: `/${encodeURIComponent(index)}/_mvt/${encodeURIComponent(geometryFieldName)}/${z}/${x}/${y}`,
+    path: `/${encodeURIComponent(index)}/_mvt/${encodeURIComponent(
+      geometryFieldName
+    )}/${z}/${x}/${y}`,
     body: {
       size: 0, // no hits
       grid_precision: gridPrecision,
@@ -79,7 +81,9 @@ export function getHitsTileRequest({
 }) {
   const requestBody = decodeMvtResponseBody(encodedRequestBody) as any;
   return {
-    path: `/${encodeURIComponent(index)}/_mvt/${encodeURIComponent(geometryFieldName)}/${z}/${x}/${y}`,
+    path: `/${encodeURIComponent(index)}/_mvt/${encodeURIComponent(
+      geometryFieldName
+    )}/${z}/${x}/${y}`,
     body: {
       grid_precision: 0, // no aggs
       exact_bounds: true,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { 
-  decodeMvtResponseBody, 
-  encodeMvtResponseBody, 
-  getAggsTileRequest, 
-  getHitsTileRequest
+import {
+  decodeMvtResponseBody,
+  encodeMvtResponseBody,
+  getAggsTileRequest,
+  getHitsTileRequest,
 } from './mvt_request_body';
 import { RENDER_AS } from './constants';
 
@@ -102,7 +102,7 @@ describe('getAggsTileRequest', () => {
       x: 0,
       y: 0,
       z: 0,
-    })
+    });
     expect(path).toEqual('/my%20index/_mvt/my%20location/0/0/0');
   });
 });
@@ -123,7 +123,7 @@ describe('getHitsTileRequest', () => {
       x: 0,
       y: 0,
       z: 0,
-    })
+    });
     expect(path).toEqual('/my%20index/_mvt/my%20location/0/0/0');
   });
 });
