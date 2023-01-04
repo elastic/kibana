@@ -52,7 +52,7 @@ export const MetricItem = ({
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const locationName = useLocationName({ locationId: monitor.location?.id });
-  const status = useStatusByLocationOverview(monitor.configId, locationName);
+  const status = useStatusByLocationOverview(monitor.id, locationName);
   const theme = useTheme();
 
   return (
