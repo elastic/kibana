@@ -26,7 +26,8 @@ jest.mock('./use_csp_integration', () => ({
 }));
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/hooks/use_subscription_status');
-jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+jest.mock('../../common/navigation/use_csp_integration_link');
+
 const chance = new Chance();
 
 const queryClient = new QueryClient({

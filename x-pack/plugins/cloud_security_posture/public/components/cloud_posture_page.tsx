@@ -31,6 +31,8 @@ import noDataIllustration from '../assets/illustrations/no_data_illustration.svg
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
 export const PACKAGE_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_package_not_installed';
+export const CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_cspm_not_installed';
+export const KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_kspm_not_installed';
 export const DEFAULT_NO_DATA_TEST_SUBJECT = 'cloud_posture_page_no_data';
 export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
 
@@ -61,6 +63,7 @@ export interface CspNoDataPageProps {
   actionHref: NoDataPageProps['actions']['elasticAgent']['href'];
   actionTitle: NoDataPageProps['actions']['elasticAgent']['title'];
   actionDescription: NoDataPageProps['actions']['elasticAgent']['description'];
+  testId: string;
 }
 
 export const CspNoDataPage = ({
@@ -69,9 +72,10 @@ export const CspNoDataPage = ({
   actionHref,
   actionTitle,
   actionDescription,
+  testId,
 }: CspNoDataPageProps) => (
   <NoDataPage
-    data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
+    data-test-subj={testId}
     css={css`
       max-width: 950px;
     `}
@@ -99,6 +103,7 @@ const packageNotInstalledRenderer = (
   return (
     <FullSizeCenteredPage>
       <EuiEmptyPrompt
+        data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
         icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
         title={
           <h2>

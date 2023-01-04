@@ -21,7 +21,8 @@ import { useCspIntegrationLink } from '../../common/navigation/use_csp_integrati
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/hooks/use_subscription_status');
-jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+jest.mock('../../common/navigation/use_csp_integration_link');
+
 const chance = new Chance();
 
 describe('<Benchmarks />', () => {

@@ -90,7 +90,7 @@ export const CloudBenchmarksSection = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       {complianceData.clusters.map((cluster) => (
-        <>
+        <React.Fragment key={cluster.meta.clusterId}>
           <EuiFlexGroup
             key={cluster.meta.clusterId}
             style={{ borderBottom: euiTheme.border.thin, padding: '16px 0' }}
@@ -135,7 +135,7 @@ export const CloudBenchmarksSection = ({
               </div>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </>
+        </React.Fragment>
       ))}
     </>
   );

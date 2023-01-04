@@ -18,6 +18,8 @@ import {
   CloudPosturePage,
   CspNoDataPage,
   CspNoDataPageProps,
+  KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
+  CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
 } from '../../components/cloud_posture_page';
 import { DASHBOARD_CONTAINER } from './test_subjects';
 import {
@@ -36,9 +38,10 @@ import {
 
 const noDataOptions: Record<
   PolicyTemplate,
-  Pick<CspNoDataPageProps, 'docsLink' | 'actionTitle' | 'actionDescription'>
+  Pick<CspNoDataPageProps, 'docsLink' | 'actionTitle' | 'actionDescription'> & { testId: string }
 > = {
   kspm: {
+    testId: KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
     docsLink: 'https://ela.st/kspm',
     actionTitle: i18n.translate(
       'xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.buttonLabel',
@@ -62,6 +65,7 @@ const noDataOptions: Record<
     ),
   },
   cspm: {
+    testId: CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
     // TODO: CIS AWS - replace link or create the docs
     docsLink: 'https://ela.st/cspm',
     actionTitle: i18n.translate(
@@ -91,15 +95,20 @@ const noDataOptions: Record<
 const getNotInstalledConfig = (
   policyTemplate: PolicyTemplate,
   actionHref: CspNoDataPageProps['actionHref']
-) => ({
-  pageTitle: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {
-    defaultMessage: 'Install Integration to get started',
-  }),
-  docsLink: noDataOptions[policyTemplate].docsLink,
-  actionHref,
-  actionTitle: noDataOptions[policyTemplate].actionTitle,
-  actionDescription: noDataOptions[policyTemplate].actionDescription,
-});
+) => {
+  const policyTemplateNoDataConfig = noDataOptions[policyTemplate];
+
+  return {
+    pageTitle: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {
+      defaultMessage: 'Install Integration to get started',
+    }),
+    docsLink: policyTemplateNoDataConfig.docsLink,
+    actionHref,
+    actionTitle: policyTemplateNoDataConfig.actionTitle,
+    actionDescription: policyTemplateNoDataConfig.actionDescription,
+    testId: policyTemplateNoDataConfig.testId,
+  };
+};
 
 const IntegrationPostureDashboard = ({
   complianceData,

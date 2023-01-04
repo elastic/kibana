@@ -68,7 +68,7 @@ export const getStatsFromFindingsEvaluationsAggs = (
   const failedFindings = findingsEvaluationsAggs.failed_findings.doc_count || 0;
   const passedFindings = findingsEvaluationsAggs.passed_findings.doc_count || 0;
   const totalFindings = failedFindings + passedFindings;
-  const postureScore = calculatePostureScore(passedFindings, failedFindings);
+  const postureScore = calculatePostureScore(passedFindings, failedFindings) || 0;
 
   return {
     totalFailed: failedFindings,
