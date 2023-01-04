@@ -43,6 +43,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   const existsSelected = select((state) => state.explicitInput.existsSelected);
   const controlStyle = select((state) => state.explicitInput.controlStyle);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
+  const fieldName = select((state) => state.explicitInput.fieldName);
   const exclude = select((state) => state.explicitInput.exclude);
   const id = select((state) => state.explicitInput.id);
 
@@ -145,9 +146,11 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         className="optionsList__popoverOverride"
         closePopover={() => setIsPopoverOpen(false)}
         anchorClassName="optionsList__anchorOverride"
-        aria-labelledby={`control-popover-${id}`}
+        aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
-        <OptionsListPopover width={dimensions.width} updateSearchString={updateSearchString} />
+        <span id={`control-popover-${id}`}>
+          <OptionsListPopover width={dimensions.width} updateSearchString={updateSearchString} />
+        </span>
       </EuiPopover>
     </EuiFilterGroup>
   );

@@ -6,20 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import {
-  EuiFilterSelectItem,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiSpacer,
-  EuiIcon,
-  useEuiTheme,
-  EuiText,
-} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import { EuiSpacer, EuiIcon, useEuiTheme, EuiText, EuiSelectable, EuiToolTip } from '@elastic/eui';
+import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -49,6 +41,7 @@ export const OptionsListPopoverSuggestions = ({
   const existsSelected = select((state) => state.explicitInput.existsSelected);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
   const hideExists = select((state) => state.explicitInput.hideExists);
+  const fieldName = select((state) => state.explicitInput.fieldName);
 
   const loading = select((state) => state.output.loading);
   // track selectedOptions and invalidSelections in sets for more efficient lookup
@@ -57,7 +50,82 @@ export const OptionsListPopoverSuggestions = ({
     () => new Set<string>(invalidSelections),
     [invalidSelections]
   );
-  const suggestions = showOnlySelected ? selectedOptions : Object.keys(availableOptions ?? {});
+
+  const suggestions = useMemo(() => {
+    return showOnlySelected ? selectedOptions : Object.keys(availableOptions ?? {});
+  }, [availableOptions, selectedOptions, showOnlySelected]);
+
+  const existsOption = useMemo<EuiSelectableOption>(() => {
+    return {
+      key: 'exists-option',
+      checked: existsSelected ? 'on' : undefined,
+      label: OptionsListStrings.controlAndPopover.getExists(),
+      className: 'optionsList__existsFilter',
+      'data-test-subj': 'optionsList-control-selection-exists',
+    };
+  }, [existsSelected]);
+
+  const suggestionsOptions = useMemo<EuiSelectableOption[]>(() => {
+    const options: EuiSelectableOption[] =
+      suggestions?.map((key) => {
+        return {
+          key,
+          label: key,
+          checked: selectedOptionsSet?.has(key) ? 'on' : undefined,
+          'data-test-subj': `optionsList-control-selection-${key}`,
+          className:
+            showOnlySelected && invalidSelectionsSet.has(key)
+              ? 'optionsList__selectionInvalid'
+              : 'optionsList__validSuggestion',
+          append:
+            !showOnlySelected && availableOptions?.[key] ? (
+              <EuiToolTip
+                content={OptionsListStrings.popover.getDocumentCountTooltip(
+                  availableOptions[key].doc_count
+                )}
+                position={'right'}
+              >
+                <EuiText
+                  className="eui-textNumber"
+                  size="xs"
+                  color={euiTheme.colors.subduedText}
+                  css={css`
+                    font-weight: ${euiTheme.font.weight.medium};
+                  `}
+                >
+                  {`${availableOptions[key].doc_count.toLocaleString()}`}
+                </EuiText>
+              </EuiToolTip>
+            ) : undefined,
+          'aria-label': availableOptions?.[key]
+            ? OptionsListStrings.popover.getSuggestionAriaLabel(
+                key,
+                availableOptions[key].doc_count ?? 0
+              )
+            : key,
+        };
+      }) ?? [];
+    return !hideExists && !(showOnlySelected && !existsSelected)
+      ? [existsOption, ...options]
+      : options;
+  }, [
+    hideExists,
+    suggestions,
+    existsOption,
+    existsSelected,
+    availableOptions,
+    showOnlySelected,
+    selectedOptionsSet,
+    invalidSelectionsSet,
+    euiTheme.colors.subduedText,
+    euiTheme.font.weight.medium,
+  ]);
+
+  const [suggestionsTest, setSuggestionsTest] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
+  useEffect(() => {
+    /* make the suggestionsOptions responsive to search, show only selected, and clear selections */
+    setSuggestionsTest(suggestionsOptions);
+  }, [suggestionsOptions]);
 
   if (
     !loading &&
@@ -86,93 +154,35 @@ export const OptionsListPopoverSuggestions = ({
 
   return (
     <>
-      {!hideExists && !(showOnlySelected && !existsSelected) && (
-        <EuiFilterSelectItem
-          data-test-subj={`optionsList-control-selection-exists`}
-          checked={existsSelected ? 'on' : undefined}
-          key={'exists-option'}
-          onClick={() => {
+      <EuiSelectable
+        aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(fieldName)}
+        listProps={{ onFocusBadge: false }} // isVirtualized: false
+        options={suggestionsTest}
+        onChange={(newSuggestions, _, changedOption) => {
+          setSuggestionsTest(newSuggestions);
+
+          const key = changedOption.key ?? changedOption.label;
+          if (key === 'exists-option') {
             dispatch(selectExists(!Boolean(existsSelected)));
-          }}
-          className="optionsList__existsFilter"
-        >
-          {OptionsListStrings.controlAndPopover.getExists()}
-        </EuiFilterSelectItem>
-      )}
-      {suggestions?.map((key: string) => (
-        <EuiFilterSelectItem
-          data-test-subj={`optionsList-control-selection-${key}`}
-          checked={selectedOptionsSet?.has(key) ? 'on' : undefined}
-          key={key}
-          onClick={() => {
-            if (showOnlySelected) {
-              dispatch(deselectOption(key));
-              return;
-            }
-            if (singleSelect) {
-              dispatch(replaceSelection(key));
-              return;
-            }
-            if (selectedOptionsSet.has(key)) {
-              dispatch(deselectOption(key));
-              return;
-            }
-            dispatch(selectOption(key));
-          }}
-          className={
-            showOnlySelected && invalidSelectionsSet.has(key)
-              ? 'optionsList__selectionInvalid'
-              : 'optionsList__validSuggestion'
+            return;
           }
-          aria-label={
-            availableOptions?.[key]
-              ? OptionsListStrings.popover.getSuggestionAriaLabel(
-                  key,
-                  availableOptions[key].doc_count ?? 0
-                )
-              : key
+          if (showOnlySelected) {
+            dispatch(deselectOption(key));
+            return;
           }
-        >
-          <EuiFlexGroup justifyContent="spaceBetween" responsive={false} alignItems="center">
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                min-width: 0;
-              `}
-            >
-              <span
-                css={css`
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                `}
-              >{`${key}`}</span>
-            </EuiFlexItem>
-            {!showOnlySelected && (
-              <EuiFlexItem grow={false} tabIndex={-1}>
-                {availableOptions && availableOptions[key] && (
-                  <EuiToolTip
-                    content={OptionsListStrings.popover.getDocumentCountTooltip(
-                      availableOptions[key].doc_count
-                    )}
-                    position={'right'}
-                  >
-                    <EuiText
-                      className="eui-textNumber"
-                      size="xs"
-                      color={euiTheme.colors.subduedText}
-                      css={css`
-                        font-weight: ${euiTheme.font.weight.medium};
-                      `}
-                    >
-                      {`${availableOptions[key].doc_count.toLocaleString()}`}
-                    </EuiText>
-                  </EuiToolTip>
-                )}
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFilterSelectItem>
-      ))}
+          if (singleSelect) {
+            dispatch(replaceSelection(key));
+            return;
+          }
+          if (selectedOptionsSet.has(key)) {
+            dispatch(deselectOption(key));
+            return;
+          }
+          dispatch(selectOption(key));
+        }}
+      >
+        {(list) => list}
+      </EuiSelectable>
     </>
   );
 };
