@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('allows edit data view from flyout', async () => {
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
-      await editDataView('*logstash*', 'logstash*');
+      await editDataView('*logstash*', '*l*');
 
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(prevDataViewId).to.equal(newDataViewId);
