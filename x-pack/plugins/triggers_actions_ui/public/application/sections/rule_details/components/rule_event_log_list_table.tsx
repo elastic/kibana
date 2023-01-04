@@ -28,7 +28,7 @@ import {
   GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
   LOCKED_COLUMNS,
 } from '../../../constants';
-import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
+import { EventLogListStatusFilter } from '../../common/components/event_log';
 import { RuleEventLogDataGrid } from './rule_event_log_data_grid';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
@@ -411,7 +411,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <RuleEventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
+            <EventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker

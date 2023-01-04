@@ -31,7 +31,6 @@ import {
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 // import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
-import { ConnectorEventLogListStatusFilter } from './actions_connectors_log_list_status_filter';
 // import {
 //   ComponentOpts as RuleApis,
 //   withBulkRuleOperations,
@@ -43,6 +42,7 @@ import {
 import { RefineSearchPrompt } from '../../rule_details/refine_search_prompt';
 import { ConnectorEventLogListKPIWithApi as ConnectorEventLogListKPI } from './actions_connectors_event_log_list_kpi';
 import { ConnectorEventLogDataGrid } from './actions_connectors_event_log_data_grid';
+import { EventLogListStatusFilter } from '../../common/components/event_log';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
@@ -384,7 +384,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ConnectorEventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
+            <EventLogListStatusFilter selectedOptions={filter} onChange={onFilterChange} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker

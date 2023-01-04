@@ -16,7 +16,7 @@ import {
 } from '../../common/components/with_bulk_rule_api_operations';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RuleEventLogListStatus } from './rule_event_log_list_status';
+import { EventLogListStatus } from '../../common/components/event_log';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -171,7 +171,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
               <EuiStat
                 data-test-subj="ruleEventLogKpi-successOutcome"
                 description={getStatDescription(
-                  <RuleEventLogListStatus
+                  <EventLogListStatus
                     status="success"
                     useExecutionStatus={isRuleUsingExecutionStatus}
                   />
@@ -185,7 +185,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
               <EuiStat
                 data-test-subj="ruleEventLogKpi-warningOutcome"
                 description={getStatDescription(
-                  <RuleEventLogListStatus
+                  <EventLogListStatus
                     status="warning"
                     useExecutionStatus={isRuleUsingExecutionStatus}
                   />
@@ -199,7 +199,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
               <EuiStat
                 data-test-subj="ruleEventLogKpi-failureOutcome"
                 description={getStatDescription(
-                  <RuleEventLogListStatus
+                  <EventLogListStatus
                     status="failure"
                     useExecutionStatus={isRuleUsingExecutionStatus}
                   />

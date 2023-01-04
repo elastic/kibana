@@ -19,7 +19,7 @@ import {
   INTERNAL_BASE_ACTION_API_PATH,
   RewriteRequestCase,
 } from '@kbn/actions-plugin/common';
-import { getFilter } from './get_filter';
+import { getFilter } from '../rule_api';
 
 const getRenamedLog = (data: IExecutionLog) => {
   const { duration_ms, schedule_delay_ms, ...rest } = data;

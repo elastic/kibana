@@ -12,7 +12,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionGroup, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { EuiSuperDatePicker, EuiDataGrid } from '@elastic/eui';
-import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
+import { EventLogListStatusFilter } from '../../common/components/event_log';
 import { RuleEventLogList } from './rule_event_log_list';
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import {
@@ -124,7 +124,7 @@ describe.skip('rule_event_log_list', () => {
 
     expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeFalsy();
 
-    expect(wrapper.find(RuleEventLogListStatusFilter).exists()).toBeTruthy();
+    expect(wrapper.find(EventLogListStatusFilter).exists()).toBeTruthy();
     expect(wrapper.find('[data-gridcell-column-id="timestamp"]').length).toEqual(5);
     expect(wrapper.find(EuiDataGrid).props().rowCount).toEqual(mockLogResponse.total);
   });

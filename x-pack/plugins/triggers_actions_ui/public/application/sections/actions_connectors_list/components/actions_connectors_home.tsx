@@ -17,9 +17,24 @@ import { suspendedComponentWithProps } from '../../../lib/suspended_component_wi
 import { HealthContextProvider } from '../../../context/health_context';
 import { HealthCheck } from '../../../components/health_check';
 import { useKibana } from '../../../../common/lib/kibana';
+import ConnectorEventLogListTableWithApi from './actions_connectors_event_log_list_table';
 
+const GLOBAL_CONNECTORS_EVENT_LOG_LIST_STORAGE_KEY =
+  'xpack.triggersActionsUI.globalConnectorsEventLogList.initialColumns';
+const LogsList = () => {
+  return suspendedComponentWithProps(
+    ConnectorEventLogListTableWithApi,
+    'xl'
+  )({
+    ruleId: '*',
+    refreshToken: 0,
+    initialPageSize: 50,
+    hasRuleNames: true,
+    hasAllSpaceSwitch: true,
+    localStorageKey: GLOBAL_CONNECTORS_EVENT_LOG_LIST_STORAGE_KEY,
+  });
+};
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
-const LogsList = lazy(() => import('./actions_connectors_log_list'));
 
 export interface MatchParams {
   section: Section;
@@ -106,11 +121,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
           <Switch>
-            <Route
-              exact
-              path={routeToLogs}
-              component={suspendedComponentWithProps(LogsList, 'xl')}
-            />
+            <Route exact path={routeToLogs} component={LogsList} />
             <Route
               exact
               path={routeToConnectors}

@@ -31,10 +31,13 @@ import {
   ExecutionLogSortFields,
 } from '@kbn/alerting-plugin/common';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { RuleEventLogListCellRenderer, ColumnId } from './rule_event_log_list_cell_renderer';
-import { RuleEventLogPaginationStatus } from './rule_event_log_pagination_status';
+import {
+  EventLogListCellRenderer,
+  ColumnId,
+  EventLogPaginationStatus,
+} from '../../common/components/event_log';
 import { RuleActionErrorBadge } from './rule_action_error_badge';
-import './rule_event_log_list.scss';
+import '../../common/components/event_log/event_log_list.scss';
 
 const getIsColumnSortable = (columnId: string) => {
   return executionLogSortableColumns.includes(columnId as ExecutionLogSortFields);
@@ -617,7 +620,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
       <EuiFlexGroup gutterSize="s" alignItems="center">
         {renderMessageWithActionError(columnId, actionErrors, true)}
         <EuiFlexItem>
-          <RuleEventLogListCellRenderer
+          <EventLogListCellRenderer
             columnId={columnId as ColumnId}
             value={value}
             version={version}
@@ -633,7 +636,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
 
   return (
     <>
-      <RuleEventLogPaginationStatus
+      <EventLogPaginationStatus
         pageIndex={pagination.pageIndex}
         pageSize={pagination.pageSize}
         totalItemCount={pagination.totalItemCount}

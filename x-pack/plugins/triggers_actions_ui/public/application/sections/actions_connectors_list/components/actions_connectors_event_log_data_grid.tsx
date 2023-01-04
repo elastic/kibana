@@ -23,9 +23,12 @@ import {
 import { executionLogSortableColumns, ExecutionLogSortFields } from '@kbn/alerting-plugin/common';
 import { IExecutionLog } from '@kbn/actions-plugin/common';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import './rule_event_log_list.scss';
-import { ConnectorEventLogPaginationStatus } from './actions_connectors_event_log_pagination_status';
-import { ColumnId, ConnectorEventLogListCellRenderer } from './rule_event_log_list_cell_renderer';
+import '../../common/components/event_log/event_log_list.scss';
+import {
+  ColumnId,
+  EventLogListCellRenderer,
+  EventLogPaginationStatus,
+} from '../../common/components/event_log';
 
 const getIsColumnSortable = (columnId: string) => {
   return executionLogSortableColumns.includes(columnId as ExecutionLogSortFields);
@@ -292,18 +295,16 @@ export const ConnectorEventLogDataGrid = (props: ConnectorEventLogDataGrid) => {
     const runLog = logs[pagedRowIndex];
     const value = logs[pagedRowIndex]?.[columnId as keyof IExecutionLog] as string;
     const version = logs?.[pagedRowIndex]?.version;
-    const ruleId = runLog?.rule_id;
     const spaceIds = runLog?.space_ids;
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
-          <ConnectorEventLogListCellRenderer
+          <EventLogListCellRenderer
             columnId={columnId as ColumnId}
             value={value}
             version={version}
             dateFormat={dateFormat}
-            ruleId={ruleId}
             spaceIds={spaceIds}
             useExecutionStatus={isRuleUsingExecutionStatus}
           />
@@ -314,7 +315,7 @@ export const ConnectorEventLogDataGrid = (props: ConnectorEventLogDataGrid) => {
 
   return (
     <>
-      <ConnectorEventLogPaginationStatus
+      <EventLogPaginationStatus
         pageIndex={pagination.pageIndex}
         pageSize={pagination.pageSize}
         totalItemCount={pagination.totalItemCount}

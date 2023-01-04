@@ -16,7 +16,7 @@ import {
 } from '../../common/components/with_actions_api_operations';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RuleEventLogListStatus } from './actions_connectors_log_list_status';
+import { EventLogListStatus } from '../../common/components/event_log';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -153,7 +153,7 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
               <EuiStat
                 data-test-subj="ruleEventLogKpi-successOutcome"
                 description={getStatDescription(
-                  <RuleEventLogListStatus
+                  <EventLogListStatus
                     status="success"
                     useExecutionStatus={isRuleUsingExecutionStatus}
                   />
@@ -167,7 +167,7 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
               <EuiStat
                 data-test-subj="ruleEventLogKpi-warningOutcome"
                 description={getStatDescription(
-                  <RuleEventLogListStatus
+                  <EventLogListStatus
                     status="warning"
                     useExecutionStatus={isRuleUsingExecutionStatus}
                   />
@@ -181,7 +181,7 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
               <EuiStat
                 data-test-subj="ruleEventLogKpi-failureOutcome"
                 description={getStatDescription(
-                  <RuleEventLogListStatus
+                  <EventLogListStatus
                     status="failure"
                     useExecutionStatus={isRuleUsingExecutionStatus}
                   />
@@ -195,7 +195,7 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
               <EuiStat
                 data-test-subj="ruleEventLogKpi-unknownOutcome"
                 description={getStatDescription(
-                  <RuleEventLogListStatus
+                  <EventLogListStatus
                     status="unknown"
                     useExecutionStatus={isRuleUsingExecutionStatus}
                   />
