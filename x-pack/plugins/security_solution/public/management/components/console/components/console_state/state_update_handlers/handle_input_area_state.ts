@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import { getCommandNameFromTextInput } from '../../../service/parsed_command_input';
-import type { ConsoleDataAction, ConsoleStoreReducer } from '../types';
+import type { ConsoleDataAction, ConsoleDataState, ConsoleStoreReducer } from '../types';
 
 export const INPUT_DEFAULT_PLACEHOLDER_TEXT = i18n.translate(
   'xpack.securitySolution.handleInputAreaState.inputPlaceholderText',
@@ -77,12 +77,34 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         state.input.rightOfCursor !== newRightOfCursor
       ) {
         const fullCommandText = newTextEntered + newRightOfCursor.text;
-        const commandEntered =
+
+        const commandNameEntered =
           // If the user has typed a command (some text followed by at space),
           // then parse it to get the command name.
           fullCommandText.trimStart().indexOf(' ') !== -1
             ? getCommandNameFromTextInput(fullCommandText)
             : '';
+
+        let enteredCommand: ConsoleDataState['input']['enteredCommand'] =
+          state.input.enteredCommand;
+
+        // Determine if `enteredCommand` should be re-defined
+        if (
+          commandNameEntered &&
+          enteredCommand &&
+          commandNameEntered !== enteredCommand.commandDefinition.name
+        ) {
+          enteredCommand = undefined;
+
+          const commandDefinition = state.commands.find((def) => def.name === commandNameEntered);
+
+          if (commandDefinition) {
+            enteredCommand = {
+              argState: {},
+              commandDefinition,
+            };
+          }
+        }
 
         return {
           ...state,
@@ -90,7 +112,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
             ...state.input,
             textEntered: newTextEntered,
             rightOfCursor: newRightOfCursor,
-            commandEntered,
+            enteredCommand,
           },
         };
       }

@@ -6,8 +6,7 @@
  */
 
 import { useConsoleStore } from '../../components/console_state/console_state';
-import type { ConsoleDataState } from '../../components/console_state/types';
 
-export const useWithInputCommandEntered = (): ConsoleDataState['input']['commandEntered'] => {
-  return useConsoleStore().state.input.commandEntered;
+export const useWithInputCommandEntered = (): string => {
+  return useConsoleStore().state.input.enteredCommand?.commandDefinition.name ?? '';
 };

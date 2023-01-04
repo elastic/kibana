@@ -40,7 +40,7 @@ export const initiateState = (
     input: {
       textEntered: '',
       rightOfCursor: { text: '' },
-      commandEntered: '',
+      enteredCommand: undefined,
       placeholder: INPUT_DEFAULT_PLACEHOLDER_TEXT,
       showPopover: undefined,
       history: [],
