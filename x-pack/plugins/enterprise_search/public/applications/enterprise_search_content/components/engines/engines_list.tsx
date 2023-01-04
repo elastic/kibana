@@ -20,14 +20,11 @@ import { handlePageChange } from '../../../shared/table_pagination';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { EnginesListTable } from './components/tables/engines_table';
-
 import { EnginesListLogic } from './engines_list_logic';
-
-// import { EngineListDetails, Meta } from './types';
 
 export const EnginesList: React.FC = () => {
   const { fetchEngines, onPaginate } = useActions(EnginesListLogic);
-  const { meta, enginesList } = useValues(EnginesListLogic);
+  const { meta, results } = useValues(EnginesListLogic);
   const [searchQuery, setSearchValue] = useState('');
 
   useEffect(() => {
@@ -129,7 +126,7 @@ export const EnginesList: React.FC = () => {
         }
       >
         <EnginesListTable
-          enginesList={enginesList}
+          enginesList={results}
           meta={meta}
           onChange={handlePageChange(onPaginate)}
           loading={false}

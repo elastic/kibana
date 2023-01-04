@@ -9,9 +9,14 @@ import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 
 import { EngineListDetails, Meta } from '../../components/engines/types';
 
-interface EnginesListAPIResponse {
+export interface EnginesListAPIResponse {
   results: EngineListDetails[];
   meta: Meta;
+  searchQuery?: string;
+}
+export interface EnginesListAPIArguments {
+  meta: Meta;
+  searchQuery?: string;
 }
 
 const metaValue: Meta = {
