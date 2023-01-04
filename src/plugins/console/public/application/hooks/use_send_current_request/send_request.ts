@@ -80,10 +80,10 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         });
 
         const statusCode = parseInt(
-          response?.headers.get('X-Kibana-Console-Status-Code') ?? '500',
+          response?.headers.get('x-console-proxy-status-code') ?? '500',
           10
         );
-        const statusText = response?.headers.get('X-Kibana-Console-Status-Text') ?? 'error';
+        const statusText = response?.headers.get('x-console-proxy-status-text') ?? 'error';
 
         if (reqId !== CURRENT_REQ_ID) {
           // Skip if previous request is not resolved yet. This can happen when issuing multiple requests at the same time and with slow networks
@@ -132,10 +132,10 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         const { response, body } = error as IHttpFetchError;
 
         const statusCode = parseInt(
-          response?.headers.get('X-Kibana-Console-Status-Code') ?? '500',
+          response?.headers.get('x-console-proxy-status-code') ?? '500',
           10
         );
-        const statusText = response?.headers.get('X-Kibana-Console-Status-Text') ?? 'error';
+        const statusText = response?.headers.get('x-console-proxy-status-text') ?? 'error';
 
         if (body) {
           value = JSON.stringify(body, null, 2);

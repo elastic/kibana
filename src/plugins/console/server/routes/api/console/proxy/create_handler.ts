@@ -168,8 +168,8 @@ export const createHandler =
             statusCode: 502,
             body: e,
             headers: {
-              'X-Kibana-Console-Status-Code': '502',
-              'X-Kibana-Console-Status-Text': 'Bad Gateway',
+              'x-console-proxy-status-code': '502',
+              'x-console-proxy-status-text': 'Bad Gateway',
             },
           });
         }
@@ -192,8 +192,8 @@ export const createHandler =
         // in the response. This is needed because the client is using them to show the status of the request
         // in the UI. By sending them as headers we avoid logging out users if the status code is 403. E.g.
         // if the user is not authorized to access the cluster, we don't want to log them out. (See https://github.com/elastic/kibana/issues/140536)
-        'X-Kibana-Console-Status-Code': String(statusCode) || '',
-        'X-Kibana-Console-Status-Text': statusMessage || '',
+        'x-console-proxy-status-code': String(statusCode) || '',
+        'x-console-proxy-status-text': statusMessage || '',
         ...(isHeadRequest && { 'Content-Type': 'text/plain' }),
       },
     });
