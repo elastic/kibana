@@ -42,7 +42,7 @@ import {
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
 import { buildFilter, combineFilters } from '../../client/utils';
-import type { ServiceContext } from './types';
+import type { CaseConnectors, ServiceContext } from './types';
 import { defaultSortField, isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
@@ -79,11 +79,6 @@ interface ConnectorInfoAggsResult {
   };
 }
 
-interface CaseConnectorInformation {
-  fields: Map<string, SavedObject<CaseUserActionResponse>>;
-  pushes: Map<string, SavedObject<CaseUserActionResponse>>;
-}
-
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;
 
@@ -95,26 +90,27 @@ export class CaseUserActionService {
     return this._creator;
   }
 
-  public async getMostRecentUserAction({
-    caseId,
-    filter,
-  }: {
-    caseId: string;
-    filter?: KueryNode;
-  }): Promise<SavedObject<CaseUserActionResponse> | undefined> {
+  public async getMostRecentUserAction(
+    caseId: string
+  ): Promise<SavedObject<CaseUserActionResponse> | undefined> {
     try {
       const id = caseId;
       const type = CASE_SAVED_OBJECT;
 
-      // TODO: finishing filling out this functionality
       const connectorsFilter = buildFilter({
-        filters: [ActionTypes.assignees, ActionTypes.comment],
+        filters: [
+          // do we want to signal a need to push if the settings, status change?
+          ActionTypes.assignees,
+          ActionTypes.comment,
+          ActionTypes.description,
+          ActionTypes.severity,
+          ActionTypes.tags,
+          ActionTypes.title,
+        ],
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,
       });
-
-      const combinedFilter = combineFilters([connectorsFilter, filter]);
 
       const userActions =
         await this.context.unsecuredSavedObjectsClient.find<CaseUserActionAttributesWithoutConnectorId>(
@@ -125,6 +121,7 @@ export class CaseUserActionService {
             perPage: 1,
             sortField: 'created_at',
             sortOrder: 'desc',
+            filter: connectorsFilter,
           }
         );
 
@@ -133,7 +130,7 @@ export class CaseUserActionService {
       }
 
       return transformToExternalModel(
-        userActions,
+        userActions.saved_objects[0],
         this.context.persistableStateAttachmentTypeRegistry
       );
     } catch (error) {
@@ -142,13 +139,7 @@ export class CaseUserActionService {
     }
   }
 
-  public async getCaseConnectorInformation({
-    caseId,
-    filter,
-  }: {
-    caseId: string;
-    filter?: KueryNode;
-  }): Promise<CaseConnectorInformation> {
+  public async getCaseConnectorInformation(caseId: string): Promise<CaseConnectors> {
     try {
       this.context.log.debug('Attempting to find connector information');
 
@@ -168,8 +159,6 @@ export class CaseUserActionService {
         type: CASE_USER_ACTION_SAVED_OBJECT,
       });
 
-      const combinedFilter = combineFilters([connectorsFilter, filter]);
-
       const response = await this.context.unsecuredSavedObjectsClient.find<
         CaseUserActionAttributesWithoutConnectorId,
         ConnectorInfoAggsResult
@@ -180,7 +169,7 @@ export class CaseUserActionService {
         perPage: 1,
         sortField: defaultSortField,
         aggs: CaseUserActionService.buildConnectorInfoAggs(),
-        filter: combinedFilter,
+        filter: connectorsFilter,
       });
 
       console.log('response', JSON.stringify(response, null, 2));
@@ -192,43 +181,40 @@ export class CaseUserActionService {
     }
   }
 
-  private createCaseConnectorInformation(
-    aggsResults?: ConnectorInfoAggsResult
-  ): CaseConnectorInformation {
-    const caseConnectorInfo = {
-      fields: new Map<string, SavedObject<CaseUserActionResponse>>(),
-      pushes: new Map<string, SavedObject<CaseUserActionResponse>>(),
-    };
+  private createCaseConnectorInformation(aggsResults?: ConnectorInfoAggsResult): CaseConnectors {
+    const caseConnectorInfo: CaseConnectors = [];
 
     if (!aggsResults) {
       return caseConnectorInfo;
     }
 
     for (const connectorInfo of aggsResults.references.connectors.ids.buckets) {
-      let rawUserActionDocument: SavedObjectsRawDoc | undefined;
+      let rawFieldsDoc: SavedObjectsRawDoc | undefined;
 
       if (connectorInfo.connectorFields.connector.mostRecent.hits.hits.length > 0) {
-        rawUserActionDocument = connectorInfo.connectorFields.connector.mostRecent.hits.hits[0];
+        rawFieldsDoc = connectorInfo.connectorFields.connector.mostRecent.hits.hits[0];
       } else if (connectorInfo.connectorFields.createCase.mostRecent.hits.hits.length > 0) {
         /**
          * If there is ever a connector update user action that takes precedence over the information stored
          * in the create case user action because it indicates that the connector's fields were changed
          */
-        rawUserActionDocument = connectorInfo.connectorFields.createCase.mostRecent.hits.hits[0];
+        rawFieldsDoc = connectorInfo.connectorFields.createCase.mostRecent.hits.hits[0];
       }
 
-      if (rawUserActionDocument != null) {
+      let fieldsDoc: SavedObject<CaseUserActionResponse> | undefined;
+      if (rawFieldsDoc != null) {
         const doc =
           this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
-            rawUserActionDocument
+            rawFieldsDoc
           );
 
-        caseConnectorInfo.fields.set(
-          connectorInfo.key,
-          transformToExternalModel(doc, this.context.persistableStateAttachmentTypeRegistry)
+        fieldsDoc = transformToExternalModel(
+          doc,
+          this.context.persistableStateAttachmentTypeRegistry
         );
       }
 
+      let pushDoc: SavedObject<CaseUserActionResponse> | undefined;
       if (connectorInfo.pushInfo.mostRecent.hits.hits.length > 0) {
         const rawPushDoc = connectorInfo.pushInfo.mostRecent.hits.hits[0];
 
@@ -237,10 +223,20 @@ export class CaseUserActionService {
             rawPushDoc
           );
 
-        caseConnectorInfo.pushes.set(
-          connectorInfo.key,
-          transformToExternalModel(doc, this.context.persistableStateAttachmentTypeRegistry)
+        pushDoc = transformToExternalModel(
+          doc,
+          this.context.persistableStateAttachmentTypeRegistry
         );
+      }
+
+      if (fieldsDoc != null) {
+        caseConnectorInfo.push({
+          connectorId: connectorInfo.key,
+          fields: fieldsDoc,
+          push: pushDoc,
+        });
+      } else {
+        this.context.log.warn(`Unable to find fields for connector id: ${connectorInfo.key}`);
       }
     }
 

@@ -10,6 +10,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
   ISavedObjectsSerializer,
+  SavedObject,
 } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { CaseAssignees } from '../../../common/api/cases/assignee';
@@ -18,6 +19,7 @@ import type {
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
+  CaseUserActionResponse,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
@@ -140,3 +142,9 @@ export interface ServiceContext {
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
 }
+
+export type CaseConnectors = Array<{
+  connectorId: string;
+  fields: SavedObject<CaseUserActionResponse>;
+  push?: SavedObject<CaseUserActionResponse>;
+}>;
