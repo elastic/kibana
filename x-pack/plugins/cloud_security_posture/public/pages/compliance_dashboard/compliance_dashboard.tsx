@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
-import { ComplianceDashboardData } from '../../../common/types';
+import type { PosturePolicyTemplate, ComplianceDashboardData } from '../../../common/types';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import {
   CloudPosturePage,
@@ -30,14 +30,10 @@ import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudSummarySection } from './dashboard_sections/cloud_summary_section';
 import { CloudBenchmarksSection } from './dashboard_sections/cloud_benchmarks_section';
-import {
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
-  PolicyTemplate,
-} from '../../../common/constants';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
 
 const noDataOptions: Record<
-  PolicyTemplate,
+  PosturePolicyTemplate,
   Pick<CspNoDataPageProps, 'docsLink' | 'actionTitle' | 'actionDescription'> & { testId: string }
 > = {
   kspm: {
@@ -93,7 +89,7 @@ const noDataOptions: Record<
 };
 
 const getNotInstalledConfig = (
-  policyTemplate: PolicyTemplate,
+  policyTemplate: PosturePolicyTemplate,
   actionHref: CspNoDataPageProps['actionHref']
 ) => {
   const policyTemplateNoDataConfig = noDataOptions[policyTemplate];

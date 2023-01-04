@@ -94,3 +94,10 @@ export const THEMSELVES = i18n.translate('xpack.cases.caseView.assignee.themselv
 export const AND = i18n.translate('xpack.cases.caseView.assignee.and', {
   defaultMessage: 'and',
 });
+
+export const UNSAVED_DRAFT_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.description.unsavedDraftDescription',
+  {
+    defaultMessage: 'You have unsaved edits for the description',
+  }
+);

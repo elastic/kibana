@@ -8,14 +8,14 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
-import type { ComplianceDashboardData } from '../../../common/types';
+import type { PosturePolicyTemplate, ComplianceDashboardData } from '../../../common/types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
 import { getTrends, Trends } from './get_trends';
-import { PolicyTemplate } from '../../../common/constants';
+import {} from '../../../common/constants';
 
 export interface KeyDocCount<TKey = string> {
   key: TKey;
@@ -58,7 +58,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
           keep_alive: '30s',
         });
 
-        const policyTemplate = request.params.policy_template as PolicyTemplate;
+        const policyTemplate = request.params.policy_template as PosturePolicyTemplate;
 
         const query: QueryDslQueryContainer = {
           bool: {

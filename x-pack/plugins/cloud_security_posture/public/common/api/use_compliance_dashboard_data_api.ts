@@ -7,13 +7,13 @@
 
 import { type QueryObserverOptions, useQuery } from '@tanstack/react-query';
 import { useKibana } from '../hooks/use_kibana';
-import { ComplianceDashboardData } from '../../../common/types';
-import { type PolicyTemplate, STATS_ROUTE_PATH } from '../../../common/constants';
+import { PosturePolicyTemplate, ComplianceDashboardData } from '../../../common/types';
+import { STATS_ROUTE_PATH } from '../../../common/constants';
 
 const getCspmStatsKey = ['csp_cspm_dashboard_stats'];
 const getKspmStatsKey = ['csp_kspm_dashboard_stats'];
 
-export const getStatsRoute = (policyTemplate: PolicyTemplate) => {
+export const getStatsRoute = (policyTemplate: PosturePolicyTemplate) => {
   return STATS_ROUTE_PATH.replace('{policy_template}', policyTemplate);
 };
 
@@ -24,7 +24,7 @@ export const useCspmComplianceDashboardDataApi = (
   return useQuery(
     getCspmStatsKey,
     // TODO: CIS AWS - remove casting and use actual policy template instead of benchmark_id
-    () => http.get<ComplianceDashboardData>(getStatsRoute('cis_aws' as PolicyTemplate)),
+    () => http.get<ComplianceDashboardData>(getStatsRoute('cis_aws' as PosturePolicyTemplate)),
     options
   );
 };
@@ -36,7 +36,7 @@ export const useKspmComplianceDashboardDataApi = (
   return useQuery(
     getKspmStatsKey,
     // TODO: CIS AWS - remove casting and use actual policy template
-    () => http.get<ComplianceDashboardData>(getStatsRoute('cis_k8s' as PolicyTemplate)),
+    () => http.get<ComplianceDashboardData>(getStatsRoute('cis_k8s' as PosturePolicyTemplate)),
     options
   );
 };

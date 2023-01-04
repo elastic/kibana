@@ -33,6 +33,7 @@ import { MlResultsService, mlResultsServiceProvider } from '../../services/resul
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { TimeBucketsInterval, TimeRangeBounds } from '../../util/time_buckets';
+import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -207,14 +208,11 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
     },
   } = useMlKibana();
 
+  const { anomalyExplorerChartsService } = useAnomalyExplorerContext();
+
   const loadExplorerData = useMemo(() => {
     const mlResultsService = mlResultsServiceProvider(mlApiServices);
 
-    const anomalyExplorerChartsService = new AnomalyExplorerChartsService(
-      timefilter,
-      mlApiServices,
-      mlResultsService
-    );
     return loadExplorerDataProvider(mlResultsService, anomalyExplorerChartsService, timefilter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

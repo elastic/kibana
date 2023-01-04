@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { BENCHMARK_SCORE_INDEX_DEFAULT_NS, PolicyTemplate } from '../../../common/constants';
-import { Stats } from '../../../common/types';
+import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
+import type { PosturePolicyTemplate, Stats } from '../../../common/types';
 import { calculatePostureScore } from './get_stats';
 
 export interface ScoreTrendDoc {
@@ -31,7 +31,7 @@ export type Trends = Array<{
   clusters: Record<string, Stats>;
 }>;
 
-export const getTrendsQuery = (policyTemplate: PolicyTemplate) => ({
+export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate) => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   // large number that should be sufficient for 24 hours considering we write to the score index every 5 minutes
   size: 999,
@@ -81,7 +81,7 @@ export const getTrendsFromQueryResult = (scoreTrendDocs: ScoreTrendDoc[]): Trend
 
 export const getTrends = async (
   esClient: ElasticsearchClient,
-  policyTemplate: PolicyTemplate
+  policyTemplate: PosturePolicyTemplate
 ): Promise<Trends> => {
   const trendsQueryResult = await esClient.search<ScoreTrendDoc>(getTrendsQuery(policyTemplate));
 
