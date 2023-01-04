@@ -44,7 +44,7 @@ export const COUNT_COULMN_TITLE = i18n.translate(
 export const DETECTIONS_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.detections.detectionTableTitle',
   {
-    defaultMessage: 'Detections',
+    defaultMessage: 'Alerts by type',
   }
 );
 

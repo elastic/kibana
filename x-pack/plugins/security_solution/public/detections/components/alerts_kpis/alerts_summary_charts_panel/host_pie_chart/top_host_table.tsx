@@ -6,16 +6,27 @@
  */
 
 import { EuiFlexItem, EuiPanel, EuiInMemoryTable, EuiProgress, EuiSpacer } from '@elastic/eui';
+import {
+  Chart,
+  Settings,
+  Axis,
+  BarSeries,
+  Position,
+  ScaleType,
+  PartialTheme,
+} from '@elastic/charts'; 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ChartsPanelProps, HostData } from '../types';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getHostTableColumns } from '../columns';
 import * as i18n from '../translations';
+import { useTheme } from '../../../../../common/components/charts/common';
 
-const TABLE_HEIGHT = 150;
+const TABLE_HEIGHT = 200;
 
 export const TopHostTable: React.FC<ChartsPanelProps> = ({
   data,
@@ -31,6 +42,45 @@ export const TopHostTable: React.FC<ChartsPanelProps> = ({
       ${() => `height: ${TABLE_HEIGHT}px;`}
     }
   `;
+
+  const sorting: { sort: { field: keyof HostData; direction: SortOrder } } = {
+    sort: {
+      field: 'value',
+      direction: 'desc',
+    },
+  };
+
+  const baseTheme = useTheme();
+  const theme: PartialTheme = {
+    barSeriesStyle: {
+      displayValue: {
+        fontSize: 15,
+        fill: { textBorder: 50, color: 'white', borderColor: 'black' },
+        // alignment: {
+        //   horizontal: onselect(
+        //     'Horizontal alignment',
+        //     {
+        //       Default: undefined,
+        //       Left: 'left',
+        //       Center: 'center',
+        //       Right: 'right',
+        //     },
+        //     undefined,
+        //   ),
+        //   vertical: onselect(
+        //     'Vertical alignment',
+        //     {
+        //       Default: undefined,
+        //       Top: 'top',
+        //       Middle: 'middle',
+        //       Bottom: 'bottom',
+        //     },
+        //     undefined,
+        //   ),
+        // },
+      },
+    },
+  };
   return (
     <EuiFlexItem style={{ minWidth: 350 }}>
       <InspectButtonContainer>
@@ -45,41 +95,51 @@ export const TopHostTable: React.FC<ChartsPanelProps> = ({
           />
           {option === 1 && (
             <Wrapper data-test-subj="alert-detections-table" className="eui-yScroll">
-              <EuiInMemoryTable columns={columns} items={items} loading={isLoading} />
+              <EuiInMemoryTable columns={columns} items={items} loading={isLoading} sorting={sorting} tableLayout="auto" />
             </Wrapper>
           )}
           {option === 2 &&
-            items.map((item) => (
-              <>
-                <EuiProgress
-                  valueText={true}
-                  max={100}
-                  color={`vis9`}
-                  size="s"
-                  value={item.value}
-                  label={
-                    <DefaultDraggable
-                      isDraggable={false}
-                      field={'host.name'}
-                      hideTopN={true}
-                      id={`alert-host-table-${item.key}`}
-                      value={item.key}
-                      queryValue={item.key}
-                      tooltipContent={null}
-                    />
-                  }
-                />
-                <EuiSpacer size="s" />
-              </>
-            ))}
+            (<Wrapper data-test-subj="alert-detections-table" className="eui-yScroll"> {
+              items.map((item) => (
+                <>
+                  <EuiProgress
+                    valueText={true}
+                    max={100}
+                    color={`vis9`}
+                    size="s"
+                    value={item.percentage}
+                    label={
+                      <DefaultDraggable
+                        isDraggable={false}
+                        field={'host.name'}
+                        hideTopN={true}
+                        id={`alert-host-table-${item.key}`}
+                        value={item.key}
+                        queryValue={item.key}
+                        tooltipContent={null}
+                      />
+                    }
+                  />
+                  <EuiSpacer size="s" />
+                  </>
+              ))}
+              </Wrapper>
+            )
+          }
           {option === 3 && (
-            <Wrapper data-test-subj="alert-detections-table" className="eui-yScroll">
-              <EuiInMemoryTable
-                columns={columns}
-                items={items}
-                loading={isLoading}
-                tableLayout={'auto'}
-              />
+            <Wrapper data-test-subj="alert-host-table" className="eui-yScroll">
+              <Chart>
+                <Settings showLegend={false} rotation={90} baseTheme={baseTheme} theme={theme} />
+                <Axis id="x left" position={Position.Left} />
+                <BarSeries
+                  id="Count"
+                  xScaleType={ScaleType.Ordinal}
+                  // yScaleType={ScaleType.Linear}
+                  xAccessor="x"
+                  yAccessors={['y']}
+                  data={items}
+                />
+              </Chart>
             </Wrapper>
           )}
         </EuiPanel>

@@ -23,16 +23,21 @@ import { InspectButtonContainer } from '../../../../../common/components/inspect
 import { getDetectionsTableColumns } from '../columns';
 import * as i18n from '../translations';
 
-const TABLE_HEIGHT = 150;
+const TABLE_HEIGHT = 200;
+
+const ColorPaletteWrapperOp1 = styled('div')`
+  position: relative;
+  margin-top:-235px;
+`;
+
+const ColorPaletteWrapperOp2 = styled('div')`
+  position: relative;
+  margin-top:-220px;
+`;
 
 const StyledEuiColorPaletteDisplay = styled(EuiColorPaletteDisplay)`
-  &.risk-score-severity-bar {
-    border: none;
-    border-radius: 0;
-    &:after {
-      border: none;
-    }
-  }
+  border: none;
+  border-radius: 0;
 `;
 interface PalletteObject {
   stop: number;
@@ -44,7 +49,7 @@ const EVENT_TYPE_COLOUR = {
   Prevention: '#D36086',
 };
 
-export const DetectionsTable: React.FC<ChartsPanelProps> = ({ data, isLoading, uniqueQueryId }) => {
+export const DetectionsTable: React.FC<ChartsPanelProps> = ({ data, isLoading, uniqueQueryId, option }) => {
   const columns = useMemo(() => getDetectionsTableColumns(), []);
   const items = (data as DetectionsData[]) ?? [];
   const Wrapper = styled.div`
@@ -93,43 +98,70 @@ export const DetectionsTable: React.FC<ChartsPanelProps> = ({ data, isLoading, u
             titleSize="xs"
             hideSubtitle
             className="no-margin"
-            toggleStatus={false}
           />
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            gutterSize="m"
-            data-test-subj="risk-score-severity-badges"
-          >
-            <EuiFlexItem grow={false} />
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="m">
-                {(Object.keys(holder) as AlertType[]).map((type) => (
-                  <EuiFlexItem key={type} grow={false}>
-                    <EuiFlexGroup alignItems="center" gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiHealth className="eui-alignMiddle" color={EVENT_TYPE_COLOUR[type]}>
-                          <EuiText size="xs">{`${type}:`}</EuiText>
-                        </EuiHealth>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs">{holder[type] || 0}</EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <StyledEuiColorPaletteDisplay
-            className="risk-score-severity-bar"
-            data-test-subj="risk-score-severity-bar"
-            size="xs"
-            palette={palette}
-          />
-          <EuiSpacer size="m" />
           <Wrapper data-test-subj="alert-detections-table" className="eui-yScroll">
             <EuiInMemoryTable columns={columns} items={items} loading={isLoading} />
           </Wrapper>
+          {option === 1 && (
+          <ColorPaletteWrapperOp1>
+            <EuiFlexGroup 
+              justifyContent="flexEnd"
+              gutterSize="m"
+              data-test-subj="risk-score-severity-badges">
+              {(Object.keys(holder) as AlertType[]).map((type) => (
+                <EuiFlexItem key={type} grow={false}>
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiHealth className="eui-alignMiddle" color={EVENT_TYPE_COLOUR[type]}>
+                        <EuiText size="xs">{`${type}:`}</EuiText>
+                      </EuiHealth>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs">{holder[type] || 0}</EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+            <EuiSpacer size="xs"/>
+            <StyledEuiColorPaletteDisplay
+              className="risk-score-severity-bar"
+              data-test-subj="risk-score-severity-bar"
+              size="xs"
+              palette={palette}
+            />
+          </ColorPaletteWrapperOp1>)}
+          {option === 2 && (
+          <ColorPaletteWrapperOp2>
+            <EuiFlexGroup 
+              justifyContent="flexEnd"
+              gutterSize="m"
+              data-test-subj="risk-score-severity-badges">
+              {(Object.keys(holder) as AlertType[]).map((type) => (
+                <EuiFlexItem key={type} grow={false}>
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiHealth className="eui-alignMiddle" color={EVENT_TYPE_COLOUR[type]}>
+                        <EuiText size="xs">{`${type}:`}</EuiText>
+                      </EuiHealth>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs">{holder[type] || 0}</EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+            <EuiSpacer size="xs"/>
+            <StyledEuiColorPaletteDisplay
+              className="risk-score-severity-bar"
+              data-test-subj="risk-score-severity-bar"
+              size="xs"
+              palette={palette}
+            />
+          </ColorPaletteWrapperOp2>)}
+
+          
         </EuiPanel>
       </InspectButtonContainer>
     </EuiFlexItem>

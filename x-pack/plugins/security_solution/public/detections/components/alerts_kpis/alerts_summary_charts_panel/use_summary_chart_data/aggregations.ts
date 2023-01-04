@@ -19,7 +19,7 @@ export const hostAgg = {
   alertsByHost: {
     terms: {
       field: 'host.name',
-      size: DEFAULT_QUERY_SIZE,
+      size: 10,
     },
   },
 };
@@ -28,7 +28,7 @@ export const detectionsAgg = {
   alertsByRule: {
     terms: {
       field: ALERT_RULE_NAME,
-      size: DEFAULT_QUERY_SIZE,
+      size: 10,
     },
     aggs: {
       ruleByEventType: {

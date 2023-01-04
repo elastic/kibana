@@ -107,6 +107,7 @@ export const parseHostData = (
   response: AlertSearchResponse<{}, AlertsByHostAgg>
 ): HostData[] | null => {
   const hostsBuckets = response?.aggregations?.alertsByHost?.buckets ?? [];
+  const total = response.hits.total.value;
 
   return hostsBuckets.length === 0
     ? null
@@ -114,8 +115,11 @@ export const parseHostData = (
         return {
           key: host.key,
           value: host.doc_count,
+          percentage: Math.round(host.doc_count / total * 100),
           label: host.key,
           color: getPieChartColor(hostsBuckets.length, i),
+          x: host.key,
+          y: host.doc_count,
         };
       });
 };

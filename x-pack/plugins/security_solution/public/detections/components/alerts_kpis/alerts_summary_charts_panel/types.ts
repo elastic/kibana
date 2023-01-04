@@ -74,11 +74,12 @@ export interface AlertsByHostAgg {
     doc_count_error_upper_bound: number;
     sum_other_doc_count: number;
     buckets: BucketItem[];
-  };
+  },
 }
 export interface HostData {
   key: string;
   value: number;
+  percentage: number;
   label: string;
 }
 

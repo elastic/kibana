@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { buildEsQuery } from '@kbn/es-query';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { SummaryChartsAgg, SummaryChartsData, UseAlertsQueryProps } from '../types';
@@ -71,7 +71,7 @@ export const useSummaryChartData: UseAlerts = ({
   signalIndexName,
   skip = false,
 }) => {
-  const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<null | SummaryChartsData[]>(null);
 
@@ -92,7 +92,7 @@ export const useSummaryChartData: UseAlerts = ({
   const {
     data,
     loading: isLoading,
-    refetch: refetchQuery,
+    refetch,
     request,
     response,
     setQuery: setAlertsQuery,
@@ -131,12 +131,6 @@ export const useSummaryChartData: UseAlerts = ({
     }
     setUpdatedAt(Date.now());
   }, [data, aggregationType]);
-
-  const refetch = useCallback(() => {
-    if (!skip && refetchQuery) {
-      refetchQuery();
-    }
-  }, [skip, refetchQuery]);
 
   useInspectButton({
     deleteQuery,

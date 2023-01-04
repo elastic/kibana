@@ -40,7 +40,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   alignHeader,
   filters,
   addFilter,
-  panelHeight = 330,
+  panelHeight = 380,
   query,
   runtimeMappings,
   signalIndexName,
@@ -67,7 +67,8 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const [option, setOption] = useState(1);
+  const [option, setOption] = useState(3);
+  const [detOption, setDetOption] = useState(1);
 
   // create a unique, but stable (across re-renders) query id
   const uniqueDetectionsQueryId = useMemo(() => `${DETECTIONS_TABLE_ID}-${uuid.v4()}`, []);
@@ -109,21 +110,40 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton color={'primary'} onClick={() => setOption(1)}>
-            {'Option 1'}
-          </EuiButton>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem/>
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton color={'primary'} onClick={() => setDetOption(1)}>
+                {'Option 1'}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton color={'primary'} onClick={() => setDetOption(2)}>
+                {'Option 2'}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton color={'primary'} onClick={() => setOption(2)}>
-            {'Option 2'}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton color={'primary'} onClick={() => setOption(3)}>
-            {'Option 3'}
-          </EuiButton>
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton color={'primary'} onClick={() => setOption(1)}>
+                {'Option 1'}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton color={'primary'} onClick={() => setOption(2)}>
+                {'Option 2'}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton color={'primary'} onClick={() => setOption(3)}>
+                {'Option 3'}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <KpiPanel
@@ -155,6 +175,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
                 data={detectionsData}
                 isLoading={isDetectionsLoading}
                 uniqueQueryId={uniqueDetectionsQueryId}
+                option={detOption}
               />
               <TopHostTable
                 data={hostData}
