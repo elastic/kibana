@@ -131,6 +131,7 @@ const createCommandHistoryEntry = (
 export const handleExecuteCommand: ConsoleStoreReducer<
   ConsoleDataAction & { type: 'executeCommand' }
 > = (state, action) => {
+  // FIXME:PT need to get parsedInput from `store` and ensure input state is reset
   const parsedInput = parseCommandInput(action.payload.input);
 
   if (parsedInput.name === '') {

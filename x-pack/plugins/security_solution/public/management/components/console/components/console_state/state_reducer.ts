@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parseCommandInput } from '../../service/parsed_command_input';
 import {
   handleInputAreaState,
   INPUT_DEFAULT_PLACEHOLDER_TEXT,
@@ -40,6 +41,7 @@ export const initiateState = (
     input: {
       leftOfCursorText: '',
       rightOfCursorText: '',
+      parsedInput: parseCommandInput(''),
       enteredCommand: undefined,
       placeholder: INPUT_DEFAULT_PLACEHOLDER_TEXT,
       showPopover: undefined,

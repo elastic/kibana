@@ -6,6 +6,7 @@
  */
 
 import type { Dispatch, Reducer } from 'react';
+import type { ParsedCommandInterface } from '../../service/types';
 import type { CommandInputProps } from '../command_input';
 import type { Command, CommandDefinition, CommandExecutionComponent } from '../../types';
 
@@ -57,8 +58,10 @@ export interface ConsoleDataState {
      */
     rightOfCursorText: string;
 
-    // FIXME:PT add parsedInput to store
-    // parsedInput: ParsedCommandInterface;
+    /**
+     * The parsed user input
+     */
+    parsedInput: ParsedCommandInterface;
 
     /** The entered command. Only defined if the command is "known" */
     enteredCommand: undefined | EnteredCommand;

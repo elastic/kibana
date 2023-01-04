@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
-import { getCommandNameFromTextInput } from '../../../service/parsed_command_input';
+import { parseCommandInput } from '../../../service/parsed_command_input';
 import type { ConsoleDataAction, ConsoleDataState, ConsoleStoreReducer } from '../types';
 
 export const INPUT_DEFAULT_PLACEHOLDER_TEXT = i18n.translate(
@@ -77,26 +77,20 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         state.input.rightOfCursorText !== newRightOfCursor
       ) {
         const fullCommandText = newTextEntered + newRightOfCursor;
-
-        const commandNameEntered =
-          // If the user has typed a command (some text followed by at space),
-          // then parse it to get the command name.
-          fullCommandText.trimStart().indexOf(' ') !== -1
-            ? getCommandNameFromTextInput(fullCommandText)
-            : '';
+        const parsedInput = parseCommandInput(fullCommandText);
 
         let enteredCommand: ConsoleDataState['input']['enteredCommand'] =
           state.input.enteredCommand;
 
         // Determine if `enteredCommand` should be re-defined
         if (
-          commandNameEntered &&
+          parsedInput.name &&
           enteredCommand &&
-          commandNameEntered !== enteredCommand.commandDefinition.name
+          parsedInput.name !== enteredCommand.commandDefinition.name
         ) {
           enteredCommand = undefined;
 
-          const commandDefinition = state.commands.find((def) => def.name === commandNameEntered);
+          const commandDefinition = state.commands.find((def) => def.name === parsedInput.name);
 
           if (commandDefinition) {
             enteredCommand = {
@@ -112,6 +106,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
             ...state.input,
             leftOfCursorText: newTextEntered,
             rightOfCursorText: newRightOfCursor,
+            parsedInput,
             enteredCommand,
           },
         };
