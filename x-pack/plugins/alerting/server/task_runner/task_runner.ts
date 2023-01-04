@@ -341,6 +341,11 @@ export class TaskRunner<
             includedHiddenTypes: ['alert', 'action'],
           });
 
+          const dataViews = await this.context.dataViews.dataViewsServiceFactory(
+            savedObjectsClient,
+            scopedClusterClient.asInternalUser
+          );
+
           updatedState = await this.context.executionContext.withContext(ctx, () =>
             this.ruleType.executor({
               executionId: this.executionId,
@@ -353,6 +358,8 @@ export class TaskRunner<
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
+                dataViews,
+                share: this.context.share,
                 ruleResultService: this.ruleResult.getLastRunSetters(),
               },
               params,

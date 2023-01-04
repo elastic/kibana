@@ -14,9 +14,11 @@ import type {
   IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
+  RegistryElasticsearch,
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
+import { builRoutingPath } from '../../../package_policies';
 import {
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
@@ -62,20 +64,26 @@ export function getTemplate({
   composedOfTemplates,
   templatePriority,
   hidden,
+  registryElasticsearch,
+  mappings,
 }: {
   templateIndexPattern: string;
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
+  mappings: IndexTemplateMappings;
   hidden?: boolean;
+  registryElasticsearch?: RegistryElasticsearch | undefined;
 }): IndexTemplate {
-  const template = getBaseTemplate(
+  const template = getBaseTemplate({
     templateIndexPattern,
     packageName,
     composedOfTemplates,
     templatePriority,
-    hidden
-  );
+    registryElasticsearch,
+    hidden,
+    mappings,
+  });
   if (template.template.settings.index.final_pipeline) {
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
@@ -470,21 +478,47 @@ const flattenFieldsToNameAndType = (
   return newFields;
 };
 
-function getBaseTemplate(
-  templateIndexPattern: string,
-  packageName: string,
-  composedOfTemplates: string[],
-  templatePriority: number,
-  hidden?: boolean
-): IndexTemplate {
+function getBaseTemplate({
+  templateIndexPattern,
+  packageName,
+  composedOfTemplates,
+  templatePriority,
+  hidden,
+  registryElasticsearch,
+  mappings,
+}: {
+  templateIndexPattern: string;
+  packageName: string;
+  composedOfTemplates: string[];
+  templatePriority: number;
+  hidden?: boolean;
+  registryElasticsearch: RegistryElasticsearch | undefined;
+  mappings: IndexTemplateMappings;
+}): IndexTemplate {
   const _meta = getESAssetMetadata({ packageName });
+
+  const isIndexModeTimeSeries = registryElasticsearch?.index_mode === 'time_series';
+
+  const mappingsProperties = mappings?.properties ?? {};
+
+  // All mapped fields of type keyword and time_series_dimension enabled will be included in the generated routing path
+  // Temporarily generating routing_path here until fixed in elasticsearch https://github.com/elastic/elasticsearch/issues/91592
+  const routingPath = builRoutingPath(mappingsProperties);
+
+  let settingsIndex = {};
+  if (isIndexModeTimeSeries && routingPath.length > 0) {
+    settingsIndex = {
+      mode: 'time_series',
+      routing_path: routingPath,
+    };
+  }
 
   return {
     priority: templatePriority,
     index_patterns: [templateIndexPattern],
     template: {
       settings: {
-        index: {},
+        index: settingsIndex,
       },
       mappings: {
         _meta,
