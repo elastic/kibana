@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
+  const supertest = getService('supertest');
   const apmApiClient = getService('apmApiClient');
 
   async function createApmPackagePolicy() {
@@ -23,9 +24,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await createApmPackagePolicy();
     });
 
-    describe('pagination', () => {
-      it('can retrieve the first page', async () => {
-        expect(true).to.be(true);
+    describe('APM Package policy', () => {
+      it('contains source maps', async () => {
+        const apiResponse = await supertest.get(
+          `/api/fleet/package_policies?page=1&perPage=10&kuery=${encodeURIComponent(
+            'ingest-package-policies.package.name:apm'
+          )}`
+        );
+
+        expect(apiResponse.body.items).to.eql({ foo: 'bar' });
       });
     });
   });
