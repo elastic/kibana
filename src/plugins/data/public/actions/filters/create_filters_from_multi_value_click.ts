@@ -37,9 +37,27 @@ export const createFiltersFromMultiValueClickAction = async ({
     )
   ).filter(Boolean) as unknown as Filter[];
   if (filters.length === 0) return;
-  let filter: Filter = buildCombinedFilter(BooleanRelation.OR, filters, {
-    id: dataViewId,
-  } as DataView);
+  const filtersHaveAlias = filters.every((f) => f.meta.alias);
+  let alias = '';
+  if (filtersHaveAlias) {
+    filters.forEach((f, i) => {
+      if (i === filters.length - 1) {
+        alias += `${f.meta.alias}`;
+      } else {
+        alias += `${f.meta.alias} ${BooleanRelation.OR} `;
+      }
+    });
+  }
+  let filter: Filter = buildCombinedFilter(
+    BooleanRelation.OR,
+    filters,
+    {
+      id: dataViewId,
+    } as DataView,
+    undefined,
+    undefined,
+    alias
+  );
   if (filter && negate) {
     filter = toggleFilterNegated(filter);
   }

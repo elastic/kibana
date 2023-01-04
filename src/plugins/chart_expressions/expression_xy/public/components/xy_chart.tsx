@@ -811,17 +811,21 @@ export function XYChart({
                   )
                 : undefined
             }
-            actions={[
-              {
-                label: () =>
-                  i18n.translate('expressionXY.tooltipActions.filterValues', {
-                    defaultMessage: 'Filter selected series',
-                  }),
-                onSelect: (values: any) => {
-                  multiClickHandler(values);
-                },
-              },
-            ]}
+            actions={
+              !args.detailedTooltip
+                ? [
+                    {
+                      label: () =>
+                        i18n.translate('expressionXY.tooltipActions.filterValues', {
+                          defaultMessage: 'Filter selected series',
+                        }),
+                      onSelect: (values: any) => {
+                        multiClickHandler(values);
+                      },
+                    },
+                  ]
+                : undefined
+            }
             customTooltip={
               args.detailedTooltip
                 ? ({ header, values }) => (
