@@ -490,6 +490,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
       connectors: `${KIBANA_DOCS}action-types.html`,
     },
+    taskManager: {
+      healthMonitoring: `${KIBANA_DOCS}task-manager-health-monitoring.html`,
+    },
     maps: {
       guide: `${KIBANA_DOCS}maps.html`,
       importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
