@@ -245,15 +245,15 @@ export async function ensureInstalled(log) {
   }
 
   // Install bazelisk if not installed
-  console.log(`reading bazel tools versions from version files`);
+  log.debug(`reading bazel tools versions from version files`);
   const [bazeliskVersion, bazelVersion] = await Promise.all([
     readBazelToolsVersionFile('.bazeliskversion'),
     readBazelToolsVersionFile('.bazelversion'),
   ]);
 
-  console.log(`installing Bazel tools`);
+  log.info(`installing Bazel tools`);
 
-  console.log(
+  log.debug(
     `bazelisk is not installed. Installing @bazel/bazelisk@${bazeliskVersion} and bazel@${bazelVersion}`
   );
   await run('npm', ['install', '--global', `@bazel/bazelisk@${bazeliskVersion}`], {
@@ -269,5 +269,5 @@ export async function ensureInstalled(log) {
     );
   }
 
-  console.log(`bazel tools installed`);
+  log.success(`bazel tools installed`);
 }
