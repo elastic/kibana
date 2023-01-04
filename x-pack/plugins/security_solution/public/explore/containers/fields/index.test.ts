@@ -13,7 +13,6 @@ describe('useIsFieldInIndexPattern', () => {
   beforeAll(() => {
     mockUseKibana.mockReturnValue({
       services: {
-        http: {},
         data: {
           dataViews: {
             getFieldsForWildcard: () => [],
