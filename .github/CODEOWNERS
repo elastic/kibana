@@ -887,6 +887,7 @@ packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 packages/kbn-apm-synthtrace @elastic/apm-ui
+packages/kbn-apm-synthtrace-client @elastic/apm-ui
 packages/kbn-apm-utils @elastic/apm-ui
 packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-plugin-package-imports @elastic/kibana-operations
