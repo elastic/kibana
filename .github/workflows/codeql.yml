@@ -110,6 +110,7 @@ jobs:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
 
+    # TODO: This step can most likely be removed as it has no function for a dynamic language
     - name: Autobuild
       uses: github/codeql-action/autobuild@v2
 
