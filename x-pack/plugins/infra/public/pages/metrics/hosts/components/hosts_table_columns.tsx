@@ -35,97 +35,6 @@ export interface HostMetrics {
 const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefined | null) =>
   value || value === 0 ? createInventoryMetricFormatter({ type })(value) : 'N/A';
 
-<<<<<<< HEAD
-export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
-  {
-    name: i18n.translate('xpack.infra.hostsTable.nameColumnHeader', {
-      defaultMessage: 'Name',
-    }),
-    field: 'title',
-    sortable: true,
-    truncateText: true,
-    render: (title: HostNodeRow['title']) => (
-      <CloudProviderIconWithTitle
-        provider={title?.cloudProvider}
-        text={title.name}
-        title={
-          <TruncateLinkWithTooltip
-            text={title.name}
-            linkProps={{
-              app: 'metrics',
-              pathname: `/detail/host/${title.name}`,
-            }}
-          />
-        }
-      />
-    ),
-  },
-  {
-    name: i18n.translate('xpack.infra.hostsTable.operatingSystemColumnHeader', {
-      defaultMessage: 'Operating System',
-    }),
-    field: 'os',
-    sortable: true,
-    render: (os: string) => <EuiText size="s">{os}</EuiText>,
-  },
-  {
-    name: i18n.translate('xpack.infra.hostsTable.numberOfCpusColumnHeader', {
-      defaultMessage: '# of CPUs',
-    }),
-    field: 'cpuCores',
-    sortable: true,
-    render: (cpuCores: SnapshotNodeMetric) => (
-      <>{formatMetric('cpuCores', cpuCores?.value ?? cpuCores?.max)}</>
-    ),
-    align: 'right',
-  },
-  {
-    name: i18n.translate('xpack.infra.hostsTable.diskLatencyColumnHeader', {
-      defaultMessage: 'Disk Latency (avg.)',
-    }),
-    field: 'diskLatency.avg',
-    sortable: true,
-    render: (avg: number) => <>{formatMetric('diskLatency', avg)}</>,
-    align: 'right',
-  },
-  {
-    name: i18n.translate('xpack.infra.hostsTable.averageTxColumnHeader', {
-      defaultMessage: 'TX (avg.)',
-    }),
-    field: 'tx.avg',
-    sortable: true,
-    render: (avg: number) => <>{formatMetric('tx', avg)}</>,
-    align: 'right',
-  },
-  {
-    name: i18n.translate('xpack.infra.hostsTable.averageRxColumnHeader', {
-      defaultMessage: 'RX (avg.)',
-    }),
-    field: 'rx.avg',
-    sortable: true,
-    render: (avg: number) => <>{formatMetric('rx', avg)}</>,
-    align: 'right',
-  },
-  {
-    name: i18n.translate('xpack.infra.hostsTable.averageMemoryTotalColumnHeader', {
-      defaultMessage: 'Memory total (avg.)',
-    }),
-    field: 'memoryTotal.avg',
-    sortable: true,
-    render: (avg: number) => <>{formatMetric('memoryTotal', avg)}</>,
-    align: 'right',
-  },
-  {
-    name: i18n.translate('xpack.infra.hostsTable.averageMemoryUsageColumnHeader', {
-      defaultMessage: 'Memory usage (avg.)',
-    }),
-    field: 'memory.avg',
-    sortable: true,
-    render: (avg: number) => <>{formatMetric('memory', avg)}</>,
-    align: 'right',
-  },
-];
-=======
 interface HostBuilderParams {
   time: TimeRange;
 }
@@ -228,4 +137,3 @@ export const buildHostsTableColumns = ({
     },
   ];
 };
->>>>>>> 94b7b092945 (refactor(infra): rebase changes)
