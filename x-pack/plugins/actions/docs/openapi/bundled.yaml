@@ -160,7 +160,7 @@ components:
       required: true
       schema:
         type: string
-        example: default
+        example: df770e30-8b8b-11ed-a780-3b746c987a81
     space_id:
       in: path
       name: spaceId
