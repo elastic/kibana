@@ -61,6 +61,26 @@ disabled:
   # Scalability testing config that we run in its own pipeline
   - x-pack/test/scalability/config.ts
 
+  # Failing: browserType.launch: Executable doesn't exist
+  # https://github.com/elastic/kibana/issues/148213
+  # https://github.com/elastic/kibana/issues/148214
+  # https://github.com/elastic/kibana/issues/148215
+  # https://github.com/elastic/kibana/issues/148216
+  # https://github.com/elastic/kibana/issues/148217
+  # https://github.com/elastic/kibana/issues/148218
+  # https://github.com/elastic/kibana/issues/148219
+  # https://github.com/elastic/kibana/issues/148220
+  - x-pack/performance/journeys/ecommerce_dashboard.ts
+  - x-pack/performance/journeys/ecommerce_dashboard_map_only.ts
+  - x-pack/performance/journeys/flight_dashboard.ts
+  - x-pack/performance/journeys/login.ts
+  - x-pack/performance/journeys/many_fields_discover.ts
+  - x-pack/performance/journeys/promotion_tracking_dashboard.ts
+  - x-pack/performance/journeys/web_logs_dashboard.ts
+  - x-pack/performance/journeys/data_stress_test_lens.ts
+  - x-pack/performance/journeys/ecommerce_dashboard_saved_search_only.ts
+  - x-pack/performance/journeys/ecommerce_dashboard_tsvb_gauge_only.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -277,13 +297,3 @@ enabled:
   - x-pack/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.js
   - x-pack/test/usage_collection/config.ts
-  - x-pack/performance/journeys/ecommerce_dashboard.ts
-  - x-pack/performance/journeys/ecommerce_dashboard_map_only.ts
-  - x-pack/performance/journeys/flight_dashboard.ts
-  - x-pack/performance/journeys/login.ts
-  - x-pack/performance/journeys/many_fields_discover.ts
-  - x-pack/performance/journeys/promotion_tracking_dashboard.ts
-  - x-pack/performance/journeys/web_logs_dashboard.ts
-  - x-pack/performance/journeys/data_stress_test_lens.ts
-  - x-pack/performance/journeys/ecommerce_dashboard_saved_search_only.ts
-  - x-pack/performance/journeys/ecommerce_dashboard_tsvb_gauge_only.ts
