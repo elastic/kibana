@@ -49,6 +49,7 @@ export const WaterfallChartStickyHeaderContainer = euiStyled(StyledScrollDiv)`
   border-bottom: ${(props) => props.theme.eui.euiBorderThin};
   padding: ${(props) => props.theme.eui.euiSizeL};
   padding-bottom: ${(props) => props.theme.eui.euiSizeXL};
+  padding-left: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 export const WaterfallChartTimeTicksContainer = euiStyled(StyledScrollDiv)`
