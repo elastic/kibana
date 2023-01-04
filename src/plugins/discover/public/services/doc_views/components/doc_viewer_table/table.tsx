@@ -273,6 +273,7 @@ export const DocViewerTable = ({
   const headers = [
     !isSingleDocView && (
       <EuiTableHeaderCell
+        key="header-cell-actions"
         align="left"
         width={showActionsInsideTableCell ? 150 : 62}
         isSorted={false}
@@ -287,14 +288,14 @@ export const DocViewerTable = ({
         </EuiText>
       </EuiTableHeaderCell>
     ),
-    <EuiTableHeaderCell align="left" width="30%" isSorted={false}>
+    <EuiTableHeaderCell key="header-cell-name" align="left" width="30%" isSorted={false}>
       <EuiText size="xs">
         <strong>
           <FormattedMessage id="discover.fieldChooser.discoverField.name" defaultMessage="Field" />
         </strong>
       </EuiText>
     </EuiTableHeaderCell>,
-    <EuiTableHeaderCell align="left" isSorted={false}>
+    <EuiTableHeaderCell key="header-cell-value" align="left" isSorted={false}>
       <EuiText size="xs">
         <strong>
           <FormattedMessage id="discover.fieldChooser.discoverField.value" defaultMessage="Value" />
