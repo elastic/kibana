@@ -24,7 +24,7 @@ export class SortingService<T = unknown> {
   public direction: Sorting['direction'];
 
   constructor(
-    private callbacks: Record<Sorting['column'], (arg: T) => string>,
+    private sortingStrategy: Record<Sorting['column'], (arg: T) => string>,
     private storage: IStorageWrapper = new Storage(window.localStorage)
   ) {
     const { column, direction } = this.getSorting();
@@ -63,17 +63,19 @@ export class SortingService<T = unknown> {
   }
 
   sortData(data: T[]) {
-    const compare = (a: string, b: string) => a.localeCompare(b);
-
     return [...data].sort((a, b) => {
-      const firstComparableField = this.callbacks[this.column](a);
-      const secondComparableField = this.callbacks[this.column](b);
+      const firstComparableField = this.sortingStrategy[this.column](a);
+      const secondComparableField = this.sortingStrategy[this.column](b);
 
-      if (this.direction === SortDirection.ASC) {
-        return compare(firstComparableField, secondComparableField);
-      } else {
-        return compare(secondComparableField, firstComparableField);
-      }
+      return this.compare(firstComparableField, secondComparableField);
     });
+  }
+
+  private compare(a: string, b: string) {
+    if (this.direction === SortDirection.ASC) {
+      return a.localeCompare(b);
+    } else {
+      return b.localeCompare(a);
+    }
   }
 }
