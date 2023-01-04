@@ -204,7 +204,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   /*
    *
    * retryGetFieldFromDataView invalidates dataViewService  cache
-   * and tried to fetch the field again to see if the field got invalidated.
+   * and tried to fetch the field again to see if updated dataview contains the field
    *
    * @param fieldName field that needs to be fetched from dataView
    *
