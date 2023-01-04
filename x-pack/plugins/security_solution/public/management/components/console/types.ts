@@ -9,14 +9,10 @@
 
 import type { ComponentType, ReactNode } from 'react';
 import type { CommonProps } from '@elastic/eui';
+import type { ParsedArgData, ParsedCommandInterface, PossibleArgDataTypes } from './service/types';
 import type { CommandExecutionResultComponent } from './components/command_execution_result';
 import type { CommandExecutionState } from './components/console_state/types';
 import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/types';
-import type {
-  ParsedArgData,
-  ParsedCommandInterface,
-  PossibleArgDataTypes,
-} from './service/parsed_command_input';
 
 export interface CommandArgDefinition {
   required: boolean;

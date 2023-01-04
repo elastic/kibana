@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ParsedCommandInterface } from '../../../service/types';
 import { ConsoleCodeBlock } from '../../console_code_block';
 import { handleInputAreaState } from './handle_input_area_state';
 import { HelpCommandArgument } from '../../builtin_commands/help_command_argument';
@@ -21,7 +22,6 @@ import type {
   ConsoleDataState,
   ConsoleStoreReducer,
 } from '../types';
-import type { ParsedCommandInterface } from '../../../service/parsed_command_input';
 import { parseCommandInput } from '../../../service/parsed_command_input';
 import { UnknownCommand } from '../../unknown_comand';
 import { BadArgument } from '../../bad_argument';
