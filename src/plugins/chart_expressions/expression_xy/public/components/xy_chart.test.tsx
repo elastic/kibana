@@ -61,6 +61,7 @@ import { LegendSize } from '@kbn/visualizations-plugin/common';
 import type { LayerCellValueActions } from '../types';
 
 const onClickValue = jest.fn();
+const onClickMultiValue = jest.fn();
 const layerCellValueActions: LayerCellValueActions = [];
 const onSelectRange = jest.fn();
 
@@ -116,6 +117,7 @@ describe('XYChart component', () => {
       paletteService,
       minInterval: 50,
       onClickValue,
+      onClickMultiValue,
       layerCellValueActions,
       onSelectRange,
       syncColors: false,

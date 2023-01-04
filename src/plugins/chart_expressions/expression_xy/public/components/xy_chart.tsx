@@ -567,11 +567,21 @@ export function XYChart({
     if (layer.splitAccessors?.length !== 1) return;
 
     const splitAccessor = getAccessorByDimension(layer.splitAccessors![0], table.columns);
+    const filterValues = values.map((v: any) => v.datum[splitAccessor]);
+    const finalValues = filterValues.map((v: any) => {
+      const splitPointRowIndex = formattedDatatables[layer.layerId].table.rows.findIndex((row) => {
+        if (Array.isArray(v)) {
+          return v.includes(row[splitAccessor]);
+        }
+        return row[splitAccessor] === v;
+      });
+      return table.rows[splitPointRowIndex][splitAccessor];
+    });
 
     onClickMultiValue({
       data: {
         column: table.columns.findIndex((column) => column.id === splitAccessor),
-        value: values.map((v: any) => v.datum[splitAccessor]),
+        value: finalValues,
         table,
       },
     });
