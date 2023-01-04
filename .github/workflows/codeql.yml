@@ -45,7 +45,7 @@ jobs:
         ls -la /usr/local/lib/node_modules
         ls -la /usr/local/lib/node_modules/@bazel
         ls -la /usr/local/lib/node_modules/@bazel/bazelisk
-        yarn kbn bootstrap
+        yarn kbn bootstrap --debug
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
