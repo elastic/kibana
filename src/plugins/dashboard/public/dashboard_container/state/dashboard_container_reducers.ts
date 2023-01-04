@@ -179,6 +179,13 @@ export const dashboardContainerReducers = {
     state.explicitInput.timeRange = action.payload;
   },
 
+  setRefreshInterval: (
+    state: DashboardReduxState,
+    action: PayloadAction<DashboardContainerByValueInput['refreshInterval']>
+  ) => {
+    state.explicitInput.refreshInterval = action.payload;
+  },
+
   setTimeslice: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardContainerByValueInput['timeslice']>
