@@ -6,7 +6,7 @@
  */
 
 /**
- * Checks wether the supplied argument is not `undefined` and not `null`.
+ * Checks whether the supplied argument is not `undefined` and not `null`.
  *
  * @param argument
  * @returns boolean

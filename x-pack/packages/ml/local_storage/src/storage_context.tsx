@@ -18,14 +18,29 @@ import { omit } from 'lodash';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 
+/**
+ * StorageDefinition is a dictionary with `string` based keys.
+ */
 interface StorageDefinition {
   [key: string]: unknown;
 }
 
+/**
+ * TStorage, a partial `StorageDefinition` or `null`.
+ */
 type TStorage = Partial<StorageDefinition> | null;
+/**
+ * TStorageKey, keys of StorageDefintion.
+ */
 type TStorageKey = keyof Exclude<TStorage, null>;
+/**
+ * TStorageMapped, mapping of TStorage with TStorageKey.
+ */
 type TStorageMapped<T extends TStorageKey> = T extends string ? unknown : null;
 
+/**
+ * StorageAPI definition of store TStorage with accessors.
+ */
 interface StorageAPI {
   value: TStorage;
   setValue: <K extends TStorageKey, T extends TStorageMapped<K>>(key: K, value: T) => void;
@@ -56,6 +71,9 @@ export const MlStorageContext = React.createContext<StorageAPI>({
   },
 });
 
+/**
+ * Props for StorageContextProvider
+ */
 interface StorageContextProviderProps<K extends TStorageKey> {
   storage: Storage;
   storageKeys: readonly K[];
