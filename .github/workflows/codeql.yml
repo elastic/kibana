@@ -38,7 +38,14 @@ jobs:
     #   uses: github/codeql-action/autobuild@v2
 
     # - run: yarn install # <-- this works fine
-    - run: yarn kbn bootstrap
+    - run: |
+        pwd
+        whoami
+        ls -la /usr/local/lib
+        ls -la /usr/local/lib/node_modules
+        ls -la /usr/local/lib/node_modules/@bazel
+        ls -la /usr/local/lib/node_modules/@bazel/bazelisk
+        yarn kbn bootstrap
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
