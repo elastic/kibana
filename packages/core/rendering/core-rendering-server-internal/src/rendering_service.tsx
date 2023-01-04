@@ -97,7 +97,6 @@ export class RenderingService {
     const buildNum = env.packageInfo.buildNum;
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
-
     const settings = {
       defaults: uiSettings.client?.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.client?.getUserProvided(),
