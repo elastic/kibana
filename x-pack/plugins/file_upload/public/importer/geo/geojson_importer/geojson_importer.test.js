@@ -288,9 +288,9 @@ describe('previewFile', () => {
             crs: {
               type: 'name',
               properties: {
-                name: 'urn:ogc:def:crs:OGC:1.3:CRS84'
-              }
-            }
+                name: 'urn:ogc:def:crs:OGC:1.3:CRS84',
+              },
+            },
           }),
         ],
         'testfile.json',
@@ -316,7 +316,7 @@ describe('previewFile', () => {
             ...FEATURE_COLLECTION,
             crs: {
               type: 'link',
-            }
+            },
           }),
         ],
         'testfile.json',
@@ -335,9 +335,9 @@ describe('previewFile', () => {
             crs: {
               type: 'name',
               properties: {
-                name: 'urn:ogc:def:crs:EPSG::25833'
-              }
-            }
+                name: 'urn:ogc:def:crs:EPSG::25833',
+              },
+            },
           }),
         ],
         'testfile.json',

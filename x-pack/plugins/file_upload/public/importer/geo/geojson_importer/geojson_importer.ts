@@ -13,10 +13,7 @@ import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
-const SUPPORTED_CRS_LIST = [
-  'EPSG:4326',
-  'urn:ogc:def:crs:OGC:1.3:CRS84'
-];
+const SUPPORTED_CRS_LIST = ['EPSG:4326', 'urn:ogc:def:crs:OGC:1.3:CRS84'];
 
 interface LoaderBatch {
   bytesUsed?: number;
@@ -62,15 +59,17 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
     // https://geojson.org/geojson-spec.html#named-crs
     // This importer only supports WGS 84 datum
     if (typeof batch?.container?.crs === 'object') {
-      const crs = batch.container.crs as { type?: string; properties?: { name?: string; } };
-      if (crs?.type === 'link' ||
-        (crs?.type === 'name' && !SUPPORTED_CRS_LIST.includes(crs?.properties?.name ?? ''))) {
+      const crs = batch.container.crs as { type?: string; properties?: { name?: string } };
+      if (
+        crs?.type === 'link' ||
+        (crs?.type === 'name' && !SUPPORTED_CRS_LIST.includes(crs?.properties?.name ?? ''))
+      ) {
         throw new Error(
           i18n.translate('xpack.fileUpload.geojsonImporter.unsupportedCrs', {
             defaultMessage: 'Unsupported coordinate reference system, expecting {supportedCrsList}',
             values: {
-              supportedCrsList: SUPPORTED_CRS_LIST.join(', ')
-            }
+              supportedCrsList: SUPPORTED_CRS_LIST.join(', '),
+            },
           })
         );
       }
