@@ -38,32 +38,7 @@ export default function (providerContext: FtrProviderContext) {
     let endpointPackagePolicyId: string;
     let inputOnlyPackagePolicyId: string;
 
-    const inputOnlyBasePackagePolicy = {
-      name: 'input-only-test-1',
-      description: '',
-      namespace: 'default',
-      policy_id: agentPolicyId,
-      inputs: [
-        {
-          type: 'logfile',
-          policy_template: 'logs',
-          enabled: true,
-          streams: [
-            {
-              enabled: true,
-              data_stream: { type: 'logs', dataset: 'input_package.logs' },
-              vars: {
-                paths: { type: 'text', value: ['/tmp/test.log'] },
-                tags: { type: 'text', value: ['tag1'] },
-                ignore_older: { value: '72h', type: 'text' },
-                'data_stream.dataset': { type: 'text', value: 'generic' },
-              },
-            },
-          ],
-        },
-      ],
-      package: { name: 'input_package', title: 'Input only package', version: '1.0.0' },
-    };
+    let inputOnlyBasePackagePolicy: NewPackagePolicy;
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -83,6 +58,33 @@ export default function (providerContext: FtrProviderContext) {
         });
 
       agentPolicyId = agentPolicyResponse.item.id;
+
+      inputOnlyBasePackagePolicy = {
+        name: 'input-only-test-1',
+        description: '',
+        namespace: 'default',
+        policy_id: agentPolicyId,
+        inputs: [
+          {
+            type: 'logfile',
+            policy_template: 'logs',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'input_package.logs' },
+                vars: {
+                  paths: { type: 'text', value: ['/tmp/test.log'] },
+                  tags: { type: 'text', value: ['tag1'] },
+                  ignore_older: { value: '72h', type: 'text' },
+                  'data_stream.dataset': { type: 'text', value: 'generic' },
+                },
+              },
+            ],
+          },
+        ],
+        package: { name: 'input_package', title: 'Input only package', version: '1.0.0' },
+      };
 
       const { body: managedAgentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
@@ -487,7 +489,7 @@ export default function (providerContext: FtrProviderContext) {
           'Package policy namespace cannot be modified for input only packages, please create a new package policy.'
         );
       });
-      it.only('should return a 400 if dataset is edited on input only package policy', async function () {
+      it('should return a 400 if dataset is edited on input only package policy', async function () {
         const updatedPolicy = JSON.parse(JSON.stringify(inputOnlyBasePackagePolicy));
 
         updatedPolicy.inputs[0].streams[0].vars['data_stream.dataset'].value = 'updated_dataset';
