@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -16,13 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
-  const PageObjects = getPageObjects([
-    'common',
-    'discover',
-    'header',
-    'timePicker',
-    'unifiedSearch',
-  ]);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultIndexPatternString = config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
@@ -46,26 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       typeCharByChar: true,
     });
     await testSubjects.click('saveIndexPatternButton');
-  };
-
-  const editDataView = async (newDataViewName: string, newDataViewTitle: string) => {
-    await testSubjects.click('discover-dataView-switch-link');
-    await testSubjects.click('indexPattern-manage-field');
-    await PageObjects.header.waitUntilLoadingHasFinished();
-
-    await testSubjects.setValue('createIndexPatternNameInput', newDataViewName, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
-    await testSubjects.setValue('createIndexPatternTitleInput', newDataViewTitle, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
-    await testSubjects.click('saveIndexPatternButton');
-    await PageObjects.header.waitUntilLoadingHasFinished();
-
-    await testSubjects.click('confirmModalConfirmButton');
-    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   describe('discover integration with data view editor', function describeIndexTests() {
