@@ -70,6 +70,12 @@ describe('aggregate()', () => {
       enabledInLicense: true,
     },
   ]);
+  const mockAggregations = {
+    status: {
+      buckets: [{ key: 'active', doc_count: 8 }],
+    },
+  };
+
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
@@ -79,59 +85,7 @@ describe('aggregate()', () => {
       per_page: 0,
       page: 1,
       saved_objects: [],
-      aggregations: {
-        status: {
-          buckets: [
-            { key: 'active', doc_count: 8 },
-            { key: 'error', doc_count: 6 },
-            { key: 'ok', doc_count: 10 },
-            { key: 'pending', doc_count: 4 },
-            { key: 'unknown', doc_count: 2 },
-            { key: 'warning', doc_count: 1 },
-          ],
-        },
-        outcome: {
-          buckets: [
-            { key: 'succeeded', doc_count: 2 },
-            { key: 'failed', doc_count: 4 },
-            { key: 'warning', doc_count: 6 },
-          ],
-        },
-        enabled: {
-          buckets: [
-            { key: 0, key_as_string: '0', doc_count: 2 },
-            { key: 1, key_as_string: '1', doc_count: 28 },
-          ],
-        },
-        muted: {
-          buckets: [
-            { key: 0, key_as_string: '0', doc_count: 27 },
-            { key: 1, key_as_string: '1', doc_count: 3 },
-          ],
-        },
-        snoozed: {
-          doc_count: 0,
-          count: {
-            doc_count: 0,
-          },
-        },
-        tags: {
-          buckets: [
-            {
-              key: 'a',
-              doc_count: 10,
-            },
-            {
-              key: 'b',
-              doc_count: 20,
-            },
-            {
-              key: 'c',
-              doc_count: 30,
-            },
-          ],
-        },
-      },
+      aggregations: mockAggregations,
     });
 
     ruleTypeRegistry.list.mockReturnValue(listedTypes);
@@ -157,81 +111,18 @@ describe('aggregate()', () => {
 
   test('calls saved objects client with given params to perform aggregation', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
-    const result = await rulesClient.aggregate({ options: {} });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "alertExecutionStatus": Object {
-          "active": 8,
-          "error": 6,
-          "ok": 10,
-          "pending": 4,
-          "unknown": 2,
-          "warning": 1,
-        },
-        "ruleEnabledStatus": Object {
-          "disabled": 2,
-          "enabled": 28,
-        },
-        "ruleLastRunOutcome": Object {
-          "failed": 4,
-          "succeeded": 2,
-          "warning": 6,
-        },
-        "ruleMutedStatus": Object {
-          "muted": 3,
-          "unmuted": 27,
-        },
-        "ruleSnoozedStatus": Object {
-          "snoozed": 0,
-        },
-        "ruleTags": Array [
-          "a",
-          "b",
-          "c",
-        ],
-      }
-    `);
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    const aggregations = { status: { terms: { field: 'some.field' } } };
+    const result = await rulesClient.aggregate(aggregations, { filter: undefined });
 
-    expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toEqual([
-      {
-        filter: undefined,
-        page: 1,
-        perPage: 0,
-        type: 'alert',
-        aggs: {
-          status: {
-            terms: { field: 'alert.attributes.executionStatus.status' },
-          },
-          outcome: {
-            terms: { field: 'alert.attributes.lastRun.outcome' },
-          },
-          enabled: {
-            terms: { field: 'alert.attributes.enabled' },
-          },
-          muted: {
-            terms: { field: 'alert.attributes.muteAll' },
-          },
-          snoozed: {
-            aggs: {
-              count: {
-                filter: {
-                  exists: {
-                    field: 'alert.attributes.snoozeSchedule.duration',
-                  },
-                },
-              },
-            },
-            nested: {
-              path: 'alert.attributes.snoozeSchedule',
-            },
-          },
-          tags: {
-            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 },
-          },
-        },
-      },
-    ]);
+    expect(result).toEqual(mockAggregations);
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
+      filter: undefined,
+      page: 1,
+      perPage: 0,
+      type: 'alert',
+      aggs: aggregations,
+    });
   });
 
   test('supports filters when aggregating', async () => {
@@ -244,7 +135,9 @@ describe('aggregate()', () => {
     });
 
     const rulesClient = new RulesClient(rulesClientParams);
-    await rulesClient.aggregate({ options: { filter: 'foo: someTerm' } });
+    const aggregations = { status: { terms: { field: 'some.field' } } };
+
+    await rulesClient.aggregate(aggregations, { filter: 'foo: someTerm' });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toEqual([
@@ -257,37 +150,7 @@ describe('aggregate()', () => {
         page: 1,
         perPage: 0,
         type: 'alert',
-        aggs: {
-          status: {
-            terms: { field: 'alert.attributes.executionStatus.status' },
-          },
-          outcome: {
-            terms: { field: 'alert.attributes.lastRun.outcome' },
-          },
-          enabled: {
-            terms: { field: 'alert.attributes.enabled' },
-          },
-          muted: {
-            terms: { field: 'alert.attributes.muteAll' },
-          },
-          snoozed: {
-            aggs: {
-              count: {
-                filter: {
-                  exists: {
-                    field: 'alert.attributes.snoozeSchedule.duration',
-                  },
-                },
-              },
-            },
-            nested: {
-              path: 'alert.attributes.snoozeSchedule',
-            },
-          },
-          tags: {
-            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 },
-          },
-        },
+        aggs: aggregations,
       },
     ]);
   });
@@ -296,7 +159,7 @@ describe('aggregate()', () => {
     const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
     authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Unauthorized'));
 
-    await expect(rulesClient.aggregate()).rejects.toThrow();
+    await expect(rulesClient.aggregate({})).rejects.toThrow();
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
         event: expect.objectContaining({
@@ -309,39 +172,5 @@ describe('aggregate()', () => {
         },
       })
     );
-  });
-
-  describe('tags number limit', () => {
-    test('sets to default (50) if it is not provided', async () => {
-      const rulesClient = new RulesClient(rulesClientParams);
-
-      await rulesClient.aggregate();
-
-      expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([
-        {
-          aggs: {
-            tags: {
-              terms: { size: 50 },
-            },
-          },
-        },
-      ]);
-    });
-
-    test('sets to the provided value', async () => {
-      const rulesClient = new RulesClient(rulesClientParams);
-
-      await rulesClient.aggregate({ options: { maxTags: 1000 } });
-
-      expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([
-        {
-          aggs: {
-            tags: {
-              terms: { size: 1000 },
-            },
-          },
-        },
-      ]);
-    });
   });
 });
