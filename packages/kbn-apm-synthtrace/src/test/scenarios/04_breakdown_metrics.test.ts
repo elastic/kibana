@@ -18,7 +18,7 @@ describe('breakdown metrics', () => {
   const LIST_SPANS = 2;
   const ID_RATE = 4;
   const ID_SPANS = 2;
-  const INTERVALS = 1;
+  const INTERVALS = 6;
 
   beforeEach(async () => {
     const javaService = apm.service({
