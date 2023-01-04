@@ -73,7 +73,7 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={{ backgroundColor: euiTheme.colors.lightestShade }}>
         {layers.map((layer, i) => (
-          <Layer layer={layer} layerIndex={i} embeddable={embeddable} />
+          <Layer key={`${layer.getId()}`} layer={layer} layerIndex={i} embeddable={embeddable} />
         ))}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

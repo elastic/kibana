@@ -32,6 +32,7 @@ import {
 
 import { QuickJobCreator } from '../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../application/jobs/new_job/job_from_lens';
+import type { CreateState } from '../../application/jobs/new_job/job_from_dashboard';
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../common/constants/new_job';
 import { extractErrorMessage } from '../../../common/util/errors';
 import { basicJobValidation } from '../../../common/util/job_utils';
@@ -40,10 +41,18 @@ import { invalidTimeIntervalMessage } from '../../application/jobs/new_job/commo
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../common/constants/locator';
 import { useMlFromLensKibanaContext } from '../lens/context';
 
+export interface CreateADJobParams {
+  jobId: string;
+  bucketSpan: string;
+  embeddable: MapEmbeddable | Embeddable;
+  startJob: boolean;
+  runInRealTime: boolean;
+}
+
 interface Props {
   children?: React.ReactElement;
-  createADJobInWizard: any; // TODO: update
-  createADJob: any; // TODO: update
+  createADJobInWizard: () => void;
+  createADJob: (args: CreateADJobParams) => Promise<CreateState>;
   layer?: LayerResult;
   layerIndex?: number;
   embeddable: Embeddable | MapEmbeddable;
@@ -73,7 +82,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
     },
   } = useMlFromLensKibanaContext();
 
-  const [jobId, setJobId] = useState<string | undefined>(undefined);
+  const [jobId, setJobId] = useState<string>('');
   const [startJob, setStartJob] = useState(true);
   const [runInRealTime, setRunInRealTime] = useState(true);
   const [bucketSpan, setBucketSpan] = useState(DEFAULT_BUCKET_SPAN);
@@ -86,7 +95,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
   const jobType = layer?.jobType ?? JOB_TYPE.GEO;
 
   async function createJob() {
-    if (jobId === undefined) {
+    if (jobId === undefined || jobId === '') {
       return;
     }
     setState(STATE.SAVING);
@@ -142,7 +151,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
 
   useDebounce(
     function validateJobId() {
-      if (jobId === undefined) {
+      if (jobId === undefined || jobId === '') {
         return;
       }
       setJobIdValidationError('');
@@ -305,7 +314,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
                 }
                 onClick={createJob.bind(null, layerIndex)}
                 size="s"
-                data-test-subj={`mlLensLayerCreateJobButton_${layerIndex ? layerIndex : ''}`}
+                data-test-subj={`mlLensLayerCreateJobButton_${layerIndex}`}
               >
                 <FormattedMessage
                   id="xpack.ml.embeddables.lensLayerFlyout.createJobButton.saving"
@@ -320,7 +329,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
                 size="s"
                 iconType="popout"
                 iconSide="right"
-                data-test-subj={`mlLensLayerCreateWithWizardButton_${layerIndex ? layerIndex : ''}`}
+                data-test-subj={`mlLensLayerCreateWithWizardButton_${layerIndex}`}
               >
                 <FormattedMessage
                   id="xpack.ml.embeddables.lensLayerFlyout.createJobButton"
@@ -334,11 +343,10 @@ export const MlJobAdditionalSettings: FC<Props> = ({
 
       {state === STATE.SAVE_SUCCESS ? (
         <>
+          <EuiSpacer size="m" />
           <EuiFlexGroup
             gutterSize="s"
-            data-test-subj={`mlLensLayerCompatible.jobCreated.success_${
-              layerIndex ? layerIndex : ''
-            }`}
+            data-test-subj={`mlLensLayerCompatible.jobCreated.success_${layerIndex}`}
           >
             <EuiFlexItem grow={false}>
               <EuiText size="s">
@@ -359,7 +367,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
           <EuiButtonEmpty
             onClick={viewResults.bind(null, jobType)}
             flush="left"
-            data-test-subj={`mlLensLayerResultsButton_${layerIndex ? layerIndex : ''}`}
+            data-test-subj={`mlLensLayerResultsButton_${layerIndex}`}
           >
             {startJob === false ? (
               <FormattedMessage
@@ -382,17 +390,20 @@ export const MlJobAdditionalSettings: FC<Props> = ({
       ) : null}
 
       {state === STATE.SAVING ? (
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.ml.embeddables.flyoutAdditionalSettings.creatingJob"
-              defaultMessage="Creating job"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.ml.embeddables.flyoutAdditionalSettings.creatingJob"
+                defaultMessage="Creating job"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       ) : null}
 
       {state === STATE.SAVE_FAILED && createError !== null ? (

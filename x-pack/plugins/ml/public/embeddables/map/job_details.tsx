@@ -12,7 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { QuickJobCreator } from '../../application/jobs/new_job/job_from_map';
 import { redirectToGeoJobWizard } from '../../application/jobs/new_job/job_from_map';
 import { useMlFromLensKibanaContext } from '../lens/context';
-import { MlJobAdditionalSettings } from '../common/ml_job_additional_settings';
+import { MlJobAdditionalSettings, CreateADJobParams } from '../common/ml_job_additional_settings';
 
 interface Props {
   embeddable: MapEmbeddable;
@@ -54,17 +54,11 @@ export const JobDetails: FC<Props> = ({
     embeddable: mapEmbeddable,
     startJob,
     runInRealTime,
-  }: {
-    jobId: string;
-    bucketSpan: string;
-    embeddable: MapEmbeddable;
-    startJob: boolean;
-    runInRealTime: boolean;
-  }) {
+  }: CreateADJobParams) {
     const result = await quickJobCreator.createAndSaveGeoJob({
       jobId,
       bucketSpan,
-      embeddable: mapEmbeddable,
+      embeddable: mapEmbeddable as MapEmbeddable,
       startJob,
       runInRealTime,
       sourceDataView,

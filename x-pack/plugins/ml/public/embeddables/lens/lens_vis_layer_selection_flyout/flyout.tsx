@@ -74,7 +74,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => 
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={{ backgroundColor: euiTheme.colors.lightestShade }}>
         {layerResults.map((layer, i) => (
-          <Layer layer={layer} layerIndex={i} embeddable={embeddable} />
+          <Layer layer={layer} layerIndex={i} key={layer.id} embeddable={embeddable} />
         ))}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

@@ -18,7 +18,10 @@ import {
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import { useMlFromLensKibanaContext } from '../../context';
-import { MlJobAdditionalSettings } from '../../../common/ml_job_additional_settings';
+import {
+  MlJobAdditionalSettings,
+  CreateADJobParams,
+} from '../../../common/ml_job_additional_settings';
 
 interface Props {
   layer: LayerResult;
@@ -54,17 +57,11 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
     embeddable: lensEmbeddable,
     startJob,
     runInRealTime,
-  }: {
-    jobId: string;
-    bucketSpan: string;
-    embeddable: Embeddable;
-    startJob: boolean;
-    runInRealTime: boolean;
-  }) {
+  }: CreateADJobParams) {
     const result = await quickJobCreator.createAndSaveJob(
       jobId,
       bucketSpan,
-      lensEmbeddable,
+      lensEmbeddable as Embeddable,
       startJob,
       runInRealTime,
       layerIndex
