@@ -29,6 +29,7 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../../common';
 import { AppState } from './discover_app_state_container';
 import {
   getInternalStateContainer,
@@ -37,7 +38,6 @@ import {
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 
