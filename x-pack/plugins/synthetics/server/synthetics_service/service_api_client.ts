@@ -153,7 +153,7 @@ export class ServiceAPIClient {
       return axios(
         this.addVersionHeader({
           method,
-          url: url + (runOnce ? '/run' : '/monitors'),
+          url: url + (runOnce ? '/run' : '/monitors/sync'),
           data: {
             monitors: monitorsStreams,
             output,

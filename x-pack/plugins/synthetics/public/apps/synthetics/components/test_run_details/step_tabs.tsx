@@ -81,7 +81,7 @@ export const StepTabs = ({
             {step?.synthetics?.payload?.source}
           </EuiCodeBlock>
         );
-      case 'console':
+      case 'stackTrace':
         return (
           <EuiCodeBlock isCopyable={true} overflowHeight="200px" language="html">
             {step?.synthetics?.error?.stack}
