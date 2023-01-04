@@ -182,6 +182,7 @@ function QueryBarMenuComponent({
           <EuiContextMenuPanel
             items={[
               <FilterEditorWrapper
+                key="filter-editor-wrapper"
                 indexPatterns={indexPatterns}
                 filters={filters!}
                 timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
