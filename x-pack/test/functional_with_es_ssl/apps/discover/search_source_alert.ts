@@ -306,7 +306,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getVisibleText()).to.equal(dataView);
   };
 
-  describe('Search source Alert', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/148388
+  // Failing: See https://github.com/elastic/kibana/issues/148386
+  // Failing: https://github.com/elastic/kibana/issues/147958
+  // Failing: https://github.com/elastic/kibana/issues/148367
+  // Failing: https://github.com/elastic/kibana/issues/148385
+  // Failing: https://github.com/elastic/kibana/issues/148387
+  // Failing: https://github.com/elastic/kibana/issues/148389
+  // Failing: https://github.com/elastic/kibana/issues/148390
+  // Failing: https://github.com/elastic/kibana/issues/148391
+  describe.skip('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
 
