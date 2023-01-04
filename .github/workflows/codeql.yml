@@ -1,9 +1,9 @@
 name: "CodeQL"
 
 on:
+  # TODO: Remove 'push' and 'pull_request' before merging PR (we can't affort to wait two hours for this to run for every PR and every push)
   push:
-    branches: [ "main", "7.17" ]
-  # TODO: Remove this before merging PR (we can't affort to wait two hours for this to run for every PR)
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
   schedule:
@@ -22,10 +22,14 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'javascript' ]
+        # branch: [ 'main', '7.17' ]
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      # TODO: Enable once a `.github/codeql/codeql-config.yml` file has been committed to 7.17
+      # with:
+      #   ref: ${{ matrix.branch }}
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
