@@ -51,7 +51,7 @@ export const chartHeight = 288;
 export function MobileServiceOverview() {
   const { serviceName, fallbackToTransactions } = useApmServiceContext();
   const router = useApmRouter();
-  const filters = useFiltersForEmbeddableCharts();
+  const embeddableFilters = useFiltersForEmbeddableCharts();
 
   const {
     query,
@@ -67,7 +67,7 @@ export function MobileServiceOverview() {
     },
   } = useApmParams('/mobile-services/{serviceName}/overview');
 
-  const kueryWithFilters = getKueryWithMobileFilters({
+  const kueryWithMobileFilters = getKueryWithMobileFilters({
     device,
     osVersion,
     appVersion,
@@ -153,8 +153,8 @@ export function MobileServiceOverview() {
                   <LatencyMap
                     start={start}
                     end={end}
-                    kuery={kueryWithFilters}
-                    filters={filters}
+                    kuery={kueryWithMobileFilters}
+                    filters={embeddableFilters}
                   />
                 </EuiPanel>
               </EuiFlexItem>
@@ -186,8 +186,8 @@ export function MobileServiceOverview() {
                         metric={DEVICE_MODEL_NAME}
                         start={start}
                         end={end}
-                        kuery={kueryWithFilters}
-                        filters={filters}
+                        kuery={kueryWithMobileFilters}
+                        filters={embeddableFilters}
                       />
                     </EuiFlexItem>
                     {/* NCT */}
@@ -202,8 +202,8 @@ export function MobileServiceOverview() {
                         metric={NETWORK_CONNECTION_TYPE}
                         start={start}
                         end={end}
-                        kuery={kueryWithFilters}
-                        filters={filters}
+                        kuery={kueryWithMobileFilters}
+                        filters={embeddableFilters}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -220,8 +220,8 @@ export function MobileServiceOverview() {
                         metric={HOST_OS_VERSION}
                         start={start}
                         end={end}
-                        kuery={kueryWithFilters}
-                        filters={filters}
+                        kuery={kueryWithMobileFilters}
+                        filters={embeddableFilters}
                       />
                     </EuiFlexItem>
                     {/* App version */}
@@ -236,8 +236,8 @@ export function MobileServiceOverview() {
                         metric={SERVICE_VERSION}
                         start={start}
                         end={end}
-                        kuery={kueryWithFilters}
-                        filters={filters}
+                        kuery={kueryWithMobileFilters}
+                        filters={embeddableFilters}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -249,7 +249,7 @@ export function MobileServiceOverview() {
             <EuiPanel hasBorder={true}>
               <LatencyChart
                 height={latencyChartHeight}
-                kuery={kueryWithFilters}
+                kuery={kueryWithMobileFilters}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -262,13 +262,13 @@ export function MobileServiceOverview() {
               <EuiFlexItem grow={3}>
                 <ServiceOverviewThroughputChart
                   height={nonLatencyChartHeight}
-                  kuery={kueryWithFilters}
+                  kuery={kueryWithMobileFilters}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
                   <TransactionsTable
-                    kuery={kueryWithFilters}
+                    kuery={kueryWithMobileFilters}
                     environment={environment}
                     fixedHeight={true}
                     isSingleColumn={isSingleColumn}
@@ -291,7 +291,7 @@ export function MobileServiceOverview() {
                 <FailedTransactionRateChart
                   height={nonLatencyChartHeight}
                   showAnnotations={false}
-                  kuery={kueryWithFilters}
+                  kuery={kueryWithMobileFilters}
                 />
               </EuiFlexItem>
 
