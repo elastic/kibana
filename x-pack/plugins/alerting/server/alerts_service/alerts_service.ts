@@ -24,6 +24,10 @@ import {
 } from './types';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 import { IRuleTypeAlerts } from '../types';
+import {
+  createResourceInstallationHelper,
+  ResourceInstallationHelper,
+} from './create_resource_installation_helper';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
@@ -67,12 +71,14 @@ interface IAlertsService {
 
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
+  private resourceInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, FieldMap> = new Map();
-  private initializedContexts: Map<string, boolean> = new Map();
-  private contextsToInitialize: IRuleTypeAlerts[] = [];
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
+    this.resourceInitializationHelper = createResourceInstallationHelper(
+      this.initializeContext.bind(this)
+    );
   }
 
   public isInitialized() {
@@ -80,7 +86,7 @@ export class AlertsService implements IAlertsService {
   }
 
   public isContextInitialized(context: string) {
-    return this.initializedContexts.get(context) ?? false;
+    return this.resourceInitializationHelper.getInitializedContexts().get(context) ?? false;
   }
 
   public initialize(timeoutMs?: number) {
@@ -109,21 +115,8 @@ export class AlertsService implements IAlertsService {
         this.initialized = false;
       }
 
-      if (!this.initialized) {
-        return;
-      }
-
-      // Look for any registered contexts awaiting initialization and install
-      while (this.contextsToInitialize.length > 0) {
-        const context = this.contextsToInitialize.pop();
-        if (context) {
-          try {
-            await this.initializeContext(context, timeoutMs);
-            this.initializedContexts.set(context.context, true);
-          } catch (err) {
-            this.initializedContexts.set(context.context, false);
-          }
-        }
+      if (this.initialized) {
+        this.resourceInitializationHelper.setReadyToInitialize(timeoutMs);
       }
     });
   }
@@ -140,24 +133,7 @@ export class AlertsService implements IAlertsService {
     }
 
     this.registeredContexts.set(context, fieldMap);
-
-    // Don't do anything yet if common resource initialization is not done
-    if (!this.initialized) {
-      this.options.logger.info(`Resources for context "${context}" are awaiting initialization.`);
-      this.contextsToInitialize.push({ context, fieldMap });
-      return;
-    }
-
-    // Common resources are ready so we can initialize this context immediately
-    // Use setImmediate to execute async fns as soon as possible
-    setImmediate(async () => {
-      try {
-        await this.initializeContext({ context, fieldMap }, timeoutMs);
-        this.initializedContexts.set(context, true);
-      } catch (err) {
-        this.initializedContexts.set(context, false);
-      }
-    });
+    this.resourceInitializationHelper.add({ context, fieldMap }, timeoutMs);
   }
 
   private async initializeContext({ context, fieldMap }: IRuleTypeAlerts, timeoutMs?: number) {
