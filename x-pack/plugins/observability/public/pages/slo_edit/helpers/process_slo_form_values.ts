@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { CreateSLOInput, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import omit from 'lodash/omit';
+import type { CreateSLOInput, SLOWithSummaryResponse, UpdateSLOInput } from '@kbn/slo-schema';
+
 import { toDuration } from '../../../utils/slo/duration';
 
 export function transformSloResponseToCreateSloInput(
@@ -14,7 +16,7 @@ export function transformSloResponseToCreateSloInput(
   if (!values) return undefined;
 
   return {
-    ...values,
+    ...omit(values, ['id', 'revision', 'createdAt', 'updatedAt', 'summary']),
     objective: {
       target: values.objective.target * 100,
       ...(values.objective.timesliceTarget && {
@@ -27,7 +29,22 @@ export function transformSloResponseToCreateSloInput(
   };
 }
 
-export function processValues(values: CreateSLOInput): CreateSLOInput {
+export function transformValuesToCreateSLOInput(values: CreateSLOInput): CreateSLOInput {
+  return {
+    ...values,
+    objective: {
+      target: values.objective.target / 100,
+      ...(values.objective.timesliceTarget && {
+        timesliceTarget: values.objective.timesliceTarget / 100,
+      }),
+      ...(values.objective.timesliceWindow && {
+        timesliceWindow: `${values.objective.timesliceWindow}m`,
+      }),
+    },
+  };
+}
+
+export function transformValuesToUpdateSLOInput(values: CreateSLOInput): UpdateSLOInput {
   return {
     ...values,
     objective: {

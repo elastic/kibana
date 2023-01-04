@@ -46,10 +46,28 @@ export function useCreateOrUpdateSlo(): UseCreateOrUpdateSlo {
     [http]
   );
 
+  const updateSlo = useCallback(
+    async (sloId: string, slo: UpdateSLOInput) => {
+      setLoading(true);
+      setError('');
+      setSuccess(false);
+      const body = JSON.stringify(slo);
+
+      try {
+        await http.put<UpdateSLOResponse>(`/api/observability/slos/${sloId}`, { body });
+        setSuccess(true);
+      } catch (e) {
+        setError(e);
+      }
+    },
+    [http]
+  );
+
   return {
     loading,
     error,
     success,
     createSlo,
+    updateSlo,
   };
 }
