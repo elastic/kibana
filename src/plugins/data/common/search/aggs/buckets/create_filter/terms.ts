@@ -30,6 +30,8 @@ export const createFilterTerms = (aggConfig: IBucketAggConfig, key: string, para
     const existsFilter = buildExistsFilter(field, indexPattern);
     existsFilter.meta.negate = true;
     return existsFilter;
+  } else if (Array.isArray(key)) {
+    return buildPhrasesFilter(field, key, indexPattern);
   }
   return buildPhraseFilter(field, key, indexPattern);
 };

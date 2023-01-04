@@ -13,7 +13,11 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import {
+  BrushTriggerEvent,
+  ClickTriggerEvent,
+  MultiClickTriggerEvent,
+} from '@kbn/charts-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
 import React from 'react';
@@ -183,7 +187,7 @@ export function getRemoveOperation(
 
 export function inferTimeField(
   datatableUtilities: DatatableUtilitiesService,
-  context: BrushTriggerEvent['data'] | ClickTriggerEvent['data']
+  context: BrushTriggerEvent['data'] | ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']
 ) {
   const tablesAndColumns =
     'table' in context
@@ -192,17 +196,19 @@ export function inferTimeField(
       ? context.data
       : // if it's a negated filter, never respect bound time field
         [];
-  return tablesAndColumns
-    .map(({ table, column }) => {
-      const tableColumn = table.columns[column];
-      const hasTimeRange = Boolean(
-        tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
-      );
-      if (hasTimeRange) {
-        return tableColumn.meta.field;
-      }
-    })
-    .find(Boolean);
+  return Array.isArray(tablesAndColumns)
+    ? tablesAndColumns
+    : [tablesAndColumns]
+        .map(({ table, column }) => {
+          const tableColumn = table.columns[column];
+          const hasTimeRange = Boolean(
+            tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
+          );
+          if (hasTimeRange) {
+            return tableColumn.meta.field;
+          }
+        })
+        .find(Boolean);
 }
 
 export function renewIDs<T = unknown>(
