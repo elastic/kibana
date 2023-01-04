@@ -1082,7 +1082,7 @@
     "jest-styled-components": "7.0.3",
     "jsdom": "^16.4.0",
     "json-schema-typed": "^8.0.1",
-    "json5": "2.2.2",
+    "json5": "^2.2.2",
     "jsondiffpatch": "0.4.1",
     "license-checker": "^25.0.1",
     "listr": "^0.14.1",
