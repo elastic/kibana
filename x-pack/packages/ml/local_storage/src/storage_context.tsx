@@ -32,10 +32,20 @@ interface StorageAPI {
   removeValue: <K extends TStorageKey>(key: K) => void;
 }
 
+/**
+ * Type guard to check if a supplied `key` is in `storageKey`.
+ *
+ * @param key
+ * @param storageKeys
+ * @returns boolean
+ */
 export function isStorageKey<T>(key: unknown, storageKeys: readonly T[]): key is T {
   return storageKeys.includes(key as T);
 }
 
+/**
+ * React context to hold storage API.
+ */
 export const MlStorageContext = React.createContext<StorageAPI>({
   value: null,
   setValue() {
@@ -51,6 +61,9 @@ interface StorageContextProviderProps<K extends TStorageKey> {
   storageKeys: readonly K[];
 }
 
+/**
+ * Provider to manage context for the `useStorage` hook.
+ */
 export function StorageContextProvider<K extends TStorageKey, T extends TStorage>({
   children,
   storage,
