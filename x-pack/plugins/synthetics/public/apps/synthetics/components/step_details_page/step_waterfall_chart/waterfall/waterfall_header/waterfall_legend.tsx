@@ -8,14 +8,7 @@
 import React, { Dispatch, SetStateAction, useState, useCallback, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import {
-  EuiIcon,
-  EuiText,
-  EuiFlexGroup,
-  EuiButtonEmpty,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiIcon, EuiText, EuiFlexGroup, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 
 import {
   FriendlyTimingLabels,
@@ -71,7 +64,6 @@ export const WaterfallLegend = ({ activeFilters, setActiveFilters }: Props) => {
           ) : null}
         </EuiFlexGroup>
         <EuiFlexGroup>
-          <EuiSpacer style={{ width: 60 }} />
           <EuiFlexGroup wrap={true} css={{ gap: `min(3%, ${euiTheme.size.l})` }}>
             {MIME_FILTERS.map((f) => (
               <LegendItem
