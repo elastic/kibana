@@ -252,7 +252,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             onSave={onSaveManageRules}
             onCancel={onCancelManageRules}
             onRuleSelectionChange={onRuleSelectionChange}
-            />
+          />
         ) : null}
         {showExportModal ? (
           <ExportExceptionsListModal
