@@ -7,7 +7,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UseQueryResult } from '@tanstack/react-query';
-import { EuiButton, EuiEmptyPrompt, EuiImage, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiImage,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
@@ -107,8 +114,18 @@ const packageNotInstalledRenderer = (
           <p>
             <FormattedMessage
               id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
-              defaultMessage="Add the security posture management integration to begin. Learn more about Cloud
-            Security Posture."
+              defaultMessage="Add the Cloud and or Kubernetes Security Posture Management (K/CSPM) integration to begin. {learnMore}."
+              values={{
+                learnMore: (
+                  // TODO: CIS AWS - replace link with general doc for both integartions
+                  <EuiLink href="https://ela.st/getting-started-with-kspm">
+                    <FormattedMessage
+                      id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
+                      defaultMessage="Learn more about Cloud Security Posture"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
           </p>
         }
