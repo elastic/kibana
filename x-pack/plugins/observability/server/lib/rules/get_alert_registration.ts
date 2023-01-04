@@ -10,6 +10,6 @@ import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/asset
 import { RULE_REGISTRATION_CONTEXT } from '../../common/constants';
 
 export const alertRegistration: IRuleTypeAlerts = {
-  registrationContext: RULE_REGISTRATION_CONTEXT,
+  context: RULE_REGISTRATION_CONTEXT,
   fieldMap: experimentalRuleFieldMap,
 };

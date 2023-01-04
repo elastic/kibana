@@ -10,6 +10,6 @@ import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/asset
 import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 
 export const alertRegistration: IRuleTypeAlerts = {
-  registrationContext: 'observability.uptime',
+  context: 'observability.uptime',
   fieldMap: { ...uptimeRuleFieldMap, ...experimentalRuleFieldMap },
 };

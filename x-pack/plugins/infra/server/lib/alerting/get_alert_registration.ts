@@ -9,11 +9,11 @@ import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server/types';
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 
 export const logAlertRegistration: IRuleTypeAlerts = {
-  registrationContext: 'observability.logs',
+  context: 'observability.logs',
   fieldMap: experimentalRuleFieldMap,
 };
 
 export const metricAlertRegistration: IRuleTypeAlerts = {
-  registrationContext: 'observability.metrics',
+  context: 'observability.metrics',
   fieldMap: experimentalRuleFieldMap,
 };

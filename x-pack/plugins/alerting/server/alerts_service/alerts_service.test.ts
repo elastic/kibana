@@ -75,18 +75,21 @@ const IlmPutBody = {
   name: 'alerts-default-ilm-policy',
 };
 
-const IndexTemplatePutBody = {
-  name: '.alerts-test-template',
+const getIndexTemplatePutBody = (context?: string) => ({
+  name: `.alerts-${context ? context : 'test'}-template`,
   body: {
-    index_patterns: ['.alerts-test-*'],
-    composed_of: ['alerts-default-component-template', 'alerts-test-component-template'],
+    index_patterns: [`.alerts-${context ? context : 'test'}-*`],
+    composed_of: [
+      'alerts-common-component-template',
+      `alerts-${context ? context : 'test'}-component-template`,
+    ],
     template: {
       settings: {
         auto_expand_replicas: '0-1',
         hidden: true,
         'index.lifecycle': {
           name: 'alerts-default-ilm-policy',
-          rollover_alias: '.alerts-test',
+          rollover_alias: `.alerts-${context ? context : 'test'}-default`,
         },
         'index.mapping.total_fields.limit': 2500,
       },
@@ -98,10 +101,15 @@ const IndexTemplatePutBody = {
       managed: true,
     },
   },
-};
+});
 
 const TestRegistrationContext = {
-  registrationContext: 'test',
+  context: 'test',
+  fieldMap: { field: { type: 'keyword', required: false } },
+};
+
+const AnotherRegistrationContext = {
+  context: 'another',
   fieldMap: { field: { type: 'keyword', required: false } },
 };
 
@@ -109,7 +117,7 @@ describe('Alerts Service', () => {
   let pluginStop$: Subject<void>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     logger = loggingSystemMock.createLogger();
     pluginStop$ = new ReplaySubject(1);
     jest.spyOn(global.Math, 'random').mockReturnValue(0.01);
@@ -132,16 +140,18 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await alertsService.initialize();
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 50));
 
+      expect(alertsService.isInitialized()).toEqual(true);
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
 
       const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
-      expect(componentTemplate1.name).toEqual('alerts-default-component-template');
+      expect(componentTemplate1.name).toEqual('alerts-common-component-template');
     });
 
-    test('should throw error if adding ILM policy throws error', async () => {
+    test('should log error and set initialized to false if adding ILM policy throws error', async () => {
       clusterClient.ilm.putLifecycle.mockRejectedValueOnce(new Error('fail'));
       const alertsService = new AlertsService({
         logger,
@@ -149,9 +159,10 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await expect(alertsService.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. fail"`
-      );
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(alertsService.isInitialized()).toEqual(false);
 
       expect(logger.error).toHaveBeenCalledWith(
         `Error installing ILM policy alerts-default-ilm-policy - fail`
@@ -161,7 +172,7 @@ describe('Alerts Service', () => {
       expect(clusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
     });
 
-    test('should throw error if creating/updating common component template throws error', async () => {
+    test('should log error and set initialized to false if creating/updating common component template throws error', async () => {
       clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(new Error('fail'));
       const alertsService = new AlertsService({
         logger,
@@ -169,48 +180,129 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await expect(alertsService.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. fail"`
-      );
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 50));
 
+      expect(alertsService.isInitialized()).toEqual(false);
       expect(logger.error).toHaveBeenCalledWith(
-        `Error installing component template alerts-default-component-template - fail`
+        `Error installing component template alerts-common-component-template - fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
     });
-  });
 
-  describe('initializeRegistrationContext()', () => {
-    test('should correctly initialize all resources for registration context', async () => {
+    test('should install resources for contexts awaiting initialization when common resources are initialized', async () => {
       const alertsService = new AlertsService({
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
       });
 
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      // pre-register contexts so they get installed right after initialization
+      alertsService.register(TestRegistrationContext);
+      alertsService.register(AnotherRegistrationContext);
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(alertsService.isInitialized()).toEqual(true);
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+      expect(alertsService.isContextInitialized(AnotherRegistrationContext.context)).toEqual(true);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
+      // 1x for common component template, 2x for context specific
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
 
       const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
-      expect(componentTemplate1.name).toEqual('alerts-default-component-template');
+      expect(componentTemplate1.name).toEqual('alerts-common-component-template');
+      const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
+      expect(componentTemplate2.name).toEqual('alerts-another-component-template');
+      const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
+      expect(componentTemplate3.name).toEqual('alerts-test-component-template');
+
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+        1,
+        getIndexTemplatePutBody('another')
+      );
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+        2,
+        getIndexTemplatePutBody()
+      );
+
+      expect(clusterClient.indices.getAlias).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(1, {
+        index: '.alerts-another-*',
+      });
+      expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(2, {
+        index: '.alerts-test-*',
+      });
+      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
+      expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(4);
+      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(4);
+      expect(clusterClient.indices.create).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.create).toHaveBeenNthCalledWith(1, {
+        index: '.alerts-another-default-000001',
+        body: {
+          aliases: {
+            '.alerts-another-default': {
+              is_write_index: true,
+            },
+          },
+        },
+      });
+      expect(clusterClient.indices.create).toHaveBeenNthCalledWith(2, {
+        index: '.alerts-test-default-000001',
+        body: {
+          aliases: {
+            '.alerts-test-default': {
+              is_write_index: true,
+            },
+          },
+        },
+      });
+    });
+  });
+
+  describe('register()', () => {
+    let alertsService: AlertsService;
+    beforeEach(async () => {
+      alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+      });
+
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isInitialized()).toEqual(true);
+    });
+
+    test('should correctly install resources for context when common initialization is complete', async () => {
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
+      const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
+      expect(componentTemplate1.name).toEqual('alerts-common-component-template');
       const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
       expect(componentTemplate2.name).toEqual('alerts-test-component-template');
 
-      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(IndexTemplatePutBody);
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        getIndexTemplatePutBody()
+      );
       expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({ index: '.alerts-test-*' });
       expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.create).toHaveBeenCalledWith({
-        index: '.alerts-test-000001',
+        index: '.alerts-test-default-000001',
         body: {
           aliases: {
-            '.alerts-test': {
+            '.alerts-test-default': {
               is_write_index: true,
             },
           },
@@ -218,51 +310,34 @@ describe('Alerts Service', () => {
       });
     });
 
-    test('should skip initialization if registration context already exists', async () => {
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
-
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+    test('should skip initialization if context already exists', async () => {
+      alertsService.register(TestRegistrationContext);
+      alertsService.register(TestRegistrationContext);
 
       expect(logger.info).toHaveBeenCalledWith(
-        `Resources for registration context "test" have already been installed.`
+        `Resources for context "test" have already been registered.`
       );
     });
 
-    test('should throw error if registration context already exists and has been registered with a different field map', async () => {
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
-
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
-      await expect(
-        alertsService.initializeRegistrationContext({
+    test('should throw error if context already exists and has been registered with a different field map', async () => {
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(() => {
+        alertsService.register({
           ...TestRegistrationContext,
           fieldMap: { anotherField: { type: 'keyword', required: false } },
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
         `"test has already been registered with a different mapping"`
       );
     });
 
     test('should not update index template if simulating template throws error', async () => {
       clusterClient.indices.simulateTemplate.mockRejectedValueOnce(new Error('fail'));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
 
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to simulate index template mappings for .alerts-test-template; not applying mappings - fail`
@@ -280,7 +355,7 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.create).toHaveBeenCalled();
     });
 
-    test('should throw error if simulating template returns empty mappings', async () => {
+    test('should log error and set initialized to false if simulating template returns empty mappings', async () => {
       clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
         ...SimulateTemplateResponse,
         template: {
@@ -288,17 +363,15 @@ describe('Alerts Service', () => {
           mappings: {},
         },
       }));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await expect(
-        alertsService.initializeRegistrationContext(TestRegistrationContext)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. No mappings would be generated for .alerts-test-template, possibly due to failed/misconfigured bootstrapping"`
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        new Error(
+          `No mappings would be generated for .alerts-test-template, possibly due to failed/misconfigured bootstrapping`
+        )
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -312,18 +385,12 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.create).not.toHaveBeenCalled();
     });
 
-    test('should throw error if updating index template throws error', async () => {
+    test('should log error and set initialized to false if updating index template throws error', async () => {
       clusterClient.indices.putIndexTemplate.mockRejectedValueOnce(new Error('fail'));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await expect(
-        alertsService.initializeRegistrationContext(TestRegistrationContext)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure during installation. fail"`);
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
 
       expect(logger.error).toHaveBeenCalledWith(
         `Error installing index template .alerts-test-template - fail`
@@ -340,18 +407,12 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.create).not.toHaveBeenCalled();
     });
 
-    test('should throw error if checking for concrete write index throws error', async () => {
+    test('should log error and set initialized to false if checking for concrete write index throws error', async () => {
       clusterClient.indices.getAlias.mockRejectedValueOnce(new Error('fail'));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await expect(
-        alertsService.initializeRegistrationContext(TestRegistrationContext)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure during installation. fail"`);
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
 
       expect(logger.error).toHaveBeenCalledWith(
         `Error fetching concrete indices for .alerts-test-* pattern - fail`
@@ -371,14 +432,10 @@ describe('Alerts Service', () => {
       const error = new Error(`index doesn't exist`) as HTTPError;
       error.statusCode = 404;
       clusterClient.indices.getAlias.mockRejectedValueOnce(error);
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
@@ -390,18 +447,12 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.create).toHaveBeenCalled();
     });
 
-    test('should throw error if updating index settings for existing indices throws error', async () => {
+    test('should log error and set initialized to false if updating index settings for existing indices throws error', async () => {
       clusterClient.indices.putSettings.mockRejectedValueOnce(new Error('fail'));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await expect(
-        alertsService.initializeRegistrationContext(TestRegistrationContext)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure during installation. fail"`);
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
 
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to PUT index.mapping.total_fields.limit settings for alias alias_1: fail`
@@ -420,14 +471,10 @@ describe('Alerts Service', () => {
 
     test('should skip updating index mapping for existing indices if simulate index template throws error', async () => {
       clusterClient.indices.simulateIndexTemplate.mockRejectedValueOnce(new Error('fail'));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
 
       expect(logger.error).toHaveBeenCalledWith(
         `Ignored PUT mappings for alias alias_1; error generating simulated mappings: fail`
@@ -444,18 +491,12 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.create).toHaveBeenCalled();
     });
 
-    test('should throw error if updating index mappings for existing indices throws error', async () => {
+    test('should log error and set initialized to false if updating index mappings for existing indices throws error', async () => {
       clusterClient.indices.putMapping.mockRejectedValueOnce(new Error('fail'));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await expect(
-        alertsService.initializeRegistrationContext(TestRegistrationContext)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure during installation. fail"`);
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
 
       expect(logger.error).toHaveBeenCalledWith(`Failed to PUT mapping for alias alias_1: fail`);
 
@@ -472,14 +513,10 @@ describe('Alerts Service', () => {
 
     test('does not updating settings or mappings if no existing concrete indices', async () => {
       clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
@@ -492,11 +529,11 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.create).toHaveBeenCalled();
     });
 
-    test('should throw error if concrete indices exist but none are write index', async () => {
+    test('should log error and set initialized to false if concrete indices exist but none are write index', async () => {
       clusterClient.indices.getAlias.mockImplementationOnce(async () => ({
-        '.alerts-test-0001': {
+        '.alerts-test-default-0001': {
           aliases: {
-            '.alerts-test': {
+            '.alerts-test-default': {
               is_write_index: false,
               is_hidden: true,
             },
@@ -507,17 +544,15 @@ describe('Alerts Service', () => {
           },
         },
       }));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await expect(
-        alertsService.initializeRegistrationContext(TestRegistrationContext)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. Indices matching pattern .alerts-test-* exist but none are set as the write index for alias .alerts-test"`
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        new Error(
+          `Indices matching pattern .alerts-test-* exist but none are set as the write index for alias .alerts-test-default`
+        )
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -533,9 +568,9 @@ describe('Alerts Service', () => {
 
     test('does not create new index if concrete write index exists', async () => {
       clusterClient.indices.getAlias.mockImplementationOnce(async () => ({
-        '.alerts-test-0001': {
+        '.alerts-test-default-0001': {
           aliases: {
-            '.alerts-test': {
+            '.alerts-test-default': {
               is_write_index: true,
               is_hidden: true,
             },
@@ -546,14 +581,10 @@ describe('Alerts Service', () => {
           },
         },
       }));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
@@ -566,18 +597,12 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.create).not.toHaveBeenCalled();
     });
 
-    test('should throw error if create concrete index throws error', async () => {
+    test('should log error and set initialized to false if create concrete index throws error', async () => {
       clusterClient.indices.create.mockRejectedValueOnce(new Error('fail'));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await expect(
-        alertsService.initializeRegistrationContext(TestRegistrationContext)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure during installation. fail"`);
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
@@ -603,16 +628,14 @@ describe('Alerts Service', () => {
       };
       clusterClient.indices.create.mockRejectedValueOnce(error);
       clusterClient.indices.get.mockImplementationOnce(async () => ({
-        '.alerts-test-000001': { aliases: { '.alerts-test': { is_write_index: true } } },
+        '.alerts-test-default-000001': {
+          aliases: { '.alerts-test-default': { is_write_index: true } },
+        },
       }));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
@@ -628,7 +651,7 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.create).toHaveBeenCalled();
     });
 
-    test('should throw error if create concrete index throws resource_already_exists_exception error and write index does not already exists', async () => {
+    test('should log error and set initialized to false if create concrete index throws resource_already_exists_exception error and write index does not already exists', async () => {
       const error = new Error(`fail`) as EsError;
       error.meta = {
         body: {
@@ -639,20 +662,14 @@ describe('Alerts Service', () => {
       };
       clusterClient.indices.create.mockRejectedValueOnce(error);
       clusterClient.indices.get.mockImplementationOnce(async () => ({
-        '.alerts-test-000001': { aliases: { '.alerts-test': { is_write_index: false } } },
+        '.alerts-test-default-000001': {
+          aliases: { '.alerts-test-default': { is_write_index: false } },
+        },
       }));
-      const alertsService = new AlertsService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-      });
 
-      await alertsService.initialize();
-      await expect(
-        alertsService.initializeRegistrationContext(TestRegistrationContext)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. Attempted to create index: .alerts-test-000001 as the write index for alias: .alerts-test, but the index already exists and is not the write index for the alias"`
-      );
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
@@ -681,7 +698,9 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await alertsService.initialize();
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 150));
+      expect(alertsService.isInitialized()).toEqual(true);
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(3);
     });
 
@@ -696,7 +715,9 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await alertsService.initialize();
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 150));
+      expect(alertsService.isInitialized()).toEqual(true);
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
     });
 
@@ -711,8 +732,13 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 150));
+      expect(alertsService.isInitialized()).toEqual(true);
+
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 150));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
     });
 
@@ -727,8 +753,13 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 150));
+      expect(alertsService.isInitialized()).toEqual(true);
+
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 150));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
       expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
     });
 
@@ -743,8 +774,13 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 150));
+      expect(alertsService.isInitialized()).toEqual(true);
+
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 150));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
       expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(4);
     });
 
@@ -759,8 +795,13 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await alertsService.initialize();
-      await alertsService.initializeRegistrationContext(TestRegistrationContext);
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 150));
+      expect(alertsService.isInitialized()).toEqual(true);
+
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 150));
+      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
       expect(clusterClient.indices.create).toHaveBeenCalledTimes(3);
     });
   });
@@ -777,9 +818,11 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await expect(alertsService.initialize(10)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure during installation. Timeout: it took more than 10ms"`
-      );
+      alertsService.initialize(10);
+      await new Promise((r) => setTimeout(r, 150));
+      expect(alertsService.isInitialized()).toEqual(false);
+
+      expect(logger.error).toHaveBeenCalledWith(new Error(`Timeout: it took more than 10ms`));
     });
 
     test('should short circuit initialization if pluginStop$ signal received but not throw error', async () => {
@@ -790,7 +833,8 @@ describe('Alerts Service', () => {
         pluginStop$,
       });
 
-      await alertsService.initialize();
+      alertsService.initialize();
+      await new Promise((r) => setTimeout(r, 50));
 
       expect(logger.error).toHaveBeenCalledWith(
         new Error(`Server is stopping; must stop all async operations`)

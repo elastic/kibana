@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertsService } from './alerts_service';
-
 const creatAlertsServiceMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<AlertsService>> = {
-    initialize: jest.fn(() => Promise.resolve()),
-  };
-  return mocked;
+  return jest.fn().mockImplementation(() => {
+    return {
+      initialize: jest.fn(),
+      register: jest.fn(),
+      isInitialized: jest.fn(),
+      isContextInitialized: jest.fn(),
+    };
+  });
 };
 
 export const alertsServiceMock = {
-  create: creatAlertsServiceMock,
+  create: creatAlertsServiceMock(),
 };

@@ -154,7 +154,8 @@ export interface SummarizedAlerts {
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 export interface IRuleTypeAlerts {
-  registrationContext: string;
+  context: string;
+  namespace?: string;
   fieldMap: FieldMap;
 }
 

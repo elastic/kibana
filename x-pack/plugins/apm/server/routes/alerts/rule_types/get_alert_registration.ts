@@ -17,7 +17,7 @@ import {
 } from '../../../../common/es_fields/apm';
 
 export const alertRegistration: IRuleTypeAlerts = {
-  registrationContext: 'observability.apm',
+  context: 'observability.apm',
   fieldMap: {
     ...experimentalRuleFieldMap,
     [SERVICE_NAME]: {

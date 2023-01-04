@@ -284,8 +284,7 @@ export class RuleTypeRegistry {
     });
 
     if (this.alertsService && ruleType.alerts) {
-      console.log('here');
-      this.alertsService.initializeRegistrationContext(ruleType.alerts);
+      this.alertsService.register(ruleType.alerts);
     }
 
     // No need to notify usage on basic alert types

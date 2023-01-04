@@ -236,9 +236,7 @@ export class AlertingPlugin {
       // TODO - should an initialization failure throw an error?
       // we do retry all resource installation steps but if all the retries fail
       // do we just disable alerts writing?
-      this.alertsService!.initialize().catch((err) => {
-        this.logger.error(`Error initializing alert resources! - ${err.message}`);
-      });
+      this.alertsService!.initialize();
     }
 
     const ruleTypeRegistry = new RuleTypeRegistry({

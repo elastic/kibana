@@ -41,121 +41,152 @@ interface ConcreteIndexInfo {
 }
 interface IAlertsService {
   /**
-   * Initializes all the ES resources used by the alerts client
-   * - ILM policy
-   * - Component templates
-   * - Index templates
-   * - Concrete write index
+   * Initializes the common ES resources needed for framework alerts as data
+   * - ILM policy - common policy shared by all AAD indices
+   * - Component template - common mappings for fields populated and used by the framework
    *
-   * Not using data streams because those are meant for append-only data
-   * and we expect to mutate these documents
+   * Once common resource initialization is complete, look for any solution-specific
+   * resources that have been registered and are awaiting initialization.
    */
-  initialize(timeoutMs?: number): Promise<void>;
-  initializeRegistrationContext(opts: IRuleTypeAlerts, timeoutMs?: number): Promise<void>;
+  initialize(timeoutMs?: number): void;
+
+  /**
+   * Register solution specific resources. If common resource initialization is
+   * complete, go ahead and install those resources, otherwise add to queue to
+   * await initialization
+   *
+   * Solution specific resources include:
+   * - Component template - solution specific mappings for fields used only by solution rule types
+   * - Index templates - solution specific template that combines common and solution specific component templates
+   * - Concrete write index - solution specific write index
+   */
+  register(opts: IRuleTypeAlerts, timeoutMs?: number): void;
+
   isInitialized(): boolean;
 }
 
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
-  private registrationContexts: Map<string, FieldMap> = new Map();
+  private registeredContexts: Map<string, FieldMap> = new Map();
   private initializedContexts: Map<string, boolean> = new Map();
+  private contextsToInitialize: IRuleTypeAlerts[] = [];
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
   }
 
-  public isInitialized(): boolean {
+  public isInitialized() {
     return this.initialized;
   }
 
-  public async initialize(timeoutMs?: number) {
+  public isContextInitialized(context: string) {
+    return this.initializedContexts.get(context) ?? false;
+  }
+
+  public initialize(timeoutMs?: number) {
     // Only initialize once
     if (this.initialized) return;
 
     this.options.logger.debug(`Initializing resources for AlertsService`);
 
-    const esClient = await this.options.elasticsearchClientPromise;
+    // Use setImmediate to execute async fns as soon as possible
+    setImmediate(async () => {
+      try {
+        const esClient = await this.options.elasticsearchClientPromise;
 
-    const initFns = [
-      () => this.createOrUpdateIlmPolicy(esClient),
-      () => this.createOrUpdateComponentTemplate(esClient, getComponentTemplate(alertFieldMap)),
-    ];
+        // Common initialization installs ILM policy and shared component template
+        const initFns = [
+          () => this.createOrUpdateIlmPolicy(esClient),
+          () => this.createOrUpdateComponentTemplate(esClient, getComponentTemplate(alertFieldMap)),
+        ];
 
-    for (let i = 0; i < initFns.length; ++i) {
-      await this.installWithTimeout(async () => await initFns[i](), timeoutMs);
-    }
+        for (const fn of initFns) {
+          await this.installWithTimeout(async () => await fn(), timeoutMs);
+        }
 
-    // if any contexts were registered, initialize resources for them
-    const uninitializedContexts = [...this.initializedContexts.keys()].filter(
-      (context: string) => this.initializedContexts.get(context) === false
-    );
-    for (let i = 0; i < uninitializedContexts.length; ++i) {
-      await this.initializeContext({
-        registrationContext: uninitializedContexts[i],
-        fieldMap: this.registrationContexts.get(uninitializedContexts[i])!,
-      });
-    }
+        this.initialized = true;
+      } catch (err) {
+        this.initialized = false;
+      }
 
-    this.initialized = true;
+      if (!this.initialized) {
+        return;
+      }
+
+      // Look for any registered contexts awaiting initialization and install
+      while (this.contextsToInitialize.length > 0) {
+        const context = this.contextsToInitialize.pop();
+        if (context) {
+          try {
+            await this.initializeContext(context, timeoutMs);
+            this.initializedContexts.set(context.context, true);
+          } catch (err) {
+            this.initializedContexts.set(context.context, false);
+          }
+        }
+      }
+    });
   }
 
-  public async initializeRegistrationContext(
-    { registrationContext, fieldMap }: IRuleTypeAlerts,
-    timeoutMs?: number
-  ) {
-    // check that this registration context has not been registered before
-    if (this.registrationContexts.has(registrationContext)) {
-      const registeredFieldMap = this.registrationContexts.get(registrationContext);
+  public register({ context, fieldMap }: IRuleTypeAlerts, timeoutMs?: number) {
+    // check whether this context has been registered before
+    if (this.registeredContexts.has(context)) {
+      const registeredFieldMap = this.registeredContexts.get(context);
       if (!isEqual(fieldMap, registeredFieldMap)) {
-        throw new Error(
-          `${registrationContext} has already been registered with a different mapping`
-        );
+        throw new Error(`${context} has already been registered with a different mapping`);
       }
-      this.options.logger.info(
-        `Resources for registration context "${registrationContext}" have already been installed.`
-      );
+      this.options.logger.info(`Resources for context "${context}" have already been registered.`);
       return;
     }
 
-    this.registrationContexts.set(registrationContext, fieldMap);
+    this.registeredContexts.set(context, fieldMap);
 
     // Don't do anything yet if common resource initialization is not done
     if (!this.initialized) {
-      console.log('hi');
-      this.initializedContexts.set(registrationContext, false);
+      this.options.logger.info(`Resources for context "${context}" are awaiting initialization.`);
+      this.contextsToInitialize.push({ context, fieldMap });
       return;
     }
 
-    this.initializeContext({ registrationContext, fieldMap });
+    // Common resources are ready so we can initialize this context immediately
+    // Use setImmediate to execute async fns as soon as possible
+    setImmediate(async () => {
+      try {
+        await this.initializeContext({ context, fieldMap }, timeoutMs);
+        this.initializedContexts.set(context, true);
+      } catch (err) {
+        this.initializedContexts.set(context, false);
+      }
+    });
   }
 
-  private async initializeContext({ registrationContext, fieldMap }: IRuleTypeAlerts) {
+  private async initializeContext({ context, fieldMap }: IRuleTypeAlerts, timeoutMs?: number) {
     this.options.logger.info(
-      `Initializing resources for registrationContext ${registrationContext}`
+      `Initializing resources for context ${context} - ${JSON.stringify(fieldMap)}`
     );
-    console.log(JSON.stringify(fieldMap));
-    const esClient = await this.options.elasticsearchClientPromise;
-    const indexTemplateAndPattern = getIndexTemplateAndPattern(registrationContext);
 
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const indexTemplateAndPattern = getIndexTemplateAndPattern(context);
+
+    // Context specific initialization installs component template, index template and write index
     const initFns = [
       async () =>
         await this.createOrUpdateComponentTemplate(
           esClient,
-          getComponentTemplate(fieldMap, registrationContext)
+          getComponentTemplate(fieldMap, context)
         ),
       async () =>
         await this.createOrUpdateIndexTemplate(esClient, indexTemplateAndPattern, [
           getComponentTemplateName(),
-          getComponentTemplateName(registrationContext),
+          getComponentTemplateName(context),
         ]),
       async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
     ];
 
-    for (let i = 0; i < initFns.length; ++i) {
-      await this.installWithTimeout(async () => await initFns[i]());
+    for (const fn of initFns) {
+      await this.installWithTimeout(async () => await fn(), timeoutMs);
     }
-
-    this.initializedContexts.set(registrationContext, true);
   }
 
   /**
@@ -361,7 +392,7 @@ export class AlertsService implements IAlertsService {
     esClient: ElasticsearchClient,
     indexPatterns: IIndexPatternString
   ) {
-    this.options.logger.info(`Creating concrete write index`);
+    this.options.logger.info(`Creating concrete write index - ${indexPatterns.name}`);
 
     // check if a concrete write index already exists
     let concreteIndices: ConcreteIndexInfo[] = [];
@@ -468,7 +499,7 @@ export class AlertsService implements IAlertsService {
       };
 
       const throwTimeoutException = (): Promise<void> => {
-        return new Promise((resolve, reject) => {
+        return new Promise((_, reject) => {
           timeoutId = setTimeout(() => {
             const msg = `Timeout: it took more than ${timeoutMs}ms`;
             reject(new Error(msg));
