@@ -17,8 +17,22 @@ on:
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
+    paths-ignore:
+      - '**/*.json'
+      - '**/*.md'
+      - '**/*.png'
+      - '**/*.yml'
+      - '**/*.asciidoc'
+      - '**/*.test.*'
+      - 'test'
+      - 'x-pack/test'
   schedule:
     - cron: '27 21 * * 0'
+
+paths-ignore:
+  - '**/*.test.*'
+  - 'test'
+  - 'x-pack/test'
 
 jobs:
   analyze:
