@@ -33,8 +33,8 @@ This means that whenever the test suite would execute against the latest version
 of packages it would be too late, as in already available to users.
 
 ### Validating a new package version
-**Important: this validation should be done before merging the new package version.
-A more tightly coupled test step can be considered as a next step (ie run the impacted
+**IMPORTANT: this validation should be done before merging the new package version.
+A more tightly coupled test step will be considered as a next step (ie run the impacted
 test suite as CI step in the integrations package).**
 
 - Get the locally built package from `<integrations-repo>/build/packages/<package>-<version>.zip`; or
