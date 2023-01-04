@@ -135,39 +135,39 @@ export const parseData = (aggregationType: AggregationType, data: AlertSearchRes
   }
 };
 
-export const getAlertsQuery = ({
-  additionalFilters = [],
-  from,
-  to,
-  entityFilter,
-  runtimeMappings,
-  aggregations,
-}: {
-  from: string;
-  to: string;
-  entityFilter?: EntityFilter;
-  additionalFilters?: ESBoolQuery[];
-  runtimeMappings?: MappingRuntimeFields;
-  aggregations: {};
-}) => ({
-  size: 0,
-  query: {
-    bool: {
-      filter: [
-        ...additionalFilters,
-        { range: { '@timestamp': { gte: from, lte: to } } },
-        ...(entityFilter
-          ? [
-              {
-                term: {
-                  [entityFilter.field]: entityFilter.value,
-                },
-              },
-            ]
-          : []),
-      ],
-    },
-  },
-  aggs: aggregations,
-  runtime_mappings: runtimeMappings,
-});
+// export const getAlertsQuery = ({
+//   additionalFilters = [],
+//   from,
+//   to,
+//   entityFilter,
+//   runtimeMappings,
+//   aggregations,
+// }: {
+//   from: string;
+//   to: string;
+//   entityFilter?: EntityFilter;
+//   additionalFilters?: ESBoolQuery[];
+//   runtimeMappings?: MappingRuntimeFields;
+//   aggregations: {};
+// }) => ({
+//   size: 0,
+//   query: {
+//     bool: {
+//       filter: [
+//         ...additionalFilters,
+//         { range: { '@timestamp': { gte: from, lte: to } } },
+//         ...(entityFilter
+//           ? [
+//               {
+//                 term: {
+//                   [entityFilter.field]: entityFilter.value,
+//                 },
+//               },
+//             ]
+//           : []),
+//       ],
+//     },
+//   },
+//   aggs: aggregations,
+//   runtime_mappings: runtimeMappings,
+// });
