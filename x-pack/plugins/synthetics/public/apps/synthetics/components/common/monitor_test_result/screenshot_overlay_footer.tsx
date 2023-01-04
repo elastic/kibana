@@ -6,7 +6,6 @@
  */
 
 import React, { MouseEvent, useEffect } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -57,12 +56,12 @@ export const ScreenshotOverlayFooter: React.FC<ScreenshotOverlayFooterProps> = (
 
   return (
     <div
-      css={css`
-        background-color: ${euiTheme.colors.lightShade};
-        display: inline-block;
-        width: 100%;
-        text-decoration: none;
-      `}
+      style={{
+        backgroundColor: euiTheme.colors.lightShade,
+        display: 'inline-block',
+        width: '100%',
+        textDecoration: 'none',
+      }}
       onClick={(evt) => {
         // we don't want this to be captured by row click which leads to step list page
         evt.stopPropagation();
