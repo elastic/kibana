@@ -170,8 +170,10 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
 };
 
 export const refreshAlertPageFilter = () => {
-  // currently there is no consistent way to refresh the filters.
-  // Have raised this with the kibana presentation team who provided this filter group plugin
+  // Currently, system keeps the cache of option List for 1 minute so as to avoid
+  // lot of unncessary traffic. Cypress is too fast and we cannot wait for a minute
+  // to trigger a reload of Page Filters.
+  // It is faster to refresh the page which will reload the Page Filter values
   cy.reload();
   waitForAlerts();
 };

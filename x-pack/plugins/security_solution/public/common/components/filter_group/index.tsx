@@ -7,10 +7,10 @@
 
 import type {
   ControlGroupInput,
-  ControlGroupContainer,
   controlGroupInputBuilder,
   ControlGroupOutput,
   OptionsListEmbeddableInput,
+  ControlGroupContainer,
 } from '@kbn/controls-plugin/public';
 import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { PropsWithChildren } from 'react';
@@ -66,6 +66,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     chainingSystem = 'HIERARCHICAL',
     initialControls,
     spaceId,
+    onInit,
   } = props;
 
   const filterChangedSubscription = useRef<Subscription>();
@@ -162,9 +163,13 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     });
   }, [controlGroup, debouncedFilterUpdates, debouncedInputUpdatesHandler]);
 
-  const onControlGroupLoadHandler = useCallback((controlGroupContainer: ControlGroupContainer) => {
-    setControlGroup(controlGroupContainer);
-  }, []);
+  const onControlGroupLoadHandler = useCallback(
+    (controlGroupContainer: ControlGroupContainer) => {
+      setControlGroup(controlGroupContainer);
+      if (onInit) onInit(controlGroupContainer);
+    },
+    [onInit]
+  );
 
   const selectControlsWithPriority = useCallback(() => {
     /*

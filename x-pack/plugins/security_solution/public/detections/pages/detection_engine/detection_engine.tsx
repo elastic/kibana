@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
@@ -71,6 +71,7 @@ import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { DetectionPageFilterSet } from '../../components/detection_page_filters';
+import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -90,6 +91,15 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).graphEventId
   );
+
+  const totalCount = useShallowEqualSelector(
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).totalCount
+  );
+
+  const isTableLoading = useShallowEqualSelector(
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
+  );
+
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -116,6 +126,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     useListsConfig();
 
   const [detectionPageFilters, setDetectionPageFilters] = useState<Filter[]>();
+  const [detectionPageFilterHandler, setDetectionPageFilterHandler] = useState<
+    FilterGroupHandler | undefined
+  >();
 
   const {
     indexPattern,
@@ -134,6 +147,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   } = useKibana().services;
 
   const { filterManager } = data.query;
+
+  useEffect(() => {
+    if (!detectionPageFilterHandler) return;
+    if (!isTableLoading) detectionPageFilterHandler.reload();
+  }, [isTableLoading, detectionPageFilterHandler]);
 
   const addFilter = useCallback(
     ({ field, value }: { field: string; value: string | number }) => {
@@ -326,6 +344,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                   mode: 'absolute',
                 }}
                 chainingSystem="HIERARCHICAL"
+                onInit={setDetectionPageFilterHandler}
               />
 
               <EuiSpacer size="l" />
