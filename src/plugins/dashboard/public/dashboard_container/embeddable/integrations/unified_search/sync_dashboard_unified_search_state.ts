@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { merge, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { distinctUntilChanged, finalize, switchMap, tap } from 'rxjs/operators';
 
 import type { Filter, Query } from '@kbn/es-query';
