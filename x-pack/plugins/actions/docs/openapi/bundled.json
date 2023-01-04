@@ -25,13 +25,54 @@
     }
   ],
   "paths": {
+    "/s/{spaceId}/api/actions/connector/{connectorId}": {
+      "get": {
+        "summary": "Retrieves a connector by ID.",
+        "operationId": "getConnector",
+        "description": "You must have `read` privileges for the *Actions and Connectors* feature in the *Management* section of the Kibana feature privileges.\n",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/connector_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/s/{spaceId}/api/actions/connector_types": {
       "get": {
         "summary": "Retrieves a list of all connector types.",
         "operationId": "getConnectorTypes",
         "description": "You do not need any Kibana feature privileges to run this API.\n",
         "tags": [
-          "cases"
+          "connectors"
         ],
         "parameters": [
           {
@@ -136,6 +177,16 @@
       }
     },
     "parameters": {
+      "connector_id": {
+        "in": "path",
+        "name": "connectorId",
+        "description": "An identifier for the connector.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "default"
+        }
+      },
       "space_id": {
         "in": "path",
         "name": "spaceId",

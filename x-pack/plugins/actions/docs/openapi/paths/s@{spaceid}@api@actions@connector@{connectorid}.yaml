@@ -1,0 +1,25 @@
+get:
+  summary: Retrieves a connector by ID.
+  operationId: getConnector
+  description: >
+    You must have `read` privileges for the *Actions and Connectors* feature in the *Management* section of the Kibana feature privileges.
+  tags:
+    - connectors
+  parameters:
+    - $ref: '../components/parameters/connector_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+#          examples:
+#            getConnectorResponse:
+#              $ref: '../components/examples/get_connector_response.yaml'
+  servers:
+    - url: https://localhost:5601
+servers:
+  - url: https://localhost:5601

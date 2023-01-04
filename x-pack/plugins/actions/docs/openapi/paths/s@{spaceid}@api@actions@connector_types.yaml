@@ -4,7 +4,7 @@ get:
   description: >
     You do not need any Kibana feature privileges to run this API.
   tags:
-    - cases
+    - connectors
   parameters:
     - $ref: '../components/parameters/space_id.yaml'
     - in: query
