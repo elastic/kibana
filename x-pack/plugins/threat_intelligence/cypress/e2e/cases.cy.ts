@@ -105,7 +105,9 @@ describe('Cases with invalid indicators', () => {
 describe('Cases interactions', () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
+    login();
   });
+
   after(() => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });

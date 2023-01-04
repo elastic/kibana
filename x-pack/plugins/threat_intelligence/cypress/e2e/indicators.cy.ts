@@ -140,6 +140,7 @@ describe('Invalid Indicators', () => {
 describe('Indicators', () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
+    login();
   });
 
   after(() => {
