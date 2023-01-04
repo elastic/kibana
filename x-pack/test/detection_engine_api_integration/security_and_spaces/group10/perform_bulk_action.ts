@@ -1848,6 +1848,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const casesForNonEmptyActions = [
             {
+              payloadThrottle: NOTIFICATION_THROTTLE_RULE,
+              expectedThrottle: NOTIFICATION_THROTTLE_RULE,
+            },
+            {
               payloadThrottle: '1h',
               expectedThrottle: '1h',
             },
@@ -1878,16 +1882,12 @@ export default ({ getService }: FtrProviderContext): void => {
                         {
                           type: BulkActionEditType.set_rule_actions,
                           value: {
+                            throttle: payloadThrottle,
                             actions: [
                               {
                                 id: webHookConnector.id,
                                 group: 'default',
                                 params: { body: '{}' },
-                                frequency: {
-                                  summary: false,
-                                  notifyWhen: 'onThrottleInterval',
-                                  throttle: payloadThrottle,
-                                },
                               },
                             ],
                           },
@@ -1902,8 +1902,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   // Check that the updates have been persisted
                   const { body: rule } = await fetchRule(ruleId).expect(200);
 
-                  expect(rule.throttle).to.be(expectedThrottle);
-                  expect(rule.actions[0].frequency.throttle).to.be(expectedThrottle);
+                  expect(rule.throttle).to.eql(expectedThrottle);
                 });
               });
             }
