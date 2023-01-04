@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// eslint-disable-next-line max-classes-per-file
 import type {
   CustomBrandingStart,
   CustomBrandingStartDeps,
@@ -25,24 +24,27 @@ export interface InternalCustomBrandingSetup {
   register: (pluginName: string) => void;
 }
 
-class CustomBrandingClass implements CustomBranding {}
-
 export class CustomBrandingService {
   private pluginName: string | undefined;
   private savedObjects?: InternalSavedObjectsServiceStart;
   private uiSettings?: InternalUiSettingsServiceStart;
-  private settingsKeys?: string[];
+  private readonly settingsKeys: Array<keyof CustomBranding> = [
+    'logo',
+    'customizedLogo',
+    'faviconPNG',
+    'faviconSVG',
+    'pageTitle',
+  ];
   private logger: Logger;
 
   constructor(coreContext: CoreContext) {
     this.logger = coreContext.logger.get('custom-branding-service');
-    this.settingsKeys = Object.keys(new CustomBrandingClass());
   }
 
   private getBrandingFrom = async (uiSettingsClient: IUiSettingsClient) => {
     const branding: CustomBranding = {};
     for (let i = 0; i < this.settingsKeys!.length; i++) {
-      const key = this.settingsKeys![i] as keyof CustomBranding;
+      const key = this.settingsKeys[i];
       const fullKey = `customBranding:${key}`;
       const value = await uiSettingsClient.get(fullKey);
       if (value) {
