@@ -38,7 +38,12 @@ jobs:
     #   uses: github/codeql-action/autobuild@v2
 
     # - run: yarn install # <-- this works fine
-    - run: yarn kbn bootstrap --debug --no-validate --no-vscode
+    - name: yarn kbn bootstrap
+      run: |
+        mkdir ~/.npm-global
+        npm config set prefix '~/.npm-global'
+        export PATH=~/.npm-global/bin:$PATH
+        yarn kbn bootstrap --no-validate --no-vscode
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
