@@ -12,6 +12,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { asyncMapWithLimit } from '@kbn/std';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { getRepoFiles } from '@kbn/get-repo-files';
+import { REPO_ROOT } from '@kbn/utils';
 import globby from 'globby';
 
 import { File } from '../file';
@@ -36,6 +37,25 @@ export async function runCheckTsProjectsCli() {
     async ({ log }) => {
       const stats = new Stats();
       let failed = false;
+
+      const everyProjectDeep = new Set(PROJECTS.flatMap((p) => p.getProjectsDeep()));
+      for (const proj of everyProjectDeep) {
+        const [, ...baseConfigRels] = proj.getConfigPaths().map((p) => Path.relative(REPO_ROOT, p));
+        const configRel = Path.relative(REPO_ROOT, proj.tsConfigPath);
+
+        if (baseConfigRels[0] === 'tsconfig.json') {
+          failed = true;
+          log.error(
+            `[${configRel}]: This tsconfig extends the root tsconfig.json file and shouldn't. The root tsconfig.json file is not a valid base config, you probably want to point to the tsconfig.base.json file.`
+          );
+        }
+        if (configRel !== 'tsconfig.base.json' && !baseConfigRels.includes('tsconfig.base.json')) {
+          failed = true;
+          log.error(
+            `[${configRel}]: This tsconfig does not extend the tsconfig.base.json file either directly or indirectly. The TS config setup for the repo expects every tsconfig file to extend this base config file.`
+          );
+        }
+      }
 
       const pathsAndProjects = await asyncMapWithLimit(PROJECTS, 5, async (proj) => {
         const paths = await globby(proj.getIncludePatterns(), {

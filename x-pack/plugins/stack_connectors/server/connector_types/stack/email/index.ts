@@ -160,7 +160,7 @@ const ParamsSchemaProps = {
     path: schema.string({ defaultValue: '/' }),
     text: schema.string({
       defaultValue: i18n.translate('xpack.stackConnectors.email.kibanaFooterLinkText', {
-        defaultMessage: 'Go to Kibana',
+        defaultMessage: 'Go to Elastic',
       }),
     }),
   }),
@@ -396,12 +396,12 @@ function getFooterMessage({
 }) {
   if (!publicBaseUrl) {
     return i18n.translate('xpack.stackConnectors.email.sentByKibanaMessage', {
-      defaultMessage: 'This message was sent by Kibana.',
+      defaultMessage: 'This message was sent by Elastic.',
     });
   }
 
   return i18n.translate('xpack.stackConnectors.email.customViewInKibanaMessage', {
-    defaultMessage: 'This message was sent by Kibana. [{kibanaFooterLinkText}]({link}).',
+    defaultMessage: 'This message was sent by Elastic. [{kibanaFooterLinkText}]({link}).',
     values: {
       kibanaFooterLinkText: kibanaFooterLink.text,
       link: `${publicBaseUrl}${kibanaFooterLink.path === '/' ? '' : kibanaFooterLink.path}`,

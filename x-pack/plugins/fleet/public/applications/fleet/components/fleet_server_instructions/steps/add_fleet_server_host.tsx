@@ -79,10 +79,10 @@ export const AddFleetServerHostStepContent = ({
         id: 'fleet-server-host',
         is_preconfigured: false,
       };
-      setFleetServerHost(newFleetServerHost);
+
       if (validate()) {
-        setSubmittedFleetServerHost(newFleetServerHost);
         setFleetServerHost(await saveFleetServerHost(newFleetServerHost));
+        setSubmittedFleetServerHost(newFleetServerHost);
       }
     } catch (err) {
       notifications.toasts.addError(err, {

@@ -84,7 +84,7 @@ export interface PackagePolicyClient {
 
   list(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery
+    options: ListWithKuery & { withAgentCount?: boolean }
   ): Promise<ListResult<PackagePolicy>>;
 
   listIds(
@@ -112,7 +112,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;

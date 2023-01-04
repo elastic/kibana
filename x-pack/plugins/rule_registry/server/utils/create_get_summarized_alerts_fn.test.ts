@@ -43,7 +43,12 @@ describe('createGetSummarizedAlertsFn', () => {
       isLifecycleAlert: false,
     })();
 
-    await getSummarizedAlertsFn({ executionUuid: 'abc', ruleId: 'rule-id', spaceId: 'space-id' });
+    await getSummarizedAlertsFn({
+      executionUuid: 'abc',
+      ruleId: 'rule-id',
+      spaceId: 'space-id',
+      excludedAlertInstanceIds: [],
+    });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
   });
 
@@ -54,7 +59,12 @@ describe('createGetSummarizedAlertsFn', () => {
       isLifecycleAlert: false,
     })();
 
-    await getSummarizedAlertsFn({ executionUuid: 'abc', ruleId: 'rule-id', spaceId: 'space-id' });
+    await getSummarizedAlertsFn({
+      executionUuid: 'abc',
+      ruleId: 'rule-id',
+      spaceId: 'space-id',
+      excludedAlertInstanceIds: [],
+    });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
   });
 
@@ -156,12 +166,13 @@ describe('createGetSummarizedAlertsFn', () => {
       executionUuid: 'abc',
       ruleId: 'rule-id',
       spaceId: 'space-id',
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(1, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -181,6 +192,15 @@ describe('createGetSummarizedAlertsFn', () => {
                   [EVENT_ACTION]: 'open',
                 },
               },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
@@ -188,7 +208,7 @@ describe('createGetSummarizedAlertsFn', () => {
     });
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(2, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -208,6 +228,15 @@ describe('createGetSummarizedAlertsFn', () => {
                   [EVENT_ACTION]: 'active',
                 },
               },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
@@ -215,7 +244,7 @@ describe('createGetSummarizedAlertsFn', () => {
     });
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(3, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -235,6 +264,15 @@ describe('createGetSummarizedAlertsFn', () => {
                   [EVENT_ACTION]: 'close',
                 },
               },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
@@ -243,7 +281,7 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.new.count).toEqual(2);
     expect(summarizedAlerts.ongoing.count).toEqual(3);
     expect(summarizedAlerts.recovered.count).toEqual(1);
-    expect(summarizedAlerts.new.alerts).toEqual([
+    expect(summarizedAlerts.new.data).toEqual([
       {
         '@timestamp': '2020-01-01T12:00:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -261,7 +299,7 @@ describe('createGetSummarizedAlertsFn', () => {
         [ALERT_UUID]: 'uuid2',
       },
     ]);
-    expect(summarizedAlerts.ongoing.alerts).toEqual([
+    expect(summarizedAlerts.ongoing.data).toEqual([
       {
         '@timestamp': '2020-01-01T12:00:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -287,7 +325,7 @@ describe('createGetSummarizedAlertsFn', () => {
         [ALERT_UUID]: 'uuid5',
       },
     ]);
-    expect(summarizedAlerts.recovered.alerts).toEqual([
+    expect(summarizedAlerts.recovered.data).toEqual([
       {
         '@timestamp': '2020-01-01T12:00:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -405,12 +443,13 @@ describe('createGetSummarizedAlertsFn', () => {
       end: new Date('2020-01-01T12:25:00.000Z'),
       ruleId: 'rule-id',
       spaceId: 'space-id',
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(1, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -426,6 +465,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
                 },
               },
               {
@@ -442,7 +490,7 @@ describe('createGetSummarizedAlertsFn', () => {
     });
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(2, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -458,6 +506,15 @@ describe('createGetSummarizedAlertsFn', () => {
               {
                 term: {
                   [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
                 },
               },
               {
@@ -483,7 +540,7 @@ describe('createGetSummarizedAlertsFn', () => {
     });
     expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(3, {
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -502,6 +559,15 @@ describe('createGetSummarizedAlertsFn', () => {
                 },
               },
               {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
+              {
                 range: {
                   [ALERT_END]: {
                     gte: '2020-01-01T11:00:00.000Z',
@@ -517,7 +583,7 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.new.count).toEqual(3);
     expect(summarizedAlerts.ongoing.count).toEqual(2);
     expect(summarizedAlerts.recovered.count).toEqual(1);
-    expect(summarizedAlerts.new.alerts).toEqual([
+    expect(summarizedAlerts.new.data).toEqual([
       {
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -546,7 +612,7 @@ describe('createGetSummarizedAlertsFn', () => {
         alert_type: 'new',
       },
     ]);
-    expect(summarizedAlerts.ongoing.alerts).toEqual([
+    expect(summarizedAlerts.ongoing.data).toEqual([
       {
         [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -566,7 +632,7 @@ describe('createGetSummarizedAlertsFn', () => {
         alert_type: 'ongoing',
       },
     ]);
-    expect(summarizedAlerts.recovered.alerts).toEqual([
+    expect(summarizedAlerts.recovered.data).toEqual([
       {
         [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -655,12 +721,13 @@ describe('createGetSummarizedAlertsFn', () => {
       executionUuid: 'abc',
       ruleId: 'rule-id',
       spaceId: 'space-id',
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledWith({
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -675,6 +742,15 @@ describe('createGetSummarizedAlertsFn', () => {
                   [ALERT_RULE_UUID]: 'rule-id',
                 },
               },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
@@ -683,7 +759,7 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.new.count).toEqual(6);
     expect(summarizedAlerts.ongoing.count).toEqual(0);
     expect(summarizedAlerts.recovered.count).toEqual(0);
-    expect(summarizedAlerts.new.alerts).toEqual([
+    expect(summarizedAlerts.new.data).toEqual([
       {
         '@timestamp': '2020-01-01T12:00:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -728,8 +804,8 @@ describe('createGetSummarizedAlertsFn', () => {
         [ALERT_UUID]: 'uuid6',
       },
     ]);
-    expect(summarizedAlerts.ongoing.alerts).toEqual([]);
-    expect(summarizedAlerts.recovered.alerts).toEqual([]);
+    expect(summarizedAlerts.ongoing.data).toEqual([]);
+    expect(summarizedAlerts.recovered.data).toEqual([]);
   });
 
   it('creates function that correctly returns non-lifecycle alerts using time range', async () => {
@@ -807,12 +883,13 @@ describe('createGetSummarizedAlertsFn', () => {
       end: new Date('2020-01-01T12:25:00.000Z'),
       ruleId: 'rule-id',
       spaceId: 'space-id',
+      excludedAlertInstanceIds: ['TEST_ALERT_10'],
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledWith({
       body: {
-        size: 1000,
+        size: 100,
         track_total_hits: true,
         query: {
           bool: {
@@ -830,6 +907,15 @@ describe('createGetSummarizedAlertsFn', () => {
                   [ALERT_RULE_UUID]: 'rule-id',
                 },
               },
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      [ALERT_INSTANCE_ID]: ['TEST_ALERT_10'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
@@ -838,7 +924,7 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.new.count).toEqual(6);
     expect(summarizedAlerts.ongoing.count).toEqual(0);
     expect(summarizedAlerts.recovered.count).toEqual(0);
-    expect(summarizedAlerts.new.alerts).toEqual([
+    expect(summarizedAlerts.new.data).toEqual([
       {
         [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
         [ALERT_RULE_EXECUTION_UUID]: 'abc',
@@ -882,8 +968,8 @@ describe('createGetSummarizedAlertsFn', () => {
         [ALERT_UUID]: 'uuid6',
       },
     ]);
-    expect(summarizedAlerts.ongoing.alerts).toEqual([]);
-    expect(summarizedAlerts.recovered.alerts).toEqual([]);
+    expect(summarizedAlerts.ongoing.data).toEqual([]);
+    expect(summarizedAlerts.recovered.data).toEqual([]);
   });
 
   it('throws error if search throws error', async () => {
@@ -897,7 +983,12 @@ describe('createGetSummarizedAlertsFn', () => {
     })();
 
     await expect(
-      getSummarizedAlertsFn({ executionUuid: 'abc', ruleId: 'rule-id', spaceId: 'space-id' })
+      getSummarizedAlertsFn({
+        executionUuid: 'abc',
+        ruleId: 'rule-id',
+        spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"search error"`);
   });
 
@@ -909,7 +1000,11 @@ describe('createGetSummarizedAlertsFn', () => {
     })();
 
     await expect(
-      getSummarizedAlertsFn({ ruleId: 'rule-id', spaceId: 'space-id' })
+      getSummarizedAlertsFn({
+        ruleId: 'rule-id',
+        spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Must specify either execution UUID or time range for summarized alert query."`
     );
@@ -929,6 +1024,7 @@ describe('createGetSummarizedAlertsFn', () => {
         end: new Date(),
         ruleId: 'rule-id',
         spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Must specify either execution UUID or time range for summarized alert query."`
@@ -943,7 +1039,12 @@ describe('createGetSummarizedAlertsFn', () => {
     })();
 
     await expect(
-      getSummarizedAlertsFn({ start: new Date(), ruleId: 'rule-id', spaceId: 'space-id' })
+      getSummarizedAlertsFn({
+        start: new Date(),
+        ruleId: 'rule-id',
+        spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Must specify either execution UUID or time range for summarized alert query."`
     );
@@ -957,7 +1058,12 @@ describe('createGetSummarizedAlertsFn', () => {
     })();
 
     await expect(
-      getSummarizedAlertsFn({ end: new Date(), ruleId: 'rule-id', spaceId: 'space-id' })
+      getSummarizedAlertsFn({
+        end: new Date(),
+        ruleId: 'rule-id',
+        spaceId: 'space-id',
+        excludedAlertInstanceIds: [],
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Must specify either execution UUID or time range for summarized alert query."`
     );

@@ -90,6 +90,9 @@ export const NOTES_AUTHOR = '.euiCommentEvent__headerUsername';
 
 export const NOTES_LINK = '[data-test-subj="markdown-link"]';
 
+export const MARKDOWN_INVESTIGATE_BUTTON =
+  '[data-test-subj="insight-investigate-in-timeline-button"]';
+
 export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
 
 export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
@@ -182,7 +185,12 @@ export const TIMELINE_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
 
 export const TIMELINE_FILTER = (filter: TimelineFilter) =>
-  `[data-test-subj="filter filter-enabled filter-key-${filter.field} filter-value-${filter.value} filter-unpinned"]`;
+  `[data-test-subj~="filter"][data-test-subj~="filter-enabled"][data-test-subj~="filter-key-${
+    filter.field
+  }"][data-test-subj~="filter-value-${(filter.value ?? '').replace(
+    /\s/g,
+    ''
+  )}"][data-test-subj~="filter-unpinned"]`;
 
 export const TIMELINE_FILTER_FIELD = '[data-test-subj="filterFieldSuggestionList"]';
 

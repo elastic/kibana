@@ -37,13 +37,6 @@ export const DESCRIPTION_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const MESSAGE_FIELD_IS_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.messageFieldRequired',
-  {
-    defaultMessage: '"message" field must be populated with a value other than just whitespace',
-  }
-);
-
 export const USE_JSON_EDITOR_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.useJsonEditorLabel',
   {
@@ -73,8 +66,7 @@ export const ENTITY_FIELD_LABEL = i18n.translate(
 );
 
 export const TAGS_HELP = i18n.translate('xpack.stackConnectors.components.opsgenie.tagsHelp', {
-  defaultMessage:
-    'Type one or more custom identifying tags for this case. Press enter after each tag to begin a new one.',
+  defaultMessage: 'Press enter after each tag to begin a new one.',
 });
 
 export const TAGS_FIELD_LABEL = i18n.translate(

@@ -1597,7 +1597,9 @@
             "label": "apiKeys",
             "description": [],
             "signature": [
-              "{ create: (request: ",
+              "{ validate: (apiKeyPrams: ",
+              "ValidateAPIKeyParams",
+              ") => Promise<boolean>; create: (request: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
@@ -2642,10 +2644,6 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
-            },
-            {
-              "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
             },
             {
@@ -3041,6 +3039,20 @@
             "description": [],
             "signature": [
               "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/plugins/security/common/model/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.ApiKey.role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "role_descriptors",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
             ],
             "path": "x-pack/plugins/security/common/model/api_key.ts",
             "deprecated": false,

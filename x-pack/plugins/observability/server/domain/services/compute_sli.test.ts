@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DateRange } from '../../types/models';
+import { DateRange } from '../models';
 import { computeSLI } from './compute_sli';
 
 const DATE_RANGE: DateRange = { from: new Date(), to: new Date() };

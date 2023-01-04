@@ -162,6 +162,13 @@ export const groupActionVariableDescription = i18n.translate(
   }
 );
 
+export const groupByKeysActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.groupByKeysActionVariableDescription',
+  {
+    defaultMessage: 'The object containing groups that are reporting data',
+  }
+);
+
 export const alertStateActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.alertStateActionVariableDescription',
   {

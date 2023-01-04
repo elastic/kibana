@@ -250,12 +250,12 @@ export const getGaugeVisualization = ({
                 palette
                   ? {
                       columnId: metricAccessor,
-                      triggerIcon: 'colorBy',
+                      triggerIconType: 'colorBy',
                       palette,
                     }
                   : {
                       columnId: metricAccessor,
-                      triggerIcon: 'none',
+                      triggerIconType: 'none',
                     },
               ]
             : [],
@@ -555,5 +555,59 @@ export const getGaugeVisualization = ({
       },
     };
     return suggestion;
+  },
+
+  getVisualizationInfo(state: GaugeVisualizationState) {
+    const dimensions = [];
+    if (state.metricAccessor) {
+      dimensions.push({
+        id: state.metricAccessor,
+        name: i18n.translate('xpack.lens.gauge.metricLabel', {
+          defaultMessage: 'Metric',
+        }),
+        dimensionType: 'metric',
+      });
+    }
+
+    if (state.maxAccessor) {
+      dimensions.push({
+        id: state.maxAccessor,
+        name: i18n.translate('xpack.lens.gauge.maxValueLabel', {
+          defaultMessage: 'Maximum value',
+        }),
+        dimensionType: 'max',
+      });
+    }
+
+    if (state.minAccessor) {
+      dimensions.push({
+        id: state.minAccessor,
+        name: i18n.translate('xpack.lens.gauge.minValueLabel', {
+          defaultMessage: 'Minimum value',
+        }),
+        dimensionType: 'min',
+      });
+    }
+
+    if (state.goalAccessor) {
+      dimensions.push({
+        id: state.goalAccessor,
+        name: i18n.translate('xpack.lens.gauge.goalValueLabel', {
+          defaultMessage: 'Goal value',
+        }),
+        dimensionType: 'goal',
+      });
+    }
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: state.shape,
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
   },
 });

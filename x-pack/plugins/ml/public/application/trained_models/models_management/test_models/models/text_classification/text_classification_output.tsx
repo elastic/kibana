@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC, Fragment } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiProgress } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiProgress,
+  EuiTitle,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 
 import type {
   TextClassificationInference,
   ZeroShotClassificationInference,
   FillMaskInference,
   LangIdentInference,
+  FormattedTextClassificationResponse,
 } from '.';
 
 export const getTextClassificationOutputComponent = (
@@ -31,24 +39,50 @@ export const TextClassificationOutput: FC<{
     | FillMaskInference
     | LangIdentInference;
 }> = ({ inferrer }) => {
-  const result = useObservable(inferrer.inferenceResult$);
+  const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
   }
+
   return (
     <>
-      {result.response.map(({ value, predictionProbability }) => (
+      {result.map(({ response, inputText }) => (
         <>
+          <PredictionProbabilityList response={response} inputText={inputText} />
+          <EuiHorizontalRule />
+        </>
+      ))}
+    </>
+  );
+};
+
+export const PredictionProbabilityList: FC<{
+  response: FormattedTextClassificationResponse;
+  inputText?: string;
+}> = ({ response, inputText }) => {
+  return (
+    <>
+      {inputText !== undefined ? (
+        <>
+          <EuiTitle size="xxs">
+            <span>{inputText}</span>
+          </EuiTitle>
+          <EuiSpacer />
+        </>
+      ) : null}
+
+      {response.map(({ value, predictionProbability }) => (
+        <Fragment key={value}>
           <EuiProgress value={predictionProbability * 100} max={100} size="m" />
           <EuiSpacer size="s" />
           <EuiFlexGroup>
-            <>
-              <EuiFlexItem>{value}</EuiFlexItem>
-              <EuiFlexItem grow={false}>{predictionProbability}</EuiFlexItem>
-            </>
+            <EuiFlexItem data-test-subj={`mlTestModelLangIdentInputValue`}>{value}</EuiFlexItem>
+            <EuiFlexItem data-test-subj={`mlTestModelLangIdentInputProbability`} grow={false}>
+              {predictionProbability}
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
-        </>
+        </Fragment>
       ))}
     </>
   );

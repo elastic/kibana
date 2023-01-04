@@ -9,9 +9,9 @@ import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
 import type { ObjectWithNavTabs } from '.';
 import { getBreadcrumbsForRoute, useSetBreadcrumbs } from '.';
-import { HostsTableType } from '../../../../hosts/store/model';
+import { HostsTableType } from '../../../../explore/hosts/store/model';
 import type { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
-import { NetworkRouteType } from '../../../../network/pages/navigation/types';
+import { NetworkRouteType } from '../../../../explore/network/pages/navigation/types';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { AdministrationSubTab } from '../../../../management/types';
 import { renderHook } from '@testing-library/react-hooks';
@@ -131,6 +131,11 @@ const exploreBreadcrumbs = {
 const rulesBReadcrumb = {
   text: 'Rules',
   href: 'securitySolutionUI/rules',
+};
+
+const exceptionsBReadcrumb = {
+  text: 'Rule Exceptions',
+  href: 'securitySolutionUI/exceptions',
 };
 
 const manageBreadcrumbs = {
@@ -430,6 +435,32 @@ describe('Navigation Breadcrumbs', () => {
           {
             text: 'Endpoints',
             href: '',
+          },
+        ]);
+      });
+
+      test('should return Exceptions breadcrumbs when supplied exception Details pageName', () => {
+        const mockListName = 'new shared list';
+        const breadcrumbs = getBreadcrumbsForRoute(
+          {
+            ...getMockObject(
+              SecurityPageName.exceptions,
+              `/exceptions/details/${mockListName}`,
+              undefined
+            ),
+            state: {
+              listName: mockListName,
+            },
+          },
+          getSecuritySolutionUrl,
+          false
+        );
+        expect(breadcrumbs).toEqual([
+          securityBreadCrumb,
+          exceptionsBReadcrumb,
+          {
+            text: mockListName,
+            href: ``,
           },
         ]);
       });
@@ -770,6 +801,31 @@ describe('Navigation Breadcrumbs', () => {
           {
             text: 'Manage',
             href: '',
+          },
+        ]);
+      });
+      test('should return Exceptions breadcrumbs when supplied exception Details pageName', () => {
+        const mockListName = 'new shared list';
+        const breadcrumbs = getBreadcrumbsForRoute(
+          {
+            ...getMockObject(
+              SecurityPageName.exceptions,
+              `/exceptions/details/${mockListName}`,
+              undefined
+            ),
+            state: {
+              listName: mockListName,
+            },
+          },
+          getSecuritySolutionUrl,
+          false
+        );
+        expect(breadcrumbs).toEqual([
+          securityBreadCrumb,
+          exceptionsBReadcrumb,
+          {
+            text: mockListName,
+            href: ``,
           },
         ]);
       });

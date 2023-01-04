@@ -9,14 +9,24 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import { IndexViewLogic } from '../index_view_logic';
 
 import { ConnectorConfigurationForm } from './connector_configuration_form';
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
 export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
+  const { connectorError } = useValues(IndexViewLogic);
   const { configView, isEditing } = useValues(ConnectorConfigurationLogic);
   const { setIsEditing } = useActions(ConnectorConfigurationLogic);
 
@@ -58,6 +68,21 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
           )
         )}
       </EuiFlexItem>
+      {!!connectorError && (
+        <EuiFlexItem>
+          <EuiCallOut
+            color="danger"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.config.error.title',
+              {
+                defaultMessage: 'Connector error',
+              }
+            )}
+          >
+            <EuiText size="s">{connectorError}</EuiText>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

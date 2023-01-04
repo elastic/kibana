@@ -38,7 +38,12 @@ For example, defining a **timeslices** budgeting method with a `95%` slice thres
 The target objective is the value the SLO needs to meet during the time window.
 If a **timeslices** budgeting method is used, we also need to define the **timeslice_target** which can be different than the overall SLO target.
 
+### Optional settings
 
+The default settings should be sufficient for most users, but if needed, the following properties can be overwritten:
+- timestamp_field: The date time field to use from the source index
+- sync_delay: The ingest delay in the source data
+- frequency: How often do we query the source data
 
 ## Example
 
@@ -57,7 +62,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.apm.transaction_error_rate",
+		"type": "sli.apm.transaction_error_rate",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
@@ -91,7 +96,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.apm.transaction_error_rate",
+		"type": "sli.apm.transaction_error_rate",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
@@ -127,7 +132,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.apm.transaction_error_rate",
+		"type": "sli.apm.transaction_error_rate",
 		"params": {
             "environment": "production",
 			"service": "o11y-app",
@@ -165,7 +170,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.apm.transaction_duration",
+		"type": "sli.apm.transaction_duration",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
@@ -199,7 +204,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.apm.transaction_duration",
+		"type": "sli.apm.transaction_duration",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
@@ -236,7 +241,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.apm.transaction_duration",
+		"type": "sli.apm.transaction_duration",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
@@ -278,12 +283,12 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.kql.custom",
+		"type": "sli.kql.custom",
 		"params": {
 			"index": "high-cardinality-data-fake_logs*",
-			"numerator": "latency < 300",
-			"denominator": "",
-			"query_filter": "labels.groupId: group-0"
+			"good": "latency < 300",
+			"total": "",
+			"filter": "labels.groupId: group-0"
 		}
 	},
 	"time_window": {

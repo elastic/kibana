@@ -14,7 +14,12 @@ import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_so
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
-import { AlertInstanceContext, AlertInstanceState } from './types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  PublicRuleResultService,
+  PublicRuleMonitoringService,
+} from './types';
 
 export { rulesClientMock };
 
@@ -96,6 +101,30 @@ const createAbortableSearchServiceMock = () => {
   };
 };
 
+const createRuleMonitoringServiceMock = () => {
+  const mock = {
+    setLastRunMetricsTotalSearchDurationMs: jest.fn(),
+    setLastRunMetricsTotalIndexingDurationMs: jest.fn(),
+    setLastRunMetricsTotalAlertsDetected: jest.fn(),
+    setLastRunMetricsTotalAlertsCreated: jest.fn(),
+    setLastRunMetricsGapDurationS: jest.fn(),
+  } as unknown as jest.Mocked<PublicRuleMonitoringService>;
+
+  return mock;
+};
+
+const createRuleLastRunServiceMock = () => {
+  const mock = {
+    getLastRunErrors: jest.fn(),
+    getLastRunWarnings: jest.fn(),
+    getLastRunOutcomeMessages: jest.fn(),
+    getLastRunResults: jest.fn(),
+    getLastRunSetters: jest.fn(),
+  } as unknown as jest.Mocked<PublicRuleResultService>;
+
+  return mock;
+};
+
 const createRuleExecutorServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
@@ -118,6 +147,7 @@ const createRuleExecutorServicesMock = <
     shouldStopExecution: () => true,
     search: createAbortableSearchServiceMock(),
     searchSourceClient: searchSourceCommonMock,
+    ruleMonitoringService: createRuleMonitoringServiceMock(),
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;
@@ -128,3 +158,7 @@ export const alertsMock = {
   createStart: createStartMock,
   createRuleExecutorServices: createRuleExecutorServicesMock,
 };
+
+export const ruleMonitoringServiceMock = { create: createRuleMonitoringServiceMock };
+
+export const ruleLastRunServiceMock = { create: createRuleLastRunServiceMock };

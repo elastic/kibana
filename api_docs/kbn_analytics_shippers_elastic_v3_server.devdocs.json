@@ -282,6 +282,24 @@
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
+            "id": "def-server.ElasticV3ServerShipper.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nTriggers a flush of the internal queue to attempt to send any events held in the queue\nand resolves the returned promise once the queue is emptied."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-server",
             "id": "def-server.ElasticV3ServerShipper.shutdown",
             "type": "Function",
             "tags": [],

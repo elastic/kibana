@@ -219,12 +219,12 @@ export const getHeatmapVisualization = ({
                 (frame.activeData || activePalette?.params?.rangeType !== 'number')
                   ? {
                       columnId: state.valueAccessor,
-                      triggerIcon: 'colorBy',
+                      triggerIconType: 'colorBy',
                       palette: displayStops.map(({ color }) => color),
                     }
                   : {
                       columnId: state.valueAccessor,
-                      triggerIcon: 'none',
+                      triggerIconType: 'none',
                     },
               ]
             : [],
@@ -506,5 +506,46 @@ export const getHeatmapVisualization = ({
       },
     };
     return suggestion;
+  },
+
+  getVisualizationInfo(state: HeatmapVisualizationState) {
+    const dimensions = [];
+    if (state.xAccessor) {
+      dimensions.push({
+        id: state.xAccessor,
+        name: getAxisName(GROUP_ID.X),
+        dimensionType: 'x',
+      });
+    }
+
+    if (state.yAccessor) {
+      dimensions.push({
+        id: state.yAccessor,
+        name: getAxisName(GROUP_ID.Y),
+        dimensionType: 'y',
+      });
+    }
+
+    if (state.valueAccessor) {
+      dimensions.push({
+        id: state.valueAccessor,
+        name: i18n.translate('xpack.lens.heatmap.cellValueLabel', {
+          defaultMessage: 'Cell value',
+        }),
+        dimensionType: 'value',
+      });
+    }
+
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: state.shape,
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
   },
 });

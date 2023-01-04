@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
@@ -33,20 +34,22 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 import * as i18n from '../../translations/shared_list';
-import { ExceptionsTableUtilityBar } from '../../components/shared_list_utilty_bar';
+import {
+  ExceptionsTableUtilityBar,
+  ListsSearchBar,
+  ExceptionsListCard,
+  ImportExceptionListFlyout,
+  CreateSharedListFlyout,
+} from '../../components';
 import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
 import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
 import { patchRule } from '../../../detection_engine/rule_management/api/api';
-import { ExceptionsSearchBar } from '../../components/list_search_bar';
+
 import { getSearchFilters } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
 import { useUserData } from '../../../detections/components/user_info';
 import { useListsConfig } from '../../../detections/containers/detection_engine/lists/use_lists_config';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
-import { ExceptionsListCard } from '../../components/exceptions_list_card';
-
-import { ImportExceptionListFlyout } from '../../components/import_exceptions_list_flyout';
-import { CreateSharedListFlyout } from '../../components/create_shared_exception_list';
 
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 
@@ -68,6 +71,14 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
   listNamespaceType: 'single',
 };
 
+const SORT_FIELDS: Array<{ field: string; label: string; defaultOrder: 'asc' | 'desc' }> = [
+  {
+    field: 'created_at',
+    label: i18n.SORT_BY_CREATE_AT,
+    defaultOrder: 'desc',
+  },
+];
+
 export const SharedLists = React.memo(() => {
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
@@ -83,16 +94,27 @@ export const SharedLists = React.memo(() => {
   const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
     exceptionReferenceModalInitialState
   );
-  const [filters, setFilters] = useState<ExceptionListFilter | undefined>(undefined);
-  const [loadingExceptions, exceptions, pagination, setPagination, refreshExceptions] =
-    useExceptionLists({
-      errorMessage: i18n.ERROR_EXCEPTION_LISTS,
-      filterOptions: filters,
-      http,
-      namespaceTypes: ['single', 'agnostic'],
-      notifications,
-      hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
-    });
+  const [filters, setFilters] = useState<ExceptionListFilter | undefined>();
+
+  const [
+    loadingExceptions,
+    exceptions,
+    pagination,
+    setPagination,
+    refreshExceptions,
+    sort,
+    setSort,
+  ] = useExceptionLists({
+    errorMessage: i18n.ERROR_EXCEPTION_LISTS,
+    filterOptions: {
+      ...filters,
+      types: [ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT],
+    },
+    http,
+    namespaceTypes: ['single', 'agnostic'],
+    notifications,
+    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+  });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
   });
@@ -126,20 +148,12 @@ export const SharedLists = React.memo(() => {
     ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
       async () => {
         try {
-          if (exceptionsListsRef[id] != null && exceptionsListsRef[id].rules.length === 0) {
-            await deleteExceptionList({
-              id,
-              namespaceType,
-              onError: handleDeleteError,
-              onSuccess: handleDeleteSuccess(listId),
-            });
-
-            if (refreshExceptions != null) {
-              refreshExceptions();
-            }
-          } else {
+          if (exceptionsListsRef[id] != null) {
             setReferenceModalState({
-              contentText: i18n.referenceErrorMessage(exceptionsListsRef[id].rules.length),
+              contentText:
+                exceptionsListsRef[id].rules.length > 0
+                  ? i18n.referenceErrorMessage(exceptionsListsRef[id].rules.length)
+                  : i18n.defaultDeleteListMessage(exceptionsListsRef[id].name),
               rulesReferences: exceptionsListsRef[id].rules.map(({ name }) => name),
               isLoading: true,
               listId: id,
@@ -152,13 +166,7 @@ export const SharedLists = React.memo(() => {
           handleDeleteError(error);
         }
       },
-    [
-      deleteExceptionList,
-      exceptionsListsRef,
-      handleDeleteError,
-      handleDeleteSuccess,
-      refreshExceptions,
-    ]
+    [exceptionsListsRef, handleDeleteError]
   );
 
   const handleExportSuccess = useCallback(
@@ -441,7 +449,11 @@ export const SharedLists = React.memo(() => {
           isBulkAction={false}
           showAlertCloseOptions
           onCancel={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
-          onConfirm={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
+          onConfirm={(didRuleChange: boolean) => {
+            setDisplayAddExceptionItemFlyout(false);
+            if (didRuleChange) handleRefresh();
+          }}
+          isNonTimeline={true}
         />
       )}
 
@@ -465,7 +477,7 @@ export const SharedLists = React.memo(() => {
             color="accent"
           />
         )}
-        {!initLoading && <ExceptionsSearchBar onSearch={handleSearch} />}
+        {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
         <EuiSpacer size="m" />
 
         {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
@@ -479,6 +491,9 @@ export const SharedLists = React.memo(() => {
             <ExceptionsTableUtilityBar
               totalExceptionLists={exceptionListsWithRuleRefs.length}
               onRefresh={handleRefresh}
+              setSort={setSort}
+              sort={sort}
+              sortFields={SORT_FIELDS}
             />
             {exceptionListsWithRuleRefs.length > 0 && canUserCRUD !== null && canUserREAD !== null && (
               <div data-test-subj="exceptionsTable">
@@ -487,7 +502,6 @@ export const SharedLists = React.memo(() => {
                     key={excList.list_id}
                     data-test-subj="exceptionsListCard"
                     readOnly={canUserREAD && !canUserCRUD}
-                    http={http}
                     exceptionsList={excList}
                     handleDelete={handleDelete}
                     handleExport={handleExport}

@@ -12,9 +12,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
-import { StoredSLO, SLO, sloSchema } from '../../types/models';
+import { StoredSLO, SLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SLONotFound } from '../../errors';
+import { sloSchema } from '../../types/schema';
 
 export interface Criteria {
   name?: string;
@@ -95,7 +96,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
 function buildFilterKuery(criteria: Criteria): string | undefined {
   const filters: string[] = [];
   if (!!criteria.name) {
-    filters.push(`slo.attributes.name: ${criteria.name}`);
+    filters.push(`slo.attributes.name: ${addWildcardIfAbsent(criteria.name)}`);
   }
   return filters.length > 0 ? filters.join(' and ') : undefined;
 }
@@ -111,4 +112,10 @@ function toSLO(storedSLO: StoredSLO): SLO {
       throw new Error('Invalid Stored SLO');
     }, t.identity)
   );
+}
+
+const WILDCARD_CHAR = '*';
+function addWildcardIfAbsent(value: string): string {
+  if (value.substring(value.length - 1) === WILDCARD_CHAR) return value;
+  return `${value}${WILDCARD_CHAR}`;
 }

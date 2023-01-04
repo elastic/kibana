@@ -30,6 +30,7 @@ export {
   enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
   enableInfrastructureHostsView,
+  enableAgentExplorerView,
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 
@@ -46,6 +47,7 @@ export * from './components/shared/action_menu';
 
 export type { UXMetrics } from './components/shared/core_web_vitals';
 export { DatePickerContextProvider } from './context/date_picker_context';
+
 export {
   getCoreVitalsComponent,
   HeaderMenuPortal,
@@ -56,6 +58,7 @@ export {
   ExploratoryView,
   DatePicker,
   LoadWhenInView,
+  ObservabilityAlertSearchBar,
 } from './components/shared';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
@@ -79,6 +82,7 @@ export * from './typings';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
+export { useTimeZone } from './hooks/use_time_zone';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
 export type { LinkDescriptor } from './hooks/use_link_props';

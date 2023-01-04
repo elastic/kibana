@@ -77,7 +77,7 @@ const externals = {
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',
   '@kbn/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
-  'rison-node': '__kbnSharedDeps__.RisonNode',
+  '@kbn/rison': '__kbnSharedDeps__.KbnRison',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
   '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',

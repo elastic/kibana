@@ -108,7 +108,7 @@ describe('Lens Attribute', () => {
             to: 'now',
           },
           dataView: mockDataView,
-          name: 'ux-series-1',
+          name: 'Page load time',
           breakdown: 'percentile',
           reportDefinitions: {},
           selectedMetricField: 'transaction.duration.us',
@@ -139,7 +139,7 @@ describe('Lens Attribute', () => {
             query: 'transaction.type: page-load and processor.event: transaction',
           },
           isBucketed: false,
-          label: `${rank} percentile of page load time`,
+          label: 'Page load time',
           operationType: 'percentile',
           params: {
             percentile: Number(rank.slice(0, 2)),

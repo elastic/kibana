@@ -138,8 +138,10 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       languageAnalyzers: `${ELASTICSEARCH_DOCS}analysis-lang-analyzer.html`,
       languageClients: `${ENTERPRISE_SEARCH_DOCS}programming-language-clients.html`,
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
+      machineLearningStart: `${ENTERPRISE_SEARCH_DOCS}machine-learning-start.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
+      syncRules: `${ENTERPRISE_SEARCH_DOCS}sync-rules.html`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
@@ -373,14 +375,14 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         linux_deadlock: `${SECURITY_SOLUTION_DOCS}ts-management.html#linux-deadlock`,
       },
       packageActionTroubleshooting: {
-        // TODO: Pending to be updated when docs are ready
-        es_connection: '',
+        es_connection: `${SECURITY_SOLUTION_DOCS}ts-management.html`,
       },
       responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
       configureEndpointIntegrationPolicy: `${SECURITY_SOLUTION_DOCS}configure-endpoint-integration-policy.html`,
       exceptions: {
-        value_lists: `${SECURITY_SOLUTION_DOCS}detections-ui-exceptions.html#manage-value-lists`,
+        value_lists: `${SECURITY_SOLUTION_DOCS}detections-ui-exceptions.html`,
       },
+      privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -486,6 +488,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
       slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
+      connectors: `${KIBANA_DOCS}action-types.html`,
     },
     maps: {
       guide: `${KIBANA_DOCS}maps.html`,

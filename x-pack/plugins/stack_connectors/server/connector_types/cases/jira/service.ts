@@ -31,6 +31,7 @@ import {
   ResponseError,
   UpdateIncidentParams,
 } from './types';
+import { escapeJqlSpecialCharacters } from './utils';
 
 import * as i18n from './translations';
 
@@ -122,12 +123,12 @@ export const createExternalService = (
 
     const { errorMessages, errors } = errorResponse;
 
-    if (errors == null) {
-      return 'unknown: errorResponse.errors was null';
-    }
-
     if (Array.isArray(errorMessages) && errorMessages.length > 0) {
       return `${errorMessages.join(', ')}`;
+    }
+
+    if (errors == null) {
+      return 'unknown: errorResponse.errors was null';
     }
 
     return Object.entries(errors).reduce((errorMessage, [, value]) => {
@@ -498,8 +499,9 @@ export const createExternalService = (
   };
 
   const getIssues = async (title: string) => {
+    const jqlEscapedTitle = escapeJqlSpecialCharacters(title);
     const query = `${searchUrl}?jql=${encodeURIComponent(
-      `project="${projectKey}" and summary ~"${title}"`
+      `project="${projectKey}" and summary ~"${jqlEscapedTitle}"`
     )}`;
 
     try {

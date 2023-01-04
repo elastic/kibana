@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorConfiguration } from '../../../../../../common/types/connectors';
+import { ConnectorConfiguration, ConnectorStatus } from '../../../../../../common/types/connectors';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   clearFlashMessages,
@@ -43,6 +43,7 @@ type ConnectorConfigurationActions = Pick<
   setLocalConfigState(configState: ConnectorConfiguration): {
     configState: ConnectorConfiguration;
   };
+  setShouldStartInEditMode(shouldStartInEditMode: boolean): { shouldStartInEditMode: boolean };
 };
 
 interface ConnectorConfigurationValues {
@@ -52,6 +53,7 @@ interface ConnectorConfigurationValues {
   isEditing: boolean;
   localConfigState: ConnectorConfiguration;
   localConfigView: ConfigEntry[];
+  shouldStartInEditMode: boolean;
 }
 
 interface ConfigEntry {
@@ -71,6 +73,7 @@ export const ConnectorConfigurationLogic = kea<
     }),
     setLocalConfigEntry: (configEntry: ConfigEntry) => ({ ...configEntry }),
     setLocalConfigState: (configState: ConnectorConfiguration) => ({ configState }),
+    setShouldStartInEditMode: (shouldStartInEditMode: boolean) => ({ shouldStartInEditMode }),
   },
   connect: {
     actions: [
@@ -82,10 +85,20 @@ export const ConnectorConfigurationLogic = kea<
     values: [CachedFetchIndexApiLogic, ['indexData as index']],
   },
   events: ({ actions, values }) => ({
-    afterMount: () =>
+    afterMount: () => {
       actions.setConfigState(
         isConnectorIndex(values.index) ? values.index.connector.configuration : {}
-      ),
+      );
+      if (
+        isConnectorIndex(values.index) &&
+        (values.index.connector.status === ConnectorStatus.CREATED ||
+          values.index.connector.status === ConnectorStatus.NEEDS_CONFIGURATION)
+      ) {
+        // Only start in edit mode if we haven't configured yet
+        // Necessary to prevent a race condition between saving config and getting updated connector
+        actions.setShouldStartInEditMode(true);
+      }
+    },
   }),
   listeners: ({ actions, values }) => ({
     apiError: (error) => flashAPIErrors(error),
@@ -101,6 +114,17 @@ export const ConnectorConfigurationLogic = kea<
     fetchIndexApiSuccess: (index) => {
       if (!values.isEditing && isConnectorIndex(index)) {
         actions.setConfigState(index.connector.configuration);
+      }
+
+      if (
+        !values.isEditing &&
+        values.shouldStartInEditMode &&
+        isConnectorIndex(index) &&
+        index.connector.status === ConnectorStatus.NEEDS_CONFIGURATION &&
+        index.connector.configuration &&
+        Object.entries(index.connector.configuration).length > 0
+      ) {
+        actions.setIsEditing(true);
       }
     },
     makeRequest: () => clearFlashMessages(),
@@ -143,6 +167,13 @@ export const ConnectorConfigurationLogic = kea<
           [key]: { label, value },
         }),
         setLocalConfigState: (_, { configState }) => configState,
+      },
+    ],
+    shouldStartInEditMode: [
+      false,
+      {
+        apiSuccess: () => false,
+        setShouldStartInEditMode: (_, { shouldStartInEditMode }) => shouldStartInEditMode,
       },
     ],
   }),

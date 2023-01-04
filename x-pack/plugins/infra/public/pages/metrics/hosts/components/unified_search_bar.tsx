@@ -10,8 +10,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQuery } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
+import { ControlsContent } from './controls_content';
 
 interface Props {
   dataView: DataView;
@@ -24,9 +26,11 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   const {
     unifiedSearchDateRange,
     unifiedSearchQuery,
-    submitFilterChange,
+    unifiedSearchFilters,
+    onSubmit,
     saveQuery,
-    clearSavedQUery,
+    clearSavedQuery,
+    setPanelFilters,
   } = useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
@@ -40,7 +44,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   };
 
   const onClearSavedQuery = () => {
-    clearSavedQUery();
+    clearSavedQuery();
   };
 
   const onQuerySave = (savedQuery: SavedQuery) => {
@@ -54,23 +58,37 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
     payload?: { dateRange: TimeRange; query?: Query };
     filters?: Filter[];
   }) => {
-    submitFilterChange(payload?.query, payload?.dateRange, filters);
+    onSubmit(payload?.query, payload?.dateRange, filters);
   };
 
   return (
-    <SearchBar
-      appName={'Infra Hosts'}
-      indexPatterns={[dataView]}
-      query={unifiedSearchQuery}
-      dateRangeFrom={unifiedSearchDateRange.from}
-      dateRangeTo={unifiedSearchDateRange.to}
-      onQuerySubmit={onQuerySubmit}
-      onSaved={onQuerySave}
-      onSavedQueryUpdated={onQuerySave}
-      onClearSavedQuery={onClearSavedQuery}
-      showSaveQuery
-      showQueryInput
-      onFiltersUpdated={onFilterChange}
-    />
+    <>
+      <SearchBar
+        appName={'Infra Hosts'}
+        placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
+          defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
+        })}
+        indexPatterns={[dataView]}
+        query={unifiedSearchQuery}
+        dateRangeFrom={unifiedSearchDateRange.from}
+        dateRangeTo={unifiedSearchDateRange.to}
+        filters={unifiedSearchFilters}
+        onQuerySubmit={onQuerySubmit}
+        onSaved={onQuerySave}
+        onSavedQueryUpdated={onQuerySave}
+        onClearSavedQuery={onClearSavedQuery}
+        showSaveQuery
+        showQueryInput
+        onFiltersUpdated={onFilterChange}
+        displayStyle="inPage"
+      />
+      <ControlsContent
+        timeRange={unifiedSearchDateRange}
+        dataViewId={dataView.id ?? ''}
+        query={unifiedSearchQuery}
+        filters={unifiedSearchFilters}
+        setPanelFilters={setPanelFilters}
+      />
+    </>
   );
 };

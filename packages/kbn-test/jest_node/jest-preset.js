@@ -12,6 +12,8 @@ const presetClone = { ...preset };
 
 delete presetClone.testEnvironment; // simply redefining as `testEnvironment: 'node'` has some weird side-effects (https://github.com/elastic/kibana/pull/138877#issuecomment-1222366247)
 
+/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
+/** @type {JestConfig} */
 module.exports = {
   ...presetClone,
   snapshotSerializers: [],

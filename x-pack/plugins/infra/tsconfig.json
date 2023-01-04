@@ -3,13 +3,12 @@
   "compilerOptions": {
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
-    "declaration": true,
+    "declaration": true
   },
   "include": [
     "../../../typings/**/*",
     "common/**/*",
     "public/**/*",
-    "scripts/**/*",
     "server/**/*",
     "types/**/*"
   ],

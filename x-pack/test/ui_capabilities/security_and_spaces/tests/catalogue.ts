@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import { UnreachableError } from '../../common/lib';
 import { UserAtSpaceScenarios } from '../scenarios';
 
 export default function catalogueTests({ getService }: FtrProviderContext) {
@@ -17,6 +18,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
   const esFeatureExceptions = [
     'security',
     'index_lifecycle_management',
+    'migrate_data',
     'snapshot_restore',
     'rollup_jobs',
     'reporting',

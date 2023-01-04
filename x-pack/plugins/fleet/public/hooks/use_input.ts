@@ -9,6 +9,18 @@ import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 
+export interface FormInput {
+  validate: () => boolean;
+}
+
+export function validateInputs(inputs: { [k: string]: FormInput }) {
+  return Object.values(inputs).reduce((acc, input) => {
+    const res = input.validate();
+
+    return acc === false ? acc : res;
+  }, true);
+}
+
 export function useInput(
   defaultValue = '',
   validate?: (value: string) => string[] | undefined,
@@ -88,6 +100,8 @@ export function useSwitchInput(defaultValue = false, disabled = false) {
     setValue(newValue);
   };
 
+  const validate = useCallback(() => true, []);
+
   return {
     value,
     props: {
@@ -95,6 +109,7 @@ export function useSwitchInput(defaultValue = false, disabled = false) {
       checked: value,
       disabled,
     },
+    validate,
     formRowProps: {},
     setValue,
     hasChanged,

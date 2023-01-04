@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useReducer, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import type { EuiSelectableOption, IconType } from '@elastic/eui';
 import {
   EuiSelectable,
@@ -17,11 +17,9 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiHighlight,
-  EuiSelectableListItem,
   useEuiTheme,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { assertNever } from '@kbn/std';
 import { isEmpty } from 'lodash';
 import type { Case } from '../../../../common';
@@ -37,18 +35,18 @@ interface Props {
 
 type TagSelectableOption = EuiSelectableOption<{ tagIcon: IconType; newItem?: boolean }>;
 
-const enum TagState {
+enum TagState {
   CHECKED = 'checked',
   PARTIAL = 'partial',
   UNCHECKED = 'unchecked',
 }
 
-const enum Actions {
+enum Actions {
   CHECK_TAG,
   UNCHECK_TAG,
 }
 
-const enum ICONS {
+enum ICONS {
   CHECKED = 'check',
   PARTIAL = 'asterisk',
   UNCHECKED = 'empty',
@@ -237,29 +235,9 @@ const hasExactMatch = (searchValue: string, options: TagSelectableOption[]) => {
   return options.some((option) => option.key === searchValue);
 };
 
-const AddNewTagItem: React.FC<{ searchValue: string; onNewItem: (newTag: string) => void }> =
-  React.memo(({ searchValue, onNewItem }) => {
-    const onNewTagClick = useCallback(() => {
-      onNewItem(searchValue);
-    }, [onNewItem, searchValue]);
-
-    return (
-      <EuiSelectableListItem
-        isFocused={false}
-        showIcons={false}
-        onClick={onNewTagClick}
-        data-test-subj="cases-actions-tags-edit-selectable-add-new-tag"
-      >
-        <FormattedMessage
-          id="xpack.cases.actions.tags.newTagMessage"
-          defaultMessage="Add {searchValue} as a tag"
-          values={{ searchValue: <b>{searchValue}</b> }}
-        />
-      </EuiSelectableListItem>
-    );
-  });
-
-AddNewTagItem.displayName = 'AddNewTagItem';
+const hasPartialMatch = (searchValue: string, options: TagSelectableOption[]) => {
+  return options.some((option) => option.key?.includes(searchValue));
+};
 
 const EditTagsSelectableComponent: React.FC<Props> = ({
   selectedCases,
@@ -328,16 +306,6 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     [onChangeTags, state.tags]
   );
 
-  const onNewItem = useCallback(
-    (newTag: string) => {
-      const { selectedTags, unSelectedTags } = getSelectedAndUnselectedTags(options, state.tags);
-      dispatch({ type: Actions.CHECK_TAG, payload: [newTag] });
-      setSearchValue('');
-      onChangeTags({ selectedTags: [...selectedTags, newTag], unSelectedTags });
-    },
-    [onChangeTags, options, state.tags]
-  );
-
   const onSelectAll = useCallback(() => {
     dispatch({ type: Actions.CHECK_TAG, payload: Object.keys(state.tags) });
     onChangeTags({ selectedTags: Object.keys(state.tags), unSelectedTags: [] });
@@ -361,25 +329,6 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   }, []);
 
   /**
-   * TODO: Remove hack when PR https://github.com/elastic/eui/pull/6317
-   * is merged and the new fix is merged into Kibana.
-   *
-   * This is a hack to force a rerender when
-   * the user adds a new tag. There is a bug in
-   * the EuiSelectable where a race condition that's causing the search bar
-   * to not to match terms with the empty string to trigger the reload.
-   * This means that when a user press the button to add a tag the
-   * search bar clears but the options are not shown.
-   */
-  const [_, setRerender] = useState(0);
-
-  useEffect(() => {
-    if (isEmpty(searchValue)) {
-      setRerender((x) => x + 1);
-    }
-  }, [options, setRerender, searchValue]);
-
-  /**
    * While the user searches we need to add the ability
    * to add the search term as a new tag. The no matches message
    * is not enough because a search term can partial match to some tags
@@ -393,8 +342,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
       return [
         {
           key: searchValue,
-          searchableLabel: searchValue,
-          label: `Add ${searchValue} as a tag`,
+          label: i18n.ADD_TAG_CUSTOM_OPTION_LABEL(searchValue),
           'data-test-subj': 'cases-actions-tags-edit-selectable-add-new-tag',
           data: { tagIcon: 'empty', newItem: true },
         },
@@ -408,6 +356,11 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   const selectedTags = Object.values(state.tags).filter(
     (tag) => tag.tagState === TagState.CHECKED || tag.tagState === TagState.PARTIAL
   ).length;
+
+  const showNoMatchText = useMemo(
+    () => !hasPartialMatch(searchValue, options) && Object.keys(state.tags).length > 0,
+    [options, searchValue, state.tags]
+  );
 
   return (
     <EuiSelectable
@@ -424,7 +377,8 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
       renderOption={renderOption}
       listProps={{ showIcons: false }}
       onChange={onChange}
-      noMatchesMessage={<AddNewTagItem searchValue={searchValue ?? ''} onNewItem={onNewItem} />}
+      noMatchesMessage={i18n.NO_SEARCH_MATCH}
+      emptyMessage={i18n.NO_TAGS_AVAILABLE}
       data-test-subj="cases-actions-tags-edit-selectable"
       height="full"
     >
@@ -483,6 +437,19 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule margin="m" />
+          {showNoMatchText ? (
+            <EuiText
+              size="xs"
+              color="subdued"
+              textAlign="center"
+              css={{
+                marginBottom: euiTheme.size.s,
+              }}
+              data-test-subj="cases-actions-tags-edit-selectable-no-match-label"
+            >
+              {i18n.NO_SEARCH_MATCH}
+            </EuiText>
+          ) : null}
           {list}
         </>
       )}

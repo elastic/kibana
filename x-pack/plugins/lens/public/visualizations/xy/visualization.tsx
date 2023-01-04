@@ -11,6 +11,7 @@ import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -42,6 +43,7 @@ import {
   type XYDataLayerConfig,
   type SeriesType,
   type PersistedState,
+  type XYAnnotationLayerConfig,
   visualizationTypes,
 } from './types';
 import {
@@ -93,7 +95,11 @@ import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
-import { createAnnotationActions } from './annotations/actions';
+import {
+  createAnnotationActions,
+  IGNORE_GLOBAL_FILTERS_ACTION_ID,
+  KEEP_GLOBAL_FILTERS_ACTION_ID,
+} from './annotations/actions';
 
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
@@ -248,14 +254,32 @@ export const getXyVisualization = ({
     ];
   },
 
-  getSupportedActionsForLayer(layerId, state, setState) {
+  getSupportedActionsForLayer(layerId, state) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     const actions = [];
     if (isAnnotationsLayer(layer)) {
-      actions.push(...createAnnotationActions({ state, layerIndex, layer, setState }));
+      actions.push(...createAnnotationActions({ state, layerIndex, layer }));
     }
     return actions;
+  },
+
+  onLayerAction(layerId, actionId, state) {
+    if ([IGNORE_GLOBAL_FILTERS_ACTION_ID, KEEP_GLOBAL_FILTERS_ACTION_ID].includes(actionId)) {
+      return {
+        ...state,
+        layers: state.layers.map((layer) =>
+          layer.layerId === layerId
+            ? {
+                ...layer,
+                ignoreGlobalFilters: !(layer as XYAnnotationLayerConfig).ignoreGlobalFilters,
+              }
+            : layer
+        ),
+      };
+    }
+
+    return state;
   },
 
   onIndexPatternChange(state, indexPatternId, layerId) {
@@ -365,7 +389,7 @@ export const getXyVisualization = ({
             ? [
                 {
                   columnId: dataLayer.splitAccessor,
-                  triggerIcon: dataLayer.collapseFn ? ('aggregate' as const) : ('colorBy' as const),
+                  triggerIconType: dataLayer.collapseFn ? 'aggregate' : 'colorBy',
                   palette: dataLayer.collapseFn
                     ? undefined
                     : paletteService
@@ -875,6 +899,89 @@ export const getXyVisualization = ({
       },
     };
     return suggestion;
+  },
+
+  getVisualizationInfo(state: XYState) {
+    const isHorizontal = isHorizontalChart(state.layers);
+    const visualizationLayersInfo = state.layers.map((layer) => {
+      const dimensions = [];
+      let chartType: SeriesType | undefined;
+      let icon;
+      let label;
+      if (isDataLayer(layer)) {
+        chartType = layer.seriesType;
+        const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
+        icon = layerVisType?.icon;
+        label = layerVisType?.fullLabel || layerVisType?.label;
+        if (layer.xAccessor) {
+          dimensions.push({
+            name: getAxisName('x', { isHorizontal }),
+            id: layer.xAccessor,
+            dimensionType: 'x',
+          });
+        }
+        if (layer.accessors && layer.accessors.length) {
+          layer.accessors.forEach((accessor) => {
+            dimensions.push({
+              name: getAxisName('y', { isHorizontal }),
+              id: accessor,
+              dimensionType: 'y',
+            });
+          });
+        }
+        if (layer.splitAccessor) {
+          dimensions.push({
+            name: i18n.translate('xpack.lens.xyChart.splitSeries', {
+              defaultMessage: 'Breakdown',
+            }),
+            dimensionType: 'breakdown',
+            id: layer.splitAccessor,
+          });
+        }
+      }
+      if (isReferenceLayer(layer) && layer.accessors && layer.accessors.length) {
+        layer.accessors.forEach((accessor) => {
+          dimensions.push({
+            name: i18n.translate('xpack.lens.xyChart.layerReferenceLine', {
+              defaultMessage: 'Reference line',
+            }),
+            dimensionType: 'reference_line',
+            id: accessor,
+          });
+        });
+        label = i18n.translate('xpack.lens.xyChart.layerReferenceLineLabel', {
+          defaultMessage: 'Reference lines',
+        });
+        icon = IconChartBarReferenceLine;
+      }
+      if (isAnnotationsLayer(layer) && layer.annotations && layer.annotations.length) {
+        layer.annotations.forEach((annotation) => {
+          dimensions.push({
+            name: i18n.translate('xpack.lens.xyChart.layerAnnotation', {
+              defaultMessage: 'Annotation',
+            }),
+            dimensionType: 'annotation',
+            id: annotation.id,
+          });
+        });
+        label = i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
+          defaultMessage: 'Annotations',
+        });
+        icon = IconChartBarAnnotations;
+      }
+
+      return {
+        layerId: layer.layerId,
+        layerType: layer.layerType,
+        chartType,
+        icon,
+        label,
+        dimensions,
+      };
+    });
+    return {
+      layers: visualizationLayersInfo,
+    };
   },
 });
 

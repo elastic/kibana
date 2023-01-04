@@ -17,6 +17,10 @@ export const FailedTestsCount = (time: { to: string; from: string }) => {
 
   const monitorId = useMonitorQueryId();
 
+  if (!monitorId) {
+    return null;
+  }
+
   return (
     <ExploratoryViewEmbeddable
       reportType="single-metric"

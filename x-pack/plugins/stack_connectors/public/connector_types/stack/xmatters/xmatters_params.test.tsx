@@ -11,6 +11,14 @@ import { XmattersSeverityOptions } from '../../types';
 import XmattersParamsFields from './xmatters_params';
 
 describe('XmattersParamsFields renders', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2022-01-01T12:00:00.000Z'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
   test('all params fields is rendered', () => {
     const actionParams = {
       alertActionGroupName: 'Small t-shirt',
@@ -52,5 +60,43 @@ describe('XmattersParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="tagsInput"]').first().prop('value')).toStrictEqual(
       'test1, test2'
     );
+  });
+
+  test('default params for testing', () => {
+    const actionParams = {};
+    const editAction = jest.fn();
+
+    mountWithIntl(
+      <XmattersParamsFields
+        actionParams={actionParams}
+        errors={{
+          alertActionGroupName: [],
+          signalId: [],
+          ruleName: [],
+          date: [],
+          spaceId: [],
+        }}
+        editAction={editAction}
+        index={0}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
+      />
+    );
+
+    expect(editAction).toHaveBeenNthCalledWith(1, 'signalId', 'test-alert', 0);
+    expect(editAction).toHaveBeenNthCalledWith(
+      2,
+      'alertActionGroupName',
+      'test-rule:test-alert',
+      0
+    );
+    expect(editAction).toHaveBeenNthCalledWith(3, 'ruleName', 'Test Rule', 0);
+    expect(editAction).toHaveBeenNthCalledWith(4, 'date', '2022-01-01T12:00:00.000Z', 0);
+    expect(editAction).toHaveBeenNthCalledWith(5, 'spaceId', 'test-space', 0);
   });
 });

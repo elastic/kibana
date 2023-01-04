@@ -14,6 +14,7 @@ import {
   EuiTitle,
   EuiIcon,
   EuiIconTip,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CLS_HELP_LABEL, DCL_TOOLTIP, FCP_TOOLTIP, LCP_HELP_LABEL } from './labels';
@@ -31,7 +32,7 @@ export const formatMillisecond = (ms: number) => {
 export const StepMetrics = () => {
   const stepMetrics = useStepMetrics();
 
-  const { fcpThreshold, lcpThreshold, clsThreshold, dclThreshold } =
+  const { fcpThreshold, lcpThreshold, clsThreshold, dclThreshold, totalThreshold } =
     useStepPrevMetrics(stepMetrics);
 
   return (
@@ -48,7 +49,14 @@ export const StepMetrics = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="l">
+      <EuiFlexGrid gutterSize="l" columns={3}>
+        <EuiFlexItem>
+          <StatThreshold
+            description={TOTAL_DURATION_LABEL}
+            title={formatMillisecond((stepMetrics.totalDuration?.value ?? 0) / 1000)}
+            threshold={totalThreshold}
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <StatThreshold
             description={'FCP'}
@@ -73,9 +81,6 @@ export const StepMetrics = () => {
             helpText={CLS_HELP_LABEL}
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup wrap>
         <EuiFlexItem>
           <StatThreshold
             description={'DCL'}
@@ -86,13 +91,14 @@ export const StepMetrics = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
+            titleSize="s"
             description={'Transfer size'}
             title={stepMetrics.transferData + ' MB'}
             reverse={true}
           />
         </EuiFlexItem>
         <EuiFlexItem />
-      </EuiFlexGroup>
+      </EuiFlexGrid>
     </>
   );
 };
@@ -106,7 +112,7 @@ const StatThreshold = ({
   threshold: number;
   title: number | string;
   description: string;
-  helpText: string;
+  helpText?: string;
 }) => {
   const isUp = threshold >= 5;
   const isDown = threshold < 5;
@@ -116,10 +122,11 @@ const StatThreshold = ({
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <EuiStat
+          titleSize="s"
           {...(isSame ? {} : { titleColor: isUp ? 'danger' : 'success' })}
           description={
             <span>
-              {description} <EuiIconTip content={helpText} position="right" />
+              {description} {helpText && <EuiIconTip content={helpText} position="right" />}
             </span>
           }
           title={
@@ -143,4 +150,8 @@ const StatThreshold = ({
 
 const METRICS_LABEL = i18n.translate('xpack.synthetics.stepDetailsRoute.metrics', {
   defaultMessage: 'Metrics',
+});
+
+const TOTAL_DURATION_LABEL = i18n.translate('xpack.synthetics.totalDuration.metrics', {
+  defaultMessage: 'Step duration',
 });

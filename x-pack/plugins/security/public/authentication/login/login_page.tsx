@@ -130,7 +130,7 @@ export class LoginPage extends Component<Props, State> {
             <span className="loginWelcome__logo">
               <EuiIcon type="logoElastic" size="xxl" />
             </span>
-            <EuiTitle size="m" className="loginWelcome__title">
+            <EuiTitle size="m" className="loginWelcome__title" data-test-subj="loginWelcomeTitle">
               <h1>
                 <FormattedMessage
                   id="xpack.security.loginPage.welcomeTitle"

@@ -7,13 +7,14 @@
  */
 
 import React, { FC, useRef } from 'react';
-import { EuiInputPopover, EuiDualRange } from '@elastic/eui';
+import { EuiInputPopover } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { timeSliderReducers } from '../time_slider_reducers';
 import { TimeSliderReduxState } from '../types';
 import { TimeSliderPopoverButton } from './time_slider_popover_button';
-import { TimeSliderPopoverContent } from './time_slider_popover_content';
+import { TimeSliderPopoverContent, EuiDualRangeRef } from './time_slider_popover_content';
 import { FROM_INDEX, TO_INDEX } from '../time_utils';
+import { getRoundedTimeRangeBounds } from '../time_slider_selectors';
 
 import './index.scss';
 
@@ -29,12 +30,13 @@ export const TimeSlider: FC<Props> = (props: Props) => {
     actions,
   } = useReduxEmbeddableContext<TimeSliderReduxState, typeof timeSliderReducers>();
   const dispatch = useEmbeddableDispatch();
+  const stepSize = select((state) => {
+    return state.componentState.stepSize;
+  });
   const ticks = select((state) => {
     return state.componentState.ticks;
   });
-  const timeRangeBounds = select((state) => {
-    return state.componentState.timeRangeBounds;
-  });
+  const timeRangeBounds = select(getRoundedTimeRangeBounds);
   const timeRangeMin = timeRangeBounds[FROM_INDEX];
   const timeRangeMax = timeRangeBounds[TO_INDEX];
   const value = select((state) => {
@@ -44,7 +46,7 @@ export const TimeSlider: FC<Props> = (props: Props) => {
     return state.componentState.isOpen;
   });
 
-  const rangeRef = useRef<EuiDualRange>(null);
+  const rangeRef = useRef<EuiDualRangeRef>(null);
 
   const onPanelResize = (width?: number) => {
     rangeRef.current?.onResize(width);
@@ -83,6 +85,7 @@ export const TimeSlider: FC<Props> = (props: Props) => {
         onClear={() => {
           props.onChange([timeRangeMin, timeRangeMax]);
         }}
+        stepSize={stepSize}
         ticks={ticks}
         timeRangeMin={timeRangeMin}
         timeRangeMax={timeRangeMax}

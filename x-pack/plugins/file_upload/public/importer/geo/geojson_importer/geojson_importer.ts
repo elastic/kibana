@@ -65,7 +65,7 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
     const isLastBatch = batch.batchType === 'root-object-batch-complete';
     if (isLastBatch) {
       // Handle single feature geoJson
-      if (featureIndex === 0) {
+      if (featureIndex === 0 && features.length === 0) {
         if (batch.container) {
           features.push(batch.container);
         }

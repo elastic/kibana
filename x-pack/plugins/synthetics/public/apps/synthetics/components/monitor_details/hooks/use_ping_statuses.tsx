@@ -8,7 +8,7 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { PingStatus } from '../../../../../../common/runtime_types';
+import { ConfigKey, PingStatus } from '../../../../../../common/runtime_types';
 import {
   getMonitorPingStatusesAction,
   selectIsMonitorStatusesLoading,
@@ -35,8 +35,11 @@ export const usePingStatuses = ({
   const location = useSelectedLocation();
 
   const pingStatusesSelector = useCallback(() => {
-    return selectPingStatusesForMonitorAndLocationAsc(monitor?.id ?? '', location?.label ?? '');
-  }, [monitor?.id, location?.label]);
+    return selectPingStatusesForMonitorAndLocationAsc(
+      monitor?.[ConfigKey.CONFIG_ID] ?? '',
+      location?.label ?? ''
+    );
+  }, [monitor, location?.label]);
   const isLoading = useSelector(selectIsMonitorStatusesLoading);
   const pingStatuses = useSelector(pingStatusesSelector()) as PingStatus[];
   const dispatch = useDispatch();

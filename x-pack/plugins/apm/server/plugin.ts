@@ -51,9 +51,13 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../common/elasticsearch_fieldnames';
+  AGENT_NAME,
+  SERVICE_LANGUAGE_NAME,
+} from '../common/es_fields/apm';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
+import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source_map_migration';
+import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm_source_map_index_template';
 
 export class APMPlugin
   implements
@@ -92,7 +96,7 @@ export class APMPlugin
     ) {
       createApmTelemetry({
         core,
-        config$,
+        config: currentConfig,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,
@@ -107,6 +111,9 @@ export class APMPlugin
 
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
+
+    const getPluginStart = () =>
+      core.getStartServices().then(([coreStart, pluginStart]) => pluginStart);
 
     const { ruleDataService } = plugins.ruleRegistry;
     const ruleDataClient = ruleDataService.initializeIndex({
@@ -131,6 +138,16 @@ export class APMPlugin
               },
               [PROCESSOR_EVENT]: {
                 type: 'keyword',
+              },
+              [AGENT_NAME]: {
+                type: 'keyword',
+              },
+              [SERVICE_LANGUAGE_NAME]: {
+                type: 'keyword',
+              },
+              labels: {
+                type: 'object',
+                dynamic: true,
               },
             },
             'strict'
@@ -190,12 +207,13 @@ export class APMPlugin
 
     if (plugins.alerting) {
       registerApmRuleTypes({
-        ruleDataClient,
         alerting: plugins.alerting,
-        ml: plugins.ml,
+        basePath: core.http.basePath,
         config$,
         logger: this.logger!.get('rule'),
-        basePath: core.http.basePath,
+        ml: plugins.ml,
+        observability: plugins.observability,
+        ruleDataClient,
       });
     }
 
@@ -205,6 +223,21 @@ export class APMPlugin
       config: currentConfig,
       logger: this.logger,
       kibanaVersion: this.initContext.env.packageInfo.version,
+    });
+
+    const fleetStartPromise = resourcePlugins.fleet?.start();
+    const taskManager = plugins.taskManager;
+
+    // create source map index and run migrations
+    scheduleSourceMapMigration({
+      coreStartPromise: getCoreStart(),
+      pluginStartPromise: getPluginStart(),
+      fleetStartPromise,
+      taskManager,
+      logger: this.logger,
+    }).catch((e) => {
+      this.logger?.error('Failed to schedule APM source map migration');
+      this.logger?.error(e);
     });
 
     return {
@@ -241,28 +274,39 @@ export class APMPlugin
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: APMPluginStartDependencies) {
     if (this.currentConfig == null || this.logger == null) {
       throw new Error('APMPlugin needs to be setup before calling start()');
     }
 
-    // create agent configuration index without blocking start lifecycle
-    createApmAgentConfigurationIndex({
-      client: core.elasticsearch.client.asInternalUser,
-      config: this.currentConfig,
-      logger: this.logger,
-    });
-    // create custom action index without blocking start lifecycle
-    createApmCustomLinkIndex({
-      client: core.elasticsearch.client.asInternalUser,
-      config: this.currentConfig,
-      logger: this.logger,
+    const logger = this.logger;
+    const client = core.elasticsearch.client.asInternalUser;
+
+    // create .apm-agent-configuration index without blocking start lifecycle
+    createApmAgentConfigurationIndex({ client, logger }).catch((e) => {
+      logger.error('Failed to create .apm-agent-configuration index');
+      logger.error(e);
     });
 
-    migrateLegacyAPMIndicesToSpaceAware({
-      coreStart: core,
-      logger: this.logger,
+    // create .apm-custom-link index without blocking start lifecycle
+    createApmCustomLinkIndex({ client, logger }).catch((e) => {
+      logger.error('Failed to create .apm-custom-link index');
+      logger.error(e);
     });
+
+    // create .apm-source-map index without blocking start lifecycle
+    createApmSourceMapIndexTemplate({ client, logger }).catch((e) => {
+      logger.error('Failed to create apm-source-map index template');
+      logger.error(e);
+    });
+
+    // TODO: remove in 9.0
+    migrateLegacyAPMIndicesToSpaceAware({ coreStart: core, logger }).catch(
+      (e) => {
+        logger.error('Failed to run migration making APM indices space aware');
+        logger.error(e);
+      }
+    );
   }
 
   public stop() {}

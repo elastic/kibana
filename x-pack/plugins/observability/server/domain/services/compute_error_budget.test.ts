@@ -13,8 +13,8 @@ import { computeErrorBudget } from './compute_error_budget';
 import { toDateRange } from './date_range';
 
 describe('computeErrorBudget', () => {
-  describe('for occurrences based SLO', () => {
-    describe('with rolling time window', () => {
+  describe('for rolling time window', () => {
+    describe('for occurrences budgeting method', () => {
       it('computes the error budget', () => {
         const slo = createSLO({
           budgeting_method: 'occurrences',
@@ -32,35 +32,12 @@ describe('computeErrorBudget', () => {
           initial: 0.05,
           consumed: 0.6,
           remaining: 0.4,
+          is_estimated: false,
         });
       });
     });
 
-    describe('with calendar aligned time window', () => {
-      it('computes the error budget', () => {
-        const slo = createSLO({
-          budgeting_method: 'occurrences',
-          time_window: weeklyCalendarAligned(twoDaysAgo()),
-          objective: { target: 0.95 },
-        });
-        const dateRange = toDateRange(slo.time_window);
-        const errorBudget = computeErrorBudget(slo, {
-          good: 97,
-          total: 100,
-          date_range: dateRange,
-        });
-
-        expect(errorBudget).toEqual({
-          initial: 0.05,
-          consumed: 0.6,
-          remaining: 0.4,
-        });
-      });
-    });
-  });
-
-  describe('for timeslices based SLO', () => {
-    describe('with rolling time window', () => {
+    describe('for timeslices budgeting method', () => {
       it('computes the error budget', () => {
         const slo = createSLO({
           budgeting_method: 'timeslices',
@@ -79,11 +56,37 @@ describe('computeErrorBudget', () => {
           initial: 0.05,
           consumed: 0.184524,
           remaining: 0.815476,
+          is_estimated: false,
+        });
+      });
+    });
+  });
+
+  describe('for calendar aligned time window', () => {
+    describe('for occurrences budgeting method', () => {
+      it('computes the error budget with an estimation of total events', () => {
+        const slo = createSLO({
+          budgeting_method: 'occurrences',
+          time_window: weeklyCalendarAligned(twoDaysAgo()),
+          objective: { target: 0.95 },
+        });
+        const dateRange = toDateRange(slo.time_window);
+        const errorBudget = computeErrorBudget(slo, {
+          good: 97,
+          total: 100,
+          date_range: dateRange,
+        });
+
+        expect(errorBudget).toEqual({
+          initial: 0.05,
+          consumed: 0.171429,
+          remaining: 0.828571,
+          is_estimated: true,
         });
       });
     });
 
-    describe('with calendar aligned time window', () => {
+    describe('for timeslices budgeting method', () => {
       it('computes the error budget', () => {
         const slo = createSLO({
           budgeting_method: 'timeslices',
@@ -105,6 +108,7 @@ describe('computeErrorBudget', () => {
           initial: 0.05,
           consumed: 0.113095,
           remaining: 0.886905,
+          is_estimated: false,
         });
       });
     });
@@ -119,10 +123,11 @@ describe('computeErrorBudget', () => {
       initial: 0.001, // 0.1%
       consumed: 0, // 0% consumed
       remaining: 1, // 100% remaining
+      is_estimated: false,
     });
   });
 
-  it("computes the error budget when 'good > total' events", () => {
+  it("returns default values when 'good >= total' events", () => {
     const slo = createSLO();
     const dateRange = toDateRange(slo.time_window);
     const errorBudget = computeErrorBudget(slo, { good: 9999, total: 9, date_range: dateRange });
@@ -131,6 +136,7 @@ describe('computeErrorBudget', () => {
       initial: 0.001,
       consumed: 0,
       remaining: 1,
+      is_estimated: false,
     });
   });
 
@@ -143,6 +149,7 @@ describe('computeErrorBudget', () => {
       initial: 0.001,
       consumed: 0,
       remaining: 1,
+      is_estimated: false,
     });
   });
 
@@ -155,6 +162,7 @@ describe('computeErrorBudget', () => {
       initial: 0.001,
       consumed: 1,
       remaining: 0,
+      is_estimated: false,
     });
   });
 
@@ -167,6 +175,7 @@ describe('computeErrorBudget', () => {
       initial: 0.001,
       consumed: 571.428571, // i.e. 57,142% consumed
       remaining: 0,
+      is_estimated: false,
     });
   });
 
@@ -179,6 +188,7 @@ describe('computeErrorBudget', () => {
       initial: 0.001,
       consumed: 1000, // i.e. 100,000% consumed
       remaining: 0,
+      is_estimated: false,
     });
   });
 });

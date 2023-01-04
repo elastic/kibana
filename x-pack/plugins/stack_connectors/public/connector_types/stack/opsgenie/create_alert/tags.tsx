@@ -17,6 +17,8 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
+import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { OpsgenieActionParams } from '../../../../../server/connector_types/stack';
 import { RULE_TAGS_TEMPLATE } from '../../../../../common/opsgenie';
 import * as i18n from './translations';
 import { EditActionCallback } from '../types';
@@ -24,6 +26,7 @@ import { EditActionCallback } from '../types';
 interface TagsProps {
   onChange: EditActionCallback;
   values: string[];
+  executionMode: ActionParamsProps<OpsgenieActionParams>['executionMode'];
 }
 
 const options: Array<EuiComboBoxOptionOption<string>> = [
@@ -35,7 +38,7 @@ const options: Array<EuiComboBoxOptionOption<string>> = [
   },
 ];
 
-const TagsComponent: React.FC<TagsProps> = ({ onChange, values }) => {
+const TagsComponent: React.FC<TagsProps> = ({ onChange, values, executionMode }) => {
   const tagOptions = useMemo(() => values.map((value) => getTagAsOption(value)), [values]);
 
   const onCreateOption = useCallback(
@@ -85,7 +88,7 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange, values }) => {
         rowHeight={50}
         fullWidth
         isClearable
-        options={options}
+        options={executionMode === ActionConnectorMode.ActionForm ? options : undefined}
         selectedOptions={tagOptions}
         onCreateOption={onCreateOption}
         onChange={onTagsChange}
