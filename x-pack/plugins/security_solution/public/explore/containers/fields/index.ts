@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 
 type FieldValidationCheck = (pattern: string, fieldsList: string[]) => Promise<boolean>;
 
 export const useIsFieldInIndexPattern = (): FieldValidationCheck => {
   const { dataViews } = useKibana().services.data;
-  return useCallback(
-    async (pattern: string, fieldsList: string[]) => {
-      const fields = await dataViews.getFieldsForWildcard({
-        pattern,
-        fields: fieldsList,
-      });
-      const fieldNames = fields.map((f) => f.name);
-      return fieldsList.every((field) => fieldNames.includes(field));
-    },
-    [dataViews]
-  );
+  return async (pattern: string, fieldsList: string[]) => {
+    const fields = await dataViews.getFieldsForWildcard({
+      pattern,
+      fields: fieldsList,
+    });
+    const fieldNames = fields.map((f) => f.name);
+    return fieldsList.every((field) => fieldNames.includes(field));
+  };
 };
