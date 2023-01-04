@@ -15,6 +15,7 @@ import { renameKeys } from '../lib/rename_keys';
 import { FindOptions } from '../../rules_client';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
+import { fetchDefaultRuleAggregations } from '../lib/fetch_default_rule_aggregations';
 
 // config definition
 const querySchema = schema.object({
@@ -77,7 +78,8 @@ export const aggregateAlertRoute = (
           : [query.search_fields];
       }
 
-      const aggregateResult = await rulesClient.aggregate({ options });
+      const aggregateResult = await fetchDefaultRuleAggregations(rulesClient, options);
+
       return res.ok({
         body: aggregateResult,
       });

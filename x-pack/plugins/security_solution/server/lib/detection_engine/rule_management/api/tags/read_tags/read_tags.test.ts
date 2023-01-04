@@ -22,7 +22,7 @@ describe('read_tags', () => {
         ruleTags: ['tag 1', 'tag 2', 'tag 3', 'tag 4'],
       });
 
-      const tags = await readTags({ rulesClient });
+      const tags = await readTags(rulesClient);
       expect(tags).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4']);
     });
   });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions, MuteOptions } from './types';
@@ -77,7 +79,10 @@ export class RulesClient {
     };
   }
 
-  public aggregate = (params?: { options?: AggregateOptions }) => aggregate(this.context, params);
+  public aggregate = <AggregationsResult = Record<string, unknown>>(
+    aggs: Record<keyof AggregationsResult, AggregationsAggregationContainer>,
+    options?: AggregateOptions
+  ): Promise<AggregationsResult | undefined> => aggregate(this.context, aggs, options);
   public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
     clone<Params>(this.context, ...args);
   public create = <Params extends RuleTypeParams = never>(params: CreateOptions<Params>) =>

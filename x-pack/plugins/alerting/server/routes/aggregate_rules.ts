@@ -13,6 +13,7 @@ import { AggregateResult, AggregateOptions } from '../rules_client';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
+import { fetchDefaultRuleAggregations } from './lib/fetch_default_rule_aggregations';
 
 // config definition
 const querySchema = schema.object({
@@ -86,7 +87,9 @@ export const aggregateRulesRoute = (
           [req.query.search, req.query.search_fields].filter(Boolean) as string[],
           usageCounter
         );
-        const aggregateResult = await rulesClient.aggregate({ options });
+
+        const aggregateResult = await fetchDefaultRuleAggregations(rulesClient, options);
+
         return res.ok({
           body: rewriteBodyRes(aggregateResult),
         });

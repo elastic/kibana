@@ -46,21 +46,46 @@ describe('aggregateAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_aggregate"`);
 
-    const aggregateResult = {
-      alertExecutionStatus: {
-        ok: 15,
-        error: 2,
-        active: 23,
-        pending: 1,
-        unknown: 0,
+    rulesClient.aggregate.mockResolvedValueOnce({
+      status: {
+        buckets: [
+          { key: 'active', doc_count: 23 },
+          { key: 'error', doc_count: 2 },
+          { key: 'ok', doc_count: 15 },
+          { key: 'pending', doc_count: 1 },
+        ],
       },
-      ruleLastRunOutcome: {
-        succeeded: 1,
-        failed: 2,
-        warning: 3,
+      outcome: {
+        buckets: [
+          { key: 'failed', doc_count: 2 },
+          { key: 'succeeded', doc_count: 1 },
+          { key: 'warning', doc_count: 3 },
+        ],
       },
-    };
-    rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
+      muted: {
+        buckets: [
+          { key: 1, key_as_string: '1', doc_count: 1 },
+          { key: 2, key_as_string: '2', doc_count: 2 },
+        ],
+      },
+      enabled: {
+        buckets: [
+          { key: 1, key_as_string: '1', doc_count: 1 },
+          { key: 0, key_as_string: '0', doc_count: 2 },
+        ],
+      },
+      snoozed: {
+        count: {
+          doc_count: 1,
+        },
+      },
+      tags: {
+        buckets: [
+          { key: 'tag-1', doc_count: 1 },
+          { key: 'tag-2', doc_count: 2 },
+        ],
+      },
+    });
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -72,38 +97,82 @@ describe('aggregateAlertRoute', () => {
       ['ok']
     );
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "alertExecutionStatus": Object {
-            "active": 23,
-            "error": 2,
-            "ok": 15,
-            "pending": 1,
-            "unknown": 0,
-          },
-          "ruleLastRunOutcome": Object {
-            "failed": 2,
-            "succeeded": 1,
-            "warning": 3,
-          },
+    expect(await handler(context, req, res)).toEqual({
+      body: {
+        alertExecutionStatus: {
+          active: 23,
+          error: 2,
+          ok: 15,
+          pending: 1,
+          unknown: 0,
+          warning: 0,
         },
-      }
-    `);
+        ruleEnabledStatus: {
+          disabled: 2,
+          enabled: 1,
+        },
+        ruleLastRunOutcome: {
+          failed: 2,
+          succeeded: 1,
+          warning: 3,
+        },
+        ruleMutedStatus: {
+          muted: 1,
+          unmuted: 0,
+        },
+        ruleSnoozedStatus: {
+          snoozed: 1,
+        },
+        ruleTags: ['tag-1', 'tag-2'],
+      },
+    });
 
     expect(rulesClient.aggregate).toHaveBeenCalledTimes(1);
-    expect(rulesClient.aggregate.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "options": Object {
-            "defaultSearchOperator": "AND",
+    expect(rulesClient.aggregate).toHaveBeenCalledWith(
+      {
+        enabled: { terms: { field: 'alert.attributes.enabled' } },
+        muted: { terms: { field: 'alert.attributes.muteAll' } },
+        outcome: { terms: { field: 'alert.attributes.lastRun.outcome' } },
+        snoozed: {
+          aggs: {
+            count: { filter: { exists: { field: 'alert.attributes.snoozeSchedule.duration' } } },
           },
+          nested: { path: 'alert.attributes.snoozeSchedule' },
         },
-      ]
-    `);
+        status: { terms: { field: 'alert.attributes.executionStatus.status' } },
+        tags: { terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 } },
+      },
+      { defaultSearchOperator: 'AND' }
+    );
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: aggregateResult,
+      body: {
+        alertExecutionStatus: {
+          ok: 15,
+          error: 2,
+          active: 23,
+          pending: 1,
+          unknown: 0,
+          warning: 0,
+        },
+        ruleEnabledStatus: {
+          disabled: 2,
+          enabled: 1,
+        },
+        ruleLastRunOutcome: {
+          succeeded: 1,
+          failed: 2,
+          warning: 3,
+        },
+        ruleMutedStatus: {
+          muted: 1,
+          unmuted: 0,
+        },
+        ruleSnoozedStatus: {
+          snoozed: 1,
+        },
+        ruleTags: ['tag-1', 'tag-2'],
+      },
     });
   });
 
@@ -116,17 +185,43 @@ describe('aggregateAlertRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     rulesClient.aggregate.mockResolvedValueOnce({
-      alertExecutionStatus: {
-        ok: 15,
-        error: 2,
-        active: 23,
-        pending: 1,
-        unknown: 0,
+      status: {
+        buckets: [
+          { key: 'active', doc_count: 23 },
+          { key: 'error', doc_count: 2 },
+          { key: 'ok', doc_count: 15 },
+          { key: 'pending', doc_count: 1 },
+        ],
       },
-      ruleLastRunOutcome: {
-        succeeded: 1,
-        failed: 2,
-        warning: 3,
+      outcome: {
+        buckets: [
+          { key: 'failed', doc_count: 2 },
+          { key: 'succeeded', doc_count: 1 },
+          { key: 'warning', doc_count: 3 },
+        ],
+      },
+      muted: {
+        buckets: [
+          { key: 1, key_as_string: '1', doc_count: 1 },
+          { key: 2, key_as_string: '2', doc_count: 2 },
+        ],
+      },
+      enabled: {
+        buckets: [
+          { key: 1, key_as_string: '1', doc_count: 1 },
+          { key: 0, key_as_string: '0', doc_count: 2 },
+        ],
+      },
+      snoozed: {
+        count: {
+          doc_count: 1,
+        },
+      },
+      tags: {
+        buckets: [
+          { key: 'tag-1', doc_count: 1 },
+          { key: 'tag-2', doc_count: 2 },
+        ],
       },
     });
 

@@ -30,9 +30,7 @@ export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
       }
 
       try {
-        const tags = await readTags({
-          rulesClient,
-        });
+        const tags = await readTags(rulesClient);
         return response.ok({ body: tags });
       } catch (err) {
         const error = transformError(err);

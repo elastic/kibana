@@ -64,7 +64,7 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
 
       try {
         const [{ prebuilt: prebuiltRulesCount, custom: customRulesCount }, tags] =
-          await Promise.all([fetchRulesCount(rulesClient), readTags({ rulesClient })]);
+          await Promise.all([fetchRulesCount(rulesClient), readTags(rulesClient)]);
         const responseBody: RuleManagementFiltersResponse = {
           rules_summary: {
             custom_count: customRulesCount,
