@@ -15,20 +15,20 @@ const storageKey = 'unified_search_sorting';
 export const ALPHABETICALLY = 'alphabetically';
 
 export interface Sorting {
-  column: typeof ALPHABETICALLY;
+  sortingStrategyType: typeof ALPHABETICALLY;
   direction: Direction;
 }
 
 export class SortingService<T = unknown> {
-  public column: Sorting['column'];
+  public sortingStrategyType: Sorting['sortingStrategyType'];
   public direction: Sorting['direction'];
 
   constructor(
-    private sortingStrategy: Record<Sorting['column'], (arg: T) => string>,
+    private sortingStrategies: Record<Sorting['sortingStrategyType'], (arg: T) => string>,
     private storage: IStorageWrapper = new Storage(window.localStorage)
   ) {
-    const { column, direction } = this.getSorting();
-    this.column = column;
+    const { sortingStrategyType, direction } = this.getSorting();
+    this.sortingStrategyType = sortingStrategyType;
     this.direction = direction;
   }
 
@@ -41,31 +41,31 @@ export class SortingService<T = unknown> {
       parsedSorting = undefined;
     }
 
-    return parsedSorting ?? { column: ALPHABETICALLY, direction: SortDirection.ASC };
+    return parsedSorting ?? { sortingStrategyType: ALPHABETICALLY, direction: SortDirection.ASC };
   }
 
   setDirection(direction: Sorting['direction']) {
     this.direction = direction;
-    this.storage.set(storageKey, { direction, column: this.column });
+    this.storage.set(storageKey, { direction, sortingStrategyType: this.sortingStrategyType });
   }
 
-  setColumn(column: Sorting['column']) {
-    this.column = column;
-    this.storage.set(storageKey, { column, direction: this.direction });
+  setSortingStrategyType(sortingStrategyType: Sorting['sortingStrategyType']) {
+    this.sortingStrategyType = sortingStrategyType;
+    this.storage.set(storageKey, { sortingStrategyType, direction: this.direction });
   }
 
   getOrderDirections(): Array<Sorting['direction']> {
     return [SortDirection.ASC, SortDirection.DESC];
   }
 
-  getColumns(): Array<Sorting['column']> {
+  getSortingStrategyTypes(): Array<Sorting['sortingStrategyType']> {
     return [ALPHABETICALLY];
   }
 
   sortData(data: T[]) {
     return [...data].sort((a, b) => {
-      const firstComparableField = this.sortingStrategy[this.column](a);
-      const secondComparableField = this.sortingStrategy[this.column](b);
+      const firstComparableField = this.sortingStrategies[this.sortingStrategyType](a);
+      const secondComparableField = this.sortingStrategies[this.sortingStrategyType](b);
 
       return this.compare(firstComparableField, secondComparableField);
     });
@@ -74,8 +74,7 @@ export class SortingService<T = unknown> {
   private compare(a: string, b: string) {
     if (this.direction === SortDirection.ASC) {
       return a.localeCompare(b);
-    } else {
-      return b.localeCompare(a);
     }
+    return b.localeCompare(a);
   }
 }

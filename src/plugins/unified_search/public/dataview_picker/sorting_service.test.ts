@@ -26,8 +26,8 @@ describe('Sorting service', () => {
     );
   });
 
-  it('should get column value', () => {
-    expect(sortingService.column).toEqual(ALPHABETICALLY);
+  it('should get sortingStrategyType value', () => {
+    expect(sortingService.sortingStrategyType).toEqual(ALPHABETICALLY);
   });
 
   it('should get direction value', () => {
@@ -40,7 +40,7 @@ describe('Sorting service', () => {
     sortingService.setDirection(SortDirection.DESC);
     expect(sortingService.direction).toEqual(SortDirection.DESC);
     expect(setSpy).toHaveBeenCalledWith('unified_search_sorting', {
-      column: 'alphabetically',
+      sortingStrategyType: 'alphabetically',
       direction: 'desc',
     });
   });
@@ -49,8 +49,8 @@ describe('Sorting service', () => {
     expect(sortingService.getOrderDirections()).toEqual([SortDirection.ASC, SortDirection.DESC]);
   });
 
-  it('should get sorting columns', () => {
-    expect(sortingService.getColumns()).toEqual([ALPHABETICALLY]);
+  it('should get sorting sortingStrategyTypes', () => {
+    expect(sortingService.getSortingStrategyTypes()).toEqual([ALPHABETICALLY]);
   });
 
   it('should sort DataViews', () => {
