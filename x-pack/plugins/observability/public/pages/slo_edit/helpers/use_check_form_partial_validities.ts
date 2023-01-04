@@ -24,7 +24,13 @@ export function useCheckFormPartialValidities({ getFieldState, formState }: Prop
   ).every((field) => getFieldState(field, formState).error === undefined);
 
   const isObjectiveValid = (
-    ['budgetingMethod', 'timeWindow.duration', 'objective.target'] as const
+    [
+      'budgetingMethod',
+      'timeWindow.duration',
+      'objective.target',
+      'objective.timesliceTarget',
+      'objective.timesliceWindow',
+    ] as const
   ).every((field) => getFieldState(field, formState).error === undefined);
 
   const isDescriptionValid = (['name', 'description'] as const).every(
