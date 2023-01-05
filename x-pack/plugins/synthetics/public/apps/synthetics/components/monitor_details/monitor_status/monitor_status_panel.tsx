@@ -52,7 +52,11 @@ export const MonitorStatusPanel = ({
       <EuiResizeObserver onResize={handleResize}>
         {(resizeRef) => (
           <div ref={resizeRef}>
-            <Chart css={{ height: 60 }}>
+            <Chart
+              size={{
+                height: 60,
+              }}
+            >
               <Settings
                 showLegend={false}
                 xDomain={xDomain}
