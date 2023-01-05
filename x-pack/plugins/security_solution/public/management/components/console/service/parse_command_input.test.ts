@@ -6,7 +6,7 @@
  */
 
 import type { ParsedCommandInterface } from './parsed_command_input';
-import { parseCommandInput, parsedPidOrEntityIdParameter } from './parsed_command_input';
+import { parseCommandInput } from './parsed_command_input';
 
 describe('when using parsed command input utils', () => {
   describe('when using parseCommandInput()', () => {
@@ -40,7 +40,7 @@ describe('when using parsed command input utils', () => {
       );
     });
 
-    it('should parse arguments that the `--` prefix', () => {
+    it('should parse arguments that have `--` prefix with no value', () => {
       const input = 'foo    --one     --two';
       const parsedCommand = parseCommandInput(input);
 
@@ -48,8 +48,8 @@ describe('when using parsed command input utils', () => {
         parsedCommandWith({
           input,
           args: {
-            one: [],
-            two: [],
+            one: [true],
+            two: [true],
           },
         })
       );
@@ -144,22 +144,25 @@ describe('when using parsed command input utils', () => {
         })
       );
     });
-  });
 
-  describe('when using parsedPidOrEntityIdParameter()', () => {
-    it('should parse a pid as a number and return proper params', () => {
-      const parameters = parsedPidOrEntityIdParameter({ pid: ['123'] });
-      expect(parameters).toEqual({ pid: 123 });
-    });
+    it.each([
+      [String.raw`C:\Foo\Dir\whatever.jpg`, undefined],
+      [String.raw`C:\\abc`, undefined],
+      [String.raw`F:\foo\bar.docx`, undefined],
+      [String.raw`C:/foo/bar.docx`, undefined],
+      [String.raw`C:\\\//\/\\/\\\/abc/\/\/\///def.txt`, undefined],
+      [String.raw`C:\abc~!@#$%^&*()_'+`, undefined],
+      [String.raw`C:foobar`, undefined],
+      [String.raw`C:\dir with spaces\foo.txt`, undefined],
+      [String.raw`C:\dir\file with spaces.txt`, undefined],
+      [String.raw`/tmp/linux file with spaces "and quotes" omg.txt`, undefined],
+      ['c\\foo\\b\\-\\-ar.txt', String.raw`c\foo\b--ar.txt`],
+      ['c:\\foo\\b \\-\\-ar.txt', String.raw`c:\foo\b --ar.txt`],
+    ])('should preserve backslashes in argument values: %s', (path, expected) => {
+      const input = `foo --path "${path}"`;
+      const parsedCommand = parseCommandInput(input);
 
-    it('should parse an entity id correctly and return proper params', () => {
-      const parameters = parsedPidOrEntityIdParameter({ entityId: ['123qwe'] });
-      expect(parameters).toEqual({ entity_id: '123qwe' });
-    });
-
-    it('should return undefined if no params are defined', () => {
-      const parameters = parsedPidOrEntityIdParameter({});
-      expect(parameters).toEqual(undefined);
+      expect(parsedCommand.args).toEqual({ path: [expected ?? path] });
     });
   });
 });

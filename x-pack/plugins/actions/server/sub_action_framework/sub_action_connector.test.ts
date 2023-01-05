@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import { Agent as HttpsAgent } from 'https';
-import HttpProxyAgent from 'http-proxy-agent';
-import { HttpsProxyAgent } from 'https-proxy-agent';
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { TestSubActionConnector } from './mocks';
-import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import * as utils from '../lib/axios_utils';
 
 jest.mock('axios');
-const axiosMock = axios as jest.Mocked<typeof axios>;
 
+jest.mock('../lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('../lib/axios_utils');
+  return {
+    ...originalUtils,
+    request: jest.fn(),
+  };
+});
+
+const axiosMock = axios as jest.Mocked<typeof axios>;
+const requestMock = utils.request as jest.Mock;
 const createAxiosError = (): AxiosError => {
   const error = new Error() as AxiosError;
   error.isAxiosError = true;
@@ -42,7 +48,7 @@ describe('SubActionConnector', () => {
     jest.resetAllMocks();
     jest.clearAllMocks();
 
-    axiosInstanceMock.mockReturnValue({ data: { status: 'ok' } });
+    requestMock.mockReturnValue({ data: { status: 'ok' } });
     axiosMock.create.mockImplementation(() => {
       return axiosInstanceMock as unknown as AxiosInstance;
     });
@@ -80,12 +86,12 @@ describe('SubActionConnector', () => {
   describe('URL validation', () => {
     it('removes double slashes correctly', async () => {
       await service.testUrl({ url: 'https://example.com//api///test-endpoint' });
-      expect(axiosInstanceMock.mock.calls[0][0]).toBe('https://example.com/api/test-endpoint');
+      expect(requestMock.mock.calls[0][0].url).toBe('https://example.com/api/test-endpoint');
     });
 
     it('removes the ending slash correctly', async () => {
       await service.testUrl({ url: 'https://example.com/' });
-      expect(axiosInstanceMock.mock.calls[0][0]).toBe('https://example.com');
+      expect(requestMock.mock.calls[0][0].url).toBe('https://example.com');
     });
 
     it('throws an error if the url is invalid', async () => {
@@ -126,24 +132,24 @@ describe('SubActionConnector', () => {
     it('sets data to an empty object if the data are null', async () => {
       await service.testUrl({ url: 'https://example.com', data: null });
 
-      expect(axiosInstanceMock).toHaveBeenCalledTimes(1);
-      const { data } = axiosInstanceMock.mock.calls[0][1];
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      const { data } = requestMock.mock.calls[0][0];
       expect(data).toEqual({});
     });
 
     it('pass data to axios correctly if not null', async () => {
       await service.testUrl({ url: 'https://example.com', data: { foo: 'foo' } });
 
-      expect(axiosInstanceMock).toHaveBeenCalledTimes(1);
-      const { data } = axiosInstanceMock.mock.calls[0][1];
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      const { data } = requestMock.mock.calls[0][0];
       expect(data).toEqual({ foo: 'foo' });
     });
 
     it('removeNullOrUndefinedFields: removes null values and undefined values correctly', async () => {
       await service.testData({ data: { foo: 'foo', bar: null, baz: undefined } });
 
-      expect(axiosInstanceMock).toHaveBeenCalledTimes(1);
-      const { data } = axiosInstanceMock.mock.calls[0][1];
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      const { data } = requestMock.mock.calls[0][0];
       expect(data).toEqual({ foo: 'foo' });
     });
 
@@ -153,7 +159,7 @@ describe('SubActionConnector', () => {
         // @ts-expect-error
         await service.testData({ data: dataToTest });
 
-        const { data } = axiosInstanceMock.mock.calls[0][1];
+        const { data } = requestMock.mock.calls[0][0];
         expect(data).toEqual({});
       }
     );
@@ -163,19 +169,18 @@ describe('SubActionConnector', () => {
     it('fetch correctly', async () => {
       const res = await service.testUrl({ url: 'https://example.com' });
 
-      expect(axiosInstanceMock).toHaveBeenCalledTimes(1);
-      expect(axiosInstanceMock).toBeCalledWith('https://example.com', {
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toBeCalledWith({
+        axios: axiosInstanceMock,
+        configurationUtilities: mockedActionsConfig,
+        logger,
         method: 'get',
         data: {},
         headers: {
           'Content-Type': 'application/json',
           'X-Test-Header': 'test',
         },
-        httpAgent: undefined,
-        httpsAgent: expect.any(HttpsAgent),
-        proxy: false,
-        maxContentLength: 1000000,
-        timeout: 360000,
+        url: 'https://example.com',
       });
 
       expect(logger.debug).toBeCalledWith(
@@ -186,14 +191,14 @@ describe('SubActionConnector', () => {
     });
 
     it('validates the response correctly', async () => {
-      axiosInstanceMock.mockReturnValue({ data: { invalidField: 'test' } });
+      requestMock.mockReturnValue({ data: { invalidField: 'test' } });
       await expect(async () => service.testUrl({ url: 'https://example.com' })).rejects.toThrow(
         'Response validation failed (Error: [status]: expected value of type [string] but got [undefined])'
       );
     });
 
     it('formats the response error correctly', async () => {
-      axiosInstanceMock.mockImplementation(() => {
+      requestMock.mockImplementation(() => {
         throw createAxiosError();
       });
 
@@ -204,140 +209,6 @@ describe('SubActionConnector', () => {
       expect(logger.debug).toHaveBeenLastCalledWith(
         'Request to external service failed. Connector Id: test-id. Connector type: .test. Method: get. URL: https://example.com'
       );
-    });
-  });
-
-  describe('Proxy', () => {
-    it('have been called with proper proxy agent for a valid url', async () => {
-      mockedActionsConfig.getProxySettings.mockReturnValue({
-        proxySSLSettings: {
-          verificationMode: 'full',
-        },
-        proxyUrl: 'https://localhost:1212',
-        proxyBypassHosts: undefined,
-        proxyOnlyHosts: undefined,
-      });
-
-      const { httpAgent, httpsAgent } = getCustomAgents(
-        mockedActionsConfig,
-        logger,
-        'https://example.com'
-      );
-
-      await service.testUrl({ url: 'https://example.com' });
-
-      expect(axiosInstanceMock).toBeCalledWith('https://example.com', {
-        method: 'get',
-        data: {},
-        headers: {
-          'X-Test-Header': 'test',
-          'Content-Type': 'application/json',
-        },
-        httpAgent,
-        httpsAgent,
-        proxy: false,
-        maxContentLength: 1000000,
-        timeout: 360000,
-      });
-    });
-
-    it('have been called with proper proxy agent for an invalid url', async () => {
-      mockedActionsConfig.getProxySettings.mockReturnValue({
-        proxyUrl: ':nope:',
-        proxySSLSettings: {
-          verificationMode: 'none',
-        },
-        proxyBypassHosts: undefined,
-        proxyOnlyHosts: undefined,
-      });
-
-      await service.testUrl({ url: 'https://example.com' });
-
-      expect(axiosInstanceMock).toBeCalledWith('https://example.com', {
-        method: 'get',
-        data: {},
-        headers: {
-          'X-Test-Header': 'test',
-          'Content-Type': 'application/json',
-        },
-        httpAgent: undefined,
-        httpsAgent: expect.any(HttpsAgent),
-        proxy: false,
-        maxContentLength: 1000000,
-        timeout: 360000,
-      });
-    });
-
-    it('bypasses with proxyBypassHosts when expected', async () => {
-      mockedActionsConfig.getProxySettings.mockReturnValue({
-        proxySSLSettings: {
-          verificationMode: 'full',
-        },
-        proxyUrl: 'https://elastic.proxy.co',
-        proxyBypassHosts: new Set(['example.com']),
-        proxyOnlyHosts: undefined,
-      });
-
-      await service.testUrl({ url: 'https://example.com' });
-
-      expect(axiosInstanceMock).toHaveBeenCalledTimes(1);
-      const { httpAgent, httpsAgent } = axiosInstanceMock.mock.calls[0][1];
-      expect(httpAgent instanceof HttpProxyAgent).toBe(false);
-      expect(httpsAgent instanceof HttpsProxyAgent).toBe(false);
-    });
-
-    it('does not bypass with proxyBypassHosts when expected', async () => {
-      mockedActionsConfig.getProxySettings.mockReturnValue({
-        proxySSLSettings: {
-          verificationMode: 'full',
-        },
-        proxyUrl: 'https://elastic.proxy.co',
-        proxyBypassHosts: new Set(['not-example.com']),
-        proxyOnlyHosts: undefined,
-      });
-
-      await service.testUrl({ url: 'https://example.com' });
-
-      expect(axiosInstanceMock).toHaveBeenCalledTimes(1);
-      const { httpAgent, httpsAgent } = axiosInstanceMock.mock.calls[0][1];
-      expect(httpAgent instanceof HttpProxyAgent).toBe(true);
-      expect(httpsAgent instanceof HttpsProxyAgent).toBe(true);
-    });
-
-    it('proxies with proxyOnlyHosts when expected', async () => {
-      mockedActionsConfig.getProxySettings.mockReturnValue({
-        proxySSLSettings: {
-          verificationMode: 'full',
-        },
-        proxyUrl: 'https://elastic.proxy.co',
-        proxyBypassHosts: undefined,
-        proxyOnlyHosts: new Set(['example.com']),
-      });
-
-      await service.testUrl({ url: 'https://example.com' });
-
-      expect(axiosInstanceMock).toHaveBeenCalledTimes(1);
-      const { httpAgent, httpsAgent } = axiosInstanceMock.mock.calls[0][1];
-      expect(httpAgent instanceof HttpProxyAgent).toBe(true);
-      expect(httpsAgent instanceof HttpsProxyAgent).toBe(true);
-    });
-
-    it('does not proxy with proxyOnlyHosts when expected', async () => {
-      mockedActionsConfig.getProxySettings.mockReturnValue({
-        proxySSLSettings: {
-          verificationMode: 'full',
-        },
-        proxyUrl: 'https://elastic.proxy.co',
-        proxyBypassHosts: undefined,
-        proxyOnlyHosts: new Set(['not-example.com']),
-      });
-
-      await service.testUrl({ url: 'https://example.com' });
-
-      expect(axiosInstanceMock).toHaveBeenCalledTimes(1);
-      const { httpAgent, httpsAgent } = axiosInstanceMock.mock.calls[0][1];
-      expect(httpAgent instanceof HttpProxyAgent).toBe(false);
-      expect(httpsAgent instanceof HttpsProxyAgent).toBe(false);
     });
   });
 });

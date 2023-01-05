@@ -10,9 +10,11 @@ import { resolve, join } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
+import { getAllExternalServiceSimulatorPaths } from '../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 // .server-log is specifically not enabled
 const enabledActionTypes = [
+  '.opsgenie',
   '.email',
   '.index',
   '.pagerduty',
@@ -22,6 +24,7 @@ const enabledActionTypes = [
   '.servicenow',
   '.servicenow-sir',
   '.slack',
+  '.tines',
   '.webhook',
   'test.authorization',
   'test.failing',
@@ -60,6 +63,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('apps'),
       triggersActions: {
         pathname: '/app/management/insightsAndAlerting/triggersActions',
+      },
+      triggersActionsConnectors: {
+        pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors',
       },
     },
     esTestCluster: {
@@ -113,6 +119,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             },
           },
         })}`,
+        `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
       ],
     },
     security: {

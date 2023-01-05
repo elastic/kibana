@@ -8,6 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { MlContext } from '../../contexts/ml';
+import { kibanaContextValueMock } from '../../contexts/ml/__mocks__/kibana_context_value';
 import { TimeSeriesExplorerUrlStateManager } from './timeseriesexplorer';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
@@ -41,7 +43,16 @@ const MockedTimeseriesexplorerNoJobsFound = TimeseriesexplorerNoJobsFound as jes
   typeof TimeseriesexplorerNoJobsFound
 >;
 
-jest.mock('../../util/url_state');
+jest.mock('@kbn/ml-url-state', () => {
+  return {
+    usePageUrlState: jest.fn(() => {
+      return [{}, jest.fn(), {}];
+    }),
+    useUrlState: jest.fn(() => {
+      return [{ refreshInterval: { value: 0, pause: true } }, jest.fn()];
+    }),
+  };
+});
 
 jest.mock('../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state');
 
@@ -109,9 +120,11 @@ describe('TimeSeriesExplorerUrlStateManager', () => {
     };
 
     render(
-      <I18nProvider>
-        <TimeSeriesExplorerUrlStateManager {...props} />
-      </I18nProvider>
+      <MlContext.Provider value={kibanaContextValueMock}>
+        <I18nProvider>
+          <TimeSeriesExplorerUrlStateManager {...props} />
+        </I18nProvider>
+      </MlContext.Provider>
     );
 
     // assert

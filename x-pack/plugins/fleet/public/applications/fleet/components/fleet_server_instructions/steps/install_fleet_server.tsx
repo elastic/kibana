@@ -73,7 +73,7 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
         fleetServerPolicyId,
         fleetServerHost,
         deploymentMode === 'production',
-        commandOutput?.ca_trusted_fingerprint,
+        commandOutput?.ca_trusted_fingerprint ?? undefined,
         kibanaVersion
       );
 
@@ -111,6 +111,7 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
         linuxRpmCommand={installCommands.rpm}
         k8sCommand={installCommands.kubernetes}
         hasK8sIntegration={false}
+        hasK8sIntegrationMultiPage={false}
         hasFleetServer={true}
       />
     </>

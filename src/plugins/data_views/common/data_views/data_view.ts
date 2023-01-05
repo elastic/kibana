@@ -15,7 +15,7 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
-import _, { cloneDeep, each, reject } from 'lodash';
+import { cloneDeep, each, reject } from 'lodash';
 import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
@@ -75,6 +75,7 @@ export class DataView implements DataViewBase {
   public id?: string;
   /**
    * Title of data view
+   * @deprecated use getIndexPattern instead
    */
   public title: string = '';
   /**
@@ -146,6 +147,11 @@ export class DataView implements DataViewBase {
    */
   public name: string = '';
 
+  /*
+   * list of indices that the index pattern matched
+   */
+  public matchedIndices: string[] = [];
+
   /**
    * constructor
    * @param config - config data and dependencies
@@ -187,6 +193,22 @@ export class DataView implements DataViewBase {
    * Get name of Data View
    */
   getName = () => (this.name ? this.name : this.title);
+
+  /**
+   * Get index pattern
+   * @returns index pattern string
+   */
+
+  getIndexPattern = () => this.title;
+
+  /**
+   * Set index pattern
+   * @param string index pattern string
+   */
+
+  setIndexPattern = (indexPattern: string) => {
+    this.title = indexPattern;
+  };
 
   /**
    * Get last saved saved object fields
@@ -293,7 +315,7 @@ export class DataView implements DataViewBase {
     const spec: DataViewSpec = {
       id: this.id,
       version: this.version,
-      title: this.title,
+      title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: [...(this.sourceFilters || [])],
       fields,
@@ -349,6 +371,13 @@ export class DataView implements DataViewBase {
   }
 
   /**
+   * returns true if dataview contains TSDB fields
+   */
+  isTSDBMode() {
+    return this.fields.some((field) => field.timeSeriesDimension || field.timeSeriesMetric);
+  }
+
+  /**
    * Does the data view have a timestamp field?
    */
 
@@ -395,19 +424,16 @@ export class DataView implements DataViewBase {
    * Returns index pattern as saved object body for saving
    */
   getAsSavedObjectBody(): DataViewAttributes {
-    const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
-      ? undefined
-      : JSON.stringify(this.fieldFormatMap);
     const fieldAttrs = this.getFieldAttrs();
     const runtimeFieldMap = this.runtimeFieldMap;
 
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
-      title: this.title,
+      title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
       fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),
-      fieldFormatMap,
+      fieldFormatMap: this.fieldFormatMap ? JSON.stringify(this.fieldFormatMap) : undefined,
       type: this.type!,
       typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
@@ -496,6 +522,7 @@ export class DataView implements DataViewBase {
 
   /**
    * Get all runtime field definitions.
+   * NOTE: this does not strip out runtime fields that match mapped field names
    * @returns map of runtime field definitions by field name
    */
 
@@ -582,8 +609,19 @@ export class DataView implements DataViewBase {
    * Return the "runtime_mappings" section of the ES search query.
    */
   getRuntimeMappings(): estypes.MappingRuntimeFields {
-    // @ts-expect-error The ES client does not yet include the "composite" runtime type
-    return _.cloneDeep(this.runtimeFieldMap);
+    const mappedFields = this.getMappedFieldNames();
+    const records = Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeFieldSpec>>(
+      (acc, fieldName) => {
+        // do not include fields that are mapped
+        if (!mappedFields.includes(fieldName)) {
+          acc[fieldName] = this.runtimeFieldMap[fieldName];
+        }
+
+        return acc;
+      },
+      {}
+    );
+    return records as estypes.MappingRuntimeFields;
   }
 
   /**
@@ -666,6 +704,15 @@ export class DataView implements DataViewBase {
   public readonly deleteFieldFormat = (fieldName: string) => {
     delete this.fieldFormatMap[fieldName];
   };
+
+  private getMappedFieldNames() {
+    return this.fields.getAll().reduce<string[]>((acc, dataViewField) => {
+      if (dataViewField.isMapped) {
+        acc.push(dataViewField.name);
+      }
+      return acc;
+    }, []);
+  }
 
   /**
    * Add composite runtime field and all subfields.

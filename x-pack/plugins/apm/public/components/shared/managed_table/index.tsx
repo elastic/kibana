@@ -29,18 +29,14 @@ export interface ITableColumn<T> {
 interface Props<T> {
   items: T[];
   columns: Array<ITableColumn<T>>;
+  initialPageSize: number;
   initialPageIndex?: number;
-  initialPageSize?: number;
   initialSortField?: ITableColumn<T>['field'];
   initialSortDirection?: 'asc' | 'desc';
   showPerPageOptions?: boolean;
   noItemsMessage?: React.ReactNode;
   sortItems?: boolean;
-  sortFn?: (
-    items: T[],
-    sortField: string,
-    sortDirection: 'asc' | 'desc'
-  ) => T[];
+  sortFn?: SortFunction<T>;
   pagination?: boolean;
   isLoading?: boolean;
   error?: boolean;
@@ -48,7 +44,6 @@ interface Props<T> {
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-export const INITIAL_PAGE_SIZE = 25;
 
 function defaultSortFn<T extends any>(
   items: T[],
@@ -58,13 +53,19 @@ function defaultSortFn<T extends any>(
   return orderBy(items, sortField, sortDirection);
 }
 
+export type SortFunction<T> = (
+  items: T[],
+  sortField: string,
+  sortDirection: 'asc' | 'desc'
+) => T[];
+
 function UnoptimizedManagedTable<T>(props: Props<T>) {
   const history = useHistory();
   const {
     items,
     columns,
     initialPageIndex = 0,
-    initialPageSize = INITIAL_PAGE_SIZE,
+    initialPageSize,
     initialSortField = props.columns[0]?.field || '',
     initialSortDirection = 'asc',
     showPerPageOptions = true,

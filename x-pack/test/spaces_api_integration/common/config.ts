@@ -6,7 +6,8 @@
  */
 
 import path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 interface CreateTestConfigOptions {
@@ -41,6 +42,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         retry: config.xpack.api.get('services.retry'),
         esArchiver: config.kibana.functional.get('services.esArchiver'),
         kibanaServer: config.kibana.functional.get('services.kibanaServer'),
+        spaces: config.xpack.api.get('services.spaces'),
       },
       junit: {
         reportName: 'X-Pack Spaces API Integration Tests -- ' + name,

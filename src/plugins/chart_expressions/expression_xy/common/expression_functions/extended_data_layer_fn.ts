@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
@@ -19,8 +20,11 @@ import {
 } from './validate';
 
 export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args, context) => {
-  const table = args.table ?? data;
-  const accessors = getAccessors<string, ExtendedDataLayerArgs>(args, table);
+  const table = data;
+  const accessors = getAccessors<string | ExpressionValueVisDimension, ExtendedDataLayerArgs>(
+    args,
+    table
+  );
 
   validateAccessor(accessors.xAccessor, table.columns);
   accessors.splitAccessors?.forEach((accessor) => validateAccessor(accessor, table.columns));

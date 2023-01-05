@@ -146,6 +146,50 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.tty_io.max_kilobytes_per_process',
+    first_supported_version: '8.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_kilobytes_per_process',
+      {
+        defaultMessage:
+          'The maximum kilobytes of terminal output to record for a single process. Default: 512',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.tty_io.max_kilobytes_per_event',
+    first_supported_version: '8.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_kilobytes_per_event',
+      {
+        defaultMessage:
+          'The maximum kilobytes of terminal output to record in a single event. Default: 512',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.capture_env_vars',
+    first_supported_version: '8.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.capture_env_vars',
+      {
+        defaultMessage:
+          'The list of environment variables to capture (up to five), separated by commas.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.tty_io.max_event_interval_seconds',
+    first_supported_version: '8.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_event_interval_seconds',
+      {
+        defaultMessage:
+          'The maximum amount of time (seconds) to batch terminal output in a single event. Default: 30',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -881,7 +925,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
       {
         defaultMessage:
-          'Allows users to control whether kprobes or ebpf are used to gather data. Possible options are kprobes, ebpf, or auto. Default: kprobes',
+          'Allows users to control whether kprobes or ebpf are used to gather data. Options are kprobe, ebpf, or auto. Auto uses ebpf if possible, otherwise uses kprobe. Default: auto',
       }
     ),
   },
@@ -938,13 +982,13 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.alerts.rollback.remediation.enabled',
+    key: 'windows.advanced.alerts.rollback.self_healing.enabled',
     first_supported_version: '8.4',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.remediation.enabled',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.enabled',
       {
         defaultMessage:
-          'Remediate malware artifacts when prevention alerts are triggered. Warning: data loss can occur.  Default: false',
+          'Self-healing erases attack artifacts when prevention alerts are triggered. Warning: data loss can occur. Default: false',
       }
     ),
     license: 'platinum',

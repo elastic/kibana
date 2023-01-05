@@ -13,9 +13,11 @@ import {
   BrowserProvider,
   FailureDebuggingProvider,
   FindProvider,
+  PngService,
   ScreenshotsService,
   SnapshotsService,
   TestSubjects,
+  RetryOnStaleProvider,
 } from './common';
 import { ComboBoxService } from './combo_box';
 import {
@@ -48,6 +50,7 @@ import { SavedQueryManagementComponentService } from './saved_query_management_c
 import { KibanaSupertestProvider } from './supertest';
 import { MenuToggleService } from './menu_toggle';
 import { MonacoEditorService } from './monaco_editor';
+import { UsageCollectionService } from './usage_collection';
 
 export const services = {
   ...commonServiceProviders,
@@ -58,6 +61,7 @@ export const services = {
   find: FindProvider,
   testSubjects: TestSubjects,
   docTable: DocTableService,
+  png: PngService,
   screenshots: ScreenshotsService,
   snapshots: SnapshotsService,
   failureDebugging: FailureDebuggingProvider,
@@ -86,4 +90,6 @@ export const services = {
   managementMenu: ManagementMenuService,
   monacoEditor: MonacoEditorService,
   menuToggle: MenuToggleService,
+  retryOnStale: RetryOnStaleProvider,
+  usageCollection: UsageCollectionService,
 };

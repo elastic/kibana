@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { AlertType } from '@kbn/apm-plugin/common/alert_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
+import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 import { waitForRuleStatus } from './wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -19,12 +19,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const ml = getService('ml');
   const log = getService('log');
+  const es = getService('es');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
 
   registry.when(
     'fetching service anomalies with a trial license',
-    { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'trial', archives: [] },
     () => {
       const start = '2021-01-01T00:00:00.000Z';
       const end = '2021-01-08T00:15:00.000Z';
@@ -38,7 +39,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let ruleId: string | undefined;
 
       before(async () => {
-        const serviceA = apm.service('a', 'production', 'java').instance('a');
+        const serviceA = apm
+          .service({ name: 'a', environment: 'production', agentName: 'java' })
+          .instance('a');
 
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')
@@ -52,7 +55,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             return [
               ...range(0, count).flatMap((_) =>
                 serviceA
-                  .transaction('tx', 'request')
+                  .transaction({ transactionName: 'tx' })
                   .timestamp(timestamp)
                   .duration(duration)
                   .outcome(outcome)
@@ -70,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with ml jobs', () => {
         before(async () => {
-          await createAndRunApmMlJob({ environment: 'production', ml });
+          await createAndRunApmMlJobs({ es, ml, environments: ['production'] });
         });
 
         after(async () => {
@@ -94,7 +97,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
               tags: ['apm', 'service.name:service-a'],
               name: 'Latency anomaly | service-a',
-              rule_type_id: AlertType.Anomaly,
+              rule_type_id: ApmRuleType.Anomaly,
               notify_when: 'onActiveAlert',
               actions: [],
             });

@@ -23,9 +23,11 @@ function getPluginSearchPaths({ rootDir, oss, examples, testPlugins }) {
     ...(testPlugins
       ? [
           resolve(rootDir, 'test/analytics/fixtures/plugins'),
+          resolve(rootDir, 'test/health_gateway/plugins'),
           resolve(rootDir, 'test/plugin_functional/plugins'),
           resolve(rootDir, 'test/interpreter_functional/plugins'),
           resolve(rootDir, 'test/common/fixtures/plugins'),
+          resolve(rootDir, 'test/server_integration/__fixtures__/plugins'),
         ]
       : []),
     ...(testPlugins && !oss

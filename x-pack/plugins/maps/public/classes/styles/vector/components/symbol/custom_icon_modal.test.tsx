@@ -10,6 +10,14 @@ import { shallow } from 'enzyme';
 
 import { CustomIconModal } from './custom_icon_modal';
 
+jest.mock('../../../../../kibana_services', () => ({
+  getUsageCollection: () => {
+    return {
+      reportUiCounter: () => {},
+    };
+  },
+}));
+
 const defaultProps = {
   cutoff: 0.25,
   onCancel: () => {},

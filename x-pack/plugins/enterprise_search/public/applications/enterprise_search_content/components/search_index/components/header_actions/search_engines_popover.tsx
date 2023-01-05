@@ -15,17 +15,28 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../../../common/constants';
-import { ENGINE_CREATION_PATH } from '../../../../../app_search/routes';
 import { KibanaLogic } from '../../../../../shared/kibana';
 
+import { CreateEngineMenuItem } from './create_engine_menu_item';
 import { SearchEnginesPopoverLogic } from './search_engines_popover_logic';
 
-export const SearchEnginesPopover: React.FC = () => {
+export interface SearchEnginesPopoverProps {
+  indexName?: string;
+  ingestionMethod: string;
+  isHiddenIndex?: boolean;
+}
+
+export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
+  indexName,
+  ingestionMethod,
+  isHiddenIndex,
+}) => {
   const { isSearchEnginesPopoverOpen } = useValues(SearchEnginesPopoverLogic);
   const { toggleSearchEnginesPopover } = useActions(SearchEnginesPopoverLogic);
 
@@ -34,7 +45,12 @@ export const SearchEnginesPopover: React.FC = () => {
       isOpen={isSearchEnginesPopoverOpen}
       closePopover={toggleSearchEnginesPopover}
       button={
-        <EuiButton iconSide="right" iconType="arrowDown" onClick={toggleSearchEnginesPopover}>
+        <EuiButton
+          data-telemetry-id={`entSearchContent-${ingestionMethod}-header-searchEngines`}
+          iconSide="right"
+          iconType="arrowDown"
+          onClick={toggleSearchEnginesPopover}
+        >
           {i18n.translate('xpack.enterpriseSearch.content.index.searchEngines.label', {
             defaultMessage: 'Search engines',
           })}
@@ -45,6 +61,7 @@ export const SearchEnginesPopover: React.FC = () => {
         size="s"
         items={[
           <EuiContextMenuItem
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-header-searchEngines-viewEngines`}
             icon="eye"
             onClick={() => {
               KibanaLogic.values.navigateToUrl(APP_SEARCH_PLUGIN.URL, {
@@ -60,22 +77,28 @@ export const SearchEnginesPopover: React.FC = () => {
               </p>
             </EuiText>
           </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            icon="plusInCircle"
-            onClick={() => {
-              KibanaLogic.values.navigateToUrl(APP_SEARCH_PLUGIN.URL + ENGINE_CREATION_PATH, {
-                shouldNotCreateHref: true,
-              });
-            }}
-          >
-            <EuiText>
-              <p>
-                {i18n.translate('xpack.enterpriseSearch.content.index.searchEngines.createEngine', {
-                  defaultMessage: 'Create a new App Search engine',
-                })}
-              </p>
-            </EuiText>
-          </EuiContextMenuItem>,
+          isHiddenIndex ? (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.enterpriseSearch.content.index.searchEngines.createEngineDisabledTooltip',
+                {
+                  defaultMessage: 'You cannot create engines from hidden indices.',
+                }
+              )}
+            >
+              <CreateEngineMenuItem
+                indexName={indexName}
+                ingestionMethod={ingestionMethod}
+                isHiddenIndex={isHiddenIndex}
+              />
+            </EuiToolTip>
+          ) : (
+            <CreateEngineMenuItem
+              indexName={indexName}
+              ingestionMethod={ingestionMethod}
+              isHiddenIndex={isHiddenIndex}
+            />
+          ),
         ]}
       />
     </EuiPopover>

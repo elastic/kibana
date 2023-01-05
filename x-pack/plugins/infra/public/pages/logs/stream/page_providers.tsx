@@ -5,29 +5,23 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
-import { LogFilterState, WithLogFilterUrlState } from '../../../containers/logs/log_filter';
-import { LogFlyout } from '../../../containers/logs/log_flyout';
-import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
-import { LogPositionState, WithLogPositionUrlState } from '../../../containers/logs/log_position';
+import stringify from 'json-stable-stringify';
+import React, { useMemo } from 'react';
+import { LogStreamPageActorRef } from '../../../observability_logs/log_stream_page/state';
+import { LogEntryFlyoutProvider } from '../../../containers/logs/log_flyout';
+import { LogHighlightsStateProvider } from '../../../containers/logs/log_highlights/log_highlights';
+import {
+  LogPositionStateProvider,
+  useLogPositionStateContext,
+} from '../../../containers/logs/log_position';
 import { LogStreamProvider, useLogStreamContext } from '../../../containers/logs/log_stream';
-import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
-import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
+import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_configuration';
+import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { useLogViewContext } from '../../../hooks/use_log_view';
+import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
 
-const LogFilterStateProvider: React.FC = ({ children }) => {
-  const { derivedDataView } = useLogViewContext();
-
-  return (
-    <LogFilterState.Provider indexPattern={derivedDataView}>
-      <WithLogFilterUrlState />
-      {children}
-    </LogFilterState.Provider>
-  );
-};
-
-const ViewLogInContextProvider: React.FC = ({ children }) => {
-  const { startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
+const ViewLogInContext: React.FC = ({ children }) => {
+  const { startTimestamp, endTimestamp } = useLogPositionStateContext();
   const { logViewId } = useLogViewContext();
 
   if (!startTimestamp || !endTimestamp) {
@@ -35,31 +29,27 @@ const ViewLogInContextProvider: React.FC = ({ children }) => {
   }
 
   return (
-    <ViewLogInContext.Provider
+    <ViewLogInContextProvider
       startTimestamp={startTimestamp}
       endTimestamp={endTimestamp}
       sourceId={logViewId}
     >
       {children}
-    </ViewLogInContext.Provider>
+    </ViewLogInContextProvider>
   );
 };
 
-const LogEntriesStateProvider: React.FC = ({ children }) => {
+const LogEntriesStateProvider: React.FC<{
+  logStreamPageState: InitializedLogStreamPageState;
+}> = ({ children, logStreamPageState }) => {
   const { logViewId } = useLogViewContext();
-  const { startTimestamp, endTimestamp, targetPosition, isInitialized } = useContext(
-    LogPositionState.Context
-  );
-  const { filterQuery } = useContext(LogFilterState.Context);
+  const { startTimestamp, endTimestamp, targetPosition } = useLogPositionStateContext();
+  const {
+    context: { parsedQuery },
+  } = logStreamPageState;
 
   // Don't render anything if the date range is incorrect.
   if (!startTimestamp || !endTimestamp) {
-    return null;
-  }
-
-  // Don't initialize the entries until the position has been fully intialized.
-  // See `<WithLogPositionUrlState />`
-  if (!isInitialized) {
     return null;
   }
 
@@ -68,7 +58,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
       sourceId={logViewId}
       startTimestamp={startTimestamp}
       endTimestamp={endTimestamp}
-      query={filterQuery?.parsedQuery}
+      query={parsedQuery}
       center={targetPosition ?? undefined}
     >
       {children}
@@ -76,10 +66,15 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
   );
 };
 
-const LogHighlightsStateProvider: React.FC = ({ children }) => {
+const LogHighlightsState: React.FC<{
+  logStreamPageState: InitializedLogStreamPageState;
+}> = ({ children, logStreamPageState }) => {
   const { logViewId, logView } = useLogViewContext();
   const { topCursor, bottomCursor, entries } = useLogStreamContext();
-  const { filterQuery } = useContext(LogFilterState.Context);
+  const serializedParsedQuery = useMemo(
+    () => stringify(logStreamPageState.context.parsedQuery),
+    [logStreamPageState.context.parsedQuery]
+  );
 
   const highlightsProps = {
     sourceId: logViewId,
@@ -88,33 +83,32 @@ const LogHighlightsStateProvider: React.FC = ({ children }) => {
     entriesEnd: bottomCursor,
     centerCursor: entries.length > 0 ? entries[Math.floor(entries.length / 2)].cursor : null,
     size: entries.length,
-    filterQuery: filterQuery?.serializedQuery ?? null,
+    filterQuery: serializedParsedQuery,
   };
-  return <LogHighlightsState.Provider {...highlightsProps}>{children}</LogHighlightsState.Provider>;
+  return <LogHighlightsStateProvider {...highlightsProps}>{children}</LogHighlightsStateProvider>;
 };
 
-export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
-  const { logViewStatus } = useLogViewContext();
-
-  // The providers assume the source is loaded, so short-circuit them otherwise
-  if (logViewStatus?.index === 'missing') {
-    return <>{children}</>;
-  }
-
+export const LogStreamPageContentProviders: React.FC<{
+  logStreamPageState: InitializedLogStreamPageState;
+}> = ({ children, logStreamPageState }) => {
   return (
-    <LogViewConfiguration.Provider>
-      <LogFlyout.Provider>
-        <LogPositionState.Provider>
-          <WithLogPositionUrlState />
-          <ViewLogInContextProvider>
-            <LogFilterStateProvider>
-              <LogEntriesStateProvider>
-                <LogHighlightsStateProvider>{children}</LogHighlightsStateProvider>
-              </LogEntriesStateProvider>
-            </LogFilterStateProvider>
-          </ViewLogInContextProvider>
-        </LogPositionState.Provider>
-      </LogFlyout.Provider>
-    </LogViewConfiguration.Provider>
+    <LogViewConfigurationProvider>
+      <LogEntryFlyoutProvider>
+        <LogPositionStateProvider>
+          <ViewLogInContext>
+            <LogEntriesStateProvider logStreamPageState={logStreamPageState}>
+              <LogHighlightsState logStreamPageState={logStreamPageState}>
+                {children}
+              </LogHighlightsState>
+            </LogEntriesStateProvider>
+          </ViewLogInContext>
+        </LogPositionStateProvider>
+      </LogEntryFlyoutProvider>
+    </LogViewConfigurationProvider>
   );
 };
+
+type InitializedLogStreamPageState = MatchedStateFromActor<
+  LogStreamPageActorRef,
+  { hasLogViewIndices: 'initialized' }
+>;

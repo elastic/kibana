@@ -14,6 +14,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
     loadTestFile(require.resolve('./alert_create_flyout'));
     loadTestFile(require.resolve('./details'));
     loadTestFile(require.resolve('./connectors'));
-    loadTestFile(require.resolve('./alerts_table'));
+    loadTestFile(require.resolve('./logs_list'));
   });
 };

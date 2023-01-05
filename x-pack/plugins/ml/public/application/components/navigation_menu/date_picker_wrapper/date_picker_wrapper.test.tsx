@@ -11,7 +11,8 @@ import React from 'react';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 
-import { useUrlState } from '../../../util/url_state';
+import { useUrlState } from '@kbn/ml-url-state';
+
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 
@@ -34,7 +35,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../util/url_state', () => {
+jest.mock('@kbn/ml-url-state', () => {
   return {
     useUrlState: jest.fn(() => {
       return [{ refreshInterval: { value: 0, pause: true } }, jest.fn()];
@@ -104,7 +105,7 @@ const MockedEuiSuperDatePicker = EuiSuperDatePicker as jest.MockedFunction<
 
 describe('Navigation Menu: <DatePickerWrapper />', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     MockedEuiSuperDatePicker.mockClear();
   });
 
@@ -123,7 +124,7 @@ describe('Navigation Menu: <DatePickerWrapper />', () => {
     refreshSubscription.unsubscribe();
   });
 
-  test('should not allow disabled pause with 0 refresh interval', () => {
+  test('should set interval to default of 5s when pause is disabled and refresh interval is 0', () => {
     // arrange
     (useUrlState as jest.Mock).mockReturnValue([{ refreshInterval: { pause: false, value: 0 } }]);
 
@@ -137,9 +138,10 @@ describe('Navigation Menu: <DatePickerWrapper />', () => {
     render(<DatePickerWrapper />);
 
     // assert
-    expect(displayWarningSpy).not.toHaveBeenCalled();
+    // Show warning that the interval set is too short
+    expect(displayWarningSpy).toHaveBeenCalled();
     const calledWith = MockedEuiSuperDatePicker.mock.calls[0][0];
-    expect(calledWith.isPaused).toBe(true);
+    expect(calledWith.isPaused).toBe(false);
     expect(calledWith.refreshInterval).toBe(5000);
   });
 

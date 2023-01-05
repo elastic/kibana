@@ -51,6 +51,7 @@ describe('esaggs expression function - server', () => {
     metricsAtAllLevels: true,
     partialRows: false,
     timeFields: ['@timestamp', 'utc_time'],
+    probability: 1,
   };
 
   beforeEach(() => {
@@ -58,7 +59,7 @@ describe('esaggs expression function - server', () => {
     mockHandlers = {
       abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
       getKibanaRequest: jest.fn().mockReturnValue({ id: 'hi' } as KibanaRequest),
-      getSearchContext: jest.fn(),
+      getSearchContext: jest.fn().mockReturnValue({}),
       getSearchSessionId: jest.fn().mockReturnValue('abc123'),
       getExecutionContext: jest.fn(),
       inspectorAdapters: jest.fn(),
@@ -130,6 +131,7 @@ describe('esaggs expression function - server', () => {
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: startDependencies.searchSource,
+      disableShardWarnings: false,
       timeFields: args.timeFields,
       timeRange: undefined,
     });

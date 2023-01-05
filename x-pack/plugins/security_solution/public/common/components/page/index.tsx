@@ -19,17 +19,37 @@ export const SecuritySolutionAppWrapper = styled.div`
 SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
 
 /**
+ * Stylesheet for Eui class overrides for components that may be displayed when content
+ * on the page has been set to display in full screen mode. It ensures that certain Eui
+ * components, that position themselves just below the kibana header, are displayed correctly
+ * when shown above content that is set to `full screen`.
+ */
+export const FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET = () => css`
+  .euiOverlayMask[data-relative-to-header='below'] {
+    top: 0 !important;
+  }
+
+  .euiFlyout {
+    top: 0 !important;
+    height: 100% !important;
+  }
+`;
+
+/** The `z-index` for EuiPopover Panels that are displayed from inside of Timeline page */
+export const TIMELINE_EUI_POPOVER_PANEL_ZINDEX = 9900;
+
+/**
  * Stylesheet with Eui class overrides in order to address display issues caused when
  * the Timeline overlay is opened. These are normally adjustments to ensure that the
  * z-index of other EUI components continues to work with the z-index used by timeline
  * overlay.
  */
 export const TIMELINE_OVERRIDES_CSS_STYLESHEET = () => css`
-  .euiPopover__panel.euiPopover__panel-isOpen {
-    z-index: 9900 !important;
+  .euiPopover__panel[data-popover-open] {
+    z-index: ${TIMELINE_EUI_POPOVER_PANEL_ZINDEX} !important;
     min-width: 24px;
   }
-  .euiPopover__panel.euiPopover__panel-isOpen.sourcererPopoverPanel {
+  .euiPopover__panel[data-popover-open].sourcererPopoverPanel {
     // needs to appear under modal
     z-index: 5900 !important;
   }
@@ -58,23 +78,10 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
   ${TIMELINE_OVERRIDES_CSS_STYLESHEET}
 
-  .euiDataGridRowCell .euiDataGridRowCell__expandActions .euiDataGridRowCell__actionButtonIcon {
-    display: none;
-
-    &:first-child,
-    &:nth-child(2),
-    &:nth-child(3),
-    &:last-child {
-      display: inline-flex;
-    }
-
-  }
-
   /*
     overrides the default styling of EuiDataGrid expand popover footer to
     make it a column of actions instead of the default actions row
   */
-
   .euiDataGridRowCell__popover {
 
     max-width: 815px !important;
@@ -89,26 +96,16 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
       }
     }
 
-
-    &.euiPopover__panel.euiPopover__panel-isOpen {
+    &.euiPopover__panel[data-popover-open] {
       padding: 8px 0;
       min-width: 65px;
     }
-
 
     .euiPopoverFooter {
       border: 0;
       margin-top: 0 !important;
       .euiFlexGroup {
         flex-direction: column;
-      }
-    }
-
-    // Hide EUI's 'Filter in' and 'Filter out' footer buttons - replaced with our own buttons
-    .euiPopoverFooter:nth-child(2) {
-      .euiFlexItem:first-child,
-      .euiFlexItem:nth-child(2) {
-          display: none;
       }
     }
   }
@@ -120,8 +117,8 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
   /* hide open draggable popovers when a modal is being displayed to prevent them from covering the modal */
   body.euiBody-hasOverlayMask {
-    .euiDataGridRowCell__popover.euiPopover__panel-isOpen,
-    .withHoverActions__popover.euiPopover__panel-isOpen {
+    .euiDataGridRowCell__popover[data-popover-open],
+    .withHoverActions__popover[data-popover-open] {
       visibility: hidden !important;
     }
   }

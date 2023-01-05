@@ -20,6 +20,7 @@ export function readCliArgs(argv: string[]) {
       'skip-generic-folders',
       'skip-platform-folders',
       'skip-os-packages',
+      'skip-canvas-shareable-runtime',
       'rpm',
       'deb',
       'docker-context-use-local-artifact',
@@ -126,7 +127,7 @@ export function readCliArgs(argv: string[]) {
     createGenericFolders: !Boolean(flags['skip-generic-folders']),
     createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
-    createExamplePlugins: Boolean(flags['example-plugins']),
+    buildExamplePlugins: Boolean(flags['example-plugins']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
     createDockerUbuntu:
@@ -136,6 +137,7 @@ export function readCliArgs(argv: string[]) {
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
     eprRegistry: flags['epr-registry'],
+    buildCanvasShareableRuntime: !Boolean(flags['skip-canvas-shareable-runtime']),
   };
 
   return {

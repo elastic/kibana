@@ -6,18 +6,29 @@
  */
 
 import pMap from 'p-map';
-import { CasePostRequest, CaseResponse } from '@kbn/cases-plugin/common/api';
+import { CasePostRequest, CaseResponse, CaseStatuses } from '@kbn/cases-plugin/common/api';
 import {
   createCase as createCaseAPI,
   deleteAllCaseItems,
   createComment,
+  updateCase,
+  getCase,
 } from '../../../cases_api_integration/common/lib/utils';
+import {
+  loginUsers,
+  suggestUserProfiles,
+} from '../../../cases_api_integration/common/lib/user_profiles';
+import { User } from '../../../cases_api_integration/common/lib/authentication/types';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';
+
+type OmitSupertest<T> = Omit<T, 'supertest'>;
 
 export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
   const kbnSupertest = getService('supertest');
   const es = getService('es');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
     async createCase(overwrites: Partial<CasePostRequest> = {}): Promise<CaseResponse> {
@@ -55,6 +66,40 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       params: Parameters<typeof createComment>[0]['params'];
     }): Promise<CaseResponse> {
       return createComment({ supertest: kbnSupertest, params, caseId });
+    },
+
+    async setStatus(
+      caseId: string,
+      caseVersion: string,
+      newStatus: 'open' | 'in-progress' | 'closed'
+    ) {
+      await updateCase({
+        supertest: kbnSupertest,
+        params: {
+          cases: [
+            {
+              id: caseId,
+              version: caseVersion,
+              status: CaseStatuses[newStatus],
+            },
+          ],
+        },
+      });
+    },
+
+    async activateUserProfiles(users: User[]) {
+      await loginUsers({
+        supertest: supertestWithoutAuth,
+        users,
+      });
+    },
+
+    async suggestUserProfiles(options: Parameters<typeof suggestUserProfiles>[0]['req']) {
+      return suggestUserProfiles({ supertest: kbnSupertest, req: options });
+    },
+
+    async getCase({ caseId }: OmitSupertest<Parameters<typeof getCase>[0]>): Promise<CaseResponse> {
+      return getCase({ supertest: kbnSupertest, caseId });
     },
   };
 }

@@ -11,10 +11,11 @@ import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
-  SavedObjectsImporter,
+  ISavedObjectsImporter,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportFailure,
   Logger,
 } from '@kbn/core/server';
-import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from '@kbn/core/server/types';
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
@@ -33,7 +34,7 @@ import { withPackageSpan } from '../../packages/utils';
 
 import { tagKibanaAssets } from './tag_assets';
 
-type SavedObjectsImporterContract = Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+type SavedObjectsImporterContract = Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
   JSON.stringify(
     errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
@@ -51,7 +52,7 @@ export type ArchiveAsset = Pick<
 
 // KibanaSavedObjectTypes are used to ensure saved objects being created for a given
 // KibanaAssetType have the correct type
-const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectType> = {
+export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectType> = {
   [KibanaAssetType.dashboard]: KibanaSavedObjectType.dashboard,
   [KibanaAssetType.indexPattern]: KibanaSavedObjectType.indexPattern,
   [KibanaAssetType.map]: KibanaSavedObjectType.map,
@@ -141,9 +142,10 @@ export async function installKibanaAssetsAndReferences({
   pkgTitle,
   paths,
   installedPkg,
+  spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
   savedObjectTagAssignmentService: IAssignmentService;
   savedObjectTagClient: ITagsClient;
   logger: Logger;
@@ -151,6 +153,7 @@ export async function installKibanaAssetsAndReferences({
   pkgTitle: string;
   paths: string[];
   installedPkg?: SavedObject<Installation>;
+  spaceId: string;
 }) {
   const kibanaAssets = await getKibanaAssets(paths);
   if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
@@ -161,13 +164,12 @@ export async function installKibanaAssetsAndReferences({
     kibanaAssets
   );
 
-  await installKibanaAssets({
+  const importedAssets = await installKibanaAssets({
     logger,
     savedObjectsImporter,
     pkgName,
     kibanaAssets,
   });
-
   await withPackageSpan('Create and assign package tags', () =>
     tagKibanaAssets({
       savedObjectTagAssignmentService,
@@ -175,6 +177,8 @@ export async function installKibanaAssetsAndReferences({
       kibanaAssets,
       pkgTitle,
       pkgName,
+      spaceId,
+      importedAssets,
     })
   );
 
@@ -290,7 +294,6 @@ export async function installKibanaSavedObjects({
         overwrite: true,
         readStream: createListStream(toBeSavedObjects),
         createNewCopies: false,
-        refresh: false,
       })
     );
 

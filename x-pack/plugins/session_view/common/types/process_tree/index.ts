@@ -12,16 +12,29 @@ export interface AlertStatusEventEntityIdMap {
   };
 }
 
-export const enum EventKind {
+export enum ProcessEventAlertCategory {
+  all = 'all',
+  file = 'file',
+  network = 'network',
+  process = 'process',
+}
+
+export interface AlertTypeCount {
+  category: ProcessEventAlertCategory;
+  count: number;
+}
+export type DefaultAlertFilterType = 'all';
+
+export enum EventKind {
   event = 'event',
   signal = 'signal',
 }
 
-export const enum EventAction {
+export enum EventAction {
   fork = 'fork',
   exec = 'exec',
   end = 'end',
-  output = 'output',
+  text_output = 'text_output',
 }
 
 export interface User {
@@ -60,6 +73,24 @@ export interface Teletype {
     major?: number;
     minor?: number;
   };
+  rows?: number;
+  columns?: number;
+}
+
+export interface IOLine {
+  event: ProcessEvent;
+  value: string;
+}
+
+export interface ProcessStartMarker {
+  event: ProcessEvent;
+  line: number;
+  maxBytesExceeded?: boolean;
+}
+
+export interface IOFields {
+  text?: string;
+  max_bytes_per_process_exceeded?: boolean;
 }
 
 export interface ProcessFields {
@@ -91,6 +122,7 @@ export interface ProcessSelf extends ProcessFields {
   session_leader?: ProcessFields;
   entry_leader?: ProcessFields;
   group_leader?: ProcessFields;
+  io?: IOFields;
 }
 
 export interface ProcessEventHost {
@@ -107,6 +139,9 @@ export interface ProcessEventHost {
     name?: string;
     platform?: string;
     version?: string;
+  };
+  boot?: {
+    id?: string;
   };
 }
 
@@ -134,14 +169,34 @@ export interface ProcessEventAlert {
   rule?: ProcessEventAlertRule;
 }
 
+export interface ProcessEventIPAddress {
+  address?: string;
+  ip?: string;
+  port?: number;
+}
+
+export interface ProcessEventNetwork {
+  type?: string;
+  transport?: string;
+  protocol?: string;
+}
+
 export interface ProcessEvent {
   '@timestamp'?: string;
   event?: {
     kind?: EventKind;
-    category?: string;
+    category?: string[];
     action?: EventAction;
     id?: string;
   };
+  file?: {
+    extension?: string;
+    path?: string;
+    name?: string;
+  };
+  network?: ProcessEventNetwork;
+  destination?: ProcessEventIPAddress;
+  source?: ProcessEventIPAddress;
   user?: User;
   group?: Group;
   host?: ProcessEventHost;
@@ -209,14 +264,14 @@ export interface ProcessEventOrchestrator {
     name?: string;
     type?: string;
     ip?: string;
+    parent?: {
+      type?: string;
+    };
   };
   namespace?: string;
   cluster?: {
     name?: string;
     id?: string;
-  };
-  parent?: {
-    type?: string;
   };
 }
 

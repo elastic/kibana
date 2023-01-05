@@ -33,4 +33,15 @@ export const i18nTexts = {
       defaultMessage: 'Encountered an unknown error: {message}',
       values: { message },
     }),
+  csvRowCountError: ({ expected, received }: { expected?: number; received: number }) =>
+    i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.incorrectRowCount', {
+      defaultMessage:
+        'Encountered an error with the number of CSV rows generated from the search: expected {expected}, received {received}.',
+      values: { expected, received },
+    }),
+  csvUnableToClosePit: () =>
+    i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.csvUnableToClosePit', {
+      defaultMessage:
+        'Unable to close the Point-In-Time used for search. Check the Kibana server logs.',
+    }),
 };

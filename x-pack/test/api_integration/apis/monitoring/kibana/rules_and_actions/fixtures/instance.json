@@ -348,7 +348,7 @@
         },
         "indices_found": {
           "internal": false,
-          "metricbeat": true
+          "ecs": true
         },
         "data": [
           [
@@ -383,7 +383,7 @@
         },
         "indices_found": {
           "internal": false,
-          "metricbeat": true
+          "ecs": true
         },
         "data": [
           [
@@ -418,7 +418,7 @@
         },
         "indices_found": {
           "internal": false,
-          "metricbeat": true
+          "ecs": true
         },
         "data": [
           [
@@ -453,7 +453,7 @@
         },
         "indices_found": {
           "internal": false,
-          "metricbeat": true
+          "ecs": true
         },
         "data": [
           [

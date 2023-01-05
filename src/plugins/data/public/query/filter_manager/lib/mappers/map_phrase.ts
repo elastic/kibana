@@ -6,27 +6,30 @@
  * Side Public License, v 1.
  */
 
+import type { Filter, PhraseFilter, ScriptedPhraseFilter } from '@kbn/es-query';
 import { get } from 'lodash';
 import {
-  PhraseFilter,
   getPhraseFilterValue,
   getPhraseFilterField,
   FILTERS,
   isScriptedPhraseFilter,
-  Filter,
   isPhraseFilter,
 } from '@kbn/es-query';
-
-import { FilterValueFormatter } from '../../../../../common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['query', 'script', 'script', 'params', 'value']);
 
-const getFormattedValueFn = (value: any) => {
-  return (formatter?: FilterValueFormatter) => {
-    return formatter ? formatter.convert(value) : value;
-  };
-};
+export function getPhraseDisplayValue(
+  filter: PhraseFilter | ScriptedPhraseFilter,
+  formatter?: FieldFormat
+): string {
+  const value = filter.meta.value ?? filter.meta.params.query;
+  if (formatter?.convert) {
+    return formatter.convert(value);
+  }
+  return value === undefined ? '' : `${value}`;
+}
 
 const getParams = (filter: PhraseFilter) => {
   const scriptedPhraseValue = getScriptedPhraseValue(filter);
@@ -39,7 +42,6 @@ const getParams = (filter: PhraseFilter) => {
     key,
     params,
     type: FILTERS.PHRASE,
-    value: getFormattedValueFn(query),
   };
 };
 

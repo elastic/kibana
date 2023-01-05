@@ -31,8 +31,12 @@ export default function alertingMonitoringCollectionTests({ getService }: FtrPro
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
+  const dedicatedTaskRunner = getService('dedicatedTaskRunner');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const waitForExecutionCount = createWaitForExecutionCount(supertest, Spaces.space1.id);
+  const backgroundNodeSupertest = dedicatedTaskRunner.enabled
+    ? dedicatedTaskRunner.getSupertest()
+    : supertest;
 
   describe('monitoring_collection', () => {
     let endDate: string;
@@ -63,7 +67,7 @@ export default function alertingMonitoringCollectionTests({ getService }: FtrPro
       // so we can't get an accurate count of executions/failures/timeouts but
       // we can test that they are at least there
 
-      const getResponse = await supertest.get(NODE_RULES_MONITORING_COLLECTION_URL);
+      const getResponse = await backgroundNodeSupertest.get(NODE_RULES_MONITORING_COLLECTION_URL);
       expect(getResponse.status).to.eql(200);
       expect(getResponse.body.node_rules.executions).to.greaterThan(0);
     });
@@ -91,7 +95,7 @@ export default function alertingMonitoringCollectionTests({ getService }: FtrPro
       // so we can't get an accurate count of executions/failures/timeouts but
       // we can test that they are at least there
 
-      const getResponse = await supertest.get(NODE_RULES_MONITORING_COLLECTION_URL);
+      const getResponse = await backgroundNodeSupertest.get(NODE_RULES_MONITORING_COLLECTION_URL);
       expect(getResponse.status).to.eql(200);
       expect(getResponse.body.node_rules.failures).to.greaterThan(0);
     });
@@ -142,7 +146,7 @@ export default function alertingMonitoringCollectionTests({ getService }: FtrPro
       // so we can't get an accurate count of executions/failures/timeouts but
       // we can test that they are at least there
 
-      const getResponse = await supertest.get(NODE_RULES_MONITORING_COLLECTION_URL);
+      const getResponse = await backgroundNodeSupertest.get(NODE_RULES_MONITORING_COLLECTION_URL);
       expect(getResponse.status).to.eql(200);
       expect(getResponse.body.node_rules.timeouts).to.greaterThan(0);
     });

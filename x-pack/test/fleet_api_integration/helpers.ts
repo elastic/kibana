@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Context } from 'mocha';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../api_integration/ftr_provider_context';
 
-export function warnAndSkipTest(mochaContext: Context, log: ToolingLog) {
+export function warnAndSkipTest(mochaContext: Mocha.Context, log: ToolingLog) {
   log.warning(
     'disabling tests because DockerServers service is not enabled, set FLEET_PACKAGE_REGISTRY_PORT to run them'
   );
@@ -47,27 +46,29 @@ export async function generateAgent(
 
   switch (status) {
     case 'error':
-      data = { last_checkin_status: 'error' };
+      data = { policy_revision_idx: 1, last_checkin_status: 'error' };
       break;
     case 'degraded':
-      data = { last_checkin_status: 'degraded' };
+      data = { policy_revision_idx: 1, last_checkin_status: 'degraded' };
       break;
     case 'offline':
-      data = { last_checkin: '2017-06-07T18:59:04.498Z' };
+      data = { policy_revision_idx: 1, last_checkin: '2017-06-07T18:59:04.498Z' };
       break;
     // Agent with last checkin status as error and currently unenrolling => should displayd updating status
     case 'error-unenrolling':
       data = {
+        policy_revision_idx: 1,
         last_checkin_status: 'error',
         unenrollment_started_at: '2017-06-07T18:59:04.498Z',
       };
       break;
     default:
-      data = { last_checkin: new Date().toISOString() };
+      data = { policy_revision_idx: 1, last_checkin: new Date().toISOString() };
   }
 
   await es.index({
     index: '.fleet-agents',
+    id,
     body: {
       id,
       active: true,
@@ -78,11 +79,28 @@ export async function generateAgent(
         elastic: {
           agent: {
             version,
+            upgradeable: true,
           },
         },
       },
       ...data,
     },
     refresh: 'wait_for',
+  });
+}
+
+export function setPrereleaseSetting(supertest: any) {
+  before(async () => {
+    await supertest
+      .put('/api/fleet/settings')
+      .set('kbn-xsrf', 'xxxx')
+      .send({ prerelease_integrations_enabled: true });
+  });
+
+  after(async () => {
+    await supertest
+      .put('/api/fleet/settings')
+      .set('kbn-xsrf', 'xxxx')
+      .send({ prerelease_integrations_enabled: false });
   });
 }

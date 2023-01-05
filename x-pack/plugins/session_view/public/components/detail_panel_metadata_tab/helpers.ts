@@ -94,14 +94,14 @@ export const getOrchestratorData = (
       name: DASH,
       type: DASH,
       ip: DASH,
+      parent: {
+        type: DASH,
+      },
     },
     namespace: DASH,
     cluster: {
       name: DASH,
       id: DASH,
-    },
-    parent: {
-      type: DASH,
     },
   };
 
@@ -115,7 +115,9 @@ export const getOrchestratorData = (
   detailPanelOrchestrator.namespace = dataOrDash(orchestrator?.namespace).toString();
   detailPanelOrchestrator.cluster.name = dataOrDash(orchestrator?.cluster?.name).toString();
   detailPanelOrchestrator.cluster.id = dataOrDash(orchestrator?.cluster?.id).toString();
-  detailPanelOrchestrator.parent.type = dataOrDash(orchestrator?.parent?.type).toString();
+  detailPanelOrchestrator.resource.parent.type = dataOrDash(
+    orchestrator?.resource?.parent?.type
+  ).toString();
 
   return detailPanelOrchestrator;
 };

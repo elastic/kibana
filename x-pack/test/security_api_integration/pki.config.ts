@@ -30,6 +30,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
   };
 
+  const auditLogPath = resolve(__dirname, './fixtures/audit/pki.log');
+
   return {
     testFiles: [require.resolve('./tests/pki')],
     servers,
@@ -71,6 +73,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--xpack.security.authc.providers=${JSON.stringify(['pki', 'basic'])}`,
+        '--xpack.security.audit.enabled=true',
+        '--xpack.security.audit.appender.type=file',
+        `--xpack.security.audit.appender.fileName=${auditLogPath}`,
+        '--xpack.security.audit.appender.layout.type=json',
+        `--xpack.security.audit.ignore_filters=${JSON.stringify([
+          { actions: ['http_request'] },
+          { categories: ['database'] },
+        ])}`,
       ],
     },
   };

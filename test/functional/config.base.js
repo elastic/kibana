@@ -69,6 +69,9 @@ export default async function ({ readConfigFile }) {
       management: {
         pathname: '/app/management',
       },
+      filesManagement: {
+        pathname: '/app/management/kibana/filesManagement',
+      },
       /** @obsolete "management" should be instead of "settings" **/
       settings: {
         pathname: '/app/management',
@@ -249,6 +252,51 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        test_index: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['test-index'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        index_a: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['index-a'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        index_b: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['index-b'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
         kibana_sample_read: {
           elasticsearch: {
             cluster: [],
@@ -343,7 +391,7 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['without-timefield', 'with-timefield'],
+                names: ['without-timefield', 'with-timefield', 'with-different-timefield'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

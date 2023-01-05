@@ -12,7 +12,7 @@ import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import type { DataViewBase, KueryNode, DataViewFieldBase, KueryQueryOptions } from '../..';
+import type { DataViewBase, KueryNode, DataViewFieldBase, KueryQueryOptions } from '../../..';
 import type { KqlContext } from '../types';
 
 import * as ast from '../ast';
@@ -100,6 +100,7 @@ export function toElasticsearchQuery(
   }
 
   const queries = fields!.reduce((accumulator: any, field: DataViewFieldBase) => {
+    const isKeywordField = field.esTypes?.length === 1 && field.esTypes.includes('keyword');
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
@@ -142,15 +143,20 @@ export function toElasticsearchQuery(
         }),
       ];
     } else if (wildcard.isNode(valueArg)) {
-      return [
-        ...accumulator,
-        wrapWithNestedQuery({
-          query_string: {
-            fields: [field.name],
-            query: wildcard.toQueryStringQuery(valueArg),
-          },
-        }),
-      ];
+      const query = isKeywordField
+        ? {
+            wildcard: {
+              [field.name]: value,
+            },
+          }
+        : {
+            query_string: {
+              fields: [field.name],
+              query: wildcard.toQueryStringQuery(valueArg),
+            },
+          };
+
+      return [...accumulator, wrapWithNestedQuery(query)];
     } else if (field.type === 'date') {
       /*
       If we detect that it's a date field and the user wants an exact date, we need to convert the query to both >= and <= the value provided to force a range query. This is because match and match_phrase queries do not accept a timezone parameter.
@@ -172,7 +178,7 @@ export function toElasticsearchQuery(
         }),
       ];
     } else {
-      const queryType = type === 'phrase' ? 'match_phrase' : 'match';
+      const queryType = isKeywordField ? 'term' : type === 'phrase' ? 'match_phrase' : 'match';
       return [
         ...accumulator,
         wrapWithNestedQuery({

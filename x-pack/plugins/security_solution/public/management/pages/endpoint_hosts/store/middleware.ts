@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { DataViewBase, Query } from '@kbn/es-query';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type {
+  IndexFieldsStrategyRequest,
+  IndexFieldsStrategyResponse,
+} from '@kbn/timelines-plugin/common';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
   HOST_METADATA_GET_ROUTE,
@@ -17,6 +21,7 @@ import {
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
   METADATA_TRANSFORMS_STATUS_ROUTE,
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
 } from '../../../../../common/endpoint/constants';
 import type {
   GetHostPolicyResponse,
@@ -41,9 +46,8 @@ import {
   createLoadingResourceState,
 } from '../../../state';
 import {
-  sendGetAgentPolicyList,
+  sendBulkGetPackagePolicies,
   sendGetEndpointSecurityPackage,
-  sendGetFleetAgentsWithEndpoint,
 } from '../../../services/policies/ingest';
 import type { GetPolicyListResponse } from '../../policy/types';
 import type {
@@ -95,13 +99,19 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       ? METADATA_UNITED_INDEX
       : metadataCurrentIndexPattern;
 
-    const { indexPatterns } = depsStart.data;
-    const fields = await indexPatterns.getFieldsForWildcard({
-      pattern: indexPatternToFetch,
-    });
+    const res$ = depsStart.data.search.search<
+      IndexFieldsStrategyRequest<'indices'>,
+      IndexFieldsStrategyResponse
+    >(
+      { indices: [indexPatternToFetch], onlyCheckIfIndicesExist: false },
+      {
+        strategy: ENDPOINT_FIELDS_SEARCH_STRATEGY,
+      }
+    );
+    const response = await firstValueFrom(res$);
     const indexPattern: DataViewBase = {
       title: indexPatternToFetch,
-      fields,
+      fields: response.indexFields,
     };
     return [indexPattern];
   }
@@ -173,19 +183,12 @@ const getAgentAndPoliciesForEndpointsList = async (
   // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
   // exists.
   const policiesFound = (
-    await sendGetAgentPolicyList(http, {
-      query: {
-        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIdsToCheck.join(
-          ' or '
-        )})`,
-      },
-    })
+    await sendBulkGetPackagePolicies(http, policyIdsToCheck)
   ).items.reduce<PolicyIds>(
-    (list, agentPolicy) => {
-      (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
-        list.packagePolicy[packagePolicy as string] = true;
-        list.agentPolicy[packagePolicy as string] = agentPolicy.id;
-      });
+    (list, packagePolicy) => {
+      list.packagePolicy[packagePolicy.id as string] = true;
+      list.agentPolicy[packagePolicy.id as string] = packagePolicy.policy_id;
+
       return list;
     },
     { packagePolicy: {}, agentPolicy: {} }
@@ -392,32 +395,6 @@ async function endpointDetailsListMiddleware({
     });
 
     loadEndpointsPendingActions(store);
-
-    try {
-      const endpointsTotalCount = await endpointsTotal(coreStart.http);
-      dispatch({
-        type: 'serverReturnedEndpointsTotal',
-        payload: endpointsTotalCount,
-      });
-    } catch (error) {
-      dispatch({
-        type: 'serverFailedToReturnEndpointsTotal',
-        payload: error,
-      });
-    }
-
-    try {
-      const agentsWithEndpoint = await sendGetFleetAgentsWithEndpoint(coreStart.http);
-      dispatch({
-        type: 'serverReturnedAgenstWithEndpointsTotal',
-        payload: agentsWithEndpoint.total,
-      });
-    } catch (error) {
-      dispatch({
-        type: 'serverFailedToReturnAgenstWithEndpointsTotal',
-        payload: error,
-      });
-    }
 
     dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
   } catch (error) {

@@ -6,12 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { FormData, ValidationFunc } from '../../shared_imports';
 
-import type { FormData, ValidationConfig, ValidationFunc } from '../../shared_imports';
-import { fieldValidators } from '../../shared_imports';
-export { queryFieldValidation } from '../../common/validations';
-
+export const MAX_QUERY_LENGTH = 2000;
 const idPattern = /^[a-zA-Z0-9-_]+$/;
+// still used in Packs
 export const idSchemaValidation: ValidationFunc<FormData, string, string> = ({ value }) => {
   const valueIsValid = idPattern.test(value);
   if (!valueIsValid) {
@@ -23,47 +22,39 @@ export const idSchemaValidation: ValidationFunc<FormData, string, string> = ({ v
   }
 };
 
+export const idHookSchemaValidation = (value: string) => {
+  const valueIsValid = idPattern.test(value);
+
+  if (!valueIsValid) {
+    return i18n.translate('xpack.osquery.pack.queryFlyoutForm.invalidIdError', {
+      defaultMessage: 'Characters must be alphanumeric, _, or -',
+    });
+  }
+};
+
 const createUniqueIdValidation = (ids: Set<string>) => {
-  const uniqueIdCheck: ValidationFunc<FormData, string, string> = ({ value }) => {
+  const uniqueIdCheck = (value: string) => {
     if (ids.has(value)) {
-      return {
-        message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.uniqueIdError', {
-          defaultMessage: 'ID must be unique',
-        }),
-      };
+      return i18n.translate('xpack.osquery.pack.queryFlyoutForm.uniqueIdError', {
+        defaultMessage: 'ID must be unique',
+      });
     }
   };
 
   return uniqueIdCheck;
 };
 
-export const createIdFieldValidations = (ids: Set<string>) => [
-  fieldValidators.emptyField(
-    i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyIdError', {
+export const createFormIdFieldValidations = (ids: Set<string>) => ({
+  required: {
+    message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyIdError', {
       defaultMessage: 'ID is required',
-    })
-  ),
-  idSchemaValidation,
-  createUniqueIdValidation(ids),
-];
+    }),
+    value: true,
+  },
+  validate: (text: string) => {
+    const isPatternValid = idHookSchemaValidation(text);
+    const isUnique = createUniqueIdValidation(ids)(text);
 
-export const intervalFieldValidations: Array<ValidationConfig<FormData, string, number>> = [
-  {
-    validator: fieldValidators.numberGreaterThanField({
-      than: 0,
-      message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError', {
-        defaultMessage: 'A positive interval value is required',
-      }),
-    }),
+    return isPatternValid || isUnique;
   },
-  {
-    validator: fieldValidators.numberSmallerThanField({
-      than: 604800,
-      message: ({ than }) =>
-        i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMaxNumberError', {
-          defaultMessage: 'An interval value must be lower than {than}',
-          values: { than },
-        }),
-    }),
-  },
-];
+});

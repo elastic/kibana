@@ -11,7 +11,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import '../../../common/mock/match_media';
-import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
+import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import {
   createSecuritySolutionStorageMock,
@@ -38,7 +38,9 @@ jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
-jest.mock('./tabs_content');
+jest.mock('./tabs_content', () => ({
+  TabsContent: () => <div data-test-subj="tabs-content" />,
+}));
 
 jest.mock('../../../common/lib/kibana');
 const originalKibanaLib = jest.requireActual('../../../common/lib/kibana');
@@ -90,13 +92,12 @@ jest.mock('react-redux', () => {
 const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
 jest.mock('../../../common/containers/sourcerer');
 const mockDataView = {
-  dataViewId: mockGlobalState.timeline.timelineById.test?.dataViewId,
+  dataViewId: mockGlobalState.timeline.timelineById[TimelineId.test]?.dataViewId,
   browserFields: mockBrowserFields,
-  docValueFields: mockDocValueFields,
   loading: false,
   indexPattern: mockIndexPattern,
   pageInfo: { activePage: 0, querySize: 0 },
-  selectedPatterns: mockGlobalState.timeline.timelineById.test?.indexNames,
+  selectedPatterns: mockGlobalState.timeline.timelineById[TimelineId.test]?.indexNames,
 };
 mockUseSourcererDataView.mockReturnValue(mockDataView);
 describe('StatefulTimeline', () => {
@@ -141,7 +142,7 @@ describe('StatefulTimeline', () => {
     );
     expect(
       wrapper
-        .find(`[data-timeline-id="test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
+        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
         .first()
         .exists()
     ).toEqual(true);
@@ -167,8 +168,8 @@ describe('StatefulTimeline', () => {
             timeline: {
               ...mockGlobalState.timeline,
               timelineById: {
-                test: {
-                  ...mockGlobalState.timeline.timelineById.test,
+                [TimelineId.test]: {
+                  ...mockGlobalState.timeline.timelineById[TimelineId.test],
                   savedObjectId: 'definitely-not-null',
                   indexNames:
                     mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline]
@@ -197,8 +198,8 @@ describe('StatefulTimeline', () => {
             timeline: {
               ...mockGlobalState.timeline,
               timelineById: {
-                test: {
-                  ...mockGlobalState.timeline.timelineById.test,
+                [TimelineId.test]: {
+                  ...mockGlobalState.timeline.timelineById[TimelineId.test],
                   savedObjectId: 'definitely-not-null',
                 },
               },
@@ -225,7 +226,7 @@ describe('StatefulTimeline', () => {
     expect(mockDispatch).toBeCalledTimes(1);
     expect(mockDispatch).toHaveBeenNthCalledWith(1, {
       payload: {
-        id: 'test',
+        id: TimelineId.test,
         dataViewId: mockDataView.dataViewId,
         indexNames: mockIndexNames,
       },

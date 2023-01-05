@@ -5,19 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FieldValuePair } from '../../../common/correlations/types';
-
-import { Setup } from '../../lib/helpers/setup_request';
-
-export interface OverallLatencyDistributionOptions {
-  query: QueryDslQueryContainer;
-  percentileThreshold: number;
-  termFilters?: FieldValuePair[];
-  setup: Setup;
-}
-
 export interface OverallLatencyDistributionResponse {
+  durationMin?: number;
+  durationMax?: number;
   totalDocCount?: number;
   percentileThresholdValue?: number | null;
   overallHistogram?: Array<{

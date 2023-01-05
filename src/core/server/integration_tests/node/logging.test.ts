@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
 
 function createRootWithRoles(roles: string[]) {
-  return kbnTestServer.createRoot({
+  return createkbnTestServerRoot({
     node: {
       roles,
     },
@@ -44,7 +44,7 @@ describe('node service global context', () => {
 
         await root.preboot();
         await root.setup();
-      }, 30000);
+      });
 
       beforeEach(() => {
         mockConsoleLog.mockClear();

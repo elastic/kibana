@@ -8,8 +8,10 @@
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
 import { connectorIndex } from '../../../__mocks__/view_index.mock';
 
-import { ConnectorConfigurationApiLogic } from '../../../api/connector_package/update_connector_configuration_api_logic';
-import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
+import { ConnectorStatus } from '../../../../../../common/types/connectors';
+
+import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
+import { CachedFetchIndexApiLogic } from '../../../api/index/cached_fetch_index_api_logic';
 
 import { IndexNameLogic } from '../index_name_logic';
 import { IndexViewLogic } from '../index_view_logic';
@@ -19,23 +21,24 @@ import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 const DEFAULT_VALUES = {
   configState: {},
   configView: [],
-  index: undefined,
+  index: null,
   isEditing: false,
   localConfigState: {},
   localConfigView: [],
+  shouldStartInEditMode: false,
 };
 
 describe('ConnectorConfigurationLogic', () => {
   const { mount } = new LogicMounter(ConnectorConfigurationLogic);
   const { mount: mountIndexNameLogic } = new LogicMounter(IndexNameLogic);
-  const { mount: mountFetchIndexApiLogic } = new LogicMounter(FetchIndexApiLogic);
+  const { mount: mountFetchIndexApiWrapperLogic } = new LogicMounter(CachedFetchIndexApiLogic);
   const { mount: mountIndexViewLogic } = new LogicMounter(IndexViewLogic);
   const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mountIndexNameLogic({ indexName: 'index-name' }, { indexName: 'index-name' });
-    mountFetchIndexApiLogic();
+    mountFetchIndexApiWrapperLogic();
     mountIndexViewLogic({ index: 'index' });
     mount();
   });
@@ -110,16 +113,16 @@ describe('ConnectorConfigurationLogic', () => {
         expect(ConnectorConfigurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           configState: {
-            foo: { label: 'thirdBar', value: 'fourthBar' },
             bar: { label: 'foo', value: 'foofoo' },
+            foo: { label: 'thirdBar', value: 'fourthBar' },
           },
           configView: [
             { key: 'bar', label: 'foo', value: 'foofoo' },
             { key: 'foo', label: 'thirdBar', value: 'fourthBar' },
           ],
           localConfigState: {
-            foo: { label: 'thirdBar', value: 'fourthBar' },
             bar: { label: 'foo', value: 'fafa' },
+            foo: { label: 'thirdBar', value: 'fourthBar' },
           },
           localConfigView: [
             { key: 'bar', label: 'foo', value: 'fafa' },
@@ -145,6 +148,26 @@ describe('ConnectorConfigurationLogic', () => {
           ...DEFAULT_VALUES,
           index: connectorIndex,
           isEditing: true,
+        });
+      });
+      it('should set isEditing if connector has a config definition and shouldStartInEditMode is true', () => {
+        ConnectorConfigurationLogic.actions.setShouldStartInEditMode(true);
+        ConnectorConfigurationLogic.actions.fetchIndexApiSuccess({
+          ...connectorIndex,
+          connector: { ...connectorIndex.connector, status: ConnectorStatus.NEEDS_CONFIGURATION },
+        });
+        expect(ConnectorConfigurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          configState: connectorIndex.connector.configuration,
+          configView: [{ key: 'foo', label: 'bar', value: 'barbar' }],
+          index: {
+            ...connectorIndex,
+            connector: { ...connectorIndex.connector, status: ConnectorStatus.NEEDS_CONFIGURATION },
+          },
+          isEditing: true,
+          localConfigState: connectorIndex.connector.configuration,
+          localConfigView: [{ key: 'foo', label: 'bar', value: 'barbar' }],
+          shouldStartInEditMode: true,
         });
       });
     });

@@ -40,7 +40,9 @@ import './search_bar.scss';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
-const blurEvent = new FocusEvent('blur');
+const blurEvent = new FocusEvent('focusout', {
+  bubbles: true,
+});
 
 const sortByScore = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
   if (a.score < b.score) return 1;
@@ -267,7 +269,7 @@ export const SearchBar: FC<SearchBarProps> = ({
   );
 
   const placeholderText = i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
-    defaultMessage: 'Find apps, content, and more. Ex: Discover',
+    defaultMessage: 'Find apps, content, and more.',
   });
   const keyboardShortcutTooltip = `${i18n.translate(
     'xpack.globalSearchBar.searchBar.shortcutTooltip.description',

@@ -9,11 +9,11 @@ import { find } from 'lodash/fp';
 import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { useWatch, useFormContext } from 'react-hook-form';
 import { QUERIES_DROPDOWN_LABEL, QUERIES_DROPDOWN_SEARCH_FIELD_LABEL } from './constants';
 import { OsquerySchemaLink } from '../components/osquery_schema_link';
 
 import { useSavedQueries } from './use_saved_queries';
-import { useFormData } from '../shared_imports';
 import type { SavedQuerySO } from '../routes/saved_queries/list';
 
 const TextTruncate = styled.div`
@@ -27,7 +27,7 @@ const StyledEuiCodeBlock = styled(EuiCodeBlock)`
   }
 `;
 
-interface SavedQueriesDropdownProps {
+export interface SavedQueriesDropdownProps {
   disabled?: boolean;
   onChange: (
     value:
@@ -49,9 +49,11 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   disabled,
   onChange,
 }) => {
+  const savedQueryId = useWatch({ name: 'savedQueryId' });
+  const context = useFormContext();
+  const { errors } = context.formState;
+  const queryFieldError = errors?.query?.message;
   const [selectedOptions, setSelectedOptions] = useState<SelectedOption[]>([]);
-
-  const [{ savedQueryId }] = useFormData();
 
   const { data } = useSavedQueries({});
 
@@ -126,11 +128,14 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
 
   return (
     <EuiFormRow
+      isInvalid={!!queryFieldError}
+      error={queryFieldError}
       label={QUERIES_DROPDOWN_SEARCH_FIELD_LABEL}
       labelAppend={<OsquerySchemaLink />}
       fullWidth
     >
       <EuiComboBox
+        data-test-subj={'savedQuerySelect'}
         isDisabled={disabled}
         fullWidth
         placeholder={QUERIES_DROPDOWN_LABEL}

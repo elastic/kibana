@@ -11,10 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { ensurePatternFormat } from '../../store/sourcerer/helpers';
 import * as i18n from './translations';
 import { RefreshButton } from './refresh_button';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
 
 export const useUpdateDataView = (
   onOpenAndReset: () => void

@@ -13,8 +13,17 @@ import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils'
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { isDataLayer } from './visualization';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
-import { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
-import { DatatablesWithFormatInfo, DatatableWithFormatInfo } from './data_layers';
+import {
+  LayerAccessorsTitles,
+  LayerFieldFormats,
+  LayersAccessorsTitles,
+  LayersFieldFormats,
+} from './layers';
+import {
+  DatatablesWithFormatInfo,
+  DatatableWithFormatInfo,
+  hasMultipleLayersWithSplits,
+} from './data_layers';
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 
@@ -22,7 +31,7 @@ export type ColorAssignments = Record<
   string,
   {
     totalSeriesCount: number;
-    getRank(sortedLayer: CommonXYDataLayerConfig, seriesName: string): number;
+    getRank(layerId: string, seriesName: string): number;
   }
 >;
 
@@ -53,7 +62,9 @@ export const getAllSeries = (
   accessors: Array<ExpressionValueVisDimension | string>,
   columnToLabel: CommonXYDataLayerConfig['columnToLabel'],
   titles: LayerAccessorsTitles,
-  fieldFormats: LayerFieldFormats
+  fieldFormats: LayerFieldFormats,
+  accessorsCount: number,
+  multipleLayersWithSplits: boolean
 ) => {
   if (!formattedDatatable.table) {
     return [];
@@ -71,7 +82,8 @@ export const getAllSeries = (
       const yTitle = columnToLabelMap[yAccessor] ?? titles?.yTitles?.[yAccessor] ?? null;
       let name = yTitle;
       if (splitName) {
-        name = accessors.length > 1 ? `${splitName} - ${yTitle}` : splitName;
+        name =
+          accessorsCount > 1 || multipleLayersWithSplits ? `${splitName} - ${yTitle}` : splitName;
       }
 
       if (!allSeries.includes(name)) {
@@ -85,7 +97,7 @@ export const getAllSeries = (
 
 export function getColorAssignments(
   layers: CommonXYLayerConfig[],
-  titles: LayerAccessorsTitles,
+  titles: LayersAccessorsTitles,
   fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo
 ): ColorAssignments {
@@ -102,6 +114,7 @@ export function getColorAssignments(
     }
     layersPerPalette[palette].push(layer);
   });
+  const multipleLayersWithSplits = hasMultipleLayersWithSplits(layers);
 
   return mapValues(layersPerPalette, (paletteLayers) => {
     const seriesPerLayer = paletteLayers.map((layer) => {
@@ -111,22 +124,23 @@ export function getColorAssignments(
           layer.splitAccessors,
           layer.accessors,
           layer.columnToLabel,
-          titles,
-          fieldFormats[layer.layerId]
+          titles[layer.layerId],
+          fieldFormats[layer.layerId],
+          layer.accessors.length,
+          multipleLayersWithSplits
         ) || [];
 
       return { numberOfSeries: allSeries.length, allSeries };
     });
+
     const totalSeriesCount = seriesPerLayer.reduce(
       (sum, perLayer) => sum + perLayer.numberOfSeries,
       0
     );
     return {
       totalSeriesCount,
-      getRank(sortedLayer: CommonXYDataLayerConfig, seriesName: string) {
-        const layerIndex = paletteLayers.findIndex(
-          (layer) => sortedLayer.layerId === layer.layerId
-        );
+      getRank(layerId: string, seriesName: string) {
+        const layerIndex = paletteLayers.findIndex((layer) => layerId === layer.layerId);
         const currentSeriesPerLayer = seriesPerLayer[layerIndex];
         const rank = currentSeriesPerLayer.allSeries.indexOf(seriesName);
         return (

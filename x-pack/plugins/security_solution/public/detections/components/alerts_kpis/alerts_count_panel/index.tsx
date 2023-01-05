@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiComboBox } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import React, { memo, useMemo, useState, useEffect, useCallback } from 'react';
 import uuid from 'uuid';
@@ -15,6 +16,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
 
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 
 import { getAlertsCountQuery } from './helpers';
@@ -36,10 +38,14 @@ interface AlertsCountPanelProps {
   panelHeight?: number;
   query?: Query;
   setStackByField0: (stackBy: string) => void;
+  setStackByField0ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
   setStackByField1: (stackBy: string | undefined) => void;
+  setStackByField1ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
   signalIndexName: string | null;
   stackByField0: string;
+  stackByField0ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByField1: string | undefined;
+  stackByField1ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByWidth?: number;
   title?: React.ReactNode;
   runtimeMappings?: MappingRuntimeFields;
@@ -55,10 +61,14 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     query,
     runtimeMappings,
     setStackByField0,
+    setStackByField0ComboboxInputRef,
     setStackByField1,
+    setStackByField1ComboboxInputRef,
     signalIndexName,
     stackByField0,
+    stackByField0ComboboxRef,
     stackByField1,
+    stackByField1ComboboxRef,
     stackByWidth,
     title = i18n.COUNT_TABLE_TITLE,
   }) => {
@@ -116,6 +126,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       }),
       indexName: signalIndexName,
       skip: querySkip,
+      queryName: ALERTS_QUERY_NAMES.COUNT,
     });
 
     useEffect(() => {
@@ -172,9 +183,13 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
             <FieldSelection
               chartOptionsContextMenu={chartOptionsContextMenu}
               setStackByField0={setStackByField0}
+              setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
               setStackByField1={setStackByField1}
+              setStackByField1ComboboxInputRef={setStackByField1ComboboxInputRef}
               stackByField0={stackByField0}
+              stackByField0ComboboxRef={stackByField0ComboboxRef}
               stackByField1={stackByField1}
+              stackByField1ComboboxRef={stackByField1ComboboxRef}
               stackByWidth={stackByWidth}
               uniqueQueryId={uniqueQueryId}
             />

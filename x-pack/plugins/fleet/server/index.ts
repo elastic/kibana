@@ -9,6 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 
 import { FleetPlugin } from './plugin';
 
+export { buildAgentStatusRuntimeField } from './services/agents/build_status_runtime_field';
 export type {
   AgentService,
   AgentClient,
@@ -35,7 +36,7 @@ export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 export { config } from './config';
 export type { FleetConfigType } from './config';
 
-export type { PackagePolicyServiceInterface } from './services/package_policy';
+export type { PackagePolicyClient } from './services/package_policy_service';
 
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
 

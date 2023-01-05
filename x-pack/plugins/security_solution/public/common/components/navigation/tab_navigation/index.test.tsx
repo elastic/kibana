@@ -7,8 +7,8 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { navTabsHostDetails } from '../../../../hosts/pages/details/nav_tabs';
-import { HostsTableType } from '../../../../hosts/store/model';
+import { navTabsHostDetails } from '../../../../explore/hosts/pages/details/nav_tabs';
+import { HostsTableType } from '../../../../explore/hosts/store/model';
 import type { RouteSpyState } from '../../../utils/route/types';
 import { TabNavigationComponent } from '.';
 import type { TabNavigationProps } from './types';
@@ -89,7 +89,7 @@ describe('Table Navigation', () => {
       `EuiTab[data-test-subj="navigation-${HostsTableType.authentications}"]`
     );
     expect(firstTab.props().href).toBe(
-      `/app/securitySolutionUI/hosts/siem-window/authentications${SEARCH_QUERY}`
+      `/app/securitySolutionUI/hosts/name/siem-window/authentications${SEARCH_QUERY}`
     );
   });
 

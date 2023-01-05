@@ -32,7 +32,7 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
 
-import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 
 export const createMockClients = () => {
@@ -106,10 +106,13 @@ const createSecuritySolutionRequestContextMock = (
 ): jest.Mocked<SecuritySolutionApiRequestHandlerContext> => {
   const core = clients.core;
   const kibanaRequest = requestMock.create();
+  const licensing = licensingMock.createSetup();
 
   return {
     core,
-    endpointAuthz: getEndpointAuthzInitialStateMock(overrides.endpointAuthz),
+    getEndpointAuthz: jest.fn(async () =>
+      getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
+    ),
     getConfig: jest.fn(() => clients.config),
     getFrameworkRequest: jest.fn(() => {
       return {
@@ -137,6 +140,10 @@ const createSecuritySolutionRequestContextMock = (
       // TODO: Mock EndpointScopedFleetServicesInterface and return the mocked object.
       throw new Error('Not implemented');
     }),
+    getQueryRuleAdditionalOptions: {
+      licensing,
+      osqueryCreateAction: jest.fn(),
+    },
   };
 };
 

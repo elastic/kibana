@@ -12,9 +12,11 @@ export const getServiceAllowedRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: API_URLS.SERVICE_ALLOWED,
   validate: {},
-  handler: async ({ syntheticsMonitorClient }): Promise<any> => {
+  handler: async ({ syntheticsMonitorClient, server }): Promise<any> => {
+    const isESS = Boolean(server.cloud?.isCloudEnabled) && server.config.service?.manifestUrl;
+
     return {
-      serviceAllowed: true,
+      serviceAllowed: isESS ? syntheticsMonitorClient.syntheticsService.isAllowed : true,
       signupUrl: syntheticsMonitorClient.syntheticsService.signupUrl,
     };
   },

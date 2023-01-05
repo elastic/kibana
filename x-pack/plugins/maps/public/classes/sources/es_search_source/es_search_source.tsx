@@ -220,15 +220,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
-    let indexPatternName = this.getIndexPatternId();
     let geoFieldType = '';
     try {
-      const indexPattern = await this.getIndexPattern();
-      indexPatternName = indexPattern.title;
       const geoField = await this._getGeoField();
       geoFieldType = geoField.type;
     } catch (error) {
-      // ignore error, title will just default to id
+      // ignore error, geoFieldType will just be blank
     }
 
     return [
@@ -238,7 +235,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       },
       {
         label: getDataViewLabel(),
-        value: indexPatternName,
+        value: await this.getDisplayName(),
       },
       {
         label: i18n.translate('xpack.maps.source.esSearch.geoFieldLabel', {
@@ -466,12 +463,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   async getSourceIndexList(): Promise<string[]> {
-    await this.getIndexPattern();
-    if (!(this.indexPattern && this.indexPattern.title)) {
-      return [];
-    }
+    const dataView = await this.getIndexPattern();
     try {
-      const { success, matchingIndexes } = await getMatchingIndexes(this.indexPattern.title);
+      const { success, matchingIndexes } = await getMatchingIndexes(dataView.getIndexPattern());
       return success ? matchingIndexes : [];
     } catch (e) {
       // Fail silently
@@ -500,11 +494,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   async _isDrawingIndex(): Promise<boolean> {
-    await this.getIndexPattern();
-    if (!(this.indexPattern && this.indexPattern.title)) {
-      return false;
-    }
-    const { success, isDrawingIndex } = await getIsDrawLayer(this.indexPattern.title);
+    const dataView = await this.getIndexPattern();
+    const { success, isDrawingIndex } = await getIsDrawLayer(dataView.getIndexPattern());
     return success && isDrawingIndex;
   }
 
@@ -514,8 +505,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   async getMaxResultWindow(): Promise<number> {
-    const indexPattern = await this.getIndexPattern();
-    const indexSettings = await loadIndexSettings(indexPattern.title);
+    const dataView = await this.getIndexPattern();
+    const indexSettings = await loadIndexSettings(dataView.getIndexPattern());
     return indexSettings.maxResultWindow;
   }
 
@@ -835,8 +826,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     refreshToken: string,
     hasLabels: boolean
   ): Promise<string> {
-    const indexPattern = await this.getIndexPattern();
-    const indexSettings = await loadIndexSettings(indexPattern.title);
+    const dataView = await this.getIndexPattern();
+    const indexSettings = await loadIndexSettings(dataView.getIndexPattern());
 
     const searchSource = await this.makeSearchSource(searchFilters, indexSettings.maxResultWindow);
     // searchSource calls dataView.getComputedFields to seed docvalueFields
@@ -858,7 +849,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
           return fieldName !== this._descriptor.geoField;
         })
         .map((fieldName) => {
-          const field = indexPattern.fields.getByName(fieldName);
+          const field = dataView.fields.getByName(fieldName);
           return field && field.type === 'date'
             ? {
                 field: fieldName,
@@ -879,7 +870,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
-&index=${indexPattern.title}\
+&index=${dataView.getIndexPattern()}\
 &hasLabels=${hasLabels}\
 &requestBody=${encodeMvtResponseBody(requestBody)}\
 &token=${refreshToken}`;

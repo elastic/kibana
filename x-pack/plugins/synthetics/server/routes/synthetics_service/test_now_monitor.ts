@@ -14,10 +14,7 @@ import {
 } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import {
-  syntheticsMonitor,
-  syntheticsMonitorType,
-} from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 
@@ -45,7 +42,7 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const monitorWithSecrets =
       await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-        syntheticsMonitor.name,
+        syntheticsMonitorType,
         monitorId
       );
     const normalizedMonitor = normalizeSecrets(monitorWithSecrets);
@@ -56,15 +53,18 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const testRunId = uuidv4();
 
-    const errors = await syntheticsService.triggerConfigs(request, [
+    const spaceId = server.spaces.spacesService.getSpaceId(request);
+
+    const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
+
+    const errors = await syntheticsService.runOnceConfigs([
       formatHeartbeatRequest({
         // making it enabled, even if it's disabled in the UI
         monitor: { ...normalizedMonitor.attributes, enabled: true },
         monitorId,
-        customHeartbeatId: (normalizedMonitor.attributes as MonitorFields)[
-          ConfigKey.CUSTOM_HEARTBEAT_ID
-        ],
+        heartbeatId: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
         testRunId,
+        params: paramsBySpace[spaceId],
       }),
     ]);
 

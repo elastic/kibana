@@ -26,6 +26,7 @@ import {
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
+import { escapeSearchQueryPhrase } from './saved_object';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -65,13 +66,14 @@ export function outputIdToUuid(id: string) {
   return uuid(id, uuid.DNS);
 }
 
-function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
-  const { output_id: outputId, ssl, ...atributes } = so.attributes;
+function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
+  const { output_id: outputId, ssl, proxy_id: proxyId, ...atributes } = so.attributes;
 
   return {
     id: outputId ?? so.id,
     ...atributes,
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
+    ...(proxyId ? { proxy_id: proxyId } : {}),
   };
 }
 
@@ -286,6 +288,23 @@ class OutputService {
     };
   }
 
+  public async listAllForProxyId(soClient: SavedObjectsClientContract, proxyId: string) {
+    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      searchFields: ['proxy_id'],
+      search: escapeSearchQueryPhrase(proxyId),
+    });
+
+    return {
+      items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
+      total: outputs.total,
+      page: outputs.page,
+      perPage: outputs.per_page,
+    };
+  }
+
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
     const outputSO = await this.encryptedSoClient.get<OutputSOAttributes>(
       SAVED_OBJECT_TYPE,
@@ -369,6 +388,9 @@ class OutputService {
 
     if (data.ssl) {
       updateData.ssl = JSON.stringify(data.ssl);
+    } else if (data.ssl === null) {
+      // Explicitly set to null to allow to delete the field
+      updateData.ssl = null;
     }
 
     // ensure only default output exists

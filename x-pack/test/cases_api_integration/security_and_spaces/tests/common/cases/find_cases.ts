@@ -238,9 +238,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns the correct fields', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
+        // all fields that contain the UserRT definition must be included here (aka created_by, closed_by, and updated_by)
+        // see https://github.com/elastic/kibana/issues/139503
         const queryFields: Array<keyof CaseResponse | Array<keyof CaseResponse>> = [
-          'title',
-          ['title', 'description'],
+          ['title', 'created_by', 'closed_by', 'updated_by'],
+          ['title', 'description', 'created_by', 'closed_by', 'updated_by'],
         ];
 
         for (const fields of queryFields) {
@@ -265,6 +267,8 @@ export default ({ getService }: FtrProviderContext): void => {
                 external_service: postedCase.external_service,
                 owner: postedCase.owner,
                 connector: postedCase.connector,
+                severity: postedCase.severity,
+                status: postedCase.status,
                 comments: [],
                 totalAlerts: 0,
                 totalComment: 0,
@@ -274,6 +278,24 @@ export default ({ getService }: FtrProviderContext): void => {
             count_open_cases: 1,
           });
         }
+      });
+
+      it('sorts by title', async () => {
+        const case3 = await createCase(supertest, { ...postCaseReq, title: 'c' });
+        const case2 = await createCase(supertest, { ...postCaseReq, title: 'b' });
+        const case1 = await createCase(supertest, { ...postCaseReq, title: 'a' });
+
+        const cases = await findCases({
+          supertest,
+          query: { sortField: 'title', sortOrder: 'asc' },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 3,
+          cases: [case1, case2, case3],
+          count_open_cases: 3,
+        });
       });
 
       it('unhappy path - 400s when bad query supplied', async () => {
@@ -289,6 +311,34 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+
+      it('sorts by severity', async () => {
+        const case4 = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.CRITICAL,
+        });
+        const case3 = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.HIGH,
+        });
+        const case2 = await createCase(supertest, {
+          ...postCaseReq,
+          severity: CaseSeverity.MEDIUM,
+        });
+        const case1 = await createCase(supertest, { ...postCaseReq, severity: CaseSeverity.LOW });
+
+        const cases = await findCases({
+          supertest,
+          query: { sortField: 'severity', sortOrder: 'asc' },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 4,
+          cases: [case1, case2, case3, case4],
+          count_open_cases: 4,
+        });
+      });
 
       describe('search and searchField', () => {
         beforeEach(async () => {
@@ -366,6 +416,11 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
             },
           });
+
+          // There is potential for the alert index to not be refreshed by the time the second comment is created
+          // which could attempt to update the alert status again and will encounter a conflict so this will
+          // ensure that the index is up to date before we try to update the next alert status
+          await es.indices.refresh({ index: defaultSignalsIndex });
         }
 
         const patchedCase = await createComment({

@@ -37,7 +37,7 @@ describe('AnomalyExplorerChartsService', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     mlApiServicesMock.jobs.jobForCloning.mockImplementation(() => Promise.resolve({}));
 
@@ -49,7 +49,7 @@ describe('AnomalyExplorerChartsService', () => {
     );
 
     timefilterMock = createTimefilterMock();
-    timefilterMock.getActiveBounds.mockReturnValue({
+    timefilterMock.getBounds.mockReturnValue({
       min: moment(1486656000000),
       max: moment(1486670399999),
     });

@@ -22,7 +22,7 @@ import { ResultFieldProps } from './types';
 import './result.scss';
 
 const iconMap: Record<string, string> = {
-  boolean: 'tokenBoolen',
+  boolean: 'tokenBoolean',
   date: 'tokenDate',
   date_range: 'tokenDate',
   double: 'tokenNumber',
@@ -74,10 +74,13 @@ export const ResultField: React.FC<ResultFieldProps> = ({
           />
         </span>
       </EuiTableRowCell>
-      <EuiTableRowCell className="resultFieldRowCell" width="25%" valign="middle">
-        <EuiText size="xs" grow={false}>
-          {fieldName}
-        </EuiText>
+      <EuiTableRowCell
+        className="resultFieldRowCell"
+        width="25%"
+        truncateText={!isExpanded}
+        valign="middle"
+      >
+        <EuiText size="xs">{fieldName}</EuiText>
       </EuiTableRowCell>
       <EuiTableRowCell
         className="resultFieldRowCell"
@@ -86,7 +89,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
       >
         <EuiIcon type="sortRight" color="subdued" />
       </EuiTableRowCell>
-      <EuiTableRowCell className="resultFieldRowCell" truncateText valign="middle">
+      <EuiTableRowCell className="resultFieldRowCell" truncateText={!isExpanded} valign="middle">
         {(fieldType === 'object' ||
           fieldType === 'array' ||
           fieldType === 'nested' ||
@@ -96,9 +99,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
             {fieldValue}
           </EuiCodeBlock>
         ) : (
-          <EuiText size="xs" grow={false}>
-            {fieldValue}
-          </EuiText>
+          <EuiText size="xs">{fieldValue}</EuiText>
         )}
       </EuiTableRowCell>
     </EuiTableRow>

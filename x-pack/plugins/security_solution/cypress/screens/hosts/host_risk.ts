@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const RULE_NAME = '[data-test-subj="topRiskScoreContributors"] .euiTableCellContent';
-
 export const RISK_DETAILS_NAV = '[data-test-subj="navigation-hostRisk"]';
 
 export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
@@ -17,6 +15,8 @@ export const HOST_BY_RISK_TABLE_CELL =
 export const HOST_BY_RISK_TABLE_FILTER = '[data-test-subj="risk-filter-button"]';
 
 export const HOST_BY_RISK_TABLE_FILTER_CRITICAL = '[data-test-subj="risk-filter-item-Critical"]';
+
+export const HOST_BY_RISK_TABLE_FILTER_LOW = '[data-test-subj="risk-filter-item-Low"]';
 
 export const HOST_BY_RISK_TABLE_PERPAGE_BUTTON =
   '[data-test-subj="loadingMoreSizeRowPopover"] button';

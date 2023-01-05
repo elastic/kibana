@@ -10,7 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 import extract from 'extract-zip';
 import del from 'del';
@@ -95,10 +95,8 @@ it('builds a generated plugin into a viable archive', async () => {
       "kibana/fooTestPlugin/server/types.js",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.br",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.gz",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.gz",
       "kibana/fooTestPlugin/translations/ja-JP.json",
       "kibana/fooTestPlugin/tsconfig.json",
     ]

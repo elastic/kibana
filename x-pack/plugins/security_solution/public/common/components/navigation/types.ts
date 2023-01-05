@@ -7,14 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 import { SecurityPageName } from '../../../app/types';
-import type { SiemRouteType } from '../../utils/route/types';
 import type { LinkCategories } from '../../links';
-
-export interface TabNavigationComponentProps {
-  pageName: string;
-  tabName: SiemRouteType | undefined;
-  pathName: string;
-}
 
 export type SearchNavTab = NavTab | { urlKey: UrlStateType; isDetailPage: boolean };
 
@@ -27,6 +20,7 @@ export enum SecurityNavGroupKey {
   detect = 'detect',
   findings = 'findings',
   explore = 'explore',
+  intelligence = 'intelligence',
   investigate = 'investigate',
   manage = 'manage',
 }
@@ -47,9 +41,10 @@ export type UrlStateType =
   | 'timeline'
   | 'explore'
   | 'dashboards'
-  | 'threat_intelligence'
+  | 'indicators'
   | 'cloud_posture'
-  | 'findings';
+  | 'findings'
+  | 'entity_analytics';
 
 export type SecurityNavGroup = Record<SecurityNavGroupKey, NavGroupTab>;
 export interface NavTab {
@@ -60,9 +55,11 @@ export interface NavTab {
   urlKey?: UrlStateType;
   pageId?: SecurityPageName;
   isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
 }
 export const securityNavKeys = [
-  SecurityPageName.administration,
   SecurityPageName.alerts,
   SecurityPageName.blocklist,
   SecurityPageName.detectionAndResponse,
@@ -76,17 +73,17 @@ export const securityNavKeys = [
   SecurityPageName.hosts,
   SecurityPageName.network,
   SecurityPageName.overview,
-  SecurityPageName.responseActions,
+  SecurityPageName.responseActionsHistory,
   SecurityPageName.rules,
   SecurityPageName.timelines,
   SecurityPageName.trustedApps,
   SecurityPageName.users,
   SecurityPageName.kubernetes,
-  SecurityPageName.threatIntelligence,
+  SecurityPageName.threatIntelligenceIndicators,
   SecurityPageName.cloudSecurityPostureDashboard,
   SecurityPageName.cloudSecurityPostureFindings,
   SecurityPageName.cloudSecurityPostureBenchmarks,
-  SecurityPageName.cloudSecurityPostureRules,
+  SecurityPageName.entityAnalytics,
 ] as const;
 export type SecurityNavKey = typeof securityNavKeys[number];
 
@@ -111,4 +108,7 @@ export interface NavLinkItem {
   title: string;
   skipUrlState?: boolean;
   isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
 }

@@ -28,12 +28,13 @@ import { i18n } from '@kbn/i18n';
 
 import { useUiTracker } from '@kbn/observability-plugin/public';
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import {
   asPercent,
   asPreciseDecimal,
 } from '../../../../common/utils/formatters';
 import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
-import { FieldStats } from '../../../../common/correlations/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
@@ -49,13 +50,11 @@ import { DurationDistributionChart } from '../../shared/charts/duration_distribu
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import { CorrelationsContextPopover } from './context_popover';
-import { OnAddFilter } from './context_popover/top_values';
+import { OnAddFilter } from './context_popover/field_stats_popover';
 
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
 import { ChartTitleToolTip } from './chart_title_tool_tip';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
 import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
 
@@ -73,13 +72,6 @@ export function FailedTransactionsCorrelations({
 
   const { progress, response, startFetch, cancelFetch } =
     useFailedTransactionsCorrelations();
-
-  const fieldStats: Record<string, FieldStats> | undefined = useMemo(() => {
-    return response.fieldStats?.reduce((obj, field) => {
-      obj[field.fieldName] = field;
-      return obj;
-    }, {} as Record<string, FieldStats>);
-  }, [response?.fieldStats]);
 
   const { overallHistogram, hasData, status } = getOverallHistogram(
     response,
@@ -295,10 +287,9 @@ export function FailedTransactionsCorrelations({
         render: (_, { fieldName, fieldValue }) => (
           <>
             {fieldName}
-            <CorrelationsContextPopover
+            <FieldStatsPopover
               fieldName={fieldName}
               fieldValue={fieldValue}
-              topValueStats={fieldStats ? fieldStats[fieldName] : undefined}
               onAddFilter={onAddFilter}
             />
           </>
@@ -363,7 +354,7 @@ export function FailedTransactionsCorrelations({
         ],
       },
     ] as Array<EuiBasicTableColumn<FailedTransactionsCorrelation>>;
-  }, [fieldStats, onAddFilter, showStats]);
+  }, [onAddFilter, showStats]);
 
   useEffect(() => {
     if (progress.error) {

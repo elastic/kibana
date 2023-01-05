@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
@@ -51,6 +51,7 @@ export class JobCreator {
   protected _indexPattern: DataView;
   protected _savedSearch: SavedSearchSavedObject | null;
   protected _indexPatternTitle: IndexPatternTitle = '';
+  protected _indexPatternDisplayName: string = '';
   protected _job_config: Job;
   protected _calendars: Calendar[];
   protected _datafeed_config: Datafeed;
@@ -79,7 +80,11 @@ export class JobCreator {
   constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
-    this._indexPatternTitle = indexPattern.title;
+
+    const title = this._indexPattern.title;
+    const name = this._indexPattern.getName();
+    this._indexPatternDisplayName = name === title ? name : `${name} (${title})`;
+    this._indexPatternTitle = title;
 
     this._job_config = createEmptyJob();
     this._calendars = [];
@@ -102,6 +107,10 @@ export class JobCreator {
 
   public get indexPatternTitle(): string {
     return this._indexPatternTitle;
+  }
+
+  public get indexPatternDisplayName(): string {
+    return this._indexPatternDisplayName;
   }
 
   protected _addDetector(detector: Detector, agg: Aggregation, field: Field) {
@@ -466,6 +475,7 @@ export class JobCreator {
   }
 
   public get queryDelay(): string | null {
+    // @ts-expect-error `estypes.Duration = string | -1 | 0;`
     return this._datafeed_config.query_delay || null;
   }
 
@@ -478,6 +488,7 @@ export class JobCreator {
   }
 
   public get frequency(): string | null {
+    // @ts-expect-error `estypes.Duration = string | -1 | 0;`
     return this._datafeed_config.frequency || null;
   }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash/fp';
 import { Ecs } from '../../../../../common/ecs';
 import { Fields } from '../../../../../common/search_strategy';

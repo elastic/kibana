@@ -13,9 +13,8 @@ import { ComponentProps } from '../../route_init';
 import { BeatsTemplate } from './beats_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
-// @ts-ignore
 import { BeatsOverview } from '../../../components/beats/overview';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -23,7 +22,7 @@ export const BeatsOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
   }) as any;

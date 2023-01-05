@@ -6,25 +6,31 @@
  */
 import React from 'react';
 import {
+  EuiBottomBar,
   EuiButtonIcon,
   EuiSpacer,
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
+  EuiText,
   EuiTitle,
   EuiToolTip,
   PropsOf,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Serializable } from '@kbn/utility-types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
+import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import {
   FINDINGS_TABLE_CELL_ADD_FILTER,
   FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER,
 } from '../test_subjects';
+
+export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
 
 export const PageTitle: React.FC = ({ children }) => (
   <EuiTitle size="l">
@@ -56,8 +62,6 @@ export const getExpandColumn = <T extends unknown>({
   ],
 });
 
-export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
-
 const baseColumns = [
   {
     field: 'resource.id',
@@ -74,7 +78,7 @@ const baseColumns = [
       />
     ),
     truncateText: true,
-    width: '15%',
+    width: '150px',
     sortable: true,
     render: (filename: string) => (
       <EuiToolTip position="top" content={filename} anchorClassName="eui-textTruncate">
@@ -100,7 +104,8 @@ const baseColumns = [
       { defaultMessage: 'Resource Type' }
     ),
     sortable: true,
-    width: '150px',
+    truncateText: true,
+    width: '10%',
   },
   {
     field: 'resource.name',
@@ -109,6 +114,12 @@ const baseColumns = [
       { defaultMessage: 'Resource Name' }
     ),
     sortable: true,
+    truncateText: true,
+    render: (name: string) => (
+      <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
+        <>{name}</>
+      </EuiToolTip>
+    ),
   },
   {
     field: 'rule.name',
@@ -116,6 +127,21 @@ const baseColumns = [
       defaultMessage: 'Rule',
     }),
     sortable: true,
+    render: (name: string) => (
+      <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
+        <>{name}</>
+      </EuiToolTip>
+    ),
+  },
+  {
+    field: 'rule.benchmark.name',
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnLabel',
+      { defaultMessage: 'Benchmark' }
+    ),
+    width: '10%',
+    sortable: true,
+    truncateText: true,
   },
   {
     field: 'rule.section',
@@ -123,8 +149,14 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
       { defaultMessage: 'CIS Section' }
     ),
+    width: '7%',
     sortable: true,
     truncateText: true,
+    render: (section: string) => (
+      <EuiToolTip content={section} anchorClassName="eui-textTruncate">
+        <>{section}</>
+      </EuiToolTip>
+    ),
   },
   {
     field: 'cluster_id',
@@ -140,23 +172,25 @@ const baseColumns = [
         )}
       />
     ),
-    truncateText: true,
+    width: '150px',
     sortable: true,
+    truncateText: true,
+    render: (section: string) => (
+      <EuiToolTip content={section} anchorClassName="eui-textTruncate">
+        <>{section}</>
+      </EuiToolTip>
+    ),
   },
   {
     field: '@timestamp',
-    width: '150px',
+    width: '10%',
     name: i18n.translate(
       'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',
       { defaultMessage: 'Last Checked' }
     ),
     truncateText: true,
     sortable: true,
-    render: (timestamp: number) => (
-      <EuiToolTip position="top" content={timestamp}>
-        <span>{moment(timestamp).fromNow()}</span>
-      </EuiToolTip>
-    ),
+    render: (timestamp: number) => <TimestampTableCell timestamp={timestamp} />,
   },
 ] as const;
 
@@ -205,7 +239,9 @@ const FilterableCell: React.FC<{
       }
     `}
   >
-    <div className="__filter_value eui-textTruncate">{children}</div>
+    <div className="__filter_value eui-textTruncate" data-test-subj="filter_cell_value">
+      {children}
+    </div>
     <div
       className="__filter_buttons"
       css={css`
@@ -236,4 +272,21 @@ const FilterableCell: React.FC<{
       />
     </div>
   </div>
+);
+
+export const LimitedResultsBar = () => (
+  <>
+    <EuiSpacer size="xxl" />
+    <EuiBottomBar data-test-subj="test-bottom-bar">
+      <EuiText textAlign="center">
+        <FormattedMessage
+          id="xpack.csp.findings..bottomBarLabel"
+          defaultMessage="These are the first {maxItems} findings matching your search, refine your search to see others."
+          values={{
+            maxItems: MAX_FINDINGS_TO_LOAD,
+          }}
+        />
+      </EuiText>
+    </EuiBottomBar>
+  </>
 );

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { generatePath } from 'react-router-dom';
+import { useValues } from 'kea';
 
 import {
   CriteriaWithPagination,
@@ -17,16 +17,16 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n-react';
 
 import { Meta } from '../../../../../common/types';
-import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
+import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../shared/kibana';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
 import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { SEARCH_INDEX_PATH } from '../../routes';
 import { ElasticsearchViewIndex, IngestionMethod } from '../../types';
-import { crawlerStatusToColor, crawlerStatusToText } from '../../utils/crawler_status_helpers';
-import { ingestionMethodToText, isCrawlerIndex } from '../../utils/indices';
+import { ingestionMethodToText } from '../../utils/indices';
 import {
   ingestionStatusToColor,
   ingestionStatusToText,
@@ -39,106 +39,87 @@ const healthColorsMap = {
   yellow: 'warning',
 };
 
-const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
-  {
-    field: 'name',
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.name.columnTitle', {
-      defaultMessage: 'Index name',
-    }),
-    render: (name: string) => (
-      <EuiLinkTo
-        data-test-subj="search-index-link"
-        to={generatePath(SEARCH_INDEX_PATH, { indexName: name })}
-      >
-        {name}
-      </EuiLinkTo>
-    ),
-    sortable: true,
-    truncateText: true,
-  },
-  {
-    field: 'health',
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.health.columnTitle', {
-      defaultMessage: 'Index health',
-    }),
-    render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
-      <span>
-        <EuiIcon type="dot" color={healthColorsMap[health] ?? ''} />
-        &nbsp;{health ?? '-'}
-      </span>
-    ),
-    sortable: true,
-    truncateText: true,
-  },
-  {
-    field: 'total.docs.count',
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
-      defaultMessage: 'Docs count',
-    }),
-    sortable: true,
-    truncateText: true,
-  },
-  {
-    field: 'ingestionMethod',
-    name: i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.columnTitle',
-      {
-        defaultMessage: 'Ingestion method',
-      }
-    ),
-    render: (ingestionMethod: IngestionMethod) => (
-      <EuiText size="s">{ingestionMethodToText(ingestionMethod)}</EuiText>
-    ),
-    truncateText: true,
-  },
-  {
-    field: 'lastUpdated',
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.columnTitle', {
-      defaultMessage: 'Last updated',
-    }),
-    render: (dateString: string) => {
-      if (dateString === 'never') {
-        return (
-          <EuiText size="s">
-            {i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.never', {
-              defaultMessage: 'Never',
-            })}
-          </EuiText>
-        );
-      }
-      return dateString ? (
-        <FormattedRelative value={new Date(dateString)} />
-      ) : (
-        <EuiText size="s">
-          {i18n.translate('xpack.enterpriseSearch.content.searchIndices.lastUpdated.none', {
-            defaultMessage: 'Unknown',
-          })}
-        </EuiText>
-      );
-    },
-    sortable: true,
-    truncateText: true,
-  },
-  {
-    name: i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.columnTitle',
-      {
-        defaultMessage: 'Ingestion status',
-      }
-    ),
-    render: (index: ElasticsearchViewIndex) => {
-      const overviewPath = generatePath(SEARCH_INDEX_PATH, { indexName: index.name });
-      if (isCrawlerIndex(index)) {
-        const label = crawlerStatusToText(index.crawler?.most_recent_crawl_request_status);
+interface IndicesTableProps {
+  indices: ElasticsearchViewIndex[];
+  isLoading?: boolean;
+  meta: Meta;
+  onChange: (criteria: CriteriaWithPagination<ElasticsearchViewIndex>) => void;
+  onDelete: (index: ElasticsearchViewIndex) => void;
+}
 
-        return (
-          <EuiBadgeTo
-            to={overviewPath}
-            label={label}
-            color={crawlerStatusToColor(index.crawler?.most_recent_crawl_request_status)}
-          />
-        );
-      } else {
+export const IndicesTable: React.FC<IndicesTableProps> = ({
+  indices,
+  isLoading,
+  meta,
+  onChange,
+  onDelete,
+}) => {
+  const { navigateToUrl } = useValues(KibanaLogic);
+  const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
+    {
+      field: 'name',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.name.columnTitle', {
+        defaultMessage: 'Index name',
+      }),
+      render: (name: string) => (
+        <EuiLinkTo
+          data-test-subj="search-index-link"
+          to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: name })}
+        >
+          {name}
+        </EuiLinkTo>
+      ),
+      sortable: true,
+      truncateText: true,
+      width: '40%',
+    },
+    {
+      field: 'health',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.health.columnTitle', {
+        defaultMessage: 'Index health',
+      }),
+      render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
+        <span>
+          <EuiIcon type="dot" color={healthColorsMap[health] ?? ''} />
+          &nbsp;{health ?? '-'}
+        </span>
+      ),
+      sortable: true,
+      truncateText: true,
+      width: '10%',
+    },
+    {
+      field: 'count',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
+        defaultMessage: 'Docs count',
+      }),
+      sortable: true,
+      truncateText: true,
+      width: '10%',
+    },
+    {
+      field: 'ingestionMethod',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.columnTitle',
+        {
+          defaultMessage: 'Ingestion method',
+        }
+      ),
+      render: (ingestionMethod: IngestionMethod) => (
+        <EuiText size="s">{ingestionMethodToText(ingestionMethod)}</EuiText>
+      ),
+      truncateText: true,
+      width: '10%',
+    },
+    {
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.columnTitle',
+        {
+          defaultMessage: 'Ingestion status',
+        }
+      ),
+      render: (index: ElasticsearchViewIndex) => {
+        const overviewPath = generateEncodedPath(SEARCH_INDEX_PATH, { indexName: index.name });
         const label = ingestionStatusToText(index.ingestionStatus);
         return (
           <EuiBadgeTo
@@ -147,50 +128,77 @@ const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
             color={ingestionStatusToColor(index.ingestionStatus)}
           />
         );
-      }
-    },
-    truncateText: true,
-  },
-  {
-    actions: [
-      {
-        render: ({ name }) => (
-          <EuiButtonIconTo
-            aria-label={name}
-            iconType="eye"
-            data-test-subj="view-search-index-button"
-            to={generatePath(SEARCH_INDEX_PATH, {
-              indexName: name,
-            })}
-          />
-        ),
       },
-    ],
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
-      defaultMessage: 'Actions',
-    }),
-  },
-];
-
-interface IndicesTableProps {
-  indices: ElasticsearchViewIndex[];
-  isLoading: boolean;
-  meta: Meta;
-  onChange: (criteria: CriteriaWithPagination<ElasticsearchViewIndex>) => void;
-}
-
-export const IndicesTable: React.FC<IndicesTableProps> = ({
-  indices,
-  isLoading,
-  meta,
-  onChange,
-}) => (
-  <EuiBasicTable
-    items={indices}
-    columns={columns}
-    onChange={onChange}
-    pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
-    tableLayout="auto"
-    loading={isLoading}
-  />
-);
+      truncateText: true,
+      width: '15%',
+    },
+    {
+      actions: [
+        {
+          description: i18n.translate(
+            'xpack.enterpriseSearch.content.searchIndices.actions.viewIndex.title',
+            {
+              defaultMessage: 'View this index',
+            }
+          ),
+          icon: 'eye',
+          isPrimary: false,
+          name: (index) =>
+            i18n.translate(
+              'xpack.enterpriseSearch.content.searchIndices.actions.viewIndex.caption',
+              {
+                defaultMessage: 'View index {indexName}',
+                values: {
+                  indexName: index.name,
+                },
+              }
+            ),
+          onClick: (index) =>
+            navigateToUrl(
+              generateEncodedPath(SEARCH_INDEX_PATH, {
+                indexName: index.name,
+              })
+            ),
+          type: 'icon',
+        },
+        {
+          color: 'danger',
+          description: i18n.translate(
+            'xpack.enterpriseSearch.content.searchIndices.actions.deleteIndex.title',
+            {
+              defaultMessage: 'Delete this index',
+            }
+          ),
+          icon: 'trash',
+          isPrimary: false,
+          name: (index) =>
+            i18n.translate(
+              'xpack.enterpriseSearch.content.searchIndices.actions.deleteIndex.caption',
+              {
+                defaultMessage: 'Delete index {indexName}',
+                values: {
+                  indexName: index.name,
+                },
+              }
+            ),
+          onClick: (index) => onDelete(index),
+          type: 'icon',
+        },
+      ],
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
+        defaultMessage: 'Actions',
+      }),
+      width: '10%',
+    },
+  ];
+  return (
+    <EuiBasicTable
+      items={indices}
+      columns={columns}
+      onChange={onChange}
+      pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
+      tableLayout="fixed"
+      loading={isLoading}
+    />
+  );
+};

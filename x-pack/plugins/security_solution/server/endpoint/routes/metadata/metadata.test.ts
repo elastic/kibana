@@ -41,7 +41,7 @@ import type {
   AgentClient,
   PackageService,
   PackageClient,
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
 import {
   HOST_METADATA_GET_ROUTE,
@@ -62,7 +62,7 @@ import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 import { createMockAgentClient, createMockPackageService } from '@kbn/fleet-plugin/server/mocks';
 import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 class IndexNotFoundException extends Error {
   meta: { body: { error: { type: string } } };
@@ -112,7 +112,7 @@ describe('test endpoint routes', () => {
     startContract = createMockEndpointAppContextServiceStartContract();
 
     (
-      startContract.packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>
+      startContract.packagePolicyService as jest.Mocked<PackagePolicyClient>
     ).list.mockImplementation(() => {
       return Promise.resolve({
         items: [],
@@ -152,7 +152,7 @@ describe('test endpoint routes', () => {
     endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
     mockAgentService = startContract.agentService!;
     mockAgentClient = createMockAgentClient();
-    mockAgentService.asScoped = () => mockAgentClient;
+    mockAgentService.asInternalUser = mockAgentClient;
     mockAgentPolicyService = startContract.agentPolicyService!;
 
     registerEndpointRoutes(routerMock, {
@@ -219,7 +219,12 @@ describe('test endpoint routes', () => {
             kuery: 'not host.ip:10.140.73.246',
           },
         });
-
+        mockSavedObjectClient.find.mockResolvedValueOnce({
+          total: 0,
+          saved_objects: [],
+          page: 1,
+          per_page: 10,
+        });
         mockAgentClient.getAgentStatusById.mockResolvedValue('error');
         mockAgentClient.listAgents.mockResolvedValue(noUnenrolledAgent);
         mockAgentPolicyService.getByIds = jest.fn().mockResolvedValueOnce([]);
@@ -240,6 +245,7 @@ describe('test endpoint routes', () => {
 
         expect(esSearchMock).toHaveBeenCalledTimes(2);
         expect(esSearchMock.mock.calls[0][0]?.index).toEqual(METADATA_UNITED_INDEX);
+        // @ts-expect-error size not defined as top level property when using typesWithBodyKey
         expect(esSearchMock.mock.calls[0][0]?.size).toEqual(1);
         expect(esSearchMock.mock.calls[1][0]?.index).toEqual(METADATA_UNITED_INDEX);
         // @ts-expect-error partial definition
@@ -248,30 +254,6 @@ describe('test endpoint routes', () => {
             must: [
               {
                 bool: {
-                  filter: [
-                    {
-                      terms: {
-                        'united.agent.policy_id': [],
-                      },
-                    },
-                    {
-                      exists: {
-                        field: 'united.endpoint.agent.id',
-                      },
-                    },
-                    {
-                      exists: {
-                        field: 'united.agent.agent.id',
-                      },
-                    },
-                    {
-                      term: {
-                        'united.agent.active': {
-                          value: true,
-                        },
-                      },
-                    },
-                  ],
                   must_not: {
                     terms: {
                       'agent.id': [
@@ -280,6 +262,12 @@ describe('test endpoint routes', () => {
                       ],
                     },
                   },
+                  filter: [
+                    { terms: { 'united.agent.policy_id': [] } },
+                    { exists: { field: 'united.endpoint.agent.id' } },
+                    { exists: { field: 'united.agent.agent.id' } },
+                    { term: { 'united.agent.active': { value: true } } },
+                  ],
                 },
               },
               {
@@ -287,63 +275,19 @@ describe('test endpoint routes', () => {
                   should: [
                     {
                       bool: {
-                        filter: [
-                          {
-                            bool: {
-                              should: [
-                                {
-                                  exists: {
-                                    field: 'united.agent.upgrade_started_at',
-                                  },
-                                },
-                              ],
-                              minimum_should_match: 1,
-                            },
-                          },
-                          {
-                            bool: {
-                              must_not: {
-                                bool: {
-                                  should: [
-                                    {
-                                      exists: {
-                                        field: 'united.agent.upgraded_at',
-                                      },
-                                    },
-                                  ],
-                                  minimum_should_match: 1,
-                                },
-                              },
-                            },
-                          },
-                        ],
+                        should: [{ match: { status: 'updating' } }],
+                        minimum_should_match: 1,
                       },
                     },
                     {
                       bool: {
-                        must_not: {
-                          bool: {
-                            should: [
-                              {
-                                exists: {
-                                  field: 'united.agent.last_checkin',
-                                },
-                              },
-                            ],
-                            minimum_should_match: 1,
-                          },
-                        },
+                        should: [{ match: { status: 'unenrolling' } }],
+                        minimum_should_match: 1,
                       },
                     },
                     {
                       bool: {
-                        should: [
-                          {
-                            exists: {
-                              field: 'united.agent.unenrollment_started_at',
-                            },
-                          },
-                        ],
+                        should: [{ match: { status: 'enrolling' } }],
                         minimum_should_match: 1,
                       },
                     },
@@ -355,13 +299,7 @@ describe('test endpoint routes', () => {
                 bool: {
                   must_not: {
                     bool: {
-                      should: [
-                        {
-                          match: {
-                            'host.ip': '10.140.73.246',
-                          },
-                        },
-                      ],
+                      should: [{ match: { 'host.ip': '10.140.73.246' } }],
                       minimum_should_match: 1,
                     },
                   },
@@ -561,6 +499,25 @@ describe('test endpoint routes', () => {
         expect(endpointResultList.pageSize).toEqual(10);
       });
     });
+
+    it('should get forbidden if no security solution access', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest();
+
+      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+        path.startsWith(HOST_METADATA_LIST_ROUTE)
+      )!;
+
+      const contextOverrides = {
+        endpointAuthz: getEndpointAuthzInitialStateMock({ canReadSecuritySolution: false }),
+      };
+      await routeHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient, contextOverrides),
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockResponse.forbidden).toBeCalled();
+    });
   });
 
   describe('GET endpoint details route', () => {
@@ -587,7 +544,6 @@ describe('test endpoint routes', () => {
       expect(esSearchMock).toHaveBeenCalledTimes(1);
       expect(routeConfig.options).toEqual({
         authRequired: true,
-        tags: ['access:securitySolution'],
       });
       expect(mockResponse.notFound).toBeCalled();
       const message = mockResponse.notFound.mock.calls[0][0]?.body;
@@ -619,7 +575,6 @@ describe('test endpoint routes', () => {
       expect(esSearchMock).toHaveBeenCalledTimes(1);
       expect(routeConfig.options).toEqual({
         authRequired: true,
-        tags: ['access:securitySolution'],
       });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
@@ -654,7 +609,6 @@ describe('test endpoint routes', () => {
       expect(esSearchMock).toHaveBeenCalledTimes(1);
       expect(routeConfig.options).toEqual({
         authRequired: true,
-        tags: ['access:securitySolution'],
       });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
@@ -691,7 +645,6 @@ describe('test endpoint routes', () => {
       expect(esSearchMock).toHaveBeenCalledTimes(1);
       expect(routeConfig.options).toEqual({
         authRequired: true,
-        tags: ['access:securitySolution'],
       });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
@@ -726,10 +679,62 @@ describe('test endpoint routes', () => {
       expect(esSearchMock).toHaveBeenCalledTimes(1);
       expect(mockResponse.badRequest).toBeCalled();
     });
+
+    it('should work if no security solution access but has fleet access', async () => {
+      const response = legacyMetadataSearchResponseMock(
+        new EndpointDocGenerator().generateHostMetadata()
+      );
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: response.hits.hits[0]._id },
+      });
+      const esSearchMock = mockScopedClient.asInternalUser.search;
+
+      mockAgentClient.getAgent.mockResolvedValue(agentGenerator.generate({ status: 'online' }));
+      esSearchMock.mockResponseOnce(response);
+
+      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+        path.startsWith(HOST_METADATA_GET_ROUTE)
+      )!;
+
+      const contextOverrides = {
+        endpointAuthz: getEndpointAuthzInitialStateMock({
+          canReadSecuritySolution: false,
+        }),
+      };
+      await routeHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient, contextOverrides),
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toBeCalled();
+    });
+
+    it('should get forbidden if no security solution or fleet access', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest();
+
+      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+        path.startsWith(HOST_METADATA_GET_ROUTE)
+      )!;
+
+      const contextOverrides = {
+        endpointAuthz: getEndpointAuthzInitialStateMock({
+          canAccessFleet: false,
+          canReadSecuritySolution: false,
+        }),
+      };
+      await routeHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient, contextOverrides),
+        mockRequest,
+        mockResponse
+      );
+
+      expect(mockResponse.forbidden).toBeCalled();
+    });
   });
 
   describe('GET metadata transform stats route', () => {
-    it('should get forbidden if no fleet access', async () => {
+    it('should get forbidden if no security solution access', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
 
       [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
@@ -737,7 +742,7 @@ describe('test endpoint routes', () => {
       )!;
 
       const contextOverrides = {
-        endpointAuthz: getEndpointAuthzInitialStateMock({ canAccessEndpointManagement: false }),
+        endpointAuthz: getEndpointAuthzInitialStateMock({ canReadSecuritySolution: false }),
       };
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient, contextOverrides),

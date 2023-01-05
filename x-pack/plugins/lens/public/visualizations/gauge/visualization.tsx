@@ -12,30 +12,25 @@ import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
-import { DatatableRow } from '@kbn/expressions-plugin/common';
+import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
-import type { GaugeArguments } from '@kbn/expression-gauge-plugin/common';
-import { GaugeShapes, EXPRESSION_GAUGE_NAME } from '@kbn/expression-gauge-plugin/common';
+import type { GaugeExpressionFunctionDefinition } from '@kbn/expression-gauge-plugin/common';
+import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import {
   getGoalValue,
   getMaxValue,
   getMinValue,
   getValueFromAccessor,
-  VerticalBulletIcon,
-  HorizontalBulletIcon,
 } from '@kbn/expression-gauge-plugin/public';
-import type { DatasourceLayers, OperationMetadata, Visualization } from '../../types';
+import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
+import type { DatasourceLayers, OperationMetadata, Suggestion, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
-import {
-  GROUP_ID,
-  LENS_GAUGE_ID,
-  GaugeVisualizationState,
-  GaugeExpressionState,
-} from './constants';
+import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
 import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
-import { layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
 
@@ -56,14 +51,14 @@ export const isNumericDynamicMetric = (op: OperationMetadata) =>
 
 export const CHART_NAMES = {
   horizontalBullet: {
-    icon: HorizontalBulletIcon,
+    icon: IconChartHorizontalBullet,
     label: i18n.translate('xpack.lens.gaugeHorizontal.gaugeLabel', {
       defaultMessage: 'Gauge horizontal',
     }),
     groupLabel: groupLabelForGauge,
   },
   verticalBullet: {
-    icon: VerticalBulletIcon,
+    icon: IconChartVerticalBullet,
     label: i18n.translate('xpack.lens.gaugeVertical.gaugeLabel', {
       defaultMessage: 'Gauge vertical',
     }),
@@ -116,47 +111,36 @@ const toExpression = (
   paletteService: PaletteRegistry,
   state: GaugeVisualizationState,
   datasourceLayers: DatasourceLayers,
-  attributes?: Partial<Omit<GaugeArguments, keyof GaugeExpressionState | 'ariaLabel'>>,
+  attributes?: unknown,
   datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-  const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+  const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);
   if (!originalOrder || !state.metricAccessor) {
     return null;
   }
 
+  const gaugeFn = buildExpressionFunction<GaugeExpressionFunctionDefinition>('gauge', {
+    metric: state.metricAccessor,
+    min: state.minAccessor,
+    max: state.maxAccessor,
+    goal: state.goalAccessor,
+    shape: state.shape ?? GaugeShapes.HORIZONTAL_BULLET,
+    colorMode: state?.colorMode ?? 'none',
+    palette: state.palette?.params
+      ? paletteService.get(CUSTOM_PALETTE).toExpression(computePaletteParams(state.palette.params))
+      : undefined,
+    ticksPosition: state.ticksPosition ?? 'auto',
+    labelMinor: state.labelMinor,
+    labelMajor: state.labelMajor,
+    labelMajorMode: state.labelMajorMode ?? 'auto',
+  });
+
   return {
     type: 'expression',
-    chain: [
-      ...(datasourceExpression?.chain ?? []),
-      {
-        type: 'function',
-        function: EXPRESSION_GAUGE_NAME,
-        arguments: {
-          metric: state.metricAccessor ? [state.metricAccessor] : [],
-          min: state.minAccessor ? [state.minAccessor] : [],
-          max: state.maxAccessor ? [state.maxAccessor] : [],
-          goal: state.goalAccessor ? [state.goalAccessor] : [],
-          shape: [state.shape ?? GaugeShapes.HORIZONTAL_BULLET],
-          colorMode: [state?.colorMode ?? 'none'],
-          palette: state.palette?.params
-            ? [
-                paletteService
-                  .get(CUSTOM_PALETTE)
-                  .toExpression(
-                    computePaletteParams((state.palette?.params || {}) as CustomPaletteParams)
-                  ),
-              ]
-            : [],
-          ticksPosition: state.ticksPosition ? [state.ticksPosition] : ['auto'],
-          labelMinor: state.labelMinor ? [state.labelMinor] : [],
-          labelMajor: state.labelMajor ? [state.labelMajor] : [],
-          labelMajorMode: state.labelMajorMode ? [state.labelMajorMode] : ['auto'],
-        },
-      },
-    ],
+    chain: [...(datasourceExpression?.chain ?? []), gaugeFn.toAst()],
   };
 };
 
@@ -216,7 +200,7 @@ export const getGaugeVisualization = ({
     return (
       state || {
         layerId: addNewLayer(),
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,
         palette: mainPalette,
         ticksPosition: 'auto',
@@ -249,40 +233,57 @@ export const getGaugeVisualization = ({
     return {
       groups: [
         {
-          supportFieldFormat: true,
+          enableFormatSelector: true,
           layerId: state.layerId,
           groupId: GROUP_ID.METRIC,
           groupLabel: i18n.translate('xpack.lens.gauge.metricLabel', {
             defaultMessage: 'Metric',
           }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
+          isMetricDimension: true,
           accessors: metricAccessor
             ? [
                 palette
                   ? {
                       columnId: metricAccessor,
-                      triggerIcon: 'colorBy',
+                      triggerIconType: 'colorBy',
                       palette,
                     }
                   : {
                       columnId: metricAccessor,
-                      triggerIcon: 'none',
+                      triggerIconType: 'none',
                     },
               ]
             : [],
           filterOperations: isNumericDynamicMetric,
           supportsMoreColumns: !metricAccessor,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsGauge_metricDimensionPanel',
           enableDimensionEditor: true,
         },
         {
           supportStaticValue: true,
-          supportFieldFormat: false,
+          enableFormatSelector: false,
           layerId: state.layerId,
           groupId: GROUP_ID.MIN,
           groupLabel: i18n.translate('xpack.lens.gauge.minValueLabel', {
             defaultMessage: 'Minimum value',
           }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.minValueLabel', {
+                defaultMessage: 'Minimum value',
+              }),
+            ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
+          isMetricDimension: true,
           accessors: state.minAccessor ? [{ columnId: state.minAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.minAccessor,
@@ -293,12 +294,23 @@ export const getGaugeVisualization = ({
         },
         {
           supportStaticValue: true,
-          supportFieldFormat: false,
+          enableFormatSelector: false,
           layerId: state.layerId,
           groupId: GROUP_ID.MAX,
           groupLabel: i18n.translate('xpack.lens.gauge.maxValueLabel', {
             defaultMessage: 'Maximum value',
           }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.maxValueLabel', {
+                defaultMessage: 'Maximum value',
+              }),
+            ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
+          isMetricDimension: true,
           accessors: state.maxAccessor ? [{ columnId: state.maxAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.maxAccessor,
@@ -309,16 +321,27 @@ export const getGaugeVisualization = ({
         },
         {
           supportStaticValue: true,
-          supportFieldFormat: false,
+          enableFormatSelector: false,
           layerId: state.layerId,
           groupId: GROUP_ID.GOAL,
           groupLabel: i18n.translate('xpack.lens.gauge.goalValueLabel', {
             defaultMessage: 'Goal value',
           }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.goalValueLabel', {
+                defaultMessage: 'Goal value',
+              }),
+            ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
+          isMetricDimension: true,
           accessors: state.goalAccessor ? [{ columnId: state.goalAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.goalAccessor,
-          required: false,
+          requiredMinDimensionCount: 0,
           dataTestSubj: 'lnsGauge_goalDimensionPanel',
         },
       ],
@@ -398,7 +421,7 @@ export const getGaugeVisualization = ({
 
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.gauge.addLayer', {
           defaultMessage: 'Visualization',
         }),
@@ -508,5 +531,83 @@ export const getGaugeVisualization = ({
     }
 
     return warnings;
+  },
+
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as Array<
+      Suggestion<GaugeVisualizationState, FormBasedPersistedState>
+    >;
+    const suggestion: Suggestion<GaugeVisualizationState, FormBasedPersistedState> = {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState?.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...(context.configuration as GaugeVisualizationState),
+      },
+    };
+    return suggestion;
+  },
+
+  getVisualizationInfo(state: GaugeVisualizationState) {
+    const dimensions = [];
+    if (state.metricAccessor) {
+      dimensions.push({
+        id: state.metricAccessor,
+        name: i18n.translate('xpack.lens.gauge.metricLabel', {
+          defaultMessage: 'Metric',
+        }),
+        dimensionType: 'metric',
+      });
+    }
+
+    if (state.maxAccessor) {
+      dimensions.push({
+        id: state.maxAccessor,
+        name: i18n.translate('xpack.lens.gauge.maxValueLabel', {
+          defaultMessage: 'Maximum value',
+        }),
+        dimensionType: 'max',
+      });
+    }
+
+    if (state.minAccessor) {
+      dimensions.push({
+        id: state.minAccessor,
+        name: i18n.translate('xpack.lens.gauge.minValueLabel', {
+          defaultMessage: 'Minimum value',
+        }),
+        dimensionType: 'min',
+      });
+    }
+
+    if (state.goalAccessor) {
+      dimensions.push({
+        id: state.goalAccessor,
+        name: i18n.translate('xpack.lens.gauge.goalValueLabel', {
+          defaultMessage: 'Goal value',
+        }),
+        dimensionType: 'goal',
+      });
+    }
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: state.shape,
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
   },
 });

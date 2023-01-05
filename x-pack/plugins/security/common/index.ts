@@ -27,4 +27,6 @@ export type {
   UserProfileUserInfoWithSecurity,
   ApiKey,
   UserRealm,
+  GetUserDisplayNameParams,
 } from './model';
+export { getUserDisplayName } from './model';

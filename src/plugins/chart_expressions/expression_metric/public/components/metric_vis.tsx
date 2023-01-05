@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -18,13 +18,14 @@ import {
   isMetricElementEvent,
   RenderChangeListener,
   Settings,
+  MetricWTrend,
+  MetricWNumber,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type {
   Datatable,
   DatatableColumn,
-  DatatableRow,
   IInterpreterRenderHandlers,
   RenderMode,
 } from '@kbn/expressions-plugin/common';
@@ -34,6 +35,8 @@ import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/commo
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useResizeObserver, useEuiScrollBar } from '@elastic/eui';
+import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import {
   getPaletteService,
@@ -79,7 +82,10 @@ const getMetricFormatter = (
   columns: Datatable['columns']
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const formatId = serializedFieldFormat?.id ?? 'number';
+  const formatId =
+    (serializedFieldFormat?.id === 'suffix'
+      ? serializedFieldFormat.params?.id
+      : serializedFieldFormat?.id) ?? 'number';
 
   if (
     !['number', 'currency', 'percent', 'bytes', 'duration', 'string', 'null'].includes(formatId)
@@ -159,20 +165,16 @@ const getColor = (
   data: Datatable,
   rowNumber: number
 ) => {
-  let minBound = paletteParams.rangeMin;
-  let maxBound = paletteParams.rangeMax;
-
   const { min, max } = getDataBoundsForPalette(accessors, data, rowNumber);
-  minBound = min;
-  maxBound = max;
 
   return getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
-    min: minBound,
-    max: maxBound,
+    min,
+    max,
   });
 };
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
+  const column = table.columns[columnIdx];
   return {
     name: 'filter',
     data: {
@@ -181,6 +183,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
           table,
           column: columnIdx,
           row: rowIdx,
+          value: table.rows[rowIdx][column.id],
         },
       ],
     },
@@ -223,36 +226,29 @@ export const MetricVis = ({
       .getConverterFor('text');
   }
 
-  let getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({});
-
   const maxColId = config.dimensions.max
     ? getColumnByAccessor(config.dimensions.max, data.columns)?.id
     : undefined;
-  if (maxColId) {
-    getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({
-      domainMax: _row[maxColId],
-      progressBarDirection: config.metric.progressDirection,
-    });
-  }
 
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
   ).map((row, rowIdx) => {
-    const value = row[primaryMetricColumn.id];
+    const value: number = row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
     const title = breakdownByColumn
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
-    return {
+    const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
+    const baseMetric: MetricWNumber = {
       value,
       valueFormatter: formatPrimaryMetric,
       title,
       subtitle,
       extra: (
         <span>
-          {config.metric.secondaryPrefix}
+          {secondaryPrefix}
           {secondaryMetricColumn
-            ? `${config.metric.secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
+            ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
                 row[secondaryMetricColumn.id]
               )}`
             : undefined}
@@ -272,8 +268,39 @@ export const MetricVis = ({
               rowIdx
             ) ?? defaultColor
           : config.metric.color ?? defaultColor,
-      ...getProgressBarConfig(row),
     };
+
+    const trendId = breakdownByColumn ? row[breakdownByColumn.id] : DEFAULT_TRENDLINE_NAME;
+    if (config.metric.trends && config.metric.trends[trendId]) {
+      const metricWTrend: MetricWTrend = {
+        ...baseMetric,
+        trend: config.metric.trends[trendId],
+        trendShape: 'area',
+        trendA11yTitle: i18n.translate('expressionMetricVis.trendA11yTitle', {
+          defaultMessage: '{dataTitle} over time.',
+          values: {
+            dataTitle: primaryMetricColumn.name,
+          },
+        }),
+        trendA11yDescription: i18n.translate('expressionMetricVis.trendA11yDescription', {
+          defaultMessage: 'A line chart showing the trend of the primary metric over time.',
+        }),
+      };
+
+      return metricWTrend;
+    }
+
+    if (maxColId && config.metric.progressDirection) {
+      const metricWProgress: MetricWProgress = {
+        ...baseMetric,
+        domainMax: row[maxColId],
+        progressBarDirection: config.metric.progressDirection,
+      };
+
+      return metricWProgress;
+    }
+
+    return baseMetric;
   });
 
   if (config.metric.minTiles) {
@@ -307,53 +334,74 @@ export const MetricVis = ({
     pixelWidth = grid[0]?.length * maxTileSideLength;
   }
 
-  // force chart to re-render to circumvent a charts bug
-  const magicKey = useRef(0);
+  const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollDimensions = useResizeObserver(scrollContainerRef.current);
+
+  const baseTheme = getThemeService().useChartsBaseTheme();
+
+  const minHeight = chartTheme.metric?.minHeight ?? baseTheme.metric.minHeight;
+
   useEffect(() => {
-    magicKey.current++;
-  }, [data]);
+    const minimumRequiredVerticalSpace = minHeight * grid.length;
+    setScrollChildHeight(
+      (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
+        ? '100%'
+        : `${minimumRequiredVerticalSpace}px`
+    );
+  }, [grid.length, minHeight, scrollDimensions.height]);
 
   return (
     <div
+      ref={scrollContainerRef}
       css={css`
         height: ${pixelHeight ? `${pixelHeight}px` : '100%'};
         width: ${pixelWidth ? `${pixelWidth}px` : '100%'};
         max-height: 100%;
         max-width: 100%;
+        overflow-y: auto;
+        ${useEuiScrollBar()}
       `}
     >
-      <Chart key={magicKey.current}>
-        <Settings
-          theme={[
-            {
-              background: { color: 'transparent' },
-              metric: {
-                background: defaultColor,
-                barBackground: euiThemeVars.euiColorLightShade,
+      <div
+        css={css`
+          height: ${scrollChildHeight};
+        `}
+      >
+        <Chart>
+          <Settings
+            theme={[
+              {
+                background: { color: 'transparent' },
+                metric: {
+                  background: defaultColor,
+                  barBackground: euiThemeVars.euiColorLightShade,
+                },
               },
-            },
-            chartTheme,
-          ]}
-          onRenderChange={onRenderChange}
-          onElementClick={(events) => {
-            if (!filterable) {
-              return;
-            }
-            events.forEach((event) => {
-              if (isMetricElementEvent(event)) {
-                const colIdx = breakdownByColumn
-                  ? data.columns.findIndex((col) => col === breakdownByColumn)
-                  : data.columns.findIndex((col) => col === primaryMetricColumn);
-                const rowLength = grid[0].length;
-                fireEvent(
-                  buildFilterEvent(event.rowIndex * rowLength + event.columnIndex, colIdx, data)
-                );
+              chartTheme,
+            ]}
+            baseTheme={baseTheme}
+            onRenderChange={onRenderChange}
+            onElementClick={(events) => {
+              if (!filterable) {
+                return;
               }
-            });
-          }}
-        />
-        <Metric id="metric" data={grid} />
-      </Chart>
+              events.forEach((event) => {
+                if (isMetricElementEvent(event)) {
+                  const colIdx = breakdownByColumn
+                    ? data.columns.findIndex((col) => col === breakdownByColumn)
+                    : data.columns.findIndex((col) => col === primaryMetricColumn);
+                  const rowLength = grid[0].length;
+                  fireEvent(
+                    buildFilterEvent(event.rowIndex * rowLength + event.columnIndex, colIdx, data)
+                  );
+                }
+              });
+            }}
+          />
+          <Metric id="metric" data={grid} />
+        </Chart>
+      </div>
     </div>
   );
 };

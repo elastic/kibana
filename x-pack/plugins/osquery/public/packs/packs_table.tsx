@@ -69,12 +69,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
   }
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      initialFocus={false}
-    >
+    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiText size="s">
         {agentPolicyIds?.map((policyId) => (
           <div key={policyId}>
@@ -131,9 +126,20 @@ const PacksTableComponent = () => {
   );
 
   const renderPlayAction = useCallback(
-    (item, enabled) => (
-      <EuiButtonIcon iconType="play" onClick={handlePlayClick(item)} isDisabled={!enabled} />
-    ),
+    (item, enabled) => {
+      const playText = i18n.translate('xpack.osquery.packs.table.runActionAriaLabel', {
+        defaultMessage: 'Run {packName}',
+        values: {
+          packName: item.attributes.name,
+        },
+      });
+
+      return (
+        <EuiToolTip position="top" content={playText}>
+          <EuiButtonIcon iconType="play" onClick={handlePlayClick(item)} isDisabled={!enabled} />
+        </EuiToolTip>
+      );
+    },
     [handlePlayClick]
   );
 

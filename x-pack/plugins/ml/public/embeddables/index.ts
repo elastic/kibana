@@ -13,6 +13,8 @@ import { AnomalyChartsEmbeddableFactory } from './anomaly_charts';
 export * from './constants';
 export * from './types';
 
+export { getEmbeddableComponent } from './get_embeddable_component';
+
 export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSetup) {
   const anomalySwimlaneEmbeddableFactory = new AnomalySwimlaneEmbeddableFactory(
     core.getStartServices

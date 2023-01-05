@@ -7,12 +7,13 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { Query, AggregateQuery } from '@kbn/es-query';
 import { SerializableRecord } from '@kbn/utility-types';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { AggConfigSerialized, IAggConfigs } from '../../../public';
+import type { AggConfigSerialized, IAggConfigs, ISearchOptions } from '../../../public';
 import type { SearchSource } from './search_source';
 
 /**
@@ -38,6 +39,9 @@ export interface ISearchStartSearchSource
   createEmpty: () => ISearchSource;
 }
 
+/**
+ * @deprecated use {@link estypes.SortResults} instead.
+ */
 export type EsQuerySearchAfter = [string | number, string | number];
 
 export enum SortDirection {
@@ -111,9 +115,13 @@ export interface SearchSourceFields {
    * {@link IndexPatternService}
    */
   index?: DataView;
-  searchAfter?: EsQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;
+  searchAfter?: estypes.SortResults;
+  /**
+   * Allow querying to use a point-in-time ID for paging results
+   */
+  pit?: estypes.SearchPointInTimeReference;
 
   parent?: SearchSourceFields;
 }
@@ -159,7 +167,7 @@ export type SerializedSearchSourceFields = {
    * {@link IndexPatternService}
    */
   index?: string | DataViewSpec;
-  searchAfter?: EsQuerySearchAfter;
+  searchAfter?: estypes.SortResults;
   timeout?: string;
   terminate_after?: number;
 
@@ -225,4 +233,23 @@ export function isSerializedSearchSource(
     maybeSerializedSearchSource !== null &&
     !Array.isArray(maybeSerializedSearchSource)
   );
+}
+
+export interface IInspectorInfo {
+  adapter?: RequestAdapter;
+  title: string;
+  id?: string;
+  description?: string;
+}
+
+export interface SearchSourceSearchOptions extends ISearchOptions {
+  /**
+   * Inspector integration options
+   */
+  inspector?: IInspectorInfo;
+
+  /**
+   * Disable default warnings of shard failures
+   */
+  disableShardFailureWarning?: boolean;
 }

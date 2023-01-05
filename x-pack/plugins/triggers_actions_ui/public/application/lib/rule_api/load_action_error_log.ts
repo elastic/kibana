@@ -9,6 +9,7 @@ import { HttpSetup } from '@kbn/core/public';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IExecutionErrorsResult, ActionErrorLogSortFields } from '@kbn/alerting-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { getFilter } from './get_filter';
 
 export type SortField = Record<
   ActionErrorLogSortFields,
@@ -27,6 +28,8 @@ export interface LoadActionErrorLogProps {
   perPage?: number;
   page?: number;
   sort?: SortField[];
+  namespace?: string;
+  withAuth?: boolean;
 }
 
 const SORT_MAP: Record<string, string> = {
@@ -49,21 +52,6 @@ const getRenamedSort = (sort?: SortField[]) => {
   });
 };
 
-// TODO (Jiawei): Use node builder instead of strings
-const getFilter = ({ runId, message }: { runId?: string; message?: string }) => {
-  const filter: string[] = [];
-
-  if (runId) {
-    filter.push(`kibana.alert.rule.execution.uuid: ${runId}`);
-  }
-
-  if (message) {
-    filter.push(`message: "${message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&')}"`);
-  }
-
-  return filter;
-};
-
 export const loadActionErrorLog = ({
   id,
   http,
@@ -74,6 +62,8 @@ export const loadActionErrorLog = ({
   perPage = 10,
   page = 0,
   sort,
+  namespace,
+  withAuth = false,
 }: LoadActionErrorLogProps & { http: HttpSetup }) => {
   const renamedSort = getRenamedSort(sort);
   const filter = getFilter({ runId, message });
@@ -90,6 +80,8 @@ export const loadActionErrorLog = ({
         // whereas data grid sorts are 0 indexed.
         page: page + 1,
         sort: renamedSort.length ? JSON.stringify(renamedSort) : undefined,
+        namespace,
+        with_auth: withAuth,
       },
     }
   );

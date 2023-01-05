@@ -7,6 +7,7 @@
 
 import type { DeletePackagePoliciesResponse, NewPackagePolicy, PackagePolicy } from './types';
 import type { FleetAuthz } from './authz';
+import { ENDPOINT_PRIVILEGES } from './constants';
 
 export const createNewPackagePolicyMock = (): NewPackagePolicy => {
   return {
@@ -15,7 +16,6 @@ export const createNewPackagePolicyMock = (): NewPackagePolicy => {
     namespace: 'default',
     enabled: true,
     policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
-    output_id: '',
     package: {
       name: 'endpoint',
       title: 'Elastic Endpoint',
@@ -62,6 +62,15 @@ export const deletePackagePolicyMock = (): DeletePackagePoliciesResponse => {
  * Creates mock `authz` object
  */
 export const createFleetAuthzMock = (): FleetAuthz => {
+  const endpointActions = ENDPOINT_PRIVILEGES.reduce((acc, privilege) => {
+    return {
+      ...acc,
+      [privilege]: {
+        executePackageAction: true,
+      },
+    };
+  }, {});
+
   return {
     fleet: {
       all: true,
@@ -80,6 +89,11 @@ export const createFleetAuthzMock = (): FleetAuthz => {
       writePackageSettings: true,
       readIntegrationPolicies: true,
       writeIntegrationPolicies: true,
+    },
+    packagePrivileges: {
+      endpoint: {
+        actions: endpointActions,
+      },
     },
   };
 };

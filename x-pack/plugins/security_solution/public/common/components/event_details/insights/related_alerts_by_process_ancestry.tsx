@@ -6,8 +6,10 @@
  */
 
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
-import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBetaBadge, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
+import type { Filter } from '@kbn/es-query';
+import { isActiveTimeline } from '../../../../helpers';
 import type { DataProvider } from '../../../../../common/types';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { getDataProvider } from '../table/use_action_cell_data_provider';
@@ -16,17 +18,28 @@ import { InsightAccordion } from './insight_accordion';
 import { SimpleAlertTable } from './simple_alert_table';
 import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_button';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { PROCESS_ANCESTRY, PROCESS_ANCESTRY_COUNT, PROCESS_ANCESTRY_ERROR } from './translations';
+import {
+  PROCESS_ANCESTRY,
+  PROCESS_ANCESTRY_COUNT,
+  PROCESS_ANCESTRY_EMPTY,
+  PROCESS_ANCESTRY_ERROR,
+  PROCESS_ANCESTRY_FILTER,
+} from './translations';
+import { BETA } from '../../../translations';
 
 interface Props {
   data: TimelineEventsDetailsItem;
   eventId: string;
-  timelineId?: string;
+  index: TimelineEventsDetailsItem;
+  originalDocumentId: TimelineEventsDetailsItem;
+  scopeId?: string;
 }
 
 interface Cache {
   alertIds: string[];
 }
+
+const dataProviderLimit = 5;
 
 /**
  * Fetches and displays alerts that were generated in the associated process'
@@ -56,53 +69,58 @@ interface Cache {
  * Due to the ephemeral nature of the data, it was decided to keep the
  * state inside the component rather than to add it to Redux.
  */
-export const RelatedAlertsByProcessAncestry = React.memo<Props>(({ data, eventId, timelineId }) => {
-  const [showContent, setShowContent] = useState(false);
-  const [cache, setCache] = useState<Partial<Cache>>({});
+export const RelatedAlertsByProcessAncestry = React.memo<Props>(
+  ({ data, originalDocumentId, index, eventId, scopeId }) => {
+    const [showContent, setShowContent] = useState(false);
+    const [cache, setCache] = useState<Partial<Cache>>({});
 
-  const onToggle = useCallback((isOpen: boolean) => setShowContent(isOpen), []);
+    const onToggle = useCallback((isOpen: boolean) => setShowContent(isOpen), []);
 
-  // Makes sure the component is not fetching data before the accordion
-  // has been openend.
-  const renderContent = useCallback(() => {
-    if (!showContent) {
-      return null;
-    } else if (cache.alertIds) {
+    // Makes sure the component is not fetching data before the accordion
+    // has been openend.
+    const renderContent = useCallback(() => {
+      if (!showContent) {
+        return null;
+      } else if (cache.alertIds) {
+        return (
+          <ActualRelatedAlertsByProcessAncestry
+            eventId={eventId}
+            scopeId={scopeId}
+            alertIds={cache.alertIds}
+          />
+        );
+      }
       return (
-        <ActualRelatedAlertsByProcessAncestry
+        <FetchAndNotifyCachedAlertsByProcessAncestry
+          data={data}
+          index={index}
+          originalDocumentId={originalDocumentId}
           eventId={eventId}
-          timelineId={timelineId}
-          alertIds={cache.alertIds}
+          isActiveTimelines={isActiveTimeline(scopeId ?? '')}
+          onCacheLoad={setCache}
         />
       );
-    }
+    }, [showContent, cache.alertIds, data, index, originalDocumentId, eventId, scopeId]);
+
+    const betaBadge = useMemo(() => <EuiBetaBadge size="s" label={BETA} color="subdued" />, []);
+
     return (
-      <FetchAndNotifyCachedAlertsByProcessAncestry
-        data={data}
-        eventId={eventId}
-        timelineId={timelineId}
-        onCacheLoad={setCache}
+      <InsightAccordion
+        prefix="RelatedAlertsByProcessAncestry"
+        // `renderContent` and the associated sub-components are making sure to
+        // render the correct loading and error states so we can omit these states here
+        state="success"
+        text={
+          // If we have fetched the alerts, display the count here, otherwise omit the count
+          cache.alertIds ? PROCESS_ANCESTRY_COUNT(cache.alertIds.length) : PROCESS_ANCESTRY
+        }
+        renderContent={renderContent}
+        onToggle={onToggle}
+        extraAction={betaBadge}
       />
     );
-  }, [showContent, cache, data, eventId, timelineId]);
-
-  const isEmpty = !!cache.alertIds && cache.alertIds.length === 0;
-
-  return (
-    <InsightAccordion
-      prefix="RelatedAlertsByProcessAncestry"
-      // `renderContent` and the associated sub-components are making sure to
-      // render the correct loading and error states so we can omit these states here
-      state={isEmpty ? 'empty' : 'success'}
-      text={
-        // If we have fetched the alerts, display the count here, otherwise omit the count
-        cache.alertIds ? PROCESS_ANCESTRY_COUNT(cache.alertIds.length) : PROCESS_ANCESTRY
-      }
-      renderContent={renderContent}
-      onToggle={onToggle}
-    />
-  );
-});
+  }
+);
 
 RelatedAlertsByProcessAncestry.displayName = 'RelatedAlertsByProcessAncestry';
 
@@ -112,13 +130,25 @@ RelatedAlertsByProcessAncestry.displayName = 'RelatedAlertsByProcessAncestry';
 const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
   data: TimelineEventsDetailsItem;
   eventId: string;
-  timelineId?: string;
+  index: TimelineEventsDetailsItem;
+  originalDocumentId: TimelineEventsDetailsItem;
+  isActiveTimelines: boolean;
   onCacheLoad: (cache: Cache) => void;
-}> = ({ data, timelineId, onCacheLoad, eventId }) => {
-  const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree(eventId, timelineId);
+}> = ({ data, originalDocumentId, index, isActiveTimelines, onCacheLoad, eventId }) => {
+  const { values: wrappedProcessEntityId } = data;
+  const { values: indices } = index;
+  const { values: wrappedDocumentId } = originalDocumentId;
+  const documentId = Array.isArray(wrappedDocumentId) ? wrappedDocumentId[0] : '';
+  const processEntityId = Array.isArray(wrappedProcessEntityId) ? wrappedProcessEntityId[0] : '';
+  const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree({
+    processEntityId,
+    isActiveTimeline: isActiveTimelines,
+    documentId,
+    indices: indices ?? [],
+  });
 
   useEffect(() => {
-    if (alertIds) {
+    if (alertIds && alertIds.length !== 0) {
       onCacheLoad({ alertIds });
     }
   }, [alertIds, onCacheLoad]);
@@ -127,6 +157,8 @@ const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
     return <EuiLoadingSpinner />;
   } else if (error) {
     return <>{PROCESS_ANCESTRY_ERROR}</>;
+  } else if (!alertIds || alertIds.length === 0) {
+    return <>{PROCESS_ANCESTRY_EMPTY}</>;
   }
 
   return null;
@@ -141,20 +173,57 @@ FetchAndNotifyCachedAlertsByProcessAncestry.displayName =
 const ActualRelatedAlertsByProcessAncestry: React.FC<{
   alertIds: string[];
   eventId: string;
-  timelineId?: string;
-}> = ({ alertIds, eventId, timelineId }) => {
+  scopeId?: string;
+}> = ({ alertIds, eventId, scopeId }) => {
+  const shouldUseFilters = alertIds && alertIds.length && alertIds.length >= dataProviderLimit;
   const dataProviders = useMemo(() => {
     if (alertIds && alertIds.length) {
-      return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
-        const id = `${timelineId}-${eventId}-event.id-${index}-${alertId}`;
-        result.push(getDataProvider('_id', id, alertId));
-        return result;
-      }, []);
+      if (shouldUseFilters) {
+        return null;
+      } else {
+        return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
+          const id = `${scopeId}-${eventId}-event.id-${index}-${alertId}`;
+          result.push(getDataProvider('_id', id, alertId));
+          return result;
+        }, []);
+      }
     }
     return null;
-  }, [alertIds, eventId, timelineId]);
+  }, [alertIds, shouldUseFilters, scopeId, eventId]);
 
-  if (!dataProviders) {
+  const filters: Filter[] | null = useMemo(() => {
+    if (shouldUseFilters) {
+      return [
+        {
+          meta: {
+            alias: PROCESS_ANCESTRY_FILTER,
+            type: 'phrases',
+            key: '_id',
+            params: [...alertIds],
+            negate: false,
+            disabled: false,
+            value: alertIds.join(),
+          },
+          query: {
+            bool: {
+              should: alertIds.map((id) => {
+                return {
+                  match_phrase: {
+                    _id: id,
+                  },
+                };
+              }),
+              minimum_should_match: 1,
+            },
+          },
+        },
+      ];
+    } else {
+      return null;
+    }
+  }, [alertIds, shouldUseFilters]);
+
+  if (!dataProviders && !filters) {
     return null;
   }
 
@@ -162,7 +231,12 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
     <>
       <SimpleAlertTable alertIds={alertIds} />
       <EuiSpacer />
-      <InvestigateInTimelineButton asEmptyButton={false} dataProviders={dataProviders}>
+      <InvestigateInTimelineButton
+        asEmptyButton={false}
+        dataProviders={dataProviders}
+        filters={filters}
+        data-test-subj="investigate-ancestry-in-timeline"
+      >
         {ACTION_INVESTIGATE_IN_TIMELINE}
       </InvestigateInTimelineButton>
     </>

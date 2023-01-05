@@ -158,7 +158,8 @@ export async function findListItems(
   visTypes: Pick<TypesStart, 'get' | 'getAliases'>,
   search: string,
   size: number,
-  references?: SavedObjectsFindOptionsReference[]
+  references?: SavedObjectsFindOptionsReference[],
+  referencesToExclude?: SavedObjectsFindOptionsReference[]
 ) {
   const visAliases = visTypes.getAliases();
   const extensions = visAliases
@@ -180,6 +181,7 @@ export async function findListItems(
     page: 1,
     defaultSearchOperator: 'AND' as 'AND',
     hasReference: references,
+    hasNoReference: referencesToExclude,
   };
 
   const { total, savedObjects } = await savedObjectsClient.find<SavedObjectAttributes>(
@@ -370,10 +372,8 @@ export async function saveVisualization(
 
   try {
     await checkForDuplicateTitle(
-      {
-        ...savedObject,
-        copyOnSave,
-      } as any,
+      savedObject,
+      copyOnSave,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
       services as any

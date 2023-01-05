@@ -98,6 +98,7 @@ export interface IVectorLayer extends ILayer {
   hasJoins(): boolean;
   showJoinEditor(): boolean;
   canShowTooltip(): boolean;
+  areTooltipsDisabled(): boolean;
   supportsFeatureEditing(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
   addFeature(geometry: Geometry | Position[]): Promise<void>;
@@ -115,13 +116,15 @@ export const NO_RESULTS_ICON_AND_TOOLTIPCONTENT = {
 export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   protected readonly _style: VectorStyle;
   private readonly _joins: InnerJoin[];
+  protected readonly _descriptor: VectorLayerDescriptor;
 
   static createDescriptor(
     options: Partial<VectorLayerDescriptor>,
     mapColors?: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
-    layerDescriptor.type = LAYER_TYPE.GEOJSON_VECTOR;
+    layerDescriptor.type =
+      layerDescriptor.type !== undefined ? layerDescriptor.type : LAYER_TYPE.GEOJSON_VECTOR;
 
     if (!options.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
@@ -131,6 +134,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     if (!options.joins) {
       layerDescriptor.joins = [];
     }
+
+    layerDescriptor.disableTooltips = options.disableTooltips ?? false;
 
     return layerDescriptor;
   }
@@ -147,6 +152,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       source,
     });
     this._joins = joins;
+    this._descriptor = AbstractVectorLayer.createDescriptor(layerDescriptor);
     this._style = new VectorStyle(
       layerDescriptor.style,
       source,
@@ -156,8 +162,13 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     );
   }
 
-  async cloneDescriptor(): Promise<VectorLayerDescriptor> {
-    const clonedDescriptor = (await super.cloneDescriptor()) as VectorLayerDescriptor;
+  async cloneDescriptor(): Promise<VectorLayerDescriptor[]> {
+    const clones = await super.cloneDescriptor();
+    if (clones.length === 0) {
+      return [];
+    }
+
+    const clonedDescriptor = clones[0] as VectorLayerDescriptor;
     if (clonedDescriptor.joins) {
       clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
         if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
@@ -209,7 +220,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         }
       });
     }
-    return clonedDescriptor;
+    return [clonedDescriptor];
   }
 
   getSource(): IVectorSource {
@@ -289,10 +300,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getCurrentStyle().renderLegendDetails();
   }
 
-  async getBounds(syncContext: DataRequestContext) {
+  async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
     return syncBoundsData({
       layerId: this.getId(),
-      syncContext,
+      syncContext: getDataRequestContext(this.getId()),
       source: this.getSource(),
       sourceQuery: this.getQuery(),
     });
@@ -932,8 +943,21 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return allProperties;
   }
 
+  /**
+   * Check if there are any properties we can display in a tooltip. If `false` the "Show tooltips" switch
+   * is disabled in Layer settings.
+   * @returns {boolean}
+   */
   canShowTooltip() {
     return this.getSource().hasTooltipProperties() || this.getJoins().length > 0;
+  }
+
+  /**
+   * Users can toggle tooltips on hover or click in the Layer settings. Tooltips are enabled by default.
+   * @returns {boolean}
+   */
+  areTooltipsDisabled(): boolean {
+    return this._descriptor.disableTooltips ?? false;
   }
 
   getFeatureId(feature: Feature): string | number | undefined {

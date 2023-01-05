@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import type { TimeRange } from '@kbn/data-plugin/common/query';
 
 export const PLUGIN_ID = 'lens';
@@ -15,6 +15,8 @@ export const DOC_TYPE = 'lens';
 export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const BASE_API_URL = '/api/lens';
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';
+
+export const ENABLE_SQL = 'discover:enableSql';
 
 export const PieChartTypes = {
   PIE: 'pie',
@@ -40,12 +42,6 @@ export const LegendDisplay = {
   DEFAULT: 'default',
   SHOW: 'show',
   HIDE: 'hide',
-} as const;
-
-export const layerTypes = {
-  DATA: 'data',
-  REFERENCELINE: 'referenceLine',
-  ANNOTATIONS: 'annotations',
 } as const;
 
 // might collide with user-supplied field names, try to make as unique as possible

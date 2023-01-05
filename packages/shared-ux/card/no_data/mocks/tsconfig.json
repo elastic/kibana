@@ -1,18 +1,22 @@
 {
-  "extends": "../../../../../tsconfig.bazel.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "rootDir": "src",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": [
-      "jest",
-      "node"
+      "node",
+      "react",
+      "jest"
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-card-no-data-types",
+    "@kbn/shared-ux-link-redirect-app-mocks",
+    "@kbn/shared-ux-storybook-mock"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

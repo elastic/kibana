@@ -227,6 +227,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       setFetchingAdvancedParamErrors(false);
       setAdvancedParamErrors(paramErrors);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     alpha,
     downsampleFactor,

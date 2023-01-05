@@ -37,11 +37,13 @@ export const WorkspaceRoute = ({
     capabilities,
     storage,
     data,
+    unifiedSearch,
     getBasePath,
     addBasePath,
     setHeaderActionMenu,
     spaces,
     indexPatterns: getIndexPatternProvider,
+    inspect,
   },
 }: WorkspaceRouteProps) => {
   /**
@@ -63,20 +65,22 @@ export const WorkspaceRoute = ({
     [getIndexPatternProvider.get]
   );
 
-  const { loading, callNodeProxy, callSearchNodeProxy, handleSearchQueryError } = useGraphLoader({
-    toastNotifications,
-    coreStart,
-  });
-
   const services = useMemo(
     () => ({
       appName: 'graph',
       storage,
       data,
+      unifiedSearch,
       ...coreStart,
     }),
-    [coreStart, data, storage]
+    [coreStart, data, storage, unifiedSearch]
   );
+
+  const { loading, requestAdapter, callNodeProxy, callSearchNodeProxy, handleSearchQueryError } =
+    useGraphLoader({
+      toastNotifications,
+      coreStart,
+    });
 
   const [store] = useState(() =>
     createGraphStore({
@@ -148,6 +152,8 @@ export const WorkspaceRoute = ({
             overlays={overlays}
             savedWorkspace={savedWorkspace}
             indexPatternProvider={indexPatternProvider}
+            inspect={inspect}
+            requestAdapter={requestAdapter}
           />
         </Provider>
       </KibanaContextProvider>

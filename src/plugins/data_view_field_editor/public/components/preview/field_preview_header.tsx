@@ -49,7 +49,7 @@ export const FieldPreviewHeader = () => {
           {i18n.translate('indexPatternFieldEditor.fieldPreview.subTitle', {
             defaultMessage: 'From: {from}',
             values: {
-              from: from.value === 'cluster' ? dataView.title : i18nTexts.customData,
+              from: from.value === 'cluster' ? dataView.getIndexPattern() : i18nTexts.customData,
             },
           })}
         </EuiTextColor>

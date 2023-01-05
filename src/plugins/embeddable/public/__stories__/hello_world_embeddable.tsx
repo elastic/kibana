@@ -7,28 +7,26 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { connect, Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { Embeddable, IEmbeddable } from '..';
+import { Embeddable } from '..';
+import { createStore, State } from '../store';
 
 export class HelloWorldEmbeddable extends Embeddable {
-  readonly type = 'hello-world';
+  // eslint-disable-next-line @kbn/eslint/no_this_in_property_initializers
+  readonly store = createStore(this);
 
-  renderError: IEmbeddable['renderError'];
+  readonly type = 'hello-world';
 
   reload() {}
 
-  render(node: HTMLElement) {
-    render(<EuiEmptyPrompt body={this.getTitle()} />, node);
+  render() {
+    const HelloWorld = connect((state: State) => ({ body: state.input.title }))(EuiEmptyPrompt);
 
-    this.reload = this.render.bind(this, node);
-  }
-
-  setErrorRenderer(renderer: IEmbeddable['renderError']) {
-    this.renderError = renderer;
-  }
-
-  updateOutput(...args: Parameters<Embeddable['updateOutput']>): void {
-    return super.updateOutput(...args);
+    return (
+      <Provider store={this.store}>
+        <HelloWorld />
+      </Provider>
+    );
   }
 }

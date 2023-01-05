@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import React, { useEffect, useRef } from 'react';
 
 import * as d3Brush from 'd3-brush';
@@ -12,6 +13,7 @@ import * as d3Scale from 'd3-scale';
 import * as d3Selection from 'd3-selection';
 import * as d3Transition from 'd3-transition';
 
+import { getSnappedWindowParameters } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 
 import './dual_brush.scss';
@@ -58,6 +60,7 @@ interface DualBrushProps {
   max: number;
   onChange?: (windowParameters: WindowParameters, windowPxParameters: WindowParameters) => void;
   marginLeft: number;
+  snapTimestamps?: number[];
   width: number;
 }
 
@@ -67,11 +70,19 @@ export function DualBrush({
   max,
   onChange,
   marginLeft,
+  snapTimestamps,
   width,
 }: DualBrushProps) {
   const d3BrushContainer = useRef(null);
   const brushes = useRef<DualBrush[]>([]);
+
+  // We need to pass props to refs here because the d3-brush code doesn't consider
+  // native React prop changes. The brush code does its own check whether these props changed then.
+  // The initialized brushes might otherwise act on stale data.
   const widthRef = useRef(width);
+  const minRef = useRef(min);
+  const maxRef = useRef(max);
+  const snapTimestampsRef = useRef(snapTimestamps);
 
   const { baselineMin, baselineMax, deviationMin, deviationMax } = windowParameters;
 
@@ -90,17 +101,20 @@ export function DualBrush({
         function brushend(this: d3Selection.BaseType) {
           const currentWidth = widthRef.current;
 
-          const x = d3.scaleLinear().domain([min, max]).rangeRound([0, currentWidth]);
+          const x = d3
+            .scaleLinear()
+            .domain([minRef.current, maxRef.current])
+            .rangeRound([0, currentWidth]);
 
           const px2ts = (px: number) => Math.round(x.invert(px));
-          const xMin = x(min) ?? 0;
-          const xMax = x(max) ?? 0;
+          const xMin = x(minRef.current) ?? 0;
+          const xMax = x(maxRef.current) ?? 0;
           const minExtentPx = Math.round((xMax - xMin) / 100);
 
-          const baselineBrush = d3.select('#brush-baseline');
+          const baselineBrush = d3.select('#aiops-brush-baseline');
           const baselineSelection = d3.brushSelection(baselineBrush.node() as SVGGElement);
 
-          const deviationBrush = d3.select('#brush-deviation');
+          const deviationBrush = d3.select('#aiops-brush-deviation');
           const deviationSelection = d3.brushSelection(deviationBrush.node() as SVGGElement);
 
           if (!isBrushXSelection(deviationSelection) || !isBrushXSelection(baselineSelection)) {
@@ -129,12 +143,6 @@ export function DualBrush({
             deviationMin: px2ts(deviationSelection[0]),
             deviationMax: px2ts(deviationSelection[1]),
           };
-          const newBrushPx = {
-            baselineMin: baselineSelection[0],
-            baselineMax: baselineSelection[1],
-            deviationMin: deviationSelection[0],
-            deviationMax: deviationSelection[1],
-          };
 
           if (
             id === 'deviation' &&
@@ -147,14 +155,6 @@ export function DualBrush({
 
             newWindowParameters.deviationMin = px2ts(newDeviationMin);
             newWindowParameters.deviationMax = px2ts(newDeviationMax);
-            newBrushPx.deviationMin = newDeviationMin;
-            newBrushPx.deviationMax = newDeviationMax;
-
-            d3.select(this)
-              .transition()
-              .duration(200)
-              // @ts-expect-error call doesn't allow the brush move function
-              .call(brushes.current[1].brush.move, [newDeviationMin, newDeviationMax]);
           } else if (
             id === 'baseline' &&
             deviationSelection &&
@@ -166,23 +166,56 @@ export function DualBrush({
 
             newWindowParameters.baselineMin = px2ts(newBaselineMin);
             newWindowParameters.baselineMax = px2ts(newBaselineMax);
-            newBrushPx.baselineMin = newBaselineMin;
-            newBrushPx.baselineMax = newBaselineMax;
+          }
 
+          const snappedWindowParameters = snapTimestampsRef.current
+            ? getSnappedWindowParameters(newWindowParameters, snapTimestampsRef.current)
+            : newWindowParameters;
+
+          const newBrushPx = {
+            baselineMin: x(snappedWindowParameters.baselineMin) ?? 0,
+            baselineMax: x(snappedWindowParameters.baselineMax) ?? 0,
+            deviationMin: x(snappedWindowParameters.deviationMin) ?? 0,
+            deviationMax: x(snappedWindowParameters.deviationMax) ?? 0,
+          };
+
+          if (
+            id === 'baseline' &&
+            (baselineSelection[0] !== newBrushPx.baselineMin ||
+              baselineSelection[1] !== newBrushPx.baselineMax)
+          ) {
             d3.select(this)
               .transition()
               .duration(200)
               // @ts-expect-error call doesn't allow the brush move function
-              .call(brushes.current[0].brush.move, [newBaselineMin, newBaselineMax]);
+              .call(brushes.current[0].brush.move, [
+                newBrushPx.baselineMin,
+                newBrushPx.baselineMax,
+              ]);
           }
 
-          brushes.current[0].start = newWindowParameters.baselineMin;
-          brushes.current[0].end = newWindowParameters.baselineMax;
-          brushes.current[1].start = newWindowParameters.deviationMin;
-          brushes.current[1].end = newWindowParameters.deviationMax;
+          if (
+            id === 'deviation' &&
+            (deviationSelection[0] !== newBrushPx.deviationMin ||
+              deviationSelection[1] !== newBrushPx.deviationMax)
+          ) {
+            d3.select(this)
+              .transition()
+              .duration(200)
+              // @ts-expect-error call doesn't allow the brush move function
+              .call(brushes.current[1].brush.move, [
+                newBrushPx.deviationMin,
+                newBrushPx.deviationMax,
+              ]);
+          }
+
+          brushes.current[0].start = snappedWindowParameters.baselineMin;
+          brushes.current[0].end = snappedWindowParameters.baselineMax;
+          brushes.current[1].start = snappedWindowParameters.deviationMin;
+          brushes.current[1].end = snappedWindowParameters.deviationMax;
 
           if (onChange) {
-            onChange(newWindowParameters, newBrushPx);
+            onChange(snappedWindowParameters, newBrushPx);
           }
           drawBrushes();
         }
@@ -199,10 +232,20 @@ export function DualBrush({
           .insert('g', '.brush')
           .attr('class', 'brush')
           .attr('id', (b: DualBrush) => {
-            return 'brush-' + b.id;
+            return 'aiops-brush-' + b.id;
+          })
+          .attr('data-test-subj', (b: DualBrush) => {
+            // Uppercase the first character of the `id` so we get aiopsBrushBaseline/aiopsBrushDeviation.
+            return 'aiopsBrush' + b.id.charAt(0).toUpperCase() + b.id.slice(1);
           })
           .each((brushObject: DualBrush, i, n) => {
             const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
+            // Ensure brush style is applied
+            brushObject.brush.extent([
+              [0, BRUSH_MARGIN],
+              [widthRef.current, BRUSH_HEIGHT - BRUSH_MARGIN],
+            ]);
+
             brushObject.brush(d3.select(n[i]));
             const xStart = x(brushObject.start) ?? 0;
             const xEnd = x(brushObject.end) ?? 0;
@@ -213,7 +256,7 @@ export function DualBrush({
         mlBrushSelection
           .attr('class', 'brush')
           .selectAll('.overlay')
-          .attr('width', width)
+          .attr('width', widthRef.current)
           .style('pointer-events', 'none');
 
         mlBrushSelection
@@ -230,10 +273,13 @@ export function DualBrush({
           .data<DualBrush>(brushes.current, (d) => (d as DualBrush).id);
 
         mlBrushSelection.each(function (brushObject, i, n) {
-          const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
+          const x = d3
+            .scaleLinear()
+            .domain([minRef.current, maxRef.current])
+            .rangeRound([0, widthRef.current]);
           brushObject.brush.extent([
             [0, BRUSH_MARGIN],
-            [width, BRUSH_HEIGHT - BRUSH_MARGIN],
+            [widthRef.current, BRUSH_HEIGHT - BRUSH_MARGIN],
           ]);
           brushObject.brush(d3.select(n[i] as SVGGElement));
           const xStart = x(brushObject.start) ?? 0;
@@ -246,22 +292,39 @@ export function DualBrush({
         widthRef.current = width;
         newBrush('baseline', baselineMin, baselineMax);
         newBrush('deviation', deviationMin, deviationMax);
-      } else {
-        if (widthRef.current !== width) {
-          widthRef.current = width;
-          updateBrushes();
-        }
+      } else if (
+        widthRef.current !== width ||
+        minRef.current !== min ||
+        maxRef.current !== max ||
+        !isEqual(snapTimestampsRef.current, snapTimestamps)
+      ) {
+        widthRef.current = width;
+        minRef.current = min;
+        maxRef.current = max;
+        snapTimestampsRef.current = snapTimestamps;
+        updateBrushes();
       }
 
       drawBrushes();
     }
-  }, [min, max, width, baselineMin, baselineMax, deviationMin, deviationMax, onChange]);
+  }, [
+    min,
+    max,
+    width,
+    baselineMin,
+    baselineMax,
+    deviationMin,
+    deviationMax,
+    snapTimestamps,
+    onChange,
+  ]);
 
   return (
     <>
       {width > 0 && (
         <svg
           className="aiops-dual-brush"
+          data-test-subj="aiopsDualBrush"
           width={width}
           height={BRUSH_HEIGHT}
           style={{ marginLeft }}

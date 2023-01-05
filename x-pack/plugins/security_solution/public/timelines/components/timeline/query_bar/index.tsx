@@ -14,10 +14,11 @@ import deepEqual from 'fast-deep-equal';
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
-import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
+import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import type { KqlMode } from '../../../store/timeline/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
@@ -213,7 +214,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           const isQuickSelection = timefilter.from.includes('now') || timefilter.to.includes('now');
 
           updateReduxTime({
-            id: 'timeline',
+            id: InputsModelId.timeline,
             end: timefilter.to,
             start: timefilter.from,
             isInvalid: false,

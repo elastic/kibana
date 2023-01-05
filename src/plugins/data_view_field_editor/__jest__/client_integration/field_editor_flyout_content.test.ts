@@ -18,7 +18,7 @@ describe('<FieldEditorFlyoutContent />', () => {
   const { httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -88,7 +88,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
     expect(onSave).toHaveBeenCalled();
     const fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
-    expect(fieldReturned).toEqual(field);
+    expect(fieldReturned).toEqual({ ...field, format: null });
   });
 
   test('should accept an onCancel prop', async () => {
@@ -139,6 +139,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       await act(async () => {
         find('fieldSaveButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
 
       expect(onSave).toHaveBeenCalled();
@@ -149,6 +150,7 @@ describe('<FieldEditorFlyoutContent />', () => {
         name: 'someName',
         type: 'keyword', // default to keyword
         script: { source: 'echo("hello")' },
+        format: null,
       });
 
       // Change the type and make sure it is forwarded
@@ -157,6 +159,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       await act(async () => {
         find('fieldSaveButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
 
       fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
@@ -165,6 +168,7 @@ describe('<FieldEditorFlyoutContent />', () => {
         name: 'someName',
         type: 'date',
         script: { source: 'echo("hello")' },
+        format: null,
       });
     });
 
@@ -193,6 +197,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       await act(async () => {
         find('fieldSaveButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
 
       expect(onSave).toBeCalled();
@@ -202,6 +207,7 @@ describe('<FieldEditorFlyoutContent />', () => {
         name: 'someName',
         type: 'keyword',
         script: { source: 'echo("hello")' },
+        format: null,
       });
     });
   });

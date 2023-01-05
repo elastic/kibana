@@ -9,7 +9,6 @@ import { merge } from '@kbn/std';
 import { isPlainObject } from 'lodash';
 import type { Ecs } from '@kbn/cases-plugin/common';
 
-// TODO we need to allow ->  docValueFields: [{ field: "@timestamp" }],
 export const buildAlertsQuery = (alertIds: string[]) => {
   if (alertIds.length === 0) {
     return {};

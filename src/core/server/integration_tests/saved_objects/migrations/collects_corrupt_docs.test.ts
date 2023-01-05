@@ -9,8 +9,12 @@
 import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { Root } from '../../../root';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
+import { Root } from '@kbn/core-root-server-internal';
 import { getMigrationDocLink } from './test_utils';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
@@ -24,7 +28,7 @@ async function removeLogFile() {
 }
 
 describe('migration v2 with corrupt saved object documents', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
 
   beforeAll(async () => {
@@ -43,7 +47,7 @@ describe('migration v2 with corrupt saved object documents', () => {
   });
 
   it('collects corrupt saved object documents across batches', async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -90,7 +94,7 @@ describe('migration v2 with corrupt saved object documents', () => {
       await root.start();
       expect(true).toEqual(false);
     } catch (err) {
-      const errorMessage = err.message;
+      const errorMessage = err.message as string;
       const errorLines = errorMessage.split('\n');
       const errorMessageWithoutStack = errorLines
         .filter((line: string) => !line.includes(' at '))
@@ -117,7 +121,7 @@ describe('migration v2 with corrupt saved object documents', () => {
         },
         {
           mode: 'contain',
-          value: 'at transform',
+          value: 'at tryTransformDoc',
         },
         {
           mode: 'equal',
@@ -129,7 +133,7 @@ describe('migration v2 with corrupt saved object documents', () => {
         },
         {
           mode: 'contain',
-          value: 'at migrationFn',
+          value: 'at 7.14.0',
         },
         {
           mode: 'equal',
@@ -137,7 +141,7 @@ describe('migration v2 with corrupt saved object documents', () => {
         },
         {
           mode: 'contain',
-          value: 'at transform',
+          value: 'at tryTransformDoc',
         },
         {
           mode: 'equal',
@@ -149,7 +153,7 @@ describe('migration v2 with corrupt saved object documents', () => {
         },
         {
           mode: 'contain',
-          value: 'at migrationFn',
+          value: 'at 7.14.0',
         },
       ]);
     }
@@ -157,7 +161,7 @@ describe('migration v2 with corrupt saved object documents', () => {
 });
 
 function createRoot() {
-  return kbnTestServer.createRootWithCorePlugins(
+  return createRootWithCorePlugins(
     {
       migrations: {
         skip: false,

@@ -14,6 +14,7 @@ import type { ChangePoint } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 
 import { buildBaseFilterCriteria } from './application/utils/query_utils';
+import { GroupTableItem } from './components/spike_analysis_table/types';
 
 export interface DocumentCountStats {
   interval?: number;
@@ -34,6 +35,7 @@ export interface DocumentStatsSearchStrategyParams {
   fieldsToFetch?: string[];
   selectedChangePoint?: ChangePoint;
   includeSelectedChangePoint?: boolean;
+  selectedGroup?: GroupTableItem | null;
 }
 
 export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategyParams) => {
@@ -48,6 +50,7 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
     fieldsToFetch,
     selectedChangePoint,
     includeSelectedChangePoint,
+    selectedGroup,
   } = params;
 
   const size = 0;
@@ -57,7 +60,8 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
     latestMs,
     searchQuery,
     selectedChangePoint,
-    includeSelectedChangePoint
+    includeSelectedChangePoint,
+    selectedGroup
   );
 
   // Don't use the sampler aggregation as this can lead to some potentially
@@ -67,7 +71,11 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
       date_histogram: {
         field: timeFieldName,
         fixed_interval: `${intervalMs}ms`,
-        min_doc_count: 1,
+        min_doc_count: 0,
+        extended_bounds: {
+          min: earliestMs,
+          max: latestMs,
+        },
       },
     },
   };

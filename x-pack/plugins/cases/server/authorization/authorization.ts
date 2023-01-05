@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { AuthFilterHelpers, OwnerEntity } from './types';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AuthFilterHelpers, OwnerEntity } from './types';
 import { getOwnersFilter } from './utils';
-import { AuthorizationAuditLogger, OperationDetails } from '.';
+import type { OperationDetails } from '.';
+import { AuthorizationAuditLogger } from '.';
 import { createCaseError } from '../common/error';
 
 /**

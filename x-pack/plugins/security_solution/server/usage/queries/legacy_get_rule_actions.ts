@@ -12,10 +12,10 @@ import type {
   SavedObjectsCreatePointInTimeFinderOptions,
 } from '@kbn/core/server';
 // eslint-disable-next-line no-restricted-imports
-import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from '../../lib/detection_engine/rule_actions/legacy_types';
+import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from '../../lib/detection_engine/rule_actions_legacy';
 
 // eslint-disable-next-line no-restricted-imports
-import { legacyRuleActionsSavedObjectType } from '../../lib/detection_engine/rule_actions/legacy_saved_object_mappings';
+import { legacyRuleActionsSavedObjectType } from '../../lib/detection_engine/rule_actions_legacy';
 
 export interface LegacyGetRuleActionsOptions {
   savedObjectsClient: SavedObjectsClientContract;

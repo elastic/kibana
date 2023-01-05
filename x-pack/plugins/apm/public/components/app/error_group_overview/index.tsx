@@ -21,13 +21,12 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
-import { INITIAL_PAGE_SIZE } from '../../shared/managed_table';
 
 type ErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
@@ -63,7 +62,7 @@ export function ErrorGroupOverview() {
       offset,
       comparisonEnabled,
       page = 0,
-      pageSize = INITIAL_PAGE_SIZE,
+      pageSize = 25,
     },
   } = useApmParams('/services/{serviceName}/errors');
 
@@ -213,10 +212,9 @@ export function ErrorGroupOverview() {
           <ErrorGroupList
             mainStatistics={errorGroupMainStatistics}
             serviceName={serviceName}
-            detailedStatisticsLoading={
-              errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
-              errorGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED
-            }
+            detailedStatisticsLoading={isPending(
+              errorGroupDetailedStatisticsStatus
+            )}
             detailedStatistics={errorGroupDetailedStatistics}
             comparisonEnabled={comparisonEnabled}
             initialSortField={sortField}

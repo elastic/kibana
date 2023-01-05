@@ -20,12 +20,13 @@ export const labelsSchema = schema.object(
     ciBuildId: schema.maybe(schema.string()),
     ciBuildNumber: schema.maybe(schema.number()),
     ftrConfig: schema.maybe(schema.string()),
-    git_rev: schema.maybe(schema.string()),
+    gitRev: schema.maybe(schema.string()),
     isPr: schema.maybe(schema.boolean()),
-    prId: schema.maybe(schema.string()),
+    prId: schema.maybe(schema.number()),
     journeyName: schema.maybe(schema.string()),
     testBuildId: schema.maybe(schema.string()),
     testJobId: schema.maybe(schema.string()),
+    ciBuildName: schema.maybe(schema.string()),
   },
   { defaultValue: {} }
 );

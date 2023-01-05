@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-apps-browser-internal",
+  "owner": "@elastic/kibana-core"
+}

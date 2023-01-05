@@ -11,16 +11,15 @@ import { renderHook } from '@testing-library/react-hooks';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { getState } from '../services/discover_state';
-import { uiSettingsMock } from '../../../__mocks__/ui_settings';
+import { getDiscoverStateContainer } from '../services/discover_state';
 
 describe('test useSearchSession', () => {
   test('getting the next session id', async () => {
     const { history } = createSearchSessionMock();
-    const stateContainer = getState({
-      getStateDefaults: () => ({ index: 'test' }),
+    const stateContainer = getDiscoverStateContainer({
+      savedSearch: savedSearchMock,
       history,
-      uiSettings: uiSettingsMock,
+      services: discoverServiceMock,
     });
 
     const nextId = 'id';

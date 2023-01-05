@@ -24,7 +24,11 @@ import { CategoryFacets } from './category_facets';
 
 import type { CategoryParams } from '.';
 import { getParams, categoryExists, mapToCard } from '.';
-import { INSTALLED_CATEGORY } from './category_facets';
+import {
+  ALL_INSTALLED_CATEGORY,
+  UPDATES_AVAILABLE,
+  UPDATES_AVAILABLE_CATEGORY,
+} from './category_facets';
 
 const AnnouncementLink = () => {
   const { docLinks } = useStartServices();
@@ -38,7 +42,7 @@ const AnnouncementLink = () => {
   );
 };
 
-const InstalledIntegrationsInfoCallout = () => (
+const InstalledIntegrationsInfoCallout: React.FC = () => (
   <EuiCallOut
     title={i18n.translate('xpack.fleet.epmList.availableCalloutTitle', {
       defaultMessage: 'Only installed Elastic Agent Integrations are displayed.',
@@ -52,6 +56,27 @@ const InstalledIntegrationsInfoCallout = () => (
         values={{
           link: <AnnouncementLink />,
         }}
+      />
+    </p>
+  </EuiCallOut>
+);
+
+const UpdatesAvailableCallout: React.FC<{ count: number }> = ({ count }) => (
+  <EuiCallOut
+    title={i18n.translate('xpack.fleet.epmList.updatesAvailableCalloutTitle', {
+      defaultMessage:
+        '{count, number} of your installed integrations {count, plural, one {has an update} other {have updates}} available.',
+      values: {
+        count,
+      },
+    })}
+    iconType="alert"
+    color="warning"
+  >
+    <p>
+      <FormattedMessage
+        id="xpack.fleet.epmList.updatesAvailableCalloutText"
+        defaultMessage="Update your integrations to get the latest features."
       />
     </p>
   </EuiCallOut>
@@ -105,9 +130,12 @@ export const InstalledPackages: React.FC<{
     useLocation().search
   );
 
+  const { http } = useStartServices();
+  const addBasePath = http.basePath.prepend;
+
   const history = useHistory();
 
-  function setSelectedCategory(categoryId: string) {
+  function setUrlCategory(categoryId: string) {
     const url = pagePathGetters.integrations_installed({
       category: categoryId,
       searchTerm: searchParam,
@@ -116,12 +144,12 @@ export const InstalledPackages: React.FC<{
     history.push(url);
   }
 
-  function setSearchTerm(search: string) {
+  function setUrlSearchTerm(search: string) {
     // Use .replace so the browser's back button is not tied to single keystroke
     history.replace(
       pagePathGetters.integrations_installed({
-        category: selectedCategory,
         searchTerm: search,
+        selectedCategory,
       })[1]
     );
   }
@@ -138,15 +166,12 @@ export const InstalledPackages: React.FC<{
   const categories: CategoryFacet[] = useMemo(
     () => [
       {
-        ...INSTALLED_CATEGORY,
+        ...ALL_INSTALLED_CATEGORY,
         count: installedPackages.length,
       },
       {
-        id: 'updates_available',
+        ...UPDATES_AVAILABLE_CATEGORY,
         count: updatablePackages.length,
-        title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
-          defaultMessage: 'Updates available',
-        }),
       },
     ],
     [installedPackages.length, updatablePackages.length]
@@ -164,32 +189,40 @@ export const InstalledPackages: React.FC<{
     <CategoryFacets
       categories={categories}
       selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategoryFacet) => setSelectedCategory(id)}
+      onCategoryChange={({ id }: CategoryFacet) => setUrlCategory(id)}
     />
   );
 
   const cards = (
-    selectedCategory === 'updates_available' ? updatablePackages : installedPackages
+    selectedCategory === UPDATES_AVAILABLE ? updatablePackages : installedPackages
   ).map((item) =>
     mapToCard({
       getAbsolutePath,
       getHref,
+      addBasePath,
       item,
       selectedCategory: selectedCategory || 'installed',
       packageVerificationKeyId,
     })
   );
 
-  const CalloutComponent = cards.some((c) => c.isUnverified)
-    ? VerificationWarningCallout
-    : InstalledIntegrationsInfoCallout;
-  const callout =
-    selectedCategory === 'updates_available' || isLoading ? null : <CalloutComponent />;
+  let CalloutComponent = <InstalledIntegrationsInfoCallout />;
+
+  const unverifiedCount = cards.filter((c) => c.isUnverified).length;
+  const updateAvailableCount = cards.filter((c) => c.isUpdateAvailable).length;
+  if (unverifiedCount) {
+    CalloutComponent = <VerificationWarningCallout />;
+  } else if (updateAvailableCount) {
+    CalloutComponent = <UpdatesAvailableCallout count={updateAvailableCount} />;
+  }
+  const callout = selectedCategory === UPDATES_AVAILABLE || isLoading ? null : CalloutComponent;
 
   return (
     <PackageListGrid
-      {...{ isLoading, controls, setSelectedCategory, callout }}
-      onSearchChange={setSearchTerm}
+      {...{ isLoading, controls, callout, categories }}
+      selectedCategory={selectedCategory}
+      setSelectedCategory={setUrlCategory}
+      onSearchChange={setUrlSearchTerm}
       initialSearch={searchParam}
       list={cards}
     />

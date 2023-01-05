@@ -9,13 +9,13 @@ import { useState, useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { DataMsg } from './use_saved_search';
 
-export function useDataState(data$: BehaviorSubject<DataMsg>) {
-  const [fetchState, setFetchState] = useState<DataMsg>(data$.getValue());
+export function useDataState<T extends DataMsg>(data$: BehaviorSubject<T>) {
+  const [fetchState, setFetchState] = useState<T>(data$.getValue());
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
       if (next.fetchStatus !== fetchState.fetchStatus) {
-        setFetchState({ ...fetchState, ...next });
+        setFetchState({ ...fetchState, ...next, ...(next.error ? {} : { error: undefined }) });
       }
     });
     return () => subscription.unsubscribe();

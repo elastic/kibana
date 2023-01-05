@@ -7,8 +7,7 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo '--- Lint: stylelint'
-checks-reporter-with-killswitch "Lint: stylelint" \
-  node scripts/stylelint
+node scripts/stylelint
 echo "stylelint ✅"
 
 echo '--- Lint: eslint'
@@ -16,9 +15,9 @@ echo '--- Lint: eslint'
 # after possibly commiting fixed files to the repo
 set +e;
 if is_pr && ! is_auto_commit_disabled; then
-  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 6 node scripts/eslint --no-cache --fix
+  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 4 node scripts/eslint --no-cache --fix
 else
-  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 6 node scripts/eslint --no-cache
+  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 4 node scripts/eslint --no-cache
 fi
 
 eslint_exit=$?

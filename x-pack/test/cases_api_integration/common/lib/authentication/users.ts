@@ -12,10 +12,8 @@ import {
   observabilityOnlyRead,
   globalRead as globalReadRole,
   noKibanaPrivileges as noKibanaPrivilegesRole,
-  securitySolutionOnlyAllSpacesAll,
-  securitySolutionOnlyReadSpacesAll,
-  observabilityOnlyAllSpacesAll,
-  observabilityOnlyReadSpacesAll,
+  noCasesPrivilegesSpace1 as noCasesPrivilegesSpace1Role,
+  securitySolutionOnlyAllSpacesRole,
   testDisabledPluginAll,
   securitySolutionOnlyDelete,
   securitySolutionOnlyNoDelete,
@@ -94,6 +92,22 @@ export const noKibanaPrivileges: User = {
   roles: [noKibanaPrivilegesRole.name],
 };
 
+export const noCasesPrivilegesSpace1: User = {
+  username: 'no_kibana_privileges_space1',
+  password: 'no_kibana_privileges_space1',
+  roles: [noCasesPrivilegesSpace1Role.name],
+};
+
+/**
+ * These users will have access to all spaces.
+ */
+
+export const secOnlySpacesAll: User = {
+  username: 'sec_only_all_spaces',
+  password: 'sec_only_all_spaces',
+  roles: [securitySolutionOnlyAllSpacesRole.name],
+};
+
 export const users = [
   superUser,
   secOnly,
@@ -106,45 +120,6 @@ export const users = [
   obsSecRead,
   globalRead,
   noKibanaPrivileges,
+  noCasesPrivilegesSpace1,
   testDisabled,
 ];
-
-/**
- * These users will have access to all spaces.
- */
-
-export const secOnlySpacesAll: User = {
-  username: 'sec_only',
-  password: 'sec_only',
-  roles: [securitySolutionOnlyAllSpacesAll.name],
-};
-
-export const secOnlyReadSpacesAll: User = {
-  username: 'sec_only_read',
-  password: 'sec_only_read',
-  roles: [securitySolutionOnlyReadSpacesAll.name],
-};
-
-export const obsOnlySpacesAll: User = {
-  username: 'obs_only',
-  password: 'obs_only',
-  roles: [observabilityOnlyAllSpacesAll.name],
-};
-
-export const obsOnlyReadSpacesAll: User = {
-  username: 'obs_only_read',
-  password: 'obs_only_read',
-  roles: [observabilityOnlyReadSpacesAll.name],
-};
-
-export const obsSecSpacesAll: User = {
-  username: 'obs_sec',
-  password: 'obs_sec',
-  roles: [securitySolutionOnlyAllSpacesAll.name, observabilityOnlyAllSpacesAll.name],
-};
-
-export const obsSecReadSpacesAll: User = {
-  username: 'obs_sec_read',
-  password: 'obs_sec_read',
-  roles: [securitySolutionOnlyReadSpacesAll.name, observabilityOnlyReadSpacesAll.name],
-};

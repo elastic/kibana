@@ -4,14 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Ast, fromExpression } from '@kbn/interpreter';
+import type { DateRange } from '../../../common/types';
 import { DatasourceStates } from '../../state_management';
-import { Visualization, DatasourceMap, DatasourceLayers } from '../../types';
+import { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
 
 export function getDatasourceExpressionsByLayers(
   datasourceMap: DatasourceMap,
-  datasourceStates: DatasourceStates
+  datasourceStates: DatasourceStates,
+  indexPatterns: IndexPatternMap,
+  dateRange: DateRange,
+  searchSessionId?: string
 ): null | Record<string, Ast> {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
@@ -24,7 +27,13 @@ export function getDatasourceExpressionsByLayers(
     const layers = datasource.getLayers(state);
 
     layers.forEach((layerId) => {
-      const result = datasource.toExpression(state, layerId);
+      const result = datasource.toExpression(
+        state,
+        layerId,
+        indexPatterns,
+        dateRange,
+        searchSessionId
+      );
       if (result) {
         datasourceExpressions.push([layerId, result]);
       }
@@ -52,6 +61,9 @@ export function buildExpression({
   datasourceLayers,
   title,
   description,
+  indexPatterns,
+  dateRange,
+  searchSessionId,
 }: {
   title?: string;
   description?: string;
@@ -60,6 +72,9 @@ export function buildExpression({
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
   datasourceLayers: DatasourceLayers;
+  indexPatterns: IndexPatternMap;
+  searchSessionId?: string;
+  dateRange: DateRange;
 }): Ast | null {
   if (visualization === null) {
     return null;
@@ -67,7 +82,10 @@ export function buildExpression({
 
   const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
     datasourceMap,
-    datasourceStates
+    datasourceStates,
+    indexPatterns,
+    dateRange,
+    searchSessionId
   );
 
   const visualizationExpression = visualization.toExpression(

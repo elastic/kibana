@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { AllSeries } from '@kbn/observability-plugin/public';
+import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
 import { useExpViewAttributes } from './use_exp_view_attrs';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useDataView } from '../local_uifilters/use_data_view';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldnames';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 interface Props {
   breakdown: BreakdownItem | null;
@@ -21,16 +23,21 @@ interface Props {
 export function PageLoadDistChart({ onPercentileChange, breakdown }: Props) {
   const { dataViewTitle } = useDataView();
 
+  const { uxUiFilters, urlParams } = useLegacyUrlParams();
+
   const kibana = useKibanaServices();
   const { ExploratoryViewEmbeddable } = kibana.observability!;
 
-  const onBrushEnd = ({ range }: { range: number[] }) => {
-    if (!range) {
-      return;
-    }
-    const [minX, maxX] = range;
-    onPercentileChange(minX, maxX);
-  };
+  const onBrushEnd = useCallback(
+    ({ range }: { range: number[] }) => {
+      if (!range) {
+        return;
+      }
+      const [minX, maxX] = range;
+      onPercentileChange(minX, maxX);
+    },
+    [onPercentileChange]
+  );
 
   const { reportDefinitions, time } = useExpViewAttributes();
 
@@ -42,6 +49,7 @@ export function PageLoadDistChart({ onPercentileChange, breakdown }: Props) {
       name: 'page-load-distribution',
       selectedMetricField: TRANSACTION_DURATION,
       breakdown: breakdown?.fieldName,
+      filters: getExploratoryViewFilter(uxUiFilters, urlParams),
     },
   ];
 

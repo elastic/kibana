@@ -25,6 +25,7 @@ __tmp__
 
 # Ignore example plugin builds
 /examples/*/build
+/x-pack/examples/*/build
 
 # Ignore certain functional test runner artifacts
 /test/*/failure_debug
@@ -39,6 +40,7 @@ __tmp__
 /x-pack/test/*/screenshots/failure
 /x-pack/test/*/screenshots/session
 /x-pack/test/*/screenshots/visual_regression_gallery.html
+/x-pack/test/functional/apps/*/*/reporting/reports/failure
 
 /html_docs
 .eslintcache
@@ -77,6 +79,12 @@ npm-debug.log*
 ## @cypress/snapshot from apm plugin
 /snapshots.js
 
+# transpiled cypress config
+x-pack/plugins/fleet/cypress.config.d.ts
+x-pack/plugins/fleet/cypress.config.js
+x-pack/plugins/osquery/cypress.config.d.ts
+x-pack/plugins/osquery/cypress.config.js
+
 # release notes script output
 report.csv
 report.asciidoc
@@ -86,11 +94,13 @@ report.asciidoc
 
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
+*.type_check.json
 
 # Yarn local mirror content
 .yarn-local-mirror
 
 # Bazel
+.ijwb
 /bazel
 /bazel-*
 .bazelrc.user
@@ -100,5 +110,6 @@ elastic-agent-*
 fleet-server-*
 elastic-agent.yml
 fleet-server.yml
-/packages/kbn-synthetic-package-map/synthetic-packages.json
-
+/packages/kbn-package-map/package-map.json
+/packages/kbn-synthetic-package-map/
+**/.synthetics/

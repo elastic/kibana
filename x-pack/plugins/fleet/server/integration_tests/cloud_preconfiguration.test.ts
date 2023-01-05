@@ -7,10 +7,15 @@
 
 import Path from 'path';
 
-import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
+import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import { AGENT_POLICY_INDEX } from '../../common';
-import type { PackagePolicySOAttributes } from '../../common/types';
+import type { PackagePolicySOAttributes, OutputSOAttributes } from '../../common/types';
 import type { AgentPolicySOAttributes } from '../types';
 
 import { useDockerRegistry, waitForFleetSetup } from './helpers';
@@ -22,14 +27,15 @@ import {
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-describe('Fleet preconfiguration reset', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
-  let kbnServer: kbnTestServer.TestKibanaUtils;
+// FLAKY: https://github.com/elastic/kibana/issues/133470
+describe.skip('Fleet preconfiguration reset', () => {
+  let esServer: TestElasticsearchUtils;
+  let kbnServer: TestKibanaUtils;
 
   const registryUrl = useDockerRegistry();
 
   const startServers = async (defaultKbnConfig: any = CLOUD_KIBANA_CONFIG) => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
       settings: {
         es: {
@@ -45,7 +51,7 @@ describe('Fleet preconfiguration reset', () => {
         await kbnServer.stop();
       }
 
-      const root = kbnTestServer.createRootWithCorePlugins(
+      const root = createRootWithCorePlugins(
         {
           xpack: {
             ...kbnConfig.xpack,
@@ -328,6 +334,63 @@ describe('Fleet preconfiguration reset', () => {
         expect(
           packagePolicies.saved_objects.find((so) => so.attributes.name === 'Elastic APM')
         ).toBeDefined();
+      });
+    });
+
+    describe('Support removing a field from output after first setup', () => {
+      beforeAll(async () => {
+        // 1. Start with a preconfigured policy withtout APM
+        const { startOrRestartKibana } = await startServers({
+          xpack: {
+            fleet: {
+              outputs: [
+                {
+                  name: 'Elastic Cloud internal output',
+                  type: 'elasticsearch',
+                  id: 'es-containerhost',
+                  hosts: ['https://cloudinternales:9200'],
+                  config: { test: '123' },
+                },
+              ],
+            },
+          },
+        });
+
+        // 2. Change the output remove config
+        await startOrRestartKibana({
+          xpack: {
+            fleet: {
+              outputs: [
+                {
+                  name: 'Elastic Cloud internal output',
+                  type: 'elasticsearch',
+                  id: 'es-containerhost',
+                  hosts: ['https://cloudinternales:9200'],
+                },
+              ],
+            },
+          },
+        });
+      });
+
+      afterAll(async () => {
+        await stopServers();
+      });
+
+      it('Works and preconfigure correctly agent policies', async () => {
+        const agentPolicies = await kbnServer.coreStart.savedObjects
+          .createInternalRepository()
+          .find<OutputSOAttributes>({
+            type: 'ingest-outputs',
+            perPage: 10000,
+          });
+
+        expect(agentPolicies.total).toBe(2);
+        const outputSO = agentPolicies.saved_objects.find(
+          (so) => so.attributes.output_id === 'es-containerhost'
+        );
+        expect(outputSO).toBeDefined();
+        expect(outputSO?.attributes.config_yaml).toBeNull();
       });
     });
   });

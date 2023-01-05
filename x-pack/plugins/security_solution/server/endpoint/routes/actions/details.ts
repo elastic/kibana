@@ -35,7 +35,7 @@ export const registerActionDetailsRoutes = (
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { all: ['canReadSecuritySolution'] },
       endpointContext.logFactory.get('hostIsolationDetails'),
       getActionDetailsRequestHandler(endpointContext)
     )
@@ -58,6 +58,7 @@ export const getActionDetailsRequestHandler = (
             (
               await context.core
             ).elasticsearch.client.asInternalUser,
+            endpointContext.service.getEndpointMetadataService(),
             req.params.action_id
           ),
         },

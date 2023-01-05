@@ -13,7 +13,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { TaskEither } from 'fp-ts/lib/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
+import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   bulkOverwriteTransformedDocuments,
   closePit,
@@ -34,19 +34,18 @@ import {
   type UpdateByQueryResponse,
   updateAndPickupMappings,
   type UpdateAndPickupMappingsResponse,
+  updateTargetMappingsMeta,
   removeWriteBlock,
   transformDocs,
   waitForIndexStatus,
   initAction,
   cloneIndex,
-} from '../../../../saved_objects/migrations/actions';
-import type {
-  DocumentsTransformFailed,
-  DocumentsTransformSuccess,
-} from '../../../../saved_objects/migrations/core';
-import { MIGRATION_CLIENT_OPTIONS } from '../../../../saved_objects/migrations/run_resilient_migrator';
+  type DocumentsTransformFailed,
+  type DocumentsTransformSuccess,
+  MIGRATION_CLIENT_OPTIONS,
+} from '@kbn/core-saved-objects-migration-server-internal';
 
-const { startES } = kbnTestServer.createTestServers({
+const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
@@ -56,7 +55,7 @@ const { startES } = kbnTestServer.createTestServers({
     },
   },
 });
-let esServer: kbnTestServer.TestElasticsearchUtils;
+let esServer: TestElasticsearchUtils;
 
 describe('migration actions', () => {
   let client: ElasticsearchClient;
@@ -72,6 +71,11 @@ describe('migration actions', () => {
       mappings: {
         dynamic: true,
         properties: {},
+        _meta: {
+          migrationMappingPropertyHashes: {
+            references: '7997cf5a56cc02bdc9c93361bde732b0',
+          },
+        },
       },
     })();
     const sourceDocs = [
@@ -144,6 +148,32 @@ describe('migration actions', () => {
           existing_index_with_docs: {
             aliases: {},
             mappings: expect.anything(),
+            settings: expect.anything(),
+          },
+        })
+      );
+    });
+    it('includes the _meta data of the indices in the response', async () => {
+      expect.assertions(1);
+      const res = (await initAction({
+        client,
+        indices: ['existing_index_with_docs'],
+      })()) as Either.Right<unknown>;
+
+      expect(res.right).toEqual(
+        expect.objectContaining({
+          existing_index_with_docs: {
+            aliases: {},
+            mappings: {
+              // FIXME https://github.com/elastic/elasticsearch-js/issues/1796
+              dynamic: 'true',
+              properties: expect.anything(),
+              _meta: {
+                migrationMappingPropertyHashes: {
+                  references: '7997cf5a56cc02bdc9c93361bde732b0',
+                },
+              },
+            },
             settings: expect.anything(),
           },
         })
@@ -475,7 +505,7 @@ describe('migration actions', () => {
         source: 'existing_index_with_write_block',
         target: 'clone_target_1',
       });
-      expect.assertions(1);
+      expect.assertions(3);
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -485,6 +515,12 @@ describe('migration actions', () => {
           },
         }
       `);
+      const { clone_target_1: cloneTarget1 } = await client.indices.getSettings({
+        index: 'clone_target_1',
+      });
+      // @ts-expect-error https://github.com/elastic/elasticsearch/issues/89381
+      expect(cloneTarget1.settings?.index.mapping?.total_fields.limit).toBe('1500');
+      expect(cloneTarget1.settings?.blocks?.write).toBeUndefined();
     });
     it('resolves right if clone target already existed after waiting for index status to be green ', async () => {
       expect.assertions(2);
@@ -1449,6 +1485,47 @@ describe('migration actions', () => {
     });
   });
 
+  describe('updateTargetMappingsMeta', () => {
+    it('rejects if ES throws an error', async () => {
+      const task = updateTargetMappingsMeta({
+        client,
+        index: 'no_such_index',
+        meta: {
+          migrationMappingPropertyHashes: {
+            references: 'updateda56cc02bdc9c93361bupdated',
+            newReferences: 'fooBarHashMd509387420934879300d9',
+          },
+        },
+      })();
+
+      await expect(task).rejects.toThrow('index_not_found_exception');
+    });
+
+    it('resolves right when mappings._meta are correctly updated', async () => {
+      const res = await updateTargetMappingsMeta({
+        client,
+        index: 'existing_index_with_docs',
+        meta: {
+          migrationMappingPropertyHashes: {
+            newReferences: 'fooBarHashMd509387420934879300d9',
+          },
+        },
+      })();
+
+      expect(Either.isRight(res)).toBe(true);
+
+      const indices = await client.indices.get({
+        index: ['existing_index_with_docs'],
+      });
+
+      expect(indices.existing_index_with_docs.mappings?._meta).toEqual({
+        migrationMappingPropertyHashes: {
+          newReferences: 'fooBarHashMd509387420934879300d9',
+        },
+      });
+    });
+  });
+
   describe('updateAliases', () => {
     describe('remove', () => {
       it('resolves left index_not_found_exception when the index does not exist', async () => {
@@ -1612,6 +1689,11 @@ describe('migration actions', () => {
         _tag: 'Right',
         right: 'create_index_succeeded',
       });
+      const { create_new_index: createNewIndex } = await client.indices.getSettings({
+        index: 'create_new_index',
+      });
+      // @ts-expect-error https://github.com/elastic/elasticsearch/issues/89381
+      expect(createNewIndex.settings?.index?.mapping.total_fields.limit).toBe('1500');
     });
     it('resolves left if an existing index status does not become green', async () => {
       expect.assertions(2);

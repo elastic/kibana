@@ -25,17 +25,19 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import { ruleDetailsRoute } from '@kbn/rule-data-utils';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
   AlertsTableConfigurationRegistryContract,
   RuleTypeRegistryContract,
 } from '../types';
-import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
+import { Section, legacyRouteToRuleDetails, routeToConnectors } from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
+import { CONNECTORS_PLUGIN_ID } from '../common/constants';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -73,7 +75,7 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const { dataViews, uiSettings, theme$ } = deps;
-  const sections: Section[] = ['rules', 'connectors', 'alerts'];
+  const sections: Section[] = ['rules', 'logs', 'alerts'];
   const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
   const sectionsRegex = sections.join('|');
@@ -96,6 +98,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
   const {
     actions: { validateEmailAddresses },
+    application: { navigateToApp },
   } = useKibana().services;
 
   return (
@@ -106,7 +109,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
         />
         <Route
-          path={routeToRuleDetails}
+          path={ruleDetailsRoute}
           component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
         />
         <Route
@@ -114,6 +117,15 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           path={legacyRouteToRuleDetails}
           render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
         />
+        <Route
+          exact
+          path={routeToConnectors}
+          render={() => {
+            navigateToApp(`management/insightsAndAlerting/${CONNECTORS_PLUGIN_ID}`);
+            return null;
+          }}
+        />
+
         <Redirect from={'/'} to="rules" />
         <Redirect from={'/alerts'} to="rules" />
       </Switch>

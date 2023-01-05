@@ -37,6 +37,7 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, inde
     {
       editingRender: (entryPoint, onChange, { isInvalid, isLoading }) => (
         <EuiFieldText
+          data-telemetry-id="entSearchContent-crawler-domainDetail-entryPoints-editEntryPoint"
           fullWidth
           value={(entryPoint as EntryPoint)[field]}
           onChange={(e) => onChange(e.target.value)}

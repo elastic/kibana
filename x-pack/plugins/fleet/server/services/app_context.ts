@@ -7,13 +7,13 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { kibanaPackageJson } from '@kbn/utils';
-import type { KibanaRequest } from '@kbn/core/server';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
   HttpServiceSetup,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
@@ -28,6 +28,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+
 import type { FleetConfigType } from '../../common/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type {
@@ -40,6 +42,8 @@ import type {
 } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
+
+import type { BulkActionsResolver } from './agents';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
@@ -61,6 +65,7 @@ class AppContextService {
   private externalCallbacks: ExternalCallbacksStorage = new Map();
   private telemetryEventsSender: TelemetryEventsSender | undefined;
   private savedObjectsTagging: SavedObjectTaggingStart | undefined;
+  private bulkActionsResolver: BulkActionsResolver | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -79,6 +84,7 @@ class AppContextService {
     this.httpSetup = appContext.httpSetup;
     this.telemetryEventsSender = appContext.telemetryEventsSender;
     this.savedObjectsTagging = appContext.savedObjectsTagging;
+    this.bulkActionsResolver = appContext.bulkActionsResolver;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -157,7 +163,7 @@ class AppContextService {
   public getInternalUserSOClient(request: KibanaRequest) {
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
-      excludedWrappers: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }
 
@@ -227,6 +233,10 @@ class AppContextService {
 
   public getTelemetryEventsSender() {
     return this.telemetryEventsSender;
+  }
+
+  public getBulkActionsResolver() {
+    return this.bulkActionsResolver;
   }
 }
 

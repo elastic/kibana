@@ -9,14 +9,15 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel euiPopover__panel--top emotion-euiPanel-grow-m-plain"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__panelArrow euiPopover__panelArrow--top"
+        class="euiPopover__arrow emotion-euiPopoverArrow-top"
+        data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
       <p
@@ -108,14 +109,16 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen emotion-euiPanel-grow-m-plain"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-isOpen-top"
+      data-popover-open="true"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__panelArrow euiPopover__panelArrow--top"
+        class="euiPopover__arrow emotion-euiPopoverArrow-top"
+        data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
       <p
@@ -219,7 +222,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                 style="padding: 16px;"
               >
                 <div
-                  class="euiSwitch"
+                  class="euiSwitch emotion-euiSwitch"
                 >
                   <button
                     aria-checked="false"
@@ -262,10 +265,10 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                 />
                 <form>
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
                   >
                     <div
-                      class="euiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <div
                         class="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
@@ -311,7 +314,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                       </div>
                     </div>
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                      class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
                       <div
                         class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
@@ -321,16 +324,16 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                           class="euiFormRow__fieldWrapper"
                         >
                           <button
-                            class="euiButton euiButton--primary euiButton--small"
+                            class="euiButton emotion-euiButtonDisplay-s-s-base-primary"
                             id="generated-id"
-                            style="min-width: auto;"
+                            style="min-inline-size: auto;"
                             type="submit"
                           >
                             <span
-                              class="euiButtonContent euiButton__content"
+                              class="emotion-euiButtonDisplayContent"
                             >
                               <span
-                                class="euiButton__text"
+                                class="eui-textTruncate"
                               >
                                 Set
                               </span>
@@ -360,14 +363,15 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel euiPopover__panel--top emotion-euiPanel-grow-m-plain"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__panelArrow euiPopover__panelArrow--top"
+        class="euiPopover__arrow emotion-euiPopoverArrow-top"
+        data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
       <p
@@ -459,14 +463,16 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen emotion-euiPanel-grow-m-plain"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel-isOpen-top"
+      data-popover-open="true"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__panelArrow euiPopover__panelArrow--top"
+        class="euiPopover__arrow emotion-euiPopoverArrow-top"
+        data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
       <p
@@ -577,7 +583,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiSwitch"
+                      class="euiSwitch emotion-euiSwitch"
                     >
                       <button
                         aria-checked="false"
@@ -644,14 +650,15 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
       aria-describedby="generated-id"
       aria-live="off"
       aria-modal="true"
-      class="euiPanel euiPanel--plain euiPopover__panel euiPopover__panel--top emotion-euiPanel-grow-m-plain"
+      class="euiPanel euiPanel--plain euiPopover__panel emotion-euiPanel-grow-m-plain-euiPopover__panel"
       data-popover-panel="true"
       role="dialog"
       style="top: -16px; left: -22px; z-index: 2000;"
       tabindex="0"
     >
       <div
-        class="euiPopover__panelArrow euiPopover__panelArrow--top"
+        class="euiPopover__arrow emotion-euiPopoverArrow-top"
+        data-popover-arrow="top"
         style="left: 10px; top: 0px;"
       />
       <p
@@ -762,7 +769,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiSwitch"
+                      class="euiSwitch emotion-euiSwitch"
                     >
                       <button
                         aria-checked="true"

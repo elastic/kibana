@@ -26,7 +26,7 @@ import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
-import { isRuleSnoozed } from './rule_status_dropdown';
+import { isRuleSnoozed } from '../../../lib';
 import './collapsed_item_actions.scss';
 import { futureTimeToInterval, SnoozePanel } from './rule_snooze';
 import {
@@ -42,19 +42,26 @@ export type ComponentOpts = {
   setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
   onEditRule: (item: RuleTableItem) => void;
   onUpdateAPIKey: (id: string[]) => void;
-} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
+  onRunRule: (item: RuleTableItem) => void;
+  onCloneRule: (ruleId: string) => void;
+} & Pick<
+  BulkOperationsComponentOpts,
+  'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'
+>;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   item,
   onLoading,
   onRuleChanged,
-  disableRule,
-  enableRule,
+  bulkDisableRules,
+  bulkEnableRules,
   setRulesToDelete,
   onEditRule,
   onUpdateAPIKey,
   snoozeRule,
   unsnoozeRule,
+  onRunRule,
+  onCloneRule,
 }: ComponentOpts) => {
   const {
     ruleTypeRegistry,
@@ -188,9 +195,9 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             const enabled = !isDisabled;
             asyncScheduler.schedule(async () => {
               if (enabled) {
-                await disableRule({ ...item, enabled });
+                await bulkDisableRules({ ids: [item.id] });
               } else {
-                await enableRule({ ...item, enabled });
+                await bulkEnableRules({ ids: [item.id] });
               }
               onRuleChanged();
             }, 10);
@@ -206,6 +213,18 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
                 'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.disableTitle',
                 { defaultMessage: 'Disable' }
               ),
+        },
+        {
+          disabled: !item.isEditable || item.consumer === AlertConsumers.SIEM,
+          'data-test-subj': 'cloneRule',
+          onClick: async () => {
+            setIsPopoverOpen(!isPopoverOpen);
+            onCloneRule(item.id);
+          },
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.cloneRuleTitle',
+            { defaultMessage: 'Clone rule' }
+          ),
         },
         {
           disabled: !item.isEditable || !isRuleTypeEditableInContext,
@@ -229,6 +248,18 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.updateApiKey',
             { defaultMessage: 'Update API key' }
+          ),
+        },
+        {
+          disabled: !item.isEditable,
+          'data-test-subj': 'runRule',
+          onClick: () => {
+            setIsPopoverOpen(!isPopoverOpen);
+            onRunRule(item);
+          },
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.runRule',
+            { defaultMessage: 'Run rule' }
           ),
         },
         {

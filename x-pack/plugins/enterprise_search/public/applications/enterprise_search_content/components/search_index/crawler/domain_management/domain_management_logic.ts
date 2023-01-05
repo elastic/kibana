@@ -13,18 +13,15 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { Meta } from '../../../../../../../common/types';
 import { HttpError, Status } from '../../../../../../../common/types/api';
 import { DEFAULT_META } from '../../../../../shared/constants';
-import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_messages';
+import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { updateMetaPageIndex } from '../../../../../shared/table_pagination';
 import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import { GetCrawlerDomainsApiLogic } from '../../../../api/crawler/get_crawler_domains_api_logic';
 import { CrawlerDomain, CrawlerDomainsWithMeta } from '../../../../api/crawler/types';
 import { IndexNameLogic } from '../../index_name_logic';
-import { CrawlerLogic } from '../crawler_logic';
 
 interface DomainManagementValues {
   deleteStatus: Status;
@@ -74,17 +71,8 @@ export const DomainManagementLogic = kea<
     deleteApiError: (error) => {
       flashAPIErrors(error);
     },
-    deleteApiSuccess: ({ domain }) => {
+    deleteApiSuccess: () => {
       actions.getDomains(values.meta);
-      flashSuccessToast(
-        i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.action.delete.successMessage', {
-          defaultMessage: "Successfully deleted domain '{domainUrl}'",
-          values: {
-            domainUrl: domain.url,
-          },
-        })
-      );
-      CrawlerLogic.actions.fetchCrawlerData();
     },
     deleteDomain: ({ domain }) => {
       const { indexName } = IndexNameLogic.values;

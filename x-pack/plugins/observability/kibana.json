@@ -27,11 +27,12 @@
     "features",
     "inspector",
     "ruleRegistry",
-    "timelines",
     "triggersActionsUi",
     "inspector",
     "unifiedSearch",
-    "sharedUX"
+    "security",
+    "guidedOnboarding",
+    "share"
   ],
   "ui": true,
   "server": true,
@@ -43,7 +44,8 @@
     "kibanaReact",
     "kibanaUtils",
     "lens",
-    "usageCollection"
+    "usageCollection",
+    "visualizations"
   ],
   "extraPublicDirs": [
     "common"

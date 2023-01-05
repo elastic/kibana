@@ -68,7 +68,6 @@ import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage } from '../../constants';
-import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
 import { RuleNotifyWhen } from './rule_notify_when';
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
@@ -79,6 +78,8 @@ import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
 import { getInitialInterval } from './get_initial_interval';
 
 const ENTER_KEY = 13;
+
+const INTEGER_REGEX = /^[1-9][0-9]*$/;
 
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
@@ -98,6 +99,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
   filteredRuleTypes?: string[];
   connectorFeatureId?: string;
+  onChangeMetaData: (metadata: MetaData) => void;
 }
 
 export const RuleForm = ({
@@ -114,6 +116,7 @@ export const RuleForm = ({
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
   connectorFeatureId = AlertingConnectorFeatureId,
+  onChangeMetaData,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -166,6 +169,7 @@ export const RuleForm = ({
     ruleTypes,
     error: loadRuleTypesError,
     ruleTypeIndex,
+    ruleTypesIsLoading,
   } = useLoadRuleTypes({ filteredRuleTypes: ruleTypeToFilter });
 
   // load rule types
@@ -193,7 +197,7 @@ export const RuleForm = ({
           },
           []
         )
-        .filter((item) => item.ruleType && hasAllPrivilege(rule, item.ruleType))
+        .filter((item) => item.ruleType && hasAllPrivilege(rule.consumer, item.ruleType))
         .filter((item) =>
           rule.consumer === ALERTS_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
@@ -221,7 +225,7 @@ export const RuleForm = ({
     setSolutions(
       new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
     );
-  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule, ruleTypeRegistry]);
+  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule.consumer, ruleTypeRegistry]);
 
   useEffect(() => {
     if (loadRuleTypesError) {
@@ -307,15 +311,6 @@ export const RuleForm = ({
 
   const selectedRuleType = rule?.ruleTypeId ? ruleTypeIndex?.get(rule?.ruleTypeId) : undefined;
   const recoveryActionGroup = selectedRuleType?.recoveryActionGroup?.id;
-  const getDefaultActionParams = useCallback(
-    (actionTypeId: string, actionGroupId: string): Record<string, RuleActionParam> | undefined =>
-      getDefaultsForActionParams(
-        actionTypeId,
-        actionGroupId,
-        actionGroupId === recoveryActionGroup
-      ),
-    [recoveryActionGroup]
-  );
 
   const tagsOptions = rule.tags ? rule.tags.map((label: string) => ({ label })) : [];
 
@@ -391,7 +386,7 @@ export const RuleForm = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule size="full" margin="xs" />
-        <EuiListGroup flush={true} gutterSize="m" size="l" maxWidth={false}>
+        <EuiListGroup flush={true} gutterSize="m" size="m" maxWidth={false}>
           {items
             .sort((a, b) => ruleTypeCompare(a, b))
             .map((item, index) => {
@@ -530,6 +525,7 @@ export const RuleForm = ({
               data={data}
               dataViews={dataViews}
               unifiedSearch={unifiedSearch}
+              onChangeMetaData={onChangeMetaData}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -569,7 +565,7 @@ export const RuleForm = ({
                   }
                 : { ...actionGroup, defaultActionMessage: ruleTypeModel?.defaultActionMessage }
             )}
-            getDefaultActionParams={getDefaultActionParams}
+            recoveryActionGroup={recoveryActionGroup}
             setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
             setActionGroupIdByIndex={(group: string, index: number) =>
               setActionProperty('group', group, index)
@@ -729,9 +725,11 @@ export const RuleForm = ({
                   data-test-subj="intervalInput"
                   onChange={(e) => {
                     const value = e.target.value;
-                    const interval = value !== '' ? parseInt(value, 10) : undefined;
-                    setRuleInterval(interval);
-                    setScheduleProperty('interval', `${value}${ruleIntervalUnit}`);
+                    if (value === '' || INTEGER_REGEX.test(value)) {
+                      const parsedValue = value === '' ? '' : parseInt(value, 10);
+                      setRuleInterval(parsedValue || undefined);
+                      setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
+                    }
                   }}
                 />
               </EuiFlexItem>
@@ -851,7 +849,7 @@ export const RuleForm = ({
           ) : null}
           {ruleTypeNodes}
         </>
-      ) : ruleTypeIndex ? (
+      ) : ruleTypeIndex && !ruleTypesIsLoading ? (
         <NoAuthorizedRuleTypes operation={operation} />
       ) : (
         <SectionLoading>
@@ -874,7 +872,7 @@ const NoAuthorizedRuleTypes = ({ operation }: { operation: string }) => (
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.ruleForm.error.noAuthorizedRuleTypesTitle"
-          defaultMessage="You have not been authorized to {operation} any Rule types"
+          defaultMessage="You have not been authorized to {operation} any rule types"
           values={{ operation }}
         />
       </h2>

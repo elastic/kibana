@@ -11,18 +11,14 @@ import type {
   FieldCapsResponse,
   TermsEnumRequest,
   TermsEnumResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ValuesType } from 'utility-types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import {
-  ESSearchRequest,
-  InferSearchResponseOf,
-} from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { omit } from 'lodash';
-import { Profile } from '../../../../../typings/es_schemas/ui/profile';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { withApmSpan } from '../../../../utils/with_apm_span';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
@@ -46,6 +42,7 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   };
   body: {
     size: number;
+    track_total_hits: boolean | number;
   };
 };
 
@@ -68,7 +65,6 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   transaction: Transaction;
   span: Span;
   metric: Metric;
-  profile: Profile;
 }[T];
 
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
@@ -84,6 +80,7 @@ export interface APMEventClientConfig {
   indices: ApmIndicesConfig;
   options: {
     includeFrozen: boolean;
+    forceSyntheticSource: boolean;
   };
 }
 
@@ -91,8 +88,9 @@ export class APMEventClient {
   private readonly esClient: ElasticsearchClient;
   private readonly debug: boolean;
   private readonly request: KibanaRequest;
-  private readonly indices: ApmIndicesConfig;
+  public readonly indices: ApmIndicesConfig;
   private readonly includeFrozen: boolean;
+  private readonly forceSyntheticSource: boolean;
 
   constructor(config: APMEventClientConfig) {
     this.esClient = config.esClient;
@@ -100,6 +98,7 @@ export class APMEventClient {
     this.request = config.request;
     this.indices = config.indices;
     this.includeFrozen = config.options.includeFrozen;
+    this.forceSyntheticSource = config.options.forceSyntheticSource;
   }
 
   private callAsyncWithDebug<T extends { body: any }>({
@@ -153,11 +152,18 @@ export class APMEventClient {
       this.indices
     );
 
+    const forceSyntheticSourceForThisRequest =
+      this.forceSyntheticSource &&
+      params.apm.events.includes(ProcessorEvent.metric);
+
     const searchParams = {
       ...withProcessorEventFilter,
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
       ignore_unavailable: true,
       preference: 'any',
+      ...(forceSyntheticSourceForThisRequest
+        ? { force_synthetic_source: true }
+        : {}),
     };
 
     return this.callAsyncWithDebug({

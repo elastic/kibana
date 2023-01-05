@@ -11,7 +11,7 @@ import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
@@ -130,13 +130,6 @@ export async function runDockerGenerator(
     config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/base'),
     dockerBuildDir
   );
-
-  if (flags.ironbank) {
-    await copyAll(
-      config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/ironbank'),
-      dockerBuildDir
-    );
-  }
 
   // Build docker image into the target folder
   // In order to do this we just call the file we

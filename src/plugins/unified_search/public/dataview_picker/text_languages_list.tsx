@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import { EuiSelectable, EuiPanel, EuiBetaBadge } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { TextBasedLanguages } from '.';
+import { i18n } from '@kbn/i18n';
+import { EuiSelectable, EuiPanel, EuiBadge } from '@elastic/eui';
+import { TextBasedLanguages } from './data_view_picker';
 
 export interface TextBasedLanguagesListProps {
   textBasedLanguages: TextBasedLanguages[];
@@ -39,15 +39,11 @@ export default function TextBasedLanguagesList({
         value: lang,
         checked: lang === selectedOption ? 'on' : undefined,
         append: (
-          <EuiBetaBadge
-            label="Technical preview"
-            color="hollow"
-            size="s"
-            css={css`
-              vertical-align: middle;
-              cursor: pointer;
-            `}
-          />
+          <EuiBadge color="hollow">
+            {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTechPreviewLabel', {
+              defaultMessage: 'Technical preview',
+            })}
+          </EuiBadge>
         ),
       }))}
       onChange={(choices) => {

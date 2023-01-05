@@ -16,13 +16,12 @@ import React, { FC } from 'react';
 import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-
+import { PersistedState } from '@kbn/visualizations-plugin/public';
 import {
   CommonXYDataLayerConfig,
   EndValue,
   FittingFunction,
   ValueLabelMode,
-  XYCurveType,
   XScaleType,
 } from '../../common';
 import { SeriesTypes, ValueLabelModes, AxisModes } from '../../common/constants';
@@ -34,6 +33,7 @@ import {
   DatatablesWithFormatInfo,
   LayersAccessorsTitles,
   LayersFieldFormats,
+  hasMultipleLayersWithSplits,
 } from '../helpers';
 
 interface Props {
@@ -42,7 +42,6 @@ interface Props {
   formatFactory: FormatFactory;
   chartHasMoreThanOneBarSeries?: boolean;
   yAxesConfiguration: GroupsConfiguration;
-  curveType?: XYCurveType;
   fittingFunction?: FittingFunction;
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
@@ -55,6 +54,8 @@ interface Props {
   valueLabels: ValueLabelMode;
   defaultXScaleType: XScaleType;
   fieldFormats: LayersFieldFormats;
+  uiState?: PersistedState;
+  singleTable?: boolean;
 }
 
 export const DataLayers: FC<Props> = ({
@@ -62,7 +63,6 @@ export const DataLayers: FC<Props> = ({
   layers,
   endValue,
   timeZone,
-  curveType,
   syncColors,
   valueLabels,
   fillOpacity,
@@ -76,14 +76,58 @@ export const DataLayers: FC<Props> = ({
   chartHasMoreThanOneBarSeries,
   defaultXScaleType,
   fieldFormats,
+  uiState,
+  singleTable,
 }) => {
-  const colorAssignments = getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
+  // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
+  const allYAccessors = layers.flatMap((layer) => layer.accessors);
+  const allColumnsToLabel = layers.reduce((acc, layer) => {
+    if (layer.columnToLabel) {
+      return { ...acc, ...JSON.parse(layer.columnToLabel) };
+    }
+
+    return acc;
+  }, {});
+  const allYTitles = Object.keys(titles).reduce((acc, key) => {
+    if (titles[key].yTitles) {
+      return { ...acc, ...titles[key].yTitles };
+    }
+    return acc;
+  }, {});
+  const colorAssignments = singleTable
+    ? getColorAssignments(
+        [
+          {
+            ...layers[0],
+            layerId: 'commonLayerId',
+            accessors: allYAccessors,
+            columnToLabel: JSON.stringify(allColumnsToLabel),
+          },
+        ],
+        { commonLayerId: { ...titles, yTitles: allYTitles } },
+        { commonLayerId: fieldFormats[layers[0].layerId] },
+        { commonLayerId: formattedDatatables[layers[0].layerId] }
+      )
+    : getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
+  const multipleLayersWithSplits = hasMultipleLayersWithSplits(layers);
   return (
     <>
-      {layers.flatMap((layer) =>
-        layer.accessors.map((accessor, accessorIndex) => {
-          const { seriesType, columnToLabel, layerId, table } = layer;
-          const yColumnId = getAccessorByDimension(accessor, table.columns);
+      {layers.flatMap((layer) => {
+        const yPercentileAccessors: string[] = [];
+        const yAccessors: string[] = [];
+        layer.accessors.forEach((accessor) => {
+          const columnId = getAccessorByDimension(accessor, layer.table.columns);
+          if (columnId.includes('.')) {
+            yPercentileAccessors.push(columnId);
+          } else {
+            yAccessors.push(columnId);
+          }
+        });
+        return (
+          yPercentileAccessors.length ? [...yAccessors, yPercentileAccessors] : [...yAccessors]
+        ).map((accessor, accessorIndex) => {
+          const { seriesType, columnToLabel, layerId } = layer;
+          const yColumnId = Array.isArray(accessor) ? accessor[0] : accessor;
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -104,7 +148,7 @@ export const DataLayers: FC<Props> = ({
           const seriesProps = getSeriesProps({
             layer,
             titles: titles[layer.layerId],
-            accessor: yColumnId,
+            accessor,
             chartHasMoreThanOneBarSeries,
             colorAssignments,
             formatFactory,
@@ -118,11 +162,15 @@ export const DataLayers: FC<Props> = ({
             fillOpacity,
             defaultXScaleType,
             fieldFormats,
+            uiState,
+            allYAccessors,
+            singleTable,
+            multipleLayersWithSplits,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;
 
-          const curve = curveType ? CurveType[curveType] : undefined;
+          const curve = layer.curveType ? CurveType[layer.curveType] : undefined;
 
           switch (seriesType) {
             case SeriesTypes.LINE:
@@ -161,8 +209,8 @@ export const DataLayers: FC<Props> = ({
                 />
               );
           }
-        })
-      )}
+        });
+      })}
     </>
   );
 };

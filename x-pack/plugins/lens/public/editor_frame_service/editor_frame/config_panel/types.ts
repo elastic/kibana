@@ -6,6 +6,7 @@
  */
 
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
 import {
   Visualization,
@@ -20,6 +21,7 @@ export interface ConfigPanelWrapperProps {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
+  indexPatternService: IndexPatternServiceAPI;
   uiActions: UiActionsStart;
 }
 

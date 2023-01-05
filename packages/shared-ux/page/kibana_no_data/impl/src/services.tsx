@@ -15,13 +15,12 @@ import {
 import { NoDataCardProvider, NoDataCardKibanaProvider } from '@kbn/shared-ux-card-no-data';
 
 import {
+  Services,
   KibanaNoDataPageServices,
   KibanaNoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-no-data-types';
 
-import { LegacyServicesProvider, getLegacyServices } from './legacy_services';
-
-const KibanaNoDataPageContext = React.createContext<KibanaNoDataPageServices | null>(null);
+const KibanaNoDataPageContext = React.createContext<Services | null>(null);
 
 /**
  * A Context Provider that provides services to the component.
@@ -29,15 +28,17 @@ const KibanaNoDataPageContext = React.createContext<KibanaNoDataPageServices | n
 export const KibanaNoDataPageProvider: FC<KibanaNoDataPageServices> = ({
   children,
   ...services
-}) => (
-  <KibanaNoDataPageContext.Provider value={services}>
-    <NoDataViewsPromptProvider {...services}>
-      <NoDataCardProvider {...services}>
-        <LegacyServicesProvider {...getLegacyServices(services)}>{children}</LegacyServicesProvider>
-      </NoDataCardProvider>
-    </NoDataViewsPromptProvider>
-  </KibanaNoDataPageContext.Provider>
-);
+}) => {
+  const { hasESData, hasUserDataView } = services;
+
+  return (
+    <KibanaNoDataPageContext.Provider value={{ hasESData, hasUserDataView }}>
+      <NoDataViewsPromptProvider {...services}>
+        <NoDataCardProvider {...services}>{children}</NoDataCardProvider>
+      </NoDataViewsPromptProvider>
+    </KibanaNoDataPageContext.Provider>
+  );
+};
 
 /**
  * Kibana-specific Provider that maps dependencies to services.
@@ -46,27 +47,16 @@ export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependenci
   children,
   ...dependencies
 }) => {
-  const { coreStart, dataViewEditor, dataViews } = dependencies;
-  const value: KibanaNoDataPageServices = {
-    addBasePath: coreStart.http.basePath.prepend,
-    canAccessFleet: coreStart.application.capabilities.navLinks.integrations,
-    canCreateNewDataView: dataViewEditor.userPermissions.editDataView(),
-    currentAppId$: coreStart.application.currentAppId$,
-    dataViewsDocLink: coreStart.docLinks.links.indexPatterns?.introduction,
-    hasDataView: dataViews.hasData.hasDataView,
+  const { dataViews } = dependencies;
+  const value: Services = {
     hasESData: dataViews.hasData.hasESData,
     hasUserDataView: dataViews.hasData.hasUserDataView,
-    navigateToUrl: coreStart.application.navigateToUrl,
-    openDataViewEditor: dataViewEditor.openEditor,
-    setIsFullscreen: (isVisible: boolean) => coreStart.chrome.setIsVisible(isVisible),
   };
 
   return (
     <KibanaNoDataPageContext.Provider value={value}>
       <NoDataViewsPromptKibanaProvider {...dependencies}>
-        <NoDataCardKibanaProvider {...dependencies}>
-          <LegacyServicesProvider {...getLegacyServices(value)}>{children}</LegacyServicesProvider>
-        </NoDataCardKibanaProvider>
+        <NoDataCardKibanaProvider {...dependencies}>{children}</NoDataCardKibanaProvider>
       </NoDataViewsPromptKibanaProvider>
     </KibanaNoDataPageContext.Provider>
   );

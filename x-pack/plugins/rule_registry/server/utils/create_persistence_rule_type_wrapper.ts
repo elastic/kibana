@@ -11,6 +11,7 @@ import { ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
+import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient }) =>
@@ -22,7 +23,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
           ...options,
           services: {
             ...options.services,
-            alertWithPersistence: async (alerts, refresh, maxAlerts = undefined) => {
+            alertWithPersistence: async (alerts, refresh, maxAlerts = undefined, enrichAlerts) => {
               const numAlerts = alerts.length;
               logger.debug(`Found ${numAlerts} alerts.`);
 
@@ -85,13 +86,25 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
                 }
 
+                let enrichedAlerts = filteredAlerts;
+
+                if (enrichAlerts) {
+                  try {
+                    enrichedAlerts = await enrichAlerts(filteredAlerts, {
+                      spaceId: options.spaceId,
+                    });
+                  } catch (e) {
+                    logger.debug('Enrichemnts failed');
+                  }
+                }
+
                 let alertsWereTruncated = false;
-                if (maxAlerts && filteredAlerts.length > maxAlerts) {
-                  filteredAlerts.length = maxAlerts;
+                if (maxAlerts && enrichedAlerts.length > maxAlerts) {
+                  enrichedAlerts.length = maxAlerts;
                   alertsWereTruncated = true;
                 }
 
-                const augmentedAlerts = filteredAlerts.map((alert) => {
+                const augmentedAlerts = enrichedAlerts.map((alert) => {
                   return {
                     ...alert,
                     _source: {
@@ -138,5 +151,10 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
         return state;
       },
+      getSummarizedAlerts: createGetSummarizedAlertsFn({
+        ruleDataClient,
+        useNamespace: true,
+        isLifecycleAlert: false,
+      })(),
     };
   };

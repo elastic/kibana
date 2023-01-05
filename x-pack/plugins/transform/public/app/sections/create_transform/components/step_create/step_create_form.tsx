@@ -26,7 +26,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/public';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
@@ -244,6 +244,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
             ...(isPopulatedObject(runtimeMappings) && isLatestTransform(transformConfig)
               ? { runtimeFieldMap: runtimeMappings }
               : {}),
+            allowNoIndex: true,
           },
           false,
           true

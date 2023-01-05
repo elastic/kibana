@@ -42,6 +42,7 @@ interface EngineCreationActions {
   setSelectedIndex(selectedIndexName: string): { selectedIndexName: string };
   setEngineType(engineType: EngineType): { engineType: EngineType };
   setIsAliasAllowed(isAliasAllowed: boolean): { isAliasAllowed: boolean };
+  initializeWithESIndex(indexName: string): { indexName: string };
 }
 
 interface EngineCreationValues {
@@ -82,6 +83,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
     setEngineType: (engineType) => ({ engineType }),
     setCreationStep: (currentEngineCreationStep) => currentEngineCreationStep,
     setIsAliasAllowed: (isAliasAllowed) => ({ isAliasAllowed }),
+    initializeWithESIndex: (indexName) => ({ indexName }),
   },
   reducers: {
     ingestionMethod: [
@@ -118,6 +120,10 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
             ? ''
             : `search-${selectedIndexName}-alias`;
         },
+        initializeWithESIndex: (_, { indexName }) =>
+          indexName.length === 0 || indexName.startsWith('search-')
+            ? ''
+            : `search-${indexName}-alias`,
       },
     ],
     isAliasAllowed: [
@@ -145,18 +151,21 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       {
         setSelectedIndex: (_, { selectedIndexName }) => selectedIndexName,
         onSubmitError: () => '',
+        initializeWithESIndex: (_, { indexName }) => indexName,
       },
     ],
     engineType: [
       'appSearch',
       {
         setEngineType: (_, { engineType }) => engineType,
+        initializeWithESIndex: () => 'elasticsearch',
       },
     ],
     currentEngineCreationStep: [
       EngineCreationSteps.SelectStep,
       {
         setCreationStep: (_, currentEngineCreationStep) => currentEngineCreationStep,
+        initializeWithESIndex: () => EngineCreationSteps.ConfigureStep,
       },
     ],
   },

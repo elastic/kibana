@@ -10,9 +10,10 @@
 import Url from 'url';
 import { run as syntheticsRun } from '@elastic/synthetics';
 import { PromiseType } from 'utility-types';
-import { createApmUsers } from '@kbn/apm-plugin/scripts/create_apm_users/create_apm_users';
+import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 
 import { esArchiverUnload } from './tasks/es_archiver';
+import { TestReporter } from './test_reporter';
 
 export interface ArgParams {
   headless: boolean;
@@ -23,6 +24,7 @@ export interface ArgParams {
 export class SyntheticsRunner {
   public getService: any;
   public kibanaUrl: string;
+  private elasticsearchUrl: string;
 
   public testFilesLoaded: boolean = false;
 
@@ -31,6 +33,7 @@ export class SyntheticsRunner {
   constructor(getService: any, params: ArgParams) {
     this.getService = getService;
     this.kibanaUrl = this.getKibanaUrl();
+    this.elasticsearchUrl = this.getElasticsearchUrl();
     this.params = params;
   }
 
@@ -40,7 +43,7 @@ export class SyntheticsRunner {
 
   async createTestUsers() {
     await createApmUsers({
-      elasticsearch: { username: 'elastic', password: 'changeme' },
+      elasticsearch: { node: this.elasticsearchUrl, username: 'elastic', password: 'changeme' },
       kibana: { hostname: this.kibanaUrl },
     });
   }
@@ -60,10 +63,7 @@ export class SyntheticsRunner {
 
       const promises = dataArchives.map((archive) => esArchiver.loadIfNeeded(e2eDir + archive));
 
-      await Promise.all([
-        ...promises,
-        esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote'),
-      ]);
+      await Promise.all([...promises]);
     } catch (e) {
       console.log(e);
     }
@@ -79,6 +79,16 @@ export class SyntheticsRunner {
     });
   }
 
+  getElasticsearchUrl() {
+    const config = this.getService('config');
+
+    return Url.format({
+      protocol: config.get('servers.elasticsearch.protocol'),
+      hostname: config.get('servers.elasticsearch.hostname'),
+      port: config.get('servers.elasticsearch.port'),
+    });
+  }
+
   async run() {
     if (!this.testFilesLoaded) {
       throw new Error('Test files not loaded');
@@ -86,9 +96,22 @@ export class SyntheticsRunner {
     const { headless, match, pauseOnError } = this.params;
     const results = await syntheticsRun({
       params: { kibanaUrl: this.kibanaUrl, getService: this.getService },
-      playwrightOptions: { headless, chromiumSandbox: false, timeout: 60 * 1000 },
+      playwrightOptions: {
+        headless,
+        chromiumSandbox: false,
+        timeout: 60 * 1000,
+        viewport: {
+          height: 900,
+          width: 1600,
+        },
+        recordVideo: {
+          dir: '.journeys/videos',
+        },
+      },
       match: match === 'undefined' ? '' : match,
       pauseOnError,
+      screenshots: 'only-on-failure',
+      reporter: TestReporter,
     });
 
     await this.assertResults(results);
@@ -97,7 +120,8 @@ export class SyntheticsRunner {
   assertResults(results: PromiseType<ReturnType<typeof syntheticsRun>>) {
     Object.entries(results).forEach(([_journey, result]) => {
       if (result.status !== 'succeeded') {
-        throw new Error('Tests failed');
+        process.exitCode = 1;
+        process.exit();
       }
     });
   }

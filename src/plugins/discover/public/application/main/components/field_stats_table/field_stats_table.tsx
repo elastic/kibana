@@ -17,11 +17,31 @@ import {
   IEmbeddable,
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import type { SavedSearch } from '../../../../services/saved_searches';
-import type { GetStateReturn } from '../../services/discover_state';
-import { AvailableFields$, DataRefetch$ } from '../../hooks/use_saved_search';
+import type { DiscoverStateContainer } from '../../services/discover_state';
+import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
+export interface RandomSamplingOption {
+  mode: 'random_sampling';
+  seed: string;
+  probability: number;
+}
+
+export interface NormalSamplingOption {
+  mode: 'normal_sampling';
+  seed: string;
+  shardSize: number;
+}
+
+export interface NoSamplingOption {
+  mode: 'no_sampling';
+  seed: string;
+}
+
+export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   dataView: DataView;
@@ -36,6 +56,8 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   sessionId?: string;
   fieldsToFetch?: string[];
+  totalDocuments?: number;
+  samplingOption?: SamplingOption;
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
@@ -73,7 +95,7 @@ export interface FieldStatisticsTableProps {
   /**
    * State container with persisted settings
    */
-  stateContainer?: GetStateReturn;
+  stateContainer?: DiscoverStateContainer;
   /**
    * Callback to add a filter to filter bar
    */
@@ -87,6 +109,7 @@ export interface FieldStatisticsTableProps {
   savedSearchRefetch$?: DataRefetch$;
   availableFields$?: AvailableFields$;
   searchSessionId?: string;
+  savedSearchDataTotalHits$?: DataTotalHits$;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
@@ -102,6 +125,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     trackUiMetric,
     savedSearchRefetch$,
     searchSessionId,
+    savedSearchDataTotalHits$,
   } = props;
   const services = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
@@ -112,8 +136,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   const showPreviewByDefault = useMemo(
-    () =>
-      stateContainer ? !stateContainer.appStateContainer.getState().hideAggregatedPreview : true,
+    () => (stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true),
     [stateContainer]
   );
 
@@ -155,6 +178,14 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         onAddFilter,
         sessionId: searchSessionId,
         fieldsToFetch: availableFields$?.getValue().fields,
+        totalDocuments: savedSearchDataTotalHits$
+          ? savedSearchDataTotalHits$.getValue()?.result
+          : undefined,
+        samplingOption: {
+          mode: 'normal_sampling',
+          shardSize: 5000,
+          seed: searchSessionId,
+        } as NormalSamplingOption,
       });
       embeddable.reload();
     }
@@ -168,6 +199,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     onAddFilter,
     searchSessionId,
     availableFields$,
+    savedSearchDataTotalHits$,
   ]);
 
   useEffect(() => {
@@ -226,13 +258,22 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     };
   }, [embeddable, embeddableRoot, trackUiMetric]);
 
+  const statsTableCss = css`
+    overflow-y: auto;
+
+    .kbnDocTableWrapper {
+      overflow-x: hidden;
+    }
+  `;
+
   return (
-    <div
-      data-test-subj="dscFieldStatsEmbeddedContent"
-      ref={embeddableRoot}
-      style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
-      // Match the scroll bar of the Discover doc table
-      className="kbnDocTableWrapper"
-    />
+    <EuiFlexItem css={statsTableCss}>
+      <div
+        data-test-subj="dscFieldStatsEmbeddedContent"
+        ref={embeddableRoot}
+        // Match the scroll bar of the Discover doc table
+        className="kbnDocTableWrapper"
+      />
+    </EuiFlexItem>
   );
 };

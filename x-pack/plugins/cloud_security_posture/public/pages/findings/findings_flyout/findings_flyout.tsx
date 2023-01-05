@@ -24,13 +24,15 @@ import {
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
-import type { CspFinding } from '../types';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import { ResourceTab } from './resource_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
-import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
+import type { BenchmarkId } from '../../../../common/types';
+import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
+import { BenchmarkName } from '../../../../common/types';
 
 const tabs = [
   {
@@ -74,13 +76,19 @@ export const Markdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => 
   <EuiMarkdownFormat textSize="s" {...props} />
 );
 
-export const CisKubernetesIcons = () => (
+export const CisKubernetesIcons = ({
+  benchmarkId,
+  benchmarkName,
+}: {
+  benchmarkId: BenchmarkId;
+  benchmarkName: BenchmarkName;
+}) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={false}>
       <EuiIcon type={cisLogoIcon} size="xxl" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiIcon type={k8sLogoIcon} size="xxl" />
+      <CISBenchmarkIcon type={benchmarkId} name={benchmarkName} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -104,7 +112,7 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   return (
-    <EuiFlyout ownFocus={false} onClose={onClose}>
+    <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
@@ -121,7 +129,12 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
         <EuiSpacer />
         <EuiTabs>
           {tabs.map((v) => (
-            <EuiTab key={v.id} isSelected={tab.id === v.id} onClick={() => setTab(v)}>
+            <EuiTab
+              key={v.id}
+              isSelected={tab.id === v.id}
+              onClick={() => setTab(v)}
+              data-test-subj={`findings_flyout_tab_${v.id}`}
+            >
               {v.title}
             </EuiTab>
           ))}

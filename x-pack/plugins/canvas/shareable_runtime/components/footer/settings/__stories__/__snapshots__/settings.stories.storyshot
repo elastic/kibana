@@ -21,15 +21,16 @@ exports[`Storyshots shareables/Footer/Settings component 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiPopover euiPopover--anchorUpRight"
+        className="euiPopover emotion-euiPopover"
         id="settings"
       >
         <div
-          className="euiPopover__anchor"
+          className="euiPopover__anchor css-16vtueo-render"
         >
           <button
             aria-label="Settings"
-            className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+            className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >
@@ -71,15 +72,16 @@ exports[`Storyshots shareables/Footer/Settings contextual 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiPopover euiPopover--anchorUpRight"
+        className="euiPopover emotion-euiPopover"
         id="settings"
       >
         <div
-          className="euiPopover__anchor"
+          className="euiPopover__anchor css-16vtueo-render"
         >
           <button
             aria-label="Settings"
-            className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+            className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >

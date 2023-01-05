@@ -211,6 +211,7 @@ describe('rule_form', () => {
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          onChangeMetaData={jest.fn()}
         />
       );
 
@@ -334,6 +335,7 @@ describe('rule_form', () => {
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
           connectorFeatureId={featureId}
+          onChangeMetaData={jest.fn()}
         />
       );
 
@@ -375,6 +377,44 @@ describe('rule_form', () => {
       expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
         ``
       );
+    });
+
+    it('handles schedule interval inputs correctly', async () => {
+      const getIntervalInput = () => {
+        return wrapper.find('[data-test-subj="intervalInput"] input').first();
+      };
+
+      await setup();
+      expect(getIntervalInput().props().value).toEqual(1);
+
+      getIntervalInput().simulate('change', { target: { value: '2' } });
+      expect(getIntervalInput().props().value).toEqual(2);
+
+      getIntervalInput().simulate('change', { target: { value: '20' } });
+      expect(getIntervalInput().props().value).toEqual(20);
+
+      getIntervalInput().simulate('change', { target: { value: '999' } });
+      expect(getIntervalInput().props().value).toEqual(999);
+
+      // Invalid values:
+      await setup();
+      getIntervalInput().simulate('change', { target: { value: '0' } });
+      expect(getIntervalInput().props().value).toEqual(1);
+
+      getIntervalInput().simulate('change', { target: { value: 'INVALID' } });
+      expect(getIntervalInput().props().value).toEqual(1);
+
+      getIntervalInput().simulate('change', { target: { value: '-123' } });
+      expect(getIntervalInput().props().value).toEqual(1);
+
+      getIntervalInput().simulate('change', { target: { value: '1.0123' } });
+      expect(getIntervalInput().props().value).toEqual(1);
+
+      getIntervalInput().simulate('change', { target: { value: '0.0123' } });
+      expect(getIntervalInput().props().value).toEqual(1);
+
+      getIntervalInput().simulate('change', { target: { value: '+123' } });
+      expect(getIntervalInput().props().value).toEqual(1);
     });
 
     it('does not render registered rule type which non editable', async () => {
@@ -540,6 +580,7 @@ describe('rule_form', () => {
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          onChangeMetaData={jest.fn()}
         />
       );
 
@@ -606,6 +647,7 @@ describe('rule_form', () => {
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
+          onChangeMetaData={jest.fn()}
         />
       );
 

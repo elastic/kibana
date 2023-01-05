@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import dateMath from '@elastic/datemath';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { NewTermsRuleParams } from '../../schemas/rule_schemas';
-import { newTermsRuleParams } from '../../schemas/rule_schemas';
+import type { NewTermsRuleParams } from '../../rule_schema';
+import { newTermsRuleParams } from '../../rule_schema';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../../signals/single_search_after';
 import { getFilter } from '../../signals/get_filter';
-import type { GenericBulkCreateResponse } from '../factories';
-import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 import { wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
+import type { EventsAndTerms } from '../factories/utils/wrap_new_terms_alerts';
 import type {
   DocFetchAggResult,
   RecentTermsAggResult,
@@ -29,40 +26,21 @@ import {
   buildRecentTermsAgg,
   buildNewTermsAgg,
 } from './build_new_terms_aggregation';
+import { validateIndexPatterns } from '../utils';
 import {
-  buildTimestampRuntimeMapping,
-  TIMESTAMP_RUNTIME_FIELD,
-} from './build_timestamp_runtime_mapping';
-import type { SignalSource } from '../../signals/types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
-
-interface BulkCreateResults {
-  bulkCreateTimes: string[];
-  createdSignalsCount: number;
-  createdSignals: unknown[];
-  success: boolean;
-  errors: string[];
-  alertsWereTruncated: boolean;
-}
-
-interface SearchAfterResults {
-  searchDurations: string[];
-  searchErrors: string[];
-}
-
-const addBulkCreateResults = (
-  results: BulkCreateResults,
-  newResults: GenericBulkCreateResponse<BaseFieldsLatest>
-): BulkCreateResults => {
-  return {
-    bulkCreateTimes: [...results.bulkCreateTimes, newResults.bulkCreateDuration],
-    createdSignalsCount: results.createdSignalsCount + newResults.createdItemsCount,
-    createdSignals: [...results.createdSignals, ...newResults.createdItems],
-    success: results.success && newResults.success,
-    errors: [...results.errors, ...newResults.errors],
-    alertsWereTruncated: results.alertsWereTruncated || newResults.alertsWereTruncated,
-  };
-};
+  parseDateString,
+  validateHistoryWindowStart,
+  transformBucketsToValues,
+  getNewTermsRuntimeMappings,
+  getAggregationField,
+  decodeMatchedValues,
+} from './utils';
+import {
+  addToSearchAfterReturn,
+  createSearchAfterReturnType,
+  getUnprocessedExceptionsWarnings,
+} from '../../signals/utils';
+import { createEnrichEventsFunction } from '../../signals/enrichments';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
@@ -81,6 +59,10 @@ export const createNewTermsAlertType = (
           if (validated == null) {
             throw new Error('Validation of rule params failed');
           }
+          validateHistoryWindowStart({
+            historyWindowStart: validated.historyWindowStart,
+            from: validated.from,
+          });
           return validated;
         },
         /**
@@ -90,7 +72,6 @@ export const createNewTermsAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
@@ -116,20 +97,31 @@ export const createNewTermsAlertType = (
           ruleExecutionLogger,
           bulkCreate,
           completeRule,
-          exceptionItems,
           tuple,
           mergeStrategy,
           inputIndex,
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
+          aggregatableTimestampField,
+          exceptionFilter,
+          unprocessedExceptions,
+          alertTimestampOverride,
         },
         services,
         params,
         spaceId,
+        state,
       } = execOptions;
 
-      const filter = await getFilter({
+      // Validate the history window size compared to `from` at runtime as well as in the `validate`
+      // function because rule preview does not use the `validate` function defined on the rule type
+      validateHistoryWindowStart({
+        historyWindowStart: params.historyWindowStart,
+        from: params.from,
+      });
+
+      const esFilter = await getFilter({
         filters: params.filters,
         index: inputIndex,
         language: params.language,
@@ -137,42 +129,23 @@ export const createNewTermsAlertType = (
         services,
         type: params.type,
         query: params.query,
-        lists: exceptionItems,
+        exceptionFilter,
       });
 
-      const parsedHistoryWindowSize = dateMath.parse(params.historyWindowStart, {
+      const parsedHistoryWindowSize = parseDateString({
+        date: params.historyWindowStart,
         forceNow: tuple.to.toDate(),
+        name: 'historyWindowStart',
       });
-      if (parsedHistoryWindowSize == null) {
-        throw Error(`Failed to parse 'historyWindowStart'`);
-      }
 
       let afterKey;
-      let bulkCreateResults: BulkCreateResults = {
-        bulkCreateTimes: [],
-        createdSignalsCount: 0,
-        createdSignals: [],
-        success: true,
-        errors: [],
-        alertsWereTruncated: false,
-      };
 
-      const searchAfterResults: SearchAfterResults = {
-        searchDurations: [],
-        searchErrors: [],
-      };
+      const result = createSearchAfterReturnType();
 
-      // If we have a timestampOverride, we'll compute a runtime field that emits the override for each document if it exists,
-      // otherwise it emits @timestamp. If we don't have a timestamp override we don't want to pay the cost of using a
-      // runtime field, so we just use @timestamp directly.
-      const { timestampField, timestampRuntimeMappings } = params.timestampOverride
-        ? {
-            timestampField: TIMESTAMP_RUNTIME_FIELD,
-            timestampRuntimeMappings: buildTimestampRuntimeMapping({
-              timestampOverride: params.timestampOverride,
-            }),
-          }
-        : { timestampField: '@timestamp', timestampRuntimeMappings: undefined };
+      const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+      if (exceptionsWarning) {
+        result.warningMessages.push(exceptionsWarning);
+      }
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
@@ -180,16 +153,13 @@ export const createNewTermsAlertType = (
       // it's possible for the array to be truncated but alert documents could fail to be created for other reasons,
       // in which case createdSignalsCount would still be less than maxSignals. Since valid alerts were truncated from
       // the array in that case, we stop and report the errors.
-      while (
-        !bulkCreateResults.alertsWereTruncated &&
-        bulkCreateResults.createdSignalsCount < params.maxSignals
-      ) {
+      while (result.createdSignalsCount < params.maxSignals) {
         // PHASE 1: Fetch a page of terms using a composite aggregation. This will collect a page from
         // all of the terms seen over the last rule interval. In the next phase we'll determine which
         // ones are new.
         const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
           aggregations: buildRecentTermsAgg({
-            field: params.newTermsFields[0],
+            fields: params.newTermsFields,
             after: afterKey,
           }),
           searchAfterSortIds: undefined,
@@ -199,7 +169,7 @@ export const createNewTermsAlertType = (
           to: tuple.to.toISOString(),
           services,
           ruleExecutionLogger,
-          filter,
+          filter: esFilter,
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
@@ -207,12 +177,12 @@ export const createNewTermsAlertType = (
         });
         const searchResultWithAggs = searchResult as RecentTermsAggResult;
         if (!searchResultWithAggs.aggregations) {
-          throw new Error('expected to find aggregations on search result');
+          throw new Error('Aggregations were missing on recent terms search result');
         }
         logger.debug(`Time spent on composite agg: ${searchDuration}`);
 
-        searchAfterResults.searchDurations.push(searchDuration);
-        searchAfterResults.searchErrors.push(...searchErrors);
+        result.searchAfterTimes.push(searchDuration);
+        result.errors.push(...searchErrors);
 
         afterKey = searchResultWithAggs.aggregations.new_terms.after_key;
 
@@ -222,9 +192,11 @@ export const createNewTermsAlertType = (
           break;
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
-        const includeValues = bucketsForField
-          .map((bucket) => Object.values(bucket.key)[0])
-          .filter((value): value is string | number => value != null);
+        const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
+        const newTermsRuntimeMappings = getNewTermsRuntimeMappings(
+          params.newTermsFields,
+          bucketsForField
+        );
 
         // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
         // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
@@ -236,13 +208,13 @@ export const createNewTermsAlertType = (
         } = await singleSearchAfter({
           aggregations: buildNewTermsAgg({
             newValueWindowStart: tuple.from,
-            timestampField,
-            field: params.newTermsFields[0],
+            timestampField: aggregatableTimestampField,
+            field: getAggregationField(params.newTermsFields),
             include: includeValues,
           }),
           runtimeMappings: {
             ...runtimeMappings,
-            ...timestampRuntimeMappings,
+            ...newTermsRuntimeMappings,
           },
           searchAfterSortIds: undefined,
           index: inputIndex,
@@ -252,19 +224,19 @@ export const createNewTermsAlertType = (
           to: tuple.to.toISOString(),
           services,
           ruleExecutionLogger,
-          filter,
+          filter: esFilter,
           pageSize: 0,
           primaryTimestamp,
           secondaryTimestamp,
         });
-        searchAfterResults.searchDurations.push(pageSearchDuration);
-        searchAfterResults.searchErrors.push(...pageSearchErrors);
+        result.searchAfterTimes.push(pageSearchDuration);
+        result.errors.push(...pageSearchErrors);
 
         logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
 
         const pageSearchResultWithAggs = pageSearchResult as NewTermsAggResult;
         if (!pageSearchResultWithAggs.aggregations) {
-          throw new Error('expected to find aggregations on page search result');
+          throw new Error('Aggregations were missing on new terms search result');
         }
 
         // PHASE 3: For each term that is not in the history window, fetch the oldest document in
@@ -282,13 +254,13 @@ export const createNewTermsAlertType = (
             searchErrors: docFetchSearchErrors,
           } = await singleSearchAfter({
             aggregations: buildDocFetchAgg({
-              timestampField,
-              field: params.newTermsFields[0],
+              timestampField: aggregatableTimestampField,
+              field: getAggregationField(params.newTermsFields),
               include: actualNewTerms,
             }),
             runtimeMappings: {
               ...runtimeMappings,
-              ...timestampRuntimeMappings,
+              ...newTermsRuntimeMappings,
             },
             searchAfterSortIds: undefined,
             index: inputIndex,
@@ -297,27 +269,28 @@ export const createNewTermsAlertType = (
             to: tuple.to.toISOString(),
             services,
             ruleExecutionLogger,
-            filter,
+            filter: esFilter,
             pageSize: 0,
             primaryTimestamp,
             secondaryTimestamp,
           });
-          searchAfterResults.searchDurations.push(docFetchSearchDuration);
-          searchAfterResults.searchErrors.push(...docFetchSearchErrors);
+          result.searchAfterTimes.push(docFetchSearchDuration);
+          result.errors.push(...docFetchSearchErrors);
 
           const docFetchResultWithAggs = docFetchSearchResult as DocFetchAggResult;
 
           if (!docFetchResultWithAggs.aggregations) {
-            throw new Error('expected to find aggregations on page search result');
+            throw new Error('Aggregations were missing on document fetch search result');
           }
 
-          const eventsAndTerms: Array<{
-            event: estypes.SearchHit<SignalSource>;
-            newTerms: Array<string | number | null>;
-          }> = docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => ({
-            event: bucket.docs.hits.hits[0],
-            newTerms: [bucket.key],
-          }));
+          const eventsAndTerms: EventsAndTerms[] =
+            docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => {
+              const newTerms = decodeMatchedValues(params.newTermsFields, bucket.key);
+              return {
+                event: bucket.docs.hits.hits[0],
+                newTerms,
+              };
+            });
 
           const wrappedAlerts = wrapNewTermsAlerts({
             eventsAndTerms,
@@ -325,31 +298,26 @@ export const createNewTermsAlertType = (
             completeRule,
             mergeStrategy,
             indicesToQuery: inputIndex,
+            alertTimestampOverride,
           });
 
           const bulkCreateResult = await bulkCreate(
             wrappedAlerts,
-            params.maxSignals - bulkCreateResults.createdSignalsCount
+            params.maxSignals - result.createdSignalsCount,
+            createEnrichEventsFunction({
+              services,
+              logger: ruleExecutionLogger,
+            })
           );
 
-          bulkCreateResults = addBulkCreateResults(bulkCreateResults, bulkCreateResult);
+          addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+
+          if (bulkCreateResult.alertsWereTruncated) {
+            break;
+          }
         }
       }
-
-      return {
-        // If an error occurs but doesn't cause us to throw then we still count the execution as a success.
-        // Should be refactored for better clarity, but that's how it is for now.
-        success: true,
-        warning: false,
-        searchAfterTimes: searchAfterResults.searchDurations,
-        bulkCreateTimes: bulkCreateResults.bulkCreateTimes,
-        lastLookBackDate: undefined,
-        createdSignalsCount: bulkCreateResults.createdSignalsCount,
-        createdSignals: bulkCreateResults.createdSignals,
-        errors: [...searchAfterResults.searchErrors, ...bulkCreateResults.errors],
-        warningMessages: [],
-        state: {},
-      };
+      return { ...result, state };
     },
   };
 };

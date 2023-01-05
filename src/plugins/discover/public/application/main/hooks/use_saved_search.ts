@@ -10,39 +10,33 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { AggregateQuery, Query } from '@kbn/es-query';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
-import { GetStateReturn } from '../services/discover_state';
+import { DiscoverStateContainer } from '../services/discover_state';
 import { validateTimeRange } from '../utils/validate_time_range';
-import { Chart } from '../components/chart/point_series';
 import { useSingleton } from './use_singleton';
 import { FetchStatus } from '../../types';
 import { fetchAll } from '../utils/fetch_all';
 import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
-import { SavedSearch } from '../../../services/saved_searches';
 import type { DataTableRecord } from '../../../types';
+import type { InspectorAdapters } from './use_inspector';
 
 export interface SavedSearchData {
   main$: DataMain$;
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
-  charts$: DataCharts$;
   availableFields$: AvailableFields$;
-}
-
-export interface TimechartBucketInterval {
-  scaled?: boolean;
-  description?: string;
-  scale?: number;
 }
 
 export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
-export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
@@ -51,7 +45,7 @@ export interface UseSavedSearch {
   refetch$: DataRefetch$;
   data$: SavedSearchData;
   reset: () => void;
-  inspectorAdapters: { requests: RequestAdapter };
+  inspectorAdapters: InspectorAdapters;
 }
 
 export enum RecordRawType {
@@ -71,6 +65,7 @@ export interface DataMsg {
   fetchStatus: FetchStatus;
   error?: Error;
   recordRawType?: RecordRawType;
+  query?: AggregateQuery | Query | undefined;
 }
 
 export interface DataMainMsg extends DataMsg {
@@ -82,14 +77,11 @@ export interface DataDocumentsMsg extends DataMsg {
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
-  fetchStatus: FetchStatus;
-  error?: Error;
   result?: number;
 }
 
 export interface DataChartsMessage extends DataMsg {
-  bucketInterval?: TimechartBucketInterval;
-  chartData?: Chart;
+  response?: SearchResponse;
 }
 
 export interface DataAvailableFieldsMsg extends DataMsg {
@@ -114,12 +106,12 @@ export const useSavedSearch = ({
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: ISearchSource;
   services: DiscoverServices;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   useNewFieldsApi: boolean;
 }) => {
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
-  const { query } = stateContainer.appStateContainer.getState();
+  const { query } = stateContainer.appState.getState();
 
   const recordRawType = useMemo(() => getRawRecordType(query), [query]);
 
@@ -133,7 +125,6 @@ export const useSavedSearch = ({
   const main$: DataMain$ = useBehaviorSubject(initialState) as DataMain$;
   const documents$: DataDocuments$ = useBehaviorSubject(initialState) as DataDocuments$;
   const totalHits$: DataTotalHits$ = useBehaviorSubject(initialState) as DataTotalHits$;
-  const charts$: DataCharts$ = useBehaviorSubject(initialState) as DataCharts$;
   const availableFields$: AvailableFields$ = useBehaviorSubject(initialState) as AvailableFields$;
 
   const dataSubjects = useMemo(() => {
@@ -141,10 +132,9 @@ export const useSavedSearch = ({
       main$,
       documents$,
       totalHits$,
-      charts$,
       availableFields$,
     };
-  }, [main$, charts$, documents$, totalHits$, availableFields$]);
+  }, [main$, documents$, totalHits$, availableFields$]);
 
   /**
    * The observable to trigger data fetching in UI
@@ -195,7 +185,7 @@ export const useSavedSearch = ({
 
       await fetchAll(dataSubjects, searchSource, val === 'reset', {
         abortController,
-        appStateContainer: stateContainer.appStateContainer,
+        appStateContainer: stateContainer.appState,
         data,
         initialFetchStatus,
         inspectorAdapters,
@@ -234,7 +224,7 @@ export const useSavedSearch = ({
     searchSource,
     services,
     services.toastNotifications,
-    stateContainer.appStateContainer,
+    stateContainer.appState,
     timefilter,
     useNewFieldsApi,
   ]);

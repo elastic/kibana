@@ -383,76 +383,73 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           expect(await waitFor(hasBeenAppliedByAgent)).to.be(true);
         });
       });
-    }
+    },
+    true
   );
 
-  registry.when(
-    'Agent configurations through fleet',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      const name = 'myservice';
-      const environment = 'development';
-      const testConfig = {
-        service: { name, environment },
-        settings: { transaction_sample_rate: '0.9' },
-      };
+  registry.when('Agent configurations through fleet', { config: 'basic', archives: [] }, () => {
+    const name = 'myservice';
+    const environment = 'development';
+    const testConfig = {
+      service: { name, environment },
+      settings: { transaction_sample_rate: '0.9' },
+    };
 
-      let agentConfiguration:
-        | APIReturnType<'GET /api/apm/settings/agent-configuration/view'>
-        | undefined;
+    let agentConfiguration:
+      | APIReturnType<'GET /api/apm/settings/agent-configuration/view'>
+      | undefined;
 
+    before(async () => {
+      log.debug('creating agent configuration');
+      await createConfiguration(testConfig);
+      const { body } = await findExactConfiguration(name, environment);
+      agentConfiguration = body;
+    });
+
+    after(async () => {
+      await deleteConfiguration(testConfig);
+    });
+
+    it(`should have 'applied_by_agent=false' when there are no agent config metrics for this etag`, async () => {
+      expect(agentConfiguration?.applied_by_agent).to.be(false);
+    });
+
+    describe('when there are agent config metrics for this etag', () => {
       before(async () => {
-        log.debug('creating agent configuration');
-        await createConfiguration(testConfig);
-        const { body } = await findExactConfiguration(name, environment);
-        agentConfiguration = body;
-      });
+        const start = new Date().getTime();
+        const end = moment(start).add(15, 'minutes').valueOf();
 
-      after(async () => {
-        await deleteConfiguration(testConfig);
-      });
-
-      it(`should have 'applied_by_agent=false' when there are no agent config metrics for this etag`, async () => {
-        expect(agentConfiguration?.applied_by_agent).to.be(false);
-      });
-
-      describe('when there are agent config metrics for this etag', () => {
-        before(async () => {
-          const start = new Date().getTime();
-          const end = moment(start).add(15, 'minutes').valueOf();
-
-          await addAgentConfigMetrics({
-            synthtraceEsClient,
-            start,
-            end,
-            etag: agentConfiguration?.etag,
-          });
-        });
-
-        after(() => synthtraceEsClient.clean());
-
-        it(`should have 'applied_by_agent=true' when getting a config from all configurations`, async () => {
-          const {
-            body: { configurations },
-          } = await getAllConfigurations();
-
-          const updatedConfig = configurations.find(
-            (x) => x.service.name === name && x.service.environment === environment
-          );
-
-          expect(updatedConfig?.applied_by_agent).to.be(true);
-        });
-
-        it(`should have 'applied_by_agent=true' when getting a single config`, async () => {
-          const {
-            body: { applied_by_agent: appliedByAgent },
-          } = await findExactConfiguration(name, environment);
-
-          expect(appliedByAgent).to.be(true);
+        await addAgentConfigMetrics({
+          synthtraceEsClient,
+          start,
+          end,
+          etag: agentConfiguration?.etag,
         });
       });
-    }
-  );
+
+      after(() => synthtraceEsClient.clean());
+
+      it(`should have 'applied_by_agent=true' when getting a config from all configurations`, async () => {
+        const {
+          body: { configurations },
+        } = await getAllConfigurations();
+
+        const updatedConfig = configurations.find(
+          (x) => x.service.name === name && x.service.environment === environment
+        );
+
+        expect(updatedConfig?.applied_by_agent).to.be(true);
+      });
+
+      it(`should have 'applied_by_agent=true' when getting a single config`, async () => {
+        const {
+          body: { applied_by_agent: appliedByAgent },
+        } = await findExactConfiguration(name, environment);
+
+        expect(appliedByAgent).to.be(true);
+      });
+    });
+  });
 
   registry.when(
     'agent configuration when data is loaded',
@@ -529,23 +526,23 @@ async function expectStatusCode(
   }>,
   statusCode: number
 ) {
-  let res;
+  let response;
   try {
-    res = await fn();
+    response = await fn();
   } catch (e) {
-    if (e && e.res && e.res.status) {
-      if (e.res.status === statusCode) {
+    if (e && e.response && e.response.status) {
+      if (e.response.status === statusCode) {
         return;
       }
       throw new Error(
-        `Expected a [${statusCode}] response, got [${e.res.status}]: ${inspect(e.res)}`
+        `Expected a [${statusCode}] response, got [${e.response.status}]: ${inspect(e.response)}`
       );
     } else {
       throw new Error(
-        `Unexpected rejection value, expected error with .res response property: ${inspect(e)}`
+        `Unexpected rejection value, expected error with .response property: ${inspect(e)}`
       );
     }
   }
 
-  expect(res.status).to.be(statusCode);
+  expect(response.status).to.be(statusCode);
 }

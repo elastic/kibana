@@ -53,6 +53,8 @@ interface SwimLanePagination {
  * Service for managing anomaly timeline state.
  */
 export class AnomalyTimelineStateService extends StateService {
+  // TODO: Add services for getSelectionInfluencers, getSelectionJobIds, & getSelectionTimeRange
+  // to consolidate usage
   private readonly _explorerURLStateCallback: (
     update: AnomalyExplorerSwimLaneUrlState,
     replaceState?: boolean
@@ -70,7 +72,7 @@ export class AnomalyTimelineStateService extends StateService {
     undefined
   );
   private _swimLaneSeverity$ = new BehaviorSubject<number>(0);
-  private _swimLanePaginations$ = new BehaviorSubject<SwimLanePagination>({
+  private _swimLanePagination$ = new BehaviorSubject<SwimLanePagination>({
     viewByFromPage: 1,
     viewByPerPage: 10,
   });
@@ -152,6 +154,7 @@ export class AnomalyTimelineStateService extends StateService {
       combineLatest([
         this.anomalyExplorerCommonStateService.getSelectedJobs$(),
         this.getContainerWidth$(),
+        this._timeBounds$,
       ]).subscribe(([selectedJobs, containerWidth]) => {
         this._swimLaneBucketInterval$.next(
           this.anomalyTimelineService.getSwimlaneBucketInterval(selectedJobs, containerWidth!)
@@ -205,7 +208,7 @@ export class AnomalyTimelineStateService extends StateService {
       if (influencersFilerQuery) {
         resultPaginaiton = { viewByPerPage: pagination.viewByPerPage, viewByFromPage: 1 };
       }
-      this._swimLanePaginations$.next(resultPaginaiton);
+      this._swimLanePagination$.next(resultPaginaiton);
     });
   }
 
@@ -616,11 +619,11 @@ export class AnomalyTimelineStateService extends StateService {
   }
 
   public getSwimLanePagination$(): Observable<SwimLanePagination> {
-    return this._swimLanePaginations$.asObservable();
+    return this._swimLanePagination$.asObservable();
   }
 
   public getSwimLanePagination(): SwimLanePagination {
-    return this._swimLanePaginations$.getValue();
+    return this._swimLanePagination$.getValue();
   }
 
   public setSwimLanePagination(update: Partial<SwimLanePagination>) {
@@ -723,7 +726,7 @@ export class AnomalyTimelineStateService extends StateService {
     this._explorerURLStateCallback(
       {
         viewByFromPage: 1,
-        viewByPerPage: this._swimLanePaginations$.getValue().viewByPerPage,
+        viewByPerPage: this._swimLanePagination$.getValue().viewByPerPage,
         viewByFieldName: fieldName,
       },
       true

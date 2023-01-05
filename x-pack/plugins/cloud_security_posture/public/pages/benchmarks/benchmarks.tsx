@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
+import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 import { BenchmarksTable } from './benchmarks_table';
@@ -29,6 +30,8 @@ import {
 } from './use_csp_benchmark_integrations';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
+import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../common/constants';
+import { usePageSize } from '../../common/hooks/use_page_size';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -44,8 +47,8 @@ const AddCisIntegrationButton = () => {
       isDisabled={!cisIntegrationLink}
     >
       <FormattedMessage
-        id="xpack.csp.benchmarks.benchmarksPageHeader.addCisIntegrationButtonLabel"
-        defaultMessage="Add a CIS integration"
+        id="xpack.csp.benchmarks.benchmarksPageHeader.addKSPMIntegrationButtonLabel"
+        defaultMessage="Add a KSPM integration"
       />
     </EuiButton>
   );
@@ -125,10 +128,11 @@ const BenchmarkSearchField = ({
 };
 
 export const Benchmarks = () => {
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY);
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
     name: '',
     page: 1,
-    perPage: 10,
+    perPage: pageSize,
     sortField: 'package_policy.name',
     sortOrder: 'asc',
   });
@@ -140,10 +144,14 @@ export const Benchmarks = () => {
     <CloudPosturePage>
       <EuiPageHeader
         data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
-        pageTitle={i18n.translate(
-          'xpack.csp.benchmarks.benchmarksPageHeader.benchmarkIntegrationsTitle',
-          { defaultMessage: 'Benchmark Integrations' }
-        )}
+        pageTitle={
+          <CloudPosturePageTitle
+            title={i18n.translate(
+              'xpack.csp.benchmarks.benchmarksPageHeader.benchmarkIntegrationsTitle',
+              { defaultMessage: 'Benchmark Integrations' }
+            )}
+          />
+        }
         rightSideItems={[<AddCisIntegrationButton />]}
         bottomBorder
       />
@@ -164,7 +172,7 @@ export const Benchmarks = () => {
         error={queryResult.error ? extractErrorMessage(queryResult.error) : undefined}
         loading={queryResult.isFetching}
         pageIndex={query.page}
-        pageSize={query.perPage}
+        pageSize={pageSize || query.perPage}
         sorting={{
           // @ts-expect-error - EUI types currently do not support sorting by nested fields
           sort: { field: query.sortField, direction: query.sortOrder },
@@ -172,6 +180,7 @@ export const Benchmarks = () => {
         }}
         totalItemCount={totalItemCount}
         setQuery={({ page, sort }) => {
+          setPageSize(page.size);
           setQuery((current) => ({
             ...current,
             page: page.index,

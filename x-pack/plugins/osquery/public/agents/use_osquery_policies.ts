@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';

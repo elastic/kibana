@@ -1,7 +1,7 @@
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "pkg_npm")
 
-PKG_BASE_NAME = "kbn-babel-preset"
+PKG_DIRNAME = "kbn-babel-preset"
 PKG_REQUIRE_NAME = "@kbn/babel-preset"
 
 SOURCE_FILES = glob([
@@ -39,30 +39,15 @@ RUNTIME_DEPS = [
   "@npm//babel-plugin-add-module-exports",
   "@npm//babel-plugin-styled-components",
   "@npm//babel-plugin-transform-react-remove-prop-types",
-  "//packages/kbn-babel-plugin-synthetic-packages",
+  "//packages/kbn-babel-plugin-package-imports",
 ]
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES + [
     ":srcs",
   ],
   deps = RUNTIME_DEPS,
   package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm(
-  name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
-)
-
-filegroup(
-  name = "build",
-  srcs = [
-    ":npm_module",
-  ],
   visibility = ["//visibility:public"],
 )

@@ -7,10 +7,11 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useFindLists } from '@kbn/securitysolution-list-hooks';
+import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import { DataViewFieldBase } from '@kbn/es-query';
+import { getDocLinks } from '@kbn/doc-links';
 
 import { filterFieldToList } from '../filter_field_to_list';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
@@ -33,6 +34,12 @@ interface AutocompleteFieldListsProps {
   rowLabel?: string;
   selectedField: DataViewFieldBase | undefined;
   selectedValue: string | undefined;
+  allowLargeValueLists?: boolean;
+}
+
+export interface AutocompleteListsData {
+  smallLists: ListSchema[];
+  largeLists: ListSchema[];
 }
 
 export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsProps> = ({
@@ -45,37 +52,44 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   rowLabel,
   selectedField,
   selectedValue,
+  allowLargeValueLists = false,
 }): JSX.Element => {
   const [error, setError] = useState<string | undefined>(undefined);
-  const [lists, setLists] = useState<ListSchema[]>([]);
-  const { loading, result, start } = useFindLists();
+  const [listData, setListData] = useState<AutocompleteListsData>({
+    smallLists: [],
+    largeLists: [],
+  });
+  const { loading, result, start } = useFindListsBySize();
   const getLabel = useCallback(({ name }) => name, []);
 
   const optionsMemo = useMemo(
-    () => filterFieldToList(lists, selectedField),
-    [lists, selectedField]
+    () => filterFieldToList(listData, selectedField),
+    [listData, selectedField]
   );
   const selectedOptionsMemo = useMemo(() => {
     if (selectedValue != null) {
-      const list = lists.filter(({ id }) => id === selectedValue);
+      const combinedLists = [...listData.smallLists, ...listData.largeLists];
+      const list = combinedLists.filter(({ id }) => id === selectedValue);
       return list ?? [];
     } else {
       return [];
     }
-  }, [selectedValue, lists]);
+  }, [selectedValue, listData]);
   const { comboOptions, labels, selectedComboOptions } = useMemo(
     () =>
       getGenericComboBoxProps<ListSchema>({
         getLabel,
-        options: optionsMemo,
+        options: [...optionsMemo.smallLists, ...optionsMemo.largeLists],
         selectedOptions: selectedOptionsMemo,
+        disabledOptions: allowLargeValueLists ? undefined : optionsMemo.largeLists, // Disable large lists if the rule type doesn't allow it
       }),
-    [optionsMemo, selectedOptionsMemo, getLabel]
+    [optionsMemo, selectedOptionsMemo, getLabel, allowLargeValueLists]
   );
 
   const handleValuesChange = useCallback(
     (newOptions: EuiComboBoxOptionOption[]) => {
-      const [newValue] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
+      const combinedLists = [...optionsMemo.smallLists, ...optionsMemo.largeLists];
+      const [newValue] = newOptions.map(({ label }) => combinedLists[labels.indexOf(label)]);
       onChange(newValue ?? '');
     },
     [labels, optionsMemo, onChange]
@@ -87,7 +101,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
 
   useEffect(() => {
     if (result != null) {
-      setLists(result.data);
+      setListData(result);
     }
   }, [result]);
 
@@ -103,8 +117,31 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
 
   const isLoadingState = useMemo((): boolean => isLoading || loading, [isLoading, loading]);
 
+  const helpText = useMemo(() => {
+    return (
+      !allowLargeValueLists && (
+        <EuiText size="xs">
+          {i18n.LISTS_TOOLTIP_INFO}{' '}
+          <EuiLink
+            external
+            target="_blank"
+            href={getDocLinks({ kibanaBranch: 'main' }).securitySolution.exceptions.value_lists}
+          >
+            {i18n.SEE_DOCUMENTATION}
+          </EuiLink>
+        </EuiText>
+      )
+    );
+  }, [allowLargeValueLists]);
+
   return (
-    <EuiFormRow label={rowLabel} error={error} isInvalid={error != null} fullWidth>
+    <EuiFormRow
+      label={rowLabel}
+      error={error}
+      isInvalid={error != null}
+      helpText={helpText}
+      fullWidth
+    >
       <EuiComboBox
         async
         data-test-subj="valuesAutocompleteComboBox listsComboxBox"

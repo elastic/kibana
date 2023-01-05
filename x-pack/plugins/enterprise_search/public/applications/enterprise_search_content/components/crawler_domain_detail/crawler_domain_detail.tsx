@@ -28,6 +28,7 @@ import { SearchIndexTabId } from '../search_index/search_index';
 import { baseBreadcrumbs } from '../search_indices';
 import { CrawlerStatusIndicator } from '../shared/crawler_status_indicator/crawler_status_indicator';
 
+import { AuthenticationPanel } from './authentication_panel/authentication_panel';
 import { CrawlRulesTable } from './crawl_rules_table';
 import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
 import { DeduplicationPanel } from './deduplication_panel/deduplication_panel';
@@ -60,6 +61,7 @@ export const CrawlerDomainDetail: React.FC = () => {
         rightSideItems: [
           <CrawlerStatusIndicator />,
           <EuiButton
+            data-telemetry-id="entSearchContent-crawler-domainDetail-header-deleteDomain"
             isLoading={getLoading}
             color="danger"
             onClick={() => {
@@ -77,6 +79,7 @@ export const CrawlerDomainDetail: React.FC = () => {
     >
       <CrawlerStatusBanner />
       <EuiButtonTo
+        data-telemetry-id="entSearchContent-crawler-domainDetail-header-allDomains"
         size="s"
         color="text"
         iconType="arrowLeft"
@@ -95,6 +98,8 @@ export const CrawlerDomainDetail: React.FC = () => {
           <EuiPanel paddingSize="l" hasBorder>
             <EntryPointsTable domain={domain} indexName={indexName} items={domain.entryPoints} />
           </EuiPanel>
+          <EuiSpacer />
+          <AuthenticationPanel />
           <EuiSpacer />
           <EuiPanel paddingSize="l" hasBorder>
             <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />

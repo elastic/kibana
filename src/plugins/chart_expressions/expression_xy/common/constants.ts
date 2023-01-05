@@ -35,6 +35,8 @@ export const FittingFunctions = {
   LINEAR: 'Linear',
   CARRY: 'Carry',
   LOOKAHEAD: 'Lookahead',
+  AVERAGE: 'Average',
+  NEAREST: 'Nearest',
 } as const;
 
 export const EndValues = {
@@ -60,6 +62,7 @@ export const LineStyles = {
   SOLID: 'solid',
   DASHED: 'dashed',
   DOTTED: 'dotted',
+  DOT_DASHED: 'dot-dashed',
 } as const;
 
 export const FillStyles = {
@@ -98,6 +101,7 @@ export const XScaleTypes = {
 export const XYCurveTypes = {
   LINEAR: 'LINEAR',
   CURVE_MONOTONE_X: 'CURVE_MONOTONE_X',
+  CURVE_STEP_AFTER: 'CURVE_STEP_AFTER',
 } as const;
 
 export const ValueLabelModes = {
@@ -119,6 +123,7 @@ export const AvailableReferenceLineIcons = {
   MAP_MARKER: 'mapMarker',
   PIN_FILLED: 'pinFilled',
   STAR_EMPTY: 'starEmpty',
+  STAR_FILLED: 'starFilled',
   TAG: 'tag',
   TRIANGLE: 'triangle',
 } as const;

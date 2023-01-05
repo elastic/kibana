@@ -12,6 +12,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_UUID,
+  ALERT_TIME_RANGE,
 } from '@kbn/rule-data-utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { castArray, omit } from 'lodash';
@@ -19,6 +20,8 @@ import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -39,6 +42,11 @@ function createRule(shouldWriteAlerts: boolean = true) {
         name: 'warning',
       },
     ],
+    actionVariables: {
+      context: [],
+      params: [],
+      state: [],
+    },
     defaultActionGroupId: 'warning',
     executor: async ({ services }) => {
       nextAlerts.forEach((alert) => {
@@ -47,17 +55,17 @@ function createRule(shouldWriteAlerts: boolean = true) {
       nextAlerts = [];
     },
     id: 'ruleTypeId',
-    minimumLicenseRequired: 'basic',
     isExportable: true,
+    minimumLicenseRequired: 'basic',
     name: 'ruleTypeName',
     producer: 'producer',
-    actionVariables: {
-      context: [],
-      params: [],
-      state: [],
-    },
     validate: {
-      params: schema.object({}, { unknowns: 'allow' }),
+      params: schema.object(
+        {},
+        {
+          unknowns: 'allow',
+        }
+      ),
     },
   });
 
@@ -73,6 +81,10 @@ function createRule(shouldWriteAlerts: boolean = true) {
         scheduleActions,
       } as any;
     },
+    alertLimit: {
+      getValue: () => 1000,
+      setLimitReached: () => {},
+    },
     done: () => ({ getRecoveredAlerts: () => [] }),
   };
 
@@ -85,13 +97,13 @@ function createRule(shouldWriteAlerts: boolean = true) {
       scheduleActions.mockClear();
 
       state = ((await type.executor({
-        alertId: 'alertId',
-        createdBy: 'createdBy',
-        name: 'name',
+        executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
+        logger: loggerMock.create(),
+        namespace: 'namespace',
         params: {},
         previousStartedAt,
-        startedAt,
         rule: {
+          id: 'alertId',
           actions: [],
           consumer: 'consumer',
           createdAt,
@@ -113,19 +125,18 @@ function createRule(shouldWriteAlerts: boolean = true) {
         services: {
           alertFactory,
           savedObjectsClient: {} as any,
-          uiSettingsClient: {} as any,
           scopedClusterClient: {} as any,
-          shouldWriteAlerts: () => shouldWriteAlerts,
-          shouldStopExecution: () => false,
           search: {} as any,
           searchSourceClient: {} as ISearchStartSearchSource,
+          shouldStopExecution: () => false,
+          shouldWriteAlerts: () => shouldWriteAlerts,
+          uiSettingsClient: {} as any,
+          share: {} as SharePluginStart,
+          dataViews: dataViewPluginMocks.createStartContract(),
         },
         spaceId: 'spaceId',
+        startedAt,
         state,
-        tags: ['tags'],
-        updatedBy: 'updatedBy',
-        namespace: 'namespace',
-        executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
       })) ?? {}) as Record<string, any>;
 
       previousStartedAt = startedAt;
@@ -228,6 +239,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.action": "open",
               "event.kind": "signal",
               "kibana.alert.duration.us": 0,
+              "kibana.alert.flapping": false,
               "kibana.alert.instance.id": "opbeans-java",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
@@ -241,6 +253,9 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "active",
+              "kibana.alert.time_range": Object {
+                "gte": "2021-06-16T09:01:00.000Z",
+              },
               "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
@@ -256,6 +271,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "event.action": "open",
               "event.kind": "signal",
               "kibana.alert.duration.us": 0,
+              "kibana.alert.flapping": false,
               "kibana.alert.instance.id": "opbeans-node",
               "kibana.alert.rule.category": "ruleTypeName",
               "kibana.alert.rule.consumer": "consumer",
@@ -269,6 +285,9 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "active",
+              "kibana.alert.time_range": Object {
+                "gte": "2021-06-16T09:01:00.000Z",
+              },
               "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
@@ -439,6 +458,10 @@ describe('createLifecycleRuleTypeFactory', () => {
 
         expect(opbeansNodeAlertDoc['event.action']).toBe('close');
         expect(opbeansNodeAlertDoc[ALERT_STATUS]).toBe(ALERT_STATUS_RECOVERED);
+        expect(opbeansNodeAlertDoc[ALERT_TIME_RANGE]).toEqual({
+          gte: '2021-06-16T09:01:00.000Z',
+          lte: '2021-06-16T09:02:00.000Z',
+        });
       });
     });
   });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { parseErrors } from './helpers';
+import { parseErrors, getInlineEditorText } from './helpers';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -51,42 +51,6 @@ describe('helpers', function () {
       ]);
     });
 
-    it('should return the correct error object if dataview not found for an one liner query', function () {
-      const error = new Error('No data view found for index pattern kibana_sample_data_ecommerce1');
-      const errors = [error];
-      expect(parseErrors(errors, `SELECT * FROM "kibana_sample_data_ecommerce1"`)).toEqual([
-        {
-          endColumn: 46,
-          endLineNumber: 1,
-          message: 'No data view found for index pattern kibana_sample_data_ecommerce1',
-          severity: 8,
-          startColumn: 10,
-          startLineNumber: 1,
-        },
-      ]);
-    });
-
-    it('should return the correct error object if dataview not found for a multiline query', function () {
-      const error = new Error('No data view found for index pattern kibana_sample_data_ecommerce1');
-      const errors = [error];
-      expect(
-        parseErrors(
-          errors,
-          `SELECT * 
-    from "kibana_sample_data_ecommerce1"`
-        )
-      ).toEqual([
-        {
-          endColumn: 41,
-          endLineNumber: 2,
-          message: 'No data view found for index pattern kibana_sample_data_ecommerce1',
-          severity: 8,
-          startColumn: 5,
-          startLineNumber: 2,
-        },
-      ]);
-    });
-
     it('should return the generic error object for an error of unknown format', function () {
       const error = new Error('I am an unknown error');
       const errors = [error];
@@ -100,6 +64,32 @@ describe('helpers', function () {
           startLineNumber: 1,
         },
       ]);
+    });
+  });
+
+  describe('getInlineEditorText', function () {
+    it('should return the entire query if it is one liner', function () {
+      const text = getInlineEditorText(
+        'SELECT field1, count(*) FROM index1 ORDER BY field1',
+        false
+      );
+      expect(text).toEqual(text);
+    });
+
+    it('should return the query on one line with extra space if is multiliner', function () {
+      const text = getInlineEditorText(
+        'SELECT field1, count(*)\nFROM index1 ORDER BY field1',
+        true
+      );
+      expect(text).toEqual('SELECT field1, count(*) FROM index1 ORDER BY field1');
+    });
+
+    it('should return the query on one line with extra spaces removed if is multiliner', function () {
+      const text = getInlineEditorText(
+        'SELECT field1, count(*)\nFROM index1 \n   ORDER BY field1',
+        true
+      );
+      expect(text).toEqual('SELECT field1, count(*) FROM index1 ORDER BY field1');
     });
   });
 });

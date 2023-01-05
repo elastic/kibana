@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../common';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
@@ -20,9 +21,9 @@ import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
-import type { SortPairArr } from '../../components/doc_table/utils/get_sort';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../types';
+import { DiscoverGridFlyout } from '../../components/discover_grid/discover_grid_flyout';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -42,7 +43,6 @@ export interface ContextAppContentProps {
   isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
   addFilter: DocViewFilterFn;
-  onFieldEdited: () => void;
 }
 
 const controlColumnIds = ['openDetails'];
@@ -73,9 +73,9 @@ export function ContextAppContent({
   isLegacy,
   setAppState,
   addFilter,
-  onFieldEdited,
 }: ContextAppContentProps) {
   const { uiSettings: config } = useDiscoverServices();
+  const services = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const isAnchorLoading =
@@ -151,7 +151,7 @@ export function ContextAppContent({
             expandedDoc={expandedDoc}
             isLoading={isAnchorLoading}
             sampleSize={0}
-            sort={sort as SortPairArr[]}
+            sort={sort as SortOrder[]}
             isSortEnabled={false}
             showTimeCol={showTimeCol}
             useNewFieldsApi={useNewFieldsApi}
@@ -162,7 +162,8 @@ export function ContextAppContent({
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             onSetColumns={onSetColumns}
-            onFieldEdited={onFieldEdited}
+            DocumentView={DiscoverGridFlyout}
+            services={services}
           />
         </div>
       )}

@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
+require('@kbn/babel-register').install();
+
 const Path = require('path');
 const Fs = require('fs');
 
-const globby = require('globby');
+const normalizePath = require('normalize-path');
+const { discoverPackageManifestPaths, Jsonc } = require('@kbn/bazel-packages');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -72,7 +76,7 @@ const ELASTIC_LICENSE_HEADER = `
 const SAFER_LODASH_SET_HEADER = `
 /*
  * Elasticsearch B.V licenses this file to you under the MIT License.
- * See \`packages/elastic-safer-lodash-set/LICENSE\` for more information.
+ * See \`packages/kbn-safer-lodash-set/LICENSE\` for more information.
  */
 `;
 
@@ -81,7 +85,7 @@ const SAFER_LODASH_SET_LODASH_HEADER = `
  * This file is forked from the lodash project (https://lodash.com/),
  * and may include modifications made by Elasticsearch B.V.
  * Elasticsearch B.V. licenses this file to you under the MIT License.
- * See \`packages/elastic-safer-lodash-set/LICENSE\` for more information.
+ * See \`packages/kbn-safer-lodash-set/LICENSE\` for more information.
  */
 `;
 
@@ -90,7 +94,7 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  * This file is forked from the DefinitelyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),
  * and may include modifications made by Elasticsearch B.V.
  * Elasticsearch B.V. licenses this file to you under the MIT License.
- * See \`packages/elastic-safer-lodash-set/LICENSE\` for more information.
+ * See \`packages/kbn-safer-lodash-set/LICENSE\` for more information.
  */
 `;
 
@@ -119,15 +123,10 @@ const VENN_DIAGRAM_HEADER = `
   */
 `;
 
-const packagePkgJsons = globby.sync('*/package.json', {
-  cwd: Path.resolve(__dirname, 'packages'),
-  absolute: true,
-});
-
 /** Packages which should not be included within production code. */
-const DEV_PACKAGES = packagePkgJsons.flatMap((path) => {
-  const pkg = JSON.parse(Fs.readFileSync(path, 'utf8'));
-  return pkg.kibana && pkg.kibana.devOnly ? Path.dirname(Path.basename(path)) : [];
+const DEV_PACKAGE_DIRS = discoverPackageManifestPaths(REPO_ROOT).flatMap((path) => {
+  const manifest = Jsonc.parse(Fs.readFileSync(path, 'utf8'));
+  return !!manifest.devOnly ? normalizePath(Path.relative(REPO_ROOT, Path.dirname(path))) : [];
 });
 
 /** Directories (at any depth) which include dev-only code. */
@@ -140,11 +139,13 @@ const DEV_DIRECTORIES = [
   '__mocks__',
   '__stories__',
   'e2e',
+  'cypress',
   'fixtures',
   'ftr_e2e',
   'integration_tests',
   'manual_tests',
   'mock',
+  'mocks',
   'storybook',
   'scripts',
   'test',
@@ -153,6 +154,7 @@ const DEV_DIRECTORIES = [
   'test_utilities',
   'test_helpers',
   'tests_client_integration',
+  'tsd_tests',
 ];
 
 /** File patterns for dev-only code. */
@@ -166,18 +168,20 @@ const DEV_FILE_PATTERNS = [
   'mock.{js,ts,tsx}',
   '_stubs.{js,ts,tsx}',
   '{testHelpers,test_helper,test_utils}.{js,ts,tsx}',
-  '{postcss,webpack}.config.js',
+  '{postcss,webpack,cypress}.config.{js,ts}',
 ];
 
 /** Glob patterns which describe dev-only code. */
 const DEV_PATTERNS = [
-  ...DEV_PACKAGES.map((pkg) => `packages/${pkg}/**/*`),
+  ...DEV_PACKAGE_DIRS.map((pkg) => `${pkg}/**/*`),
   ...DEV_DIRECTORIES.map((dir) => `{packages,src,x-pack}/**/${dir}/**/*`),
   ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
   'packages/kbn-interpreter/tasks/**/*',
   'src/dev/**/*',
-  'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
-  'x-pack/plugins/*/server/scripts/**/*',
+  'x-pack/{dev-tools,tasks,test,build_chromium}/**/*',
+  'x-pack/performance/**/*',
+  'src/setup_node_env/index.js',
+  'src/cli/dev.js',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -185,44 +189,44 @@ const RESTRICTED_IMPORTS = [
   {
     name: 'lodash',
     importNames: ['set', 'setWith'],
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set instead',
   },
   {
     name: 'lodash.set',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set instead',
   },
   {
     name: 'lodash.setwith',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set instead',
   },
   {
     name: 'lodash/set',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set instead',
   },
   {
     name: 'lodash/setWith',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set instead',
   },
   {
     name: 'lodash/fp',
     importNames: ['set', 'setWith', 'assoc', 'assocPath'],
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set instead',
   },
   {
     name: 'lodash/fp/set',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set instead',
   },
   {
     name: 'lodash/fp/setWith',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set instead',
   },
   {
     name: 'lodash/fp/assoc',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set instead',
   },
   {
     name: 'lodash/fp/assocPath',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @kbn/safer-lodash-set instead',
   },
   {
     name: 'lodash',
@@ -284,12 +288,6 @@ module.exports = {
       files: ['x-pack/plugins/cross_cluster_replication/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
-      files: ['x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
       },
     },
 
@@ -408,7 +406,7 @@ module.exports = {
      * safer-lodash-set package requires special license headers
      */
     {
-      files: ['packages/elastic-safer-lodash-set/**/*.{js,mjs,ts,tsx}'],
+      files: ['packages/kbn-safer-lodash-set/**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -437,7 +435,7 @@ module.exports = {
     },
 
     {
-      files: ['packages/elastic-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
+      files: ['packages/kbn-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -465,7 +463,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/elastic-safer-lodash-set/**/*.d.ts'],
+      files: ['packages/kbn-safer-lodash-set/**/*.d.ts'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -599,12 +597,12 @@ module.exports = {
         'test/*/config_open.ts',
         'test/*/*.config.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
-        'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
         'x-pack/test/performance/**/*.ts',
+        '**/cypress.config.{js,ts}',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -733,7 +731,7 @@ module.exports = {
      * Harden specific rules
      */
     {
-      files: ['test/harden/*.js', 'packages/elastic-safer-lodash-set/test/*.js'],
+      files: ['test/harden/*.js', 'packages/kbn-safer-lodash-set/test/*.js'],
       rules: {
         'mocha/handle-done-callback': 'off',
       },
@@ -753,11 +751,11 @@ module.exports = {
             paths: [
               {
                 name: 'lodash.set',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash.setwith',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash.template',
@@ -766,11 +764,11 @@ module.exports = {
               },
               {
                 name: 'lodash/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
+                message: 'Please use @kbn/safer-lodash-set instead',
               },
               {
                 name: 'lodash/template',
@@ -785,12 +783,12 @@ module.exports = {
           {
             object: 'lodash',
             property: 'set',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: '_',
             property: 'set',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: 'lodash',
@@ -807,32 +805,32 @@ module.exports = {
           {
             object: 'lodash',
             property: 'setWith',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: '_',
             property: 'setWith',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: 'lodash',
             property: 'assoc',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: '_',
             property: 'assoc',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: 'lodash',
             property: 'assocPath',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
           {
             object: '_',
             property: 'assocPath',
-            message: 'Please use @elastic/safer-lodash-set instead',
+            message: 'Please use @kbn/safer-lodash-set instead',
           },
         ],
       },
@@ -904,7 +902,14 @@ module.exports = {
         ],
       },
     },
-
+    // Profiling
+    {
+      files: ['x-pack/plugins/profiling/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^(useAsync)$' }],
+      },
+    },
     {
       // disable imports from legacy uptime plugin
       files: ['x-pack/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}'],
@@ -1110,7 +1115,10 @@ module.exports = {
       },
       overrides: [
         {
-          files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+          files: [
+            'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+          ],
           rules: {
             '@typescript-eslint/consistent-type-imports': 'error',
           },
@@ -1321,7 +1329,7 @@ module.exports = {
     },
     {
       // typescript only for back end
-      files: ['x-pack/plugins/triggers_actions_ui/server/**/*.ts'],
+      files: ['x-pack/plugins/{stack_connectors,triggers_actions_ui}/server/**/*.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1341,7 +1349,7 @@ module.exports = {
      * Discover overrides
      */
     {
-      files: ['src/plugins/discover/**/*.{ts,tsx}'],
+      files: ['src/plugins/discover/**/*.{ts,tsx}', 'src/plugins/saved_search/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [
@@ -1402,6 +1410,30 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': [
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
+        ],
+      },
+    },
+    /**
+     * Allows snake_case variables in the server, because that's how we return API properties
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/server/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/naming-convention': [
+          'error',
+          {
+            selector: 'variable',
+            modifiers: ['destructured'],
+            format: null,
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+          },
+          {
+            selector: 'variable',
+            format: ['camelCase', 'UPPER_CASE'],
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+          },
         ],
       },
     },

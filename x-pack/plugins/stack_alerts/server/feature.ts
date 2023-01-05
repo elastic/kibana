@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { TRANSFORM_RULE_TYPE } from '@kbn/transform-plugin/common';
-import { ID as IndexThreshold } from './alert_types/index_threshold/alert_type';
-import { GEO_CONTAINMENT_ID as GeoContainment } from './alert_types/geo_containment/alert_type';
-import { ES_QUERY_ID as ElasticsearchQuery } from './alert_types/es_query/constants';
+import { ID as IndexThreshold } from './rule_types/index_threshold/rule_type';
+import { GEO_CONTAINMENT_ID as GeoContainment } from './rule_types/geo_containment/alert_type';
+import { ES_QUERY_ID as ElasticsearchQuery } from './rule_types/es_query/constants';
 import { STACK_ALERTS_FEATURE_ID } from '../common';
 
 const TransformHealth = TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH;

@@ -26,10 +26,11 @@ export const EmptyLocations = ({
     <EuiEmptyPrompt
       hasBorder
       title={<h2>{ADD_FIRST_LOCATION}</h2>}
+      titleSize="s"
       body={
-        <p>
+        <EuiText size="s">
           {!inFlyout ? FIRST_MONITOR : ''} {START_ADDING_LOCATIONS_DESCRIPTION}
-        </p>
+        </EuiText>
       }
       actions={
         <EuiButton
@@ -47,15 +48,21 @@ export const EmptyLocations = ({
       }
       footer={
         <EuiText size="s">
-          {LEARN_MORE}{' '}
-          <EuiLink href="#" target="_blank">
-            {READ_DOCS}
-          </EuiLink>
+          {LEARN_MORE} <PrivateLocationDocsLink />
         </EuiText>
       }
     />
   );
 };
+
+export const PrivateLocationDocsLink = ({ label }: { label?: string }) => (
+  <EuiLink
+    href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
+    target="_blank"
+  >
+    {label ?? READ_DOCS}
+  </EuiLink>
+);
 
 const FIRST_MONITOR = i18n.translate('xpack.synthetics.monitorManagement.firstLocationMonitor', {
   defaultMessage: 'In order to create a monitor, you will need to add a location first.',

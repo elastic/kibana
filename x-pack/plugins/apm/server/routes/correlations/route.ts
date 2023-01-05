@@ -12,24 +12,22 @@ import { i18n } from '@kbn/i18n';
 import { toNumberRt } from '@kbn/io-ts-utils';
 
 import { termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
-
-import { setupRequest } from '../../lib/helpers/setup_request';
 
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { fetchDurationFieldCandidates } from './queries/fetch_duration_field_candidates';
-import { ProcessorEvent } from '../../../common/processor_event';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { fetchFieldValueFieldStats } from './queries/field_stats/fetch_field_value_field_stats';
 import { fetchFieldValuePairs } from './queries/fetch_field_value_pairs';
 import { fetchSignificantCorrelations } from './queries/fetch_significant_correlations';
-import { fetchFieldsStats } from './queries/field_stats/fetch_fields_stats';
 import { fetchPValues } from './queries/fetch_p_values';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
   defaultMessage:
@@ -58,7 +56,7 @@ const fieldCandidatesTransactionsRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       query: {
@@ -87,75 +85,7 @@ const fieldCandidatesTransactionsRoute = createApmServerRoute({
           ],
         },
       },
-      setup,
-    });
-  },
-});
-
-const fieldStatsTransactionsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/correlations/field_stats/transactions',
-  params: t.type({
-    body: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
-      }),
-      t.type({
-        fieldsToSample: t.array(t.string),
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    stats: Array<
-      import('./../../../common/correlations/field_stats_types').FieldStats
-    >;
-    errors: any[];
-  }> => {
-    const { context } = resources;
-    const { license } = await context.licensing;
-    if (!isActivePlatinumLicense(license)) {
-      throw Boom.forbidden(INVALID_LICENSE);
-    }
-
-    const setup = await setupRequest(resources);
-
-    const {
-      body: {
-        serviceName,
-        transactionName,
-        transactionType,
-        start,
-        end,
-        environment,
-        kuery,
-        fieldsToSample,
-      },
-    } = resources.params;
-
-    return fetchFieldsStats({
-      setup,
-      eventType: ProcessorEvent.transaction,
-      start,
-      end,
-      environment,
-      kuery,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
-            ...termQuery(TRANSACTION_NAME, transactionName),
-          ],
-        },
-      },
-      fieldsToSample,
+      apmEventClient,
     });
   },
 });
@@ -168,6 +98,7 @@ const fieldValueStatsTransactionsRoute = createApmServerRoute({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
+        samplerShardSize: t.string,
       }),
       environmentRt,
       kueryRt,
@@ -190,7 +121,7 @@ const fieldValueStatsTransactionsRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       query: {
@@ -203,11 +134,15 @@ const fieldValueStatsTransactionsRoute = createApmServerRoute({
         kuery,
         fieldName,
         fieldValue,
+        samplerShardSize: samplerShardSizeStr,
       },
     } = resources.params;
 
+    const samplerShardSize = samplerShardSizeStr
+      ? parseInt(samplerShardSizeStr, 10)
+      : undefined;
     return fetchFieldValueFieldStats({
-      setup,
+      apmEventClient,
       eventType: ProcessorEvent.transaction,
       start,
       end,
@@ -226,6 +161,7 @@ const fieldValueStatsTransactionsRoute = createApmServerRoute({
         fieldName,
         fieldValue,
       },
+      samplerShardSize,
     });
   },
 });
@@ -262,7 +198,7 @@ const fieldValuePairsTransactionsRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       body: {
@@ -278,7 +214,7 @@ const fieldValuePairsTransactionsRoute = createApmServerRoute({
     } = resources.params;
 
     return fetchFieldValuePairs({
-      setup,
+      apmEventClient,
       eventType: ProcessorEvent.transaction,
       start,
       end,
@@ -307,6 +243,8 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
+        durationMin: toNumberRt,
+        durationMax: toNumberRt,
       }),
       environmentRt,
       kueryRt,
@@ -332,8 +270,7 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
     totalDocCount: number;
     fallbackResult?: import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation;
   }> => {
-    const setup = await setupRequest(resources);
-
+    const apmEventClient = await getApmEventClient(resources);
     const {
       body: {
         serviceName,
@@ -343,12 +280,14 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
         end,
         environment,
         kuery,
+        durationMin,
+        durationMax,
         fieldValuePairs,
       },
     } = resources.params;
 
     return fetchSignificantCorrelations({
-      setup,
+      apmEventClient,
       start,
       end,
       environment,
@@ -362,6 +301,8 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
           ],
         },
       },
+      durationMinOverride: durationMin,
+      durationMaxOverride: durationMax,
       fieldValuePairs,
     });
   },
@@ -375,6 +316,8 @@ const pValuesTransactionsRoute = createApmServerRoute({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
+        durationMin: toNumberRt,
+        durationMax: toNumberRt,
       }),
       environmentRt,
       kueryRt,
@@ -394,7 +337,7 @@ const pValuesTransactionsRoute = createApmServerRoute({
     ccsWarning: boolean;
     fallbackResult?: import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation;
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       body: {
@@ -405,12 +348,14 @@ const pValuesTransactionsRoute = createApmServerRoute({
         end,
         environment,
         kuery,
+        durationMin,
+        durationMax,
         fieldCandidates,
       },
     } = resources.params;
 
     return fetchPValues({
-      setup,
+      apmEventClient,
       start,
       end,
       environment,
@@ -424,6 +369,8 @@ const pValuesTransactionsRoute = createApmServerRoute({
           ],
         },
       },
+      durationMin,
+      durationMax,
       fieldCandidates,
     });
   },
@@ -431,7 +378,6 @@ const pValuesTransactionsRoute = createApmServerRoute({
 
 export const correlationsRouteRepository = {
   ...fieldCandidatesTransactionsRoute,
-  ...fieldStatsTransactionsRoute,
   ...fieldValueStatsTransactionsRoute,
   ...fieldValuePairsTransactionsRoute,
   ...significantCorrelationsTransactionsRoute,

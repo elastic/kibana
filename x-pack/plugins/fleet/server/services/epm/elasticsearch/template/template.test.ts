@@ -52,6 +52,7 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
+      mappings: { properties: [] },
     });
     expect(template.index_patterns).toStrictEqual([templateIndexPattern]);
   });
@@ -64,6 +65,7 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates,
       templatePriority: 200,
+      mappings: { properties: [] },
     });
     expect(template.composed_of).toStrictEqual([
       ...composedOfTemplates,
@@ -79,6 +81,7 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates,
       templatePriority: 200,
+      mappings: { properties: [] },
     });
     expect(template.composed_of).toStrictEqual(FLEET_COMPONENT_TEMPLATES);
   });
@@ -92,6 +95,7 @@ describe('EPM template', () => {
       composedOfTemplates: [],
       templatePriority: 200,
       hidden: true,
+      mappings: { properties: [] },
     });
     expect(templateWithHidden.data_stream.hidden).toEqual(true);
 
@@ -100,6 +104,7 @@ describe('EPM template', () => {
       packageName: 'nginx',
       composedOfTemplates: [],
       templatePriority: 200,
+      mappings: { properties: [] },
     });
     expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
   });
@@ -128,6 +133,17 @@ describe('EPM template', () => {
 
   it('tests loading system.yml', () => {
     const ymlPath = path.join(__dirname, '../../fields/tests/system.yml');
+    const fieldsYML = readFileSync(ymlPath, 'utf-8');
+    const fields: Field[] = safeLoad(fieldsYML);
+    const processedFields = processFields(fields);
+
+    const mappings = generateMappings(processedFields);
+
+    expect(mappings).toMatchSnapshot(path.basename(ymlPath));
+  });
+
+  it('tests loading cockroachdb_dynamic_templates.yml', () => {
+    const ymlPath = path.join(__dirname, '../../fields/tests/cockroachdb_dynamic_templates.yml');
     const fieldsYML = readFileSync(ymlPath, 'utf-8');
     const fields: Field[] = safeLoad(fieldsYML);
     const processedFields = processFields(fields);
@@ -166,7 +182,6 @@ describe('EPM template', () => {
     const keywordWithIndexFalseMapping = {
       properties: {
         keywordIndexFalse: {
-          ignore_above: 1024,
           type: 'keyword',
           doc_values: false,
         },

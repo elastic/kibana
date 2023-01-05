@@ -74,6 +74,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
 
       let previousTimestamp: string | null = null;
       for (const log of execLogs) {
+        expect(log.rule_name).to.equal('abc');
         if (previousTimestamp) {
           // default sort is `desc` by timestamp
           expect(Date.parse(log.timestamp)).to.be.lessThan(Date.parse(previousTimestamp));
@@ -177,6 +178,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       expect(execLogs.length).to.eql(1);
 
       for (const log of execLogs) {
+        expect(log.rule_name).to.equal('abc');
         expect(log.duration_ms).to.be.greaterThan(0);
         expect(log.schedule_delay_ms).to.be.greaterThan(0);
         expect(log.status).to.equal('success');
@@ -314,6 +316,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       expect(execLogs.length).to.eql(1);
 
       for (const log of execLogs) {
+        expect(log.rule_name).to.equal('abc');
         expect(log.status).to.equal('success');
 
         expect(log.num_active_alerts).to.equal(1);
@@ -372,6 +375,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       expect(execLogs.length).to.eql(1);
 
       for (const log of execLogs) {
+        expect(log.rule_name).to.equal('abc');
         expect(log.status).to.equal('success');
 
         expect(log.num_active_alerts).to.equal(1);

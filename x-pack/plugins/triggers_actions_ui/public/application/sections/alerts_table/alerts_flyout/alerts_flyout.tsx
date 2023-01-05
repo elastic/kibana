@@ -36,6 +36,7 @@ interface AlertsFlyoutProps {
   isLoading: boolean;
   onClose: () => void;
   onPaginate: (pageIndex: number) => void;
+  id?: string;
 }
 export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   alert,
@@ -46,6 +47,7 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   isLoading,
   onClose,
   onPaginate,
+  id,
 }: AlertsFlyoutProps) => {
   const {
     header: Header,
@@ -60,9 +62,10 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   const passedProps = useMemo(
     () => ({
       alert,
+      id,
       isLoading,
     }),
-    [alert, isLoading]
+    [alert, id, isLoading]
   );
 
   const FlyoutBody = useCallback(
@@ -96,7 +99,7 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   );
 
   return (
-    <EuiFlyout onClose={onClose} size={flyoutSize} data-test-subj="alertsFlyout">
+    <EuiFlyout onClose={onClose} size={flyoutSize} data-test-subj="alertsFlyout" ownFocus={false}>
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
         <Suspense fallback={null}>

@@ -73,7 +73,6 @@ export function useLatencyCorrelations() {
       percentileThresholdValue: undefined,
       overallHistogram: undefined,
       totalDocCount: undefined,
-      fieldStats: undefined,
     });
     setResponse.flush();
 
@@ -86,20 +85,25 @@ export function useLatencyCorrelations() {
       };
 
       // Initial call to fetch the overall distribution for the log-log plot.
-      const { overallHistogram, totalDocCount, percentileThresholdValue } =
-        await callApmApi(
-          'POST /internal/apm/latency/overall_distribution/transactions',
-          {
-            signal: abortCtrl.current.signal,
-            params: {
-              body: {
-                ...fetchParams,
-                percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-                chartType: LatencyDistributionChartType.latencyCorrelations,
-              },
+      const {
+        overallHistogram,
+        totalDocCount,
+        percentileThresholdValue,
+        durationMin,
+        durationMax,
+      } = await callApmApi(
+        'POST /internal/apm/latency/overall_distribution/transactions',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            body: {
+              ...fetchParams,
+              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+              chartType: LatencyDistributionChartType.latencyCorrelations,
             },
-          }
-        );
+          },
+        }
+      );
       responseUpdate.overallHistogram = overallHistogram;
       responseUpdate.totalDocCount = totalDocCount;
       responseUpdate.percentileThresholdValue = percentileThresholdValue;
@@ -192,7 +196,12 @@ export function useLatencyCorrelations() {
           {
             signal: abortCtrl.current.signal,
             params: {
-              body: { ...fetchParams, fieldValuePairs: fieldValuePairChunk },
+              body: {
+                ...fetchParams,
+                durationMin,
+                durationMax,
+                fieldValuePairs: fieldValuePairChunk,
+              },
             },
           }
         );
@@ -247,20 +256,6 @@ export function useLatencyCorrelations() {
       }
       setResponse.flush();
 
-      const { stats } = await callApmApi(
-        'POST /internal/apm/correlations/field_stats/transactions',
-        {
-          signal: abortCtrl.current.signal,
-          params: {
-            body: {
-              ...fetchParams,
-              fieldsToSample: [...fieldsToSample],
-            },
-          },
-        }
-      );
-
-      responseUpdate.fieldStats = stats;
       setResponse({
         ...responseUpdate,
         loaded: LOADED_DONE,

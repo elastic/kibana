@@ -58,7 +58,6 @@ export interface Features {
 }
 
 export interface Configuration {
-  isPublicKey: boolean;
   needsBaseUrl: boolean;
   needsSubdomain?: boolean;
   needsConfiguration?: boolean;

@@ -527,6 +527,30 @@ describe('Output Service', () => {
 
       expect(soClient.update).toBeCalled();
     });
+    it('Should call update with null fields if', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, 'existing-logstash-output', {
+        is_default: true,
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+        config_yaml: null,
+        ssl: null,
+      });
+
+      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        is_default: true,
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+        config_yaml: null,
+        ssl: null,
+      });
+    });
     it('Should throw if you try to make that output the default output and somne policies using default output has APM integration', async () => {
       const soClient = getMockedSoClient({});
       mockedAgentPolicyService.list.mockResolvedValue({

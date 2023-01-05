@@ -19,36 +19,57 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('home');
     });
 
-    it('should emit the "Loaded Kibana" event', async () => {
+    it('should emit the legacy "Loaded Kibana"', async () => {
       const [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['Loaded Kibana'] });
+
       expect(event.event_type).to.eql('Loaded Kibana');
       expect(event.properties).to.have.property('kibana_version');
       expect(event.properties.kibana_version).to.be.a('string');
       expect(event.properties).to.have.property('protocol');
       expect(event.properties.protocol).to.be.a('string');
+    });
+
+    it('should emit the kibana_loaded event', async () => {
+      const [event] = await ebtUIHelper.getEvents(1, {
+        eventTypes: ['performance_metric'],
+        filters: { 'properties.eventName': { eq: 'kibana_loaded' } },
+      });
+
+      // New event
+      expect(event.event_type).to.eql('performance_metric');
+      expect(event.properties.eventName).to.eql('kibana_loaded');
+
+      // meta
+      expect(event.properties).to.have.property('meta');
+
+      const meta = event.properties.meta as Record<string, any>;
+      expect(meta.kibana_version).to.be.a('string');
+      expect(meta.protocol).to.be.a('string');
 
       // Kibana Loaded timings
-      expect(event.properties).to.have.property('load_started');
-      expect(event.properties.load_started).to.be.a('number');
-      expect(event.properties).to.have.property('bootstrap_started');
-      expect(event.properties.bootstrap_started).to.be.a('number');
-      expect(event.properties).to.have.property('core_created');
-      expect(event.properties.core_created).to.be.a('number');
-      expect(event.properties).to.have.property('setup_done');
-      expect(event.properties.setup_done).to.be.a('number');
-      expect(event.properties).to.have.property('start_done');
-      expect(event.properties.start_done).to.be.a('number');
-      expect(event.properties).to.have.property('first_app_nav');
-      expect(event.properties.start_done).to.be.a('number');
+      expect(event.properties).to.have.property('duration');
+      expect(event.properties.duration).to.be.a('number');
+
+      expect(event.properties).to.have.property('key1', 'load_started');
+      expect(event.properties).to.have.property('key2', 'bootstrap_started');
+      expect(event.properties).to.have.property('key3', 'core_created');
+      expect(event.properties).to.have.property('key4', 'setup_done');
+      expect(event.properties).to.have.property('key5', 'start_done');
+
+      expect(event.properties.value1).to.be.a('number');
+      expect(event.properties.value2).to.be.a('number');
+      expect(event.properties.value3).to.be.a('number');
+      expect(event.properties.value4).to.be.a('number');
+      expect(event.properties.value5).to.be.a('number');
 
       if (browser.isChromium) {
         // Kibana Loaded memory
-        expect(event.properties).to.have.property('memory_js_heap_size_limit');
-        expect(event.properties.memory_js_heap_size_limit).to.be.a('number');
-        expect(event.properties).to.have.property('memory_js_heap_size_total');
-        expect(event.properties.memory_js_heap_size_total).to.be.a('number');
-        expect(event.properties).to.have.property('memory_js_heap_size_used');
-        expect(event.properties.memory_js_heap_size_used).to.be.a('number');
+        expect(meta).to.have.property('jsHeapSizeLimit');
+        expect(meta.jsHeapSizeLimit).to.be.a('number');
+        expect(meta).to.have.property('totalJSHeapSize');
+        expect(meta.totalJSHeapSize).to.be.a('number');
+        expect(meta).to.have.property('usedJSHeapSize');
+        expect(meta.usedJSHeapSize).to.be.a('number');
       }
     });
   });

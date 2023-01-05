@@ -16,7 +16,7 @@ import { buildBulkBody } from './build_bulk_body';
 import type { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
 import type { BuildReasonMessage } from '../../../signals/reason_formatters';
-import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,
@@ -43,7 +43,8 @@ export const buildAlertGroupFromSequence = (
   mergeStrategy: ConfigType['alertMergeStrategy'],
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage,
-  indicesToQuery: string[]
+  indicesToQuery: string[],
+  alertTimestampOverride: Date | undefined
 ): Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest | EqlShellFieldsLatest>> => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
@@ -63,7 +64,8 @@ export const buildAlertGroupFromSequence = (
         [],
         false,
         buildReasonMessage,
-        indicesToQuery
+        indicesToQuery,
+        alertTimestampOverride
       )
     );
   } catch (error) {
@@ -93,7 +95,8 @@ export const buildAlertGroupFromSequence = (
     completeRule,
     spaceId,
     buildReasonMessage,
-    indicesToQuery
+    indicesToQuery,
+    alertTimestampOverride
   );
   const sequenceAlert: WrappedFieldsLatest<EqlShellFieldsLatest> = {
     _id: shellAlert[ALERT_UUID],
@@ -122,7 +125,8 @@ export const buildAlertRoot = (
   completeRule: CompleteRule<RuleParams>,
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage,
-  indicesToQuery: string[]
+  indicesToQuery: string[],
+  alertTimestampOverride: Date | undefined
 ): EqlShellFieldsLatest => {
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({
@@ -130,7 +134,14 @@ export const buildAlertRoot = (
     severity: completeRule.ruleParams.severity,
     mergedDoc: mergedAlerts as SignalSourceHit,
   });
-  const doc = buildAlert(wrappedBuildingBlocks, completeRule, spaceId, reason, indicesToQuery);
+  const doc = buildAlert(
+    wrappedBuildingBlocks,
+    completeRule,
+    spaceId,
+    reason,
+    indicesToQuery,
+    alertTimestampOverride
+  );
   const alertId = generateAlertId(doc);
   return {
     ...mergedAlerts,

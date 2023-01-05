@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import { ConnectorStatus, SyncStatus } from '../../../../common/types/connectors';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
+
+import {
+  ConnectorStatus,
+  FilteringPolicy,
+  FilteringRuleRule,
+  FilteringValidationState,
+  SyncStatus,
+} from '../../../../common/types/connectors';
 import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
 
 export const indices: ElasticsearchIndexWithIngestion[] = [
   {
+    count: 1,
+    hidden: false,
     name: 'api',
     total: {
       docs: {
@@ -23,8 +33,63 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
     connector: {
       api_key_id: null,
       configuration: { foo: { label: 'bar', value: 'barbar' } },
+      description: null,
+      error: null,
+      features: null,
+      filtering: [
+        {
+          active: {
+            advanced_snippet: {
+              created_at: expect.any(String),
+              updated_at: expect.any(String),
+              value: {},
+            },
+            rules: [
+              {
+                created_at: expect.any(String),
+                field: '_',
+                id: 'DEFAULT',
+                order: 0,
+                policy: FilteringPolicy.INCLUDE,
+                rule: FilteringRuleRule.REGEX,
+                updated_at: expect.any(String),
+                value: '.*',
+              },
+            ],
+            validation: {
+              errors: [],
+              state: FilteringValidationState.VALID,
+            },
+          },
+          domain: 'DEFAULT',
+          draft: {
+            advanced_snippet: {
+              created_at: expect.any(String),
+              updated_at: expect.any(String),
+              value: {},
+            },
+            rules: [
+              {
+                created_at: expect.any(String),
+                field: '_',
+                id: 'DEFAULT',
+                order: 0,
+                policy: FilteringPolicy.INCLUDE,
+                rule: FilteringRuleRule.REGEX,
+                updated_at: expect.any(String),
+                value: '.*',
+              },
+            ],
+            validation: {
+              errors: [],
+              state: FilteringValidationState.VALID,
+            },
+          },
+        },
+      ],
       id: '2',
       index_name: 'connector',
+      is_native: false,
       language: 'en',
       last_seen: null,
       last_sync_error: null,
@@ -39,6 +104,8 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       status: ConnectorStatus.CONFIGURED,
       sync_now: false,
     },
+    count: 1,
+    hidden: false,
     name: 'connector',
     total: {
       docs: {
@@ -49,10 +116,86 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
     },
   },
   {
-    crawler: {
-      id: '3',
+    connector: {
+      api_key_id: null,
+      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      description: null,
+      error: null,
+      features: null,
+      filtering: [
+        {
+          active: {
+            advanced_snippet: {
+              created_at: expect.any(String),
+              updated_at: expect.any(String),
+              value: {},
+            },
+            rules: [
+              {
+                created_at: expect.any(String),
+                field: '_',
+                id: 'DEFAULT',
+                order: 0,
+                policy: FilteringPolicy.INCLUDE,
+                rule: FilteringRuleRule.REGEX,
+                updated_at: expect.any(String),
+                value: '.*',
+              },
+            ],
+            validation: {
+              errors: [],
+              state: FilteringValidationState.VALID,
+            },
+          },
+          domain: 'DEFAULT',
+          draft: {
+            advanced_snippet: {
+              created_at: expect.any(String),
+              updated_at: expect.any(String),
+              value: {},
+            },
+            rules: [
+              {
+                created_at: expect.any(String),
+                field: '_',
+                id: 'DEFAULT',
+                order: 0,
+                policy: FilteringPolicy.INCLUDE,
+                rule: FilteringRuleRule.REGEX,
+                updated_at: expect.any(String),
+                value: '.*',
+              },
+            ],
+            validation: {
+              errors: [],
+              state: FilteringValidationState.VALID,
+            },
+          },
+        },
+      ],
+      id: '4',
       index_name: 'crawler',
+      is_native: true,
+      language: 'en',
+      last_seen: null,
+      last_sync_error: null,
+      last_sync_status: SyncStatus.COMPLETED,
+      last_synced: null,
+      name: 'crawler',
+      scheduling: {
+        enabled: false,
+        interval: '',
+      },
+      service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+      status: ConnectorStatus.CONFIGURED,
+      sync_now: false,
     },
+    count: 1,
+    crawler: {
+      id: '5',
+      index_name: 'connector-crawler',
+    },
+    hidden: false,
     name: 'crawler',
     total: {
       docs: {

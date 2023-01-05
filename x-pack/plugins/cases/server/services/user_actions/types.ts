@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-import {
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { CaseAssignees } from '../../../common/api/cases/assignee';
+import type {
   CasePostRequest,
   CaseSettings,
   CaseSeverity,
@@ -18,7 +19,7 @@ import {
   UserAction,
   UserActionTypes,
 } from '../../../common/api';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 export interface BuilderParameters {
   title: {
@@ -35,6 +36,9 @@ export interface BuilderParameters {
   };
   tags: {
     parameters: { payload: { tags: string[] } };
+  };
+  assignees: {
+    parameters: { payload: { assignees: CaseAssignees } };
   };
   pushed: {
     parameters: {
@@ -94,9 +98,22 @@ export interface Attributes {
   payload: Record<string, unknown>;
 }
 
-export interface BuilderReturnValue {
+export interface SavedObjectParameters {
   attributes: Attributes;
   references: SavedObjectReference[];
+}
+
+export interface EventDetails {
+  getMessage: (storedUserActionId?: string) => string;
+  action: UserAction;
+  descriptiveAction: string;
+  savedObjectId: string;
+  savedObjectType: string;
+}
+
+export interface UserActionEvent {
+  parameters: SavedObjectParameters;
+  eventDetails: EventDetails;
 }
 
 export type CommonBuilderArguments = CommonArguments & {

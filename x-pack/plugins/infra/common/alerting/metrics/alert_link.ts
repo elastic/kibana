@@ -6,7 +6,7 @@
  */
 
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import { stringify } from 'query-string';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 

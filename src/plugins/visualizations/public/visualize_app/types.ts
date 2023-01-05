@@ -10,6 +10,8 @@ import type { EventEmitter } from 'events';
 import type { History } from 'history';
 import type { SerializableRecord } from '@kbn/utility-types';
 
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
 import type {
   CoreStart,
   PluginInitializerContext,
@@ -37,7 +39,7 @@ import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type {
   Vis,
   VisualizeEmbeddableContract,
@@ -110,6 +112,7 @@ export interface VisualizeServices extends CoreStart {
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
   visEditorsRegistry: VisEditorsRegistry;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface VisInstance {
@@ -143,6 +146,7 @@ export interface EditorRenderProps {
   query?: Query;
   savedSearch?: SavedSearch;
   uiState: PersistedState;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   /**
    * Flag to determine if visualiztion is linked to the saved search
    */

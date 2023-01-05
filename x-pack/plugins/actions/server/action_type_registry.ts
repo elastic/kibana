@@ -147,20 +147,25 @@ export class ActionTypeRegistry {
       );
     }
 
+    const maxAttempts = this.actionsConfigUtils.getMaxAttempts({
+      actionTypeId: actionType.id,
+      actionTypeMaxAttempts: actionType.maxAttempts,
+    });
+
     this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
-        maxAttempts: actionType.maxAttempts || 1,
+        maxAttempts,
         getRetry(attempts: number, error: unknown) {
           if (error instanceof ExecutorError) {
             return error.retry == null ? false : error.retry;
           }
-          // Don't retry other kinds of errors
-          return false;
+          // Only retry other kinds of errors based on attempts
+          return attempts < maxAttempts;
         },
         createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(context, actionType.maxAttempts),
+          this.taskRunnerFactory.create(context, maxAttempts),
       },
     });
     // No need to notify usage on basic action types
@@ -211,5 +216,16 @@ export class ActionTypeRegistry {
         enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
         supportedFeatureIds: actionType.supportedFeatureIds,
       }));
+  }
+
+  /**
+   * Returns the actions configuration utilities
+   */
+  public getUtils(): ActionsConfigurationUtilities {
+    return this.actionsConfigUtils;
+  }
+
+  public getAllTypes(): string[] {
+    return [...this.list().map(({ id }) => id)];
   }
 }

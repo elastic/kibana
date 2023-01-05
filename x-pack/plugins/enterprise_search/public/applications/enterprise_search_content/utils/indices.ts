@@ -9,11 +9,13 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 import { SyncStatus, ConnectorStatus } from '../../../../common/types/connectors';
 import {
   ConnectorIndex,
   CrawlerIndex,
   ElasticsearchIndexWithIngestion,
+  ElasticsearchIndex,
 } from '../../../../common/types/indices';
 
 import {
@@ -26,18 +28,22 @@ import {
 } from '../types';
 
 export function isConnectorIndex(
-  index: ElasticsearchIndexWithIngestion | undefined
+  index: ElasticsearchIndexWithIngestion | null | undefined
 ): index is ConnectorIndex {
-  return !!(index as ConnectorIndex)?.connector;
+  const connectorIndex = index as ConnectorIndex;
+  return (
+    !!connectorIndex?.connector &&
+    connectorIndex.connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+  );
 }
 
 export function isCrawlerIndex(
-  index: ElasticsearchIndexWithIngestion | undefined
+  index: ElasticsearchIndexWithIngestion | null | undefined
 ): index is CrawlerIndex {
   return !!(index as CrawlerIndex)?.crawler;
 }
 
-export function isApiIndex(index: ElasticsearchIndexWithIngestion | undefined): boolean {
+export function isApiIndex(index: ElasticsearchIndexWithIngestion | null | undefined): boolean {
   if (!index) {
     return false;
   }
@@ -45,7 +51,11 @@ export function isApiIndex(index: ElasticsearchIndexWithIngestion | undefined): 
 }
 
 export function isConnectorViewIndex(index: ElasticsearchViewIndex): index is ConnectorViewIndex {
-  return !!(index as ConnectorViewIndex)?.connector;
+  const connectorViewIndex = index as ConnectorViewIndex;
+  return (
+    !!connectorViewIndex?.connector &&
+    connectorViewIndex.connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+  );
 }
 
 export function isCrawlerViewIndex(index: ElasticsearchViewIndex): index is CrawlerViewIndex {
@@ -71,7 +81,7 @@ export function getIngestionStatus(index?: ElasticsearchIndexWithIngestion): Ing
   if (!index || isApiIndex(index)) {
     return IngestionStatus.CONNECTED;
   }
-  if (isConnectorIndex(index)) {
+  if (isConnectorIndex(index) || isCrawlerIndex(index)) {
     if (
       index.connector.last_seen &&
       moment(index.connector.last_seen).isBefore(moment().subtract(30, 'minutes'))
@@ -87,6 +97,9 @@ export function getIngestionStatus(index?: ElasticsearchIndexWithIngestion): Ing
     if (index.connector.status === ConnectorStatus.ERROR) {
       return IngestionStatus.ERROR;
     }
+    if (index.connector.status === ConnectorStatus.CONFIGURED) {
+      return IngestionStatus.CONFIGURED;
+    }
   }
   return IngestionStatus.INCOMPLETE;
 }
@@ -95,9 +108,9 @@ export function getLastUpdated(index?: ElasticsearchIndexWithIngestion): string 
   return isConnectorIndex(index) ? index.connector.last_synced ?? 'never' : null;
 }
 
-export function indexToViewIndex(index: ConnectorIndex): ConnectorViewIndex;
-export function indexToViewIndex(index: CrawlerIndex): CrawlerViewIndex;
-export function indexToViewIndex(index: ElasticsearchIndexWithIngestion): ApiViewIndex {
+export function indexToViewIndex(index: ElasticsearchIndex): ConnectorViewIndex;
+export function indexToViewIndex(index: ElasticsearchIndex): CrawlerViewIndex;
+export function indexToViewIndex(index: ElasticsearchIndex): ApiViewIndex {
   const extraFields = {
     ingestionMethod: getIngestionMethod(index),
     ingestionStatus: getIngestionStatus(index),

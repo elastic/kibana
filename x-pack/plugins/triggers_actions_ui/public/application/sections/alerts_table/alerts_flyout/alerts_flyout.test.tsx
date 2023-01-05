@@ -22,6 +22,7 @@ const props = {
   } as unknown as EcsFieldsResponse,
   alertsTableConfiguration: {
     id: 'test',
+    casesFeatureId: 'testCases',
     columns: [
       {
         id: AlertsField.name,
@@ -134,7 +135,7 @@ describe('AlertsFlyout', () => {
       await nextTick();
       wrapper.update();
     });
-    wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
+    wrapper.find('[data-test-subj="pagination-button-next"]').last().simulate('click');
     expect(onPaginate).toHaveBeenCalledWith(1);
   });
 
@@ -148,7 +149,7 @@ describe('AlertsFlyout', () => {
       await nextTick();
       wrapper.update();
     });
-    wrapper.find('[data-test-subj="pagination-button-previous"]').first().simulate('click');
+    wrapper.find('[data-test-subj="pagination-button-previous"]').last().simulate('click');
     expect(onPaginate).toHaveBeenCalledWith(0);
   });
 });

@@ -10,12 +10,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  CaseConfigureRequestParamsRt,
-  throwErrors,
-  CasesConfigurePatch,
-  excess,
-} from '../../../../common/api';
+import type { CasesConfigurePatch } from '../../../../common/api';
+import { CaseConfigureRequestParamsRt, throwErrors, excess } from '../../../../common/api';
 import { CASE_CONFIGURE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';

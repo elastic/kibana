@@ -5,49 +5,38 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import dateMath from '@kbn/datemath';
-import type { Unit } from '@kbn/datemath';
-import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import styled from 'styled-components';
-import type { EuiButtonGroupOptionProps, OnTimeChangeProps } from '@elastic/eui';
+import type { OnTimeChangeProps } from '@elastic/eui';
 import {
-  EuiButtonGroup,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelect,
   EuiFormRow,
-  EuiButton,
   EuiSpacer,
   EuiSuperDatePicker,
+  EuiSuperUpdateButton,
 } from '@elastic/eui';
 import moment from 'moment';
-import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
-import type { FieldValueQueryBar } from '../query_bar';
+import type { List } from '@kbn/securitysolution-io-ts-list-types';
+import { isEqual } from 'lodash';
 import * as i18n from './translations';
 import { usePreviewRoute } from './use_preview_route';
 import { PreviewHistogram } from './preview_histogram';
-import { getTimeframeOptions } from './helpers';
 import { PreviewLogsComponent } from './preview_logs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LoadingHistogram } from './loading_histogram';
-import type { FieldValueThreshold } from '../threshold_input';
-import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { Form, UseField, useForm, useFormData } from '../../../../shared_imports';
-import { ScheduleItem } from '../schedule_item_form';
-import type { AdvancedPreviewForm } from '../../../pages/detection_engine/rules/types';
-import { schema } from './schema';
+import type {
+  AboutStepRule,
+  DefineStepRule,
+  ScheduleStepRule,
+  TimeframePreviewOptions,
+} from '../../../pages/detection_engine/rules/types';
+import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
-const HelpTextComponent = (
-  <EuiFlexGroup direction="column" gutterSize="none">
-    <EuiFlexItem>{i18n.QUERY_PREVIEW_HELP_TEXT}</EuiFlexItem>
-    <EuiFlexItem>{i18n.QUERY_PREVIEW_DISCLAIMER}</EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const REASONABLE_INVOCATION_COUNT = 200;
 
 const timeRanges = [
   { start: 'now/d', end: 'now', label: 'Today' },
@@ -60,59 +49,37 @@ const timeRanges = [
   { start: 'now-30d', end: 'now', label: 'Last 30 days' },
 ];
 
-const QUICK_QUERY_SELECT_ID = 'quickQuery';
-const ADVANCED_QUERY_SELECT_ID = 'advancedQuery';
-
-const advancedOptionsDefaultValue = {
-  interval: '5m',
-  lookback: '1m',
-};
-
 export interface RulePreviewProps {
-  index: string[];
-  isDisabled: boolean;
-  query: FieldValueQueryBar;
-  dataViewId?: string;
-  ruleType: Type;
-  threatIndex: string[];
-  threatMapping: ThreatMapping;
-  threatQuery: FieldValueQueryBar;
-  threshold: FieldValueThreshold;
-  machineLearningJobId: string[];
-  anomalyThreshold: number;
-  eqlOptions: EqlOptionsSelected;
-  newTermsFields: string[];
-  historyWindowSize: string;
+  isDisabled?: boolean;
+  defineRuleData: DefineStepRule;
+  aboutRuleData: AboutStepRule;
+  scheduleRuleData: ScheduleStepRule;
+  exceptionsList?: List[];
 }
 
-const Select = styled(EuiSelect)`
-  width: ${({ theme }) => theme.eui.euiSuperDatePickerWidth};
-`;
+interface RulePreviewState {
+  defineRuleData?: DefineStepRule;
+  aboutRuleData?: AboutStepRule;
+  scheduleRuleData?: ScheduleStepRule;
+  timeframeOptions: TimeframePreviewOptions;
+}
 
-const PreviewButton = styled(EuiButton)`
-  margin-left: 0;
-`;
-
-const defaultTimeRange: Unit = 'h';
+const refreshedTimeframe = (startDate: string, endDate: string) => {
+  return {
+    start: dateMath.parse(startDate) || moment().subtract(1, 'hour'),
+    end: dateMath.parse(endDate) || moment(),
+  };
+};
 
 const RulePreviewComponent: React.FC<RulePreviewProps> = ({
-  index,
-  dataViewId,
   isDisabled,
-  query,
-  ruleType,
-  threatIndex,
-  threatQuery,
-  threatMapping,
-  threshold,
-  machineLearningJobId,
-  anomalyThreshold,
-  eqlOptions,
-  newTermsFields,
-  historyWindowSize,
+  defineRuleData,
+  aboutRuleData,
+  scheduleRuleData,
+  exceptionsList,
 }) => {
+  const { indexPattern, ruleType } = defineRuleData;
   const { spaces } = useKibana().services;
-  const { loading: isMlLoading, jobs } = useSecurityJobs(false);
 
   const [spaceId, setSpaceId] = useState('');
   useEffect(() => {
@@ -121,68 +88,42 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     }
   }, [spaces]);
 
+  // Raw timeframe as a string
   const [startDate, setStartDate] = useState('now-1h');
   const [endDate, setEndDate] = useState('now');
 
-  const { form } = useForm<AdvancedPreviewForm>({
-    defaultValue: advancedOptionsDefaultValue,
-    options: { stripEmptyFields: false },
-    schema,
+  // Parsed timeframe as a Moment object
+  const [timeframeStart, setTimeframeStart] = useState(moment().subtract(1, 'hour'));
+  const [timeframeEnd, setTimeframeEnd] = useState(moment());
+
+  const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
+
+  useEffect(() => {
+    const { start, end } = refreshedTimeframe(startDate, endDate);
+    setTimeframeStart(start);
+    setTimeframeEnd(end);
+  }, [startDate, endDate]);
+
+  // The data state that we used for the last preview results
+  const [previewData, setPreviewData] = useState<RulePreviewState>({
+    timeframeOptions: {
+      timeframeStart,
+      timeframeEnd,
+      interval: '5m',
+      lookback: '1m',
+    },
   });
 
-  const [{ interval: formInterval, lookback: formLookback }] = useFormData<AdvancedPreviewForm>({
-    form,
-    watch: ['interval', 'lookback'],
+  const { invocationCount } = usePreviewInvocationCount({
+    timeframeOptions: {
+      timeframeStart,
+      timeframeEnd,
+      interval: scheduleRuleData.interval,
+      lookback: scheduleRuleData.from,
+    },
   });
+  const showInvocationCountWarning = invocationCount > REASONABLE_INVOCATION_COUNT;
 
-  const areRelaventMlJobsRunning = useMemo(() => {
-    if (ruleType !== 'machine_learning') {
-      return true; // Don't do the expensive logic if we don't need it
-    }
-    if (isMlLoading) {
-      const selectedJobs = jobs.filter(({ id }) => machineLearningJobId.includes(id));
-      return selectedJobs.every((job) => isJobStarted(job.jobState, job.datafeedState));
-    }
-  }, [jobs, machineLearningJobId, ruleType, isMlLoading]);
-
-  const [queryPreviewIdSelected, setQueryPreviewRadioIdSelected] = useState(QUICK_QUERY_SELECT_ID);
-
-  // Callback for when user toggles between Quick query and Advanced query preview
-  const onChangeDataSource = (optionId: string) => {
-    setQueryPreviewRadioIdSelected(optionId);
-  };
-
-  const quickAdvancedToggleButtonOptions: EuiButtonGroupOptionProps[] = useMemo(
-    () => [
-      {
-        id: QUICK_QUERY_SELECT_ID,
-        label: i18n.QUICK_PREVIEW_TOGGLE_BUTTON,
-        'data-test-subj': `rule-preview-toggle-${QUICK_QUERY_SELECT_ID}`,
-      },
-      {
-        id: ADVANCED_QUERY_SELECT_ID,
-        label: i18n.ADVANCED_PREVIEW_TOGGLE_BUTTON,
-        'data-test-subj': `rule-index-toggle-${ADVANCED_QUERY_SELECT_ID}`,
-      },
-    ],
-    []
-  );
-
-  const showAdvancedOptions = queryPreviewIdSelected === ADVANCED_QUERY_SELECT_ID;
-  const advancedOptions = useMemo(
-    () =>
-      showAdvancedOptions && startDate && endDate && formInterval && formLookback
-        ? {
-            timeframeStart: dateMath.parse(startDate) || moment().subtract(1, 'hour'),
-            timeframeEnd: dateMath.parse(endDate) || moment(),
-            interval: formInterval,
-            lookback: formLookback,
-          }
-        : undefined,
-    [endDate, formInterval, formLookback, showAdvancedOptions, startDate]
-  );
-
-  const [timeFrame, setTimeFrame] = useState<Unit>(defaultTimeRange);
   const {
     addNoiseWarning,
     createPreview,
@@ -191,40 +132,34 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     logs,
     hasNoiseWarning,
     isAborted,
-    showInvocationCountWarning,
   } = usePreviewRoute({
-    index,
-    isDisabled,
-    dataViewId,
-    query,
-    threatIndex,
-    threatQuery,
-    timeFrame,
-    ruleType,
-    threatMapping,
-    threshold,
-    machineLearningJobId,
-    anomalyThreshold,
-    eqlOptions,
-    newTermsFields,
-    historyWindowSize,
-    advancedOptions,
+    defineRuleData: previewData.defineRuleData,
+    aboutRuleData: previewData.aboutRuleData,
+    scheduleRuleData: previewData.scheduleRuleData,
+    exceptionsList,
+    timeframeOptions: previewData.timeframeOptions,
   });
-
-  // Resets the timeFrame to default when rule type is changed because not all time frames are supported by all rule types
-  useEffect(() => {
-    setTimeFrame(defaultTimeRange);
-  }, [ruleType]);
 
   const { startTransaction } = useStartTransaction();
 
-  const handlePreviewClick = useCallback(() => {
-    startTransaction({ name: SINGLE_RULE_ACTIONS.PREVIEW });
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  useEffect(() => {
+    if (!isRefreshing) {
+      return;
+    }
     createPreview();
-  }, [createPreview, startTransaction]);
+    setIsRefreshing(false);
+  }, [isRefreshing, createPreview]);
+
+  useEffect(() => {
+    const { start, end } = refreshedTimeframe(startDate, endDate);
+    setTimeframeStart(start);
+    setTimeframeEnd(end);
+  }, [endDate, startDate]);
 
   const onTimeChange = useCallback(
     ({ start: newStart, end: newEnd, isInvalid }: OnTimeChangeProps) => {
+      setIsDateRangeInvalid(isInvalid);
       if (!isInvalid) {
         setStartDate(newStart);
         setEndDate(newEnd);
@@ -233,19 +168,50 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     []
   );
 
+  const onTimeframeRefresh = useCallback(() => {
+    startTransaction({ name: SINGLE_RULE_ACTIONS.PREVIEW });
+    const { start, end } = refreshedTimeframe(startDate, endDate);
+    setTimeframeStart(start);
+    setTimeframeEnd(end);
+    setPreviewData({
+      defineRuleData,
+      aboutRuleData,
+      scheduleRuleData,
+      timeframeOptions: {
+        timeframeStart: start,
+        timeframeEnd: end,
+        interval: scheduleRuleData.interval,
+        lookback: scheduleRuleData.from,
+      },
+    });
+    setIsRefreshing(true);
+  }, [aboutRuleData, defineRuleData, endDate, scheduleRuleData, startDate, startTransaction]);
+
+  const isDirty = useMemo(
+    () =>
+      !timeframeStart.isSame(previewData.timeframeOptions.timeframeStart) ||
+      !timeframeEnd.isSame(previewData.timeframeOptions.timeframeEnd) ||
+      !isEqual(defineRuleData, previewData.defineRuleData) ||
+      !isEqual(aboutRuleData, previewData.aboutRuleData) ||
+      !isEqual(scheduleRuleData, previewData.scheduleRuleData),
+    [
+      aboutRuleData,
+      defineRuleData,
+      previewData.aboutRuleData,
+      previewData.defineRuleData,
+      previewData.scheduleRuleData,
+      previewData.timeframeOptions.timeframeEnd,
+      previewData.timeframeOptions.timeframeStart,
+      scheduleRuleData,
+      timeframeEnd,
+      timeframeStart,
+    ]
+  );
+
   return (
     <>
-      <EuiSpacer />
-      <EuiButtonGroup
-        legend="Quick query or advanced query preview selector"
-        data-test-subj="quickAdvancedToggleButtonGroup"
-        idSelected={queryPreviewIdSelected}
-        onChange={onChangeDataSource}
-        options={quickAdvancedToggleButtonOptions}
-        color="primary"
-      />
-      <EuiSpacer />
-      {showAdvancedOptions && showInvocationCountWarning && (
+      <EuiSpacer size="s" />
+      {showInvocationCountWarning && (
         <>
           <EuiCallOut
             color="warning"
@@ -259,83 +225,44 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       )}
       <EuiFormRow
         label={i18n.QUERY_PREVIEW_LABEL}
-        helpText={HelpTextComponent}
         error={undefined}
         isInvalid={false}
         data-test-subj="rule-preview"
         describedByIds={['rule-preview']}
       >
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            {showAdvancedOptions ? (
-              <EuiSuperDatePicker
-                start={startDate}
-                end={endDate}
-                onTimeChange={onTimeChange}
-                showUpdateButton={false}
-                isDisabled={isDisabled}
-                commonlyUsedRanges={timeRanges}
-              />
-            ) : (
-              <Select
-                id="preview-time-frame"
-                options={getTimeframeOptions(ruleType)}
-                value={timeFrame}
-                onChange={(e) => setTimeFrame(e.target.value as Unit)}
-                aria-label={i18n.QUERY_PREVIEW_SELECT_ARIA}
-                disabled={isDisabled}
-                data-test-subj="preview-time-frame"
-              />
-            )}
-          </EuiFlexItem>
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+          <EuiSuperDatePicker
+            start={startDate}
+            end={endDate}
+            isDisabled={isDisabled}
+            onTimeChange={onTimeChange}
+            showUpdateButton={false}
+            commonlyUsedRanges={timeRanges}
+            onRefresh={onTimeframeRefresh}
+            data-test-subj="preview-time-frame"
+          />
           <EuiFlexItem grow={false}>
-            <PreviewButton
-              fill
-              isLoading={isPreviewRequestInProgress}
-              isDisabled={isDisabled || !areRelaventMlJobsRunning}
-              onClick={handlePreviewClick}
-              data-test-subj="queryPreviewButton"
-            >
-              {i18n.QUERY_PREVIEW_BUTTON}
-            </PreviewButton>
+            <EuiSuperUpdateButton
+              isDisabled={isDateRangeInvalid || isDisabled}
+              iconType={isDirty ? 'kqlFunction' : 'refresh'}
+              onClick={onTimeframeRefresh}
+              color={isDirty ? 'success' : 'primary'}
+              fill={true}
+              data-test-subj="previewSubmitButton"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      {showAdvancedOptions && (
-        <Form form={form} data-test-subj="previewRule">
-          <EuiSpacer size="s" />
-          <UseField
-            path="interval"
-            component={ScheduleItem}
-            componentProps={{
-              idAria: 'detectionEnginePreviewRuleInterval',
-              isDisabled,
-              dataTestSubj: 'detectionEnginePreviewRuleInterval',
-            }}
-          />
-          <UseField
-            path="lookback"
-            component={ScheduleItem}
-            componentProps={{
-              idAria: 'detectionEnginePreviewRuleLookback',
-              isDisabled,
-              dataTestSubj: 'detectionEnginePreviewRuleLookback',
-              minimumValue: 1,
-            }}
-          />
-          <EuiSpacer size="s" />
-        </Form>
-      )}
+      <EuiSpacer size="l" />
       {isPreviewRequestInProgress && <LoadingHistogram />}
       {!isPreviewRequestInProgress && previewId && spaceId && (
         <PreviewHistogram
           ruleType={ruleType}
-          timeFrame={timeFrame}
           previewId={previewId}
           addNoiseWarning={addNoiseWarning}
           spaceId={spaceId}
-          index={index}
-          advancedOptions={advancedOptions}
+          indexPattern={indexPattern}
+          timeframeOptions={previewData.timeframeOptions}
         />
       )}
       <PreviewLogsComponent logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />

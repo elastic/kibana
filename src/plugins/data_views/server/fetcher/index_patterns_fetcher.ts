@@ -25,6 +25,10 @@ export interface FieldDescriptor {
   esTypes: string[];
   subType?: FieldSubType;
   metadata_field?: boolean;
+  fixedInterval?: string[];
+  timeZone?: string[];
+  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge';
+  timeSeriesDimension?: boolean;
 }
 
 interface FieldSubType {
@@ -53,12 +57,13 @@ export class IndexPatternsFetcher {
   async getFieldsForWildcard(options: {
     pattern: string | string[];
     metaFields?: string[];
-    fieldCapsOptions?: { allow_no_indices: boolean };
+    fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean };
     type?: string;
     rollupIndex?: string;
-    filter?: QueryDslQueryContainer;
-  }): Promise<FieldDescriptor[]> {
-    const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, filter } = options;
+    indexFilter?: QueryDslQueryContainer;
+    fields?: string[];
+  }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
+    const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, indexFilter } = options;
     const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
     const allowNoIndices = fieldCapsOptions
       ? fieldCapsOptions.allow_no_indices
@@ -74,8 +79,10 @@ export class IndexPatternsFetcher {
       metaFields,
       fieldCapsOptions: {
         allow_no_indices: allowNoIndices,
+        include_unmapped: fieldCapsOptions?.includeUnmapped,
       },
-      filter,
+      indexFilter,
+      fields: options.fields || ['*'],
     });
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
@@ -90,17 +97,20 @@ export class IndexPatternsFetcher {
       }
 
       const rollupIndexCapabilities = capabilityCheck.aggs;
-      const fieldCapsResponseObj = keyBy(fieldCapsResponse, 'name');
+      const fieldCapsResponseObj = keyBy(fieldCapsResponse.fields, 'name');
       // Keep meta fields
       metaFields!.forEach(
         (field: string) =>
           fieldCapsResponseObj[field] && rollupFields.push(fieldCapsResponseObj[field])
       );
-      return mergeCapabilitiesWithFields(
-        rollupIndexCapabilities!,
-        fieldCapsResponseObj,
-        rollupFields
-      );
+      return {
+        fields: mergeCapabilitiesWithFields(
+          rollupIndexCapabilities!,
+          fieldCapsResponseObj,
+          rollupFields
+        ),
+        indices: fieldCapsResponse.indices,
+      };
     }
     return fieldCapsResponse;
   }
@@ -116,7 +126,7 @@ export class IndexPatternsFetcher {
       patternList
         .map(async (index) => {
           // perserve negated patterns
-          if (index.startsWith('-')) {
+          if (index.startsWith('-') || index.includes(':-')) {
             return true;
           }
           const searchResponse = await this.elasticsearchClient.fieldCaps({

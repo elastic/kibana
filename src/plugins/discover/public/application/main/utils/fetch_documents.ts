@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
 import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
+import { EsHitRecord } from '../../../types';
 import { buildDataTableRecordList } from '../../../utils/build_data_record';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { FetchDeps } from './fetch_all';
@@ -56,7 +57,7 @@ export const fetchDocuments = (
     .pipe(
       filter((res) => isCompleteResponse(res)),
       map((res) => {
-        return buildDataTableRecordList(res.rawResponse.hits.hits, dataView);
+        return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView);
       })
     );
 

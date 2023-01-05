@@ -14,7 +14,7 @@ import { AlertsHistogramPanel } from '../../../detections/components/alerts_kpis
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 
-import type { InputsModelId } from '../../../common/store/inputs/constants';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { UpdateDateRange } from '../../../common/components/charts/common';
 
 import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
@@ -33,7 +33,6 @@ interface Props {
   query?: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showLegend?: boolean;
-  timelineId?: string;
   runtimeMappings?: MappingRuntimeFields;
 }
 
@@ -45,8 +44,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   paddingSize,
   query,
   showLegend,
-  setAbsoluteRangeDatePickerTarget = 'global',
-  timelineId,
+  setAbsoluteRangeDatePickerTarget = InputsModelId.global,
   runtimeMappings,
 }) => {
   const dispatch = useDispatch();

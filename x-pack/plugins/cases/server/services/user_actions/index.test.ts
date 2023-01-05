@@ -8,22 +8,23 @@
 import { get, omit } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import {
+import type {
   SavedObject,
   SavedObjectReference,
+  SavedObjectsBulkCreateObject,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import {
-  Actions,
-  ActionTypes,
-  CaseSeverity,
-  CaseStatuses,
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import type {
+  CaseAttributes,
   CaseUserActionAttributes,
   ConnectorUserAction,
   UserAction,
 } from '../../../common/api';
+import { Actions, ActionTypes, CaseSeverity, CaseStatuses } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -39,6 +40,7 @@ import {
 } from '../../common/constants';
 
 import {
+  createCaseSavedObjectResponse,
   createConnectorObject,
   createExternalService,
   createJiraConnector,
@@ -51,12 +53,15 @@ import {
   updatedCases,
   comment,
   attachments,
+  updatedAssigneesCases,
+  originalCasesWithAssignee,
+  updatedTagsCases,
 } from './mocks';
 import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import {
   externalReferenceAttachmentSO,
-  getPersistableStateAttachmentTypeRegistry,
+  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
 
@@ -302,10 +307,10 @@ const testConnectorId = (
 };
 
 describe('CaseUserActionService', () => {
-  const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();
+  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
 
   beforeAll(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
   });
 
@@ -632,17 +637,38 @@ describe('CaseUserActionService', () => {
   describe('methods', () => {
     let service: CaseUserActionService;
     const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'created_user_action_id',
+    } as SavedObject);
+
+    unsecuredSavedObjectsClient.bulkCreate.mockImplementation(
+      async (objects: SavedObjectsBulkCreateObject[]) => {
+        const savedObjects: SavedObject[] = [];
+        for (let i = 0; i < objects.length; i++) {
+          savedObjects.push({ id: i } as unknown as SavedObject);
+        }
+
+        return {
+          saved_objects: savedObjects,
+        };
+      }
+    );
     const mockLogger = loggerMock.create();
     const commonArgs = {
-      unsecuredSavedObjectsClient,
       caseId: '123',
       user: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
       owner: SECURITY_SOLUTION_OWNER,
     };
+    const mockAuditLogger = auditLoggerMock.create();
 
     beforeEach(() => {
       jest.clearAllMocks();
-      service = new CaseUserActionService(mockLogger, persistableStateAttachmentTypeRegistry);
+      service = new CaseUserActionService({
+        unsecuredSavedObjectsClient,
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        auditLogger: mockAuditLogger,
+      });
     });
 
     describe('createUserAction', () => {
@@ -667,6 +693,7 @@ describe('CaseUserActionService', () => {
               type: 'create_case',
               owner: 'securitySolution',
               payload: {
+                assignees: [{ uid: '1' }],
                 connector: {
                   fields: {
                     category: 'Denial of Service',
@@ -698,6 +725,39 @@ describe('CaseUserActionService', () => {
           );
         });
 
+        it('logs a create case user action', async () => {
+          await service.createUserAction({
+            ...commonArgs,
+            payload: casePayload,
+            type: ActionTypes.create_case,
+          });
+
+          expect(mockAuditLogger.log).toBeCalledTimes(1);
+          expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_create_case",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "creation",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "123",
+                    "type": "cases",
+                  },
+                },
+                "message": "User created case id: 123 - user action id: created_user_action_id",
+              },
+            ]
+          `);
+        });
+
         describe('status', () => {
           it('creates an update status user action', async () => {
             await service.createUserAction({
@@ -722,6 +782,39 @@ describe('CaseUserActionService', () => {
               },
               { references: [{ id: '123', name: 'associated-cases', type: 'cases' }] }
             );
+          });
+
+          it('logs an update status user action', async () => {
+            await service.createUserAction({
+              ...commonArgs,
+              payload: { status: CaseStatuses.closed },
+              type: ActionTypes.status,
+            });
+
+            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "event": Object {
+                    "action": "case_user_action_update_case_status",
+                    "category": Array [
+                      "database",
+                    ],
+                    "outcome": "success",
+                    "type": Array [
+                      "change",
+                    ],
+                  },
+                  "kibana": Object {
+                    "saved_object": Object {
+                      "id": "123",
+                      "type": "cases",
+                    },
+                  },
+                  "message": "User updated the status for case id: 123 - user action id: created_user_action_id",
+                },
+              ]
+            `);
           });
         });
 
@@ -749,6 +842,39 @@ describe('CaseUserActionService', () => {
               },
               { references: [{ id: '123', name: 'associated-cases', type: 'cases' }] }
             );
+          });
+
+          it('logs an update severity user action', async () => {
+            await service.createUserAction({
+              ...commonArgs,
+              payload: { severity: CaseSeverity.MEDIUM },
+              type: ActionTypes.severity,
+            });
+
+            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "event": Object {
+                    "action": "case_user_action_update_case_severity",
+                    "category": Array [
+                      "database",
+                    ],
+                    "outcome": "success",
+                    "type": Array [
+                      "change",
+                    ],
+                  },
+                  "kibana": Object {
+                    "saved_object": Object {
+                      "id": "123",
+                      "type": "cases",
+                    },
+                  },
+                  "message": "User updated the severity for case id: 123 - user action id: created_user_action_id",
+                },
+              ]
+            `);
           });
         });
 
@@ -796,6 +922,39 @@ describe('CaseUserActionService', () => {
               }
             );
           });
+
+          it('logs a push user action', async () => {
+            await service.createUserAction({
+              ...commonArgs,
+              payload: { externalService },
+              type: ActionTypes.pushed,
+            });
+
+            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "event": Object {
+                    "action": "case_user_action_pushed_case",
+                    "category": Array [
+                      "database",
+                    ],
+                    "outcome": "success",
+                    "type": Array [
+                      "change",
+                    ],
+                  },
+                  "kibana": Object {
+                    "saved_object": Object {
+                      "id": "123",
+                      "type": "cases",
+                    },
+                  },
+                  "message": "User pushed case id: 123 to an external service with connector id: 456 - user action id: created_user_action_id",
+                },
+              ]
+            `);
+          });
         });
 
         describe('comment', () => {
@@ -839,64 +998,79 @@ describe('CaseUserActionService', () => {
               );
             }
           );
+
+          it.each([[Actions.create], [Actions.delete], [Actions.update]])(
+            'logs a comment user action of action: %s',
+            async (action) => {
+              await service.createUserAction({
+                ...commonArgs,
+                type: ActionTypes.comment,
+                action,
+                attachmentId: 'test-id',
+                payload: { attachment: comment },
+              });
+
+              expect(mockAuditLogger.log).toBeCalledTimes(1);
+              expect(mockAuditLogger.log.mock.calls[0]).toMatchSnapshot();
+            }
+          );
         });
       });
     });
 
-    describe('bulkCreateCaseDeletion', () => {
-      it('creates a delete case user action', async () => {
-        await service.bulkCreateCaseDeletion({
-          unsecuredSavedObjectsClient,
-          cases: [
-            { id: '1', owner: SECURITY_SOLUTION_OWNER, connectorId: '3' },
-            { id: '2', owner: SECURITY_SOLUTION_OWNER, connectorId: '4' },
-          ],
-          user: commonArgs.user,
-        });
+    describe('bulkAuditLogCaseDeletion', () => {
+      it('logs a delete case audit log message', async () => {
+        await service.bulkAuditLogCaseDeletion(['1', '2']);
 
-        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-          [
-            {
-              attributes: {
-                action: 'delete',
-                created_at: '2022-01-09T22:00:00.000Z',
-                created_by: {
-                  email: 'elastic@elastic.co',
-                  full_name: 'Elastic User',
-                  username: 'elastic',
+        expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
+        expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_delete_case",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "deletion",
+                  ],
                 },
-                type: 'delete_case',
-                owner: 'securitySolution',
-                payload: {},
-              },
-              references: [
-                { id: '1', name: 'associated-cases', type: 'cases' },
-                { id: '3', name: 'connectorId', type: 'action' },
-              ],
-              type: 'cases-user-actions',
-            },
-            {
-              attributes: {
-                action: 'delete',
-                created_at: '2022-01-09T22:00:00.000Z',
-                created_by: {
-                  email: 'elastic@elastic.co',
-                  full_name: 'Elastic User',
-                  username: 'elastic',
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
                 },
-                type: 'delete_case',
-                owner: 'securitySolution',
-                payload: {},
+                "message": "User deleted case id: 1",
               },
-              references: [
-                { id: '2', name: 'associated-cases', type: 'cases' },
-                { id: '4', name: 'connectorId', type: 'action' },
-              ],
-              type: 'cases-user-actions',
-            },
-          ],
-          { refresh: undefined }
-        );
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_delete_case",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "deletion",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "2",
+                    "type": "cases",
+                  },
+                },
+                "message": "User deleted case id: 2",
+              },
+            ],
+          ]
+        `);
       });
     });
 
@@ -1068,6 +1242,656 @@ describe('CaseUserActionService', () => {
           { refresh: undefined }
         );
       });
+
+      it('logs the correct user actions when bulk updating cases', async () => {
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases,
+          updatedCases,
+          user: commonArgs.user,
+        });
+
+        expect(mockAuditLogger.log).toBeCalledTimes(8);
+        expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_update_case_title",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "change",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
+                },
+                "message": "User updated the title for case id: 1 - user action id: 0",
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_update_case_status",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "change",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
+                },
+                "message": "User updated the status for case id: 1 - user action id: 1",
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_update_case_connector",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "change",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
+                },
+                "message": "User changed the case connector to id: 456 for case id: 1 - user action id: 2",
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_update_case_description",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "change",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "2",
+                    "type": "cases",
+                  },
+                },
+                "message": "User updated the description for case id: 2 - user action id: 3",
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_add_case_tags",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "change",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "2",
+                    "type": "cases",
+                  },
+                },
+                "message": "User added tags to case id: 2 - user action id: 4",
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_delete_case_tags",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "deletion",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "2",
+                    "type": "cases",
+                  },
+                },
+                "message": "User deleted tags in case id: 2 - user action id: 5",
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_update_case_settings",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "change",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "2",
+                    "type": "cases",
+                  },
+                },
+                "message": "User updated the settings for case id: 2 - user action id: 6",
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_update_case_severity",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "change",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "2",
+                    "type": "cases",
+                  },
+                },
+                "message": "User updated the severity for case id: 2 - user action id: 7",
+              },
+            ],
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when an assignee is added', async () => {
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases,
+          updatedCases: updatedAssigneesCases,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "add",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "1",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
+      });
+
+      it('logs the correct user actions when an assignee is added', async () => {
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases,
+          updatedCases: updatedAssigneesCases,
+          user: commonArgs.user,
+        });
+
+        expect(mockAuditLogger.log).toBeCalledTimes(1);
+        expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_add_case_assignees",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "change",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
+                },
+                "message": "User assigned uids: [1] to case id: 1 - user action id: 0",
+              },
+            ],
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when an assignee is removed', async () => {
+        const casesWithAssigneeRemoved: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
+          {
+            ...createCaseSavedObjectResponse(),
+            id: '1',
+            attributes: {
+              assignees: [],
+            },
+          },
+        ];
+
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases: originalCasesWithAssignee,
+          updatedCases: casesWithAssigneeRemoved,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "delete",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "1",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
+      });
+
+      it('logs the correct user actions when an assignee is removed', async () => {
+        const casesWithAssigneeRemoved: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
+          {
+            ...createCaseSavedObjectResponse(),
+            id: '1',
+            attributes: {
+              assignees: [],
+            },
+          },
+        ];
+
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases: originalCasesWithAssignee,
+          updatedCases: casesWithAssigneeRemoved,
+          user: commonArgs.user,
+        });
+
+        expect(mockAuditLogger.log).toBeCalledTimes(1);
+        expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_delete_case_assignees",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "deletion",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
+                },
+                "message": "User unassigned uids: [1] from case id: 1 - user action id: 0",
+              },
+            ],
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when assignees are added and removed', async () => {
+        const caseAssignees: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
+          {
+            ...createCaseSavedObjectResponse(),
+            id: '1',
+            attributes: {
+              assignees: [{ uid: '2' }],
+            },
+          },
+        ];
+
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases: originalCasesWithAssignee,
+          updatedCases: caseAssignees,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "add",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "2",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+              Object {
+                "attributes": Object {
+                  "action": "delete",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "1",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
+      });
+
+      it('logs the correct user actions when assignees are added and removed', async () => {
+        const caseAssignees: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
+          {
+            ...createCaseSavedObjectResponse(),
+            id: '1',
+            attributes: {
+              assignees: [{ uid: '2' }],
+            },
+          },
+        ];
+
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases: originalCasesWithAssignee,
+          updatedCases: caseAssignees,
+          user: commonArgs.user,
+        });
+
+        expect(mockAuditLogger.log).toBeCalledTimes(2);
+        expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_add_case_assignees",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "change",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
+                },
+                "message": "User assigned uids: [2] to case id: 1 - user action id: 0",
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_delete_case_assignees",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "deletion",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
+                },
+                "message": "User unassigned uids: [1] from case id: 1 - user action id: 1",
+              },
+            ],
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when tags are added and removed', async () => {
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases,
+          updatedCases: updatedTagsCases,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "add",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "tags": Array [
+                      "a",
+                      "b",
+                    ],
+                  },
+                  "type": "tags",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+              Object {
+                "attributes": Object {
+                  "action": "delete",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "tags": Array [
+                      "defacement",
+                    ],
+                  },
+                  "type": "tags",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
+      });
+
+      it('logs the correct user actions when tags are added and removed', async () => {
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases,
+          updatedCases: updatedTagsCases,
+          user: commonArgs.user,
+        });
+
+        expect(mockAuditLogger.log).toBeCalledTimes(2);
+        expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_add_case_tags",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "change",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
+                },
+                "message": "User added tags to case id: 1 - user action id: 0",
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_delete_case_tags",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "deletion",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
+                },
+                "message": "User deleted tags in case id: 1 - user action id: 1",
+              },
+            ],
+          ]
+        `);
+      });
     });
 
     describe('bulkCreateAttachmentDeletion', () => {
@@ -1130,20 +1954,60 @@ describe('CaseUserActionService', () => {
           { refresh: undefined }
         );
       });
-    });
 
-    describe('create', () => {
-      it('creates user actions', async () => {
-        await service.create<{ title: string }>({
-          unsecuredSavedObjectsClient,
-          attributes: { title: 'test' },
-          references: [],
+      it('logs delete comment user action', async () => {
+        await service.bulkCreateAttachmentDeletion({
+          ...commonArgs,
+          attachments,
         });
-        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-          'cases-user-actions',
-          { title: 'test' },
-          { references: [] }
-        );
+
+        expect(mockAuditLogger.log).toBeCalledTimes(2);
+        expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_delete_comment",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "deletion",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases-comments",
+                  },
+                },
+                "message": "User deleted comment id: 1 for case id: 123 - user action id: 0",
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_delete_comment",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "deletion",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "2",
+                    "type": "cases-comments",
+                  },
+                },
+                "message": "User deleted comment id: 2 for case id: 123 - user action id: 1",
+              },
+            ],
+          ]
+        `);
       });
     });
 
@@ -1193,7 +2057,6 @@ describe('CaseUserActionService', () => {
 
       it('it returns an empty array if the response is not valid', async () => {
         const res = await service.getUniqueConnectors({
-          unsecuredSavedObjectsClient,
           caseId: '123',
         });
 
@@ -1207,7 +2070,6 @@ describe('CaseUserActionService', () => {
         } as unknown as Promise<SavedObjectsFindResponse>);
 
         const res = await service.getUniqueConnectors({
-          unsecuredSavedObjectsClient,
           caseId: '123',
         });
 
@@ -1220,7 +2082,6 @@ describe('CaseUserActionService', () => {
 
       it('it returns the unique connectors', async () => {
         await service.getUniqueConnectors({
-          unsecuredSavedObjectsClient,
           caseId: '123',
         });
 

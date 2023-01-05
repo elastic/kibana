@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
+import { ESCaseSeverity, ESCaseStatus } from '@kbn/cases-plugin/server/services/cases/types';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
@@ -424,6 +425,108 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
           expect(caseInfo).to.have.property('severity');
           expect(caseInfo.severity).to.be('low');
+        });
+      });
+    });
+
+    describe('8.5.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('assignees', () => {
+        it('adds the assignees field for existing documents', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            // This case exists in the 8.2.0 cases_duration.json file and does not contain an assignees field
+            caseId: '4537b380-a512-11ec-b92f-859b9e89e434',
+          });
+
+          expect(caseInfo).to.have.property('assignees');
+          expect(caseInfo.assignees).to.eql([]);
+        });
+
+        it('does not overwrite the assignees field if it already exists', async () => {
+          const caseInfo = await getCase({
+            supertest,
+            // This case exists in the 8.5.0 cases_assignees.json file and does contain an assignees field
+            caseId: '063d5820-1284-11ed-81af-63a2bdfb2bf9',
+          });
+
+          expect(caseInfo).to.have.property('assignees');
+          expect(caseInfo.assignees).to.eql([
+            {
+              uid: 'abc',
+            },
+          ]);
+        });
+      });
+    });
+
+    describe('8.7.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_severity_and_status.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_severity_and_status.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('severity', () => {
+        it('severity keyword values are converted to matching short', async () => {
+          const expectedSeverityValues: Record<string, ESCaseSeverity> = {
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': ESCaseSeverity.LOW,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': ESCaseSeverity.MEDIUM,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': ESCaseSeverity.HIGH,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': ESCaseSeverity.CRITICAL,
+          };
+
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+
+          for (const hit of casesFromES.body.hits.hits) {
+            const caseID = hit._id;
+            expect(expectedSeverityValues[caseID]).not.to.be(undefined);
+            expect(hit._source?.cases.severity).to.eql(expectedSeverityValues[caseID]);
+          }
+        });
+      });
+
+      describe('status', () => {
+        it('status keyword values are converted to matching short', async () => {
+          const expectedStatusValues: Record<string, ESCaseStatus> = {
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': ESCaseStatus.OPEN,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': ESCaseStatus.OPEN,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': ESCaseStatus.IN_PROGRESS,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': ESCaseStatus.CLOSED,
+          };
+
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+
+          for (const hit of casesFromES.body.hits.hits) {
+            const caseID = hit._id;
+            expect(expectedStatusValues[caseID]).not.to.be(undefined);
+            expect(hit._source?.cases.status).to.eql(expectedStatusValues[caseID]);
+          }
         });
       });
     });

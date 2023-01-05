@@ -18,8 +18,7 @@ const commonLinkProperties: Partial<LinkItem> = {
 
 export const rootLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('findings'),
-  globalNavEnabled: true,
-  globalNavOrder: 3,
+  globalNavPosition: 3,
   ...commonLinkProperties,
 };
 
@@ -40,19 +39,11 @@ export const manageLinks: LinkItem = {
   description: i18n.translate(
     'xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription',
     {
-      defaultMessage: 'View, enable, and or disable benchmark rules.',
+      defaultMessage: 'View benchmark rules.',
     }
   ),
   landingIcon: IconExceptionLists,
   ...commonLinkProperties,
-  links: [
-    {
-      ...getSecuritySolutionLink<SecurityPageName>('rules'),
-      sideNavDisabled: true,
-      globalSearchDisabled: true,
-      ...commonLinkProperties,
-    },
-  ],
 };
 
 export const manageCategories: LinkCategories = [

@@ -10,9 +10,9 @@ import { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
+import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../common';
-import { getSavedSearchUrl } from '../services/saved_searches';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 

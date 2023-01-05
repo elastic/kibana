@@ -14,10 +14,12 @@ export type TCPFormatMap = Record<keyof TCPFields, Formatter>;
 export const tcpFormatters: TCPFormatMap = {
   [ConfigKey.METADATA]: null,
   [ConfigKey.HOSTS]: null,
+  [ConfigKey.PORT]: null,
   [ConfigKey.PROXY_URL]: null,
   [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: null,
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: null,
   [ConfigKey.REQUEST_SEND_CHECK]: null,
+  [ConfigKey.URLS]: null,
   ...tlsFormatters,
   ...commonFormatters,
 };

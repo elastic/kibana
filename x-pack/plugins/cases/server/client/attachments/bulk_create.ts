@@ -12,20 +12,16 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import {
-  BulkCreateCommentRequest,
-  BulkCreateCommentRequestRt,
-  CaseResponse,
-  CommentRequest,
-  throwErrors,
-} from '../../../common/api';
+import type { BulkCreateCommentRequest, CaseResponse, CommentRequest } from '../../../common/api';
+import { BulkCreateCommentRequestRt, throwErrors } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 
 import { decodeCommentRequest } from '../utils';
-import { Operations, OwnerEntity } from '../../authorization';
+import type { OwnerEntity } from '../../authorization';
+import { Operations } from '../../authorization';
 
 export interface BulkCreateArgs {
   caseId: string;

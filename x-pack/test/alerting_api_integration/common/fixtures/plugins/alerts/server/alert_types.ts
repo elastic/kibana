@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
+import { Logger } from '@kbn/logging';
 import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { curry, times } from 'lodash';
+import { curry, range, times } from 'lodash';
 import {
   RuleType,
   AlertInstanceState,
@@ -15,8 +17,9 @@ import {
   RuleTypeState,
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
-import { ES_TEST_INDEX_NAME } from '../../../../lib';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
+import { ES_TEST_INDEX_NAME } from '../../../../lib';
 
 export const EscapableStrings = {
   escapableBold: '*bold*',
@@ -94,45 +97,23 @@ function getAlwaysFiringAlertType() {
 }
 
 async function alwaysFiringExecutor(alertExecutorOptions: any) {
-  const {
-    services,
-    params,
-    state,
-    alertId,
-    spaceId,
-    namespace,
-    name,
-    tags,
-    createdBy,
-    updatedBy,
-    rule,
-  } = alertExecutorOptions;
+  const { services, params, state, spaceId, namespace, rule } = alertExecutorOptions;
   let group: string | null = 'default';
-  let subgroup: string | null = null;
-  const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy, ...rule };
+  const alertInfo = { spaceId, namespace, ...rule };
 
   if (params.groupsToScheduleActionsInSeries) {
     const index = state.groupInSeriesIndex || 0;
-    const [scheduledGroup, scheduledSubgroup] = (
-      params.groupsToScheduleActionsInSeries[index] ?? ''
-    ).split(':');
+    const [scheduledGroup] = (params.groupsToScheduleActionsInSeries[index] ?? '').split(':');
 
     group = scheduledGroup;
-    subgroup = scheduledSubgroup;
   }
 
   if (group) {
     const instance = services.alertFactory.create('1').replaceState({ instanceStateValue: true });
 
-    if (subgroup) {
-      instance.scheduleActionsWithSubGroup(group, subgroup, {
-        instanceContextValue: true,
-      });
-    } else {
-      instance.scheduleActions(group, {
-        instanceContextValue: true,
-      });
-    }
+    instance.scheduleActions(group, {
+      instanceContextValue: true,
+    });
   }
 
   await services.scopedClusterClient.asCurrentUser.index({
@@ -269,6 +250,60 @@ function getFailingAlertType() {
         },
       });
       throw new Error('Failed to execute alert type');
+    },
+  };
+  return result;
+}
+
+function getExceedsAlertLimitRuleType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    getsLimit: schema.boolean(),
+    reportsLimitReached: schema.boolean(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
+    id: 'test.exceedsAlertLimit',
+    name: 'Test: ExceedsAlertLimit',
+    validate: {
+      params: paramsSchema,
+    },
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor({ services, params, state }) {
+      let limit: number | null = null;
+      if (params.getsLimit) {
+        limit = services.alertFactory.alertLimit.getValue();
+      }
+
+      const alertsToCreate = limit ? limit : 25;
+
+      range(alertsToCreate)
+        .map(() => uuid.v4())
+        .forEach((id: string) => {
+          services.alertFactory.create(id).scheduleActions('default');
+        });
+
+      if (params.reportsLimitReached) {
+        services.alertFactory.alertLimit.setLimitReached(true);
+      }
+
+      // Index something
+      await services.scopedClusterClient.asCurrentUser.index({
+        index: params.index,
+        refresh: 'wait_for',
+        body: {
+          numAlerts: alertsToCreate,
+        },
+      });
     },
   };
   return result;
@@ -451,9 +486,7 @@ function getPatternFiringAlertType() {
             deep: DeepContextVariables,
           });
         } else if (typeof scheduleByPattern === 'string') {
-          services.alertFactory
-            .create(instanceId)
-            .scheduleActionsWithSubGroup('default', scheduleByPattern);
+          services.alertFactory.create(instanceId).scheduleActions('default', scheduleByPattern);
         }
       }
 
@@ -608,9 +641,80 @@ function getCancellableRuleType() {
   return result;
 }
 
+function getAlwaysFiringAlertAsDataRuleType(
+  logger: Logger,
+  { ruleRegistry }: Pick<FixtureSetupDeps, 'ruleRegistry'>
+) {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+  });
+
+  const ruleDataClient = ruleRegistry.ruleDataService.initializeIndex({
+    feature: AlertConsumers.OBSERVABILITY,
+    registrationContext: 'observability.test.alerts',
+    dataset: ruleRegistry.dataset.alerts,
+    componentTemplateRefs: [],
+    componentTemplates: [
+      {
+        name: 'mappings',
+      },
+    ],
+  });
+
+  const createLifecycleRuleType = ruleRegistry.createLifecycleRuleTypeFactory({
+    logger,
+    ruleDataClient,
+  });
+
+  return createLifecycleRuleType({
+    id: 'test.always-firing-alert-as-data',
+    name: 'Test: Always Firing Alert As Data',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    validate: {
+      params: paramsSchema,
+    },
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor(ruleExecutorOptions) {
+      const { services, params, state, spaceId, namespace, rule } = ruleExecutorOptions;
+      const ruleInfo = { spaceId, namespace, ...rule };
+
+      services
+        .alertWithLifecycle({
+          id: '1',
+          fields: {},
+        })
+        .scheduleActions('default');
+
+      services
+        .alertWithLifecycle({
+          id: '2',
+          fields: {},
+        })
+        .scheduleActions('default');
+
+      await services.scopedClusterClient.asCurrentUser.index({
+        index: params.index,
+        refresh: 'wait_for',
+        body: {
+          state,
+          params,
+          reference: params.reference,
+          source: 'rule:test.always-firing-alert-as-data',
+          ruleInfo,
+        },
+      });
+    },
+  });
+}
+
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
-  { alerting }: Pick<FixtureSetupDeps, 'alerting'>
+  { alerting, ruleRegistry }: Pick<FixtureSetupDeps, 'alerting' | 'ruleRegistry'>,
+  logger: Logger
 ) {
   const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.noop',
@@ -786,4 +890,6 @@ export function defineAlertTypes(
   alerting.registerType(getLongRunningPatternRuleType(false));
   alerting.registerType(getCancellableRuleType());
   alerting.registerType(getPatternSuccessOrFailureAlertType());
+  alerting.registerType(getExceedsAlertLimitRuleType());
+  alerting.registerType(getAlwaysFiringAlertAsDataRuleType(logger, { ruleRegistry }));
 }

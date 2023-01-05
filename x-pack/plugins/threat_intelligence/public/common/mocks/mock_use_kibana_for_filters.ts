@@ -7,7 +7,7 @@
 
 import { Filter } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
-import * as hook from '../../hooks/use_kibana';
+import * as hook from '../../hooks';
 
 jest.mock('../../hooks/use_kibana');
 
@@ -42,7 +42,6 @@ export const mockUseKibanaForFilters = ({
         },
       },
       dataViews: { getFieldsForWildcard },
-      uiSettings: { get: () => ['mock-index'] },
     },
   } as any);
 

@@ -45,6 +45,7 @@ export const postCaseReq: CasePostRequest = {
     syncAlerts: true,
   },
   owner: 'securitySolutionFixture',
+  assignees: [],
 };
 
 /**
@@ -69,6 +70,14 @@ export const postCommentAlertReq: CommentRequestAlertType = {
   owner: 'securitySolutionFixture',
 };
 
+export const postCommentAlertMultipleIdsReq: CommentRequestAlertType = {
+  alertId: ['test-id-1', 'test-id-2'],
+  index: ['test-index', 'test-index-2'],
+  rule: { id: 'test-rule-id', name: 'test-index-id' },
+  type: CommentType.alert,
+  owner: 'securitySolutionFixture',
+};
+
 export const postCommentActionsReq: CommentRequestActionsType = {
   comment: 'comment text',
   actions: {
@@ -79,6 +88,21 @@ export const postCommentActionsReq: CommentRequestActionsType = {
       },
     ],
     type: 'isolate',
+  },
+  type: CommentType.actions,
+  owner: 'securitySolutionFixture',
+};
+
+export const postCommentActionsReleaseReq: CommentRequestActionsType = {
+  comment: 'comment text',
+  actions: {
+    targets: [
+      {
+        hostname: 'host-name',
+        endpointId: 'endpoint-id',
+      },
+    ],
+    type: 'unisolate',
   },
   type: CommentType.actions,
   owner: 'securitySolutionFixture',

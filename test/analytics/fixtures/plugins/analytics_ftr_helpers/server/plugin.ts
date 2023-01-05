@@ -48,6 +48,21 @@ export class AnalyticsFTRHelpers implements Plugin {
             eventTypes: schema.arrayOf(schema.string()),
             withTimeoutMs: schema.maybe(schema.number()),
             fromTimestamp: schema.maybe(schema.string()),
+            filters: schema.maybe(
+              schema.recordOf(
+                schema.string(),
+                schema.recordOf(
+                  schema.oneOf([
+                    schema.literal('eq'),
+                    schema.literal('gte'),
+                    schema.literal('gt'),
+                    schema.literal('lte'),
+                    schema.literal('lt'),
+                  ]),
+                  schema.any()
+                )
+              )
+            ),
           }),
         },
       },

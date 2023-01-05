@@ -8,7 +8,7 @@
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
-import type { DashboardSavedObject } from '@kbn/dashboard-plugin/public';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { useDashboardService } from '../../services/dashboard_service';
 import { useMlKibana } from '../../contexts/kibana';
 
@@ -16,7 +16,7 @@ export interface DashboardItem {
   id: string;
   title: string;
   description: string | undefined;
-  attributes: DashboardSavedObject;
+  attributes: DashboardAttributes;
 }
 
 export type EuiTableProps = EuiInMemoryTableProps<DashboardItem>;
@@ -35,6 +35,7 @@ export const useDashboardTable = () => {
     return () => {
       fetchDashboards.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const search: EuiTableProps['search'] = useMemo(() => {
@@ -48,10 +49,12 @@ export const useDashboardTable = () => {
         'data-test-subj': 'mlDashboardsSearchBox',
       },
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [dashboardItems, setDashboardItems] = useState<DashboardItem[]>([]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchDashboards = useCallback(
     debounce(async (query?: string) => {
       try {

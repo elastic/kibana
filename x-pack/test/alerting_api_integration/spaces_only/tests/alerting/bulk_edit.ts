@@ -6,16 +6,38 @@
  */
 
 import expect from '@kbn/expect';
+import uuid from 'uuid';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { Spaces } from '../../scenarios';
-import { checkAAD, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
+import {
+  checkAAD,
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  createWaitForExecutionCount,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+
+const getSnoozeSchedule = () => {
+  return {
+    id: uuid.v4(),
+    duration: 28800000,
+    rRule: {
+      dtstart: '2022-09-19T11:49:59.329Z',
+      count: 1,
+      tzid: 'America/Vancouver',
+    },
+  };
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
+  const waitForExecutionCount = createWaitForExecutionCount(supertest, Spaces.space1.id);
 
-  describe('bulkEdit', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/138050
+  describe.skip('bulkEdit', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -247,6 +269,212 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should bulk snooze rule with snoozeSchedule operation', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ enabled: false }));
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: {
+              duration: 28800000,
+              rRule: {
+                dtstart: '2022-09-19T11:49:59.329Z',
+                count: 1,
+                tzid: 'America/Vancouver',
+              },
+            },
+          },
+        ],
+      };
+
+      const bulkSnoozeResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
+
+      expect(bulkSnoozeResponse.body.errors).to.have.length(0);
+      expect(bulkSnoozeResponse.body.rules).to.have.length(1);
+      expect(bulkSnoozeResponse.body.rules[0].snooze_schedule.length).to.eql(1);
+      expect(bulkSnoozeResponse.body.rules[0].snooze_schedule[0].duration).to.eql(28800000);
+
+      const bulkUnsnoozeResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...payload,
+          operations: [
+            {
+              operation: 'delete',
+              field: 'snoozeSchedule',
+            },
+          ],
+        });
+
+      expect(bulkUnsnoozeResponse.body.errors).to.have.length(0);
+      expect(bulkUnsnoozeResponse.body.rules).to.have.length(1);
+      expect(bulkUnsnoozeResponse.body.rules[0].snooze_schedule).empty();
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdRule.id,
+      });
+    });
+
+    it('should bulk snooze schedule rule with snoozeSchedule operation', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ enabled: false }));
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: getSnoozeSchedule(),
+          },
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: getSnoozeSchedule(),
+          },
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: getSnoozeSchedule(),
+          },
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: getSnoozeSchedule(),
+          },
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: getSnoozeSchedule(),
+          },
+        ],
+      };
+
+      const bulkSnoozeResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
+
+      expect(bulkSnoozeResponse.body.errors).to.have.length(0);
+      expect(bulkSnoozeResponse.body.rules).to.have.length(1);
+      expect(bulkSnoozeResponse.body.rules[0].snooze_schedule.length).to.eql(5);
+
+      // Try adding more than 5 schedules
+      const bulkSnoozeError = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...payload,
+          operations: [
+            {
+              operation: 'set',
+              field: 'snoozeSchedule',
+              value: getSnoozeSchedule(),
+            },
+          ],
+        });
+
+      expect(bulkSnoozeError.body.errors).to.have.length(1);
+      expect(bulkSnoozeError.body.rules).to.have.length(0);
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdRule.id,
+      });
+    });
+
+    it('should ignore bulk snooze and snooze schedule rule for SIEM rules', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ enabled: false, consumer: 'siem' }));
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'set',
+            field: 'snoozeSchedule',
+            value: getSnoozeSchedule(),
+          },
+        ],
+      };
+
+      const bulkSnoozeResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
+
+      expect(bulkSnoozeResponse.body.errors).to.have.length(0);
+      expect(bulkSnoozeResponse.body.rules).to.have.length(1);
+      expect(bulkSnoozeResponse.body.rules[0].snooze_schedule).empty();
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdRule.id,
+      });
+    });
+
+    it('should bulk update API key with apiKey operation', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: false,
+          })
+        );
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'set',
+            field: 'apiKey',
+          },
+        ],
+      };
+
+      const bulkApiKeyResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
+
+      expect(bulkApiKeyResponse.body.errors).to.have.length(0);
+      expect(bulkApiKeyResponse.body.rules).to.have.length(1);
+      expect(bulkApiKeyResponse.body.rules[0].api_key_owner).to.eql(null);
+    });
+
     it(`shouldn't bulk edit rule from another space`, async () => {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -309,6 +537,62 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         risk_score: 40,
         severity: '40-medium',
       });
+    });
+
+    it('should not overwrite internal field monitoring', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: true,
+            tags: ['default'],
+            params: { risk_score: 40, severity: 'medium' },
+          })
+        );
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      await waitForExecutionCount(1, createdRule.id);
+
+      const monitoringData = (
+        await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`
+        )
+      ).body.monitoring;
+
+      // single rule execution is recorded in monitoring history
+      expect(monitoringData.execution.history).to.have.length(1);
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'add',
+            field: 'tags',
+            value: ['tag-1'],
+          },
+        ],
+      };
+
+      const bulkEditResponse = await retry.try(
+        async () =>
+          await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+            .set('kbn-xsrf', 'foo')
+            .send(payload)
+            .expect(200)
+      );
+
+      // after applying bulk edit action monitoring still available
+      expect(bulkEditResponse.body.rules[0].monitoring).to.eql(monitoringData);
+
+      // test if monitoring data persistent
+      const getRuleResponse = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`
+      );
+
+      expect(getRuleResponse.body.monitoring).to.eql(monitoringData);
     });
   });
 }

@@ -24,6 +24,7 @@ export function mockAuthenticatedUser(user: MockAuthenticatedUserProps = {}) {
     authentication_provider: { type: 'basic', name: 'basic1' },
     authentication_type: 'realm',
     elastic_cloud_user: false,
+    profile_uid: 'uid',
     metadata: { _reserved: false },
     ...user,
   };

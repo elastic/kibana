@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const toasts = getService('toasts');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'dashboard']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -23,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover data grid supports copy to clipboard', function describeIndexTests() {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');

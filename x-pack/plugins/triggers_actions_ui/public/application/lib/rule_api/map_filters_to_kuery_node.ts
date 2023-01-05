@@ -12,6 +12,7 @@ export const mapFiltersToKueryNode = ({
   typesFilter,
   actionTypesFilter,
   ruleExecutionStatusesFilter,
+  ruleLastRunOutcomesFilter,
   ruleStatusesFilter,
   tagsFilter,
   searchText,
@@ -20,6 +21,7 @@ export const mapFiltersToKueryNode = ({
   actionTypesFilter?: string[];
   tagsFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
+  ruleLastRunOutcomesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
   searchText?: string;
 }): KueryNode | null => {
@@ -51,6 +53,16 @@ export const mapFiltersToKueryNode = ({
     );
   }
 
+  if (ruleLastRunOutcomesFilter && ruleLastRunOutcomesFilter.length) {
+    filterKueryNode.push(
+      nodeBuilder.or(
+        ruleLastRunOutcomesFilter.map((resf) =>
+          nodeBuilder.is('alert.attributes.lastRun.outcome', resf)
+        )
+      )
+    );
+  }
+
   if (ruleStatusesFilter && ruleStatusesFilter.length) {
     const snoozedFilter = nodeBuilder.or([
       fromKueryExpression('alert.attributes.muteAll: true'),
@@ -72,7 +84,8 @@ export const mapFiltersToKueryNode = ({
     if (ruleStatusesFilter.includes('snoozed')) {
       ruleStatusesFilterKueryNode.push(snoozedFilter);
     }
-    filterKueryNode.push(nodeBuilder.and(ruleStatusesFilterKueryNode));
+
+    filterKueryNode.push(nodeBuilder.or(ruleStatusesFilterKueryNode));
   }
 
   if (tagsFilter && tagsFilter.length) {
@@ -82,10 +95,14 @@ export const mapFiltersToKueryNode = ({
   }
 
   if (searchText && searchText !== '') {
+    // if the searchText includes quotes, treat it as an exact match query
+    const value = searchText.match(/(['"`])(.*?)\1/g)
+      ? nodeTypes.literal.buildNode(searchText, true)
+      : nodeTypes.wildcard.buildNode(searchText);
     filterKueryNode.push(
       nodeBuilder.or([
-        nodeBuilder.is('alert.attributes.name', nodeTypes.wildcard.buildNode(searchText)),
-        nodeBuilder.is('alert.attributes.tags', nodeTypes.wildcard.buildNode(searchText)),
+        nodeBuilder.is('alert.attributes.name', value),
+        nodeBuilder.is('alert.attributes.tags', value),
       ])
     );
   }

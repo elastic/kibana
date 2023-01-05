@@ -55,6 +55,7 @@ import {
   getExtendedRoleDeprecationNotice,
   prepareRoleClone,
 } from '../../../../common/model';
+import { useCapabilities } from '../../../components/use_capabilities';
 import type { UserAPIClient } from '../../users';
 import type { IndicesAPIClient } from '../indices_api_client';
 import { KibanaPrivileges } from '../model';
@@ -124,7 +125,6 @@ function useIndexPatternsTitles(
         }
 
         fatalErrors.add(err);
-        throw err;
       })
       .then((titles) => setIndexPatternsTitles(titles.filter(Boolean)));
   }, [fatalErrors, dataViews, notifications]);
@@ -141,7 +141,7 @@ function usePrivileges(
   );
   useEffect(() => {
     Promise.all([
-      privilegesAPIClient.getAll({ includeActions: true }),
+      privilegesAPIClient.getAll({ includeActions: true, respectLicenseLevel: false }),
       privilegesAPIClient.getBuiltIn(),
     ]).then(
       ([kibanaPrivileges, builtInESPrivileges]) =>
@@ -297,6 +297,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     throw new Error('The dataViews plugin is required for this page, but it is not available');
   }
   const backToRoleList = useCallback(() => history.push('/'), [history]);
+  const hasReadOnlyPrivileges = !useCapabilities('roles').save;
 
   // We should keep the same mutable instance of Validator for every re-render since we'll
   // eventually enable validation after the first time user tries to save a role.
@@ -319,12 +320,19 @@ export const EditRolePage: FunctionComponent<Props> = ({
     roleName
   );
 
+  const isEditingExistingRole = !!roleName && action === 'edit';
+
+  useEffect(() => {
+    if (hasReadOnlyPrivileges && !isEditingExistingRole) {
+      backToRoleList();
+    }
+  }, [hasReadOnlyPrivileges, isEditingExistingRole]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!role || !runAsUsers || !indexPatternsTitles || !privileges || !spaces || !features) {
     return null;
   }
 
-  const isEditingExistingRole = !!roleName && action === 'edit';
-  const isRoleReadOnly = checkIfRoleReadOnly(role);
+  const isRoleReadOnly = hasReadOnlyPrivileges || checkIfRoleReadOnly(role);
   const isRoleReserved = checkIfRoleReserved(role);
   const isDeprecatedRole = checkIfRoleDeprecated(role);
 
@@ -335,7 +343,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     const props: HTMLProps<HTMLDivElement> = {
       tabIndex: 0,
     };
-    if (isRoleReserved) {
+    if (isRoleReserved || isRoleReadOnly) {
       titleText = (
         <FormattedMessage
           id="xpack.security.management.editRole.viewingRoleTitle"
@@ -410,7 +418,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
             onChange={onNameChange}
             onBlur={onNameBlur}
             data-test-subj={'roleFormNameInput'}
-            readOnly={isRoleReserved || isEditingExistingRole}
+            disabled={isRoleReserved || isEditingExistingRole || isRoleReadOnly}
             isInvalid={creatingRoleAlreadyExists}
           />
         </EuiFormRow>
@@ -491,10 +499,14 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getReturnToRoleListButton = () => {
     return (
-      <EuiButton {...reactRouterNavigate(history, '')} data-test-subj="roleFormReturnButton">
+      <EuiButton
+        {...reactRouterNavigate(history, '')}
+        iconType="arrowLeft"
+        data-test-subj="roleFormReturnButton"
+      >
         <FormattedMessage
           id="xpack.security.management.editRole.returnToRoleListButtonLabel"
-          defaultMessage="Return to role list"
+          defaultMessage="Back to roles"
         />
       </EuiButton>
     );

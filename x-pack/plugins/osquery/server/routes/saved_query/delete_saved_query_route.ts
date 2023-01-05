@@ -27,7 +27,10 @@ export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       const coreContext = await context.core;
       const savedObjectsClient = coreContext.savedObjects.client;
 
-      const isPrebuilt = await isSavedQueryPrebuilt(osqueryContext, request.params.id);
+      const isPrebuilt = await isSavedQueryPrebuilt(
+        osqueryContext.service.getPackageService()?.asInternalUser,
+        request.params.id
+      );
       if (isPrebuilt) {
         return response.conflict({ body: `Elastic prebuilt Saved query cannot be deleted.` });
       }

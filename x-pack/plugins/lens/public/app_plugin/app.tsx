@@ -6,11 +6,12 @@
  */
 
 import './app.scss';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
@@ -25,11 +26,14 @@ import {
   LensAppState,
   DispatchSetState,
   selectSavedObjectFormat,
+  updateIndexPatterns,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';
+import { IndexPatternServiceAPI, createIndexPatternService } from '../data_views_service/service';
+import { replaceIndexpattern } from '../state_management/lens_slice';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -59,6 +63,9 @@ export function App({
 
   const {
     data,
+    dataViews,
+    uiActions,
+    uiSettings,
     chrome,
     inspector: lensInspector,
     application,
@@ -66,10 +73,13 @@ export function App({
     getOriginatingAppName,
     spaces,
     http,
+    notifications,
     executionContext,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
   } = lensAppServices;
+
+  const saveAndExit = useRef<() => void>();
 
   const dispatch = useLensDispatch();
   const dispatchSetState: DispatchSetState = useCallback(
@@ -107,6 +117,7 @@ export function App({
     undefined
   );
   const [isGoBackToVizEditorModalVisible, setIsGoBackToVizEditorModalVisible] = useState(false);
+  const [shouldCloseAndSaveTextBasedQuery, setShouldCloseAndSaveTextBasedQuery] = useState(false);
   const savedObjectId = (initialInput as LensByReferenceInput)?.savedObjectId;
 
   useEffect(() => {
@@ -239,6 +250,19 @@ export function App({
         ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit visualization' })
         : persistedDoc.title;
     }
+    if (
+      !persistedDoc?.title &&
+      initialContext &&
+      'isEmbeddable' in initialContext &&
+      initialContext.isEmbeddable
+    ) {
+      currentDocTitle = i18n.translate('xpack.lens.breadcrumbsEditInLensFromDashboard', {
+        defaultMessage: 'Converting {title} visualization',
+        values: {
+          title: initialContext.title ? `"${initialContext.title}"` : initialContext.visTypeTitle,
+        },
+      });
+    }
     breadcrumbs.push({ text: currentDocTitle });
     chrome.setBreadcrumbs(breadcrumbs);
   }, [
@@ -253,6 +277,12 @@ export function App({
     initialContext,
   ]);
 
+  const switchDatasource = useCallback(() => {
+    if (saveAndExit && saveAndExit.current) {
+      saveAndExit.current();
+    }
+  }, []);
+
   const runSave = useCallback(
     (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
       dispatch(applyChanges());
@@ -266,7 +296,9 @@ export function App({
           persistedDoc,
           onAppLeave,
           redirectTo,
+          switchDatasource,
           originatingApp: incomingState?.originatingApp,
+          textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
           ...lensAppServices,
         },
         saveProps,
@@ -276,6 +308,7 @@ export function App({
           if (newState) {
             dispatchSetState(newState);
             setIsSaveModalVisible(false);
+            setShouldCloseAndSaveTextBasedQuery(false);
           }
         },
         () => {
@@ -285,19 +318,20 @@ export function App({
       );
     },
     [
-      incomingState?.originatingApp,
+      dispatch,
       lastKnownDoc,
-      persistedDoc,
       getIsByValueMode,
       savedObjectsTagging,
       initialInput,
       redirectToOrigin,
+      persistedDoc,
       onAppLeave,
       redirectTo,
+      switchDatasource,
+      incomingState?.originatingApp,
+      shouldCloseAndSaveTextBasedQuery,
       lensAppServices,
       dispatchSetState,
-      dispatch,
-      setIsSaveModalVisible,
     ]
   );
 
@@ -315,13 +349,13 @@ export function App({
       'vizEditorOriginatingAppUrl' in initialContext &&
       initialContext.vizEditorOriginatingAppUrl
     ) {
-      const initialDocFromContextHasChanged = !isLensEqual(
+      const [initialDocFromContextUnchanged, currentDocHasBeenSavedInLens] = [
         initialDocFromContext,
-        lastKnownDoc,
-        data.query.filterManager.inject,
-        datasourceMap
+        persistedDoc,
+      ].map((refDoc) =>
+        isLensEqual(refDoc, lastKnownDoc, data.query.filterManager.inject, datasourceMap)
       );
-      if (!initialDocFromContextHasChanged) {
+      if (initialDocFromContextUnchanged || currentDocHasBeenSavedInLens) {
         onAppLeave((actions) => {
           return actions.default();
         });
@@ -338,6 +372,7 @@ export function App({
     initialDocFromContext,
     lastKnownDoc,
     onAppLeave,
+    persistedDoc,
   ]);
 
   const navigateToVizEditor = useCallback(() => {
@@ -360,9 +395,54 @@ export function App({
     );
   }, [initialContext]);
 
+  const indexPatternService = useMemo(
+    () =>
+      createIndexPatternService({
+        dataViews,
+        uiActions,
+        core: { http, notifications, uiSettings },
+        data,
+        contextDataViewSpec: (initialContext as VisualizeFieldContext | undefined)?.dataViewSpec,
+        updateIndexPatterns: (newIndexPatternsState, options) => {
+          dispatch(updateIndexPatterns(newIndexPatternsState));
+          if (options?.applyImmediately) {
+            dispatch(applyChanges());
+          }
+        },
+        replaceIndexPattern: (newIndexPattern, oldId, options) => {
+          dispatch(replaceIndexpattern({ newIndexPattern, oldId }));
+          if (options?.applyImmediately) {
+            dispatch(applyChanges());
+          }
+        },
+      }),
+    [dataViews, uiActions, http, notifications, uiSettings, data, initialContext, dispatch]
+  );
+
+  const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel }) => {
+    setIsSaveModalVisible(true);
+    setShouldCloseAndSaveTextBasedQuery(true);
+    saveAndExit.current = () => {
+      onSave();
+    };
+  }, []);
+
+  const returnToOriginSwitchLabelForContext =
+    initialContext &&
+    'isEmbeddable' in initialContext &&
+    initialContext.isEmbeddable &&
+    !persistedDoc
+      ? i18n.translate('xpack.lens.app.replacePanel', {
+          defaultMessage: 'Replace panel on {originatingApp}',
+          values: {
+            originatingApp: initialContext?.originatingApp,
+          },
+        })
+      : undefined;
+
   return (
     <>
-      <div className="lnsApp" data-test-subj="lnsApp">
+      <div className="lnsApp" data-test-subj="lnsApp" role="main">
         <LensTopNavMenu
           initialInput={initialInput}
           redirectToOrigin={redirectToOrigin}
@@ -373,14 +453,18 @@ export function App({
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
           datasourceMap={datasourceMap}
+          visualizationMap={visualizationMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
+          currentDoc={currentDoc}
           goBackToOriginatingApp={goBackToOriginatingApp}
           contextOriginatingApp={contextOriginatingApp}
           initialContextIsEmbedded={initialContextIsEmbedded}
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
           theme$={theme$}
+          indexPatternService={indexPatternService}
+          onTextBasedSavedAndExit={onTextBasedSavedAndExit}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
@@ -388,13 +472,18 @@ export function App({
             editorFrame={editorFrame}
             showNoDataPopover={showNoDataPopover}
             lensInspector={lensInspector}
+            indexPatternService={indexPatternService}
           />
         )}
       </div>
       {isSaveModalVisible && (
         <SaveModalContainer
           lensServices={lensAppServices}
-          originatingApp={isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+          originatingApp={
+            isLinkedToOriginatingApp
+              ? incomingState?.originatingApp ?? initialContext?.originatingApp
+              : undefined
+          }
           isSaveable={isSaveable}
           runSave={runSave}
           onClose={() => {
@@ -407,13 +496,15 @@ export function App({
           initialInput={initialInput}
           redirectTo={redirectTo}
           redirectToOrigin={redirectToOrigin}
+          initialContext={initialContext}
           returnToOriginSwitchLabel={
-            getIsByValueMode() && initialInput
+            returnToOriginSwitchLabelForContext ??
+            (getIsByValueMode() && initialInput
               ? i18n.translate('xpack.lens.app.updatePanel', {
                   defaultMessage: 'Update panel on {originatingAppName}',
                   values: { originatingAppName: getOriginatingAppName() },
                 })
-              : undefined
+              : undefined)
           }
         />
       )}
@@ -433,6 +524,7 @@ export function App({
           })}
           buttonColor="danger"
           defaultFocusedButton="confirm"
+          data-test-subj="lnsApp_discardChangesModalOrigin"
         >
           {i18n.translate('xpack.lens.app.goBackModalMessage', {
             defaultMessage:
@@ -449,13 +541,19 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
   showNoDataPopover,
   lensInspector,
+  indexPatternService,
 }: {
   editorFrame: EditorFrameInstance;
   lensInspector: LensInspector;
   showNoDataPopover: () => void;
+  indexPatternService: IndexPatternServiceAPI;
 }) {
   const { EditorFrameContainer } = editorFrame;
   return (
-    <EditorFrameContainer showNoDataPopover={showNoDataPopover} lensInspector={lensInspector} />
+    <EditorFrameContainer
+      showNoDataPopover={showNoDataPopover}
+      lensInspector={lensInspector}
+      indexPatternService={indexPatternService}
+    />
   );
 });

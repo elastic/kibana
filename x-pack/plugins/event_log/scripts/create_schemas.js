@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { set } = require('@elastic/safer-lodash-set');
+const { set } = require('@kbn/safer-lodash-set');
 const lodash = require('lodash');
 
 const LineWriter = require('./lib/line_writer');
@@ -158,6 +158,11 @@ function generateSchemaLines(lineWriter, prop, mappings) {
 
   if (mappings.type === 'version') {
     lineWriter.addLine(`${propKey}: ecsVersion(),`);
+    return;
+  }
+
+  if (mappings.type === 'boolean') {
+    lineWriter.addLine(`${propKey}: ecsBoolean(),`);
     return;
   }
 
@@ -322,6 +327,10 @@ function ecsStringOrNumber() {
 
 function ecsDate() {
   return schema.maybe(schema.string({ validate: validateDate }));
+}
+
+function ecsBoolean() {
+  return schema.maybe(schema.boolean());
 }
 
 const ISO_DATE_PATTERN = /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/;

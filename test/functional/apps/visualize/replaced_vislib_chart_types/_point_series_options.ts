@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
   ]);
   const inspector = getService('inspector');
-  const xyChartSelector = 'visTypeXyChart';
+  const xyChartSelector = 'xyVisChart';
 
   async function initChart() {
     log.debug('navigateToApp visualize');

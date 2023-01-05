@@ -7,17 +7,18 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { StatusPopoverButton } from './status_popover_button';
 import { TestProviders } from '../../../mock';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 const props = {
   eventId: 'testid',
-  contextId: 'detections-page',
+  contextId: 'alerts-page',
   enrichedFieldInfo: {
-    contextId: 'detections-page',
+    contextId: 'alerts-page',
     eventId: 'testid',
     fieldType: 'string',
-    timelineId: 'detections-page',
+    scopeId: 'alerts-page',
     data: {
       field: 'kibana.alert.workflow_status',
       format: 'string',
@@ -45,7 +46,7 @@ const props = {
     },
   },
   indexName: '.internal.alerts-security.alerts-default-000001',
-  timelineId: 'detections-page',
+  scopeId: 'alerts-page',
   handleOnEventClosed: jest.fn(),
 };
 
@@ -86,6 +87,7 @@ describe('StatusPopoverButton', () => {
     );
 
     getByText('open').click();
+    await waitForEuiPopoverOpen();
 
     expect(container.querySelector('.euiBadge__icon')).not.toBeNull();
     getByText('Mark as acknowledged');

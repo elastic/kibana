@@ -8,9 +8,12 @@
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
+
 import { RouteDependencies } from '../../../types';
-// @ts-ignore
-import { WatchStatus } from '../../../models/watch_status';
+import {
+  buildServerWatchStatusModel,
+  buildClientWatchStatusModel,
+} from '../../../models/watch_status_model';
 
 function activateWatch(dataClient: IScopedClusterClient, watchId: string) {
   return dataClient.asCurrentUser.watcher.activateWatch({
@@ -46,10 +49,10 @@ export function registerActivateRoute({
           watchStatusJson,
         };
 
-        const watchStatus = WatchStatus.fromUpstreamJson(json);
+        const watchStatus = buildServerWatchStatusModel(json);
         return response.ok({
           body: {
-            watchStatus: watchStatus.downstreamJson,
+            watchStatus: buildClientWatchStatusModel(watchStatus),
           },
         });
       } catch (e) {

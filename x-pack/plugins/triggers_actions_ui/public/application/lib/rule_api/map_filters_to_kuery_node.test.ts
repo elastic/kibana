@@ -57,6 +57,30 @@ describe('mapFiltersToKueryNode', () => {
     );
   });
 
+  test('should handle ruleLastRunOutcomesFilter', () => {
+    expect(
+      toElasticsearchQuery(
+        mapFiltersToKueryNode({
+          ruleLastRunOutcomesFilter: ['succeeded'],
+        }) as KueryNode
+      )
+    ).toEqual(
+      toElasticsearchQuery(fromKueryExpression('alert.attributes.lastRun.outcome: succeeded'))
+    );
+
+    expect(
+      toElasticsearchQuery(
+        mapFiltersToKueryNode({
+          ruleLastRunOutcomesFilter: ['succeeded', 'failed', 'warning'],
+        }) as KueryNode
+      )
+    ).toEqual(
+      toElasticsearchQuery(
+        fromKueryExpression('alert.attributes.lastRun.outcome: (succeeded or failed or warning)')
+      )
+    );
+  });
+
   test('should handle ruleStatusesFilter', () => {
     expect(
       toElasticsearchQuery(
@@ -97,7 +121,7 @@ describe('mapFiltersToKueryNode', () => {
     ).toEqual(
       toElasticsearchQuery(
         fromKueryExpression(
-          `alert.attributes.enabled: true and
+          `alert.attributes.enabled: true or
           (alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })`
         )
       )
@@ -112,7 +136,7 @@ describe('mapFiltersToKueryNode', () => {
     ).toEqual(
       toElasticsearchQuery(
         fromKueryExpression(
-          `alert.attributes.enabled: false and
+          `alert.attributes.enabled: false or
           (alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })`
         )
       )
@@ -127,8 +151,8 @@ describe('mapFiltersToKueryNode', () => {
     ).toEqual(
       toElasticsearchQuery(
         fromKueryExpression(
-          `alert.attributes.enabled: true and
-          alert.attributes.enabled: false and
+          `alert.attributes.enabled: true or
+          alert.attributes.enabled: false or
           (alert.attributes.muteAll: true OR alert.attributes.snoozeSchedule: { duration > 0 })`
         )
       )
@@ -211,6 +235,48 @@ describe('mapFiltersToKueryNode', () => {
     `);
   });
 
+  test('should handle exact match search Text on rule name and tag', () => {
+    expect(
+      toElasticsearchQuery(
+        mapFiltersToKueryNode({
+          searchText: '"fo"',
+        }) as KueryNode
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "alert.attributes.name": "\\"fo\\"",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "alert.attributes.tags": "\\"fo\\"",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
   test('should handle typesFilter, actionTypesFilter, ruleExecutionStatusesFilter, and tagsFilter', () => {
     expect(
       toElasticsearchQuery(
@@ -218,6 +284,7 @@ describe('mapFiltersToKueryNode', () => {
           typesFilter: ['type', 'filter'],
           actionTypesFilter: ['action', 'types', 'filter'],
           ruleExecutionStatusesFilter: ['alert', 'statuses', 'filter'],
+          ruleLastRunOutcomesFilter: ['warning', 'failed'],
           tagsFilter: ['a', 'b', 'c'],
         }) as KueryNode
       )
@@ -229,6 +296,7 @@ describe('mapFiltersToKueryNode', () => {
         alert.attributes.actions:{ actionTypeId:types } OR
         alert.attributes.actions:{ actionTypeId:filter }) and
       alert.attributes.executionStatus.status:(alert or statuses or filter) and
+      alert.attributes.lastRun.outcome:(warning or failed) and
       alert.attributes.tags:(a or b or c)`
         )
       )

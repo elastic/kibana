@@ -12,7 +12,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { TimefilterContract } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -25,26 +25,29 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAiOpsKibana } from '../../kibana_context';
-import { setFullTimeRange } from './full_time_range_selector_service';
-import { AIOPS_FROZEN_TIER_PREFERENCE, useStorage } from '../../hooks/use_storage';
+import { useStorage } from '@kbn/ml-local-storage';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import {
+  type GetTimeFieldRangeResponse,
+  setFullTimeRange,
+} from './full_time_range_selector_service';
+import {
+  AIOPS_FROZEN_TIER_PREFERENCE,
+  FROZEN_TIER_PREFERENCE,
+  type AiOpsKey,
+  type AiOpsStorageMapped,
+  type FrozenTierPreference,
+} from '../../types/storage';
 
-interface Props {
+export interface FullTimeRangeSelectorProps {
   timefilter: TimefilterContract;
   dataView: DataView;
   disabled: boolean;
   query?: QueryDslQueryContainer;
-  callback?: (a: any) => void;
+  callback?: (a: GetTimeFieldRangeResponse) => void;
 }
 
-const FROZEN_TIER_PREFERENCE = {
-  EXCLUDE: 'exclude-frozen',
-  INCLUDE: 'include-frozen',
-} as const;
-
-type FrozenTierPreference = typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];
-
-export const FullTimeRangeSelector: FC<Props> = ({
+export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = ({
   timefilter,
   dataView,
   query,
@@ -52,16 +55,22 @@ export const FullTimeRangeSelector: FC<Props> = ({
   callback,
 }) => {
   const {
-    services: {
-      notifications: { toasts },
-    },
-  } = useAiOpsKibana();
+    http,
+    notifications: { toasts },
+  } = useAiopsAppContext();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   const setRange = useCallback(
     async (i: DataView, q?: QueryDslQueryContainer, excludeFrozenData?: boolean) => {
       try {
-        const fullTimeRange = await setFullTimeRange(timefilter, i, q, excludeFrozenData, toasts);
+        const fullTimeRange = await setFullTimeRange(
+          timefilter,
+          i,
+          toasts,
+          http,
+          q,
+          excludeFrozenData
+        );
         if (typeof callback === 'function') {
           callback(fullTimeRange);
         }
@@ -76,12 +85,15 @@ export const FullTimeRangeSelector: FC<Props> = ({
         );
       }
     },
-    [callback, timefilter, toasts]
+    [callback, http, timefilter, toasts]
   );
 
   const [isPopoverOpen, setPopover] = useState(false);
 
-  const [frozenDataPreference, setFrozenDataPreference] = useStorage<FrozenTierPreference>(
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    AiOpsKey,
+    AiOpsStorageMapped<typeof AIOPS_FROZEN_TIER_PREFERENCE>
+  >(
     AIOPS_FROZEN_TIER_PREFERENCE,
     // By default we will exclude frozen data tier
     FROZEN_TIER_PREFERENCE.EXCLUDE

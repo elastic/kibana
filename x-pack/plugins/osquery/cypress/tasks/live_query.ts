@@ -8,7 +8,7 @@
 import { LIVE_QUERY_EDITOR } from '../screens/live_query';
 
 export const DEFAULT_QUERY = 'select * from processes;';
-export const BIG_QUERY = 'select * from processes, users limit 200;';
+export const BIG_QUERY = 'select * from processes, users limit 110;';
 
 export const selectAllAgents = () => {
   cy.react('AgentsTable').find('input').should('not.be.disabled');
@@ -25,10 +25,23 @@ export const clearInputQuery = () =>
 
 export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);
 
-export const submitQuery = () => cy.contains('Submit').click();
+export const submitQuery = () => {
+  cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
+  cy.contains('Submit').click();
+};
 
-export const checkResults = () =>
-  cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+// sometimes the results get stuck in the tests, this is a workaround
+export const checkResults = () => {
+  cy.getBySel('osqueryResultsTable').then(($table) => {
+    if ($table.find('div .euiDataGridRow').length > 0) {
+      cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+    } else {
+      cy.getBySel('osquery-status-tab').click();
+      cy.getBySel('osquery-results-tab').click();
+      cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+    }
+  });
+};
 
 export const typeInECSFieldInput = (text: string) => cy.getBySel('ECS-field-input').type(text);
 export const typeInOsqueryFieldInput = (text: string) =>

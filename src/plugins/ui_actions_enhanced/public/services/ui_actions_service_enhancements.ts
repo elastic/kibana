@@ -110,6 +110,7 @@ export class UiActionsServiceEnhancements
     createConfig,
     isConfigValid,
     getDisplayName,
+    actionMenuItem,
     euiIcon,
     execute,
     getHref,
@@ -143,6 +144,17 @@ export class UiActionsServiceEnhancements
         type: factoryId,
         getIconType: () => euiIcon,
         getDisplayName: () => serializedAction.name,
+        MenuItem: actionMenuItem
+          ? () => {
+              const comp = actionMenuItem();
+              return {
+                render: (el, { context }) => {
+                  comp.render(el, { context, config: serializedAction });
+                },
+                unmount: comp.unmount,
+              };
+            }
+          : undefined,
         execute: async (context) => await execute(serializedAction.config, context),
         getHref: getHref ? async (context) => getHref(serializedAction.config, context) : undefined,
         isCompatible: isCompatible

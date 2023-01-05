@@ -71,12 +71,14 @@ export type LayerDescriptor = {
   style?: StyleDescriptor | null;
   query?: Query;
   includeInFitToBounds?: boolean;
+  parent?: string;
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR | LAYER_TYPE.BLENDED_VECTOR;
   joins?: JoinDescriptor[];
   style: VectorStyleDescriptor;
+  disableTooltips?: boolean;
 };
 
 export type HeatmapLayerDescriptor = LayerDescriptor & {
@@ -87,4 +89,11 @@ export type HeatmapLayerDescriptor = LayerDescriptor & {
 export type EMSVectorTileLayerDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.EMS_VECTOR_TILE;
   style: EMSVectorTileStyleDescriptor;
+};
+
+export type LayerGroupDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.LAYER_GROUP;
+  label: string;
+  sourceDescriptor: null;
+  visible: boolean;
 };

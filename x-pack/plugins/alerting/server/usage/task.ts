@@ -111,13 +111,46 @@ export function telemetryTaskRunner(
               dailyExecutionTimeoutCounts,
               dailyFailedAndUnrecognizedTasks,
             ]) => {
+              const hasErrors =
+                totalCountAggregations.hasErrors ||
+                totalInUse.hasErrors ||
+                dailyExecutionCounts.hasErrors ||
+                dailyExecutionTimeoutCounts.hasErrors ||
+                dailyFailedAndUnrecognizedTasks.hasErrors;
+
+              const errorMessages = [
+                totalCountAggregations.errorMessage,
+                totalInUse.errorMessage,
+                dailyExecutionCounts.errorMessage,
+                dailyExecutionTimeoutCounts.errorMessage,
+                dailyFailedAndUnrecognizedTasks.errorMessage,
+              ].filter((message) => message !== undefined);
+
               return {
                 state: {
+                  has_errors: hasErrors,
+                  ...(errorMessages.length > 0 && { error_messages: errorMessages }),
                   runs: (state.runs || 0) + 1,
-                  ...totalCountAggregations,
+                  count_total: totalCountAggregations.count_total,
+                  count_by_type: totalCountAggregations.count_by_type,
+                  throttle_time: totalCountAggregations.throttle_time,
+                  schedule_time: totalCountAggregations.schedule_time,
+                  throttle_time_number_s: totalCountAggregations.throttle_time_number_s,
+                  schedule_time_number_s: totalCountAggregations.schedule_time_number_s,
+                  connectors_per_alert: totalCountAggregations.connectors_per_alert,
                   count_active_by_type: totalInUse.countByType,
                   count_active_total: totalInUse.countTotal,
                   count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
+                  count_rules_by_execution_status:
+                    totalCountAggregations.count_rules_by_execution_status,
+                  count_rules_with_tags: totalCountAggregations.count_rules_with_tags,
+                  count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
+                  count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
+                  count_rules_muted: totalCountAggregations.count_rules_muted,
+                  count_rules_with_muted_alerts:
+                    totalCountAggregations.count_rules_with_muted_alerts,
+                  count_connector_types_by_consumers:
+                    totalCountAggregations.count_connector_types_by_consumers,
                   count_rules_namespaces: totalInUse.countNamespaces,
                   count_rules_executions_per_day: dailyExecutionCounts.countTotalRuleExecutions,
                   count_rules_executions_by_type_per_day:
@@ -128,6 +161,8 @@ export function telemetryTaskRunner(
                     dailyExecutionCounts.countFailedExecutionsByReason,
                   count_rules_executions_failured_by_reason_by_type_per_day:
                     dailyExecutionCounts.countFailedExecutionsByReasonByType,
+                  count_rules_by_execution_status_per_day:
+                    dailyExecutionCounts.countRulesByExecutionStatus,
                   count_rules_executions_timeouts_per_day:
                     dailyExecutionTimeoutCounts.countExecutionTimeouts,
                   count_rules_executions_timeouts_by_type_per_day:

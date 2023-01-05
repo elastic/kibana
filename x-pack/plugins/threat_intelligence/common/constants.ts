@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-export const API_ROUTE_SOURCES = '/internal/threat_intelligence/source';
+export const THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME = 'threatIntelligenceSearchStrategy';
 
-export const EMPTY_VALUE = '-';
+export const BARCHART_AGGREGATION_NAME = 'barchartAggregation';
 
-export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
-
-export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
-
-export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
+/**
+ * Used inside custom search strategy
+ */
+export enum FactoryQueryType {
+  IndicatorGrid = 'indicatorGrid',
+  Barchart = 'barchart',
+}

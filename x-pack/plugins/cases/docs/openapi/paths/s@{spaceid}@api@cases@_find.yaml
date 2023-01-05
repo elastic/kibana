@@ -7,9 +7,17 @@ get:
     feature privileges, depending on the owner of the cases you're seeking.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/parameters/space_id.yaml'
+    - name: assignees
+      in: query
+      description: Filters the returned cases by assignees. Valid values are `none` or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
     - name: defaultSearchOperator
       in: query
       description: The default operator to use for the simple_query_string.
@@ -132,16 +140,14 @@ get:
     '200':
       description: Indicates a successful call.
       content:
-         application/json; charset=utf-8:
+         application/json:
           schema:
             type: object
             properties:
               cases:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    $ref: '../components/schemas/case_response_properties.yaml'
+                  $ref: '../components/schemas/case_response_properties.yaml'
               count_closed_cases:
                 type: integer
               count_in_progress_cases:

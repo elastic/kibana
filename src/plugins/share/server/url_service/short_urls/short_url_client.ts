@@ -143,10 +143,27 @@ export class ServerShortUrlClient implements IShortUrlClient {
     const { storage } = this.dependencies;
     const record = await storage.getBySlug(slug);
     const data = this.injectReferences(record);
+    this.updateAccessFields(record);
 
     return {
       data,
     };
+  }
+
+  /**
+   * Access field updates are executed in the background as we don't need to
+   * wait for them and confirm that they were successful.
+   */
+  protected updateAccessFields(record: ShortUrlRecord) {
+    const { storage } = this.dependencies;
+    const { id, ...attributes } = record.data;
+    storage
+      .update(id, {
+        ...attributes,
+        accessDate: Date.now(),
+        accessCount: (attributes.accessCount || 0) + 1,
+      })
+      .catch(() => {}); // We are not interested if it succeeds or not.
   }
 
   public async delete(id: string): Promise<void> {

@@ -49,6 +49,7 @@ export const DATA_STREAM_API_ROUTES = {
 // Package policy API routes
 export const PACKAGE_POLICY_API_ROUTES = {
   LIST_PATTERN: `${PACKAGE_POLICY_API_ROOT}`,
+  BULK_GET_PATTERN: `${PACKAGE_POLICY_API_ROOT}/_bulk_get`,
   INFO_PATTERN: `${PACKAGE_POLICY_API_ROOT}/{packagePolicyId}`,
   CREATE_PATTERN: `${PACKAGE_POLICY_API_ROOT}`,
   UPDATE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/{packagePolicyId}`,
@@ -61,6 +62,7 @@ export const PACKAGE_POLICY_API_ROUTES = {
 // Agent policy API routes
 export const AGENT_POLICY_API_ROUTES = {
   LIST_PATTERN: `${AGENT_POLICY_API_ROOT}`,
+  BULK_GET_PATTERN: `${AGENT_POLICY_API_ROOT}/_bulk_get`,
   INFO_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}`,
   CREATE_PATTERN: `${AGENT_POLICY_API_ROOT}`,
   UPDATE_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}`,
@@ -84,6 +86,23 @@ export const OUTPUT_API_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   CREATE_PATTERN: `${API_ROOT}/outputs`,
   LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
+};
+
+// Fleet server API routes
+export const FLEET_SERVER_HOST_API_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/fleet_server_hosts`,
+  CREATE_PATTERN: `${API_ROOT}/fleet_server_hosts`,
+  INFO_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
+  UPDATE_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
+  DELETE_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
+};
+
+export const FLEET_PROXY_API_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/proxies`,
+  CREATE_PATTERN: `${API_ROOT}/proxies`,
+  INFO_PATTERN: `${API_ROOT}/proxies/{itemId}`,
+  UPDATE_PATTERN: `${API_ROOT}/proxies/{itemId}`,
+  DELETE_PATTERN: `${API_ROOT}/proxies/{itemId}`,
 };
 
 // Settings API routes
@@ -116,14 +135,19 @@ export const AGENT_API_ROUTES = {
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
   BULK_REASSIGN_PATTERN: `${API_ROOT}/agents/bulk_reassign`,
+  REQUEST_DIAGNOSTICS_PATTERN: `${API_ROOT}/agents/{agentId}/request_diagnostics`,
+  BULK_REQUEST_DIAGNOSTICS_PATTERN: `${API_ROOT}/agents/bulk_request_diagnostics`,
+  AVAILABLE_VERSIONS_PATTERN: `${API_ROOT}/agents/available_versions`,
   STATUS_PATTERN: `${API_ROOT}/agent_status`,
   DATA_PATTERN: `${API_ROOT}/agent_status/data`,
   // deprecated since 8.0
   STATUS_PATTERN_DEPRECATED: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
-  CURRENT_UPGRADES_PATTERN: `${API_ROOT}/agents/current_upgrades`,
+  ACTION_STATUS_PATTERN: `${API_ROOT}/agents/action_status`,
   LIST_TAGS_PATTERN: `${API_ROOT}/agents/tags`,
+  LIST_UPLOADS_PATTERN: `${API_ROOT}/agents/{agentId}/uploads`,
+  GET_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}/{fileName}`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
@@ -150,7 +174,6 @@ export const INSTALL_SCRIPT_API_ROUTES = `${API_ROOT}/install/{osType}`;
 
 // Policy preconfig API routes
 export const PRECONFIGURATION_API_ROUTES = {
-  UPDATE_PATTERN: `${API_ROOT}/setup/preconfiguration`,
   RESET_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies`,
   RESET_ONE_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies/{agentPolicyId}`,
 };

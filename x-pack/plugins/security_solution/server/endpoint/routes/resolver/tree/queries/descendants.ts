@@ -8,39 +8,26 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { JsonObject, JsonValue } from '@kbn/utility-types';
-import type { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import type { NodeID, TimeRange } from '../utils';
-import { docValueFields, validIDs } from '../utils';
-
-interface DescendantsParams {
-  schema: ResolverSchema;
-  indexPatterns: string | string[];
-  timeRange: TimeRange;
-  isInternalRequest: boolean;
-}
+import type { FieldsObject } from '../../../../../../common/endpoint/types';
+import type { NodeID } from '../utils';
+import { validIDs } from '../utils';
+import type { ResolverQueryParams } from './base';
+import { BaseResolverQuery } from './base';
 
 /**
  * Builds a query for retrieving descendants of a node.
  */
-export class DescendantsQuery {
-  private readonly schema: ResolverSchema;
-  private readonly indexPatterns: string | string[];
-  private readonly timeRange: TimeRange;
-  private readonly docValueFields: JsonValue[];
-  private readonly isInternalRequest: boolean;
+export class DescendantsQuery extends BaseResolverQuery {
+  declare readonly resolverFields: JsonValue[];
 
-  constructor({ schema, indexPatterns, timeRange, isInternalRequest }: DescendantsParams) {
-    this.docValueFields = docValueFields(schema);
-    this.schema = schema;
-    this.indexPatterns = indexPatterns;
-    this.timeRange = timeRange;
-    this.isInternalRequest = isInternalRequest;
+  constructor({ schema, indexPatterns, timeRange, isInternalRequest }: ResolverQueryParams) {
+    super({ schema, indexPatterns, timeRange, isInternalRequest });
   }
 
   private query(nodes: NodeID[], size: number): JsonObject {
     return {
       _source: false,
-      docvalue_fields: this.docValueFields,
+      fields: this.resolverFields,
       size,
       collapse: {
         field: this.schema.id,
@@ -49,15 +36,7 @@ export class DescendantsQuery {
       query: {
         bool: {
           filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: this.timeRange.from,
-                  lte: this.timeRange.to,
-                  format: 'strict_date_optional_time',
-                },
-              },
-            },
+            ...this.getRangeFilter(),
             {
               terms: { [this.schema.parent]: nodes },
             },
@@ -93,7 +72,7 @@ export class DescendantsQuery {
   private queryWithAncestryArray(nodes: NodeID[], ancestryField: string, size: number): JsonObject {
     return {
       _source: false,
-      docvalue_fields: this.docValueFields,
+      fields: this.resolverFields,
       size,
       collapse: {
         field: this.schema.id,
@@ -136,15 +115,7 @@ export class DescendantsQuery {
       query: {
         bool: {
           filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: this.timeRange.from,
-                  lte: this.timeRange.to,
-                  format: 'strict_date_optional_time',
-                },
-              },
-            },
+            ...this.getRangeFilter(),
             {
               terms: {
                 [ancestryField]: nodes,

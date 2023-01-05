@@ -19,7 +19,7 @@ import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 import { tabifyAggResponse } from '../../tabify';
 
-interface RequestHandlerParams {
+export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
   aggs: IAggConfigs;
   filters?: Filter[];
@@ -30,8 +30,11 @@ interface RequestHandlerParams {
   searchSourceService: ISearchStartSearchSource;
   timeFields?: string[];
   timeRange?: TimeRange;
+  disableShardWarnings?: boolean;
   getNow?: () => Date;
   executionContext?: KibanaExecutionContext;
+  title?: string;
+  description?: string;
 }
 
 export const handleRequest = ({
@@ -45,8 +48,11 @@ export const handleRequest = ({
   searchSourceService,
   timeFields,
   timeRange,
+  disableShardWarnings,
   getNow,
   executionContext,
+  title,
+  description,
 }: RequestHandlerParams) => {
   return defer(async () => {
     const forceNow = getNow?.();
@@ -111,16 +117,21 @@ export const handleRequest = ({
       requestSearchSource
         .fetch$({
           abortSignal,
+          disableShardFailureWarning: disableShardWarnings,
           sessionId: searchSessionId,
           inspector: {
             adapter: inspectorAdapters.requests,
-            title: i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
-              defaultMessage: 'Data',
-            }),
-            description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
-              defaultMessage:
-                'This request queries Elasticsearch to fetch the data for the visualization.',
-            }),
+            title:
+              title ??
+              i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
+                defaultMessage: 'Data',
+              }),
+            description:
+              description ??
+              i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
+                defaultMessage:
+                  'This request queries Elasticsearch to fetch the data for the visualization.',
+              }),
           },
           executionContext,
         })

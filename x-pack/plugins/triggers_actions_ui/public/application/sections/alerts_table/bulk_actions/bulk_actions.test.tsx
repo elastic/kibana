@@ -8,6 +8,7 @@ import React, { useReducer } from 'react';
 
 import { render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 import { BulkActionsContext } from './context';
@@ -66,6 +67,7 @@ describe('AlertsTable.BulkActions', () => {
 
   const alertsTableConfiguration = {
     id: '',
+    casesFeatureId: 'test',
     columns,
     sort: [],
     useInternalFlyout: jest.fn().mockImplementation(() => ({
@@ -94,6 +96,11 @@ describe('AlertsTable.BulkActions', () => {
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
     updatedAt: Date.now(),
+    onToggleColumn: () => {},
+    onResetColumns: () => {},
+    onColumnsChange: () => {},
+    onChangeVisibleColumns: () => {},
+    browserFields: {},
   };
 
   const tablePropsWithBulkActions = {
@@ -344,6 +351,7 @@ describe('AlertsTable.BulkActions', () => {
           );
 
           userEvent.click(getByTestId('selectedShowBulkActionsButton'));
+          await waitForEuiPopoverOpen();
 
           userEvent.click(getByText('Fake Bulk Action'));
           expect(mockedFn.mock.calls[0]).toEqual([
@@ -420,7 +428,7 @@ describe('AlertsTable.BulkActions', () => {
         });
 
         describe('and executing a bulk action', () => {
-          it('should return the are all selected flag set to true', () => {
+          it('should return the are all selected flag set to true', async () => {
             const mockedFn = jest.fn();
             const props = {
               ...tablePropsWithBulkActions,
@@ -449,6 +457,7 @@ describe('AlertsTable.BulkActions', () => {
             );
 
             userEvent.click(getByTestId('selectedShowBulkActionsButton'));
+            await waitForEuiPopoverOpen();
 
             userEvent.click(getByText('Fake Bulk Action'));
             expect(mockedFn.mock.calls[0]).toEqual([

@@ -20,8 +20,7 @@ const { log } = require('./log');
  * log([10, 100, 1000, 10000, 100000]) // returns [1, 2, 3, 4, 5]
  */
 
-module.exports = { log10 };
-
 function log10(a) {
   return log(a, 10);
 }
+module.exports = { log10 };

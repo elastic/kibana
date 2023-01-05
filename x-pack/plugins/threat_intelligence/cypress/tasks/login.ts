@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import Url from 'url';
 import type { UrlObject } from 'url';
+import Url from 'url';
 
 import * as yaml from 'js-yaml';
 
 import type { ROLES } from './privileges';
-import { hostDetailsUrl, LOGOUT_URL } from './navigation';
+
+const LOGIN_API_ENDPOINT = '/internal/security/login';
+const LOGOUT_URL = '/logout';
+
+export const hostDetailsUrl = (hostName: string) =>
+  `/app/security/hosts/${hostName}/authentications`;
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -42,11 +47,6 @@ const ELASTICSEARCH_USERNAME = 'ELASTICSEARCH_USERNAME';
  * username to be used when authenticating with Kibana
  */
 const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
-
-/**
- * The Kibana server endpoint used for authentication
- */
-const LOGIN_API_ENDPOINT = '/internal/security/login';
 
 /**
  * cy.visit will default to the baseUrl which uses the default kibana test user

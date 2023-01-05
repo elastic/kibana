@@ -14,13 +14,38 @@ import { TestProviders } from '../../../mock';
 import { useAlertPrevalenceFromProcessTree } from '../../../containers/alerts/use_alert_prevalence_from_process_tree';
 import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { PROCESS_ANCESTRY, PROCESS_ANCESTRY_COUNT, PROCESS_ANCESTRY_ERROR } from './translations';
+import {
+  PROCESS_ANCESTRY,
+  PROCESS_ANCESTRY_COUNT,
+  PROCESS_ANCESTRY_ERROR,
+  PROCESS_ANCESTRY_EMPTY,
+} from './translations';
 
 jest.mock('../../../containers/alerts/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
 
+const props = {
+  eventId: 'random',
+  data: {
+    field: 'testfield',
+    values: ['test value'],
+    isObjectArray: false,
+  },
+  index: {
+    field: 'index',
+    values: ['test value'],
+    isObjectArray: false,
+  },
+  originalDocumentId: {
+    field: '_id',
+    values: ['original'],
+    isObjectArray: false,
+  },
+  scopeId: 'table-test',
+  isActiveTimelines: false,
+};
 describe('RelatedAlertsByProcessAncestry', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -29,14 +54,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
   it('shows an accordion and does not fetch data right away', () => {
     render(
       <TestProviders>
-        <RelatedAlertsByProcessAncestry
-          eventId="random"
-          data={{
-            field: 'testfield',
-            values: ['test value'],
-            isObjectArray: false,
-          }}
-        />
+        <RelatedAlertsByProcessAncestry {...props} />
       </TestProviders>
     );
 
@@ -51,14 +69,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
 
     render(
       <TestProviders>
-        <RelatedAlertsByProcessAncestry
-          eventId="random"
-          data={{
-            field: 'testfield',
-            values: ['test value'],
-            isObjectArray: false,
-          }}
-        />
+        <RelatedAlertsByProcessAncestry {...props} />
       </TestProviders>
     );
 
@@ -75,14 +86,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
 
     render(
       <TestProviders>
-        <RelatedAlertsByProcessAncestry
-          eventId="random"
-          data={{
-            field: 'testfield',
-            values: ['test value'],
-            isObjectArray: false,
-          }}
-        />
+        <RelatedAlertsByProcessAncestry {...props} />
       </TestProviders>
     );
 
@@ -100,14 +104,7 @@ describe('RelatedAlertsByProcessAncestry', () => {
 
     render(
       <TestProviders>
-        <RelatedAlertsByProcessAncestry
-          eventId="random"
-          data={{
-            field: 'testfield',
-            values: ['test value'],
-            isObjectArray: false,
-          }}
-        />
+        <RelatedAlertsByProcessAncestry {...props} />
       </TestProviders>
     );
 
@@ -118,6 +115,44 @@ describe('RelatedAlertsByProcessAncestry', () => {
       expect(
         screen.getByRole('button', { name: ACTION_INVESTIGATE_IN_TIMELINE })
       ).toBeInTheDocument();
+    });
+  });
+
+  it('renders a special message when there are no alerts to display (empty response)', async () => {
+    mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
+      loading: false,
+      error: false,
+      alertIds: [] as string[],
+    });
+
+    render(
+      <TestProviders>
+        <RelatedAlertsByProcessAncestry {...props} />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByText(PROCESS_ANCESTRY));
+    await waitFor(() => {
+      expect(screen.getByText(PROCESS_ANCESTRY_EMPTY)).toBeInTheDocument();
+    });
+  });
+
+  it('renders a special message when there are no alerts to display (undefined case)', async () => {
+    mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
+      loading: false,
+      error: false,
+      alertIds: undefined,
+    });
+
+    render(
+      <TestProviders>
+        <RelatedAlertsByProcessAncestry {...props} />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByText(PROCESS_ANCESTRY));
+    await waitFor(() => {
+      expect(screen.getByText(PROCESS_ANCESTRY_EMPTY)).toBeInTheDocument();
     });
   });
 });

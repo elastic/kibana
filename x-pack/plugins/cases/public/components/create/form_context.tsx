@@ -6,23 +6,24 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { schema, FormProps } from './schema';
-import { Form, useForm } from '../../common/shared_imports';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FormProps } from './schema';
+import { schema } from './schema';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
-import { Case } from '../../containers/types';
+import type { Case } from '../../containers/types';
+import type { CasePostRequest } from '../../../common/api';
 import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
-import {
-  UseCreateAttachments,
-  useCreateAttachments,
-} from '../../containers/use_create_attachments';
+import type { UseCreateAttachments } from '../../containers/use_create_attachments';
+import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { useCasesFeatures } from '../../common/use_cases_features';
 import { getConnectorById } from '../utils';
-import { CaseAttachments } from '../../types';
+import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -33,6 +34,7 @@ const initialCaseValue: FormProps = {
   fields: null,
   syncAlerts: true,
   selectedOwner: null,
+  assignees: [],
 };
 
 interface Props {
@@ -42,7 +44,8 @@ interface Props {
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => Promise<void>;
-  attachments?: CaseAttachments;
+  attachments?: CaseAttachmentsWithoutOwner;
+  initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -50,13 +53,15 @@ export const FormContext: React.FC<Props> = ({
   children,
   onSuccess,
   attachments,
+  initialValue,
 }) => {
   const { data: connectors = [], isLoading: isLoadingConnectors } = useGetConnectors();
-  const { owner } = useCasesContext();
+  const { owner, appId } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();
   const { createAttachments } = useCreateAttachments();
   const { pushCaseToExternalService } = usePostPushToService();
+  const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
 
   const submitCase = useCallback(
     async (
@@ -71,6 +76,8 @@ export const FormContext: React.FC<Props> = ({
       if (isValid) {
         const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
+
+        startTransaction({ appId, attachments });
 
         const connectorToUpdate = caseConnector
           ? normalizeActionConnector(caseConnector, fields)
@@ -87,6 +94,7 @@ export const FormContext: React.FC<Props> = ({
         if (updatedCase && Array.isArray(attachments) && attachments.length > 0) {
           await createAttachments({
             caseId: updatedCase.id,
+            caseOwner: updatedCase.owner,
             data: attachments,
           });
         }
@@ -108,6 +116,8 @@ export const FormContext: React.FC<Props> = ({
       }
     },
     [
+      appId,
+      startTransaction,
       isSyncAlertsEnabled,
       connectors,
       postCase,
@@ -121,7 +131,7 @@ export const FormContext: React.FC<Props> = ({
   );
 
   const { form } = useForm<FormProps>({
-    defaultValue: initialCaseValue,
+    defaultValue: { ...initialCaseValue, ...initialValue },
     options: { stripEmptyFields: false },
     schema,
     onSubmit: submitCase,

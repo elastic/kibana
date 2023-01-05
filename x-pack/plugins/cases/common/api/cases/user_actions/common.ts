@@ -9,6 +9,7 @@ import * as rt from 'io-ts';
 import { UserRT } from '../../user';
 
 export const ActionTypes = {
+  assignees: 'assignees',
   comment: 'comment',
   connector: 'connector',
   description: 'description',
@@ -21,6 +22,9 @@ export const ActionTypes = {
   create_case: 'create_case',
   delete_case: 'delete_case',
 } as const;
+
+export type ActionTypeKeys = keyof typeof ActionTypes;
+export type ActionTypeValues = typeof ActionTypes[ActionTypeKeys];
 
 export const Actions = {
   add: 'add',

@@ -124,17 +124,8 @@ describe('Security Plugin', () => {
           "privilegeDeprecationsService": Object {
             "getKibanaRolesByFeatureId": [Function],
           },
-          "setIsElasticCloudDeployment": [Function],
         }
       `);
-    });
-
-    it('#setIsElasticCloudDeployment cannot be called twice', () => {
-      const { setIsElasticCloudDeployment } = plugin.setup(mockCoreSetup, mockSetupDependencies);
-      setIsElasticCloudDeployment();
-      expect(() => setIsElasticCloudDeployment()).toThrowErrorMatchingInlineSnapshot(
-        `"The Elastic Cloud deployment flag has been set already!"`
-      );
     });
   });
 
@@ -150,6 +141,8 @@ describe('Security Plugin', () => {
               "grantAsInternalUser": [Function],
               "invalidate": [Function],
               "invalidateAsInternalUser": [Function],
+              "update": [Function],
+              "validate": [Function],
             },
             "getCurrentUser": [Function],
           },

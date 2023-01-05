@@ -80,12 +80,11 @@ export function getLensAttributeService(
       return checkForDuplicateTitle(
         {
           title: props.newTitle,
-          copyOnSave: false,
+          displayName: DOC_TYPE,
+          isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
           lastSavedTitle: '',
-          getEsType: () => DOC_TYPE,
-          getDisplayName: () => DOC_TYPE,
+          copyOnSave: false,
         },
-        props.isTitleDuplicateConfirmed,
         props.onTitleDuplicate,
         {
           savedObjectsClient,

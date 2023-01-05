@@ -11,6 +11,7 @@ import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -49,6 +50,7 @@ import {
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -122,6 +124,8 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   listTypes: RuleTypeRegistry['list'];
 
+  getAllTypes: RuleTypeRegistry['getAllTypes'];
+
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
 
   getAlertingAuthorizationWithRequest(
@@ -154,6 +158,8 @@ export interface AlertingPluginsStart {
   spaces: SpacesPluginStart;
   security?: SecurityPluginStart;
   data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
+  share: SharePluginStart;
 }
 
 export class AlertingPlugin {
@@ -426,6 +432,8 @@ export class AlertingPlugin {
     taskRunnerFactory.initialize({
       logger,
       data: plugins.data,
+      share: plugins.share,
+      dataViews: plugins.dataViews,
       savedObjects: core.savedObjects,
       uiSettings: core.uiSettings,
       elasticsearch: core.elasticsearch,
@@ -442,6 +450,7 @@ export class AlertingPlugin {
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
+      maxAlerts: this.config.rules.run.alerts.max,
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
     });
@@ -463,6 +472,7 @@ export class AlertingPlugin {
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
+      getAllTypes: ruleTypeRegistry!.getAllTypes.bind(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>

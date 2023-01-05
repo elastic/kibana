@@ -13,7 +13,6 @@ import { cloneDeep } from 'lodash';
 import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
-import { sortWithExcludesAtEnd } from '../../store/sourcerer/helpers';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -28,6 +27,7 @@ import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { TimelineId, TimelineType } from '../../../../common/types';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
+import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
 const mockDispatch = jest.fn();
 
@@ -411,7 +411,7 @@ describe('Sourcerer component', () => {
       availableOptionCount: title.split(',').length - 4,
       optionsSelected: true,
     });
-    wrapper.find(`[data-test-subj="sourcerer-save"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="sourcerer-save"]`).first().simulate('click');
     expect(wrapper.find(`[data-test-subj="sourcerer-popover"]`).first().prop('isOpen')).toBeFalsy();
 
     expect(mockDispatch).toHaveBeenCalledWith(
@@ -461,7 +461,7 @@ describe('Sourcerer component', () => {
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="sourcerer-save"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="sourcerer-save"]`).first().simulate('click');
 
     expect(mockUpdateUrlParam).toHaveBeenCalledTimes(1);
   });
@@ -843,7 +843,13 @@ describe('timeline sourcerer', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state2,
+      SUB_PLUGINS_REDUCER,
+
+      kibanaObservable,
+      storage
+    );
 
     wrapper = mount(
       <TestProviders store={store}>
@@ -905,7 +911,7 @@ describe('Sourcerer integration tests', () => {
       availableOptionCount: 0,
       optionsSelected: true,
     });
-    wrapper.find(`[data-test-subj="sourcerer-save"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="sourcerer-save"]`).first().simulate('click');
 
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedDataView({

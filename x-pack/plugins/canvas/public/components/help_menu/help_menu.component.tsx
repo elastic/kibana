@@ -33,7 +33,7 @@ export const HelpMenu: FC<Props> = ({ hideHelpMenu, showKeyboardShortcutsDocFlyo
       <EuiButtonEmpty
         size="s"
         flush="left"
-        iconType="keyboardShortcut"
+        iconType="keyboard"
         onClick={onKeyboardShortcutButtonClick}
       >
         {strings.getKeyboardShortcutsLinkLabel()}

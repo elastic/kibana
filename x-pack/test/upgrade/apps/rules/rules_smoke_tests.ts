@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.click('rulesTab');
         });
         it('shows created rule with no errors', async () => {
-          const createdRuleName = 'Upgrade Rule';
+          const createdRuleName = 'UpgradeRule';
           await testSubjects.click('rulesTab');
           await rulesHelper.searchRules('"' + createdRuleName + '"');
           const workAround = process.env.TEST_RULE_WORKAROUND ? true : false;
@@ -57,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(searchResults[0].name).to.contain(createdRuleName);
           expect(searchResults[0].interval).to.equal('1 min');
           expect(searchResults[0].status).to.equal('Enabled');
-          expect(searchResults[0].lastResponse).to.equal('Ok');
+          expect(searchResults[0].lastResponse).to.equal('Succeeded');
         });
       });
     });

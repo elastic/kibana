@@ -29,19 +29,11 @@ export type LinkCategories = Readonly<LinkCategory[]>;
 
 export interface LinkItem {
   /**
-   * The description of the link content
-   */
-  description?: string;
-  /**
-   * Experimental flag needed to enable the link
-   */
-  experimentalKey?: keyof ExperimentalFeatures;
-  /**
    * Capabilities strings (using object dot notation) to enable the link.
    *
    * The format of defining features supports OR and AND mechanism. To specify features in an OR fashion
    * they can be defined in a single level array like: [requiredFeature1, requiredFeature2]. If either of these features
-   * is satisfied the deeplinks would be included. To require that the features be AND'd together a second level array
+   * is satisfied the link would be included. To require that the features be AND'd together a second level array
    * can be specified: [feature1, [feature2, feature3]] this would result in feature1 || (feature2 && feature3). To specify
    * features that all must be and'd together an example would be: [[feature1, feature2]], this would result in the boolean
    * operation feature1 && feature2.
@@ -55,13 +47,19 @@ export interface LinkItem {
    */
   categories?: LinkCategories;
   /**
-   * Enables link in the global navigation. Defaults to false.
+   * The description of the link content
    */
-  globalNavEnabled?: boolean;
+  description?: string;
   /**
-   * Global navigation order number
+   * Experimental flag needed to enable the link
    */
-  globalNavOrder?: number;
+  experimentalKey?: keyof ExperimentalFeatures;
+  /**
+   * Global navigation position number.
+   * Define this property only if the link needs to be visible within
+   * the Security section of the Kibana collapsible global navigation
+   */
+  globalNavPosition?: number;
   /**
    * Disables link in the global search. Defaults to false.
    */
@@ -71,6 +69,10 @@ export interface LinkItem {
    */
   globalSearchKeywords?: string[];
   /**
+   * Disables the timeline call to action on the bottom of the page. Defaults to false.
+   */
+  hideTimeline?: boolean;
+  /**
    * Experimental flag needed to disable the link. Opposite of experimentalKey
    */
   hideWhenExperimentalKey?: keyof ExperimentalFeatures;
@@ -79,9 +81,15 @@ export interface LinkItem {
    */
   id: SecurityPageName;
   /**
-   * Displays the "Beta" badge
+   * Displays the "Beta" badge. Defaults to false.
    */
   isBeta?: boolean;
+  /**
+   * Customize the "Beta" badge content.
+   */
+  betaOptions?: {
+    text: string;
+  };
   /**
    * Icon that is displayed on menu navigation landing page.
    * Only required for pages that are displayed inside a landing page.
@@ -112,10 +120,6 @@ export interface LinkItem {
    * Disables the state query string in the URL. Defaults to false.
    */
   skipUrlState?: boolean;
-  /**
-   * Disables the timeline call to action on the bottom of the page. Defaults to false.
-   */
-  hideTimeline?: boolean; // defaults to false
   /**
    * Title of the link
    */

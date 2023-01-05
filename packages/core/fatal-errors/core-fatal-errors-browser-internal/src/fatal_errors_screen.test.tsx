@@ -7,7 +7,7 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import testSubjSelector from '@kbn/test-subj-selector';
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import React from 'react';
 import { of, ReplaySubject } from 'rxjs';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';

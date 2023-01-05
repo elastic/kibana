@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 export { CasesClient } from './client';
-import { ConfigType, ConfigSchema } from './config';
+import type { ConfigType } from './config';
+import { ConfigSchema } from './config';
 import { CasePlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<ConfigType> = {

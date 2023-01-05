@@ -26,12 +26,13 @@
   ],
   "requiredBundles": [
     "kibanaReact",
+    "kibanaUtils",
     "maps",
     "esUiShared",
     "fieldFormats",
     "uiActions",
     "lens",
-    "cloud"
+    "cloudChat"
   ],
   "owner": {
     "name": "Machine Learning UI",

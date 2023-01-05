@@ -54,10 +54,11 @@ Tell {kib} where to find the data you want to explore, and then specify the time
 +
 {kib} uses a <<data-views,{data-source}>> to tell it where to find
 your {es} data.
-To view the ecommerce sample data, open the {data-source} menu, and select **kibana_sample_data_ecommerce**.
+To view the ecommerce sample data, open the {data-source} menu, and then select **Kibana Sample Data Ecommerce**.
 +
 [role="screenshot"]
-image::images/discover-data-view.png[How to set the {data-source} in Discover, width=50%]
+image::images/discover-data-view.png[How to set the {data-source} in Discover, width="40%"]
+
 +
 To create a data view for your own data,
 click *Create a data view*.
@@ -87,12 +88,15 @@ You can also search for the field by name.
 [role="screenshot"]
 image:images/discover-sidebar-available-fields.png[Fields list that displays the top five search results, width=50%]
 
-. Click the `manufacturer` field to view its five most popular values.
+. Click `manufacturer` to view its most popular values.
 +
-[role="screenshot"]
-image:images/find-manufacturer-field.png[Fields list that displays the top five search results, width=75%]
+**Discover** shows the top 10 values and the number of records used to calculate those values.
 
 . Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
++
+[role="screenshot"]
+image::images/discover-add-icon.png[How to add a field as a column in the table, width="50%"]
+
 
 . Find the `customer_first_name` and `customer_last_name` fields and add
 them to the document table. Your table should look similar to this:
@@ -103,7 +107,8 @@ image:images/document-table.png[Document table with fields for manufacturer, cus
 . To rearrange the table columns, click a
 column header, and then select *Move left* or *Move right*.
 
-. To view more of the document table, click
+. To view more of the document table,
+click
 image:images/chart-icon.png[icon button for opening Show/Hide chart menu, width=24px]
 to open the *Chart options* menu,
 and then select *Hide chart*.
@@ -118,7 +123,7 @@ You can add a runtime field to your {data-source} from inside of **Discover**,
 and then use that field for analysis and visualizations,
 the same way you do with other fields.
 
-. Open the data view menu, and then click *Add a field to this data view*.
+. In the sidebar, click *Add a field*.
 
 . In the *Create field* form, enter `hello` for the name.
 
@@ -191,7 +196,7 @@ and more.
 
 Exclude documents where day of week is not Wednesday:
 
-. Click image:images/add-icon.png[Add icon] to the left of the query bar.
+. Click image:images/add-icon.png[Add icon] next to the query bar.
 . In the *Add filter* pop-up, set *Field* to *day_of_week*, *Operator* to *is not*, and *Value* to *Wednesday*.
 +
 [role="screenshot"]
@@ -217,8 +222,7 @@ to show document details.
 image:images/document-table-expanded.png[Table view with document expanded]
 
 . Scan through the fields and their values. If you find a field of interest,
-click
-image:images/actions-icon.png[three dots icon next to data view dropdown] in the *Actions* column for filters and other controls.
+hover your mouse over the *Actions* column for filters and other options.
 
 . To create a view of the document that you can bookmark and share, click **Single document**.
 
@@ -237,6 +241,8 @@ and current view of *Discover*, including the columns selected in
 the document table, the sort order, and the {data-source}.
 
 . In the toolbar, click **Save**.
+
+. Optionally store <<managing-tags,tags>> and the time range with the search.
 
 . Give your search a title, and then click **Save**.
 
@@ -289,7 +295,7 @@ The *Create rule* form is pre-filled with the latest query sent to {es}.
 
 . Click *Save*.
 
-For more about this and other rules provided in {kib} {alert-features}, go to <<alerting-getting-started>>.
+For more about this and other rules provided in {alert-features}, go to <<alerting-getting-started>>.
 
 
 [float]
@@ -299,9 +305,8 @@ For more about this and other rules provided in {kib} {alert-features}, go to <<
 
 * <<discover-search-for-relevance, Search for relevance>>.
 
-* <<kibana-discover-settings, Configure Discover>> to better meet your needs.
-Go to **Advanced Settings** to configure the number of documents to show,
-the table columns that display by default, and more.
+* <<document-explorer, Configure the chart and document table>> to better meet your needs.
+
 
 --
 include::{kib-repo-dir}/discover/document-explorer.asciidoc[]

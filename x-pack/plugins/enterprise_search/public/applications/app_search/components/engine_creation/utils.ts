@@ -91,6 +91,7 @@ export const formatIndicesToSelectable = (
           label: index.alias ? 'Alias' : 'Index',
           ...(icon ? { icon } : {}),
         },
+        count: index.count,
         disabled: index.alias && !index.name.startsWith('search-'),
         label: index.name,
         health: index.health,

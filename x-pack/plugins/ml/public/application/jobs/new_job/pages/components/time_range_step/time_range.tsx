@@ -69,14 +69,22 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
 
     jobCreatorUpdate();
     loadChart();
-  }, [JSON.stringify(timeRange)]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    jobCreator,
+    chartInterval,
+    timeRange.start,
+    timeRange.end,
+    jobCreatorUpdate,
+    services.data.query.timefilter,
+  ]);
 
   useEffect(() => {
     setTimeRange({
       start: jobCreator.start,
       end: jobCreator.end,
     });
-  }, [jobCreatorUpdated]);
+  }, [jobCreator, jobCreatorUpdated]);
 
   function fullTimeRangeCallback(range: GetTimeFieldRangeResponse) {
     if (range.start !== null && range.end !== null) {

@@ -9,15 +9,7 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
-import {
-  Filter,
-  FilterStateStore,
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  Query,
-  AggregateQuery,
-} from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, Filter, FilterStateStore } from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -36,67 +28,18 @@ import {
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { DiscoverGridSettings } from '../../../components/discover_grid/types';
-import { SavedSearch } from '../../../services/saved_searches';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../../common';
+import { AppState } from './discover_app_state_container';
+import {
+  getInternalStateContainer,
+  InternalStateContainer,
+} from './discover_internal_state_container';
+import { getStateDefaults } from '../utils/get_state_defaults';
+import { DiscoverServices } from '../../../build_services';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
-import { VIEW_MODE } from '../../../components/view_mode_toggle';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
-
-export interface AppState {
-  /**
-   * Columns displayed in the table
-   */
-  columns?: string[];
-  /**
-   * Array of applied filters
-   */
-  filters?: Filter[];
-  /**
-   * Data Grid related state
-   */
-  grid?: DiscoverGridSettings;
-  /**
-   * Hide chart
-   */
-  hideChart?: boolean;
-  /**
-   * id of the used data view
-   */
-  index?: string;
-  /**
-   * Used interval of the histogram
-   */
-  interval?: string;
-  /**
-   * Lucence or KQL query
-   */
-  query?: Query | AggregateQuery;
-  /**
-   * Array of the used sorting [[field,direction],...]
-   */
-  sort?: string[][];
-  /**
-   * id of the used saved query
-   */
-  savedQuery?: string;
-  /**
-   * Table view: Documents vs Field Statistics
-   */
-  viewMode?: VIEW_MODE;
-  /**
-   * Hide mini distribution/preview charts when in Field Statistics mode
-   */
-  hideAggregatedPreview?: boolean;
-  /**
-   * Document explorer row height option
-   */
-  rowHeight?: number;
-  /**
-   * Number of rows in the grid per page
-   */
-  rowsPerPage?: number;
-}
+import { getValidFilters } from '../../../utils/get_valid_filters';
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
   /**
@@ -105,34 +48,22 @@ export interface AppStateUrl extends Omit<AppState, 'sort'> {
   sort?: string[][] | [string, string];
 }
 
-interface GetStateParams {
-  /**
-   * Default state used for merging with with URL state to get the initial state
-   */
-  getStateDefaults?: () => AppState;
-  /**
-   * Determins the use of long vs. short/hashed urls
-   */
-  storeInSessionStorage?: boolean;
+interface DiscoverStateContainerParams {
   /**
    * Browser history
    */
-  history: History;
-
+  history?: History;
   /**
-   * Core's notifications.toasts service
-   * In case it is passed in,
-   * kbnUrlStateStorage will use it notifying about inner errors
+   * The current savedSearch
    */
-  toasts?: NotificationsStart['toasts'];
-
+  savedSearch: SavedSearch;
   /**
    * core ui settings service
    */
-  uiSettings: IUiSettingsClient;
+  services: DiscoverServices;
 }
 
-export interface GetStateReturn {
+export interface DiscoverStateContainer {
   /**
    * kbnUrlStateStorage
    */
@@ -140,7 +71,11 @@ export interface GetStateReturn {
   /**
    * App state, the _a part of the URL
    */
-  appStateContainer: ReduxLikeStateContainer<AppState>;
+  appState: ReduxLikeStateContainer<AppState>;
+  /**
+   * Internal state that's used at several places in the UI
+   */
+  internalState: InternalStateContainer;
   /**
    * Initialize state with filters and query,  start state syncing
    */
@@ -178,13 +113,46 @@ export interface GetStateReturn {
    */
   isAppStateDirty: () => boolean;
   /**
-   * Reset AppState to default, discarding all changes
+   * Reset AppState by the given savedSearch discarding all changes
    */
-  resetAppState: () => void;
+  resetAppState: (nextSavedSearch: SavedSearch) => void;
   /**
    * Pause the auto refresh interval without pushing an entry to history
    */
   pauseAutoRefreshInterval: () => Promise<void>;
+  /**
+   * functions executed by UI
+   */
+  actions: {
+    /**
+     * Set the currently selected data view
+     */
+    setDataView: (dataView: DataView) => void;
+    /**
+     * Load current list of data views, add them to internal state
+     */
+    loadDataViewList: () => Promise<void>;
+    /**
+     * Set new adhoc data view list
+     */
+    setAdHocDataViews: (dataViews: DataView[]) => void;
+    /**
+     * Append a given ad-hoc data views to the list of ad-hoc data view
+     */
+    appendAdHocDataViews: (dataViews: DataView | DataView[]) => void;
+    /**
+     * Remove the ad-hoc data view of the given id from the list of ad-hoc data view
+     * @param id
+     */
+    removeAdHocDataViewById: (id: string) => void;
+    /**
+     * Replace the data view of the given id with the given data view
+     * Used when the spec of a data view changed to prevent duplicates
+     * @param id
+     * @param dataView
+     */
+    replaceAdHocDataViewWithId: (id: string, dataView: DataView) => void;
+  };
 }
 
 const APP_STATE_URL_KEY = '_a';
@@ -194,14 +162,17 @@ const GLOBAL_STATE_URL_KEY = '_g';
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
-export function getState({
-  getStateDefaults,
-  storeInSessionStorage = false,
+export function getDiscoverStateContainer({
   history,
-  toasts,
-  uiSettings,
-}: GetStateParams): GetStateReturn {
-  const defaultAppState = getStateDefaults ? getStateDefaults() : {};
+  savedSearch,
+  services,
+}: DiscoverStateContainerParams): DiscoverStateContainer {
+  const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
+  const toasts = services.core.notifications.toasts;
+  const defaultAppState = getStateDefaults({
+    savedSearch,
+    services,
+  });
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
@@ -215,7 +186,7 @@ export function getState({
       ...defaultAppState,
       ...appStateFromUrl,
     },
-    uiSettings
+    services.uiSettings
   );
 
   // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
@@ -250,6 +221,8 @@ export function getState({
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
 
+  const internalStateContainer = getInternalStateContainer();
+
   const pauseAutoRefreshInterval = async () => {
     const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
     if (state?.refreshInterval && !state.refreshInterval.pause) {
@@ -261,9 +234,27 @@ export function getState({
     }
   };
 
+  const setDataView = (dataView: DataView) => {
+    internalStateContainer.transitions.setDataView(dataView);
+  };
+  const setAdHocDataViews = (dataViews: DataView[]) =>
+    internalStateContainer.transitions.setAdHocDataViews(dataViews);
+  const appendAdHocDataViews = (dataViews: DataView | DataView[]) =>
+    internalStateContainer.transitions.appendAdHocDataViews(dataViews);
+  const replaceAdHocDataViewWithId = (id: string, dataView: DataView) =>
+    internalStateContainer.transitions.replaceAdHocDataViewWithId(id, dataView);
+  const removeAdHocDataViewById = (id: string) =>
+    internalStateContainer.transitions.removeAdHocDataViewById(id);
+
+  const loadDataViewList = async () => {
+    const dataViewList = await services.dataViews.getIdsWithTitle(true);
+    internalStateContainer.transitions.setSavedDataViews(dataViewList);
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
-    appStateContainer: appStateContainerModified,
+    appState: appStateContainerModified,
+    internalState: internalStateContainer,
     startSync: () => {
       const { start, stop } = syncAppState();
       start();
@@ -274,10 +265,10 @@ export function getState({
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
     },
-    resetAppState: () => {
+    resetAppState: (nextSavedSearch: SavedSearch) => {
       const defaultState = handleSourceColumnState(
-        getStateDefaults ? getStateDefaults() : {},
-        uiSettings
+        getStateDefaults({ savedSearch: nextSavedSearch, services }),
+        services.uiSettings
       );
       setState(appStateContainerModified, defaultState);
     },
@@ -295,7 +286,7 @@ export function getState({
         setState(appStateContainerModified, { index: dataView.id });
       }
       // sync initial app filters from state to filterManager
-      const filters = appStateContainer.getState().filters;
+      const filters = appStateContainer.getState().filters || [];
       if (filters) {
         filterManager.setAppFilters(cloneDeep(filters));
       }
@@ -319,6 +310,14 @@ export function getState({
         stateStorage
       );
 
+      // some filters may not be valid for this context, so update
+      // the filter manager with a modified list of valid filters
+      const currentFilters = filterManager.getFilters();
+      const validFilters = getValidFilters(dataView, currentFilters);
+      if (!isEqual(currentFilters, validFilters)) {
+        filterManager.setFilters(validFilters);
+      }
+
       const { start, stop } = syncAppState();
 
       replaceUrlAppState({}).then(() => {
@@ -330,6 +329,14 @@ export function getState({
         stopSyncingGlobalStateWithUrl();
         stop();
       };
+    },
+    actions: {
+      setDataView,
+      loadDataViewList,
+      setAdHocDataViews,
+      appendAdHocDataViews,
+      replaceAdHocDataViewWithId,
+      removeAdHocDataViewById,
     },
   };
 }
@@ -450,5 +457,6 @@ function createUrlGeneratorState({
     useHash: false,
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
+    breakdownField: appState.breakdownField,
   };
 }

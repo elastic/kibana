@@ -26,6 +26,7 @@ interface CreateTestConfigOptions {
   rejectUnauthorized?: boolean; // legacy
   emailDomainsAllowed?: string[];
   testFiles?: string[];
+  useDedicatedTaskRunner: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -33,6 +34,7 @@ const enabledActionTypes = [
   '.cases-webhook',
   '.email',
   '.index',
+  '.opsgenie',
   '.pagerduty',
   '.swimlane',
   '.server-log',
@@ -42,10 +44,11 @@ const enabledActionTypes = [
   '.jira',
   '.resilient',
   '.slack',
+  '.tines',
   '.webhook',
   '.xmatters',
-  '.test-sub-action-connector',
-  '.test-sub-action-connector-without-sub-actions',
+  'test.sub-action-connector',
+  'test.sub-action-connector-without-sub-actions',
   'test.authorization',
   'test.failing',
   'test.index-record',
@@ -69,6 +72,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     rejectUnauthorized = true, // legacy
     emailDomainsAllowed = undefined,
     testFiles = undefined,
+    useDedicatedTaskRunner,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -163,6 +167,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
       kbnTestServer: {
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
+        useDedicatedTaskRunner,
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
@@ -175,6 +180,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+          '--xpack.alerting.rules.run.alerts.max=20',
           `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
             { id: 'test.capped', max: '1' },
           ])}`,
@@ -192,6 +198,18 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ])}`,
           `--xpack.actions.preconfiguredAlertHistoryEsIndex=${preconfiguredAlertHistoryEsIndex}`,
           `--xpack.actions.preconfigured=${JSON.stringify({
+            'my-test-email': {
+              actionTypeId: '.email',
+              name: 'TestEmail#xyz',
+              config: {
+                from: 'me@test.com',
+                service: '__json',
+              },
+              secrets: {
+                user: 'user',
+                password: 'password',
+              },
+            },
             'my-slack1': {
               actionTypeId: '.slack',
               name: 'Slack#xyz',

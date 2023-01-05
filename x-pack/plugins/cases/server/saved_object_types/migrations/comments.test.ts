@@ -20,18 +20,18 @@ import { CommentType } from '../../../common/api';
 
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
-import { LensDocShape715 } from '@kbn/lens-plugin/server';
-import {
-  mergeSavedObjectMigrationMaps,
+import type { LensDocShape715 } from '@kbn/lens-plugin/server';
+import type {
   SavedObjectReference,
   SavedObjectsMigrationLogger,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { PersistableStateAttachmentTypeSetup } from '../../attachment_framework/types';
+import type { PersistableStateAttachmentTypeSetup } from '../../attachment_framework/types';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 
 describe('comments migrations', () => {
@@ -237,7 +237,11 @@ describe('comments migrations', () => {
       it('should remove time zone param from date histogram', () => {
         const migrations = createCommentsMigrations({
           persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
-          lensEmbeddableFactory: makeLensEmbeddableFactory(() => ({}), {}),
+          lensEmbeddableFactory: makeLensEmbeddableFactory(
+            () => ({}),
+            () => ({}),
+            {}
+          ),
         });
 
         expect(migrations['7.14.0']).toBeDefined();
@@ -574,7 +578,11 @@ describe('comments migrations', () => {
 
     const migrations = createCommentsMigrations({
       persistableStateAttachmentTypeRegistry,
-      lensEmbeddableFactory: makeLensEmbeddableFactory(() => ({}), {}),
+      lensEmbeddableFactory: makeLensEmbeddableFactory(
+        () => ({}),
+        () => ({}),
+        {}
+      ),
     });
 
     it('migrates a persistable state attachment correctly', () => {

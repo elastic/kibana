@@ -11,13 +11,11 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiModal, EuiFieldText } from '@elastic/eui';
+import { EuiModal, EuiFieldText, EuiCodeBlock } from '@elastic/eui';
 
 const mockActions = { makeRequest: jest.fn(), setKeyName: jest.fn() };
 
 const mockValues = { apiKey: '', isLoading: false, isSuccess: false, keyName: '' };
-
-import { ApiKey } from '../../../api_key/api_key';
 
 import { GenerateApiKeyModal } from './modal';
 
@@ -84,8 +82,8 @@ describe('GenerateApiKeyModal', () => {
       );
       expect(wrapper.find(EuiFieldText)).toHaveLength(0);
       expect(wrapper.find('[data-test-subj="generateApiKeyButton"]')).toHaveLength(0);
-      expect(wrapper.find(ApiKey)).toHaveLength(1);
-      expect(wrapper.find(ApiKey).prop('apiKey')).toEqual('apiKeyFromBackend123123==');
+      expect(wrapper.find(EuiCodeBlock)).toHaveLength(1);
+      expect(wrapper.find(EuiCodeBlock).children().text()).toEqual('apiKeyFromBackend123123==');
     });
   });
 });

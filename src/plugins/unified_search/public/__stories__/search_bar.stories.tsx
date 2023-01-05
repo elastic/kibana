@@ -22,7 +22,7 @@ const mockIndexPatterns = [
     title: 'logstash-*',
     fields: [
       {
-        name: 'response',
+        name: 'bytes',
         type: 'number',
         esTypes: ['integer'],
         aggregatable: true,
@@ -30,6 +30,7 @@ const mockIndexPatterns = [
         searchable: true,
       },
     ],
+    getName: () => 'logstash-*',
   },
   {
     id: '1235',
@@ -44,6 +45,7 @@ const mockIndexPatterns = [
         searchable: true,
       },
     ],
+    getName: () => 'test-*',
   },
 ] as DataView[];
 
@@ -162,6 +164,11 @@ const services = {
       ],
     },
   },
+  dataViewEditor: {
+    userPermissions: {
+      editDataView: action('editDataView'),
+    },
+  },
 };
 
 setIndexPatterns({
@@ -173,7 +180,6 @@ function wrapSearchBarInContext(testProps: SearchBarProps<Query>) {
     appName: 'test',
     timeHistory: mockTimeHistory,
     intl: null as any,
-    showQueryBar: true,
     showFilterBar: true,
     showDatePicker: true,
     showAutoRefreshOnly: false,
@@ -289,6 +295,15 @@ storiesOf('SearchBar', module)
       showDatePicker: false,
       showFilterBar: false,
       showQueryInput: true,
+      query: { query: 'Test: miaou', language: 'kuery' },
+    } as unknown as SearchBarProps)
+  )
+  .add('with query menu off', () =>
+    wrapSearchBarInContext({
+      showDatePicker: false,
+      showFilterBar: false,
+      showQueryInput: true,
+      showQueryMenu: false,
       query: { query: 'Test: miaou', language: 'kuery' },
     } as unknown as SearchBarProps)
   )
@@ -430,6 +445,24 @@ storiesOf('SearchBar', module)
       showSubmitButton: false,
     } as SearchBarProps)
   )
+  .add('show only datepicker without submit', () =>
+    wrapSearchBarInContext({
+      showDatePicker: true,
+      showFilterBar: false,
+      showAutoRefreshOnly: false,
+      showQueryInput: false,
+      showSubmitButton: false,
+    } as SearchBarProps)
+  )
+  .add('show only query bar and timepicker without submit', () =>
+    wrapSearchBarInContext({
+      showDatePicker: true,
+      showFilterBar: false,
+      showAutoRefreshOnly: false,
+      showQueryInput: true,
+      showSubmitButton: false,
+    } as SearchBarProps)
+  )
   .add('with filter bar on but pinning option is hidden from menus', () =>
     wrapSearchBarInContext({
       showDatePicker: false,
@@ -534,4 +567,60 @@ storiesOf('SearchBar', module)
       ],
       query: { sql: 'SELECT field1, field10 FROM DATAVIEW' },
     } as unknown as SearchBarProps<Query>)
+  )
+  .add('in disabled state', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      isDisabled: true,
+    } as SearchBarProps)
+  )
+  .add('no submit button', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      showSubmitButton: false,
+    } as SearchBarProps)
+  )
+  .add('submit button always as icon', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      submitButtonStyle: 'iconOnly',
+    } as SearchBarProps)
+  )
+  .add('submit button always as a full button', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      submitButtonStyle: 'full',
+    } as SearchBarProps)
   );

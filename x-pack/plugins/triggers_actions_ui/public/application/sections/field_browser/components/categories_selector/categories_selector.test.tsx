@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mockBrowserFields } from '../../mock';
 import { CategoriesSelector } from './categories_selector';
 
@@ -40,31 +41,35 @@ describe('CategoriesSelector', () => {
     expect(result.getByText('2')).toBeInTheDocument();
   });
 
-  it('should open the category selector', () => {
+  it('should open the category selector', async () => {
     const result = render(<CategoriesSelector {...defaultProps} />);
 
     result.getByTestId('categories-filter-button').click();
+    await waitForEuiPopoverOpen();
 
     expect(result.getByTestId('categories-selector-search')).toBeInTheDocument();
     expect(result.getByTestId(`categories-selector-option-base`)).toBeInTheDocument();
   });
 
-  it('should open the category selector with selected categories', () => {
+  it('should open the category selector with selected categories', async () => {
     const result = render(
       <CategoriesSelector {...defaultProps} selectedCategoryIds={['base', 'event']} />
     );
 
     result.getByTestId('categories-filter-button').click();
+    await waitForEuiPopoverOpen();
 
     expect(result.getByTestId('categories-selector-search')).toBeInTheDocument();
     expect(result.getByTestId(`categories-selector-option-base`)).toBeInTheDocument();
     expect(result.getByTestId(`categories-selector-option-name-base`)).toBeInTheDocument();
   });
 
-  it('should call setSelectedCategoryIds when category selected', () => {
+  it('should call setSelectedCategoryIds when category selected', async () => {
     const result = render(<CategoriesSelector {...defaultProps} />);
 
     result.getByTestId('categories-filter-button').click();
+    await waitForEuiPopoverOpen();
+
     result.getByTestId(`categories-selector-option-base`).click();
     expect(mockSetSelectedCategoryIds).toHaveBeenCalledWith(['base']);
   });

@@ -26,6 +26,9 @@ export interface SavedObjectsType<Attributes = any> {
   /**
    * Is the type hidden by default. If true, repositories will not have access to this type unless explicitly
    * declared as an `extraType` when creating the repository.
+   * It is recommended to hide the type for better backward compatibility.
+   * The hidden types will not be automatically exposed via the HTTP API.
+   * Therefore, that should prevent unexpected behavior in the client code, as all the interactions will be done via the plugin API.
    *
    * See {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}.
    */
@@ -110,6 +113,7 @@ export interface SavedObjectsType<Attributes = any> {
    * ```
    *
    * Note: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process.
+   * @deprecated Converting to multi-namespace clashes with the ZDT requirement for serverless
    */
   convertToMultiNamespaceTypeVersion?: string;
   /**

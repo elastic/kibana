@@ -49,22 +49,18 @@ export const DETECTION_RESPONSE_TITLE = i18n.translate(
     defaultMessage: 'Detection & Response',
   }
 );
-export const NO_PERMISSIONS_MSG = i18n.translate(
-  'xpack.securitySolution.detectionResponse.noPagePermissionsMessage',
+
+export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.pageDesc',
   {
     defaultMessage:
-      'To view this page you must update privileges. For more information, contact your Kibana administrator.',
+      'Detect threats from users and devices within your network with Entity Analytics',
   }
 );
-export const NO_PERMISSIONS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionResponse.noPermissionsTitle',
+
+export const TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.technicalPreviewLabel',
   {
-    defaultMessage: 'Privileges required',
-  }
-);
-export const GO_TO_DOCUMENTATION = i18n.translate(
-  'xpack.securitySolution.detectionResponse.goToDocumentationButton',
-  {
-    defaultMessage: 'View documentation',
+    defaultMessage: 'Technical Preview',
   }
 );

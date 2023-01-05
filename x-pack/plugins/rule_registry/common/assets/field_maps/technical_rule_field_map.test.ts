@@ -37,11 +37,19 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.case_ids": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.duration.us": Object {
         "type": "long",
       },
       "kibana.alert.end": Object {
         "type": "date",
+      },
+      "kibana.alert.flapping": Object {
+        "type": "boolean",
       },
       "kibana.alert.instance.id": Object {
         "required": true,
@@ -193,10 +201,39 @@ it('matches snapshot', () => {
         "required": true,
         "type": "keyword",
       },
+      "kibana.alert.suppression.docs_count": Object {
+        "array": false,
+        "required": false,
+        "type": "long",
+      },
+      "kibana.alert.suppression.end": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
+      "kibana.alert.suppression.start": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
+      "kibana.alert.suppression.terms.field": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.suppression.terms.value": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.system_status": Object {
         "array": false,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.alert.time_range": Object {
+        "format": "epoch_millis||strict_date_optional_time",
+        "type": "date_range",
       },
       "kibana.alert.uuid": Object {
         "required": true,

@@ -6,9 +6,12 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
-import { act } from '@testing-library/react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
+import { act, waitFor } from '@testing-library/react';
+
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
 import { TestProviders } from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
@@ -31,6 +34,7 @@ import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/api');
+jest.mock('../../containers/user_profiles/api');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
@@ -63,7 +67,7 @@ const fillForm = (wrapper: ReactWrapper) => {
 
   act(() => {
     (
-      wrapper.find(EuiComboBox).props() as unknown as {
+      wrapper.find(EuiComboBox).at(0).props() as unknown as {
         onChange: (a: EuiComboBoxOptionOption[]) => void;
       }
     ).onChange(sampleTags.map((tag) => ({ label: tag })));
@@ -102,16 +106,66 @@ describe('CreateCase case', () => {
     });
   });
 
-  it('should call cancel on cancel click', async () => {
+  it('should open modal on cancel click', async () => {
     const wrapper = mount(
       <TestProviders>
         <CreateCase {...defaultProps} />
       </TestProviders>
     );
-    await act(async () => {
-      wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+
+    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+
+    await waitFor(() => {
+      expect(
+        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
+      ).toBeTruthy();
     });
-    expect(defaultProps.onCancel).toHaveBeenCalled();
+  });
+
+  it('should confirm cancelation on modal confirm click', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CreateCase {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+
+    await waitFor(() => {
+      expect(
+        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
+      ).toBeTruthy();
+    });
+
+    wrapper.find(`button[data-test-subj="confirmModalConfirmButton"]`).simulate('click');
+
+    await waitFor(() => {
+      expect(defaultProps.onCancel).toHaveBeenCalled();
+    });
+  });
+
+  it('should close modal on modal cancel click', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CreateCase {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+
+    await waitFor(() => {
+      expect(
+        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
+      ).toBeTruthy();
+    });
+
+    wrapper.find(`button[data-test-subj="confirmModalCancelButton"]`).simulate('click');
+
+    await waitFor(() => {
+      expect(
+        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
+      ).toBeFalsy();
+    });
   });
 
   it('should redirect to new case when posting the case', async () => {
@@ -123,8 +177,9 @@ describe('CreateCase case', () => {
 
     await act(async () => {
       fillForm(wrapper);
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+      wrapper.find(`button[data-test-subj="create-case-submit"]`).first().simulate('click');
     });
+
     expect(defaultProps.onSuccess).toHaveBeenCalled();
   });
 });

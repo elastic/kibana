@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const fieldName = 'clientip';
   const deployment = getService('deployment');
   const retry = getService('retry');
+  const security = getService('security');
 
   const clickFieldAndCheckUrl = async (fieldLink: WebElementWrapper) => {
     const fieldValue = await fieldLink.getVisibleText();
@@ -38,6 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Changing field formatter to Url', () => {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
@@ -57,6 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await security.testUser.restoreDefaults();
     });
 
     it('applied on dashboard', async () => {

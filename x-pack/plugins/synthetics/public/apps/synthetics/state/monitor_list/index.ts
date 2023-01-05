@@ -5,17 +5,35 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { createReducer } from '@reduxjs/toolkit';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 
-import { ConfigKey, MonitorManagementListResult } from '../../../../../common/runtime_types';
+import { SavedObject } from '@kbn/core-saved-objects-common';
+import {
+  ConfigKey,
+  MonitorManagementListResult,
+  SyntheticsMonitor,
+} from '../../../../../common/runtime_types';
 
-import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
+import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import { MonitorListPageState } from './models';
-import { fetchMonitorListAction } from './actions';
+import {
+  clearMonitorUpsertStatus,
+  enableMonitorAlertAction,
+  fetchMonitorListAction,
+  fetchUpsertFailureAction,
+  fetchUpsertMonitorAction,
+  fetchUpsertSuccessAction,
+} from './actions';
 
 export interface MonitorListState {
   data: MonitorManagementListResult;
+  monitorUpsertStatuses: Record<
+    string,
+    { status: FETCH_STATUS; enabled?: boolean; alertStatus?: FETCH_STATUS }
+  >;
   pageState: MonitorListPageState;
   loading: boolean;
   loaded: boolean;
@@ -24,6 +42,7 @@ export interface MonitorListState {
 
 const initialState: MonitorListState = {
   data: { page: 1, perPage: 10, total: null, monitors: [], syncErrors: [], absoluteTotal: 0 },
+  monitorUpsertStatuses: {},
   pageState: {
     pageIndex: 0,
     pageSize: 10,
@@ -38,7 +57,9 @@ const initialState: MonitorListState = {
 export const monitorListReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(fetchMonitorListAction.get, (state, action) => {
-      state.pageState = action.payload;
+      if (!isEqual(state.pageState, action.payload)) {
+        state.pageState = action.payload;
+      }
       state.loading = true;
       state.loaded = false;
     })
@@ -49,7 +70,52 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchMonitorListAction.fail, (state, action) => {
       state.loading = false;
-      state.error = serializeHttpFetchError(action.payload);
+      state.error = action.payload;
+    })
+    .addCase(fetchUpsertMonitorAction, (state, action) => {
+      state.monitorUpsertStatuses[action.payload.configId] = {
+        status: FETCH_STATUS.LOADING,
+      };
+    })
+    .addCase(fetchUpsertSuccessAction, (state, action) => {
+      state.monitorUpsertStatuses[action.payload.id] = {
+        status: FETCH_STATUS.SUCCESS,
+        enabled: action.payload.attributes.enabled,
+      };
+    })
+    .addCase(fetchUpsertFailureAction, (state, action) => {
+      state.monitorUpsertStatuses[action.payload.configId] = { status: FETCH_STATUS.FAILURE };
+    })
+    .addCase(enableMonitorAlertAction.get, (state, action) => {
+      state.monitorUpsertStatuses[action.payload.configId] = {
+        ...state.monitorUpsertStatuses[action.payload.configId],
+        alertStatus: FETCH_STATUS.LOADING,
+      };
+    })
+    .addCase(enableMonitorAlertAction.success, (state, action) => {
+      state.monitorUpsertStatuses[action.payload.id] = {
+        ...state.monitorUpsertStatuses[action.payload.id],
+        alertStatus: FETCH_STATUS.SUCCESS,
+      };
+      if ('updated_at' in action.payload) {
+        state.data.monitors = state.data.monitors.map((monitor) => {
+          if (monitor.id === action.payload.id) {
+            return action.payload as SavedObject<SyntheticsMonitor>;
+          }
+          return monitor;
+        });
+      }
+    })
+    .addCase(enableMonitorAlertAction.fail, (state, action) => {
+      state.monitorUpsertStatuses[action.payload.configId] = {
+        ...state.monitorUpsertStatuses[action.payload.configId],
+        alertStatus: FETCH_STATUS.FAILURE,
+      };
+    })
+    .addCase(clearMonitorUpsertStatus, (state, action) => {
+      if (state.monitorUpsertStatuses[action.payload]) {
+        delete state.monitorUpsertStatuses[action.payload];
+      }
     });
 });
 

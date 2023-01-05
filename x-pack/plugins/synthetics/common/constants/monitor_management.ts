@@ -5,12 +5,20 @@
  * 2.0.
  */
 
+export enum AlertConfigKey {
+  STATUS_ENABLED = 'alert.status.enabled',
+  TLS_ENABLED = 'alert.tls.enabled',
+}
+
 // values must match keys in the integration package
 export enum ConfigKey {
+  ALERT_CONFIG = 'alert',
   APM_SERVICE_NAME = 'service.name',
   CUSTOM_HEARTBEAT_ID = 'custom_heartbeat_id',
   CONFIG_ID = 'config_id',
+  CONFIG_HASH = 'hash',
   ENABLED = 'enabled',
+  FORM_MONITOR_TYPE = 'form_monitor_type',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',
   MONITOR_SOURCE_TYPE = 'origin',
@@ -53,6 +61,7 @@ export enum ConfigKey {
   SOURCE_ZIP_PROXY_URL = 'source.zip_url.proxy_url',
   PROJECT_ID = 'project_id',
   SYNTHETICS_ARGS = 'synthetics_args',
+  TEXT_ASSERTION = 'playwright_text_assertion',
   TLS_CERTIFICATE_AUTHORITIES = 'ssl.certificate_authorities',
   TLS_CERTIFICATE = 'ssl.certificate',
   TLS_KEY = 'ssl.key',
@@ -75,6 +84,7 @@ export enum ConfigKey {
   ZIP_URL_TLS_KEY_PASSPHRASE = 'source.zip_url.ssl.key_passphrase',
   ZIP_URL_TLS_VERIFICATION_MODE = 'source.zip_url.ssl.verification_mode',
   ZIP_URL_TLS_VERSION = 'source.zip_url.ssl.supported_protocols',
+  MONITOR_QUERY_ID = 'id',
 }
 
 export const secretKeys = [

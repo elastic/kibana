@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mockBrowserFields } from './mock';
 import { FIELD_BROWSER_WIDTH } from './helpers';
 import { FieldBrowserComponent } from './field_browser';
@@ -96,7 +97,8 @@ describe('FieldsBrowser', () => {
       });
 
       result.getByTestId('categories-filter-button').click();
-      expect(result.getByTestId('categories-selector-option-base')).toBeInTheDocument();
+      await waitForEuiPopoverOpen();
+      expect(result.getByTestId('categories-selector-option-base')).toBeVisible();
 
       fireEvent.change(result.getByTestId('field-search'), { target: { value: 'client' } });
       await waitFor(() => {
@@ -118,5 +120,26 @@ describe('FieldsBrowser', () => {
 
     const result = renderComponent({ isEventViewer, width: FIELD_BROWSER_WIDTH });
     expect(result.getByTestId('show-field-browser')).toBeInTheDocument();
+  });
+
+  describe('options.preselectedCategoryIds', () => {
+    it("should render fields list narrowed to preselected category id's", async () => {
+      const agentFieldsCount = Object.keys(mockBrowserFields.agent?.fields || {}).length;
+
+      // Narrowing the selection to 'agent' only
+      const result = renderComponent({ options: { preselectedCategoryIds: ['agent'] } });
+
+      result.getByTestId('show-field-browser').click();
+
+      // Wait for the modal to open
+      await waitFor(() => {
+        expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
+      });
+
+      // Check if there are only 4 fields in the table
+      expect(result.queryByTestId('field-table')?.querySelectorAll('tbody tr')).toHaveLength(
+        agentFieldsCount
+      );
+    });
   });
 });

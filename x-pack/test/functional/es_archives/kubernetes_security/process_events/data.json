@@ -212,3 +212,17 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": "kubernetes-test-index",
+    "id": "15",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:31.570Z",
+      "message": "hello world security",
+      "orchestrator.namespace": "namespace09",
+      "process.entry_leader.entity_id": "1"
+    }
+  }
+}

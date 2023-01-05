@@ -118,7 +118,7 @@ export const ActionFactory: React.FC<ActionFactoryProps> = ({
           </EuiFlexItem>
           {!!onChange && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" onClick={onChange}>
+              <EuiButtonEmpty size="xs" data-test-subj="changeDrilldownType" onClick={onChange}>
                 {txtChangeButton}
               </EuiButtonEmpty>
             </EuiFlexItem>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -23,7 +23,7 @@ import type {
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesUiStart } from '@kbn/cases-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
 import type { KubernetesSecurityStart } from '@kbn/kubernetes-security-plugin/public';
@@ -40,14 +40,13 @@ import type {
   SavedObjectTaggingOssPluginStart,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plugin/public';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
-import type { Hosts } from './hosts';
-import type { Users } from './users';
-import type { Network } from './network';
 import type { Kubernetes } from './kubernetes';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
@@ -56,6 +55,8 @@ import type { Management } from './management';
 import type { LandingPages } from './landing_pages';
 import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { ThreatIntelligence } from './threat_intelligence';
+import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
+import type { Explore } from './explore';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -74,6 +75,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
   kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
@@ -87,9 +89,10 @@ export interface StartPlugins {
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery?: OsqueryPluginStart;
-  security: SecurityPluginSetup;
+  security: SecurityPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   threatIntelligence: ThreatIntelligencePluginStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -99,8 +102,18 @@ export interface StartPluginsDependencies extends StartPlugins {
 export type StartServices = CoreStart &
   StartPlugins & {
     storage: Storage;
+    sessionStorage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
+    onAppLeave: (handler: AppLeaveHandler) => void;
+
+    /**
+     * This component will be exposed to all lazy loaded plugins, via useKibana hook. It should wrap every plugin route.
+     * The goal is to allow page property customization (such as `template`).
+     */
+    securityLayout: {
+      getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
+    };
   };
 
 export interface PluginSetup {
@@ -121,9 +134,7 @@ export interface SubPlugins {
   rules: Rules;
   exceptions: Exceptions;
   [CASES_SUB_PLUGIN_KEY]: Cases;
-  hosts: Hosts;
-  users: Users;
-  network: Network;
+  explore: Explore;
   kubernetes: Kubernetes;
   overview: Overview;
   timelines: Timelines;
@@ -139,9 +150,7 @@ export interface StartedSubPlugins {
   rules: ReturnType<Rules['start']>;
   exceptions: ReturnType<Exceptions['start']>;
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
-  hosts: ReturnType<Hosts['start']>;
-  users: ReturnType<Users['start']>;
-  network: ReturnType<Network['start']>;
+  explore: ReturnType<Explore['start']>;
   kubernetes: ReturnType<Kubernetes['start']>;
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;

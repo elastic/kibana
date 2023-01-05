@@ -8,13 +8,17 @@
 import React, { useEffect } from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { useBreadcrumbs } from '../../hooks';
 import { getServiceLocations } from '../../state';
+import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
 import { SimpleMonitorForm } from './simple_monitor_form';
+
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   useEffect(() => {
     dispatch(getServiceLocations());
@@ -32,23 +36,19 @@ export const GettingStartedPage = () => {
           <>
             <EuiText size="s">
               {OR_LABEL}{' '}
-              <EuiLink href="/synthetics/monitors/add-new">{SELECT_DIFFERENT_MONITOR}</EuiLink>
+              <EuiLink
+                href={history.createHref({
+                  pathname: MONITOR_ADD_ROUTE,
+                })}
+              >
+                {SELECT_DIFFERENT_MONITOR}
+              </EuiLink>
               {i18n.translate('xpack.synthetics.gettingStarted.createSingle.description', {
                 defaultMessage: ' to get started with Elastic Synthetics Monitoring',
               })}
             </EuiText>
             <EuiSpacer />
             <SimpleMonitorForm />
-          </>
-        }
-        footer={
-          <>
-            <EuiText size="s" color="subdued" className="eui-displayInlineBlock">
-              {FOR_MORE_INFO_LABEL}
-            </EuiText>{' '}
-            <EuiLink href="#" target="_blank" className="eui-displayInline">
-              {GETTING_STARTED_LABEL}
-            </EuiLink>
           </>
         }
       />
@@ -65,21 +65,10 @@ const Wrapper = styled.div`
   }
 `;
 
-const FOR_MORE_INFO_LABEL = i18n.translate('xpack.synthetics.gettingStarted.forMoreInfo', {
-  defaultMessage: 'For more information, read our',
-});
-
 const CREATE_SINGLE_PAGE_LABEL = i18n.translate(
   'xpack.synthetics.gettingStarted.createSinglePageLabel',
   {
     defaultMessage: 'Create a single page browser monitor',
-  }
-);
-
-const GETTING_STARTED_LABEL = i18n.translate(
-  'xpack.synthetics.gettingStarted.gettingStartedLabel',
-  {
-    defaultMessage: 'Getting Started Guide',
   }
 );
 

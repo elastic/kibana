@@ -58,7 +58,7 @@ export function oneNodeWithPaginatedEvents(): {
         indexPatterns,
       }: {
         entityID: string;
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         indexPatterns: string[];
       }): Promise<ResolverRelatedEvents> {
         /**
@@ -86,7 +86,7 @@ export function oneNodeWithPaginatedEvents(): {
         entityID: string;
         category: string;
         after?: string;
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         indexPatterns: string[];
       }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
         let events: SafeResolverEvent[] = [];
@@ -121,7 +121,7 @@ export function oneNodeWithPaginatedEvents(): {
         eventTimestamp: string;
         eventID?: string | number;
         winlogRecordID: string;
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {
         return mockTree.events.find((event) => eventModel.eventID(event) === eventID) ?? null;

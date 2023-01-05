@@ -68,13 +68,6 @@ function wrapper({
               },
             ],
           };
-        case 'POST /internal/apm/correlations/field_stats/transactions':
-          return {
-            stats: [
-              { fieldName: 'field-name-1', count: 123 },
-              { fieldName: 'field-name-2', count: 1111 },
-            ],
-          };
         default:
           return {};
       }
@@ -108,7 +101,7 @@ function wrapper({
 
 describe('useFailedTransactionsCorrelations', () => {
   beforeEach(async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   // Running all pending timers and switching to real timers using Jest
   afterEach(() => {
@@ -168,9 +161,10 @@ describe('useFailedTransactionsCorrelations', () => {
       );
 
       try {
+        // Each simulated request takes 100ms. After an initial 50ms
+        // we track the internal requests the hook is running and
+        // check the expected progress after these requests.
         jest.advanceTimersByTime(50);
-        await waitFor(() => expect(result.current.progress.loaded).toBe(0));
-        jest.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0));
         jest.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(0.05));
@@ -182,7 +176,27 @@ describe('useFailedTransactionsCorrelations', () => {
         });
         expect(result.current.response).toEqual({
           ccsWarning: false,
-          fieldStats: undefined,
+          errorHistogram: undefined,
+          failedTransactionsCorrelations: undefined,
+          overallHistogram: [
+            {
+              doc_count: 1234,
+              key: 'the-key',
+            },
+          ],
+          percentileThresholdValue: 1.234,
+        });
+
+        jest.advanceTimersByTime(100);
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0.1));
+
+        expect(result.current.progress).toEqual({
+          error: undefined,
+          isRunning: true,
+          loaded: 0.1,
+        });
+        expect(result.current.response).toEqual({
+          ccsWarning: false,
           errorHistogram: [
             {
               doc_count: 1234,
@@ -200,61 +214,18 @@ describe('useFailedTransactionsCorrelations', () => {
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() => expect(result.current.progress.loaded).toBe(0.1));
+        await waitFor(() => expect(result.current.progress.loaded).toBe(0.15));
 
         // field candidates are an implementation detail and
-        // will not be exposed, it will just set loaded to 0.1.
+        // will not be exposed, it will just set loaded to 0.15.
         expect(result.current.progress).toEqual({
           error: undefined,
           isRunning: true,
-          loaded: 0.1,
+          loaded: 0.15,
         });
 
         jest.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(1));
-
-        expect(result.current.progress).toEqual({
-          error: undefined,
-          isRunning: true,
-          loaded: 1,
-        });
-
-        expect(result.current.response).toEqual({
-          ccsWarning: false,
-          fieldStats: undefined,
-          errorHistogram: [
-            {
-              doc_count: 1234,
-              key: 'the-key',
-            },
-          ],
-          failedTransactionsCorrelations: [
-            {
-              fieldName: 'field-name-1',
-              fieldValue: 'field-value-1',
-              doc_count: 123,
-              bg_count: 1234,
-              score: 0.66,
-              pValue: 0.01,
-              normalizedScore: 0.85,
-              failurePercentage: 30,
-              successPercentage: 70,
-              histogram: [{ key: 'the-key', doc_count: 123 }],
-            },
-          ],
-          overallHistogram: [
-            {
-              doc_count: 1234,
-              key: 'the-key',
-            },
-          ],
-          percentileThresholdValue: 1.234,
-        });
-
-        jest.advanceTimersByTime(100);
-        await waitFor(() =>
-          expect(result.current.response.fieldStats).toBeDefined()
-        );
 
         expect(result.current.progress).toEqual({
           error: undefined,
@@ -264,10 +235,6 @@ describe('useFailedTransactionsCorrelations', () => {
 
         expect(result.current.response).toEqual({
           ccsWarning: false,
-          fieldStats: [
-            { fieldName: 'field-name-1', count: 123 },
-            { fieldName: 'field-name-2', count: 1111 },
-          ],
           errorHistogram: [
             {
               doc_count: 1234,

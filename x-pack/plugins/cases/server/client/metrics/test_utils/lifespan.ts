@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
-import { CaseStatuses, CaseUserActionResponse } from '../../../../common/api';
+import type { SavedObject } from '@kbn/core/server';
+import type { CaseStatuses, CaseUserActionResponse } from '../../../../common/api';
 
 export function createStatusChangeSavedObject(
   status: CaseStatuses,

@@ -6,29 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { execSync } from 'child_process';
+import { asyncForEachWithLimit } from '@kbn/std';
+import Fs from 'fs';
 
 export interface EslintDisableCounts {
   eslintDisableLineCount: number;
   eslintDisableFileCount: number;
 }
 
-export async function countEslintDisableLine(path: string): Promise<EslintDisableCounts> {
-  const disableCountOutputs = await Promise.all([
-    execSync(`grep -rE 'eslint-disable-next-line|eslint-disable-line' ${path} | wc -l`),
-    execSync(`grep -rE 'eslint-disable ' ${path} | wc -l`),
-  ]);
-  const eslintDisableLineCount = Number.parseInt(disableCountOutputs[0].toString(), 10);
+const count = (s: string, r: RegExp) => Array.from(s.matchAll(r)).length;
 
-  if (eslintDisableLineCount === undefined || isNaN(eslintDisableLineCount)) {
-    throw new Error(`Parsing ${disableCountOutputs[0]} failed to product a valid number`);
-  }
+export async function countEslintDisableLines(paths: string[]): Promise<EslintDisableCounts> {
+  let eslintDisableFileCount = 0;
+  let eslintDisableLineCount = 0;
 
-  const eslintDisableFileCount = Number.parseInt(disableCountOutputs[1].toString(), 10);
+  await asyncForEachWithLimit(paths, 100, async (path) => {
+    const content = await Fs.promises.readFile(path, 'utf8');
 
-  if (eslintDisableFileCount === undefined || isNaN(eslintDisableFileCount)) {
-    throw new Error(`Parsing ${disableCountOutputs[1]} failed to product a valid number`);
-  }
+    eslintDisableLineCount +=
+      count(content, /eslint-disable-next-line/g) + count(content, /eslint-disable-line/g);
+    eslintDisableFileCount += count(content, /eslint-disable\s/g);
+  });
 
   return { eslintDisableFileCount, eslintDisableLineCount };
 }

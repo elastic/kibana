@@ -14,7 +14,8 @@
     "alerting",
     "triggersActionsUi",
     "observability",
-    "ruleRegistry"
+    "ruleRegistry",
+    "unifiedSearch"
   ],
   "optionalPlugins": ["ml", "home", "embeddable", "osquery"],
   "server": true,
@@ -27,7 +28,8 @@
     "kibanaUtils",
     "kibanaReact",
     "ml",
-    "embeddable"
+    "embeddable",
+    "controls"  
   ],
   "owner": {
     "name": "Logs and Metrics UI",

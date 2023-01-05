@@ -10,9 +10,9 @@ import { scaleLog } from 'd3-scale';
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { getDurationField, getEventType } from '../utils';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
@@ -25,21 +25,40 @@ const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
 
 export const fetchDurationHistogramRangeSteps = async ({
   chartType,
-  setup,
+  apmEventClient,
   start,
   end,
   environment,
   kuery,
   query,
   searchMetrics,
+  durationMinOverride,
+  durationMaxOverride,
 }: CommonCorrelationsQueryParams & {
   chartType: LatencyDistributionChartType;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchMetrics: boolean;
-}): Promise<number[]> => {
-  const { apmEventClient } = setup;
-
+  durationMinOverride?: number;
+  durationMaxOverride?: number;
+}): Promise<{
+  durationMin?: number;
+  durationMax?: number;
+  rangeSteps: number[];
+}> => {
   const steps = 100;
+
+  if (durationMinOverride && durationMaxOverride) {
+    return {
+      durationMin: durationMinOverride,
+      durationMax: durationMaxOverride,
+      rangeSteps: getHistogramRangeSteps(
+        durationMinOverride,
+        durationMaxOverride,
+        steps
+      ),
+    };
+  }
+
   const durationField = getDurationField(chartType, searchMetrics);
 
   // when using metrics data, ensure we filter by docs with the appropriate duration field
@@ -54,6 +73,7 @@ export const fetchDurationHistogramRangeSteps = async ({
         events: [getEventType(chartType, searchMetrics)],
       },
       body: {
+        track_total_hits: 1,
         size: 0,
         query: getCommonCorrelationsQuery({
           start,
@@ -71,7 +91,7 @@ export const fetchDurationHistogramRangeSteps = async ({
   );
 
   if (resp.hits.total.value === 0) {
-    return getHistogramRangeSteps(0, 1, 100);
+    return { rangeSteps: getHistogramRangeSteps(0, 1, 100) };
   }
 
   if (
@@ -81,11 +101,15 @@ export const fetchDurationHistogramRangeSteps = async ({
       isFiniteNumber(resp.aggregations.duration_max.value)
     )
   ) {
-    return [];
+    return { rangeSteps: [] };
   }
 
-  const min = resp.aggregations.duration_min.value;
-  const max = resp.aggregations.duration_max.value * 2;
+  const durationMin = resp.aggregations.duration_min.value;
+  const durationMax = resp.aggregations.duration_max.value * 2;
 
-  return getHistogramRangeSteps(min, max, steps);
+  return {
+    durationMin,
+    durationMax,
+    rangeSteps: getHistogramRangeSteps(durationMin, durationMax, steps),
+  };
 };

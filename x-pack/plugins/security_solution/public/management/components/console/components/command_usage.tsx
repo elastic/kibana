@@ -22,10 +22,10 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
   const usageHelp = useMemo(() => {
     return getArgumentsForCommand(commandDef).map((usage, index) => {
       return (
-        <>
+        <React.Fragment key={`helpUsage-${index}`}>
           {index > 0 && <EuiSpacer size="xs" />}
           <ConsoleCodeBlock>{`${commandDef.name} ${usage}`}</ConsoleCodeBlock>
-        </>
+        </React.Fragment>
       );
     });
   }, [commandDef]);
@@ -45,7 +45,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
                 })}
               </ConsoleCodeBlock>
             ),
-            description: usageHelp,
+            description: usageHelp && usageHelp.length > 0 ? usageHelp : commandDef.name,
           },
         ]}
         descriptionProps={additionalProps}

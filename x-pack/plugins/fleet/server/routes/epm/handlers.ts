@@ -37,6 +37,7 @@ import type {
   GetStatsRequestSchema,
   FleetRequestHandler,
   UpdatePackageRequestSchema,
+  GetLimitedPackagesRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -51,11 +52,7 @@ import {
   getInstallation,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
-import {
-  defaultIngestErrorHandler,
-  ingestErrorToResponseOptions,
-  IngestManagerError,
-} from '../../errors';
+import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
 import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
@@ -71,14 +68,16 @@ export const getCategoriesHandler: FleetRequestHandler<
   TypeOf<typeof GetCategoriesRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const res = await getCategories(request.query);
+    const res = await getCategories({
+      ...request.query,
+    });
     const body: GetCategoriesResponse = {
       items: res,
       response: res,
     };
     return response.ok({ body, headers: { ...CACHE_CONTROL_10_MINUTES_HEADER } });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -87,7 +86,7 @@ export const getListHandler: FleetRequestHandler<
   TypeOf<typeof GetPackagesRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = (await context.fleet).epm.internalSoClient;
+    const savedObjectsClient = (await context.fleet).internalSoClient;
     const res = await getPackages({
       savedObjectsClient,
       ...request.query,
@@ -103,14 +102,21 @@ export const getListHandler: FleetRequestHandler<
       headers: request.query.excludeInstallStatus ? { ...CACHE_CONTROL_10_MINUTES_HEADER } : {},
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
-export const getLimitedListHandler: FleetRequestHandler = async (context, request, response) => {
+export const getLimitedListHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetLimitedPackagesRequestSchema.query>,
+  undefined
+> = async (context, request, response) => {
   try {
-    const savedObjectsClient = (await context.fleet).epm.internalSoClient;
-    const res = await getLimitedPackages({ savedObjectsClient });
+    const savedObjectsClient = (await context.fleet).internalSoClient;
+    const res = await getLimitedPackages({
+      savedObjectsClient,
+      prerelease: request.query.prerelease,
+    });
     const body: GetLimitedPackagesResponse = {
       items: res,
       response: res,
@@ -119,7 +125,7 @@ export const getLimitedListHandler: FleetRequestHandler = async (context, reques
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -128,7 +134,7 @@ export const getFileHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   try {
     const { pkgName, pkgVersion, filePath } = request.params;
-    const savedObjectsClient = (await context.fleet).epm.internalSoClient;
+    const savedObjectsClient = (await context.fleet).internalSoClient;
     const installation = await getInstallation({ savedObjectsClient, pkgName });
     const useLocalFile = pkgVersion === installation?.version;
 
@@ -193,31 +199,35 @@ export const getFileHandler: FleetRequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
 export const getInfoHandler: FleetRequestHandler<
-  TypeOf<typeof GetInfoRequestSchema.params>
+  TypeOf<typeof GetInfoRequestSchema.params>,
+  TypeOf<typeof GetInfoRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = (await context.fleet).epm.internalSoClient;
+    const savedObjectsClient = (await context.fleet).internalSoClient;
     const { pkgName, pkgVersion } = request.params;
+    const { ignoreUnverified = false, full = false, prerelease } = request.query;
     if (pkgVersion && !semverValid(pkgVersion)) {
-      throw new IngestManagerError('Package version is not a valid semver');
+      throw new FleetError('Package version is not a valid semver');
     }
     const res = await getPackageInfo({
       savedObjectsClient,
       pkgName,
       pkgVersion: pkgVersion || '',
-      skipArchive: true,
+      skipArchive: !full,
+      ignoreUnverified,
+      prerelease,
     });
     const body: GetInfoResponse = {
       item: res,
     };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -227,7 +237,7 @@ export const updatePackageHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackageRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = (await context.fleet).epm.internalSoClient;
+    const savedObjectsClient = (await context.fleet).internalSoClient;
     const { pkgName } = request.params;
 
     const res = await updatePackage({ savedObjectsClient, pkgName, ...request.body });
@@ -237,7 +247,7 @@ export const updatePackageHandler: FleetRequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -246,13 +256,13 @@ export const getStatsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   try {
     const { pkgName } = request.params;
-    const savedObjectsClient = (await context.fleet).epm.internalSoClient;
+    const savedObjectsClient = (await context.fleet).internalSoClient;
     const body: GetStatsResponse = {
       response: await getPackageUsageStats({ savedObjectsClient, pkgName }),
     };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -263,7 +273,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const savedObjectsClient = fleetContext.epm.internalSoClient;
+  const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { pkgName, pkgVersion } = request.params;
 
@@ -287,7 +297,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } else {
-    return await defaultIngestErrorHandler({ error: res.error, response });
+    return await defaultFleetErrorHandler({ error: res.error, response });
   }
 };
 
@@ -295,7 +305,7 @@ const bulkInstallServiceResponseToHttpEntry = (
   result: BulkInstallResponse
 ): BulkInstallPackageInfo | IBulkInstallPackageHTTPError => {
   if (isBulkInstallError(result)) {
-    const { statusCode, body } = ingestErrorToResponseOptions(result.error);
+    const { statusCode, body } = fleetErrorToResponseOptions(result.error);
     return {
       name: result.name,
       statusCode,
@@ -308,12 +318,12 @@ const bulkInstallServiceResponseToHttpEntry = (
 
 export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.query>,
   TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const savedObjectsClient = fleetContext.epm.internalSoClient;
+  const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
   const bulkInstalledResponses = await bulkInstallPackages({
@@ -321,6 +331,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     esClient,
     packagesToInstall: request.body.packages,
     spaceId,
+    prerelease: request.query.prerelease,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -343,7 +354,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   }
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const savedObjectsClient = fleetContext.epm.internalSoClient;
+  const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
@@ -366,7 +377,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } else {
-    return defaultIngestErrorHandler({ error: res.error, response });
+    return defaultFleetErrorHandler({ error: res.error, response });
   }
 };
 
@@ -379,7 +390,7 @@ export const deletePackageHandler: FleetRequestHandler<
     const { pkgName, pkgVersion } = request.params;
     const coreContext = await context.core;
     const fleetContext = await context.fleet;
-    const savedObjectsClient = fleetContext.epm.internalSoClient;
+    const savedObjectsClient = fleetContext.internalSoClient;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const res = await removeInstallation({
       savedObjectsClient,
@@ -393,6 +404,6 @@ export const deletePackageHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

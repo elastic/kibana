@@ -6,22 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
-import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { LEGACY_PIE_CHARTS_LIBRARY } from '@kbn/vis-type-pie-plugin/common';
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '@kbn/vis-type-heatmap-plugin/common';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '@kbn/vis-type-gauge-plugin/common';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { setUsageCollectionStart } from './services';
 import { heatmapVisTypeDefinition } from './heatmap';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
-import { createPieVisFn } from './pie_fn';
-import { pieVisTypeDefinition } from './pie';
 import { setFormatService, setDataActions, setTheme } from './services';
 import { getVislibVisRenderer } from './vis_renderer';
 import { gaugeVisTypeDefinition } from './gauge';
@@ -37,6 +35,7 @@ export interface VisTypeVislibPluginSetupDependencies {
 /** @internal */
 export interface VisTypeVislibPluginStartDependencies {
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   usageCollection?: UsageCollectionStart;
 }
 
@@ -58,12 +57,6 @@ export class VisTypeVislibPlugin
     expressions.registerRenderer(getVislibVisRenderer(core, charts));
     expressions.registerFunction(createVisTypeVislibVisFn());
 
-    if (core.uiSettings.get(LEGACY_PIE_CHARTS_LIBRARY, false)) {
-      // register vislib pie chart
-      visualizations.createBaseVisualization(pieVisTypeDefinition);
-      expressions.registerFunction(createPieVisFn());
-    }
-
     if (core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
       // register vislib heatmap chart
       visualizations.createBaseVisualization(heatmapVisTypeDefinition);
@@ -76,8 +69,11 @@ export class VisTypeVislibPlugin
     }
   }
 
-  public start(core: CoreStart, { data, usageCollection }: VisTypeVislibPluginStartDependencies) {
-    setFormatService(data.fieldFormats);
+  public start(
+    core: CoreStart,
+    { data, usageCollection, fieldFormats }: VisTypeVislibPluginStartDependencies
+  ) {
+    setFormatService(fieldFormats);
     setDataActions(data.actions);
     setTheme(core.theme);
     if (usageCollection) {

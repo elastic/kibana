@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ImportResolver } from '@kbn/import-resolver';
 import normalizePath from 'normalize-path';
 
@@ -93,6 +93,7 @@ export class RepoPath {
           pkgDir,
           pkgId,
           rel,
+          isBazelPackage: this.resolver.isBazelPackage(pkgId),
         };
       }
     }

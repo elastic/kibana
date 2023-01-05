@@ -25,7 +25,7 @@ interface AggsResponse {
 export const useLocationMonitors = () => {
   const { savedObjects } = useKibana().services;
 
-  const { data } = useFetcher(() => {
+  const { data, loading } = useFetcher(() => {
     const aggs = {
       locations: {
         terms: {
@@ -47,8 +47,8 @@ export const useLocationMonitors = () => {
         ({ key, doc_count: count }) => ({ id: key, count })
       );
 
-      return { locationMonitors: newValues };
+      return { locationMonitors: newValues, loading };
     }
-    return { locationMonitors: [] };
-  }, [data]);
+    return { locationMonitors: [], loading };
+  }, [data, loading]);
 };

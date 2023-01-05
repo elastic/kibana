@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
+import { isActiveTimeline } from '../../../../helpers';
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useActionCellDataProvider } from '../table/use_action_cell_data_provider';
@@ -18,13 +19,18 @@ import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_bu
 import { SimpleAlertTable } from './simple_alert_table';
 import { getEnrichedFieldInfo } from '../helpers';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { SOURCE_EVENT_LOADING, SOURCE_EVENT_ERROR, SOURCE_EVENT_COUNT } from './translations';
+import {
+  SOURCE_EVENT_LOADING,
+  SOURCE_EVENT_EMPTY,
+  SOURCE_EVENT_ERROR,
+  SOURCE_EVENT_COUNT,
+} from './translations';
 
 interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem;
   eventId: string;
-  timelineId: string;
+  scopeId: string;
 }
 
 /**
@@ -35,38 +41,49 @@ interface Props {
  * the related alerts in a timeline investigation.
  */
 export const RelatedAlertsBySourceEvent = React.memo<Props>(
-  ({ browserFields, data, eventId, timelineId }) => {
+  ({ browserFields, data, eventId, scopeId }) => {
     const { field, values } = data;
     const { error, count, alertIds } = useAlertPrevalence({
       field,
       value: values,
-      timelineId: timelineId ?? '',
+      isActiveTimelines: isActiveTimeline(scopeId),
       signalIndexName: null,
       includeAlertIds: true,
     });
 
     const { fieldFromBrowserField } = getEnrichedFieldInfo({
       browserFields,
-      contextId: timelineId,
+      contextId: scopeId,
       eventId,
       field: { id: data.field },
-      timelineId,
+      scopeId,
       item: data,
     });
 
     const cellData = useActionCellDataProvider({
       field,
       values,
-      contextId: timelineId,
+      contextId: scopeId,
       eventId,
       fieldFromBrowserField,
       fieldFormat: fieldFromBrowserField?.format,
       fieldType: fieldFromBrowserField?.type,
     });
 
+    const isEmpty = count === 0;
+
+    let state: InsightAccordionState = 'loading';
+    if (error) {
+      state = 'error';
+    } else if (alertIds) {
+      state = 'success';
+    }
+
     const renderContent = useCallback(() => {
       if (!alertIds || !cellData?.dataProviders) {
         return null;
+      } else if (isEmpty && state !== 'loading') {
+        return SOURCE_EVENT_EMPTY;
       }
       return (
         <>
@@ -80,16 +97,7 @@ export const RelatedAlertsBySourceEvent = React.memo<Props>(
           </InvestigateInTimelineButton>
         </>
       );
-    }, [alertIds, cellData?.dataProviders]);
-
-    let state: InsightAccordionState = 'loading';
-    if (error) {
-      state = 'error';
-    } else if (count === 0) {
-      state = 'empty';
-    } else if (alertIds) {
-      state = 'success';
-    }
+    }, [alertIds, cellData?.dataProviders, isEmpty, state]);
 
     return (
       <InsightAccordion
@@ -109,7 +117,6 @@ function getTextFromState(state: InsightAccordionState, count: number | undefine
     case 'error':
       return SOURCE_EVENT_ERROR;
     case 'success':
-    case 'empty':
       return SOURCE_EVENT_COUNT(count);
     default:
       return '';

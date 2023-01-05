@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/docs-utils",
-        "id": "def-server.runBuildApiDocsCli",
+        "id": "def-common.runBuildApiDocsCli",
         "type": "Function",
         "tags": [],
         "label": "runBuildApiDocsCli",
@@ -23,19 +31,12 @@
         ],
         "path": "packages/kbn-docs-utils/src/api_docs/build_api_docs_cli.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

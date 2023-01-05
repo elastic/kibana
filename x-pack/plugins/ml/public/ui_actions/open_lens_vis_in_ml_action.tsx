@@ -40,11 +40,11 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
       }
     },
     async isCompatible(context: { embeddable: Embeddable }) {
-      if (context.embeddable.type !== 'lens') {
+      if (context.embeddable.type !== 'lens' || !context.embeddable.getSavedVis()) {
         return false;
       }
 
-      const [{ getJobsItemsFromEmbeddable, isCompatibleVisualizationType }, [coreStart]] =
+      const [{ getJobsItemsFromEmbeddable, isCompatibleVisualizationType }, [coreStart, { lens }]] =
         await Promise.all([
           import('../application/jobs/new_job/job_from_lens'),
           getStartServices(),
@@ -57,8 +57,14 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
         return false;
       }
 
-      const { vis } = getJobsItemsFromEmbeddable(context.embeddable);
-      return isCompatibleVisualizationType(vis);
+      try {
+        const { chartInfo } = await getJobsItemsFromEmbeddable(context.embeddable, lens);
+        return isCompatibleVisualizationType(chartInfo);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error attempting to check for ML job compatibility', error);
+        return false;
+      }
     },
   });
 }

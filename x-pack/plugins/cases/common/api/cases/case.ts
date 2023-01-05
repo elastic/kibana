@@ -12,28 +12,23 @@ import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors';
+import { CaseAssigneesRt } from './assignee';
 
-const BucketsAggs = rt.array(
-  rt.type({
-    key: rt.string,
-  })
-);
-
-export const GetCaseIdsByAlertIdAggsRt = rt.type({
-  references: rt.type({
-    doc_count: rt.number,
-    caseIds: rt.type({
-      buckets: BucketsAggs,
-    }),
-  }),
+export const AttachmentTotalsRt = rt.type({
+  alerts: rt.number,
+  userComments: rt.number,
 });
 
-export const CasesByAlertIdRt = rt.array(
-  rt.type({
-    id: rt.string,
-    title: rt.string,
-  })
-);
+export const RelatedCaseInfoRt = rt.type({
+  id: rt.string,
+  title: rt.string,
+  description: rt.string,
+  status: CaseStatusRt,
+  createdAt: rt.string,
+  totals: AttachmentTotalsRt,
+});
+
+export const CasesByAlertIdRt = rt.array(RelatedCaseInfoRt);
 
 export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
@@ -86,6 +81,10 @@ const CaseBasicRt = rt.type({
    * The severity of the case
    */
   severity: CaseSeverityRt,
+  /**
+   * The users assigned to this case
+   */
+  assignees: CaseAssigneesRt,
 });
 
 /**
@@ -154,6 +153,10 @@ export const CasePostRequestRt = rt.intersection([
   }),
   rt.partial({
     /**
+     * The users assigned to the case
+     */
+    assignees: CaseAssigneesRt,
+    /**
      * The severity of the case. The severity is
      * default it to "low" if not provided.
      */
@@ -174,6 +177,10 @@ export const CasesFindRequestRt = rt.partial({
    * The severity of the case
    */
   severity: CaseSeverityRt,
+  /**
+   * The uids of the user profiles to filter by
+   */
+  assignees: rt.union([rt.array(rt.string), rt.string]),
   /**
    * The reporters to filter by
    */
@@ -337,5 +344,6 @@ export type CaseExternalServiceBasic = rt.TypeOf<typeof CaseExternalServiceBasic
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;
 
-export type GetCaseIdsByAlertIdAggs = rt.TypeOf<typeof GetCaseIdsByAlertIdAggsRt>;
+export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
+export type RelatedCaseInfo = rt.TypeOf<typeof RelatedCaseInfoRt>;
 export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;

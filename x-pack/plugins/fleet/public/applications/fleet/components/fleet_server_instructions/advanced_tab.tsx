@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiSteps } from '@elastic/eui';
 import React from 'react';
+import { EuiLoadingContent, EuiSteps } from '@elastic/eui';
 
 import { useAdvancedForm } from './hooks';
+import { useLatestFleetServers } from './hooks/use_latest_fleet_servers';
 
 import {
   getAddFleetServerHostStep,
@@ -24,6 +25,7 @@ interface AdvancedTabProps {
 
 export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selectedPolicyId }) => {
   const {
+    isSelectFleetServerPolicyLoading,
     eligibleFleetServerPolicies,
     refreshEligibleFleetServerPolicies,
     fleetServerPolicyId,
@@ -36,6 +38,8 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selecte
     deploymentMode,
     setDeploymentMode,
   } = useAdvancedForm();
+
+  const { hasRecentlyEnrolledFleetServers } = useLatestFleetServers();
 
   const steps = [
     getSelectAgentPolicyStep({
@@ -57,18 +61,25 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selecte
       serviceToken,
       generateServiceToken,
       isLoadingServiceToken,
-      disabled: !Boolean(fleetServerHostForm.isFleetServerHostSubmitted),
+      disabled: Boolean(!fleetServerHostForm.fleetServerHost),
     }),
     getInstallFleetServerStep({
       isFleetServerReady,
       serviceToken,
-      fleetServerHost: fleetServerHostForm.fleetServerHost,
+      fleetServerHost: fleetServerHostForm.fleetServerHost?.host_urls[0],
       fleetServerPolicyId: fleetServerPolicyId || selectedPolicyId,
       deploymentMode,
       disabled: !Boolean(serviceToken),
     }),
-    getConfirmFleetServerConnectionStep({ isFleetServerReady, disabled: !Boolean(serviceToken) }),
+    getConfirmFleetServerConnectionStep({
+      hasRecentlyEnrolledFleetServers,
+      disabled: !Boolean(serviceToken),
+    }),
   ];
 
-  return <EuiSteps steps={steps} className="eui-textLeft" />;
+  return isSelectFleetServerPolicyLoading ? (
+    <EuiLoadingContent />
+  ) : (
+    <EuiSteps steps={steps} className="eui-textLeft" />
+  );
 };

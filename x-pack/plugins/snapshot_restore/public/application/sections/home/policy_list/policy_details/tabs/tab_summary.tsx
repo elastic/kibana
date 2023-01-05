@@ -86,7 +86,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                   description={i18n.translate(
                     'xpack.snapshotRestore.policyDetails.snapshotsTakenStat',
                     {
-                      defaultMessage: 'Snapshots',
+                      defaultMessage: 'Snapshots taken',
                     }
                   )}
                   titleSize="s"

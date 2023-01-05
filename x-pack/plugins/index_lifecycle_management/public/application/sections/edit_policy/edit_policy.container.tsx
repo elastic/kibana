@@ -7,7 +7,12 @@
 
 import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiLoadingSpinner,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MIN_SEARCHABLE_SNAPSHOT_LICENSE } from '../../../../common/constants';

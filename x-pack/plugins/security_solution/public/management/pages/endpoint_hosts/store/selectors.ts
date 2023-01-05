@@ -9,7 +9,7 @@
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
-import { decode } from 'rison-node';
+import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import type { Immutable, HostMetadata } from '../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../common/endpoint/types';
@@ -70,15 +70,6 @@ export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.i
 export const autoRefreshInterval = (state: Immutable<EndpointState>) => state.autoRefreshInterval;
 
 export const policyVersionInfo = (state: Immutable<EndpointState>) => state.policyVersionInfo;
-
-export const areEndpointsEnrolling = (state: Immutable<EndpointState>) => {
-  return state.agentsWithEndpointsTotal > state.endpointsTotal;
-};
-
-export const agentsWithEndpointsTotalError = (state: Immutable<EndpointState>) =>
-  state.agentsWithEndpointsTotalError;
-
-export const endpointsTotalError = (state: Immutable<EndpointState>) => state.endpointsTotalError;
 
 export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
   isLoadedResourceState(info) ? info.data.version : undefined
@@ -174,7 +165,7 @@ export const showView: (state: EndpointState) => EndpointIndexUIQueryParams['sho
  * Returns the Host Status which is connected the fleet agent
  */
 export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
-  (state) => state.hostStatus,
+  (state: Immutable<EndpointState>) => state.hostStatus,
   (hostStatus) => {
     return hostStatus ? hostStatus : HostStatus.UNHEALTHY;
   }
@@ -184,7 +175,7 @@ export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = c
  * Returns the Policy Response overall status
  */
 export const policyResponseStatus: (state: Immutable<EndpointState>) => string = createSelector(
-  (state) => state.policyResponse,
+  (state: Immutable<EndpointState>) => state.policyResponse,
   (policyResponse) => {
     return (policyResponse && policyResponse?.Endpoint?.policy?.applied?.status) || '';
   }

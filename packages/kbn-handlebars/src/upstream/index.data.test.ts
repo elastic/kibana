@@ -5,7 +5,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars from '..';
+import Handlebars from '../..';
 import { expectTemplate } from '../__jest__/test_bench';
 
 describe('data', () => {
@@ -47,6 +47,8 @@ describe('data', () => {
       .withInput({ foo: true })
       .withHelpers(helpers)
       .toCompileTo('Hello world');
+
+    global.kbnHandlebarsEnv = null;
   });
 
   it('parameter data can be looked up via @foo', () => {

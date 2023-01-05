@@ -22,9 +22,16 @@ import { appContextService } from '../../app_context';
 
 import { PackageNotFoundError } from '../../../errors';
 
+import { getSettings } from '../../settings';
+
 import { getPackageInfo, getPackageUsageStats } from './get';
 
 const MockRegistry = Registry as jest.Mocked<typeof Registry>;
+
+jest.mock('../../settings');
+
+const mockGetSettings = getSettings as jest.Mock;
+mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: true });
 
 describe('When using EPM `get` services', () => {
   describe('and invoking getPackageUsageStats()', () => {
@@ -42,7 +49,6 @@ describe('When using EPM `get` services', () => {
             namespace: 'default',
             policy_id: '22222-22222-2222-2222',
             enabled: true,
-            output_id: '',
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
             revision: 1,
@@ -66,7 +72,6 @@ describe('When using EPM `get` services', () => {
             package: { name: 'system', title: 'System', version: '0.10.4' },
             enabled: true,
             policy_id: '11111-111111-11111-11111', // << duplicate id with plicy below
-            output_id: 'ca111b80-43c1-11eb-84bf-7177b74381c5',
             inputs: [],
             revision: 1,
             created_at: '2020-12-21T19:22:04.902Z',
@@ -89,7 +94,6 @@ describe('When using EPM `get` services', () => {
             namespace: 'default',
             policy_id: '11111-111111-11111-11111',
             enabled: true,
-            output_id: '',
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
             revision: 1,
@@ -113,7 +117,6 @@ describe('When using EPM `get` services', () => {
             namespace: 'default',
             policy_id: '33333-33333-333333-333333',
             enabled: true,
-            output_id: '',
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
             revision: 1,
@@ -192,7 +195,11 @@ describe('When using EPM `get` services', () => {
         name: 'my-package',
         version: '1.0.0',
       } as RegistryPackage);
-      MockRegistry.getRegistryPackage.mockResolvedValue({
+      MockRegistry.fetchInfo.mockResolvedValue({
+        name: 'my-package',
+        version: '1.0.0',
+      } as RegistryPackage);
+      MockRegistry.getPackage.mockResolvedValue({
         paths: [],
         packageInfo: {
           name: 'my-package',
@@ -370,7 +377,7 @@ describe('When using EPM `get` services', () => {
           status: 'not_installed',
         });
 
-        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
+        expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
 
       // when calling the get package endpoint without a package version we
@@ -396,7 +403,7 @@ describe('When using EPM `get` services', () => {
           status: 'not_installed',
         });
 
-        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
+        expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
     });
   });

@@ -115,10 +115,12 @@ export const EventSchema = schema.maybe(
             action_group_id: ecsString(),
             action_subgroup: ecsString(),
             status: ecsString(),
+            outcome: ecsString(),
           })
         ),
         alert: schema.maybe(
           schema.object({
+            flapping: ecsBoolean(),
             rule: schema.maybe(
               schema.object({
                 consumer: ecsString(),
@@ -143,6 +145,14 @@ export const EventSchema = schema.maybe(
                         es_search_duration_ms: ecsStringOrNumber(),
                         total_search_duration_ms: ecsStringOrNumber(),
                         execution_gap_duration_s: ecsStringOrNumber(),
+                        rule_type_run_duration_ms: ecsStringOrNumber(),
+                        process_alerts_duration_ms: ecsStringOrNumber(),
+                        trigger_actions_duration_ms: ecsStringOrNumber(),
+                        process_rule_duration_ms: ecsStringOrNumber(),
+                        claim_to_start_duration_ms: ecsStringOrNumber(),
+                        prepare_rule_duration_ms: ecsStringOrNumber(),
+                        total_run_duration_ms: ecsStringOrNumber(),
+                        total_enrichment_duration_ms: ecsStringOrNumber(),
                       })
                     ),
                   })
@@ -188,6 +198,10 @@ function ecsStringOrNumber() {
 
 function ecsDate() {
   return schema.maybe(schema.string({ validate: validateDate }));
+}
+
+function ecsBoolean() {
+  return schema.maybe(schema.boolean());
 }
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;

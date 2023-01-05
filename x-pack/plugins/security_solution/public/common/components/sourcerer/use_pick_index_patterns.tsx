@@ -10,10 +10,11 @@ import type { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui
 import { useDispatch } from 'react-redux';
 
 import { getSourcererDataView } from '../../containers/sourcerer/api';
-import { getScopePatternListSelection, sortWithExcludesAtEnd } from '../../store/sourcerer/helpers';
+import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
 interface UsePickIndexPatternsProps {
   dataViewId: string | null;
@@ -194,11 +195,7 @@ export const usePickIndexPatterns = ({
           // constantly getting destroy and re-init
           const pickedDataViewData = await getSourcererDataView(newSelectedDataViewId);
           if (isHookAlive.current) {
-            dispatch(
-              sourcererActions.updateSourcererDataViews({
-                dataView: pickedDataViewData,
-              })
-            );
+            dispatch(sourcererActions.setDataView(pickedDataViewData));
             setSelectedOptions(
               isOnlyDetectionAlerts
                 ? alertsOptions

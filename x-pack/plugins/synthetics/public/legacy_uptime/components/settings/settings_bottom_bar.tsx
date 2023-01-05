@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { OutPortal, createPortalNode, InPortal } from 'react-reverse-portal';
+import { OutPortal, createHtmlPortalNode, InPortal } from 'react-reverse-portal';
 import { SettingsActions, SettingsActionsProps } from './settings_actions';
 
 export const SettingsBottomBar = () => {
@@ -24,4 +24,4 @@ export const SettingsActionBarPortal = (props: SettingsActionsProps) => {
     </InPortal>
   );
 };
-export const SettingsBarPortalNode = createPortalNode();
+export const SettingsBarPortalNode = createHtmlPortalNode();

@@ -15,7 +15,6 @@ import type {
 } from '../../../../common/correlations/types';
 
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { Setup } from '../../../lib/helpers/setup_request';
 import {
   computeExpectationsAndRanges,
   splitAllSettledPromises,
@@ -26,17 +25,22 @@ import { fetchDurationFractions } from './fetch_duration_fractions';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchDurationRanges } from './fetch_duration_ranges';
 import { getEventType } from '../utils';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchSignificantCorrelations = async ({
-  setup,
+  apmEventClient,
   start,
   end,
   environment,
   kuery,
   query,
+  durationMinOverride,
+  durationMaxOverride,
   fieldValuePairs,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
+  apmEventClient: APMEventClient;
+  durationMinOverride?: number;
+  durationMaxOverride?: number;
   fieldValuePairs: FieldValuePair[];
 }) => {
   // Create an array of ranges [2, 4, 6, ..., 98]
@@ -46,7 +50,7 @@ export const fetchSignificantCorrelations = async ({
   const eventType = getEventType(chartType, searchMetrics);
 
   const { percentiles: percentilesRecords } = await fetchDurationPercentiles({
-    setup,
+    apmEventClient,
     chartType,
     start,
     end,
@@ -65,7 +69,7 @@ export const fetchSignificantCorrelations = async ({
   const { expectations, ranges } = computeExpectationsAndRanges(percentiles);
 
   const { fractions, totalDocCount } = await fetchDurationFractions({
-    setup,
+    apmEventClient,
     eventType,
     start,
     end,
@@ -75,8 +79,8 @@ export const fetchSignificantCorrelations = async ({
     ranges,
   });
 
-  const histogramRangeSteps = await fetchDurationHistogramRangeSteps({
-    setup,
+  const { rangeSteps } = await fetchDurationHistogramRangeSteps({
+    apmEventClient,
     chartType,
     start,
     end,
@@ -84,13 +88,15 @@ export const fetchSignificantCorrelations = async ({
     kuery,
     query,
     searchMetrics,
+    durationMinOverride,
+    durationMaxOverride,
   });
 
   const { fulfilled, rejected } = splitAllSettledPromises(
     await Promise.allSettled(
       fieldValuePairs.map((fieldValuePair) =>
         fetchDurationCorrelationWithHistogram({
-          setup,
+          apmEventClient,
           chartType,
           start,
           end,
@@ -100,7 +106,7 @@ export const fetchSignificantCorrelations = async ({
           expectations,
           ranges,
           fractions,
-          histogramRangeSteps,
+          histogramRangeSteps: rangeSteps,
           totalDocCount,
           fieldValuePair,
         })
@@ -136,7 +142,7 @@ export const fetchSignificantCorrelations = async ({
   if (latencyCorrelations.length === 0 && fallbackResult) {
     const { fieldName, fieldValue } = fallbackResult;
     const { durationRanges: histogram } = await fetchDurationRanges({
-      setup,
+      apmEventClient,
       chartType,
       start,
       end,
@@ -147,7 +153,7 @@ export const fetchSignificantCorrelations = async ({
           filter: [query, ...termQuery(fieldName, fieldValue)],
         },
       },
-      rangeSteps: histogramRangeSteps,
+      rangeSteps,
       searchMetrics,
     });
 
@@ -159,7 +165,8 @@ export const fetchSignificantCorrelations = async ({
     }
   }
 
-  const index = setup.indices[eventType as keyof typeof setup.indices];
+  const index =
+    apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
 
   const ccsWarning = rejected.length > 0 && index.includes(':');
 

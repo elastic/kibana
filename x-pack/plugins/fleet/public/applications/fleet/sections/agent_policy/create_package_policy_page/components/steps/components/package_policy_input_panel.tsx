@@ -26,6 +26,7 @@ import type {
   PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
+  RegistryStreamWithDataStream,
 } from '../../../../../../types';
 import type { PackagePolicyInputValidationResults } from '../../../services';
 import { hasInvalidButRequiredVar, countValidationErrors } from '../../../services';
@@ -73,8 +74,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
-  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>;
+  packageInputStreams: RegistryStreamWithDataStream[];
   packagePolicyInput: NewPackagePolicyInput;
+  updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
@@ -85,6 +87,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     packageInputStreams,
     packagePolicyInput,
     packagePolicy,
+    updatePackagePolicy,
     updatePackagePolicyInput,
     inputValidationResults,
     forceShowErrors,
@@ -236,6 +239,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   packagePolicy={packagePolicy}
                   packageInputStream={packageInputStream}
                   packagePolicyInputStream={packagePolicyInputStream!}
+                  updatePackagePolicy={updatePackagePolicy}
                   updatePackagePolicyInputStream={(
                     updatedStream: Partial<PackagePolicyInputStream>
                   ) => {

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   AllSeries,
   fromQuery,
@@ -16,6 +16,8 @@ import {
 } from '@kbn/observability-plugin/public';
 import { useHistory } from 'react-router-dom';
 
+import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { useDataView } from '../local_uifilters/use_data_view';
@@ -31,6 +33,8 @@ export function PageViewsChart({ breakdown }: Props) {
   const kibana = useKibanaServices();
   const { ExploratoryViewEmbeddable } = kibana.observability;
 
+  const { uxUiFilters, urlParams } = useLegacyUrlParams();
+
   const theme = useTheme();
 
   const { reportDefinitions, time } = useExpViewAttributes();
@@ -44,26 +48,30 @@ export function PageViewsChart({ breakdown }: Props) {
       selectedMetricField: RECORDS_FIELD,
       breakdown: breakdown?.fieldName,
       color: theme.eui.euiColorVis1,
+      filters: getExploratoryViewFilter(uxUiFilters, urlParams),
     },
   ];
-  const onBrushEnd = ({ range }: { range: number[] }) => {
-    if (!range) {
-      return;
-    }
-    const [minX, maxX] = range;
+  const onBrushEnd = useCallback(
+    ({ range }: { range: number[] }) => {
+      if (!range) {
+        return;
+      }
+      const [minX, maxX] = range;
 
-    const rangeFrom = moment(minX).toISOString();
-    const rangeTo = moment(maxX).toISOString();
+      const rangeFrom = moment(minX).toISOString();
+      const rangeTo = moment(maxX).toISOString();
 
-    history.push({
-      ...history.location,
-      search: fromQuery({
-        ...toQuery(history.location.search),
-        rangeFrom,
-        rangeTo,
-      }),
-    });
-  };
+      history.push({
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(history.location.search),
+          rangeFrom,
+          rangeTo,
+        }),
+      });
+    },
+    [history]
+  );
 
   if (!dataViewTitle) {
     return null;
@@ -71,11 +79,10 @@ export function PageViewsChart({ breakdown }: Props) {
 
   return (
     <ExploratoryViewEmbeddable
-      customHeight="300px"
+      customHeight={'300px'}
       attributes={allSeries}
       onBrushEnd={onBrushEnd}
       reportType="kpi-over-time"
-      dataTypesIndexPatterns={{ ux: dataViewTitle }}
       isSingleMetric={true}
       axisTitlesVisibility={{ x: false, yRight: true, yLeft: true }}
       legendIsVisible={Boolean(breakdown)}

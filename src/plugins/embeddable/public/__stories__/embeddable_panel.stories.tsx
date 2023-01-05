@@ -15,7 +15,6 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { ReplaySubject } from 'rxjs';
 import { ThemeContext } from '@emotion/react';
 import { DecoratorFn, Meta } from '@storybook/react';
@@ -25,6 +24,7 @@ import { CoreTheme } from '@kbn/core-theme-browser';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import { CONTEXT_MENU_TRIGGER, EmbeddablePanel, PANEL_BADGE_TRIGGER, ViewMode } from '..';
+import { actions } from '../store';
 import { HelloWorldEmbeddable } from './hello_world_embeddable';
 
 const layout: DecoratorFn = (story) => {
@@ -93,20 +93,16 @@ const HelloWorldEmbeddablePanel = forwardRef<
     const theme = useContext(ThemeContext) as CoreTheme;
 
     useEffect(() => theme$.next(theme), [theme$, theme]);
+    useEffect(() => {
+      embeddable.store.dispatch(actions.input.setTitle(title));
+    }, [embeddable.store, title]);
+    useEffect(() => {
+      embeddable.store.dispatch(
+        actions.input.setViewMode(viewMode ? ViewMode.VIEW : ViewMode.EDIT)
+      );
+    }, [embeddable.store, viewMode]);
     useEffect(
-      () =>
-        embeddable.updateInput({
-          title,
-          viewMode: viewMode ? ViewMode.VIEW : ViewMode.EDIT,
-          lastReloadRequestTime: new Date().getMilliseconds(),
-        }),
-      [embeddable, title, viewMode]
-    );
-    useEffect(
-      () =>
-        embeddable.updateOutput({
-          loading,
-        }),
+      () => void embeddable.store.dispatch(actions.output.setLoading(loading)),
       [embeddable, loading]
     );
     useImperativeHandle(ref, () => ({ embeddable }));
@@ -162,7 +158,9 @@ export function DefaultWithBadges({ badges, ...props }: DefaultWithBadgesProps) 
 
   useEffect(
     () =>
-      ref.current?.embeddable.updateInput({ lastReloadRequestTime: new Date().getMilliseconds() }),
+      void ref.current?.embeddable.store.dispatch(
+        actions.input.setLastReloadRequestTime(new Date().getMilliseconds())
+      ),
     [getActions]
   );
 
@@ -207,7 +205,9 @@ export function DefaultWithContextMenu({ items, ...props }: DefaultWithContextMe
 
   useEffect(
     () =>
-      ref.current?.embeddable.updateInput({ lastReloadRequestTime: new Date().getMilliseconds() }),
+      void ref.current?.embeddable.store.dispatch(
+        actions.input.setLastReloadRequestTime(new Date().getMilliseconds())
+      ),
     [getActions]
   );
 
@@ -230,7 +230,10 @@ interface DefaultWithErrorProps extends HelloWorldEmbeddablePanelProps {
 export function DefaultWithError({ message, ...props }: DefaultWithErrorProps) {
   const ref = useRef<React.ComponentRef<typeof HelloWorldEmbeddablePanel>>(null);
 
-  useEffect(() => ref.current?.embeddable.updateOutput({ error: new Error(message) }), [message]);
+  useEffect(
+    () => void ref.current?.embeddable.store.dispatch(actions.output.setError(new Error(message))),
+    [message]
+  );
 
   return <HelloWorldEmbeddablePanel ref={ref} {...props} />;
 }
@@ -247,16 +250,17 @@ DefaultWithError.argTypes = {
 export function DefaultWithCustomError({ message, ...props }: DefaultWithErrorProps) {
   const ref = useRef<React.ComponentRef<typeof HelloWorldEmbeddablePanel>>(null);
 
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.embeddable.catchError = (error) => {
+        return <EuiEmptyPrompt iconColor="warning" iconType="bug" body={error.message} />;
+      };
+    }
+  }, []);
   useEffect(
-    () =>
-      ref.current?.embeddable.setErrorRenderer((node, error) => {
-        render(<EuiEmptyPrompt iconColor="warning" iconType="bug" body={error.message} />, node);
-
-        return () => unmountComponentAtNode(node);
-      }),
-    []
+    () => void ref.current?.embeddable.store.dispatch(actions.output.setError(new Error(message))),
+    [message]
   );
-  useEffect(() => ref.current?.embeddable.updateOutput({ error: new Error(message) }), [message]);
 
   return <HelloWorldEmbeddablePanel ref={ref} {...props} />;
 }

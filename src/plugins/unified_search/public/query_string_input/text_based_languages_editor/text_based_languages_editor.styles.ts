@@ -79,6 +79,7 @@ export const textBasedLanguagedEditorStyles = (
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginTop: 0,
       marginLeft: 0,
+      marginBottom: 0,
       borderBottomLeftRadius: '6px',
       borderBottomRightRadius: '6px',
     },
