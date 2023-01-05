@@ -1,42 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SLO Edit Page when the feature flag is enabled in Create mode calls the createSlo hook if all required values are filled in 1`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Object {
-        "budgetingMethod": "occurrences",
-        "description": "irrelevant",
-        "indicator": Object {
-          "params": Object {
-            "filter": "irrelevant",
-            "good": "irrelevant",
-            "index": "some-index",
-            "total": "irrelevant",
-          },
-          "type": "sli.kql.custom",
-        },
-        "name": "irrelevant",
-        "objective": Object {
-          "target": 0.995,
-        },
-        "timeWindow": Object {
-          "duration": "30d",
-          "isRolling": true,
-        },
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
-    },
-  ],
-}
-`;
-
-exports[`SLO Edit Page when the feature flag is enabled in Edit mode calls the updateSlo hook if all required values are filled in 1`] = `
+exports[`SLO Edit Page when a sloId route param is provided calls the updateSlo hook if all required values are filled in 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -61,6 +25,42 @@ exports[`SLO Edit Page when the feature flag is enabled in Edit mode calls the u
           "frequency": "1m",
           "syncDelay": "1m",
           "timestampField": "@timestamp",
+        },
+        "timeWindow": Object {
+          "duration": "30d",
+          "isRolling": true,
+        },
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`SLO Edit Page when no sloId route param is provided calls the createSlo hook if all required values are filled in 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "budgetingMethod": "occurrences",
+        "description": "irrelevant",
+        "indicator": Object {
+          "params": Object {
+            "filter": "irrelevant",
+            "good": "irrelevant",
+            "index": "some-index",
+            "total": "irrelevant",
+          },
+          "type": "sli.kql.custom",
+        },
+        "name": "irrelevant",
+        "objective": Object {
+          "target": 0.995,
         },
         "timeWindow": Object {
           "duration": "30d",
