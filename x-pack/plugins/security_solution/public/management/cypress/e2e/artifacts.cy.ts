@@ -89,7 +89,7 @@ describe('Artifacts pages', () => {
 
   for (const testData of getArtifactsListTestsData()) {
     describe(`When on the ${testData.title} entries list`, () => {
-      it(`no access - should not show empty state page and the add button does not exists`, () => {
+      it(`no access - should show no privileges callout`, () => {
         loginWithoutAccess(`/app/security/administration/${testData.urlPath}`);
         cy.getBySel('noPrivilegesPage').should('exist');
         cy.getBySel('empty-page-feature-action').should('exist');
@@ -97,7 +97,7 @@ describe('Artifacts pages', () => {
         cy.getBySel(`${testData.pagePrefix}-emptyState-addButton`).should('not.exist');
       });
 
-      it(`read - should show empty state page if there is no ${testData.title} entry and the add button does not exists`, () => {
+      it(`read - should show empty state page if there is no ${testData.title} entry and the add button does not exist`, () => {
         loginWithReadAccess(`/app/security/administration/${testData.urlPath}`);
         cy.getBySel(testData.emptyState).should('exist');
         cy.getBySel(`${testData.pagePrefix}-emptyState-addButton`).should('not.exist');
