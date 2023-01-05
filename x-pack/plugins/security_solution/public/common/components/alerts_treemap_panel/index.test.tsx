@@ -9,7 +9,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { SecurityPageName } from '../../../../common/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
 import {
@@ -136,12 +135,9 @@ const defaultProps: Props = {
   setIsPanelExpanded: jest.fn(),
   setStackByField0: jest.fn(),
   setStackByField1: jest.fn(),
-  showBuildingBlockAlerts: false,
-  showOnlyThreatIndicatorAlerts: false,
   signalIndexName: '.alerts-security.alerts-default',
   stackByField0: 'kibana.alert.rule.name',
   stackByField1: 'host.name',
-  status: 'open' as Status,
   title: <ChartSelect alertViewSelection="treemap" setAlertViewSelection={jest.fn()} />,
 };
 

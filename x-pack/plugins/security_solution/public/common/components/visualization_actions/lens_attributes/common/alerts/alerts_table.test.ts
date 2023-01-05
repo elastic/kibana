@@ -41,39 +41,36 @@ describe('getAlertsTableLensAttributes', () => {
     expect(result?.current).toMatchSnapshot();
   });
 
-  it('should render with extra options - showBuildingBlockAlerts', () => {
+  it('should render with extra options - filters', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
-          extraOptions: { showBuildingBlockAlerts: true },
-          getLensAttributes: getAlertsTableLensAttributes,
-          stackByField: 'event.category',
-        }),
-      { wrapper }
-    );
-
-    expect(result?.current).toMatchSnapshot();
-  });
-
-  it('should render with extra options - showOnlyThreatIndicatorAlerts', () => {
-    const { result } = renderHook(
-      () =>
-        useLensAttributes({
-          extraOptions: { showOnlyThreatIndicatorAlerts: true },
-          getLensAttributes: getAlertsTableLensAttributes,
-          stackByField: 'event.category',
-        }),
-      { wrapper }
-    );
-
-    expect(result?.current).toMatchSnapshot();
-  });
-
-  it('should render with extra options - status', () => {
-    const { result } = renderHook(
-      () =>
-        useLensAttributes({
-          extraOptions: { status: 'open' },
+          extraOptions: {
+            filters: [
+              {
+                meta: {
+                  type: 'phrases',
+                  key: '_index',
+                  params: ['.alerts-security.alerts-default'],
+                  alias: null,
+                  negate: false,
+                  disabled: false,
+                },
+                query: {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          _index: '.alerts-security.alerts-default',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              },
+            ],
+          },
           getLensAttributes: getAlertsTableLensAttributes,
           stackByField: 'event.category',
         }),

@@ -78,10 +78,8 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       paddingSize={paddingSize}
       query={query}
       runtimeMappings={runtimeMappings}
-      showBuildingBlockAlerts={false}
       showLegend={showLegend}
       showLinkToAlerts={onlyField == null ? true : false}
-      showOnlyThreatIndicatorAlerts={false}
       showStackBy={onlyField == null}
       showTotalAlertsCount={true}
       signalIndexName={signalIndexName}
