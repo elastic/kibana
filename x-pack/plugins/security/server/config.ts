@@ -405,6 +405,13 @@ export function createConfig(
       },
     } as AppenderConfigType);
 
+  const session = getSessionConfig(config.session, providers);
+  if (session.concurrentSessions?.maxSessions != null && config.authc.http.enabled) {
+    logger.warn(
+      'Both concurrent user sessions limit and HTTP authentication are configured. The limit does not apply to HTTP authentication.'
+    );
+  }
+
   return {
     ...config,
     audit: {
@@ -417,7 +424,7 @@ export function createConfig(
       sortedProviders: Object.freeze(sortedProviders),
       http: config.authc.http,
     },
-    session: getSessionConfig(config.session, providers),
+    session,
     encryptionKey,
     secureCookies,
   };
