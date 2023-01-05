@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react'; // useEffect, useMemo, useState
-import type { MapEmbeddable } from '@kbn/maps-plugin/public'; // ILayer
+import React, { FC } from 'react';
+import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,32 +25,30 @@ interface Props {
   embeddable: MapEmbeddable;
 }
 
-export const Layer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
-  return (
-    <>
-      <EuiSplitPanel.Outer grow>
-        <EuiSplitPanel.Inner>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={'tokenGeo'} />
-            </EuiFlexItem>
-            <EuiFlexItem grow>
-              <EuiText color={layer.dataView?.timeFieldName ? '' : 'subdued'}>
-                <h5>{layer.layerDisplayName}</h5>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiSplitPanel.Inner>
-        <EuiHorizontalRule margin="none" />
-        <EuiSplitPanel.Inner grow={false} color="plain">
-          {layer.dataView && layer.dataView.timeFieldName ? (
-            <CompatibleLayer embeddable={embeddable} layer={layer} layerIndex={layerIndex} />
-          ) : (
-            <IncompatibleLayer noDataView={layer.dataView === undefined} />
-          )}
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
-      <EuiSpacer />
-    </>
-  );
-};
+export const Layer: FC<Props> = ({ layer, layerIndex, embeddable }) => (
+  <>
+    <EuiSplitPanel.Outer grow>
+      <EuiSplitPanel.Inner>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={'tokenGeo'} />
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiText color={layer.dataView?.timeFieldName ? '' : 'subdued'}>
+              <h5>{layer.layerDisplayName}</h5>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+      <EuiHorizontalRule margin="none" />
+      <EuiSplitPanel.Inner grow={false} color="plain">
+        {layer.dataView && layer.dataView.timeFieldName ? (
+          <CompatibleLayer embeddable={embeddable} layer={layer} layerIndex={layerIndex} />
+        ) : (
+          <IncompatibleLayer noDataView={layer.dataView === undefined} />
+        )}
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
+    <EuiSpacer />
+  </>
+);

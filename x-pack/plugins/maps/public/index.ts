@@ -49,5 +49,5 @@ export type {
   SourceStatus,
 } from './classes/sources/vector_source/vector_source';
 export type { IField } from './classes/fields/field';
-export type { ILayer, LayerWizard, RenderWizardArguments } from './classes/layers';
+export type { LayerWizard, RenderWizardArguments } from './classes/layers';
 export type { DataRequest } from './classes/util/data_request';

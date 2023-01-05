@@ -30,11 +30,21 @@ export function MachineLearningLensVisualizationsProvider(
     async assertLensLayerSelectorExists() {
       await testSubjects.existOrFail('mlFlyoutLensLayerSelector');
     },
+    async assertMapLayerSelectorExists() {
+      await testSubjects.existOrFail('mlGeoJobFlyout');
+    },
     async assertMLJobMenuActionDoesNotExist() {
       await testSubjects.missingOrFail('embeddablePanelAction-create-ml-ad-job-action');
     },
     async assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers: number) {
       const compatibleLayers = await testSubjects.findAll('mlLensLayerCompatible');
+      expect(compatibleLayers.length).to.eql(
+        numberOfCompatibleLayers,
+        `Expected number of compatible layers to be ${numberOfCompatibleLayers} (got '${compatibleLayers.length}')`
+      );
+    },
+    async assertNumberOfCompatibleMapLayers(numberOfCompatibleLayers: number) {
+      const compatibleLayers = await testSubjects.findAll('mlMapLayerCompatible');
       expect(compatibleLayers.length).to.eql(
         numberOfCompatibleLayers,
         `Expected number of compatible layers to be ${numberOfCompatibleLayers} (got '${compatibleLayers.length}')`

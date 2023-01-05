@@ -54,7 +54,7 @@ interface Props {
   createADJobInWizard: () => void;
   createADJob: (args: CreateADJobParams) => Promise<CreateState>;
   layer?: LayerResult;
-  layerIndex?: number;
+  layerIndex: number;
   embeddable: Embeddable | MapEmbeddable;
   incomingCreateError?: { text: string; errorText: string };
 }

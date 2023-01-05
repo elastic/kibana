@@ -93,6 +93,7 @@ export const JobDetails: FC<Props> = ({
   return (
     <>
       <MlJobAdditionalSettings
+        layerIndex={layerIndex}
         createADJob={createADJob}
         createADJobInWizard={createGeoJobInWizard}
         embeddable={embeddable}
