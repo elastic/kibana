@@ -26,6 +26,7 @@ export interface UseAllLiveQueriesConfig {
   alertId?: string;
 }
 
+// Make sure we keep this and ACTIONS_QUERY_KEY in osquery_flyout.tsx in sync.
 const ACTIONS_QUERY_KEY = 'actions';
 
 export const useAllLiveQueries = ({

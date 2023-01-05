@@ -23,7 +23,7 @@ interface ResponseActionsListProps {
 
 const GhostFormField = () => <></>;
 
-export const ResponseActionsList = React.memo(({ items, removeItem }: ResponseActionsListProps) => {
+export const ResponseActionsList = React.memo<ResponseActionsListProps>(({ items, removeItem }) => {
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const { data: rule } = useRule(ruleId);
 

@@ -30,6 +30,7 @@ export interface OsqueryFlyoutProps {
   ecsData?: Ecs;
 }
 
+// Make sure we keep this and ACTIONS_QUERY_KEY in use_all_live_queries.ts in sync.
 const ACTIONS_QUERY_KEY = 'actions';
 
 const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({

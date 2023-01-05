@@ -13,8 +13,13 @@ interface OsqueryInvestigationGuidePanelProps {
   onClick: () => void;
 }
 
-export const OsqueryInvestigationGuidePanel: React.FC<OsqueryInvestigationGuidePanelProps> =
-  React.memo(({ onClick }) => {
+const panelCss = {
+  marginBottom: '16px',
+};
+const flexGroupCss = { padding: `0 24px` };
+
+export const OsqueryInvestigationGuidePanel = React.memo<OsqueryInvestigationGuidePanelProps>(
+  ({ onClick }) => {
     const [hideInvestigationGuideSuggestion, setHideInvestigationGuideSuggestion] = useState(false);
 
     const handleClick = useCallback(() => {
@@ -26,8 +31,8 @@ export const OsqueryInvestigationGuidePanel: React.FC<OsqueryInvestigationGuideP
       return null;
     }
     return (
-      <EuiPanel color={'primary'} paddingSize={'xs'} css={{ marginBottom: '16px' }}>
-        <EuiFlexGroup direction={'row'} alignItems={'center'} css={{ padding: `0 24px` }}>
+      <EuiPanel color={'primary'} paddingSize={'xs'} css={panelCss}>
+        <EuiFlexGroup direction={'row'} alignItems={'center'} css={flexGroupCss}>
           <EuiFlexItem grow={true}>
             <EuiText size="s">
               <FormattedMessage
@@ -54,6 +59,7 @@ export const OsqueryInvestigationGuidePanel: React.FC<OsqueryInvestigationGuideP
         </EuiFlexGroup>
       </EuiPanel>
     );
-  });
+  }
+);
 
 OsqueryInvestigationGuidePanel.displayName = 'OsqueryInvestigationGuidePanel';

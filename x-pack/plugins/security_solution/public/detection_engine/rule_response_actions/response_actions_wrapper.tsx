@@ -20,8 +20,8 @@ interface ResponseActionsWrapperProps {
   supportedResponseActionTypes: ResponseActionType[];
 }
 
-export const ResponseActionsWrapper = React.memo(
-  ({ items, removeItem, supportedResponseActionTypes, addItem }: ResponseActionsWrapperProps) => {
+export const ResponseActionsWrapper = React.memo<ResponseActionsWrapperProps>(
+  ({ items, removeItem, supportedResponseActionTypes, addItem }) => {
     const actionTypeIdRef = useRef<string | null>(null);
     const updateActionTypeId = useCallback((id) => {
       actionTypeIdRef.current = id;
