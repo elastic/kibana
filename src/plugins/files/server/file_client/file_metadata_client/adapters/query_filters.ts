@@ -22,6 +22,7 @@ export function filterDeletedFiles({ attrPrefix }: { attrPrefix: string }): Kuer
 
 export function filterArgsToKuery({
   extension,
+  mimeType,
   kind,
   meta,
   name,
@@ -52,6 +53,7 @@ export function filterArgsToKuery({
   addFilters('FileKind', kind);
   addFilters('Status', status);
   addFilters('extension', extension);
+  addFilters('mime_type', mimeType);
 
   if (meta) {
     const addMetaFilters = pipe(

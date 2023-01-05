@@ -91,6 +91,10 @@ export interface FindFileArgs extends Pagination {
    */
   extension?: string[];
   /**
+   * File mime type(s).
+   */
+  mimeType?: string[];
+  /**
    * File status(es).
    */
   status?: string[];
