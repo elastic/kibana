@@ -32,7 +32,7 @@ export class FilePickerState {
   public readonly totalPages$ = new Rx.BehaviorSubject<undefined | number>(undefined);
   public readonly isUploading$ = new Rx.BehaviorSubject<boolean>(false);
   public readonly deletePrompt$ = new Rx.BehaviorSubject<FileJSON | null>(null);
-  
+
   private readonly selectedFiles = new Map<string, FileJSON>();
   private readonly retry$ = new Rx.BehaviorSubject<void>(undefined);
   private readonly subscriptions: Rx.Subscription[] = [];
@@ -205,6 +205,10 @@ export class FilePickerState {
 
   public hideDeletePrompt = (): void => {
     this.deletePrompt$.next(null);
+  };
+
+  public delete = async (file: FileJSON): Promise<void> => {
+    await this.client.delete({ id: file.id, kind: file.fileKind });
   };
 
   watchFileSelected$ = (id: string): Rx.Observable<boolean> => {
