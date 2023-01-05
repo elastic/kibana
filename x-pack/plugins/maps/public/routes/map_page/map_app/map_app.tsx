@@ -294,13 +294,10 @@ export class MapApp extends React.Component<Props, State> {
       return this._initialTimeFromUrl;
     }
 
-    if (this.props.savedMap.hasSaveAndReturnConfig()) {
-      return getTimeFilter().getTime();
-    }
-
-    return serializedMapState?.timeFilters
+    return !this.props.savedMap.hasSaveAndReturnConfig() && serializedMapState?.timeFilters
       ? serializedMapState.timeFilters
-      : getUiSettings().get('timepicker:timeDefaults', { from: 'now-15m', to: 'now' });
+      : getTimeFilter().getTime();
+    }
   }
 
   _initMapAndLayerSettings(serializedMapState?: SerializedMapState) {
