@@ -1791,7 +1791,7 @@ describe('Session index', () => {
       index: '.kibana_some_tenant_security_session',
       query: {
         bool: {
-          must: [
+          filter: [
             { term: { usernameHash: 'some-username-hash' } },
             { term: { 'provider.type': 'basic' } },
             { term: { 'provider.name': 'basic1' } },

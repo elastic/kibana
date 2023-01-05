@@ -559,7 +559,7 @@ export class SessionIndex {
         // Find all sessions created for the same user by the same authentication provider.
         query: {
           bool: {
-            must: [
+            filter: [
               { term: { usernameHash: sessionValue.usernameHash } },
               { term: { 'provider.type': sessionValue.provider.type } },
               { term: { 'provider.name': sessionValue.provider.name } },
