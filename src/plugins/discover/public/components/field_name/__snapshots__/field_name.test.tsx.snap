@@ -139,7 +139,7 @@ Array [
 exports[`FieldName renders when mapping is provided 1`] = `
 Array [
   <div
-    class="euiFlexItem kbnDocViewer__fieldIcon emotion-euiFlexItem-growZero"
+    class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
   >
     <span
       class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
@@ -153,10 +153,10 @@ Array [
     </span>
   </div>,
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-flexStart-row"
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
-      class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
     >
       <span
         class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
@@ -173,7 +173,7 @@ Array [
 exports[`FieldName renders with a search highlight 1`] = `
 Array [
   <div
-    class="euiFlexItem kbnDocViewer__fieldIcon emotion-euiFlexItem-growZero"
+    class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
   >
     <span
       class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
@@ -187,10 +187,10 @@ Array [
     </span>
   </div>,
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-flexStart-row"
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
-      class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
     >
       <span
         class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
