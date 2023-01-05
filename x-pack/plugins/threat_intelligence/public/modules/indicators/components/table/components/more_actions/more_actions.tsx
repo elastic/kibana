@@ -14,10 +14,20 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AddToBlockListContextMenu } from '../../../../../block_list/components/add_to_block_list';
 import { AddToNewCase } from '../../../../../cases/components/add_to_new_case/add_to_new_case';
 import { AddToExistingCase } from '../../../../../cases/components/add_to_existing_case/add_to_existing_case';
 import { Indicator } from '../../../../../../../common/types/indicator';
+import { canAddToBlockList } from '../../../../../block_list/utils/can_add_to_block_list';
+
+export const MORE_ACTIONS_BUTTON_TEST_ID = 'tiIndicatorTableMoreActionsButton';
+export const ADD_TO_EXISTING_CASE_CONTEXT_MENU_TEST_ID =
+  'tiIndicatorTableAddToExistingCaseContextMenu';
+export const ADD_TO_NEW_CASE_CONTEXT_MENU_TEST_ID = 'tiIndicatorTableAddToNewCaseContextMenu';
 import { ADD_TO_EXISTING_TEST_ID, ADD_TO_NEW_CASE_TEST_ID, MORE_ACTIONS_TEST_ID } from './test_ids';
+
+export const ADD_TO_BLOCK_LIST_CONTEXT_MENU_TEST_ID =
+  'tiIndicatorsTableCellAddToBlockListContextMenu';
 
 const BUTTON_LABEL = i18n.translate('xpack.threatIntelligence.indicator.table.moreActions', {
   defaultMessage: 'More actions',
@@ -54,6 +64,11 @@ export const MoreActions: VFC<TakeActionProps> = ({ indicator }) => {
       indicator={indicator}
       onClick={closePopover}
       data-test-subj={ADD_TO_NEW_CASE_TEST_ID}
+    />,
+    <AddToBlockListContextMenu
+      data={canAddToBlockList(indicator)}
+      onClick={closePopover}
+      data-test-subj={ADD_TO_BLOCK_LIST_CONTEXT_MENU_TEST_ID}
     />,
   ];
 

@@ -8,10 +8,20 @@
 import React, { useState, VFC } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { canAddToBlockList } from '../../../../block_list/utils/can_add_to_block_list';
+import { AddToBlockListContextMenu } from '../../../../block_list/components/add_to_block_list';
 import { AddToNewCase } from '../../../../cases/components/add_to_new_case/add_to_new_case';
 import { AddToExistingCase } from '../../../../cases/components/add_to_existing_case/add_to_existing_case';
 import { Indicator } from '../../../../../../common/types/indicator';
 import { InvestigateInTimelineContextMenu } from '../../../../timeline';
+
+export const TAKE_ACTION_BUTTON_TEST_ID = 'tiIndicatorFlyoutTakeActionButton';
+export const INVESTIGATE_IN_TIMELINE_CONTEXT_MENU_TEST_ID =
+  'tiIndicatorFlyoutInvestigateInTimelineContextMenu';
+export const ADD_TO_EXISTING_CASE_CONTEXT_MENU_TEST_ID =
+  'tiIndicatorFlyoutAddToExistingCaseContextMenu';
+export const ADD_TO_NEW_CASE_CONTEXT_MENU_TEST_ID = 'tiIndicatorFlyoutAddToNewCaseContextMenu';
+export const ADD_TO_BLOCK_LIST_CONTEXT_MENU_TEST_ID = 'tiIndicatorFlyoutAddToBlockListContextMenu';
 import {
   ADD_TO_EXISTING_CASE_TEST_ID,
   ADD_TO_NEW_CASE_TEST_ID,
@@ -39,6 +49,7 @@ export const TakeAction: VFC<TakeActionProps> = ({ indicator }) => {
     setPopover(false);
   };
 
+  const indicatorValue: string | null = canAddToBlockList(indicator);
   const items = [
     <InvestigateInTimelineContextMenu
       data={indicator}
@@ -54,6 +65,11 @@ export const TakeAction: VFC<TakeActionProps> = ({ indicator }) => {
       indicator={indicator}
       onClick={closePopover}
       data-test-subj={ADD_TO_NEW_CASE_TEST_ID}
+    />,
+    <AddToBlockListContextMenu
+      data={indicatorValue}
+      onClick={closePopover}
+      data-test-subj={ADD_TO_BLOCK_LIST_CONTEXT_MENU_TEST_ID}
     />,
   ];
 
