@@ -37,6 +37,7 @@ import {
   getSpacesApi,
   getTimeFilter,
   getToasts,
+  getUiSettings,
 } from '../../../kibana_services';
 import {
   AppStateManager,
@@ -51,7 +52,6 @@ import { getMapEmbeddableDisplayName } from '../../../../common/i18n_getters';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
-  getInitialTimeFilters,
   SavedMap,
   unsavedChangesTitle,
   unsavedChangesWarning,
@@ -108,6 +108,7 @@ export class MapApp extends React.Component<Props, State> {
   _prevIndexPatternIds: string[] | null = null;
   _isMounted: boolean = false;
   _kbnUrlStateStorage: IKbnUrlStateStorage;
+  _intitialTimeFromUrl: TimeRange | undefined;
 
   constructor(props: Props) {
     super(props);
@@ -145,8 +146,12 @@ export class MapApp extends React.Component<Props, State> {
       )
       .subscribe();
 
+    // syncGlobalQueryStateWithUrl mutates global state by merging combining with default state
+    // capture _initialTimeFromUrl before global state is mutated
+    this._initialTimeFromUrl = this._getGlobalState()?.time;
     const { stop } = syncGlobalQueryStateWithUrl(getData().query, this._kbnUrlStateStorage);
     this._globalSyncUnsubscribe = stop;
+    
     this._appSyncUnsubscribe = startAppStateSyncing(this._appStateManager, this._kbnUrlStateStorage);
     this._globalSyncChangeMonitorSubscription = getData().query.state$.subscribe(
       this._updateFromGlobalState
@@ -284,6 +289,20 @@ export class MapApp extends React.Component<Props, State> {
     this._updateGlobalState(updatedGlobalState);
   };
 
+  _getInitialTime(serializedMapState?: SerializedMapState) {
+    if (this._initialTimeFromUrl) {
+      return this._initialTimeFromUrl;
+    }
+
+    if (this.props.savedMap.hasSaveAndReturnConfig()) {
+      return getTimeFilter().getTime();
+    }
+
+    return serializedMapState?.timeFilters
+      ? serializedMapState.timeFilters
+      : getUiSettings().get('timepicker:timeDefaults', { from: 'now-15m', to: 'now' });
+  }
+
   _initMapAndLayerSettings(serializedMapState?: SerializedMapState) {
     const globalState = this._getGlobalState();
 
@@ -301,11 +320,7 @@ export class MapApp extends React.Component<Props, State> {
     this._onQueryChange({
       filters: [..._.get(globalState, 'filters', []), ...appFilters, ...savedObjectFilters],
       query,
-      time: getInitialTimeFilters({
-        hasSaveAndReturnConfig: this.props.savedMap.hasSaveAndReturnConfig(),
-        serializedMapState,
-        globalState,
-      }),
+      time: this._getInitialTime(serializedMapState),
     });
 
     this._onRefreshConfigChange(
