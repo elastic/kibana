@@ -3873,63 +3873,63 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
+"@kbn/securitysolution-autocomplete@link:packages/security-solution/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-es-utils@link:packages/kbn-securitysolution-es-utils":
+"@kbn/securitysolution-es-utils@link:packages/security-solution/kbn-securitysolution-es-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-exception-list-components@link:packages/kbn-securitysolution-exception-list-components":
+"@kbn/securitysolution-exception-list-components@link:packages/security-solution/kbn-securitysolution-exception-list-components":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-hook-utils@link:packages/kbn-securitysolution-hook-utils":
+"@kbn/securitysolution-hook-utils@link:packages/security-solution/kbn-securitysolution-hook-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-alerting-types@link:packages/kbn-securitysolution-io-ts-alerting-types":
+"@kbn/securitysolution-io-ts-alerting-types@link:packages/security-solution/kbn-securitysolution-io-ts-alerting-types":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-list-types@link:packages/kbn-securitysolution-io-ts-list-types":
+"@kbn/securitysolution-io-ts-list-types@link:packages/security-solution/kbn-securitysolution-io-ts-list-types":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-types@link:packages/kbn-securitysolution-io-ts-types":
+"@kbn/securitysolution-io-ts-types@link:packages/security-solution/kbn-securitysolution-io-ts-types":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-utils@link:packages/kbn-securitysolution-io-ts-utils":
+"@kbn/securitysolution-io-ts-utils@link:packages/security-solution/kbn-securitysolution-io-ts-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-api@link:packages/kbn-securitysolution-list-api":
+"@kbn/securitysolution-list-api@link:packages/security-solution/kbn-securitysolution-list-api":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-constants@link:packages/kbn-securitysolution-list-constants":
+"@kbn/securitysolution-list-constants@link:packages/security-solution/kbn-securitysolution-list-constants":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-hooks@link:packages/kbn-securitysolution-list-hooks":
+"@kbn/securitysolution-list-hooks@link:packages/security-solution/kbn-securitysolution-list-hooks":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-utils@link:packages/kbn-securitysolution-list-utils":
+"@kbn/securitysolution-list-utils@link:packages/security-solution/kbn-securitysolution-list-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-rules@link:packages/kbn-securitysolution-rules":
+"@kbn/securitysolution-rules@link:packages/security-solution/kbn-securitysolution-rules":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-t-grid@link:packages/kbn-securitysolution-t-grid":
+"@kbn/securitysolution-t-grid@link:packages/security-solution/kbn-securitysolution-t-grid":
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-utils@link:packages/kbn-securitysolution-utils":
+"@kbn/securitysolution-utils@link:packages/security-solution/kbn-securitysolution-utils":
   version "0.0.0"
   uid ""
 

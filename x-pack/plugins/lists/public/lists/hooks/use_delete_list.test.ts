@@ -14,7 +14,7 @@ import { getListResponseMock } from '../../../common/schemas/response/list_schem
 
 jest.mock('@kbn/securitysolution-list-api');
 
-// TODO: This test should be ported to the package: packages/kbn-securitysolution-list-hooks/src/use_delete_list/index.test.ts once we have mocks in kbn packages
+// TODO: This test should be ported to the package: packages/security-solution/kbn-securitysolution-list-hooks/src/use_delete_list/index.test.ts once we have mocks in kbn packages
 
 describe('useDeleteList', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;

@@ -22,7 +22,7 @@ import { getExceptionListItemSchemaMock } from '../../../common/schemas/response
 const mockKibanaHttpService = coreMock.createStart().http;
 jest.mock('@kbn/securitysolution-list-api');
 
-// TODO: Port this test over to packages/kbn-securitysolution-list-hooks/src/use_persist_exception_item/index.test.ts once the other mocks are added to the kbn package system
+// TODO: Port this test over to packages/security-solution/kbn-securitysolution-list-hooks/src/use_persist_exception_item/index.test.ts once the other mocks are added to the kbn package system
 
 describe('usePersistExceptionItem', () => {
   const onError = jest.fn();

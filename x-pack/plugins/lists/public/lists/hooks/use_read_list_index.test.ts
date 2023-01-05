@@ -14,7 +14,7 @@ import { getAcknowledgeSchemaResponseMock } from '../../../common/schemas/respon
 
 jest.mock('@kbn/securitysolution-list-api');
 
-// TODO: Port this code over to the package: packages/kbn-securitysolution-list-hooks/src/use_read_list_index/index.test.ts once kibana has mocks in packages
+// TODO: Port this code over to the package: packages/security-solution/kbn-securitysolution-list-hooks/src/use_read_list_index/index.test.ts once kibana has mocks in packages
 
 describe('useReadListIndex', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;

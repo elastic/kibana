@@ -29,7 +29,7 @@
         "signature": [
           "<T>(item: NotArray<T>) => T"
         ],
-        "path": "packages/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "NotArray<T>"
             ],
-            "path": "packages/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -78,7 +78,7 @@
           },
           "; value: string; }) => boolean | undefined"
         ],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -89,7 +89,7 @@
             "tags": [],
             "label": "{\n  os,\n  type,\n  value,\n}",
             "description": [],
-            "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -109,7 +109,7 @@
                     "text": "OperatingSystem"
                   }
                 ],
-                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -123,7 +123,7 @@
                 "signature": [
                   "\"match\" | \"wildcard\" | \"match_any\""
                 ],
-                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -134,7 +134,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -178,7 +178,7 @@
           },
           "; value: string; }) => boolean"
         ],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -189,7 +189,7 @@
             "tags": [],
             "label": "{\n  os,\n  field,\n  type,\n  value,\n}",
             "description": [],
-            "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -209,7 +209,7 @@
                     "text": "OperatingSystem"
                   }
                 ],
-                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -238,7 +238,7 @@
                   },
                   " | \"file.path.text\""
                 ],
-                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -252,7 +252,7 @@
                 "signature": [
                   "\"match\" | \"wildcard\" | \"match_any\""
                 ],
-                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -263,7 +263,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -285,7 +285,7 @@
         "signature": [
           "<T>(item: NotArray<T>) => T | Pick<T & { id?: string | undefined; }, Exclude<keyof T, \"id\">>"
         ],
-        "path": "packages/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -301,7 +301,7 @@
             "signature": [
               "NotArray<T>"
             ],
-            "path": "packages/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -320,7 +320,7 @@
         "signature": [
           "(data: unknown[]) => string"
         ],
-        "path": "packages/kbn-securitysolution-utils/src/transform_data_to_ndjson/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/transform_data_to_ndjson/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -334,7 +334,7 @@
             "signature": [
               "unknown[]"
             ],
-            "path": "packages/kbn-securitysolution-utils/src/transform_data_to_ndjson/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-utils/src/transform_data_to_ndjson/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -361,7 +361,7 @@
           },
           "; value?: string | undefined; }) => string | undefined"
         ],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -372,7 +372,7 @@
             "tags": [],
             "label": "{\n  os,\n  value = '',\n}",
             "description": [],
-            "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -392,7 +392,7 @@
                     "text": "OperatingSystem"
                   }
                 ],
-                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -406,7 +406,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -426,7 +426,7 @@
         "tags": [],
         "label": "ConditionEntryField",
         "description": [],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -438,7 +438,7 @@
         "tags": [],
         "label": "EntryFieldType",
         "description": [],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -450,7 +450,7 @@
         "tags": [],
         "label": "OperatingSystem",
         "description": [],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -482,7 +482,7 @@
           },
           " | \"file.path.text\""
         ],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -497,7 +497,7 @@
         "signature": [
           "\"file.path\" | \"file.hash.*\" | \"file.Ext.code_signature\""
         ],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -512,7 +512,7 @@
         "signature": [
           "\"match\" | \"wildcard\" | \"match_any\""
         ],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -527,7 +527,7 @@
         "signature": [
           "any"
         ],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -542,7 +542,7 @@
         "signature": [
           "any"
         ],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -557,7 +557,7 @@
         "signature": [
           "\"process.hash.*\" | \"process.executable.caseless\" | \"process.Ext.code_signature\""
         ],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -572,7 +572,7 @@
         "signature": [
           "\"match\" | \"wildcard\""
         ],
-        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

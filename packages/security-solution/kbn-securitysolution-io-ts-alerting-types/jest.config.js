@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-securitysolution-io-ts-alerting-types'],
+  roots: ['<rootDir>/packages/security-solution/kbn-securitysolution-io-ts-alerting-types'],
 };

@@ -32,7 +32,7 @@ jest.mock('uuid', () => ({
 
 const mockKibanaHttpService = coreMock.createStart().http;
 
-// TODO: Once the mocks are figured out and the types are moved into kbn core this test should be moved next to the file: packages/kbn-securitysolution-list-hooks/src/use_api/index.test.ts
+// TODO: Once the mocks are figured out and the types are moved into kbn core this test should be moved next to the file: packages/security-solution/kbn-securitysolution-list-hooks/src/use_api/index.test.ts
 
 describe('useApi', () => {
   const onErrorMock = jest.fn();

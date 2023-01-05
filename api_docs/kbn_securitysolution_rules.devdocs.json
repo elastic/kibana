@@ -29,7 +29,7 @@
         "signature": [
           "(prefix: string, maybeObj: unknown) => Record<string, SearchTypes>"
         ],
-        "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+            "path": "packages/security-solution/kbn-securitysolution-rules/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -58,7 +58,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+            "path": "packages/security-solution/kbn-securitysolution-rules/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -77,7 +77,7 @@
         "signature": [
           "(ruleType: unknown) => ruleType is \"query\" | \"eql\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\""
         ],
-        "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,7 +91,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+            "path": "packages/security-solution/kbn-securitysolution-rules/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -117,7 +117,7 @@
             "text": "RuleTypeId"
           }
         ],
-        "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -131,7 +131,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-securitysolution-rules/src/utils.ts",
+            "path": "packages/security-solution/kbn-securitysolution-rules/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -154,7 +154,7 @@
         "signature": [
           "\"siem.eqlRule\""
         ],
-        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -169,7 +169,7 @@
         "signature": [
           "\"siem.indicatorRule\""
         ],
-        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -186,7 +186,7 @@
         "signature": [
           "1000"
         ],
-        "path": "packages/kbn-securitysolution-rules/src/configuration_constants.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/configuration_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -201,7 +201,7 @@
         "signature": [
           "\"siem.mlRule\""
         ],
-        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -216,7 +216,7 @@
         "signature": [
           "\"siem.newTermsRule\""
         ],
-        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -231,7 +231,7 @@
         "signature": [
           "\"siem.queryRule\""
         ],
-        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -246,7 +246,7 @@
         "signature": [
           "\"query\" | \"eql\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\""
         ],
-        "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -261,7 +261,7 @@
         "signature": [
           "\"siem.eqlRule\" | \"siem.indicatorRule\" | \"siem.mlRule\" | \"siem.queryRule\" | \"siem.savedQueryRule\" | \"siem.thresholdRule\" | \"siem.newTermsRule\""
         ],
-        "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -276,7 +276,7 @@
         "signature": [
           "\"siem.savedQueryRule\""
         ],
-        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -293,7 +293,7 @@
         "signature": [
           "\"siem.signals\""
         ],
-        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -308,7 +308,7 @@
         "signature": [
           "\"siem.thresholdRule\""
         ],
-        "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -324,7 +324,7 @@
         "description": [
           "\nMaps legacy rule types to RAC rule type IDs."
         ],
-        "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+        "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -338,7 +338,7 @@
             "signature": [
               "\"siem.eqlRule\""
             ],
-            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_mappings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -352,7 +352,7 @@
             "signature": [
               "\"siem.mlRule\""
             ],
-            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_mappings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -366,7 +366,7 @@
             "signature": [
               "\"siem.queryRule\""
             ],
-            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_mappings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -380,7 +380,7 @@
             "signature": [
               "\"siem.savedQueryRule\""
             ],
-            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_mappings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -394,7 +394,7 @@
             "signature": [
               "\"siem.indicatorRule\""
             ],
-            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_mappings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -408,7 +408,7 @@
             "signature": [
               "\"siem.thresholdRule\""
             ],
-            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_mappings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -422,7 +422,7 @@
             "signature": [
               "\"siem.newTermsRule\""
             ],
-            "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
+            "path": "packages/security-solution/kbn-securitysolution-rules/src/rule_type_mappings.ts",
             "deprecated": false,
             "trackAdoption": false
           }

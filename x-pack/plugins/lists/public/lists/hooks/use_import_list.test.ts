@@ -14,7 +14,7 @@ import { getListResponseMock } from '../../../common/schemas/response/list_schem
 
 jest.mock('@kbn/securitysolution-list-api');
 
-// TODO: Port this test over to: packages/kbn-securitysolution-list-hooks/src/use_import_list/index.ts once mocks are moved to packages
+// TODO: Port this test over to: packages/security-solution/kbn-securitysolution-list-hooks/src/use_import_list/index.ts once mocks are moved to packages
 
 describe('useImportList', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;

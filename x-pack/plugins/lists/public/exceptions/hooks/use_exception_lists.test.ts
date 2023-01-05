@@ -20,7 +20,7 @@ const mockKibanaHttpService = coreMock.createStart().http;
 const mockKibanaNotificationsService = coreMock.createStart().notifications;
 jest.mock('@kbn/securitysolution-list-api');
 
-// TODO: Move this test to the kbn package: packages/kbn-securitysolution-list-hooks/src/use_exception_lists/index.test.ts once mocks are ported over
+// TODO: Move this test to the kbn package: packages/security-solution/kbn-securitysolution-list-hooks/src/use_exception_lists/index.test.ts once mocks are ported over
 
 describe('useExceptionLists', () => {
   beforeEach(() => {

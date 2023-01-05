@@ -29,7 +29,7 @@
         "signature": [
           "(entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]) => ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -70,7 +70,7 @@
           },
           "[]) => boolean"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,7 +91,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -126,7 +126,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -147,7 +147,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -184,7 +184,7 @@
           },
           " | undefined"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -195,7 +195,7 @@
             "tags": [],
             "label": "{\n  fields,\n  selectedField,\n}",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -216,7 +216,7 @@
                   },
                   "[]"
                 ],
-                "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -230,7 +230,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -257,7 +257,7 @@
             "text": "EmptyEntry"
           }
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -281,7 +281,7 @@
             "text": "EmptyNestedEntry"
           }
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -316,7 +316,7 @@
           },
           ") => ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; }) & { id?: string | undefined; }"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -336,7 +336,7 @@
                 "text": "OperatorOption"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -357,7 +357,7 @@
                 "text": "FormattedBuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -402,7 +402,7 @@
           },
           "; }"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -424,7 +424,7 @@
                 "text": "FormattedBuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -447,7 +447,7 @@
                 "text": "DataViewFieldBase"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -484,7 +484,7 @@
           },
           "; }"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -506,7 +506,7 @@
                 "text": "FormattedBuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -523,7 +523,7 @@
             "signature": [
               "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; }"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -560,7 +560,7 @@
           },
           "; }"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -582,7 +582,7 @@
                 "text": "FormattedBuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -599,7 +599,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -636,7 +636,7 @@
           },
           "; }"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -658,7 +658,7 @@
                 "text": "FormattedBuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -675,7 +675,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -720,7 +720,7 @@
           },
           "; index: number; }"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -742,7 +742,7 @@
                 "text": "FormattedBuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -765,7 +765,7 @@
                 "text": "OperatorOption"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -802,7 +802,7 @@
           },
           "; }"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -824,7 +824,7 @@
                 "text": "FormattedBuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -841,7 +841,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -870,7 +870,7 @@
           },
           ") => string | string[] | undefined"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -892,7 +892,7 @@
                 "text": "BuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -911,7 +911,7 @@
         "signature": [
           "({ savedObjectType, }: { savedObjectType: string; }) => \"single\" | \"agnostic\""
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/get_exception_list_type/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_exception_list_type/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -922,7 +922,7 @@
             "tags": [],
             "label": "{\n  savedObjectType,\n}",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_exception_list_type/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_exception_list_type/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -933,7 +933,7 @@
                 "tags": [],
                 "label": "savedObjectType",
                 "description": [],
-                "path": "packages/kbn-securitysolution-list-utils/src/get_exception_list_type/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_exception_list_type/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -970,7 +970,7 @@
             "text": "OperatorOption"
           }
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -992,7 +992,7 @@
                 "text": "BuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1052,7 +1052,7 @@
             "text": "DataViewBase"
           }
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1074,7 +1074,7 @@
                 "text": "DataViewBase"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1097,7 +1097,7 @@
                 "text": "FormattedBuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1112,7 +1112,7 @@
             "signature": [
               "\"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\""
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1143,7 +1143,7 @@
               },
               ") | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1158,7 +1158,7 @@
             "signature": [
               "(\"windows\" | \"linux\" | \"macos\")[] | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1185,7 +1185,7 @@
           },
           ") => string"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_filters/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1205,7 +1205,7 @@
                 "text": "GetFiltersParams"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_filters/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1250,7 +1250,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1270,7 +1270,7 @@
                 "text": "DataViewBase"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1294,7 +1294,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1311,7 +1311,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1328,7 +1328,7 @@
             "signature": [
               "{ entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1345,7 +1345,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1389,7 +1389,7 @@
             "text": "FormattedBuilderEntry"
           }
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1409,7 +1409,7 @@
                 "text": "DataViewBase"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1432,7 +1432,7 @@
                 "text": "BuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1449,7 +1449,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1466,7 +1466,7 @@
             "signature": [
               "{ entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1483,7 +1483,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1500,7 +1500,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1535,7 +1535,7 @@
           },
           "[]) => string"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/get_general_filters/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_general_filters/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1555,7 +1555,7 @@
                 "text": "ExceptionListFilter"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_general_filters/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_general_filters/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1577,7 +1577,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_general_filters/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_general_filters/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1604,7 +1604,7 @@
           },
           "[]; showDetection: boolean; showEndpoint: boolean; }) => { ids: string[]; namespaces: (\"single\" | \"agnostic\")[]; }"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/get_ids_and_namespaces/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_ids_and_namespaces/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1615,7 +1615,7 @@
             "tags": [],
             "label": "{\n  lists,\n  showDetection,\n  showEndpoint,\n}",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_ids_and_namespaces/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_ids_and_namespaces/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1636,7 +1636,7 @@
                   },
                   "[]"
                 ],
-                "path": "packages/kbn-securitysolution-list-utils/src/get_ids_and_namespaces/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_ids_and_namespaces/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1647,7 +1647,7 @@
                 "tags": [],
                 "label": "showDetection",
                 "description": [],
-                "path": "packages/kbn-securitysolution-list-utils/src/get_ids_and_namespaces/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_ids_and_namespaces/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1658,7 +1658,7 @@
                 "tags": [],
                 "label": "showEndpoint",
                 "description": [],
-                "path": "packages/kbn-securitysolution-list-utils/src/get_ids_and_namespaces/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_ids_and_namespaces/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1685,7 +1685,7 @@
             "text": "CreateExceptionListItemBuilderSchema"
           }
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1696,7 +1696,7 @@
             "tags": [],
             "label": "{\n  listId,\n  namespaceType,\n  name,\n}",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1710,7 +1710,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1724,7 +1724,7 @@
                 "signature": [
                   "\"single\" | \"agnostic\" | undefined"
                 ],
-                "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1735,7 +1735,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1773,7 +1773,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1793,7 +1793,7 @@
                 "text": "FormattedBuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1808,7 +1808,7 @@
             "signature": [
               "\"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\""
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1823,7 +1823,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1840,7 +1840,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1876,7 +1876,7 @@
             "text": "ListOperatorTypeEnum"
           }
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1898,7 +1898,7 @@
                 "text": "BuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1924,7 +1924,7 @@
             "text": "SavedObjectType"
           }
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/get_saved_object_type/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_saved_object_type/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1935,7 +1935,7 @@
             "tags": [],
             "label": "{\n  namespaceType,\n}",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_saved_object_type/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_saved_object_type/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1949,7 +1949,7 @@
                 "signature": [
                   "\"single\" | \"agnostic\""
                 ],
-                "path": "packages/kbn-securitysolution-list-utils/src/get_saved_object_type/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_saved_object_type/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1977,7 +1977,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/get_saved_object_types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_saved_object_types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1988,7 +1988,7 @@
             "tags": [],
             "label": "{\n  namespaceType,\n}",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_saved_object_types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_saved_object_types/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2002,7 +2002,7 @@
                 "signature": [
                   "(\"single\" | \"agnostic\")[]"
                 ],
-                "path": "packages/kbn-securitysolution-list-utils/src/get_saved_object_types/index.ts",
+                "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_saved_object_types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2039,7 +2039,7 @@
             "text": "ExceptionsBuilderExceptionItem"
           }
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2059,7 +2059,7 @@
                 "text": "ExceptionsBuilderExceptionItem"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2076,7 +2076,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2091,7 +2091,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2110,7 +2110,7 @@
         "signature": [
           "(entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]) => boolean"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/has_large_value_list/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/has_large_value_list/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2124,7 +2124,7 @@
             "signature": [
               "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/has_large_value_list/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/has_large_value_list/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2151,7 +2151,7 @@
           },
           ") => item is { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; }"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2171,7 +2171,7 @@
                 "text": "BuilderEntry"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2189,7 +2189,7 @@
         "tags": [],
         "label": "EmptyEntry",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2200,7 +2200,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2214,7 +2214,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2234,7 +2234,7 @@
                 "text": "ListOperatorEnum"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2271,7 +2271,7 @@
               },
               ".WILDCARD"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2285,7 +2285,7 @@
             "signature": [
               "string | string[] | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2299,7 +2299,7 @@
         "tags": [],
         "label": "EmptyListEntry",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2310,7 +2310,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2324,7 +2324,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2344,7 +2344,7 @@
                 "text": "ListOperatorEnum"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2365,7 +2365,7 @@
               },
               ".LIST"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2379,7 +2379,7 @@
             "signature": [
               "{ id: string | undefined; type: string | undefined; }"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2393,7 +2393,7 @@
         "tags": [],
         "label": "EmptyNestedEntry",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2404,7 +2404,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2418,7 +2418,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2439,7 +2439,7 @@
               },
               ".NESTED"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2453,7 +2453,7 @@
             "signature": [
               "(({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } & { id?: string | undefined; }) | ({ field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } & { id?: string | undefined; }) | ({ field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } & { id?: string | undefined; }) | ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } & { id?: string | undefined; }))[]"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2467,7 +2467,7 @@
         "tags": [],
         "label": "FormattedBuilderEntry",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2478,7 +2478,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2499,7 +2499,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2519,7 +2519,7 @@
                 "text": "OperatorOption"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2533,7 +2533,7 @@
             "signature": [
               "string | string[] | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2547,7 +2547,7 @@
             "signature": [
               "\"parent\" | \"child\" | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2558,7 +2558,7 @@
             "tags": [],
             "label": "entryIndex",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2580,7 +2580,7 @@
               },
               "; parentIndex: number; } | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2601,7 +2601,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2615,7 +2615,7 @@
         "tags": [],
         "label": "GetFiltersParams",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_filters/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2635,7 +2635,7 @@
                 "text": "ExceptionListFilter"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_filters/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2649,7 +2649,7 @@
             "signature": [
               "(\"single\" | \"agnostic\")[]"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_filters/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2663,7 +2663,7 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/get_filters/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/get_filters/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2677,7 +2677,7 @@
         "tags": [],
         "label": "OperatorOption",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2688,7 +2688,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2699,7 +2699,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2719,7 +2719,7 @@
                 "text": "ListOperatorEnum"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2739,7 +2739,7 @@
                 "text": "ListOperatorTypeEnum"
               }
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2766,7 +2766,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2812,7 +2812,7 @@
             "text": "EmptyNestedEntry"
           }
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2827,7 +2827,7 @@
         "signature": [
           "Omit<{ entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; }, \"entries\"> & { id?: string | undefined; entries: (({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } & { id?: string | undefined; }) | ({ field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } & { id?: string | undefined; }) | ({ field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } & { id?: string | undefined; }) | ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } & { id?: string | undefined; }))[]; }"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2850,7 +2850,7 @@
           },
           "[]; list_id: string | undefined; namespace_type: \"single\" | \"agnostic\" | undefined; }"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2872,7 +2872,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2894,7 +2894,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2916,7 +2916,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2938,7 +2938,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2953,7 +2953,7 @@
         "signature": [
           "\"exception-list-agnostic\""
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2976,7 +2976,7 @@
           },
           "[]; }"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2991,7 +2991,7 @@
         "signature": [
           "\"exception-list\""
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3020,7 +3020,7 @@
             "text": "CreateExceptionListItemBuilderSchema"
           }
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3035,7 +3035,7 @@
         "signature": [
           "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | ({ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }) | ({ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; list_id?: undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; })"
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3050,7 +3050,7 @@
         "signature": [
           "\"exception-list-agnostic\" | \"exception-list\""
         ],
-        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3064,7 +3064,7 @@
         "tags": [],
         "label": "doesNotExistOperator",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3078,7 +3078,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3099,7 +3099,7 @@
               },
               ".EXCLUDED"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3120,7 +3120,7 @@
               },
               ".EXISTS"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3131,7 +3131,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3145,7 +3145,7 @@
         "tags": [],
         "label": "doesNotMatchOperator",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3159,7 +3159,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3180,7 +3180,7 @@
               },
               ".EXCLUDED"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3201,7 +3201,7 @@
               },
               ".WILDCARD"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3212,7 +3212,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3226,7 +3226,7 @@
         "tags": [],
         "label": "existsOperator",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3240,7 +3240,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3261,7 +3261,7 @@
               },
               ".INCLUDED"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3282,7 +3282,7 @@
               },
               ".EXISTS"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3293,7 +3293,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3307,7 +3307,7 @@
         "tags": [],
         "label": "isInListOperator",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3321,7 +3321,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3342,7 +3342,7 @@
               },
               ".INCLUDED"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3363,7 +3363,7 @@
               },
               ".LIST"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3374,7 +3374,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3388,7 +3388,7 @@
         "tags": [],
         "label": "isNotInListOperator",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3402,7 +3402,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3423,7 +3423,7 @@
               },
               ".EXCLUDED"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3444,7 +3444,7 @@
               },
               ".LIST"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3455,7 +3455,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3469,7 +3469,7 @@
         "tags": [],
         "label": "isNotOneOfOperator",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3483,7 +3483,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3504,7 +3504,7 @@
               },
               ".EXCLUDED"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3525,7 +3525,7 @@
               },
               ".MATCH_ANY"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3536,7 +3536,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3550,7 +3550,7 @@
         "tags": [],
         "label": "isNotOperator",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3564,7 +3564,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3585,7 +3585,7 @@
               },
               ".EXCLUDED"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3606,7 +3606,7 @@
               },
               ".MATCH"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3617,7 +3617,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3631,7 +3631,7 @@
         "tags": [],
         "label": "isOneOfOperator",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3645,7 +3645,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3666,7 +3666,7 @@
               },
               ".INCLUDED"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3687,7 +3687,7 @@
               },
               ".MATCH_ANY"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3698,7 +3698,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3712,7 +3712,7 @@
         "tags": [],
         "label": "isOperator",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3726,7 +3726,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3747,7 +3747,7 @@
               },
               ".INCLUDED"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3768,7 +3768,7 @@
               },
               ".MATCH"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3779,7 +3779,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3793,7 +3793,7 @@
         "tags": [],
         "label": "matchesOperator",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+        "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3807,7 +3807,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3828,7 +3828,7 @@
               },
               ".INCLUDED"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3849,7 +3849,7 @@
               },
               ".WILDCARD"
             ],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3860,7 +3860,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "packages/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
+            "path": "packages/security-solution/kbn-securitysolution-list-utils/src/autocomplete_operators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

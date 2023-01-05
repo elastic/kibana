@@ -12,7 +12,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('@kbn/securitysolution-list-api');
 
-// TODO: Move this test to the kbn package: packages/kbn-securitysolution-list-hooks/src/use_export_list/index.ts once Mocks are ported from Kibana
+// TODO: Move this test to the kbn package: packages/security-solution/kbn-securitysolution-list-hooks/src/use_export_list/index.ts once Mocks are ported from Kibana
 
 describe('useExportList', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;
