@@ -201,27 +201,6 @@ describe('mappingFromFieldMap', () => {
                 end: {
                   type: 'date',
                 },
-                evaluation_results: {
-                  type: 'object',
-                  properties: {
-                    thresholds: {
-                      properties: {
-                        comparator: {
-                          type: 'keyword',
-                        },
-                        type: {
-                          type: 'keyword',
-                        },
-                        value: {
-                          type: 'keyword',
-                        },
-                      },
-                    },
-                    value: {
-                      type: 'float',
-                    },
-                  },
-                },
                 flapping: {
                   type: 'boolean',
                 },
