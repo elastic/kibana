@@ -61,35 +61,13 @@ export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerByVa
 export function startDiffingDashboardState(
   this: DashboardContainer,
   {
-    initialInput,
     useSessionBackup,
     setCleanupFunction,
-    initialLastSavedInput,
   }: {
     useSessionBackup?: boolean;
-    initialInput: DashboardContainerByValueInput;
-    initialLastSavedInput: DashboardContainerByValueInput;
     setCleanupFunction: (cleanupFunction: () => void) => void;
   }
 ) {
-  const { dashboardSessionStorage } = pluginServices.getServices();
-
-  const checkForUnsavedChanges = async (
-    lastState: DashboardContainerByValueInput,
-    currentState: DashboardContainerByValueInput
-  ): Promise<boolean> => {
-    const unsavedChanges = await getUnsavedChanges.bind(this)(lastState, currentState);
-
-    if (useSessionBackup) {
-      dashboardSessionStorage.setState(
-        this.getDashboardSavedObjectId(),
-        omit(unsavedChanges, keysToOmitFromSessionStorage)
-      );
-    }
-
-    return Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0; // omit view mode because it is always backed up
-  };
-
   const checkForUnsavedChangesSubject$ = new Subject<null>();
 
   // middleware starts the check for unsaved changes function if the action dispatched could cause them.
@@ -105,51 +83,59 @@ export function startDiffingDashboardState(
     next(action);
   };
 
-  // once the dashboard is initialized, start listening to the subject
-  this.untilInitialized().then(() => {
-    const {
-      getState,
-      dispatch,
-      actions: { setHasUnsavedChanges },
-    } = this.getReduxEmbeddableTools();
-
-    const getHasUnsavedChangesSubscription = checkForUnsavedChangesSubject$
-      .pipe(
-        debounceTime(CHANGE_CHECK_DEBOUNCE),
-        switchMap(() => {
-          return new Observable((observer) => {
-            const {
-              explicitInput: currentInput,
-              componentState: { lastSavedInput },
-            } = this.getReduxEmbeddableTools().getState();
-            checkForUnsavedChanges(lastSavedInput, currentInput).then((hasChanges) => {
+  const getHasUnsavedChangesSubscription = checkForUnsavedChangesSubject$
+    .pipe(
+      debounceTime(CHANGE_CHECK_DEBOUNCE),
+      switchMap(() => {
+        return new Observable((observer) => {
+          const {
+            explicitInput: currentInput,
+            componentState: { lastSavedInput },
+          } = this.getReduxEmbeddableTools().getState();
+          getUnsavedChanges
+            .bind(this)(lastSavedInput, currentInput)
+            .then((unsavedChanges) => {
               if (observer.closed) return;
-              if (getState().componentState.hasUnsavedChanges !== hasChanges) {
-                dispatch(setHasUnsavedChanges(hasChanges));
-              }
+
+              updateUnsavedChangesState.bind(this)(unsavedChanges);
+              if (useSessionBackup) backupUnsavedChanges.bind(this)(unsavedChanges);
             });
-          });
-        })
-      )
-      .subscribe();
+        });
+      })
+    )
+    .subscribe();
 
-    setCleanupFunction(() => getHasUnsavedChangesSubscription.unsubscribe());
-  });
-
-  // set initial unsaved changes
-  checkForUnsavedChanges(initialLastSavedInput, initialInput).then(
-    async (initialUnsavedChanges) => {
-      await this.untilInitialized();
-      if (!initialUnsavedChanges) return; // early return because we know hasUnsavedChanges has been initialized to false
-      const {
-        dispatch,
-        actions: { setHasUnsavedChanges },
-      } = this.getReduxEmbeddableTools();
-      dispatch(setHasUnsavedChanges(initialUnsavedChanges));
-    }
-  );
+  setCleanupFunction(() => getHasUnsavedChangesSubscription.unsubscribe());
 
   return diffingMiddleware;
+}
+
+function updateUnsavedChangesState(
+  this: DashboardContainer,
+  unsavedChanges: Partial<DashboardContainerByValueInput>
+) {
+  const {
+    getState,
+    dispatch,
+    actions: { setHasUnsavedChanges },
+  } = this.getReduxEmbeddableTools();
+
+  // dispatch has unsaved changes state
+  const hasChanges = Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0;
+  if (getState().componentState.hasUnsavedChanges !== hasChanges) {
+    dispatch(setHasUnsavedChanges(hasChanges));
+  }
+}
+
+function backupUnsavedChanges(
+  this: DashboardContainer,
+  unsavedChanges: Partial<DashboardContainerByValueInput>
+) {
+  const { dashboardSessionStorage } = pluginServices.getServices();
+  dashboardSessionStorage.setState(
+    this.getDashboardSavedObjectId(),
+    omit(unsavedChanges, keysToOmitFromSessionStorage)
+  );
 }
 
 /**
@@ -161,7 +147,8 @@ export async function getUnsavedChanges(
   lastInput: DashboardContainerByValueInput,
   input: DashboardContainerByValueInput,
   keys?: Array<keyof DashboardContainerByValueInput>
-) {
+): Promise<Partial<DashboardContainerByValueInput>> {
+  await this.untilInitialized();
   const allKeys =
     keys ??
     ([...new Set([...Object.keys(lastInput), ...Object.keys(input)])] as Array<
