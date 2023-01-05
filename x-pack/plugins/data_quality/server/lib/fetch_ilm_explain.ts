@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import { IlmExplainLifecycleResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-export const fetchStats = async (
+export const fetchILMExplain = async (
   client: IScopedClusterClient,
   indexPattern: string
-): Promise<IndicesStatsResponse> =>
-  client.asCurrentUser.indices.stats({
-    expand_wildcards: ['open'],
+): Promise<IlmExplainLifecycleResponse> =>
+  client.asCurrentUser.ilm.explainLifecycle({
     index: indexPattern,
   });

@@ -10,9 +10,9 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 
 export const fetchMappings = async (
   client: IScopedClusterClient,
-  indexName: string
+  indexPattern: string
 ): Promise<Record<string, IndicesGetMappingIndexMappingRecord>> =>
   client.asCurrentUser.indices.getMapping({
     expand_wildcards: ['open'],
-    index: indexName,
+    index: indexPattern,
   });
