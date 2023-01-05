@@ -8,7 +8,12 @@
 import type { Dispatch, Reducer } from 'react';
 import type { ParsedCommandInterface } from '../../service/types';
 import type { CommandInputProps } from '../command_input';
-import type { Command, CommandDefinition, CommandExecutionComponent } from '../../types';
+import type {
+  Command,
+  CommandDefinition,
+  CommandExecutionComponent,
+  CommandArgDefinition,
+} from '../../types';
 
 export interface ConsoleDataState {
   /**
@@ -82,6 +87,10 @@ export interface ConsoleDataState {
 
 export interface EnteredCommand {
   commandDefinition: CommandDefinition;
+
+  /** keeps a list of arguments definitions that are defined with a Value Selector component */
+  argsWithValueSelectors: undefined | Record<string, CommandArgDefinition>;
+
   argState: {
     // Each arg has an array (just like the parsed input) and keeps the
     // state that is provided to that instance of the argument on the input.
@@ -171,7 +180,9 @@ export type ConsoleDataAction =
       payload?: never;
     };
 
-type PayloadValueOrFunction<T extends object = object> = T | ((options: Required<T>) => T);
+type PayloadValueOrFunction<T extends object = object, R extends object = T> =
+  | T
+  | ((options: Required<T>) => R);
 
 export interface ConsoleStore {
   state: ConsoleDataState;

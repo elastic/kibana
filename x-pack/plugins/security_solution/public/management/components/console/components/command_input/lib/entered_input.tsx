@@ -5,11 +5,64 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
+import React from 'react';
+import { ArgumentSelectorWrapper } from '../components/argument_selector_wrapper';
+import type { ParsedCommandInterface } from '../../../service/types';
+import type { EnteredCommand } from '../../console_state/types';
+
 /**
  * Class that manages the command entered and how that is displayed to the left and right of the cursor
  */
 export class EnteredInput {
-  constructor(private leftOfCursorText: string, private rightOfCursorText: string) {}
+  private leftOfCursorContent: string[];
+  private rightOfCursorContent: string[];
+
+  constructor(
+    private leftOfCursorText: string,
+    private rightOfCursorText: string,
+    private readonly parsedInput: ParsedCommandInterface,
+    private readonly enteredCommand: undefined | EnteredCommand
+  ) {
+    this.leftOfCursorContent = leftOfCursorText.split('');
+    this.rightOfCursorContent = leftOfCursorText.split('');
+
+    // Determine if any argument value selector should be inserted
+    if (parsedInput.hasArgs && enteredCommand && enteredCommand.argsWithValueSelectors) {
+      const inputPieces = [
+        {
+          input: leftOfCursorText,
+          items: this.leftOfCursorContent,
+        },
+        {
+          input: rightOfCursorText,
+          items: this.rightOfCursorContent,
+        },
+      ];
+
+      for (const [argName, argDef] of Object.entries(enteredCommand.argsWithValueSelectors)) {
+        // Loop through the input pieces (left and right side of cursor) looking for the Argument name
+        for (const { input, items } of inputPieces) {
+          // TODO:PT Support multiple occurrences of the argument
+
+          const argNameMatch = `--${argName}`;
+          const pos = input.indexOf(argNameMatch);
+
+          if (parsedInput.hasArg(argName) && pos !== -1) {
+            const argChrLength = argNameMatch.length;
+            const replaceValues: Array<symbol | ReactNode> = Array.from(
+              { length: argChrLength },
+              () => null
+            );
+
+            replaceValues[0] = <ArgumentSelectorWrapper argName={argName} argDefinition={argDef} />;
+
+            items.splice(pos, argChrLength, ...replaceValues);
+          }
+        }
+      }
+    }
+  }
 
   private replaceSelection(selection: string, newValue: string) {
     const prevFullTextEntered = this.leftOfCursorText + this.rightOfCursorText;

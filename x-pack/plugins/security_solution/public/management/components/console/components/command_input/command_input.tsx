@@ -88,12 +88,14 @@ export interface CommandInputProps extends CommonProps {
 
 export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
   useInputHints();
-  const dispatch = useConsoleStateDispatch();
-  const { rightOfCursorText, leftOfCursorText, fullTextEntered } = useWithInputTextEntered();
-  const visibleState = useWithInputVisibleState();
-  const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
+  const dispatch = useConsoleStateDispatch();
+  const { rightOfCursorText, leftOfCursorText, fullTextEntered, parsedInput, enteredCommand } =
+    useWithInputTextEntered();
+  const visibleState = useWithInputVisibleState();
   const isPopoverOpen = !!useWithInputShowPopover();
+
+  const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const [commandToExecute, setCommandToExecute] = useState('');
   const [popoverWidth, setPopoverWidth] = useState('94vw');
 
@@ -164,7 +166,13 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       dispatch({
         type: 'updateInputTextEnteredState',
         payload: ({ leftOfCursorText: prevLeftOfCursor, rightOfCursorText: prevRightOfCursor }) => {
-          let inputText = new EnteredInput(prevLeftOfCursor, prevRightOfCursor);
+          let inputText = new EnteredInput(
+            prevLeftOfCursor,
+            prevRightOfCursor,
+            // FIXME:PT get parsedInput and enteredCommand from action callback arguments
+            parsedInput,
+            enteredCommand
+          );
 
           inputText.addValue(value ?? '', selection);
 
@@ -182,7 +190,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             // ENTER  = Execute command and blank out the input area
             case 13:
               setCommandToExecute(inputText.getFullText());
-              inputText = new EnteredInput('', '');
+              inputText = new EnteredInput('', '', parsedInput, enteredCommand);
               break;
 
             // ARROW LEFT
@@ -213,7 +221,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         },
       });
     },
-    [dispatch]
+    [dispatch, enteredCommand, parsedInput]
   );
 
   // Execute the command if one was ENTER'd.

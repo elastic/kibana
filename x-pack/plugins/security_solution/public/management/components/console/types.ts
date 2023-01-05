@@ -14,6 +14,9 @@ import type { CommandExecutionResultComponent } from './components/command_execu
 import type { CommandExecutionState } from './components/console_state/types';
 import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/types';
 
+/**
+ * Definition interface for a Command argument
+ */
 export interface CommandArgDefinition {
   required: boolean;
   allowMultiples: boolean;

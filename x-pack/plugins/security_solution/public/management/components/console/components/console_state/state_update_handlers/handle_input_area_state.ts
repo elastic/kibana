@@ -8,7 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import { parseCommandInput } from '../../../service/parsed_command_input';
-import type { ConsoleDataAction, ConsoleDataState, ConsoleStoreReducer } from '../types';
+import type {
+  ConsoleDataAction,
+  ConsoleDataState,
+  ConsoleStoreReducer,
+  EnteredCommand,
+} from '../types';
 
 export const INPUT_DEFAULT_PLACEHOLDER_TEXT = i18n.translate(
   'xpack.securitySolution.handleInputAreaState.inputPlaceholderText',
@@ -69,6 +74,8 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           ? payload({
               leftOfCursorText: state.input.leftOfCursorText,
               rightOfCursorText: state.input.rightOfCursorText,
+              enteredCommand: state.input.enteredCommand,
+              parsedInput: state.input.parsedInput,
             })
           : payload;
 
@@ -85,20 +92,34 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         // Determine if `enteredCommand` should be re-defined
         if (
           parsedInput.name &&
-          enteredCommand &&
-          parsedInput.name !== enteredCommand.commandDefinition.name
+          (!enteredCommand || parsedInput.name !== enteredCommand.commandDefinition.name)
         ) {
           enteredCommand = undefined;
 
           const commandDefinition = state.commands.find((def) => def.name === parsedInput.name);
 
           if (commandDefinition) {
+            let argsWithValueSelectors: EnteredCommand['argsWithValueSelectors'];
+
+            for (const [argName, argDef] of Object.entries(commandDefinition.args ?? {})) {
+              if (argDef.SelectorComponent) {
+                if (!argsWithValueSelectors) {
+                  argsWithValueSelectors = {};
+                }
+
+                argsWithValueSelectors[argName] = argDef;
+              }
+            }
+
             enteredCommand = {
               argState: {},
               commandDefinition,
+              argsWithValueSelectors,
             };
           }
         }
+
+        // FIXME:PT need to update `parsedInput` to include Argument Value selector values
 
         return {
           ...state,
