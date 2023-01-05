@@ -22,4 +22,12 @@ export class ContentRegistry {
 
     this.contents.set(contentType, config);
   }
+
+  getStorage<T extends ContentStorage = ContentStorage>(contentType: string) {
+    const contentConfig = this.contents.get(contentType);
+    if (!contentConfig) {
+      throw new Error(`Content [${contentType}] is not registered.`);
+    }
+    return contentConfig.storage as T;
+  }
 }

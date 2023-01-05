@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ContentStorage } from './content_storage';
+import { ContentCrud } from './crud';
 import { ContentRegistry } from './registry';
 
 export class ContentCore {
@@ -18,8 +19,13 @@ export class ContentCore {
   setup() {}
 
   start() {
+    const crud = <T extends ContentStorage = ContentStorage>(contentType: string) => {
+      return new ContentCrud<T>(contentType, this.contentRegistry);
+    };
+
     return {
       register: this.contentRegistry.register.bind(this.contentRegistry),
+      crud,
     };
   }
 }

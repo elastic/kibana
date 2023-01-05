@@ -8,6 +8,9 @@
 
 import type { CommonFields, InternalFields, KibanaContent, SearchOptions } from './types';
 
+/**
+ * Storage class that all content must implement
+ */
 export abstract class ContentStorage<
   Fields extends CommonFields = CommonFields,
   Content extends KibanaContent = KibanaContent
@@ -19,14 +22,14 @@ export abstract class ContentStorage<
   public abstract mget(ids: string[], options?: unknown): Promise<Content[]>;
 
   /** Create an item */
-  public abstract create(fields: Fields, options?: unknown): Promise<Content[]>;
+  public abstract create(fields: Fields, options?: unknown): Promise<Content>;
 
   /** Update an item */
   public abstract update<T extends Partial<Fields>>(
     id: string,
     fields: T,
     options?: unknown
-  ): Partial<T & InternalFields>;
+  ): Promise<Partial<T & InternalFields>>;
 
   /** Delete an item */
   public abstract delete(id: string, options?: unknown): Promise<Content>;
