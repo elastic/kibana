@@ -139,6 +139,10 @@ Observability::
 * Adds alert details page feature flag by App {kibana-pull}142839[#142839]
 * Adds new contextual attributes to Infrastructure - Inventory Rule {kibana-pull}140598[#140598]
 
+Osquery::
+
+Allows users to deploy Osquery across all {agent} policies or on specified policies only {kibana-pull}143948[#143948]
+
 Platform::
 Adds notifications plugin, offering basic email service {kibana-pull}143303[#143303]
 
