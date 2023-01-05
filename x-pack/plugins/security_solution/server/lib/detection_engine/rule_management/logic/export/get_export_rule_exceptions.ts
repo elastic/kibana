@@ -94,6 +94,7 @@ export const createPromises = (
         id,
         listId,
         namespaceType,
+        includeExpiredExceptions: true, // TODO: pass this arg in via the rule export api
       });
     }
   );
