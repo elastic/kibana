@@ -41,3 +41,35 @@ Example.args = {
   },
   serviceName: 'opbeans-java',
 };
+
+export const AndroidAgent: Story<Args> = (args) => {
+  return <ServiceLink {...args} />;
+};
+AndroidAgent.args = {
+  agentName: 'android/java',
+  query: {
+    environment: 'ENVIRONMENT_ALL',
+    kuery: '',
+    rangeFrom: 'now-15m',
+    rangeTo: 'now',
+    serviceGroup: '',
+    comparisonEnabled: false,
+  },
+  serviceName: 'opbeans-android',
+};
+
+export const IOSAgent: Story<Args> = (args) => {
+  return <ServiceLink {...args} />;
+};
+IOSAgent.args = {
+  agentName: 'iOS/swift',
+  query: {
+    environment: 'ENVIRONMENT_ALL',
+    kuery: '',
+    rangeFrom: 'now-15m',
+    rangeTo: 'now',
+    serviceGroup: '',
+    comparisonEnabled: false,
+  },
+  serviceName: 'opbeans-swift',
+};

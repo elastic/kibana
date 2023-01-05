@@ -13,6 +13,7 @@ import { PromiseType } from 'utility-types';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 
 import { esArchiverUnload } from './tasks/es_archiver';
+import { TestReporter } from './test_reporter';
 
 export interface ArgParams {
   headless: boolean;
@@ -62,10 +63,7 @@ export class SyntheticsRunner {
 
       const promises = dataArchives.map((archive) => esArchiver.loadIfNeeded(e2eDir + archive));
 
-      await Promise.all([
-        ...promises,
-        esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote'),
-      ]);
+      await Promise.all([...promises]);
     } catch (e) {
       console.log(e);
     }
@@ -98,10 +96,22 @@ export class SyntheticsRunner {
     const { headless, match, pauseOnError } = this.params;
     const results = await syntheticsRun({
       params: { kibanaUrl: this.kibanaUrl, getService: this.getService },
-      playwrightOptions: { headless, chromiumSandbox: false, timeout: 60 * 1000 },
+      playwrightOptions: {
+        headless,
+        chromiumSandbox: false,
+        timeout: 60 * 1000,
+        viewport: {
+          height: 900,
+          width: 1600,
+        },
+        recordVideo: {
+          dir: '.journeys/videos',
+        },
+      },
       match: match === 'undefined' ? '' : match,
       pauseOnError,
-      screenshots: 'off',
+      screenshots: 'only-on-failure',
+      reporter: TestReporter,
     });
 
     await this.assertResults(results);
@@ -110,7 +120,8 @@ export class SyntheticsRunner {
   assertResults(results: PromiseType<ReturnType<typeof syntheticsRun>>) {
     Object.entries(results).forEach(([_journey, result]) => {
       if (result.status !== 'succeeded') {
-        throw new Error('Tests failed');
+        process.exitCode = 1;
+        process.exit();
       }
     });
   }

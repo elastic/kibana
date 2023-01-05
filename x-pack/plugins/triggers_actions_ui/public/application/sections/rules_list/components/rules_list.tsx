@@ -70,8 +70,6 @@ import { RuleLastRunOutcomeFilter } from './rule_last_run_outcome_filter';
 import { RulesListErrorBanner } from './rules_list_error_banner';
 import {
   loadRuleTypes,
-  disableRule,
-  enableRule,
   snoozeRule,
   unsnoozeRule,
   bulkUpdateAPIKey,
@@ -626,13 +624,19 @@ export const RulesList = ({
     ];
   };
 
-  const onDisableRule = (rule: RuleTableItem) => {
-    return disableRule({ http, id: rule.id });
-  };
+  const onDisableRule = useCallback(
+    async (rule: RuleTableItem) => {
+      await bulkDisableRules({ http, ids: [rule.id] });
+    },
+    [bulkDisableRules]
+  );
 
-  const onEnableRule = (rule: RuleTableItem) => {
-    return enableRule({ http, id: rule.id });
-  };
+  const onEnableRule = useCallback(
+    async (rule: RuleTableItem) => {
+      await bulkEnableRules({ http, ids: [rule.id] });
+    },
+    [bulkEnableRules]
+  );
 
   const onSnoozeRule = (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => {
     return snoozeRule({ http, id: rule.id, snoozeSchedule });
@@ -703,7 +707,7 @@ export const RulesList = ({
 
     return selectedIds.length
       ? filterRulesById(rulesState.data, selectedIds).every((selectedRule) =>
-          hasAllPrivilege(selectedRule, ruleTypesState.data.get(selectedRule.ruleTypeId))
+          hasAllPrivilege(selectedRule.consumer, ruleTypesState.data.get(selectedRule.ruleTypeId))
         )
       : false;
   }, [selectedIds, rulesState.data, ruleTypesState.data, isAllSelected]);
@@ -1051,7 +1055,10 @@ export const RulesList = ({
   const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
 
   useEffect(() => {
-    setIsDeleteModalVisibility(rulesToDelete.length > 0 || Boolean(rulesToDeleteFilter));
+    setIsDeleteModalVisibility(
+      (!isAllSelected && rulesToDelete.length > 0) ||
+        (isAllSelected && Boolean(rulesToDeleteFilter))
+    );
   }, [rulesToDelete, rulesToDeleteFilter]);
 
   const { showToast } = useBulkOperationToast({ onSearchPopulate });
@@ -1059,11 +1066,9 @@ export const RulesList = ({
   const onEnable = useCallback(async () => {
     setIsEnablingRules(true);
 
-    const { errors, total } = await bulkEnableRules({
-      ...(isAllSelected ? { filter: getFilter() } : {}),
-      ...(isAllSelected ? {} : { ids: selectedIds }),
-      http,
-    });
+    const { errors, total } = isAllSelected
+      ? await bulkEnableRules({ http, filter: getFilter() })
+      : await bulkEnableRules({ http, ids: selectedIds });
 
     setIsEnablingRules(false);
     showToast({ action: 'ENABLE', errors, total });
@@ -1074,11 +1079,9 @@ export const RulesList = ({
   const onDisable = useCallback(async () => {
     setIsDisablingRules(true);
 
-    const { errors, total } = await bulkDisableRules({
-      ...(isAllSelected ? { filter: getFilter() } : {}),
-      ...(isAllSelected ? {} : { ids: selectedIds }),
-      http,
-    });
+    const { errors, total } = isAllSelected
+      ? await bulkDisableRules({ http, filter: getFilter() })
+      : await bulkDisableRules({ http, ids: selectedIds });
 
     setIsDisablingRules(false);
     showToast({ action: 'DISABLE', errors, total });
@@ -1090,22 +1093,29 @@ export const RulesList = ({
     setIsDeleteModalVisibility(false);
     clearRulesToDelete();
   };
+
   const onDeleteConfirm = useCallback(async () => {
     setIsDeleteModalVisibility(false);
     setIsDeletingRules(true);
 
-    const { errors, total } = await bulkDeleteRules({
-      filter: rulesToDeleteFilter,
-      ids: rulesToDelete,
-      http,
-    });
+    const bulkDeleteRulesArguments =
+      isAllSelected && rulesToDeleteFilter
+        ? {
+            filter: rulesToDeleteFilter,
+            http,
+          }
+        : {
+            ids: rulesToDelete,
+            http,
+          };
+    const { errors, total } = await bulkDeleteRules(bulkDeleteRulesArguments);
 
     setIsDeletingRules(false);
     showToast({ action: 'DELETE', errors, total });
     await refreshRules();
     clearRulesToDelete();
     onClearSelection();
-  }, [http, rulesToDelete, rulesToDeleteFilter, setIsDeletingRules, toasts]);
+  }, [http, rulesToDelete, rulesToDeleteFilter]);
 
   const numberRulesToDelete = rulesToDelete.length || numberOfSelectedItems;
 

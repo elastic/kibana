@@ -97,7 +97,7 @@ trackEvent,
           </p>
           <EuiCodeBlock language="javascript" isCopyable>
             {`createTracker({
-dsn: "${analyticsDNSUrl}",
+  dsn: "${analyticsDNSUrl}",
 });`}
           </EuiCodeBlock>
         </EuiText>
@@ -136,16 +136,15 @@ dsn: "${analyticsDNSUrl}",
             {`// track a page view in React
 
 const SearchPage = (props) => {
-useEffect(() => {
-trackPageView();
-}, []);
+  useEffect(() => {
+    trackPageView();
+  }, []);
 
-return (
-<div>
-  <h1>Search Page</h1>
-  <
-</div>
-);
+  return (
+    <div>
+      <h1>Search Page</h1>
+    </div>
+  );
 };`}
           </EuiCodeBlock>
           <EuiSpacer size="m" />
@@ -164,20 +163,21 @@ import { trackEvent } from '@elastic/behavioural-analytics-javascript-tracker';
 
 const ProductDetailPage = (props) => {
 
-return (
-<div>
-  <h1>Product detail page</h1>
-  <input type="button" onClick={() => {
-    trackEvent("click", {
-      category: "product",
-      action: "add_to_cart",
-      label: "product_id",
-      value: "123"
-    })
-  }} />
-  }}>Add to Basket</input>
-</div>
-)
+  return (
+    <div>
+      <h1>Product detail page</h1>
+      <input type="button" onClick={() => {
+        trackEvent("click", {
+          category: "product",
+          action: "add_to_cart",
+          label: "product_id",
+          value: "123"
+        })
+      }} />
+      }}>Add to Basket</input>
+    </div>
+    )
+  }
 }`}
           </EuiCodeBlock>
         </EuiText>
