@@ -46,6 +46,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.security.authc.providers=${JSON.stringify({
           basic: { basic1: { order: 0 } },
           saml: { saml1: { order: 1, realm: 'saml1' } },
+          anonymous: {
+            anonymous1: {
+              order: 3,
+              credentials: { username: 'anonymous_user', password: 'changeme' },
+            },
+          },
         })}`,
         // Exclude Uptime tasks to not interfere (additional ES load) with the session cleanup task.
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['UPTIME:*'])}`,

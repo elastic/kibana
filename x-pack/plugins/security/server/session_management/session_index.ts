@@ -24,6 +24,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AuthenticationProvider } from '../../common/model';
 import type { AuditLogger } from '../audit';
 import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audit';
+import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
 
@@ -539,8 +540,14 @@ export class SessionIndex {
    * @param sessionValue Session index value to check against concurrent sessions limit.
    */
   async isWithinConcurrentSessionLimit(sessionValue: Readonly<SessionIndexValue>) {
+    // Concurrent user sessions limit doesn't apply if it's not configured, or session isn't authenticated, or session
+    // belongs to the anonymous user.
     const maxConcurrentSessions = this.options.config.session.concurrentSessions?.maxSessions;
-    if (maxConcurrentSessions == null || !sessionValue.usernameHash) {
+    if (
+      maxConcurrentSessions == null ||
+      !sessionValue.usernameHash ||
+      sessionValue.provider.type === AnonymousAuthenticationProvider.type
+    ) {
       return true;
     }
 

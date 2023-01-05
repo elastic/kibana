@@ -19,6 +19,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 
 import type { AuditLogger } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';
+import { AnonymousAuthenticationProvider } from '../authentication';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
 import {
@@ -1839,6 +1840,18 @@ describe('Session index', () => {
       await expect(
         sessionIndex.isWithinConcurrentSessionLimit(
           sessionIndexMock.createValue({ usernameHash: undefined })
+        )
+      ).resolves.toBe(true);
+      expect(mockElasticsearchClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns `true` if session belongs to the anonymous user', async () => {
+      await expect(
+        sessionIndex.isWithinConcurrentSessionLimit(
+          sessionIndexMock.createValue({
+            createdAt: 100,
+            provider: { type: AnonymousAuthenticationProvider.type, name: 'anonymous1' },
+          })
         )
       ).resolves.toBe(true);
       expect(mockElasticsearchClient.search).not.toHaveBeenCalled();

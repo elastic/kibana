@@ -22,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   const testUser = { username: 'test_user', password: 'changeme' };
   const basicProvider = { type: 'basic', name: 'basic1' };
   const samlProvider = { type: 'saml', name: 'saml1' };
+  const anonymousProvider = { type: 'anonymous', name: 'anonymous1' };
 
   async function checkSessionCookie(
     sessionCookie: Cookie,
@@ -88,7 +89,33 @@ export default function ({ getService }: FtrProviderContext) {
     return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
   }
 
+  async function loginWithAnonymous() {
+    const authenticationResponse = await supertest
+      .post('/internal/security/login')
+      .set('kbn-xsrf', 'xxx')
+      .send({
+        providerType: anonymousProvider.type,
+        providerName: anonymousProvider.name,
+        currentURL: '/',
+      })
+      .expect(200);
+
+    return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
+  }
+
   describe('Session Global Concurrent Limit', () => {
+    before(async () => {
+      await security.user.create('anonymous_user', {
+        password: 'changeme',
+        roles: [],
+        full_name: 'Guest',
+      });
+    });
+
+    after(async () => {
+      await security.user.delete('anonymous_user');
+    });
+
     beforeEach(async () => {
       await security.testUser.setRoles(['kibana_admin']);
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
@@ -206,6 +233,18 @@ export default function ({ getService }: FtrProviderContext) {
       await checkSessionCookie(basicSessionCookieThree, testUser.username, basicProvider);
       await checkSessionCookie(samlSessionCookieTwo, 'a@b.c', samlProvider);
       await checkSessionCookie(samlSessionCookieThree, 'a@b.c', samlProvider);
+    });
+
+    it('should not enforce session limit for anonymous users', async function () {
+      // All sessions should be active.
+      for (const anonymousSessionCookie of [
+        await loginWithAnonymous(),
+        await loginWithAnonymous(),
+        await loginWithAnonymous(),
+        await loginWithAnonymous(),
+      ]) {
+        await checkSessionCookie(anonymousSessionCookie, 'anonymous_user', anonymousProvider);
+      }
     });
   });
 }
