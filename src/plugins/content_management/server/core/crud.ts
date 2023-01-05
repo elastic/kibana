@@ -6,37 +6,80 @@
  * Side Public License, v 1.
  */
 
-import { ContentStorage } from './content_storage';
-import { ContentRegistry } from './registry';
+import type { ContentStorage } from './content_storage';
+import type { EventBus } from './event_bus';
+import type { ContentRegistry } from './registry';
+import { CommonFields, InternalFields, KibanaContent, SearchOptions } from './types';
 
-export class ContentCrud<T extends ContentStorage = ContentStorage> {
-  private storage: T;
+export class ContentCrud implements ContentStorage {
+  private storage: ContentStorage;
+  private eventBus: EventBus;
+  public contentType: string;
 
-  constructor(contentType: string, contentRegistry: ContentRegistry) {
-    this.storage = contentRegistry.getStorage(contentType);
+  constructor(
+    contentType: string,
+    deps: {
+      contentRegistry: ContentRegistry;
+      eventBus: EventBus;
+    }
+  ) {
+    this.contentType = contentType;
+    this.storage = deps.contentRegistry.getStorage(contentType);
+    this.eventBus = deps.eventBus;
   }
 
-  get(...args: Parameters<T['get']>) {
-    return this.storage.get(args[0], args[1]) as ReturnType<T['get']>;
+  public get(contentId: string, options?: unknown): Promise<KibanaContent> {
+    this.eventBus.emit({
+      type: 'getItemStart',
+      contentId,
+      contentType: this.contentType,
+    });
+
+    return this.storage
+      .get(contentId, options)
+      .then((res) => {
+        this.eventBus.emit({
+          type: 'getItemSuccess',
+          contentId,
+          contentType: this.contentType,
+          data: res,
+        });
+
+        return res;
+      })
+      .catch((e) => {
+        this.eventBus.emit({
+          type: 'getItemError',
+          contentId,
+          contentType: this.contentType,
+          error: e,
+        });
+
+        throw e;
+      });
   }
 
-  mget(...args: Parameters<T['mget']>) {
-    return this.storage.mget(args[0], args[1]) as ReturnType<T['mget']>;
+  public mget(ids: string[], options?: unknown): Promise<KibanaContent[]> {
+    return this.storage.mget(ids, options);
   }
 
-  create(...args: Parameters<T['create']>) {
-    return this.storage.create(args[0], args[1]) as ReturnType<T['create']>;
+  public create(fields: CommonFields, options?: unknown): Promise<KibanaContent> {
+    return this.storage.create(fields, options);
   }
 
-  update(...args: Parameters<T['update']>) {
-    return this.storage.update(args[0], args[1], args[2]) as ReturnType<T['update']>;
+  public update<T extends Partial<CommonFields>>(
+    id: string,
+    fields: T,
+    options?: unknown
+  ): Promise<Partial<T & InternalFields>> {
+    return this.storage.update(id, fields, options);
   }
 
-  delete(...args: Parameters<T['delete']>) {
-    return this.storage.delete(args[0], args[1]) as ReturnType<T['delete']>;
+  public delete(id: string, options?: unknown): Promise<KibanaContent> {
+    return this.storage.delete(id, options);
   }
 
-  search(...args: Parameters<T['search']>) {
-    return this.storage.search(args[0]) as ReturnType<T['search']>;
+  public search<O extends SearchOptions = SearchOptions>(options: O): Promise<KibanaContent> {
+    return this.storage.search(options);
   }
 }

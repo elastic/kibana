@@ -8,6 +8,15 @@
 
 import type { ContentStorage } from './content_storage';
 
+// --- CONFIG
+
+export interface ContentConfig<S extends ContentStorage> {
+  /** The storage layer for the content.*/
+  storage: S;
+}
+
+// --- CONTENT FIELDS
+
 /** Interface to represent a reference field (allows to populate() content) */
 export interface Ref {
   $id: string;
@@ -33,12 +42,9 @@ export interface CommonFields {
 /** Base type for all Kibana content */
 export type KibanaContent = InternalFields & CommonFields;
 
+// --- CRUD
+
 export interface SearchOptions {
   limit?: number;
   pageCursor?: string;
-}
-
-export interface ContentConfig<S extends ContentStorage> {
-  /** The storage layer for the content.*/
-  storage: S;
 }

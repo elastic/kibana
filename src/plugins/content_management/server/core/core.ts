@@ -7,20 +7,26 @@
  */
 import type { ContentStorage } from './content_storage';
 import { ContentCrud } from './crud';
+import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
 
 export class ContentCore {
   private contentRegistry: ContentRegistry;
+  private eventBus: EventBus;
 
   constructor() {
     this.contentRegistry = new ContentRegistry();
+    this.eventBus = new EventBus();
   }
 
   setup() {}
 
   start() {
     const crud = <T extends ContentStorage = ContentStorage>(contentType: string) => {
-      return new ContentCrud<T>(contentType, this.contentRegistry);
+      return new ContentCrud(contentType, {
+        contentRegistry: this.contentRegistry,
+        eventBus: this.eventBus,
+      }) as unknown as T;
     };
 
     return {
