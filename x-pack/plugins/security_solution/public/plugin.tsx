@@ -60,7 +60,9 @@ import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/vie
 import type { SecurityAppStore } from './common/store/types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
+  readonly kibanaBranch: string;
   readonly kibanaVersion: string;
+  readonly prebuiltRulesPackageVersion?: string;
   private config: SecuritySolutionUiConfigType;
   readonly experimentalFeatures: ExperimentalFeatures;
 
@@ -68,6 +70,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.kibanaBranch = initializerContext.env.packageInfo.branch;
+    this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
   }
   private appUpdater$ = new Subject<AppUpdater>();
 
@@ -211,7 +215,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
-    KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
+    KibanaServices.init({
+      ...core,
+      ...plugins,
+      kibanaBranch: this.kibanaBranch,
+      kibanaVersion: this.kibanaVersion,
+      prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
+    });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     licenseService.start(plugins.licensing.license$);
 

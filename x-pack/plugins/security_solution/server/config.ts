@@ -109,6 +109,11 @@ export const configSchema = schema.object({
    * Artifacts Configuration
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
+
+  /**
+   * Detection prebuilt rules
+   */
+  prebuiltRulesPackageVersion: schema.string(),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

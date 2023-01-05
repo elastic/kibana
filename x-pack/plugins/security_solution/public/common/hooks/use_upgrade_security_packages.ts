@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
-import { useKibana } from '../lib/kibana';
+import { KibanaServices, useKibana } from '../lib/kibana';
 import { useUserPrivileges } from '../components/user_privileges';
 
 /**
@@ -17,11 +17,14 @@ import { useUserPrivileges } from '../components/user_privileges';
  *
  * @param http an http client for sending the request
  * @param options an object containing options for the request
+ * @param prebuiltRulesPackageVersion specific version of the prebuilt rules package to install
  */
 const sendUpgradeSecurityPackages = async (
   http: HttpStart,
-  options: HttpFetchOptions = {}
+  options: HttpFetchOptions = {},
+  prebuiltRulesPackageVersion?: string
 ): Promise<BulkInstallPackagesResponse> => {
+  // TODO: If `prebuiltRulesPackageVersion` is provided, try to install that version
   return http.post<BulkInstallPackagesResponse>(epmRouteService.getBulkInstallPath(), {
     ...options,
     body: JSON.stringify({
@@ -50,8 +53,21 @@ export const useUpgradeSecurityPackages = () => {
           // Make sure fleet is initialized first
           await context.services.fleet?.isInitialized();
 
+          const isPrerelease =
+            KibanaServices.getKibanaVersion().includes('-SNAPSHOT') ||
+            KibanaServices.getKibanaBranch() === 'main';
+
           // ignore the response for now since we aren't notifying the user
-          await sendUpgradeSecurityPackages(context.services.http, { signal });
+          await sendUpgradeSecurityPackages(
+            context.services.http,
+            {
+              query: {
+                prerelease: isPrerelease,
+              },
+              signal,
+            },
+            KibanaServices.getPrebuiltRulesPackageVersion()
+          );
         } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
 
