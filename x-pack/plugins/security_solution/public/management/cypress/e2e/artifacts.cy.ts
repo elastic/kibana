@@ -13,7 +13,7 @@ import {
 import { BASE_ENDPOINT_ROUTE } from '../../../../common/endpoint/constants';
 import { login, loginWithRole, ROLE } from '../tasks/login';
 
-import { getArtifactsListTestsData } from './mocks/artifacts_page';
+import { type FormAction, getArtifactsListTestsData } from './mocks/artifacts_page';
 import { runEndpointLoaderScript } from '../tasks/run_endpoint_loader';
 
 const removeAllArtifacts = () => {
@@ -60,6 +60,20 @@ const loadEndpointDataForEventFiltersIfNeeded = () => {
   });
 };
 
+const runAction = (action: FormAction) => {
+  if (action.type === 'click') {
+    cy.getBySel(action.selector).click();
+  } else if (action.type === 'input') {
+    cy.getBySel(action.selector).type(action.value || '');
+  } else if (action.type === 'clear') {
+    cy.getBySel(action.selector).clear();
+  } else if (action.type === 'customClick') {
+    cy.get(action.selector).click();
+  } else if (action.type === 'removeItem') {
+    cy.get(`[data-test-subj="${action.selector}"] > span > button`).click();
+  }
+};
+
 describe('Artifacts pages', () => {
   before(() => {
     login();
@@ -74,7 +88,7 @@ describe('Artifacts pages', () => {
   });
 
   for (const testData of getArtifactsListTestsData()) {
-    describe(`When on the ${testData.title} entries list`, function () {
+    describe(`When on the ${testData.title} entries list`, () => {
       it(`no access - should not show empty state page and the add button does not exists`, () => {
         loginWithoutAccess(`/app/security/administration/${testData.urlPath}`);
         cy.getBySel('noPrivilegesPage').should('exist');
@@ -89,7 +103,7 @@ describe('Artifacts pages', () => {
         cy.getBySel(`${testData.pagePrefix}-emptyState-addButton`).should('not.exist');
       });
 
-      it(`writte - should show empty state page if there is no ${testData.title} entry and the add button exists`, () => {
+      it(`write - should show empty state page if there is no ${testData.title} entry and the add button exists`, () => {
         loginWithWriteAccess(`/app/security/administration/${testData.urlPath}`);
         cy.getBySel(testData.emptyState).should('exist');
         cy.getBySel(`${testData.pagePrefix}-emptyState-addButton`).should('exist');
@@ -100,14 +114,8 @@ describe('Artifacts pages', () => {
         // Opens add flyout
         cy.getBySel(`${testData.pagePrefix}-emptyState-addButton`).click();
 
-        for (const formAction of testData.create.formFields) {
-          if (formAction.type === 'click') {
-            cy.getBySel(formAction.selector).click();
-          } else if (formAction.type === 'input') {
-            cy.getBySel(formAction.selector).type(formAction.value || '');
-          } else if (formAction.type === 'customClick') {
-            cy.get(formAction.selector).click();
-          }
+        for (const formAction of testData.create.formActions) {
+          runAction(formAction);
         }
 
         // Submit create artifact form
@@ -142,18 +150,8 @@ describe('Artifacts pages', () => {
         cy.getBySel(`${testData.pagePrefix}-card-header-actions-button`).click();
         cy.getBySel(`${testData.pagePrefix}-card-cardEditAction`).click();
 
-        for (const formAction of testData.update.formFields) {
-          if (formAction.type === 'click') {
-            cy.getBySel(formAction.selector).click();
-          } else if (formAction.type === 'input') {
-            cy.getBySel(formAction.selector).type(formAction.value || '');
-          } else if (formAction.type === 'clear') {
-            cy.getBySel(formAction.selector).clear();
-          } else if (formAction.type === 'customClick') {
-            cy.get(formAction.selector).click();
-          } else if (formAction.type === 'removeItem') {
-            cy.get(`[data-test-subj="${formAction.selector}"] > span > button`).click();
-          }
+        for (const formAction of testData.update.formActions) {
+          runAction(formAction);
         }
 
         // Submit edit artifact form

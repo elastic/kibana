@@ -19,12 +19,18 @@ export interface ArtifactBodyType {
   entries: TranslatedExceptionListItem[];
 }
 
+export interface FormAction {
+  type: string;
+  selector: string;
+  value?: string;
+}
+
 export const getArtifactsListTestsData = () => [
   {
     title: 'Trusted applications',
     pagePrefix: 'trustedAppsListPage',
     create: {
-      formFields: [
+      formActions: [
         {
           type: 'input',
           selector: 'trustedApps-form-nameTextField',
@@ -58,7 +64,7 @@ export const getArtifactsListTestsData = () => [
       ],
     },
     update: {
-      formFields: [
+      formActions: [
         {
           type: 'clear',
           selector: 'trustedApps-form-nameTextField',
@@ -123,7 +129,7 @@ export const getArtifactsListTestsData = () => [
     title: 'Event Filters',
     pagePrefix: 'EventFiltersListPage',
     create: {
-      formFields: [
+      formActions: [
         {
           type: 'input',
           selector: 'eventFilters-form-name-input',
@@ -159,7 +165,7 @@ export const getArtifactsListTestsData = () => [
       ],
     },
     update: {
-      formFields: [
+      formActions: [
         {
           type: 'clear',
           selector: 'eventFilters-form-name-input',
@@ -223,7 +229,7 @@ export const getArtifactsListTestsData = () => [
     title: 'Blocklist',
     pagePrefix: 'blocklistPage',
     create: {
-      formFields: [
+      formActions: [
         {
           type: 'input',
           selector: 'blocklist-form-name-input',
@@ -261,7 +267,7 @@ export const getArtifactsListTestsData = () => [
       ],
     },
     update: {
-      formFields: [
+      formActions: [
         {
           type: 'clear',
           selector: 'blocklist-form-name-input',
@@ -331,7 +337,7 @@ export const getArtifactsListTestsData = () => [
     title: 'Host isolation exceptions',
     pagePrefix: 'hostIsolationExceptionsListPage',
     create: {
-      formFields: [
+      formActions: [
         {
           type: 'input',
           selector: 'hostIsolationExceptions-form-name-input',
@@ -356,7 +362,7 @@ export const getArtifactsListTestsData = () => [
       ],
     },
     update: {
-      formFields: [
+      formActions: [
         {
           type: 'clear',
           selector: 'hostIsolationExceptions-form-name-input',
