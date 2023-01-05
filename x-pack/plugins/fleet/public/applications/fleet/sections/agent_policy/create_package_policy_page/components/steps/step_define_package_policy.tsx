@@ -266,7 +266,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         isEditPage && packageInfo.type === 'input' ? (
                           <FormattedMessage
                             id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditNamespaceHelpLabel"
-                            defaultMessage="The namespace cannot be changed for this integration. Create a new package policy to use a different namespace."
+                            defaultMessage="The namespace cannot be changed for this integration. Create a new integration policy to use a different namespace."
                           />
                         ) : (
                           <FormattedMessage
