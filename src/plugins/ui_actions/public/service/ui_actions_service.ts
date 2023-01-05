@@ -128,12 +128,12 @@ export class UiActionsService {
     this.attachAction(triggerId, action.id);
   };
 
-  public readonly getAction = (id: string) => {
+  public readonly getAction = (id: string): Action => {
     if (!this.actions.has(id)) {
       throw new Error(`Action [action.id = ${id}] not registered.`);
     }
 
-    return this.actions.get(id);
+    return this.actions.get(id)! as Action;
   };
 
   public readonly getTriggerActions = (triggerId: string): Action[] => {
