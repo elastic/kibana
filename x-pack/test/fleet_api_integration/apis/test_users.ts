@@ -104,6 +104,30 @@ export const testUsers: {
     username: 'endpoint_integr_write_policy',
     password: 'changeme',
   },
+  // agent status API
+  endpoint_fleet_all_integr_read_policy: {
+    permissions: {
+      feature: {
+        fleet: ['all'],
+        siem: ['minimal_all', 'policy_management_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_fleet_all_integr_read_policy',
+    password: 'changeme',
+  },
+  // no access to integrations or policies
+  endpoint_fleet_read_integr_none: {
+    permissions: {
+      feature: {
+        fleet: ['read'],
+        siem: ['minimal_all'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_fleet_read_integr_none',
+    password: 'changeme',
+  },
 };
 
 export const setupTestUsers = async (security: SecurityService) => {
