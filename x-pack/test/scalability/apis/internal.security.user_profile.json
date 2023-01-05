@@ -16,7 +16,7 @@
         "duration": "345s"
       }
     ],
-    "maxDuration": "10m"
+    "maxDuration": "8m"
   },
   "testData": {
     "esArchives": [],
