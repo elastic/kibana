@@ -85,11 +85,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       subject_name: true,
     },
   },
-  dns: {
-    question: {
-      name: true,
-    },
-  },
+  dns: true,
   event: true,
   group: {
     name: true,
