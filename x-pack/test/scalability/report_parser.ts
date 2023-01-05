@@ -32,21 +32,31 @@ const REQUESTS_REGEXP = /(?<=var requests = unpack\(\[)(.*)(?=\]\);)/g;
 const RESPONSES_PERCENTILES_REGEXP =
   /(?<=var responsetimepercentilesovertimeokPercentiles = unpack\(\[)(.*)(?=\]\);)/g;
 
+/**
+ * Returns Rps value for time point when response time is over threshold first time for specific metric
+ * @param rpsData Rps dataset
+ * @param responseTimeData Response time dataset
+ * @param responseTimeThreshold Response time threshold
+ * @param metricName Gatling response metric to compare with threshold
+ * @param log logger
+ * @returns
+ */
 const getRPSByResponseTime = (
   rpsData: RpsMetric[],
   responseTimeData: ResponseMetric[],
   responseTimeThreshold: number,
   metricName: ResponseTimeMetric,
-  defaultRpsValue: number
+  log: ToolingLog
 ) => {
-  const timestamp = getTimePoint(responseTimeData, metricName, responseTimeThreshold);
+  const timestamp = getTimePoint(responseTimeData, metricName, responseTimeThreshold, log);
   if (timestamp === -1) {
-    // Data point was not found, probably 'responseTimeThreshold' is too high or maxRps is too low for the api
-    return defaultRpsValue;
+    // Data point was not found, most likely 'responseTimeThreshold' should be adjusted
+    // Returning '0' as invalid result
+    return 0;
   } else {
     const rps = rpsData.find((i) => i.timestamp === timestamp)?.value;
-    // In edge case Gatling might fail to report requests for specific timestamp, returning '-1' as invalid result
-    return !rps ? -1 : rps;
+    // In edge case Gatling might fail to report requests for specific timestamp, returning '0' as invalid result
+    return !rps ? 0 : rps;
   }
 };
 
@@ -70,15 +80,30 @@ const parseData = (str: string, regex: RegExp) => {
     });
 };
 
+/**
+ * Returns timestamp for the first response time entry above the threshold
+ * @param data Response time dataset
+ * @param metricName Gatling response metric to compare with threshold
+ * @param responseTimeValue Response time threshold
+ * @param log logger
+ * @returns
+ */
 const getTimePoint = (
   data: ResponseMetric[],
   metricName: ResponseTimeMetric,
-  responseTimeValue: number
+  responseTimeValue: number,
+  log: ToolingLog
 ) => {
   const resultsAboveThreshold = data.filter((i) => i.metrics[metricName] >= responseTimeValue);
-  if (resultsAboveThreshold.length > 0) {
+  if (resultsAboveThreshold.length === data.length) {
+    log.debug(`Threshold '${responseTimeValue} is too low for '${metricName}' metric'`);
+    return -1;
+  } else if (resultsAboveThreshold.length === 0) {
+    log.debug(`Threshold '${responseTimeValue} is too high for '${metricName}' metric'`);
+    return -1;
+  } else {
     return resultsAboveThreshold[0].timestamp;
-  } else return -1;
+  }
 };
 
 const mapValuesWithMetrics = (data: DataPoint[], metrics: string[]) => {
@@ -150,7 +175,7 @@ export function getCapacityMetrics(
     testData,
     thresholds.threshold1,
     metricName,
-    rpsMax
+    log
   );
 
   const rpsAtThreshold2 = getRPSByResponseTime(
@@ -158,7 +183,7 @@ export function getCapacityMetrics(
     testData,
     thresholds.threshold2,
     metricName,
-    rpsMax
+    log
   );
 
   const rpsAtThreshold3 = getRPSByResponseTime(
@@ -166,7 +191,7 @@ export function getCapacityMetrics(
     testData,
     thresholds.threshold3,
     metricName,
-    rpsMax
+    log
   );
 
   return {
