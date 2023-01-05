@@ -37,14 +37,14 @@ jest.mock('../../../../hooks/use_load_alert_summary', () => ({
 }));
 const useLoadAlertSummaryMock = useLoadAlertSummary as jest.Mock;
 
-describe('Alert Summary Widget', () => {
+describe('AlertSummaryWidget', () => {
   const mockedTimeRange = {
     ...mockAlertSummaryTimeRange,
     title: <h3 data-test-subj={TITLE_DATA_TEST_SUBJ}>mockedTimeRangeTitle</h3>,
   };
 
-  const renderComponent = (props: Partial<AlertSummaryWidgetProps> = {}) => {
-    return render(
+  const renderComponent = (props: Partial<AlertSummaryWidgetProps> = {}) =>
+    render(
       <IntlProvider locale="en">
         <AlertSummaryWidget
           featureIds={['apm', 'uptime', 'logs']}
@@ -54,21 +54,20 @@ describe('Alert Summary Widget', () => {
         />
       </IntlProvider>
     );
-  };
 
-  it('should render Alerts Summary Widget compact version', async () => {
+  it('should render AlertSummaryWidget compact version', async () => {
     const alertSummaryWidget = renderComponent();
 
     expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();
   });
 
-  it('should render Alerts Summary Widget full-size version', async () => {
+  it('should render AlertSummaryWidget full-size version', async () => {
     const alertSummaryWidget = renderComponent({ fullSize: true });
 
     expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSize')).toBeTruthy();
   });
 
-  it('should render information correctly', async () => {
+  it('should render counts and title correctly', async () => {
     const alertSummaryWidget = renderComponent();
     expect(alertSummaryWidget.queryByTestId('activeAlertsCount')).toHaveTextContent('1');
     expect(alertSummaryWidget.queryByTestId('recoveredAlertsCount')).toHaveTextContent('7');
@@ -76,7 +75,7 @@ describe('Alert Summary Widget', () => {
     expect(alertSummaryWidget.queryByTestId(TITLE_DATA_TEST_SUBJ)).toBeTruthy();
   });
 
-  it('should render Alert Summary Widget Error when API call fails', async () => {
+  it('should render AlertSummaryWidgetError when API call fails', async () => {
     useLoadAlertSummaryMock.mockImplementation(() => ({
       alertSummary: {
         activeAlertCount: 0,
@@ -92,7 +91,7 @@ describe('Alert Summary Widget', () => {
     expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetError')).toBeTruthy();
   });
 
-  it('should render Alert Summary Widget loading when API is loading', async () => {
+  it('should render AlertSummaryWidget loading when API is loading', async () => {
     useLoadAlertSummaryMock.mockImplementation(() => ({
       alertSummary: {
         activeAlertCount: 0,
