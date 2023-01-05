@@ -252,6 +252,7 @@ export const RULE_THREAD_POOL_SEARCH_REJECTIONS = `${RULE_PREFIX}alert_thread_po
 export const RULE_THREAD_POOL_WRITE_REJECTIONS = `${RULE_PREFIX}alert_thread_pool_write_rejections`;
 export const RULE_CCR_READ_EXCEPTIONS = `${RULE_PREFIX}ccr_read_exceptions`;
 export const RULE_LARGE_SHARD_SIZE = `${RULE_PREFIX}shard_size`;
+export const RULE_DATA_QUALITY = `${RULE_PREFIX}data_quality`;
 
 interface LegacyRuleDetails {
   label: string;

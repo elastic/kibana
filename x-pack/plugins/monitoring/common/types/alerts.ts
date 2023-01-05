@@ -129,6 +129,13 @@ export interface AlertUiState {
   triggeredMS: number;
 }
 
+export interface AlertDataQualityState extends AlertNodeState {}
+
+export interface AlertDataQualityStats {
+  unallowedValues: number;
+  clusterUuid: string;
+}
+
 export interface AlertMessage {
   text: string; // Do this. #link this is a link #link
   code?: string;
