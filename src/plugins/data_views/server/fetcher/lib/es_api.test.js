@@ -14,6 +14,12 @@ import * as convertEsErrorNS from './errors';
 
 import { callIndexAliasApi, callFieldCapsApi } from './es_api';
 
+const getFieldCapsStub = ({ indices = ['indexA'], body } = {}) => {
+  const fieldCaps = sinon.stub();
+  fieldCaps.returns(body ? body : { body: { indices } });
+  return fieldCaps;
+};
+
 describe('server/index_patterns/service/lib/es_api', () => {
   describe('#callIndexAliasApi()', () => {
     let sandbox;
@@ -48,7 +54,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
     });
 
     it('returns the es response directly', async () => {
-      const football = {};
+      const football = { indices: ['indexA'] };
       const getAlias = sinon.stub().returns(football);
       const callCluster = {
         indices: {
@@ -110,7 +116,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
     afterEach(() => sandbox.restore());
 
     it('calls fieldCaps() via callCluster', async () => {
-      const fieldCaps = sinon.stub();
+      const fieldCaps = getFieldCapsStub();
       const callCluster = {
         indices: {
           getAlias: sinon.stub(),
@@ -123,7 +129,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
 
     it('passes indices directly to es api', async () => {
       const indices = ['indexA', 'indexB'];
-      const fieldCaps = sinon.stub();
+      const fieldCaps = getFieldCapsStub({ indices });
       const callCluster = {
         indices: {
           getAlias: sinon.stub(),
@@ -136,8 +142,8 @@ describe('server/index_patterns/service/lib/es_api', () => {
     });
 
     it('returns the es response directly', async () => {
-      const football = {};
-      const fieldCaps = sinon.stub().returns(football);
+      const body = { body: { indices: ['indexA'] } };
+      const fieldCaps = getFieldCapsStub({ body });
       const callCluster = {
         indices: {
           getAlias: sinon.stub(),
@@ -146,11 +152,11 @@ describe('server/index_patterns/service/lib/es_api', () => {
       };
       const resp = await callFieldCapsApi({ callCluster });
       sinon.assert.calledOnce(fieldCaps);
-      expect(resp).toBe(football);
+      expect(resp).toBe(body);
     });
 
     it('sets ignore_unavailable, allow_no_indices, and fields params', async () => {
-      const fieldCaps = sinon.stub();
+      const fieldCaps = getFieldCapsStub();
       const callCluster = {
         indices: {
           getAlias: sinon.stub(),
@@ -163,7 +169,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const passedOpts = fieldCaps.args[0][0];
       expect(passedOpts).toHaveProperty('fields', ['*']);
       expect(passedOpts).toHaveProperty('ignore_unavailable', true);
-      expect(passedOpts).toHaveProperty('allow_no_indices', false);
+      expect(passedOpts).toHaveProperty('allow_no_indices', true);
     });
 
     it('handles errors with convertEsError()', async () => {
