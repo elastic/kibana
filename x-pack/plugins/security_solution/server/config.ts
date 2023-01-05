@@ -113,7 +113,7 @@ export const configSchema = schema.object({
   /**
    * Detection prebuilt rules
    */
-  prebuiltRulesPackageVersion: schema.string(),
+  prebuiltRulesPackageVersion: schema.string({ defaultValue: '' }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
