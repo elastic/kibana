@@ -6,10 +6,10 @@
  */
 import expect from '@kbn/expect';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
-
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -64,6 +64,7 @@ export default function (providerContext: FtrProviderContext) {
         description: '',
         namespace: 'default',
         policy_id: agentPolicyId,
+        enabled: true,
         inputs: [
           {
             type: 'logfile',
