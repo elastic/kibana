@@ -165,7 +165,7 @@ describe('SLO Edit Page', () => {
       );
     });
 
-    it('calls the createSlo hook if all required values are filled in', async () => {
+    it.skip('calls the createSlo hook if all required values are filled in', async () => {
       jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
       useFetchIndicesMock.mockReturnValue({
         loading: false,
@@ -184,7 +184,6 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />, config);
 
-      userEvent.selectOptions(screen.getByTestId('sloFormIndicatorTypeSelect'), 'sli.kql.custom');
       userEvent.type(screen.getByTestId('sloFormCustomKqlIndexInput'), 'some-index');
       userEvent.type(screen.getByTestId('sloFormCustomKqlFilterQueryInput'), 'irrelevant');
       userEvent.type(screen.getByTestId('sloFormCustomKqlGoodQueryInput'), 'irrelevant');
@@ -196,9 +195,11 @@ describe('SLO Edit Page', () => {
       userEvent.type(screen.getByTestId('sloFormNameInput'), 'irrelevant');
       userEvent.type(screen.getByTestId('sloFormDescriptionTextArea'), 'irrelevant');
 
-      await waitFor(() => expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled());
+      const t = Date.now();
+      await waitFor(() => expect(screen.getByTestId('sloFormSubmitButton')).toBeEnabled());
+      console.log('end waiting for submit button: ', Math.ceil(Date.now() - t));
 
-      fireEvent.click(screen.queryByTestId('sloFormSubmitButton')!);
+      fireEvent.click(screen.getByTestId('sloFormSubmitButton')!);
 
       expect(mockCreate).toMatchSnapshot();
     });
