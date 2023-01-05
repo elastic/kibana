@@ -21,14 +21,14 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
 
   async function createConfiguration(configuration: any) {
-    return apmApiClient.superuser({
+    return apmApiClient.writeUser({
       endpoint: 'PUT /api/apm/settings/agent-configuration',
       params: { body: configuration },
     });
   }
 
   async function deleteConfiguration(configuration: any) {
-    return apmApiClient.superuser({
+    return apmApiClient.writeUser({
       endpoint: 'DELETE /api/apm/settings/agent-configuration',
       params: { body: { service: configuration.service } },
     });
