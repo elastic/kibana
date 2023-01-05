@@ -212,7 +212,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return the status of agents', async () => {
-      const { body: apiResponse1 } = await supertest.get(`/api/fleet/agents`).expect(200);
       const { body: apiResponse } = await supertest.get(`/api/fleet/agent_status`).expect(200);
       expect(apiResponse).to.eql({
         results: {
