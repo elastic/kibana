@@ -22,7 +22,7 @@ import styled from 'styled-components';
 
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
-import type { RowRenderer } from '@kbn/row-renderers';
+import type { RowRenderer } from '@kbn/row-renderer-types';
 import type { Ecs } from '../../../../common/ecs';
 import { APP_UI_ID } from '../../../../common/constants';
 import type { TimelineItem } from '../../../../common/search_strategy';

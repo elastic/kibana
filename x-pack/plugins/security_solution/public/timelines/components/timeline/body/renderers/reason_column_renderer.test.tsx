@@ -15,8 +15,8 @@ import { plainColumnRenderer } from './plain_column_renderer';
 
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { TableId } from '../../../../../../common/types';
-import type { RowRenderer } from '@kbn/row-renderers';
-import { RowRendererId } from '@kbn/row-renderers';
+import type { RowRenderer } from '@kbn/row-renderer-types';
+import { RowRendererId } from '@kbn/row-renderer-types';
 
 import { render } from '@testing-library/react';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';

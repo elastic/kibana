@@ -8,7 +8,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 
-import type { RowRenderer } from '@kbn/row-renderers';
+import type { RowRenderer } from '@kbn/row-renderer-types';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import type { inputsModel } from '../../../../../common/store';
 import type {

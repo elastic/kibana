@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { RowRenderer, RowRendererId } from '@kbn/row-renderers';
+import type { RowRenderer, RowRendererId } from '@kbn/row-renderer-types';
 import type { Ecs } from '../../../../../../../common/ecs';
 
 export const combineRenderers = ({

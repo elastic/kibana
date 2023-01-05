@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 
-import type { RowRenderer } from '@kbn/row-renderers';
+import type { RowRenderer } from '@kbn/row-renderer-types';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
 import type { Fields } from '../../../../../../../common/search_strategy';
 import { ID_FIELD_NAME } from '../../../../../../common/components/event_details/event_id';

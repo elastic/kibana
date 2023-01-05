@@ -8,6 +8,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-row-renderers'],
+  rootDir: '../../..',
+  roots: ['<rootDir>/packages/row-renderers/kbn-row-renderer-types'],
 };

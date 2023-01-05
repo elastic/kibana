@@ -11,7 +11,7 @@ import uuid from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
-import type { RowRendererId } from '@kbn/row-renderers';
+import type { RowRendererId } from '@kbn/row-renderer-types';
 import type { SessionViewConfig, ExpandedDetailTimeline } from '../../../../common/types';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Sort } from '../../components/timeline/body/sort';

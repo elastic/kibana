@@ -8,7 +8,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import type { Filter } from '@kbn/es-query';
 
-import type { RowRendererId } from '@kbn/row-renderers';
+import type { RowRendererId } from '@kbn/row-renderer-types';
 import type { SessionViewConfig } from '../../../../common/types';
 import type {
   DataProvider,

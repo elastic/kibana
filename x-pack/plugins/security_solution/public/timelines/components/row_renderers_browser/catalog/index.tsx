@@ -8,7 +8,7 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 
-import { RowRendererId } from '@kbn/row-renderers';
+import { RowRendererId } from '@kbn/row-renderer-types';
 import {
   AlertsExample,
   AuditdExample,

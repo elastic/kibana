@@ -9,8 +9,8 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import type { RowRenderer } from '@kbn/row-renderers';
-import { RowRendererId } from '@kbn/row-renderers';
+import type { RowRenderer } from '@kbn/row-renderer-types';
+import { RowRendererId } from '@kbn/row-renderer-types';
 import { asArrayIfExists } from '../../../../../../common/lib/helpers';
 import {
   TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,

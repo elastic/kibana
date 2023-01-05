@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import type { RowRenderer } from '@kbn/row-renderers';
+import type { RowRenderer } from '@kbn/row-renderer-types';
 import { TimelineId } from '../../../../../../../common/types';
 import type { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';

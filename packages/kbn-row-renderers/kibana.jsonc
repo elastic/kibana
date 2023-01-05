@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/row-renderers",
-  "owner": "@elastic/security-threat-hunting-explore",
-  "runtimeDeps": [],
-  "typeDeps": [],
-}

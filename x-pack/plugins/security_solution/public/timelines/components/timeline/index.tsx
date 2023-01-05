@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
-import type { RowRenderer } from '@kbn/row-renderers';
+import type { RowRenderer } from '@kbn/row-renderer-types';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';

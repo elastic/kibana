@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RowRendererId } from '@kbn/row-renderers';
+import { RowRendererId } from '@kbn/row-renderer-types';
 import * as i18n from './translations';
 
 export const eventRendererNames: { [key in RowRendererId]: string } = {

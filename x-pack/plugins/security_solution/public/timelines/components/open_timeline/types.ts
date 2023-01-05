@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import type { RowRendererId } from '@kbn/row-renderers';
+import type { RowRendererId } from '@kbn/row-renderer-types';
 import type { AllTimelinesVariables } from '../../containers/all';
 import type { TimelineModel } from '../../store/timeline/model';
 import type { NoteResult } from '../../../../common/types/timeline/note';

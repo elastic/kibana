@@ -8,7 +8,7 @@
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useMemo } from 'react';
-import type { RowRenderer } from '@kbn/row-renderers';
+import type { RowRenderer } from '@kbn/row-renderer-types';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { TableId } from '../../../../../../common/types';
 import type { Ecs } from '../../../../../../common/ecs';

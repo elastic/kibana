@@ -27,6 +27,7 @@ const BAZEL_PACKAGE_DIRS = [
   'packages/core/*',
   'packages/home',
   'packages/content-management',
+  'packages/row-renderers',
   'x-pack/packages/ml',
 ];
 

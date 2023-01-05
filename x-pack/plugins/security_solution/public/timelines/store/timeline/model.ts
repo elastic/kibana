@@ -7,7 +7,7 @@
 
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import type { RowRendererId } from '@kbn/row-renderers';
+import type { RowRendererId } from '@kbn/row-renderer-types';
 import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../../common/types';
 import type {
   EqlOptionsSelected,

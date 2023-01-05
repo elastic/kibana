@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { RowRendererId } from '@kbn/row-renderers';
+import { RowRendererId } from '@kbn/row-renderer-types';
 import type { TableId } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
 import { StatefulEventsViewer } from '../events_viewer';

@@ -7,7 +7,7 @@
 
 import type { Ecs } from '../../../../../../../common/ecs';
 import { TimelineId } from '../../../../../../../common/types';
-import { RowRendererId } from '@kbn/row-renderers';
+import { RowRendererId } from '@kbn/row-renderer-types';
 import { combineRenderers } from '.';
 
 describe('combineRenderers', () => {

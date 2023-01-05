@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RowRenderer } from '@kbn/row-renderers';
+import type { RowRenderer } from '@kbn/row-renderer-types';
 import { auditdRowRenderers } from './auditd/generic_row_renderer';
 import type { ColumnRenderer } from './column_renderer';
 import { emptyColumnRenderer } from './empty_column_renderer';

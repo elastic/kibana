@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Ecs } from '@kbn/logging';
+import { Ecs } from '@kbn/ecs';
 import * as runtimeTypes from 'io-ts';
 
 export enum RowRendererId {

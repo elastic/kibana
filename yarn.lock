@@ -3865,7 +3865,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/row-renderers@link:packages/kbn-row-renderers":
+"@kbn/row-renderer-types@link:packages/row-renderers/kbn-row-renderer-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/row_renderer_types@link:packages/row-renderers/kbn-row-renderer-types":
   version "0.0.0"
   uid ""
 

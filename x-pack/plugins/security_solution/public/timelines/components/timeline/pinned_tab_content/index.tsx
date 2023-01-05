@@ -14,7 +14,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import type { RowRenderer } from '@kbn/row-renderers';
+import type { RowRenderer } from '@kbn/row-renderer-types';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import type { CellValueElementProps } from '../cell_rendering';

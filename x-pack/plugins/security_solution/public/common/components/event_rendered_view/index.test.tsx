@@ -10,7 +10,7 @@ import React from 'react';
 import type { EventRenderedViewProps } from '.';
 import { EventRenderedView } from '.';
 import { TableId } from '../../../../common/types';
-import { RowRendererId } from '@kbn/row-renderers';
+import { RowRendererId } from '@kbn/row-renderer-types';
 import { mockTimelineData, TestProviders } from '../../mock';
 
 const eventRenderedProps: EventRenderedViewProps = {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RowRenderer } from '@kbn/row-renderers';
-import { RowRendererId } from '@kbn/row-renderers';
+import type { RowRenderer } from '@kbn/row-renderer-types';
+import { RowRendererId } from '@kbn/row-renderer-types';
 import { hasThreatMatchValue } from './helpers';
 import { ThreatMatchRows } from './threat_match_rows';
 
