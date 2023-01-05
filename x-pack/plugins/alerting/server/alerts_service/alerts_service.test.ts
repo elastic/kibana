@@ -76,9 +76,9 @@ const IlmPutBody = {
 };
 
 const getIndexTemplatePutBody = (context?: string) => ({
-  name: `.alerts-${context ? context : 'test'}-template`,
+  name: `.alerts-${context ? context : 'test'}-default-template`,
   body: {
-    index_patterns: [`.alerts-${context ? context : 'test'}-*`],
+    index_patterns: [`.alerts-${context ? context : 'test'}-default-*`],
     composed_of: [
       'alerts-common-component-template',
       `alerts-${context ? context : 'test'}-component-template`,
@@ -236,10 +236,10 @@ describe('Alerts Service', () => {
 
       expect(clusterClient.indices.getAlias).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(1, {
-        index: '.alerts-another-*',
+        index: '.alerts-another-default-*',
       });
       expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(2, {
-        index: '.alerts-test-*',
+        index: '.alerts-test-default-*',
       });
       expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
       expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(4);
@@ -300,7 +300,9 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         getIndexTemplatePutBody()
       );
-      expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({ index: '.alerts-test-*' });
+      expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
+        index: '.alerts-test-default-*',
+      });
       expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
@@ -348,7 +350,7 @@ describe('Alerts Service', () => {
       );
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to simulate index template mappings for .alerts-test-template; not applying mappings - fail`
+        `Failed to simulate index template mappings for .alerts-test-default-template; not applying mappings - fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -380,7 +382,7 @@ describe('Alerts Service', () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         new Error(
-          `No mappings would be generated for .alerts-test-template, possibly due to failed/misconfigured bootstrapping`
+          `No mappings would be generated for .alerts-test-default-template, possibly due to failed/misconfigured bootstrapping`
         )
       );
 
@@ -405,7 +407,7 @@ describe('Alerts Service', () => {
       );
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Error installing index template .alerts-test-template - fail`
+        `Error installing index template .alerts-test-default-template - fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -429,7 +431,7 @@ describe('Alerts Service', () => {
       );
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Error fetching concrete indices for .alerts-test-* pattern - fail`
+        `Error fetching concrete indices for .alerts-test-default-* pattern - fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -577,7 +579,7 @@ describe('Alerts Service', () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         new Error(
-          `Indices matching pattern .alerts-test-* exist but none are set as the write index for alias .alerts-test-default`
+          `Indices matching pattern .alerts-test-default-* exist but none are set as the write index for alias .alerts-test-default`
         )
       );
 

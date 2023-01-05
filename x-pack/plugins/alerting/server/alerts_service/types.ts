@@ -25,8 +25,8 @@ export const getIndexTemplateAndPattern = (
 ): IIndexPatternString => {
   const pattern = `${context}-${namespace ? namespace : 'default'}`;
   return {
-    template: `.alerts-${context}-template`,
-    pattern: `.alerts-${context}-*`,
+    template: `.alerts-${pattern}-template`,
+    pattern: `.alerts-${pattern}-*`,
     alias: `.alerts-${pattern}`,
     name: `.alerts-${pattern}-000001`,
   };
