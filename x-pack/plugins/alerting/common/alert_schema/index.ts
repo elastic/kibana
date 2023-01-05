@@ -6,6 +6,4 @@
  */
 
 export { alertFieldMap } from './field_maps/alert_field_map';
-export { AlertSchema } from './schemas/alert_schema';
-export type { Alert } from './schemas/alert_schema';
 export { getComponentTemplateFromFieldMap } from './field_maps/component_template_from_field_map';
