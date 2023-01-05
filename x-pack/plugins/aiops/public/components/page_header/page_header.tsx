@@ -16,12 +16,14 @@ import {
 } from '@elastic/eui';
 import { useUrlState } from '@kbn/ml-url-state';
 import { FullTimeRangeSelectorProps } from '../full_time_range_selector/full_time_range_selector';
+import { useCss } from '../../hooks/use_css';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useTimefilter } from '../../hooks/use_time_filter';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 
 export const PageHeader: FC = () => {
+  const { aiopsPageHeader, dataViewTitleHeader } = useCss();
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
 
@@ -41,9 +43,9 @@ export const PageHeader: FC = () => {
     <>
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
-          <EuiPageContentHeader className="aiopsPageHeader">
+          <EuiPageContentHeader css={aiopsPageHeader}>
             <EuiPageContentHeaderSection>
-              <div className="dataViewTitleHeader">
+              <div css={dataViewTitleHeader}>
                 <EuiTitle size="s">
                   <h2>{dataView.getName()}</h2>
                 </EuiTitle>
