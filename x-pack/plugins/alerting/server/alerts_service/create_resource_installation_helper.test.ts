@@ -58,8 +58,8 @@ describe('createResourceInstallationHelper', () => {
     const initializedContexts = helper.getInitializedContexts();
     expect([...initializedContexts.keys()].length).toEqual(2);
 
-    expect(initializedContexts.get('test1')).toEqual(true);
-    expect(initializedContexts.get('test2')).toEqual(true);
+    expect(await initializedContexts.get('test1')).toEqual(true);
+    expect(await initializedContexts.get('test2')).toEqual(true);
   });
 
   test(`should install resources for contexts added after readyToInitialize is called`, async () => {
@@ -69,7 +69,7 @@ describe('createResourceInstallationHelper', () => {
     helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
     helper.add({ context: 'test2', fieldMap: { field: { type: 'keyword', required: false } } });
 
-    // Start processing the queued contexts; Each initFn will take 50 ms since we're adding an artificial delay
+    // Start processing the queued contexts
     helper.setReadyToInitialize();
 
     // for the setImmediate
@@ -79,15 +79,15 @@ describe('createResourceInstallationHelper', () => {
     helper.add({ context: 'test3', fieldMap: { field: { type: 'keyword', required: false } } });
 
     // 3 contexts with delay will take 150
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.info).toHaveBeenCalledTimes(3);
     const initializedContexts = helper.getInitializedContexts();
     expect([...initializedContexts.keys()].length).toEqual(3);
 
-    expect(initializedContexts.get('test1')).toEqual(true);
-    expect(initializedContexts.get('test2')).toEqual(true);
-    expect(initializedContexts.get('test3')).toEqual(true);
+    expect(await initializedContexts.get('test1')).toEqual(true);
+    expect(await initializedContexts.get('test2')).toEqual(true);
+    expect(await initializedContexts.get('test3')).toEqual(true);
   });
 
   test(`should install resources for contexts added after initial processing loop has run`, async () => {
@@ -113,7 +113,7 @@ describe('createResourceInstallationHelper', () => {
     initializedContexts = helper.getInitializedContexts();
     expect([...initializedContexts.keys()].length).toEqual(1);
 
-    expect(initializedContexts.get('test1')).toEqual(true);
+    expect(await initializedContexts.get('test1')).toEqual(true);
   });
 
   test(`should gracefully handle errors during initialization and set initialized flag to false`, async () => {
@@ -132,6 +132,6 @@ describe('createResourceInstallationHelper', () => {
 
     const initializedContexts = helper.getInitializedContexts();
     expect([...initializedContexts.keys()].length).toEqual(1);
-    expect(initializedContexts.get('test1')).toEqual(false);
+    expect(await initializedContexts.get('test1')).toEqual(false);
   });
 });

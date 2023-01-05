@@ -206,8 +206,12 @@ describe('Alerts Service', () => {
       await new Promise((r) => setTimeout(r, 50));
 
       expect(alertsService.isInitialized()).toEqual(true);
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
-      expect(alertsService.isContextInitialized(AnotherRegistrationContext.context)).toEqual(true);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
+      expect(await alertsService.isContextInitialized(AnotherRegistrationContext.context)).toEqual(
+        true
+      );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
       // 1x for common component template, 2x for context specific
@@ -281,7 +285,9 @@ describe('Alerts Service', () => {
     test('should correctly install resources for context when common initialization is complete', async () => {
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
 
@@ -337,7 +343,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
 
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to simulate index template mappings for .alerts-test-template; not applying mappings - fail`
@@ -366,7 +374,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        false
+      );
 
       expect(logger.error).toHaveBeenCalledWith(
         new Error(
@@ -390,7 +400,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        false
+      );
 
       expect(logger.error).toHaveBeenCalledWith(
         `Error installing index template .alerts-test-template - fail`
@@ -412,7 +424,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        false
+      );
 
       expect(logger.error).toHaveBeenCalledWith(
         `Error fetching concrete indices for .alerts-test-* pattern - fail`
@@ -435,7 +449,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
@@ -452,7 +468,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        false
+      );
 
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to PUT index.mapping.total_fields.limit settings for alias alias_1: fail`
@@ -474,7 +492,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
 
       expect(logger.error).toHaveBeenCalledWith(
         `Ignored PUT mappings for alias alias_1; error generating simulated mappings: fail`
@@ -496,7 +516,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        false
+      );
 
       expect(logger.error).toHaveBeenCalledWith(`Failed to PUT mapping for alias alias_1: fail`);
 
@@ -516,7 +538,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
@@ -547,7 +571,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        false
+      );
 
       expect(logger.error).toHaveBeenCalledWith(
         new Error(
@@ -584,7 +610,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
@@ -602,7 +630,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        false
+      );
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
@@ -635,7 +665,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
@@ -669,7 +701,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 50));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(false);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        false
+      );
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
@@ -738,7 +772,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 150));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
     });
 
@@ -759,7 +795,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 150));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
       expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
     });
 
@@ -780,7 +818,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 150));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
       expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(4);
     });
 
@@ -801,7 +841,9 @@ describe('Alerts Service', () => {
 
       alertsService.register(TestRegistrationContext);
       await new Promise((r) => setTimeout(r, 150));
-      expect(alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(true);
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
       expect(clusterClient.indices.create).toHaveBeenCalledTimes(3);
     });
   });

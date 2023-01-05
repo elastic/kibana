@@ -85,8 +85,8 @@ export class AlertsService implements IAlertsService {
     return this.initialized;
   }
 
-  public isContextInitialized(context: string) {
-    return this.resourceInitializationHelper.getInitializedContexts().get(context) ?? false;
+  public async isContextInitialized(context: string) {
+    return (await this.resourceInitializationHelper.getInitializedContexts().get(context)) ?? false;
   }
 
   public initialize(timeoutMs?: number) {
@@ -180,6 +180,8 @@ export class AlertsService implements IAlertsService {
           }),
         { logger: this.options.logger }
       );
+      // await new Promise((r) => setTimeout(r, 15000));
+      this.options.logger.info(`DONE Installing ILM policy ${ILM_POLICY_NAME}`);
     } catch (err) {
       this.options.logger.error(`Error installing ILM policy ${ILM_POLICY_NAME} - ${err.message}`);
       throw err;
@@ -196,6 +198,8 @@ export class AlertsService implements IAlertsService {
       await retryTransientEsErrors(() => esClient.cluster.putComponentTemplate(template), {
         logger: this.options.logger,
       });
+      // await new Promise((r) => setTimeout(r, 15000));
+      this.options.logger.info(`DONE Installing component template ${template.name}`);
     } catch (err) {
       this.options.logger.error(
         `Error installing component template ${template.name} - ${err.message}`
@@ -265,6 +269,8 @@ export class AlertsService implements IAlertsService {
       await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(indexTemplate), {
         logger: this.options.logger,
       });
+      // await new Promise((r) => setTimeout(r, 15000));
+      this.options.logger.info(`DONE Installing index template ${indexPatterns.template}`);
     } catch (err) {
       this.options.logger.error(
         `Error installing index template ${indexPatterns.template} - ${err.message}`
@@ -438,6 +444,8 @@ export class AlertsService implements IAlertsService {
             logger: this.options.logger,
           }
         );
+        // await new Promise((r) => setTimeout(r, 15000));
+        this.options.logger.info(`DONE Creating concrete write index - ${indexPatterns.name}`);
       } catch (error) {
         this.options.logger.error(`Error creating concrete write index - ${error.message}`);
         // If the index already exists and it's the write index for the alias,
