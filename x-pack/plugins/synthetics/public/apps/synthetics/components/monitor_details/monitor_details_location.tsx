@@ -50,7 +50,7 @@ export const MonitorDetailsLocation: React.FC = () => {
       );
 
       const menuItems = loadingLocationsStatus
-        ? [<span>Loading...</span>]
+        ? [<span key="loading">Loading...</span>]
         : monitor.locations
             .map((location) => {
               const fullLocation = locations.find((l) => l.id === location.id);
@@ -76,7 +76,7 @@ export const MonitorDetailsLocation: React.FC = () => {
                   onClick={() => {
                     closeLocationList();
                     services.application!.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
-                      path: `/monitor/${monitor.id}?locationId=${fullLocation.id}`,
+                      path: `/monitor/${monitor.config_id}?locationId=${fullLocation.id}`,
                     });
                   }}
                 >

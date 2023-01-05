@@ -8,22 +8,15 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiLoadingSpinner,
-  EuiSpacer,
-} from '@elastic/eui';
-import { BreakdownLegend } from './components/timings_breakdown/breakdown_legend';
-import { WaterfallChartContainer } from './components/network_waterfall/step_detail/waterfall/waterfall_chart_container';
-import { ObjectWeightList } from './components/object_weight_list';
-import { NetworkTimingsDonut } from './components/network_timings_donut';
-import { StepMetrics } from './components/step_metrics';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { BreakdownLegend } from './step_timing_breakdown/breakdown_legend';
+import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
+import { ObjectWeightList } from './step_objects/object_weight_list';
+import { NetworkTimingsDonut } from './step_timing_breakdown/network_timings_donut';
+import { StepMetrics } from './step_metrics/step_metrics';
 import { NetworkTimingsBreakdown } from './network_timings_breakdown';
-import { ObjectCountList } from './components/object_count_list';
-import { StepImage } from './components/step_image';
+import { ObjectCountList } from './step_objects/object_count_list';
+import { StepImage } from './step_screenshot/step_image';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
 
@@ -53,9 +46,9 @@ export const StepDetailPage = () => {
 
   return (
     <>
-      {data?.details?.journey && (
+      {data?.details?.journey?.config_id && (
         <MonitorDetailsLinkPortal
-          id={data.details.journey.monitor.id}
+          configId={data.details.journey.config_id}
           name={data.details.journey.monitor.name!}
         />
       )}
@@ -108,15 +101,15 @@ export const StepDetailPage = () => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="s" />
+
+      <EuiSpacer size="l" />
+
       {data && (
-        <div>
-          <WaterfallChartContainer
-            checkGroup={checkGroupId}
-            stepIndex={Number(stepIndex)}
-            activeStep={activeStep}
-          />
-        </div>
+        <WaterfallChartContainer
+          checkGroup={checkGroupId}
+          stepIndex={Number(stepIndex)}
+          activeStep={activeStep}
+        />
       )}
     </>
   );

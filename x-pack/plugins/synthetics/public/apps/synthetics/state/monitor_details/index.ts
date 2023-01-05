@@ -13,6 +13,7 @@ import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import {
   getMonitorLastRunAction,
+  updateMonitorLastRunAction,
   getMonitorRecentPingsAction,
   setMonitorDetailsLocationAction,
   getMonitorAction,
@@ -30,6 +31,7 @@ export interface MonitorDetailsState {
   };
   syntheticsMonitorLoading: boolean;
   syntheticsMonitor: EncryptedSyntheticsSavedMonitor | null;
+  syntheticsMonitorDispatchedAt: number;
   error: IHttpSerializedFetchError | null;
   selectedLocationId: string | null;
 }
@@ -39,6 +41,7 @@ const initialState: MonitorDetailsState = {
   lastRun: { loading: false },
   syntheticsMonitor: null,
   syntheticsMonitorLoading: false,
+  syntheticsMonitorDispatchedAt: 0,
   error: null,
   selectedLocationId: null,
 };
@@ -62,6 +65,9 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
       state.lastRun.loading = false;
       state.error = action.payload;
     })
+    .addCase(updateMonitorLastRunAction, (state, action) => {
+      state.lastRun.data = action.payload.data;
+    })
     .addCase(getMonitorRecentPingsAction.get, (state, action) => {
       state.pings.loading = true;
       state.pings.data = state.pings.data.filter(
@@ -78,7 +84,8 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
       state.pings.loading = false;
     })
 
-    .addCase(getMonitorAction.get, (state) => {
+    .addCase(getMonitorAction.get, (state, action) => {
+      state.syntheticsMonitorDispatchedAt = action.meta.dispatchedAt;
       state.syntheticsMonitorLoading = true;
     })
     .addCase(getMonitorAction.success, (state, action) => {

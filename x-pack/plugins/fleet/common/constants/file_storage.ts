@@ -10,3 +10,12 @@
 // found in `common/services/file_storage`
 export const FILE_STORAGE_METADATA_INDEX_PATTERN = '.fleet-files-*';
 export const FILE_STORAGE_DATA_INDEX_PATTERN = '.fleet-file-data-*';
+
+// which integrations support file upload and the name to use for the file upload index
+export const FILE_STORAGE_INTEGRATION_INDEX_NAMES: Readonly<Record<string, string>> = {
+  elastic_agent: 'agent',
+  endpoint: 'endpoint',
+};
+export const FILE_STORAGE_INTEGRATION_NAMES: Readonly<string[]> = Object.keys(
+  FILE_STORAGE_INTEGRATION_INDEX_NAMES
+);

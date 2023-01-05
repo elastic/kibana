@@ -6,11 +6,21 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonIcon, EuiContextMenu, useEuiShadow, EuiPanel } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenu,
+  useEuiShadow,
+  EuiPanel,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
+import { useSelectedMonitor } from '../../../monitor_details/hooks/use_selected_monitor';
+import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
+import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
 import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
@@ -87,10 +97,12 @@ export function ActionsPopover({
   const locationName = useLocationName({ locationId: monitor.location.id });
 
   const detailUrl = useMonitorDetailLocator({
-    monitorId: monitor.id,
+    configId: monitor.configId,
     locationId: monitor.location.id,
   });
-  const editUrl = useEditMonitorLocator({ monitorId: monitor.id });
+  const editUrl = useEditMonitorLocator({ configId: monitor.configId });
+
+  const { monitor: monitorFields } = useSelectedMonitor(monitor.configId);
 
   const labels = useMemo(
     () => ({
@@ -101,10 +113,12 @@ export function ActionsPopover({
     [monitor.name]
   );
   const { status, isEnabled, updateMonitorEnabledState } = useMonitorEnableHandler({
-    id: monitor.id,
+    configId: monitor.configId,
     isEnabled: monitor.isEnabled,
     labels,
   });
+
+  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
 
   const [enableLabel, setEnableLabel] = useState(
     monitor.isEnabled ? disableMonitorLabel : enableMonitorLabel
@@ -125,11 +139,15 @@ export function ActionsPopover({
     disabled: !locationName,
     onClick: () => {
       if (locationName) {
-        dispatch(setFlyoutConfig({ monitorId: monitor.id, location: locationName }));
+        dispatch(
+          setFlyoutConfig({ configId: monitor.configId, location: locationName, id: monitor.id })
+        );
         setIsPopoverOpen(false);
       }
     },
   };
+
+  const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
 
   let popoverItems = [
     {
@@ -155,6 +173,27 @@ export function ActionsPopover({
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
           updateMonitorEnabledState(!monitor.isEnabled);
+        }
+      },
+    },
+    {
+      name: monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel,
+      icon: alertLoading ? (
+        <EuiLoadingSpinner size="s" />
+      ) : monitor.isStatusAlertEnabled ? (
+        'bellSlash'
+      ) : (
+        'bell'
+      ),
+      onClick: () => {
+        if (!alertLoading) {
+          updateAlertEnabledState({
+            monitor: {
+              [ConfigKey.ALERT_CONFIG]: toggleStatusAlert(monitorFields?.[ConfigKey.ALERT_CONFIG]),
+            },
+            configId: monitor.configId,
+            name: monitor.name,
+          });
         }
       },
     },
@@ -251,6 +290,20 @@ const disableMonitorLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelDisableMonitor',
   {
     defaultMessage: 'Disable monitor',
+  }
+);
+
+const disableAlertLabel = i18n.translate(
+  'xpack.synthetics.overview.actions.disableLabelDisableAlert',
+  {
+    defaultMessage: 'Disable status alerts',
+  }
+);
+
+const enableMonitorAlertLabel = i18n.translate(
+  'xpack.synthetics.overview.actions.enableLabelDisableAlert',
+  {
+    defaultMessage: 'Enable status alerts',
   }
 );
 

@@ -12,7 +12,7 @@ import {
   functionWrapper,
   getElasticLogo,
   getElasticOutline,
-} from '@kbn/presentation-util-plugin/common/lib';
+} from '@kbn/presentation-util-plugin/common';
 import { imageFunction as image } from './image_function';
 
 describe('image', () => {

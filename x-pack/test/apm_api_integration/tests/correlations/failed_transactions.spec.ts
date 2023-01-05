@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import type { FailedTransactionsCorrelationsResponse } from '@kbn/apm-plugin/common/correlations/failed_transactions_correlations/types';
-import { EVENT_OUTCOME } from '@kbn/apm-plugin/common/elasticsearch_fieldnames';
+import { EVENT_OUTCOME } from '@kbn/apm-plugin/common/es_fields/apm';
 import { EventOutcome } from '@kbn/apm-plugin/common/event_outcome';
 import { LatencyDistributionChartType } from '@kbn/apm-plugin/common/latency_distribution_chart_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';

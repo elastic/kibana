@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -11,15 +11,18 @@
     "server/**/*.ts",
     "../../typings/**/*"
   ],
-  "exclude": [],
+  "exclude": [
+    "target/**/*",
+  ],
   "kbn_references": [
-    { "path": "../../src/core/tsconfig.json" },
-    { "path": "../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../src/plugins/ui_actions/tsconfig.json" },
-    { "path": "../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../../src/plugins/dashboard/tsconfig.json" },
-    { "path": "../../src/plugins/saved_objects/tsconfig.json" },
-    { "path": "../../src/plugins/presentation_util/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/dashboard-plugin",
+    "@kbn/saved-objects-plugin",
+    "@kbn/i18n",
+    "@kbn/utility-types",
   ]
 }

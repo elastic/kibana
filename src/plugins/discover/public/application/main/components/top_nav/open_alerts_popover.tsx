@@ -8,11 +8,12 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { I18nStart } from '@kbn/core/public';
+import type { Observable } from 'rxjs';
+import type { CoreTheme, I18nStart } from '@kbn/core/public';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView, ISearchSource } from '@kbn/data-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { updateSearchSource } from '../../utils/update_search_source';
 
@@ -29,7 +30,7 @@ interface AlertsPopoverProps {
   adHocDataViews: DataView[];
   I18nContext: I18nStart['Context'];
   services: DiscoverServices;
-  updateDataViewList: (dataViews: DataView[]) => Promise<void>;
+  updateDataViewList: (dataViews: DataView[]) => void;
 }
 
 interface EsQueryAlertMetaData {
@@ -177,6 +178,7 @@ function closeAlertsPopover() {
 
 export function openAlertsPopover({
   I18nContext,
+  theme$,
   anchorElement,
   searchSource,
   services,
@@ -185,12 +187,13 @@ export function openAlertsPopover({
   updateDataViewList,
 }: {
   I18nContext: I18nStart['Context'];
+  theme$: Observable<CoreTheme>;
   anchorElement: HTMLElement;
   searchSource: ISearchSource;
   services: DiscoverServices;
   adHocDataViews: DataView[];
   savedQueryId?: string;
-  updateDataViewList: (dataViews: DataView[]) => Promise<void>;
+  updateDataViewList: (dataViews: DataView[]) => void;
 }) {
   if (isOpen) {
     closeAlertsPopover();
@@ -203,16 +206,18 @@ export function openAlertsPopover({
   const element = (
     <I18nContext>
       <KibanaContextProvider services={services}>
-        <AlertsPopover
-          onClose={closeAlertsPopover}
-          anchorElement={anchorElement}
-          searchSource={searchSource}
-          savedQueryId={savedQueryId}
-          adHocDataViews={adHocDataViews}
-          I18nContext={I18nContext}
-          services={services}
-          updateDataViewList={updateDataViewList}
-        />
+        <KibanaThemeProvider theme$={theme$}>
+          <AlertsPopover
+            onClose={closeAlertsPopover}
+            anchorElement={anchorElement}
+            searchSource={searchSource}
+            savedQueryId={savedQueryId}
+            adHocDataViews={adHocDataViews}
+            I18nContext={I18nContext}
+            services={services}
+            updateDataViewList={updateDataViewList}
+          />
+        </KibanaThemeProvider>
       </KibanaContextProvider>
     </I18nContext>
   );

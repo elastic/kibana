@@ -2,165 +2,181 @@
 
 exports[`NoDataCard props button 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center-vertical"
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center"
 >
   <div
-    class="euiCard__content emotion-euiCard__content-vertical"
+    class="euiCard__main emotion-euiCard__main-vertical"
   >
-    <p
-      class="euiTitle euiCard__title emotion-euiTitle-s"
-      id="generated-idTitle"
-    >
-      <span
-        class="emotion-euiCard__text-center"
-      >
-        Card title
-      </span>
-    </p>
     <div
-      class="euiText emotion-euiText-s-euiCard__description"
-      id="generated-idDescription"
+      class="euiCard__content emotion-euiCard__content-vertical"
     >
-      <p>
-        Description
-      </p>
-    </div>
-  </div>
-  <div
-    class="emotion-euiCard__footer"
-  >
-    <button
-      class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
-      type="button"
-    >
-      <span
-        class="emotion-euiButtonDisplayContent"
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
       >
         <span
-          class="eui-textTruncate"
+          class="emotion-euiCard__text-center"
         >
-          Button
+          Card title
         </span>
-      </span>
-    </button>
+      </p>
+      <div
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          Description
+        </p>
+      </div>
+    </div>
+    <div
+      class="emotion-euiCard__footer"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate"
+          >
+            Button
+          </span>
+        </span>
+      </button>
+    </div>
   </div>
 </div>
 `;
 
 exports[`NoDataCard props href 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-euiCard-center-vertical"
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-euiCard-center"
 >
   <div
-    class="euiCard__content emotion-euiCard__content-vertical"
+    class="euiCard__main emotion-euiCard__main-vertical"
   >
-    <p
-      class="euiTitle euiCard__title emotion-euiTitle-s"
-      id="generated-idTitle"
-    >
-      <a
-        aria-describedby="generated-idDescription"
-        class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
-        href="#"
-        rel="noreferrer"
-      >
-        Card title
-      </a>
-    </p>
     <div
-      class="euiText emotion-euiText-s-euiCard__description"
-      id="generated-idDescription"
+      class="euiCard__content emotion-euiCard__content-vertical"
     >
-      <p>
-        Description
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <a
+          aria-describedby="generated-idDescription"
+          class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
+          href="#"
+          rel="noreferrer"
+        >
+          Card title
+        </a>
       </p>
+      <div
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          Description
+        </p>
+      </div>
     </div>
-  </div>
-  <div
-    class="emotion-euiCard__footer"
-  >
-    <button
-      class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
-      type="button"
+    <div
+      class="emotion-euiCard__footer"
     >
-      <span
-        class="emotion-euiButtonDisplayContent"
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        type="button"
       >
         <span
-          class="eui-textTruncate"
+          class="emotion-euiButtonDisplayContent"
         >
-          Button
+          <span
+            class="eui-textTruncate"
+          >
+            Button
+          </span>
         </span>
-      </span>
-    </button>
+      </button>
+    </div>
   </div>
 </div>
 `;
 
 exports[`NoDataCard props recommended 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center-vertical-hasBetaBadge"
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center-hasBetaBadge"
 >
   <div
-    class="euiCard__content emotion-euiCard__content-vertical"
+    class="euiCard__main emotion-euiCard__main-vertical"
   >
-    <p
-      class="euiTitle euiCard__title emotion-euiTitle-s"
-      id="generated-idTitle"
+    <div
+      class="euiCard__content emotion-euiCard__content-vertical"
+    >
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <span
+          class="emotion-euiCard__text-center"
+        >
+          Card title
+        </span>
+      </p>
+      <div
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          Description
+        </p>
+      </div>
+    </div>
+    <span
+      class="emotion-euiCard__betaBadgeAnchor"
     >
       <span
-        class="emotion-euiCard__text-center"
+        class="euiBetaBadge emotion-euiBetaBadge-hollow-m-baseline-euiCard__betaBadge"
+        id="generated-idBetaBadge"
+        title="Recommended"
       >
-        Card title
+        Recommended
       </span>
-    </p>
-    <div
-      class="euiText emotion-euiText-s-euiCard__description"
-      id="generated-idDescription"
-    >
-      <p>
-        Description
-      </p>
-    </div>
-  </div>
-  <span
-    class="emotion-euiCard__betaBadgeAnchor"
-  >
-    <span
-      class="euiBetaBadge euiBetaBadge--hollow emotion-euiCard__betaBadge"
-      id="generated-idBetaBadge"
-      title="Recommended"
-    >
-      Recommended
     </span>
-  </span>
+  </div>
 </div>
 `;
 
 exports[`NoDataCard renders 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center-vertical"
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center"
 >
   <div
-    class="euiCard__content emotion-euiCard__content-vertical"
+    class="euiCard__main emotion-euiCard__main-vertical"
   >
-    <p
-      class="euiTitle euiCard__title emotion-euiTitle-s"
-      id="generated-idTitle"
-    >
-      <span
-        class="emotion-euiCard__text-center"
-      >
-        Card title
-      </span>
-    </p>
     <div
-      class="euiText emotion-euiText-s-euiCard__description"
-      id="generated-idDescription"
+      class="euiCard__content emotion-euiCard__content-vertical"
     >
-      <p>
-        Description
+      <p
+        class="euiTitle euiCard__title emotion-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <span
+          class="emotion-euiCard__text-center"
+        >
+          Card title
+        </span>
       </p>
+      <div
+        class="euiText emotion-euiText-s-euiCard__description"
+        id="generated-idDescription"
+      >
+        <p>
+          Description
+        </p>
+      </div>
     </div>
   </div>
 </div>

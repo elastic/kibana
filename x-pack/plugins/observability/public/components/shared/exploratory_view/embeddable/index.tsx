@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -14,6 +14,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import styled from 'styled-components';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useAppDataView } from './use_app_data_view';
 import { ObservabilityPublicPluginsStart, useFetcher } from '../../../..';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
@@ -70,6 +71,10 @@ export function getExploratoryViewEmbeddable(
       );
     }
 
+    if (!dataViews[series?.dataType]) {
+      return <EmptyState height={props.customHeight} />;
+    }
+
     return (
       <EuiErrorBoundary>
         <EuiThemeProvider darkMode={isDarkMode}>
@@ -103,3 +108,17 @@ const LoadingWrapper = styled.div<{
   align-items: center;
   justify-content: center;
 `;
+
+function EmptyState({ height }: { height?: string }) {
+  return (
+    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: height ?? '100%' }}>
+      <EuiFlexItem grow={false}>
+        <span>{NO_DATA_LABEL}</span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+const NO_DATA_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.noData', {
+  defaultMessage: 'No data',
+});

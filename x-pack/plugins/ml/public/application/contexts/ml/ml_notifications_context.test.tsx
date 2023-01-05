@@ -56,7 +56,7 @@ describe('useMlNotifications', () => {
       mockKibana as unknown as ReturnType<typeof useMlKibana>
     );
 
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(1663945337063);
   });
 
@@ -207,6 +207,25 @@ describe('useMlNotifications', () => {
     expect(result.current.notificationsCounts).toEqual({ info: 1, error: 0, warning: 0 });
     expect(result.current.latestRequestedAt).toEqual(1664551009292);
     expect(result.current.lastCheckedAt).toEqual(1664551009292);
+  });
+
+  test('stops fetching notifications on leave', () => {
+    const { unmount } = renderHook(useMlNotifications, {
+      wrapper: MlNotificationsContextProvider,
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(0);
+    });
+
+    expect(mockCountMessages).toHaveBeenCalledTimes(1);
+
+    unmount();
+
+    act(() => {
+      jest.advanceTimersByTime(60001);
+    });
+    expect(mockCountMessages).toHaveBeenCalledTimes(1);
   });
 
   test('does not start polling if requires capabilities are missing', () => {

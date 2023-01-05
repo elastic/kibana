@@ -11,7 +11,7 @@ import { tasks } from './tasks';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 
 describe('data telemetry collection tasks', () => {
   const indices = {
@@ -298,10 +298,6 @@ describe('data telemetry collection tasks', () => {
             '1d': 1,
             all: 1,
           },
-          sourcemap: {
-            '1d': 1,
-            all: 1,
-          },
           span: {
             '1d': 1,
             all: 1,
@@ -319,9 +315,6 @@ describe('data telemetry collection tasks', () => {
             ms: 0,
           },
           onboarding: {
-            ms: 0,
-          },
-          sourcemap: {
             ms: 0,
           },
           span: {
@@ -383,10 +376,26 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'indices_stats');
 
     it('returns a map of index stats', async () => {
-      const indicesStats = jest.fn().mockResolvedValueOnce({
+      const indicesStats = jest.fn().mockResolvedValue({
         _all: { total: { docs: { count: 1 }, store: { size_in_bytes: 1 } } },
         _shards: { total: 1 },
       });
+
+      const statsResponse = {
+        shards: {
+          total: 1,
+        },
+        all: {
+          total: {
+            docs: {
+              count: 1,
+            },
+            store: {
+              size_in_bytes: 1,
+            },
+          },
+        },
+      };
 
       expect(
         await task?.executor({
@@ -395,26 +404,32 @@ describe('data telemetry collection tasks', () => {
         } as any)
       ).toEqual({
         indices: {
-          shards: {
-            total: 1,
-          },
-          all: {
-            total: {
-              docs: {
-                count: 1,
-              },
-              store: {
-                size_in_bytes: 1,
-              },
-            },
-          },
+          ...statsResponse,
+          metric: statsResponse,
+          traces: statsResponse,
         },
       });
     });
 
     describe('with no results', () => {
       it('returns zero values', async () => {
-        const indicesStats = jest.fn().mockResolvedValueOnce({});
+        const indicesStats = jest.fn().mockResolvedValue({});
+
+        const statsResponse = {
+          shards: {
+            total: 0,
+          },
+          all: {
+            total: {
+              docs: {
+                count: 0,
+              },
+              store: {
+                size_in_bytes: 0,
+              },
+            },
+          },
+        };
 
         expect(
           await task?.executor({
@@ -423,19 +438,9 @@ describe('data telemetry collection tasks', () => {
           } as any)
         ).toEqual({
           indices: {
-            shards: {
-              total: 0,
-            },
-            all: {
-              total: {
-                docs: {
-                  count: 0,
-                },
-                store: {
-                  size_in_bytes: 0,
-                },
-              },
-            },
+            ...statsResponse,
+            metric: statsResponse,
+            traces: statsResponse,
           },
         });
       });

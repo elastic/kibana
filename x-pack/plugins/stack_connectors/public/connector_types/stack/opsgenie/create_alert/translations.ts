@@ -37,13 +37,6 @@ export const DESCRIPTION_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const MESSAGE_FIELD_IS_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.messageFieldRequired',
-  {
-    defaultMessage: '"message" field must be populated with a value other than just whitespace',
-  }
-);
-
 export const USE_JSON_EDITOR_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.useJsonEditorLabel',
   {

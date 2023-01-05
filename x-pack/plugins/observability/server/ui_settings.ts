@@ -19,7 +19,6 @@ import {
   enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
-  apmOperationsTab,
   apmLabsButton,
   enableAgentExplorerView,
   enableAwsLambdaMetrics,
@@ -27,7 +26,6 @@ import {
   apmAWSLambdaRequestCostPerMillion,
   enableCriticalPath,
   enableInfrastructureHostsView,
-  enableServiceMetrics,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -165,21 +163,6 @@ export const uiSettings: Record<string, UiSettings> = {
     },
     showInLabs: true,
   },
-  [enableServiceMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
-      defaultMessage: 'Service metrics',
-    }),
-    value: false,
-    description: i18n.translate('xpack.observability.apmEnableServiceMetricsGroupsDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enables Service metrics. When is enabled, additional configuration in APM Server is required.',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-    showInLabs: true,
-  },
   [apmServiceInventoryOptimizedSorting]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmServiceInventoryOptimizedSorting', {
@@ -224,25 +207,6 @@ export const uiSettings: Record<string, UiSettings> = {
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
         feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-trace-explorer' }),
-      },
-    }),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
-  },
-  [apmOperationsTab]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmOperationsBreakdown', {
-      defaultMessage: 'APM Operations Breakdown',
-    }),
-    description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-operations-breakdown' }),
       },
     }),
     schema: schema.boolean(),

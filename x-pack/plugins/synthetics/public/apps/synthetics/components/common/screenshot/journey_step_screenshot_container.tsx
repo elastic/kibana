@@ -6,10 +6,10 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { css } from '@emotion/react';
 import useIntersection from 'react-use/lib/useIntersection';
 import { i18n } from '@kbn/i18n';
 
+import styled from 'styled-components';
 import { EmptyImage } from './empty_image';
 import {
   isScreenshotImageBlob,
@@ -36,7 +36,7 @@ interface Props {
 }
 
 export const JourneyStepScreenshotContainer = ({
-  stepLabels = [],
+  stepLabels,
   checkGroup,
   stepStatus,
   allStepsLoaded,
@@ -55,7 +55,7 @@ export const JourneyStepScreenshotContainer = ({
   const { basePath } = useContext(SyntheticsSettingsContext);
 
   const imgPath = `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${stepNumber}`;
-  const stepLabel = stepLabels[stepNumber - 1] ?? '';
+  const stepLabel = stepLabels?.[stepNumber - 1] ?? '';
 
   const intersection = useIntersection(intersectionRef, {
     root: null,
@@ -121,12 +121,7 @@ export const JourneyStepScreenshotContainer = ({
   }, [numberOfCaptions, initialStepNo, stepNumber]);
 
   return (
-    <div
-      css={css`
-        figcaption {
-          display: none; // Do not show the OverlayFooter under thumbnails
-        }
-      `}
+    <Wrapper
       onMouseEnter={() => setIsImagePopoverOpen(true)}
       onMouseLeave={() => setIsImagePopoverOpen(false)}
       ref={intersectionRef}
@@ -148,9 +143,15 @@ export const JourneyStepScreenshotContainer = ({
       ) : (
         <EmptyImage isLoading={loading || !allStepsLoaded} size={size} />
       )}
-    </div>
+    </Wrapper>
   );
 };
+
+const Wrapper = styled.div`
+  figcaption {
+    display: none; // Do not show the OverlayFooter under thumbnails
+  }
+`;
 
 export const formatCaptionContent = (stepNumber: number, totalSteps?: number) =>
   i18n.translate('xpack.synthetics.monitor.stepOfSteps', {

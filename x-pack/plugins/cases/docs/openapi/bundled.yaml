@@ -113,6 +113,15 @@ paths:
         - cases
       parameters:
         - $ref: '#/components/parameters/space_id'
+        - name: assignees
+          in: query
+          description: Filters the returned cases by assignees. Valid values are `none` or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
         - name: defaultSearchOperator
           in: query
           description: The default operator to use for the simple_query_string.
@@ -948,7 +957,7 @@ paths:
       summary: Adds a comment or alert to a case.
       operationId: addCaseComment
       description: |
-        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.
+        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating. NOTE: Each case can have a maximum of 1,000 alerts.
       tags:
         - cases
       parameters:
@@ -2079,7 +2088,7 @@ components:
     alert_identifiers:
       title: Alert identifiers
       description: |
-        The alert identifier. It is required only when `type` is `alert`. If it is an array, `index` must also be an array with the same length or number of elements. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       oneOf:
         - type: string
         - type: array
@@ -2090,7 +2099,7 @@ components:
     alert_indices:
       title: Alert indices
       description: |
-        The alert index. It is required only when `type` is `alert`. If it is an array, `alertId` must also be an array with the same length or number of elements. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        The alert indices. It is required only when `type` is `alert`.  If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the `alertId` array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       oneOf:
         - type: string
         - type: array
@@ -2100,7 +2109,7 @@ components:
     rule:
       title: Alerting rule
       description: |
-        The rule that is associated with the alert. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       type: object
       x-technical-preview: true
       properties:

@@ -23,7 +23,7 @@ interface SubActionsState<R> {
   error: Error | null;
 }
 
-const enum SubActionsActionsList {
+enum SubActionsActionsList {
   START,
   STOP,
   SUCCESS,

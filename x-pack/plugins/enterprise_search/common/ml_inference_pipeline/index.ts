@@ -7,6 +7,7 @@
 
 import {
   IngestPipeline,
+  IngestRemoveProcessor,
   IngestSetProcessor,
   MlTrainedModelConfig,
   MlTrainedModelStats,
@@ -16,6 +17,7 @@ import {
   MlInferencePipeline,
   CreateMlInferencePipelineParameters,
   TrainedModelState,
+  InferencePipelineInferenceConfig,
 } from '../types/pipelines';
 
 // Getting an error importing this from @kbn/ml-plugin/common/constants/data_frame_analytics'
@@ -36,6 +38,7 @@ export const SUPPORTED_PYTORCH_TASKS = {
 export interface MlInferencePipelineParams {
   description?: string;
   destinationField: string;
+  inferenceConfig?: InferencePipelineInferenceConfig;
   model: MlTrainedModelConfig;
   pipelineName: string;
   sourceField: string;
@@ -49,6 +52,7 @@ export interface MlInferencePipelineParams {
 export const generateMlInferencePipelineBody = ({
   description,
   destinationField,
+  inferenceConfig,
   model,
   pipelineName,
   sourceField,
@@ -58,6 +62,7 @@ export const generateMlInferencePipelineBody = ({
     model.input?.field_names?.length > 0 ? model.input.field_names[0] : 'MODEL_INPUT_FIELD';
 
   const inferenceType = Object.keys(model.inference_config)[0];
+  const remove = getRemoveProcessorForInferenceType(destinationField, inferenceType);
   const set = getSetProcessorForInferenceType(destinationField, inferenceType);
 
   return {
@@ -69,11 +74,13 @@ export const generateMlInferencePipelineBody = ({
           ignore_missing: true,
         },
       },
+      ...(remove ? [{ remove }] : []),
       {
         inference: {
           field_map: {
             [sourceField]: modelInputField,
           },
+          inference_config: inferenceConfig,
           model_id: model.model_id,
           on_failure: [
             {
@@ -123,7 +130,7 @@ export const getSetProcessorForInferenceType = (
       copy_from: `${prefixedDestinationField}.predicted_value`,
       description: `Copy the predicted_value to '${destinationField}' if the prediction_probability is greater than 0.5`,
       field: destinationField,
-      if: `ctx.${prefixedDestinationField}.prediction_probability > 0.5`,
+      if: `ctx?.ml?.inference != null && ctx.ml.inference['${destinationField}'] != null && ctx.ml.inference['${destinationField}'].prediction_probability > 0.5`,
       value: undefined,
     };
   } else if (inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING) {
@@ -131,11 +138,27 @@ export const getSetProcessorForInferenceType = (
       copy_from: `${prefixedDestinationField}.predicted_value`,
       description: `Copy the predicted_value to '${destinationField}'`,
       field: destinationField,
+      if: `ctx?.ml?.inference != null && ctx.ml.inference['${destinationField}'] != null`,
       value: undefined,
     };
   }
 
   return set;
+};
+
+export const getRemoveProcessorForInferenceType = (
+  destinationField: string,
+  inferenceType: string
+): IngestRemoveProcessor | undefined => {
+  if (
+    inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION ||
+    inferenceType === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING
+  ) {
+    return {
+      field: destinationField,
+      ignore_missing: true,
+    };
+  }
 };
 
 /**
@@ -176,7 +199,7 @@ export const parseMlInferenceParametersFromPipeline = (
     return null;
   }
   return {
-    destination_field: inferenceProcessor.target_field.replace('ml.inference.', ''),
+    destination_field: inferenceProcessor.target_field?.replace('ml.inference.', ''),
     model_id: inferenceProcessor.model_id,
     pipeline_name: name,
     source_field: sourceField,

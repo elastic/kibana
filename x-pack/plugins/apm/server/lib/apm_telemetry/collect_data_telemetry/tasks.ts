@@ -4,20 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fromKueryExpression } from '@kbn/es-query';
-import { flatten, merge, sortBy, sum, pickBy, uniq } from 'lodash';
-import { createHash } from 'crypto';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { fromKueryExpression } from '@kbn/es-query';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { TelemetryTask } from '.';
+import { createHash } from 'crypto';
+import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
-import {
-  SavedServiceGroup,
-  APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
-  MAX_NUMBER_OF_SERVICE_GROUPS,
-} from '../../../../common/service_groups';
-import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
 import {
   AGENT_NAME,
   AGENT_VERSION,
@@ -30,9 +23,9 @@ import {
   FAAS_TRIGGER_TYPE,
   HOST_NAME,
   HOST_OS_PLATFORM,
+  KUBERNETES_POD_NAME,
   OBSERVER_HOSTNAME,
   PARENT_ID,
-  KUBERNETES_POD_NAME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_FRAMEWORK_NAME,
@@ -40,6 +33,7 @@ import {
   SERVICE_LANGUAGE_NAME,
   SERVICE_LANGUAGE_VERSION,
   SERVICE_NAME,
+  SERVICE_NODE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
@@ -47,17 +41,42 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
   USER_AGENT_ORIGINAL,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
+import {
+  APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+  MAX_NUMBER_OF_SERVICE_GROUPS,
+  SavedServiceGroup,
+} from '../../../../common/service_groups';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { APMTelemetry, APMPerService } from '../types';
+import { APMTelemetry, APMPerService, APMDataTelemetry } from '../types';
+import {
+  ApmIndicesConfig,
+  APM_AGENT_CONFIGURATION_INDEX,
+} from '../../../routes/settings/apm_indices/get_apm_indices';
+import { TelemetryClient } from '../telemetry_client';
+
+type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
 const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
 const timeout = '5m';
+
+interface TelemetryTask {
+  name: string;
+  executor: (params: TelemetryTaskExecutorParams) => Promise<APMDataTelemetry>;
+}
+
+export interface TelemetryTaskExecutorParams {
+  telemetryClient: TelemetryClient;
+  indices: ApmIndicesConfig;
+  savedObjectsClient: ISavedObjectsClient;
+}
 
 export const tasks: TelemetryTask[] = [
   {
@@ -448,7 +467,6 @@ export const tasks: TelemetryTask[] = [
         span: indices.span,
         transaction: indices.transaction,
         onboarding: indices.onboarding,
-        sourcemap: indices.sourcemap,
       };
 
       type ProcessorEvent = keyof typeof indicesByProcessorEvent;
@@ -542,7 +560,7 @@ export const tasks: TelemetryTask[] = [
     name: 'agent_configuration',
     executor: async ({ indices, telemetryClient }) => {
       const agentConfigurationCount = await telemetryClient.search({
-        index: indices.apmAgentConfigurationIndex,
+        index: APM_AGENT_CONFIGURATION_INDEX,
         body: {
           size: 0,
           timeout,
@@ -1017,18 +1035,59 @@ export const tasks: TelemetryTask[] = [
     executor: async ({ indices, telemetryClient }) => {
       const response = await telemetryClient.indicesStats({
         index: [
-          indices.apmAgentConfigurationIndex,
+          APM_AGENT_CONFIGURATION_INDEX,
           indices.error,
           indices.metric,
           indices.onboarding,
-          indices.sourcemap,
           indices.span,
           indices.transaction,
         ],
       });
 
+      const metricIndicesResponse = await telemetryClient.indicesStats({
+        index: [indices.metric],
+      });
+
+      const tracesIndicesResponse = await telemetryClient.indicesStats({
+        index: [indices.span, indices.transaction],
+      });
+
       return {
         indices: {
+          metric: {
+            shards: {
+              total: metricIndicesResponse._shards?.total ?? 0,
+            },
+            all: {
+              total: {
+                docs: {
+                  count: metricIndicesResponse._all?.total?.docs?.count ?? 0,
+                },
+                store: {
+                  size_in_bytes:
+                    metricIndicesResponse._all?.total?.store?.size_in_bytes ??
+                    0,
+                },
+              },
+            },
+          },
+          traces: {
+            shards: {
+              total: tracesIndicesResponse._shards?.total ?? 0,
+            },
+            all: {
+              total: {
+                docs: {
+                  count: tracesIndicesResponse._all?.total?.docs?.count ?? 0,
+                },
+                store: {
+                  size_in_bytes:
+                    tracesIndicesResponse._all?.total?.store?.size_in_bytes ??
+                    0,
+                },
+              },
+            },
+          },
           shards: {
             total: response._shards?.total ?? 0,
           },
@@ -1193,18 +1252,28 @@ export const tasks: TelemetryTask[] = [
             },
           },
           aggs: {
-            environments: {
+            service_names: {
               terms: {
-                field: SERVICE_ENVIRONMENT,
-                size: 1000,
+                field: SERVICE_NAME,
+                size: 2500,
               },
               aggs: {
-                service_names: {
+                environments: {
                   terms: {
-                    field: SERVICE_NAME,
-                    size: 1000,
+                    field: SERVICE_ENVIRONMENT,
+                    size: 5,
                   },
                   aggs: {
+                    instances: {
+                      cardinality: {
+                        field: SERVICE_NODE_NAME,
+                      },
+                    },
+                    transaction_types: {
+                      cardinality: {
+                        field: TRANSACTION_TYPE,
+                      },
+                    },
                     top_metrics: {
                       top_metrics: {
                         sort: '_score',
@@ -1273,87 +1342,85 @@ export const tasks: TelemetryTask[] = [
           },
         },
       });
-      const envBuckets = response.aggregations?.environments.buckets ?? [];
-      const data: APMPerService[] = envBuckets.flatMap((envBucket) => {
+      const serviceBuckets = response.aggregations?.service_names.buckets ?? [];
+      const data: APMPerService[] = serviceBuckets.flatMap((serviceBucket) => {
         const envHash = createHash('sha256')
-          .update(envBucket.key as string)
+          .update(serviceBucket.key as string)
           .digest('hex');
-        const serviceBuckets = envBucket.service_names?.buckets ?? [];
-        return serviceBuckets.map((serviceBucket) => {
+        const envBuckets = serviceBucket.environments?.buckets ?? [];
+        return envBuckets.map((envBucket) => {
           const nameHash = createHash('sha256')
-            .update(serviceBucket.key as string)
+            .update(envBucket.key as string)
             .digest('hex');
           const fullServiceName = `${nameHash}~${envHash}`;
           return {
             service_id: fullServiceName,
             timed_out: response.timed_out,
+            num_service_nodes: envBucket.instances.value ?? 1,
+            num_transaction_types: envBucket.transaction_types.value ?? 0,
             cloud: {
               availability_zones:
-                serviceBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(
+                envBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
               regions:
-                serviceBucket[CLOUD_REGION]?.buckets.map(
+                envBucket[CLOUD_REGION]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
               providers:
-                serviceBucket[CLOUD_PROVIDER]?.buckets.map(
+                envBucket[CLOUD_PROVIDER]?.buckets.map(
                   (inner) => inner.key as string
                 ) ?? [],
             },
             faas: {
               trigger: {
                 type:
-                  serviceBucket[FAAS_TRIGGER_TYPE]?.buckets.map(
+                  envBucket[FAAS_TRIGGER_TYPE]?.buckets.map(
                     (inner) => inner.key as string
                   ) ?? [],
               },
             },
             agent: {
-              name: serviceBucket.top_metrics?.top[0].metrics[
-                AGENT_NAME
-              ] as string,
-              version: serviceBucket.top_metrics?.top[0].metrics[
+              name: envBucket.top_metrics?.top[0].metrics[AGENT_NAME] as string,
+              version: envBucket.top_metrics?.top[0].metrics[
                 AGENT_VERSION
               ] as string,
             },
             service: {
               language: {
-                name: serviceBucket.top_metrics?.top[0].metrics[
+                name: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_LANGUAGE_NAME
                 ] as string,
-                version: serviceBucket.top_metrics?.top[0].metrics[
+                version: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_LANGUAGE_VERSION
                 ] as string,
               },
               framework: {
-                name: serviceBucket.top_metrics?.top[0].metrics[
+                name: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_FRAMEWORK_NAME
                 ] as string,
-                version: serviceBucket.top_metrics?.top[0].metrics[
+                version: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_FRAMEWORK_VERSION
                 ] as string,
               },
               runtime: {
-                name: serviceBucket.top_metrics?.top[0].metrics[
+                name: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_RUNTIME_NAME
                 ] as string,
-                version: serviceBucket.top_metrics?.top[0].metrics[
+                version: envBucket.top_metrics?.top[0].metrics[
                   SERVICE_RUNTIME_VERSION
                 ] as string,
               },
             },
             kubernetes: {
               pod: {
-                name: serviceBucket.top_metrics?.top[0].metrics[
+                name: envBucket.top_metrics?.top[0].metrics[
                   KUBERNETES_POD_NAME
                 ] as string,
               },
             },
             container: {
-              id: serviceBucket.top_metrics?.top[0].metrics[
-                CONTAINER_ID
-              ] as string,
+              id: envBucket.top_metrics?.top[0].metrics[CONTAINER_ID] as string,
             },
           };
         });

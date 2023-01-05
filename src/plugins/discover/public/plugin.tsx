@@ -40,6 +40,8 @@ import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { PLUGIN_ID } from '../common';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
@@ -53,7 +55,6 @@ import {
 } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
-import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from './locator';
 import { SearchEmbeddableFactory } from './embeddable';
 import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
@@ -69,6 +70,7 @@ import {
   DiscoverSingleDocLocator,
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
+import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -192,6 +194,7 @@ export interface DiscoverStartPlugins {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  lens: LensPublicStart;
 }
 
 /**
@@ -216,7 +219,7 @@ export class DiscoverPlugin
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
       this.locator = plugins.share.url.locators.create(
-        new DiscoverAppLocatorDefinition({ useHash })
+        new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl })
       );
 
       this.contextLocator = plugins.share.url.locators.create(

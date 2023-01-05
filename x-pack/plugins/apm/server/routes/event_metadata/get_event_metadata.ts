@@ -11,7 +11,7 @@ import {
   ERROR_ID,
   SPAN_ID,
   TRANSACTION_ID,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getEventMetadata({

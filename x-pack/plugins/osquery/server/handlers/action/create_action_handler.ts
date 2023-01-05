@@ -9,6 +9,7 @@ import uuid from 'uuid';
 import moment from 'moment';
 import { flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { getInternalSavedObjectsClient } from '../../routes/utils';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
@@ -27,14 +28,16 @@ interface Metadata {
 export const createActionHandler = async (
   osqueryContext: OsqueryAppContext,
   params: CreateLiveQueryRequestBodySchema,
+  soClient?: SavedObjectsClientContract,
   metadata?: Metadata
 ) => {
   const [coreStartServices] = await osqueryContext.getStartServices();
   const esClientInternal = coreStartServices.elasticsearch.client.asInternalUser;
-  const soClient = coreStartServices.savedObjects.createInternalRepository();
   const internalSavedObjectsClient = await getInternalSavedObjectsClient(
     osqueryContext.getStartServices
   );
+  const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { agent_all, agent_ids, agent_platforms, agent_policy_ids } = params;
   const selectedAgents = await parseAgentSelection(internalSavedObjectsClient, osqueryContext, {
@@ -50,7 +53,10 @@ export const createActionHandler = async (
   let packSO;
 
   if (params.pack_id) {
-    packSO = await soClient.get<PackSavedObjectAttributes>(packSavedObjectType, params.pack_id);
+    packSO = await savedObjectsClient.get<PackSavedObjectAttributes>(
+      packSavedObjectType,
+      params.pack_id
+    );
   }
 
   const osqueryAction = {

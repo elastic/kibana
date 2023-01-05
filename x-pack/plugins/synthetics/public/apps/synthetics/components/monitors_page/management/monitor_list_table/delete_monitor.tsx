@@ -12,23 +12,29 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  ConfigKey,
+  EncryptedSyntheticsSavedMonitor,
+  SourceType,
+  SyntheticsMonitor,
+} from '../../../../../../../common/runtime_types';
 import { fetchDeleteMonitor } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import * as labels from './labels';
 
 export const DeleteMonitor = ({
-  id,
-  name,
+  fields,
   reloadPage,
-  isProjectMonitor,
-  setIsDeleteModalVisible,
+  setMonitorPendingDeletion,
 }: {
-  id: string;
-  name: string;
+  fields: SyntheticsMonitor | EncryptedSyntheticsSavedMonitor;
   reloadPage: () => void;
-  isProjectMonitor?: boolean;
-  setIsDeleteModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setMonitorPendingDeletion: (val: null) => void;
 }) => {
+  const configId = fields[ConfigKey.CONFIG_ID];
+  const name = fields[ConfigKey.NAME];
+  const isProjectMonitor = fields[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const handleConfirmDelete = () => {
@@ -37,9 +43,9 @@ export const DeleteMonitor = ({
 
   const { status: monitorDeleteStatus } = useFetcher(() => {
     if (isDeleting) {
-      return fetchDeleteMonitor({ id });
+      return fetchDeleteMonitor({ configId });
     }
-  }, [id, isDeleting]);
+  }, [configId, isDeleting]);
 
   useEffect(() => {
     if (!isDeleting) {
@@ -63,7 +69,7 @@ export const DeleteMonitor = ({
               {i18n.translate(
                 'xpack.synthetics.monitorManagement.monitorDeleteSuccessMessage.name',
                 {
-                  defaultMessage: 'Monitor {name} deleted successfully.',
+                  defaultMessage: 'Deleted "{name}"',
                   values: { name },
                 }
               )}
@@ -78,9 +84,9 @@ export const DeleteMonitor = ({
       monitorDeleteStatus === FETCH_STATUS.FAILURE
     ) {
       setIsDeleting(false);
-      setIsDeleteModalVisible(false);
+      setMonitorPendingDeletion(null);
     }
-  }, [setIsDeleting, isDeleting, reloadPage, monitorDeleteStatus, setIsDeleteModalVisible, name]);
+  }, [setIsDeleting, isDeleting, reloadPage, monitorDeleteStatus, setMonitorPendingDeletion, name]);
 
   return (
     <EuiConfirmModal
@@ -88,7 +94,7 @@ export const DeleteMonitor = ({
         defaultMessage: 'Delete "{name}" monitor?',
         values: { name },
       })}
-      onCancel={() => setIsDeleteModalVisible(false)}
+      onCancel={() => setMonitorPendingDeletion(null)}
       onConfirm={handleConfirmDelete}
       cancelButtonText={labels.NO_LABEL}
       confirmButtonText={labels.YES_LABEL}
@@ -113,7 +119,7 @@ export const DeleteMonitor = ({
 export const PROJECT_MONITOR_TITLE = i18n.translate(
   'xpack.synthetics.monitorManagement.monitorList.disclaimer.title',
   {
-    defaultMessage: "Deleting this monitor will not remove it from Project's source",
+    defaultMessage: 'Deleting this monitor will not remove it from the project source',
   }
 );
 
@@ -121,7 +127,7 @@ export const ProjectMonitorDisclaimer = () => {
   return (
     <FormattedMessage
       id="xpack.synthetics.monitorManagement.monitorList.disclaimer.label"
-      defaultMessage="Make sure to remove this monitor from Project's source, otherwise it will be recreated the next time you use the push command. For more information, {docsLink} for deleting project monitors."
+      defaultMessage="To delete it completely and stop it from being pushed again in the future, delete it from the project source. {docsLink}."
       values={{
         docsLink: (
           <EuiLink
@@ -129,7 +135,7 @@ export const ProjectMonitorDisclaimer = () => {
             target="_blank"
           >
             {i18n.translate('xpack.synthetics.monitorManagement.projectDelete.docsLink', {
-              defaultMessage: 'read our docs',
+              defaultMessage: 'Learn more',
             })}
           </EuiLink>
         ),
