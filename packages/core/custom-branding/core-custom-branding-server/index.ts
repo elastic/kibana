@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type { CustomBrandingStart, CustomBrandingSetup, CustomBrandingStartDeps } from './types';
+export type {
+  CustomBrandingStart,
+  CustomBrandingSetup,
+  CustomBrandingStartDeps,
+  CustomBrandingFetchFn,
+} from './types';

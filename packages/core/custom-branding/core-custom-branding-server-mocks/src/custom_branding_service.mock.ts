@@ -11,6 +11,7 @@ import { serviceContractMock } from './service_contract.mock';
 const createSetupContractMock = () => {
   return {
     register: jest.fn(),
+    getBrandingFor: jest.fn(),
   };
 };
 
@@ -22,7 +23,6 @@ const createMock = () => {
   const mocked = serviceContractMock();
   mocked.setup.mockReturnValue(createSetupContractMock());
   mocked.start.mockReturnValue(createStartContractMock());
-  mocked.getBrandingFor = jest.fn();
   return mocked;
 };
 

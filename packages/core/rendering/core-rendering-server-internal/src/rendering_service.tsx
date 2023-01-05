@@ -93,10 +93,7 @@ export class RenderingService {
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
     const { elasticsearch, http, uiPlugins, status } = renderOptions;
-    let customBranding;
-    if ('customBranding' in renderOptions) {
-      customBranding = renderOptions.customBranding;
-    }
+
     const env = {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
@@ -123,8 +120,8 @@ export class RenderingService {
             catchError(() => of({}))
           )
         );
-        if (customBranding) {
-          branding = await customBranding.getBrandingFor(request);
+        if ('customBranding' in renderOptions) {
+          branding = await renderOptions.customBranding.getBrandingFor(request);
         }
       }
     } catch (err) {

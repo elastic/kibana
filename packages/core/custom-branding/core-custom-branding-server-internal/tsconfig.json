@@ -12,8 +12,6 @@
     "@kbn/core-custom-branding-server",
     "@kbn/core-base-server-mocks",
     "@kbn/core-http-server",
-    "@kbn/core-saved-objects-server-internal",
-    "@kbn/core-ui-settings-server-internal",
     "@kbn/core-base-server-internal",
     "@kbn/logging",
     "@kbn/core-ui-settings-server",

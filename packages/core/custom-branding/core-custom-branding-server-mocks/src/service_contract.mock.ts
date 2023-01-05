@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 
-export const serviceContractMock = (): jest.Mocked<any> => {
+export const serviceContractMock = (): jest.Mocked<CustomBrandingService> => {
   return {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
-  };
+  } as unknown as jest.Mocked<CustomBrandingService>;
 };

@@ -5,20 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
-import type { InternalUiSettingsServiceStart } from '@kbn/core-ui-settings-server-internal';
+import { KibanaRequest } from '@kbn/core-http-server';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
 
 /** @public */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CustomBrandingStart {}
 
-export interface CustomBrandingStartDeps {
-  savedObjects: InternalSavedObjectsServiceStart;
-  uiSettings: InternalUiSettingsServiceStart;
-}
+export type CustomBrandingFetchFn = (request: KibanaRequest) => Promise<CustomBranding>;
 
 /** @public */
 export interface CustomBrandingSetup {
-  register: () => void;
+  register: (fetchFn: CustomBrandingFetchFn) => void;
 }

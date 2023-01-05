@@ -7,8 +7,7 @@
     ]
   },
   "kbn_references": [
-    "@kbn/core-saved-objects-server-internal",
-    "@kbn/core-ui-settings-server-internal"
+    "@kbn/core-custom-branding-common"
   ],
   "include": [
     "**/*.ts",

@@ -8,6 +8,7 @@
 
 import { CustomBrandingService } from './custom_branding_service';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { KibanaRequest } from '@kbn/core-http-server';
 
 describe('#setup', () => {
   const coreContext: ReturnType<typeof mockCoreContext.create> = mockCoreContext.create();
@@ -15,9 +16,36 @@ describe('#setup', () => {
   it('registers plugin correctly', () => {
     const service = new CustomBrandingService(coreContext);
     const { register } = service.setup();
-    register('pluginName');
+    const fetchFn = jest.fn();
+    register('pluginName', fetchFn);
     expect(() => {
-      register('anotherPlugin');
+      register('anotherPlugin', fetchFn);
     }).toThrow('Another plugin already registered');
+  });
+
+  it('throws if `getBrandingFor` called before #start', async () => {
+    const service = new CustomBrandingService(coreContext);
+    const { register, getBrandingFor } = service.setup();
+    const fetchFn = jest.fn();
+    register('customBranding', fetchFn);
+    const kibanaRequest: jest.Mocked<KibanaRequest> = {} as unknown as jest.Mocked<KibanaRequest>;
+    try {
+      await getBrandingFor(kibanaRequest);
+    } catch (e) {
+      expect(e.message).toMatch('Cannot be called before #start');
+    }
+  });
+
+  it('calls fetchFn correctly', async () => {
+    const service = new CustomBrandingService(coreContext);
+    const { register, getBrandingFor } = service.setup();
+    service.start();
+    const fetchFn = jest.fn();
+    fetchFn.mockImplementation(() => Promise.resolve({ logo: 'myLogo' }));
+    register('customBranding', fetchFn);
+    const kibanaRequest: jest.Mocked<KibanaRequest> = {} as unknown as jest.Mocked<KibanaRequest>;
+    const customBranding = await getBrandingFor(kibanaRequest);
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+    expect(customBranding).toEqual({ logo: 'myLogo' });
   });
 });

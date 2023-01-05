@@ -398,10 +398,7 @@ export class Server {
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
-    const customBrandingStart = this.customBranding.start({
-      uiSettings: uiSettingsStart,
-      savedObjects: savedObjectsStart,
-    });
+    const customBrandingStart = this.customBranding.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
     const coreUsageDataStart = this.coreUsageData.start({
