@@ -12,6 +12,7 @@ import { useUpdateTimerangeOnPageChange } from './search_bar/use_update_timerang
 import { useInitTimelineFromUrlParam } from './timeline/use_init_timeline_url_param';
 import { useSyncTimelineUrlParam } from './timeline/use_sync_timeline_url_param';
 import { useQueryTimelineByIdOnUrlChange } from './timeline/use_query_timeline_by_id_on_url_change';
+import { useFlyoutsUrlStateSync } from './flyouts';
 
 export const useUrlState = () => {
   useSyncGlobalQueryString();
@@ -20,6 +21,7 @@ export const useUrlState = () => {
   useUpdateTimerangeOnPageChange();
   useInitTimelineFromUrlParam();
   useSyncTimelineUrlParam();
+  useFlyoutsUrlStateSync();
   useQueryTimelineByIdOnUrlChange();
 };
 
@@ -28,6 +30,7 @@ export enum URL_PARAM_KEY {
   filters = 'filters',
   savedQuery = 'savedQuery',
   sourcerer = 'sourcerer',
+  flyouts = 'flyouts',
   timeline = 'timeline',
   timerange = 'timerange',
   pageFilter = 'pageFilters',

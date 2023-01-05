@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export { appModel } from './app';
-export { dragAndDropModel } from './drag_and_drop';
-export { inputsModel } from './inputs';
-export { sourcererModel } from './sourcerer';
-export { flyoutsModel } from './flyout';
-export * from './types';
+import * as flyoutsActions from './actions';
+import * as flyoutsSelectors from './selectors';
+import * as flyoutsModel from './model';
+
+export { flyoutsActions, flyoutsSelectors, flyoutsModel };
