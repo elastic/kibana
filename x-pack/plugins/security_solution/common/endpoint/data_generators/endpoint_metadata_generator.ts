@@ -28,7 +28,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
 
     // v8.7 introduced kubernetes endpoint capabilities
     if (gte(agentVersion, '8.7.0')) {
-      capabilities.push('kube-list');
+      capabilities.push('kube_list');
     }
 
     // v8.4 introduced additional endpoint capabilities

@@ -66,8 +66,8 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
   }
 `;
 
-const COLUMNS_TO_RESOURCE_MAPPING = {
-  pod: [
+const getColumns = (resource: 'pod' | 'deployment') => {
+  const commonColumns = [
     {
       field: 'name',
       name: i18n.translate(
@@ -84,89 +84,83 @@ const COLUMNS_TO_RESOURCE_MAPPING = {
       ),
       width: '10%',
     },
-    {
-      field: 'status',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.status',
-        { defaultMessage: 'STATUS' }
-      ),
-      width: '10%',
-    },
-    {
-      field: 'restarts',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.restarts',
-        { defaultMessage: 'RESTARTS' }
-      ),
-      width: '10%',
-    },
-    {
-      field: 'age',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.age',
-        { defaultMessage: 'AGE' }
-      ),
-      width: '10%',
-    },
-    {
-      field: 'ip',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.ip',
-        { defaultMessage: 'IP' }
-      ),
-      width: '15%',
-    },
-    {
-      field: 'node',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.node',
-        { defaultMessage: 'NODE' }
-      ),
-      width: '25%',
-    },
-  ],
-  deployment: [
-    {
-      field: 'name',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.name',
-        { defaultMessage: 'NAME' }
-      ),
-      width: '20%',
-    },
-    {
-      field: 'ready',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.ready',
-        { defaultMessage: 'READY' }
-      ),
-      width: '10%',
-    },
-    {
-      field: 'upToDate',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.upToDate',
-        { defaultMessage: 'UP-TO-DATE' }
-      ),
-      width: '10%',
-    },
-    {
-      field: 'available',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.available',
-        { defaultMessage: 'AVAILABLE' }
-      ),
-      width: '10%',
-    },
-    {
-      field: 'age',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.age',
-        { defaultMessage: 'AGE' }
-      ),
-      width: '10%',
-    },
-  ],
+  ];
+
+  if (resource === 'pod') {
+    return [
+      ...commonColumns,
+      {
+        field: 'status',
+        name: i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.status',
+          { defaultMessage: 'STATUS' }
+        ),
+        width: '10%',
+      },
+      {
+        field: 'restarts',
+        name: i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.restarts',
+          { defaultMessage: 'RESTARTS' }
+        ),
+        width: '10%',
+      },
+      {
+        field: 'age',
+        name: i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.age',
+          { defaultMessage: 'AGE' }
+        ),
+        width: '10%',
+      },
+      {
+        field: 'ip',
+        name: i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.ip',
+          { defaultMessage: 'IP' }
+        ),
+        width: '15%',
+      },
+      {
+        field: 'node',
+        name: i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.node',
+          { defaultMessage: 'NODE' }
+        ),
+        width: '25%',
+      },
+    ];
+  }
+
+  if (resource === 'deployment') {
+    return [
+      ...commonColumns,
+      {
+        field: 'upToDate',
+        name: i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.upToDate',
+          { defaultMessage: 'UP-TO-DATE' }
+        ),
+        width: '20%',
+      },
+      {
+        field: 'available',
+        name: i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.available',
+          { defaultMessage: 'AVAILABLE' }
+        ),
+        width: '20%',
+      },
+      {
+        field: 'age',
+        name: i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getKubeList.table.header.age',
+          { defaultMessage: 'AGE' }
+        ),
+        width: '30%',
+      },
+    ];
+  }
 };
 
 export const KubeListActionResult = memo<
@@ -212,7 +206,7 @@ export const KubeListActionResult = memo<
 
       if (entries?.resource === 'deployment') {
         return {
-          columns: COLUMNS_TO_RESOURCE_MAPPING.deployment,
+          columns: getColumns(entries.resource),
           items: entries.items.map(({ metadata, status: kubeStatus }) => ({
             name: metadata.name,
             ready: `${kubeStatus.readyReplicas}/${kubeStatus.replicas}`,
@@ -224,7 +218,7 @@ export const KubeListActionResult = memo<
       }
       if (entries?.resource === 'pod') {
         return {
-          columns: COLUMNS_TO_RESOURCE_MAPPING.pod,
+          columns: getColumns(entries.resource),
           items: entries.items.map(({ metadata, status: kubeStatus, spec }) => ({
             name: metadata.name,
             ready: `${kubeStatus.containerStatuses.filter(({ ready }) => ready).length}/${

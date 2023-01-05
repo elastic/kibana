@@ -76,7 +76,7 @@ export interface EndpointAuthz extends EndpointPermissions {
   canWriteEventFilters: boolean;
   /** if user has read permissions for event filters */
   canReadEventFilters: boolean;
-  /** if user has permissions for execute Kubernetes commands */
+  /** if user has permission to execute Kubernetes commands */
   canExecuteKubernetesCommands: boolean;
 }
 

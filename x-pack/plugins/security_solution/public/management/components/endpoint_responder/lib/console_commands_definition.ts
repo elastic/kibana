@@ -73,7 +73,7 @@ const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, Endpoint
   ['suspend-process', 'suspend_process'],
   ['processes', 'running_processes'],
   ['get-file', 'get_file'],
-  ['kube-list', 'kube-list'],
+  ['kube-list', 'kube_list'],
 ]);
 
 const getRbacControl = ({
@@ -126,18 +126,6 @@ const HELP_GROUPS = Object.freeze({
     label: i18n.translate('xpack.securitySolution.endpointConsoleCommands.groups.responseActions', {
       defaultMessage: 'Response actions',
     }),
-  },
-});
-
-const HELP_KUBE_COMMANDS = Object.freeze({
-  kubernetesActions: {
-    position: 1,
-    label: i18n.translate(
-      'xpack.securitySolution.endpointConsoleCommands.groups.kubernetesActions',
-      {
-        defaultMessage: 'Kubernetes Response actions',
-      }
-    ),
   },
 });
 
@@ -491,14 +479,15 @@ export const getEndpointConsoleCommands = ({
           about: i18n.translate(
             'xpack.securitySolution.endpointConsoleCommands.kubeList.resource.arg.about',
             {
-              defaultMessage: 'A kubernetes resource to list (pod or deployment)',
+              defaultMessage:
+                'A kubernetes resource to list. Valid value are "pod" or "deployment"',
             }
           ),
           validate: kubernetesResourceValidator,
         },
       },
-      helpGroupLabel: HELP_KUBE_COMMANDS.kubernetesActions.label,
-      helpGroupPosition: HELP_KUBE_COMMANDS.kubernetesActions.position,
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 7,
       helpDisabled: doesEndpointSupportCommand('kube-list') === false,
       helpHidden: !getRbacControl({ commandName: 'kube-list', privileges: endpointPrivileges }),

@@ -31,7 +31,7 @@ export const ENDPOINT_CAPABILITIES = [
   'suspend_process',
   'running_processes',
   'get_file',
-  'kube-list',
+  'kube_list',
 ] as const;
 
 export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];

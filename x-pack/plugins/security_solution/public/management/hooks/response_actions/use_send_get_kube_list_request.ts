@@ -17,7 +17,7 @@ import { GET_KUBE_LIST_ROUTE } from '../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 /**
- * Get running processes
+ * Get kubernetes list
  * @param customOptions
  */
 export const useSendGetKubeListRequest = (
