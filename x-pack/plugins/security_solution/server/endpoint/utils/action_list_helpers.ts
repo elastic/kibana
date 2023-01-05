@@ -29,7 +29,7 @@ import type {
   LogsOsqueryResponse,
   OsqueryResponse,
 } from '../../../common/endpoint/types';
-import { ACTIONS_SEARCH_PAGE_SIZE } from '../services/actions/constants';
+import { ACTIONS_SEARCH_PAGE_SIZE, ACTION_RESPONSE_INDICES } from '../services/actions/constants';
 import { catchAndWrapError } from './wrap_errors';
 import type { GetActionDetailsListParam } from '../services/actions/action_list';
 import { getDateFilters, isLogsOsqueryAction } from '../services/actions/utils';
@@ -184,8 +184,7 @@ export const getActionResponses = async ({
   }
 
   const responsesSearchQuery: SearchRequest = {
-    // index: [...ACTION_RESPONSE_INDICES, OSQUERY_ACTION_RESPONSES_INDEX],
-    index: [OSQUERY_ACTION_RESPONSES_INDEX],
+    index: [...ACTION_RESPONSE_INDICES, OSQUERY_ACTION_RESPONSES_INDEX],
     size: ACTIONS_SEARCH_PAGE_SIZE,
     from: 0,
     body: {
