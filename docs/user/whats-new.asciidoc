@@ -102,4 +102,5 @@ Enhancing the case assignment capability, this release
 adds email notifications when a user is assigned a case.
 This draws users' attention to the assignment, and enables them to act more quickly on the assignment.
 Email notifications include the case title, status, severity,
-and tags, and a link to the case in {kib}.
+and tags, and a link to the case in {kib}. For more information, check
+<<add-case-notifications>>.
