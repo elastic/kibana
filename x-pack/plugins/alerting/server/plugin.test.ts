@@ -21,8 +21,13 @@ import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import {
+  DataViewsServerPluginStart,
+  PluginSetup as DataPluginSetup,
+} from '@kbn/data-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
@@ -227,6 +232,12 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
           data: dataPluginMock.createStartContract(),
+          share: {} as SharePluginStart,
+          dataViews: {
+            dataViewsServiceFactory: jest
+              .fn()
+              .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+          } as DataViewsServerPluginStart,
         });
 
         expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
@@ -268,6 +279,12 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
           data: dataPluginMock.createStartContract(),
+          share: {} as SharePluginStart,
+          dataViews: {
+            dataViewsServiceFactory: jest
+              .fn()
+              .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+          } as DataViewsServerPluginStart,
         });
 
         const fakeRequest = {
@@ -320,6 +337,12 @@ describe('Alerting Plugin', () => {
         eventLog: eventLogMock.createStart(),
         taskManager: taskManagerMock.createStart(),
         data: dataPluginMock.createStartContract(),
+        share: {} as SharePluginStart,
+        dataViews: {
+          dataViewsServiceFactory: jest
+            .fn()
+            .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+        } as DataViewsServerPluginStart,
       });
 
       const fakeRequest = {
