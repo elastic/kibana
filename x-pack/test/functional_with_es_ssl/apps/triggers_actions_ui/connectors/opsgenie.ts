@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   let objectRemover: ObjectRemover;
 
-  describe.only('Opsgenie', () => {
+  describe('Opsgenie', () => {
     before(async () => {
       objectRemover = await createSlackConnectorAndObjectRemover({ getService });
     });
