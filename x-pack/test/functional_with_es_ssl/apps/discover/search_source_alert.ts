@@ -363,8 +363,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await input.type('search-source-alert-o*');
       await testSubjects.click('explore-matching-indices-button');
 
-      const dataViewSelector = await testSubjects.find('selectDataViewExpression');
-      expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nsearch-source-alert-o*');
+      await retry.waitFor('selection to happen', async () => {
+        const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+        return (await dataViewSelector.getVisibleText()) === 'DATA VIEW\nsearch-source-alert-o*';
+      });
 
       await testSubjects.click('saveRuleButton');
 
