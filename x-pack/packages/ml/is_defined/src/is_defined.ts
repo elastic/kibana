@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * Checks whether the supplied argument is not `undefined` and not `null`.
+ *
+ * @param argument
+ * @returns boolean
+ */
 export function isDefined<T>(argument: T | undefined | null): argument is T {
   return argument !== undefined && argument !== null;
 }
