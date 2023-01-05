@@ -145,7 +145,6 @@ export const useResponseActionsLogTable = ({
         const command = getUiCommand(_command);
 
         const isOsquery = command === 'osquery';
-
         const isGetFileCommand = command === 'get-file';
         const dataList = [
           {
@@ -235,8 +234,8 @@ export const useResponseActionsLogTable = ({
             <EuiFlexGroup
               data-test-subj={getTestId('details-tray')}
               direction="column"
-              // TODO check if this maxHeight can be ommited
-              style={{ maxHeight: 270, overflowY: 'auto' }}
+              // TODO check if this maxHeight is really necessary
+              // style={{ maxHeight: 270, overflowY: 'auto' }}
               className="eui-yScrollWithShadows"
               gutterSize="s"
             >

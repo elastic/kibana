@@ -7,38 +7,31 @@
 
 import { map } from 'lodash';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isOsqueryAction, isLogsOsqueryResponse } from '../services/actions/utils';
 import type {
+  EndpointActionResponse,
   LogsEndpointAction,
   LogsOsqueryAction,
-  LogsOsqueryActionTransformed,
+  OsqueryResponse,
+  LogsEndpointActionResponse,
+  LogsOsqueryResponse,
+  OsqueryAction,
 } from '../../../common/endpoint/types';
 
-// TODO use enum for osquery
-const isOsqueryAction = (
-  source: LogsEndpointAction | LogsOsqueryAction | undefined
-): source is LogsOsqueryAction => {
-  return (source && 'input_type' in source && source.input_type === 'osquery') || false;
-};
-
 export const transformToEndpointActions = (
-  actions: Array<SearchHit<LogsOsqueryAction | LogsEndpointAction>>
-): Array<SearchHit<LogsOsqueryActionTransformed | LogsEndpointAction>> => {
+  actions: Array<SearchHit<OsqueryAction | LogsEndpointAction>>
+): Array<SearchHit<LogsOsqueryAction | LogsEndpointAction>> => {
   const result = map(actions, (action) => {
-    if (isOsqueryAction(action?._source)) {
-      const source = action._source;
-
+    const source = action._source;
+    if (source && isOsqueryAction(source)) {
       return {
         ...action,
         _source: {
           EndpointActions: {
+            ...source,
             data: {
-              command: 'osquery' as const,
-              // queries: source.queries,
+              command: 'osquery',
             },
-            action_id: source.action_id,
-            input_type: source.input_type,
-            expiration: source.expiration,
-            type: source.type,
           },
           // alert: { id: source.alert_ids?.[0] },
           agent: { id: source.agent_ids },
@@ -53,5 +46,34 @@ export const transformToEndpointActions = (
     }
     return action;
   });
-  return result as Array<SearchHit<LogsOsqueryActionTransformed | LogsEndpointAction>>;
+  return result as Array<SearchHit<LogsOsqueryAction | LogsEndpointAction>>;
+};
+
+export const transformToEndpointResponse = (
+  responses: Array<SearchHit<EndpointActionResponse | LogsEndpointActionResponse | OsqueryResponse>>
+): Array<SearchHit<EndpointActionResponse | LogsEndpointActionResponse | LogsOsqueryResponse>> => {
+  const result = map(responses, (response) => {
+    const source = response._source;
+
+    if (source && isLogsOsqueryResponse(source)) {
+      return {
+        ...response,
+        _source: {
+          '@timestamp': source['@timestamp'],
+          agent: { id: source.agent_id },
+
+          EndpointActions: {
+            ...source,
+            data: {
+              command: source.command ?? 'osquery',
+            },
+          },
+        },
+      };
+    }
+    return response;
+  });
+  return result as Array<
+    SearchHit<EndpointActionResponse | LogsEndpointActionResponse | LogsOsqueryResponse>
+  >;
 };

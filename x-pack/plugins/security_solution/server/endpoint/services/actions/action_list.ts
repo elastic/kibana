@@ -253,11 +253,16 @@ const getActionDetailsList = async ({
   // compute action details list for each action id
   const actionDetails: ActionListApiResponse['data'] = normalizedActionRequests.map((action) => {
     // pick only those responses that match the current action id
-    const matchedResponses = categorizedResponses.filter((categorizedResponse) =>
-      categorizedResponse.type === 'response'
-        ? categorizedResponse.item.data.EndpointActions.action_id === action.id
-        : categorizedResponse.item.data.action_id === action.id
-    );
+    const matchedResponses = categorizedResponses.filter((categorizedResponse) => {
+      // TODO find a way to filter out those that are not from the specific action
+      if (categorizedResponse.type === 'osqueryResponse') {
+        return categorizedResponse.item.data.EndpointActions.action_id;
+      } else {
+        return categorizedResponse.type === 'response'
+          ? categorizedResponse.item.data.EndpointActions.action_id === action.id
+          : categorizedResponse.item.data.action_id === action.id;
+      }
+    });
 
     // find the specific response's details using that set of matching responses
     const { isCompleted, completedAt, wasSuccessful, errors, agentState } = getActionCompletionInfo(
@@ -290,7 +295,6 @@ const getActionDetailsList = async ({
       agentState,
       isExpired,
       status,
-      // status: action.status ?? status,
       createdBy: action.createdBy,
       comment: action.comment,
       parameters: action.parameters,

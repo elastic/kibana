@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { OsqueryActionResult } from '../command_render_components/osquery_action';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
   EndpointCapabilities,
@@ -367,6 +368,51 @@ export const getEndpointConsoleCommands = ({
       helpCommandPosition: 3,
       helpDisabled: doesEndpointSupportCommand('processes') === false,
       helpHidden: !getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }),
+    },
+    {
+      name: 'osquery',
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.osquery.about', {
+          defaultMessage: 'Call Osquery',
+        }),
+        isSupported: true,
+      }),
+      RenderComponent: OsqueryActionResult,
+      meta: {
+        endpointId: endpointAgentId,
+        // capabilities: endpointCapabilities,
+        // privileges: endpointPrivileges,
+      },
+      exampleUsage: 'osquery --query "select * from processes"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      // validate: capabilitiesAndPrivilegesValidator,
+      args: {
+        query: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+        savedQueryId: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+        packId: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 1,
+      // helpDisabled: doesEndpointSupportCommand('release') === false,
+      // helpHidden: !getRbacControl({ commandName: 'release', privileges: endpointPrivileges }),
     },
   ];
 

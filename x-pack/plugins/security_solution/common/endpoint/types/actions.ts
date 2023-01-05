@@ -69,6 +69,8 @@ export const ActivityLogItemTypes = {
   RESPONSE: 'response' as const,
   FLEET_ACTION: 'fleetAction' as const,
   FLEET_RESPONSE: 'fleetResponse' as const,
+  OSQUERY_ACTION: 'osqueryAction' as const,
+  OSQUERY_RESPONSE: 'osqueryResponse' as const,
 };
 
 interface EcsError {
@@ -114,7 +116,7 @@ export interface LogsEndpointAction {
   };
 }
 
-export interface LogsOsqueryAction {
+export interface OsqueryAction {
   action_id: string;
   '@timestamp': string;
   input_type: 'osquery';
@@ -123,6 +125,19 @@ export interface LogsOsqueryAction {
   alert_ids: string[];
   agent_ids: string[];
   user_id: string;
+  queries: Array<Record<string, unknown>>;
+}
+
+export interface OsqueryResponse extends ActionResponseFields {
+  action_id: string;
+  '@timestamp': string;
+  agent_id: string;
+  action_input_type: 'osquery';
+  action_data: {
+    [key: string]: unknown;
+    command: ResponseActionsApiCommandNames;
+  };
+  command: 'osquery';
 }
 
 /**
@@ -141,7 +156,20 @@ export interface LogsEndpointActionResponse<TOutputContent extends object = obje
   };
   error?: EcsError;
 }
-export interface LogsOsqueryActionTransformed {
+
+export interface LogsOsqueryResponse<TOutputContent extends object = object> {
+  '@timestamp': string;
+  agent: {
+    id: string | string[];
+  };
+  EndpointActions: ActionResponseFields & {
+    action_id: string;
+    data: OsqueryResponse;
+  };
+  error?: EcsError;
+}
+
+export interface LogsOsqueryAction {
   '@timestamp': string;
   agent: {
     id: string | string[];
@@ -149,22 +177,19 @@ export interface LogsOsqueryActionTransformed {
   EndpointActions: {
     data: {
       command: 'osquery';
+      comment: string;
       // queries: source.queries,
     };
     action_id: string;
     input_type: 'osquery';
     expiration: string;
     type: 'INPUT_ACTION';
+    queries: Array<Record<string, unknown>>;
   };
   user: {
     id: string;
   };
-  // TODO check if we can get/need this
-  completed_at?: string;
-  started_at?: string;
 }
-
-export type LogsAction = LogsEndpointAction | LogsOsqueryAction;
 
 interface ResponseActionParametersWithPid {
   pid: number;
@@ -239,7 +264,7 @@ export interface EndpointActivityLogAction {
   type: typeof ActivityLogItemTypes.ACTION;
   item: {
     id: string;
-    data: LogsEndpointAction | LogsOsqueryActionTransformed;
+    data: LogsEndpointAction;
   };
 }
 
@@ -270,6 +295,22 @@ export interface ActivityLogActionResponse {
   };
 }
 
+export interface OsqueryActivityLogAction {
+  type: typeof ActivityLogItemTypes.OSQUERY_ACTION;
+  item: {
+    id: string;
+    data: EndpointAction;
+  };
+}
+
+export interface OsqueryActivityLogActionResponse {
+  type: typeof ActivityLogItemTypes.OSQUERY_RESPONSE;
+  item: {
+    id: string;
+    data: LogsOsqueryResponse;
+  };
+}
+
 /**
  * One of the possible Response Action Log entry - Either a Fleet Action request, Fleet action response,
  * Endpoint action request and/or endpoint action response.
@@ -278,7 +319,9 @@ export type ActivityLogEntry =
   | ActivityLogAction
   | ActivityLogActionResponse
   | EndpointActivityLogAction
-  | EndpointActivityLogActionResponse;
+  | EndpointActivityLogActionResponse
+  | OsqueryActivityLogAction
+  | OsqueryActivityLogActionResponse;
 
 export interface ActivityLog {
   page: number;
@@ -299,6 +342,7 @@ export interface HostIsolationResponse {
 }
 
 export type ProcessesRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
+
 export interface ResponseActionApiResponse<TOutput extends object = object> {
   action?: string;
   data: ActionDetails<TOutput>;
@@ -385,6 +429,7 @@ export interface ActionDetailsApiResponse<
 > {
   data: ActionDetails<TOutputType, TParameters>;
 }
+
 export interface ActionListApiResponse {
   page: number | undefined;
   pageSize: number | undefined;
