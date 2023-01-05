@@ -207,7 +207,7 @@ async function _getActions(
           nbAgentsActioned: source.total ?? 0,
           status: isExpired
             ? 'EXPIRED'
-            : rolloutPeriodHasPassed(source)
+            : hasRolloutPeriodPassed(source)
             ? 'ROLLOUT_PASSED'
             : 'IN_PROGRESS',
           expiration: source.expiration,

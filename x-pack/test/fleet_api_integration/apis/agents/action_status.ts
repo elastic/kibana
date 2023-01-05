@@ -192,7 +192,7 @@ export default function (providerContext: FtrProviderContext) {
             startTime: '2022-09-15T10:00:00.000Z',
             type: 'UPGRADE',
             nbAgentsActioned: 5,
-            status: 'ROLLOUT_PASSED',
+            status: 'IN_PROGRESS',
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
           },
