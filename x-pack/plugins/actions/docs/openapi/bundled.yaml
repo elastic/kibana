@@ -66,6 +66,22 @@ paths:
                   $ref: '#/components/examples/get_connector_response'
       servers:
         - url: https://localhost:5601
+    delete:
+      summary: Deletes a connector.
+      operationId: deleteConnector
+      description: |
+        You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. WARNING: When you delete a connector, it cannot be recovered.
+      tags:
+        - connectors
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/connector_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+      servers:
+        - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
   /s/{spaceId}/api/actions/connectors:
@@ -217,6 +233,12 @@ components:
       schema:
         type: string
         example: default
+    kbn_xsrf:
+      schema:
+        type: string
+      in: header
+      name: kbn-xsrf
+      required: true
   schemas:
     connector_types:
       type: string

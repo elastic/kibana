@@ -18,12 +18,52 @@ Any modifications made to this file will be overwritten.
   <div class="method-summary"></div>
   <h4><a href="#Connectors">Connectors</a></h4>
   <ul>
+  <li><a href="#deleteConnector"><code><span class="http-method">delete</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></a></li>
   <li><a href="#getConnector"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></a></li>
   <li><a href="#getConnectorTypes"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connector_types</code></a></li>
   <li><a href="#getConnectors"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connectors</code></a></li>
   </ul>
 
   <h1><a name="Connectors">Connectors</a></h1>
+  <div class="method"><a name="deleteConnector"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></pre></div>
+    <div class="method-summary">Deletes a connector. (<span class="nickname">deleteConnector</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Actions and Connectors</strong> feature in the <strong>Management</strong> section of the Kibana feature privileges. WARNING: When you delete a connector, it cannot be recovered.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">connectorId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the connector. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
   <div class="method"><a name="getConnector"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
