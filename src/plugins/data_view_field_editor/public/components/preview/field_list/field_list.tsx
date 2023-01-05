@@ -55,20 +55,15 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
 
   const [showAllFields, setShowAllFields] = useState(false);
 
-  const {
-    fields: { getAll: getAllFields },
-  } = dataView;
-
-  const indexPatternFields = useMemo(() => {
-    return getAllFields();
-  }, [getAllFields]);
-
   const fieldList: DocumentField[] = useMemo(
     () =>
-      indexPatternFields
-        .map(({ name, displayName }) => {
+      dataView.fields
+        .getAll()
+        .map((field) => {
+          const { name, displayName } = field;
+          const formatter = dataView.getFormatterForField(field);
           const value = get(currentDocument?._source, name);
-          const formattedValue = defaultValueFormatter(value);
+          const formattedValue = formatter.convert(value, 'html') ?? defaultValueFormatter(value);
 
           return {
             key: displayName,
@@ -78,7 +73,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
           };
         })
         .filter(({ value }) => value !== undefined),
-    [indexPatternFields, currentDocument?._source]
+    [dataView, currentDocument?._source]
   );
 
   const fieldListWithPinnedFields: DocumentField[] = useMemo(() => {
