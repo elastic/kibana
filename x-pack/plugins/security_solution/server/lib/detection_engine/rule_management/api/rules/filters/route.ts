@@ -85,7 +85,6 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
           return response.ok({ body: validatedBody ?? {} });
         }
       } catch (err) {
-        console.log(err);
         const error = transformError(err);
         return siemResponse.error({
           body: error.message,
