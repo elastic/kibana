@@ -599,7 +599,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               >
                 <FormattedMessage
                   id="xpack.fleet.agentActivityFlyout.abortUpgradeButtom"
-                  defaultMessage="Abort upgrade"
+                  defaultMessage="Cancel"
                 />
               </EuiButton>
             </EuiFlexItem>

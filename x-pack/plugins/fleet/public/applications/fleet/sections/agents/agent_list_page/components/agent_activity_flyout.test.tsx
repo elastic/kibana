@@ -101,7 +101,7 @@ describe('AgentActivityFlyout', () => {
     ).toContain('Started on Sep 15, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
 
     act(() => {
-      fireEvent.click(result.getByText('Abort upgrade'));
+      fireEvent.click(result.getByText('Cancel'));
     });
 
     expect(mockAbortUpgrade).toHaveBeenCalled();
@@ -142,7 +142,7 @@ describe('AgentActivityFlyout', () => {
     ).toContain('Scheduled for Sep 16, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
 
     act(() => {
-      fireEvent.click(result.getByText('Abort upgrade'));
+      fireEvent.click(result.getByText('Cancel'));
     });
 
     expect(mockAbortUpgrade).toHaveBeenCalled();
