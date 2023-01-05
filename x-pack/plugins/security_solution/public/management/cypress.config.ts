@@ -36,7 +36,6 @@ export default defineCypressConfig({
     supportFile: 'public/management/cypress/support/e2e.ts',
     specPattern: 'public/management/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     experimentalSessionAndOrigin: true,
-    testIsolation: 'on',
     experimentalRunAllSpecs: true,
   },
 });
