@@ -16,7 +16,7 @@ import { i18nTexts } from '../../i18n_texts';
 
 interface Props {}
 
-export const DeletePrompt: FunctionComponent<Props> = ({ }) => {
+export const DeletePrompt: FunctionComponent<Props> = ({}) => {
   const [deleting, setDeleting] = React.useState(false);
   const isMounted = useMountedState();
   const { state } = useFilePickerContext();

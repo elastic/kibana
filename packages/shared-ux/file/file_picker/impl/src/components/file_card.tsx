@@ -97,7 +97,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
     </>
   );
 
-  const deleteButton = deleteButtonPredicate && (deleteButtonPredicate(file)) && (
+  const deleteButton = deleteButtonPredicate && deleteButtonPredicate(file) && (
     <EuiButtonIcon
       iconType="trash"
       aria-label={i18nTexts.delete}

@@ -154,7 +154,12 @@ export const FilePicker: FunctionComponent<Props> = ({
   onUpload = () => {},
   ...rest
 }) => (
-  <FilePickerContext pageSize={pageSize} kind={kind} multiple={multiple} deleteButtonPredicate={deleteButtonPredicate}>
+  <FilePickerContext
+    pageSize={pageSize}
+    kind={kind}
+    multiple={multiple}
+    deleteButtonPredicate={deleteButtonPredicate}
+  >
     <Component {...rest} {...{ pageSize, kind, multiple, onUpload }} />
   </FilePickerContext>
 );
