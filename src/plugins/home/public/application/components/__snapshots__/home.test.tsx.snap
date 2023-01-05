@@ -32,7 +32,6 @@ exports[`home change home route should render a link to change the default route
       }
     }
     isCloudEnabled={false}
-    isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
@@ -89,7 +88,6 @@ exports[`home directories should not render directory entry when showOnHomePage 
       }
     }
     isCloudEnabled={false}
-    isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
@@ -146,7 +144,6 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
       }
     }
     isCloudEnabled={false}
-    isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
@@ -250,7 +247,6 @@ exports[`home directories should render solutions in the "solution section" 1`] 
       }
     }
     isCloudEnabled={false}
-    isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
@@ -319,7 +315,6 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
       }
     }
     isCloudEnabled={false}
-    isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
@@ -400,7 +395,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
       }
     }
     isCloudEnabled={false}
-    isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}
@@ -476,7 +470,6 @@ exports[`home should render home component 1`] = `
       }
     }
     isCloudEnabled={false}
-    isDarkMode={false}
   />
   <ManageData
     addBasePath={[Function]}

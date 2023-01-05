@@ -39,7 +39,6 @@ describe('AddData', () => {
       <AddData
         addBasePath={addBasePathMock}
         application={applicationStartMock}
-        isDarkMode={false}
         isCloudEnabled={false}
       />
     );

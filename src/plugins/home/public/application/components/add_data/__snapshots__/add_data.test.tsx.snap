@@ -103,61 +103,39 @@ exports[`AddData render 1`] = `
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiPanel
-        paddingSize="l"
-      >
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="xl"
-        >
-          <EuiFlexItem>
-            <EuiImage
-              alt="Illustration for cloud data migration"
-              src="/plugins/kibanaReact/assets/illustration_cloud_migration.png"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle
-              size="xs"
-            >
-              <h4>
-                <FormattedMessage
-                  defaultMessage="Considering Elastic Cloud?"
-                  id="home.addData.moveYourDataTitle"
-                  values={Object {}}
-                />
-              </h4>
-            </EuiTitle>
-            <EuiSpacer
-              size="s"
-            />
-            <EuiText
-              size="s"
-            >
-              <FormattedMessage
-                defaultMessage="Moving your data to Elastic Cloud is easy and can save you time and money."
-                id="home.addData.moveYourDataToElasticCloud"
-                values={Object {}}
-              />
-            </EuiText>
-            <EuiSpacer
-              size="m"
-            />
-            <EuiButton
-              color="primary"
-              href="/app/management/data/migrate_data"
-              onClick={[Function]}
-              size="m"
-            >
-              <FormattedMessage
-                defaultMessage="Explore the benefits"
-                id="home.addData.moveYourDataButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      <MoveData
+        addBasePath={
+          [MockFunction] {
+            "calls": Array [
+              Array [
+                "/app/integrations/browse",
+              ],
+              Array [
+                "#/tutorial_directory/sampleData",
+              ],
+              Array [
+                "#/tutorial_directory/fileDataViz",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/app/integrations/browse",
+              },
+              Object {
+                "type": "return",
+                "value": "#/tutorial_directory/sampleData",
+              },
+              Object {
+                "type": "return",
+                "value": "#/tutorial_directory/fileDataViz",
+              },
+            ],
+          }
+        }
+        isCloudEnabled={false}
+        trackUiMetric={[MockFunction]}
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
 </_EuiPageSection>
