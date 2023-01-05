@@ -3773,7 +3773,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-is-defined@link:x-pack/packages/ml/is_defined":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-is-populated-object@link:x-pack/packages/ml/is_populated_object":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-local-storage@link:x-pack/packages/ml/local_storage":
   version "0.0.0"
   uid ""
 
