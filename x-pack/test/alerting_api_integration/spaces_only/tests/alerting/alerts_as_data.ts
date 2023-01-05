@@ -65,7 +65,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
     });
 
     it('should install context specific alerts as data resources on startup', async () => {
-      const componentTemplateName = 'alerts-test.always-firing-component-template';
+      const componentTemplateName = 'alerts-test.always-firing-default-component-template';
       const indexTemplateName = '.alerts-test.always-firing-default-template';
       const indexName = '.alerts-test.always-firing-default-000001';
       const contextSpecificMappings = {

@@ -128,19 +128,16 @@ export class AlertsService implements IAlertsService {
       if (!isEqual(fieldMap, registeredFieldMap)) {
         throw new Error(`${context} has already been registered with a different mapping`);
       }
-      this.options.logger.info(`Resources for context "${context}" have already been registered.`);
+      this.options.logger.debug(`Resources for context "${context}" have already been registered.`);
       return;
     }
 
+    this.options.logger.info(`Registering resources for context "${context}".`);
     this.registeredContexts.set(context, fieldMap);
     this.resourceInitializationHelper.add({ context, fieldMap }, timeoutMs);
   }
 
   private async initializeContext({ context, fieldMap }: IRuleTypeAlerts, timeoutMs?: number) {
-    this.options.logger.info(
-      `Initializing resources for context ${context} - ${JSON.stringify(fieldMap)}`
-    );
-
     const esClient = await this.options.elasticsearchClientPromise;
 
     const indexTemplateAndPattern = getIndexTemplateAndPattern(context);
@@ -180,7 +177,6 @@ export class AlertsService implements IAlertsService {
           }),
         { logger: this.options.logger }
       );
-      this.options.logger.info(`DONE Installing ILM policy ${ILM_POLICY_NAME}`);
     } catch (err) {
       this.options.logger.error(`Error installing ILM policy ${ILM_POLICY_NAME} - ${err.message}`);
       throw err;
@@ -197,7 +193,6 @@ export class AlertsService implements IAlertsService {
       await retryTransientEsErrors(() => esClient.cluster.putComponentTemplate(template), {
         logger: this.options.logger,
       });
-      this.options.logger.info(`DONE Installing component template ${template.name}`);
     } catch (err) {
       this.options.logger.error(
         `Error installing component template ${template.name} - ${err.message}`
@@ -267,7 +262,6 @@ export class AlertsService implements IAlertsService {
       await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(indexTemplate), {
         logger: this.options.logger,
       });
-      this.options.logger.info(`DONE Installing index template ${indexPatterns.template}`);
     } catch (err) {
       this.options.logger.error(
         `Error installing index template ${indexPatterns.template} - ${err.message}`
@@ -283,7 +277,9 @@ export class AlertsService implements IAlertsService {
     esClient: ElasticsearchClient,
     concreteIndices: ConcreteIndexInfo[]
   ) {
-    this.options.logger.info(`Updating underlying mappings for ${concreteIndices.length} indices.`);
+    this.options.logger.debug(
+      `Updating underlying mappings for ${concreteIndices.length} indices.`
+    );
 
     // Update total field limit setting of found indices
     // Other index setting changes are not updated at this time
@@ -388,8 +384,10 @@ export class AlertsService implements IAlertsService {
         }))
       );
 
-      this.options.logger.info(
-        `Found ${concreteIndices.length} concrete indices - ${JSON.stringify(concreteIndices)}`
+      this.options.logger.debug(
+        `Found ${concreteIndices.length} concrete indices for ${
+          indexPatterns.name
+        } - ${JSON.stringify(concreteIndices)}`
       );
     } catch (error) {
       // 404 is expected if no concrete write indices have been created
@@ -441,7 +439,6 @@ export class AlertsService implements IAlertsService {
             logger: this.options.logger,
           }
         );
-        this.options.logger.info(`DONE Creating concrete write index - ${indexPatterns.name}`);
       } catch (error) {
         this.options.logger.error(`Error creating concrete write index - ${error.message}`);
         // If the index already exists and it's the write index for the alias,

@@ -322,7 +322,7 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       alertsService.register(TestRegistrationContext);
 
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         `Resources for context "test" have already been registered.`
       );
     });
