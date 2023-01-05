@@ -14,9 +14,9 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
 import { Loader } from '../../../../common/components/loader';
-import { displayErrorToast, useStateToaster } from '../../../../common/components/toasters';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { Embeddable } from './embeddable';
 import { createEmbeddable } from './create_embeddable';
@@ -111,7 +111,7 @@ export const EmbeddedMapComponent = ({
   const [isIndexError, setIsIndexError] = useState(false);
   const [storageValue, setStorageValue] = useState(storage.get(NETWORK_MAP_VISIBLE) ?? true);
 
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   const getDataViewsSelector = useMemo(
     () => sourcererSelectors.getSourcererDataViewsSelector(),
@@ -149,9 +149,11 @@ export const EmbeddedMapComponent = ({
         if (!canceled) {
           setMapDataViews(goodDataViews);
         }
-      } catch {
+      } catch (e) {
         if (!canceled) {
           setMapDataViews([]);
+          addError(e, i18n.ERROR_CREATING_EMBEDDABLE);
+          setIsError(true);
         }
       }
     };
@@ -190,7 +192,7 @@ export const EmbeddedMapComponent = ({
         }
       } catch (e) {
         if (isSubscribed) {
-          displayErrorToast(i18n.ERROR_CREATING_EMBEDDABLE, [e.message], dispatchToaster);
+          addError(e, i18n.ERROR_CREATING_EMBEDDABLE);
           setIsError(true);
         }
       }
@@ -204,7 +206,7 @@ export const EmbeddedMapComponent = ({
       isSubscribed = false;
     };
   }, [
-    dispatchToaster,
+    addError,
     endDate,
     embeddable,
     filters,
