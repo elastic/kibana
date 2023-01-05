@@ -38,10 +38,7 @@ import {
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
-import {
-  AppStateManager,
-  startAppStateSyncing,
-} from '../url_state';
+import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
@@ -150,8 +147,11 @@ export class MapApp extends React.Component<Props, State> {
     this._initialTimeFromUrl = this._getGlobalState()?.time;
     const { stop } = syncGlobalQueryStateWithUrl(getData().query, this._kbnUrlStateStorage);
     this._globalSyncUnsubscribe = stop;
-    
-    this._appSyncUnsubscribe = startAppStateSyncing(this._appStateManager, this._kbnUrlStateStorage);
+
+    this._appSyncUnsubscribe = startAppStateSyncing(
+      this._appStateManager,
+      this._kbnUrlStateStorage
+    );
     this._globalSyncChangeMonitorSubscription = getData().query.state$.subscribe(
       this._updateFromGlobalState
     );
@@ -337,14 +337,12 @@ export class MapApp extends React.Component<Props, State> {
       isRefreshPaused: isPaused,
       refreshInterval: interval,
     });
-    this._updateGlobalState(
-      {
-        refreshInterval: {
-          pause: isPaused,
-          value: interval,
-        },
-      }
-    );
+    this._updateGlobalState({
+      refreshInterval: {
+        pause: isPaused,
+        value: interval,
+      },
+    });
   }
 
   _updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
