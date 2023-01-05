@@ -400,7 +400,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       vertical: 'auto',
     },
     overviewRulerBorder: false,
-    readOnly: isDisabled,
+    readOnly: isDisabled || Boolean(codeOneLiner),
   };
 
   if (isCompactFocused) {
