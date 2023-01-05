@@ -956,6 +956,18 @@ describe('Session index', () => {
     describe('concurrent session limit', () => {
       const expectedSearchParameters = () => ({
         index: '.kibana_some_tenant_security_session',
+        query: {
+          bool: {
+            filter: [
+              { exists: { field: 'usernameHash' } },
+              {
+                bool: {
+                  must_not: [{ term: { 'provider.type': AnonymousAuthenticationProvider.type } }],
+                },
+              },
+            ],
+          },
+        },
         aggs: {
           sessions_grouped_by_user: {
             multi_terms: {

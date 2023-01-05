@@ -22,6 +22,7 @@ import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tool
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const es = getService('es');
+  const security = getService('security');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const config = getService('config');
   const log = getService('log');
@@ -29,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   const testUser = { username: 'test_user', password: 'changeme' };
   const basicProvider = { type: 'basic', name: 'basic1' };
   const samlProvider = { type: 'saml', name: 'saml1' };
+  const anonymousProvider = { type: 'anonymous', name: 'anonymous1' };
   const kibanaServerConfig = config.get('servers.kibana');
 
   async function checkSessionCookie(
@@ -82,22 +84,29 @@ export default function ({ getService }: FtrProviderContext) {
     return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
   }
 
-  async function loginWithSAML() {
+  async function startSAMLHandshake() {
     const handshakeResponse = await supertest
       .post('/internal/security/login')
       .set('kbn-xsrf', 'xxx')
       .send({ providerType: samlProvider.type, providerName: samlProvider.name, currentURL: '' })
       .expect(200);
 
+    return {
+      cookie: parseCookie(handshakeResponse.headers['set-cookie'][0])!,
+      location: handshakeResponse.body.location,
+    };
+  }
+
+  async function finishSAMLHandshake(handshakeCookie: Cookie, handshakeLocation: string) {
     const authenticationResponse = await supertest
       .post('/api/security/saml/callback')
       .set('kbn-xsrf', 'xxx')
-      .set('Cookie', parseCookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
+      .set('Cookie', handshakeCookie.cookieString())
       .send({
         SAMLResponse: await getSAMLResponse({
           destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
           sessionIndex: String(randomness.naturalNumber()),
-          inResponseTo: await getSAMLRequestId(handshakeResponse.body.location),
+          inResponseTo: await getSAMLRequestId(handshakeLocation),
         }),
       })
       .expect(302);
@@ -105,7 +114,38 @@ export default function ({ getService }: FtrProviderContext) {
     return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
   }
 
+  async function loginWithSAML() {
+    const { cookie, location } = await startSAMLHandshake();
+    return finishSAMLHandshake(cookie, location);
+  }
+
+  async function loginWithAnonymous() {
+    const authenticationResponse = await supertest
+      .post('/internal/security/login')
+      .set('kbn-xsrf', 'xxx')
+      .send({
+        providerType: anonymousProvider.type,
+        providerName: anonymousProvider.name,
+        currentURL: '/',
+      })
+      .expect(200);
+
+    return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
+  }
+
   describe('Session Concurrent Limit cleanup', () => {
+    before(async () => {
+      await security.user.create('anonymous_user', {
+        password: 'changeme',
+        roles: [],
+        full_name: 'Guest',
+      });
+    });
+
+    after(async () => {
+      await security.user.delete('anonymous_user');
+    });
+
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
       await esDeleteAllIndices('.kibana_security_session*');
@@ -114,12 +154,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should properly clean up sessions that exceeded concurrent session limit', async function () {
       this.timeout(100000);
 
-      log.debug(`Log in as ${testUser.username} 3 times with a 1s delay.`);
+      log.debug(`Log in as ${testUser.username} 3 times with a 0.5s delay.`);
 
       const basicSessionCookieOne = await loginWithBasic(testUser);
-      await setTimeoutAsync(1000);
+      await setTimeoutAsync(500);
       const basicSessionCookieTwo = await loginWithBasic(testUser);
-      await setTimeoutAsync(1000);
+      await setTimeoutAsync(500);
       const basicSessionCookieThree = await loginWithBasic(testUser);
 
       expect(await getNumberOfSessionDocuments()).to.be(3);
@@ -139,14 +179,14 @@ export default function ({ getService }: FtrProviderContext) {
     it('should properly clean up sessions that exceeded concurrent session limit even for multiple providers', async function () {
       this.timeout(100000);
 
-      log.debug(`Log in as ${testUser.username} and SAML user 3 times each with a 1s delay.`);
+      log.debug(`Log in as ${testUser.username} and SAML user 3 times each with a 0.5s delay.`);
 
       const basicSessionCookieOne = await loginWithBasic(testUser);
       const samlSessionCookieOne = await loginWithSAML();
-      await setTimeoutAsync(1000);
+      await setTimeoutAsync(500);
       const basicSessionCookieTwo = await loginWithBasic(testUser);
       const samlSessionCookieTwo = await loginWithSAML();
-      await setTimeoutAsync(1000);
+      await setTimeoutAsync(500);
       const basicSessionCookieThree = await loginWithBasic(testUser);
       const samlSessionCookieThree = await loginWithSAML();
 
@@ -171,14 +211,14 @@ export default function ({ getService }: FtrProviderContext) {
     it('should properly clean up sessions that exceeded concurrent session limit when legacy sessions are present', async function () {
       this.timeout(100000);
 
-      log.debug(`Log in as ${testUser.username} and SAML user 3 times each with a 1s delay.`);
+      log.debug(`Log in as ${testUser.username} and SAML user 3 times each with a 0.5s delay.`);
 
       const basicSessionCookieOne = await loginWithBasic(testUser);
       const samlSessionCookieOne = await loginWithSAML();
-      await setTimeoutAsync(1000);
+      await setTimeoutAsync(500);
       const basicSessionCookieTwo = await loginWithBasic(testUser);
       const samlSessionCookieTwo = await loginWithSAML();
-      await setTimeoutAsync(1000);
+      await setTimeoutAsync(500);
       const basicSessionCookieThree = await loginWithBasic(testUser);
       const samlSessionCookieThree = await loginWithSAML();
 
@@ -237,10 +277,10 @@ export default function ({ getService }: FtrProviderContext) {
     it('should not clean up session if the limit is not exceeded', async function () {
       this.timeout(100000);
 
-      log.debug(`Log in as ${testUser.username} 2 times with a 1s delay.`);
+      log.debug(`Log in as ${testUser.username} 2 times with a 0.5s delay.`);
 
       const basicSessionCookieOne = await loginWithBasic(testUser);
-      await setTimeoutAsync(1000);
+      await setTimeoutAsync(500);
       const basicSessionCookieTwo = await loginWithBasic(testUser);
 
       expect(await getNumberOfSessionDocuments()).to.be(2);
@@ -254,6 +294,74 @@ export default function ({ getService }: FtrProviderContext) {
 
       await checkSessionCookie(basicSessionCookieOne, testUser.username, basicProvider);
       await checkSessionCookie(basicSessionCookieTwo, testUser.username, basicProvider);
+    });
+
+    it('should not clean up sessions of the anonymous users', async function () {
+      this.timeout(100000);
+
+      log.debug(`Log in as anonymous_user 3 times.`);
+
+      const anonymousSessionCookieOne = await loginWithAnonymous();
+      const anonymousSessionCookieTwo = await loginWithAnonymous();
+      const anonymousSessionCookieThree = await loginWithAnonymous();
+
+      expect(await getNumberOfSessionDocuments()).to.be(3);
+
+      // Cleanup routine runs every 30s, let's wait for 40s to make sure cleanup routine runs at least once.
+      log.debug('Waiting for cleanup job to run...');
+      await setTimeoutAsync(60000);
+
+      // The oldest session should have been removed, but the rest should still be valid.
+      expect(await getNumberOfSessionDocuments()).to.be(3);
+
+      // All sessions should be active.
+      for (const anonymousSessionCookie of [
+        anonymousSessionCookieOne,
+        anonymousSessionCookieTwo,
+        anonymousSessionCookieThree,
+      ]) {
+        await checkSessionCookie(anonymousSessionCookie, 'anonymous_user', anonymousProvider);
+      }
+    });
+
+    it('should not clean up unauthenticated sessions', async function () {
+      this.timeout(100000);
+
+      log.debug(`Starting SAML handshake 3 times.`);
+
+      const unauthenticatedSessionOne = await startSAMLHandshake();
+      const unauthenticatedSessionTwo = await startSAMLHandshake();
+      const unauthenticatedSessionThree = await startSAMLHandshake();
+
+      expect(await getNumberOfSessionDocuments()).to.be(3);
+
+      // Cleanup routine runs every 30s, let's wait for 40s to make sure cleanup routine runs at least once.
+      log.debug('Waiting for cleanup job to run...');
+      await setTimeoutAsync(60000);
+
+      // The oldest session should have been removed, but the rest should still be valid.
+      expect(await getNumberOfSessionDocuments()).to.be(3);
+
+      // Finish SAML handshake (all should succeed since we don't enforce limit at session creation time).
+      const samlSessionCookieOne = await finishSAMLHandshake(
+        unauthenticatedSessionOne.cookie,
+        unauthenticatedSessionOne.location
+      );
+      await setTimeoutAsync(500);
+      const samlSessionCookieTwo = await finishSAMLHandshake(
+        unauthenticatedSessionTwo.cookie,
+        unauthenticatedSessionTwo.location
+      );
+      await setTimeoutAsync(500);
+      const samlSessionCookieThree = await finishSAMLHandshake(
+        unauthenticatedSessionThree.cookie,
+        unauthenticatedSessionThree.location
+      );
+
+      // For authenticated sessions limit should be enforced
+      await checkSessionCookieInvalid(samlSessionCookieOne);
+      await checkSessionCookie(samlSessionCookieTwo, 'a@b.c', samlProvider);
+      await checkSessionCookie(samlSessionCookieThree, 'a@b.c', samlProvider);
     });
   });
 }

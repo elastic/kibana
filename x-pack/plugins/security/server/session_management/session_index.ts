@@ -874,6 +874,21 @@ export class SessionIndex {
     >({
       index: this.aliasName,
 
+      // Exclude unauthenticated sessions and sessions of the anonymous users that shouldn't be affected by the
+      // concurrent user sessions limit.
+      query: {
+        bool: {
+          filter: [
+            { exists: { field: 'usernameHash' } },
+            {
+              bool: {
+                must_not: [{ term: { 'provider.type': AnonymousAuthenticationProvider.type } }],
+              },
+            },
+          ],
+        },
+      },
+
       aggs: {
         sessions_grouped_by_user: {
           multi_terms: {
