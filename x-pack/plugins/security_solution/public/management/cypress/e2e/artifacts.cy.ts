@@ -11,8 +11,7 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import { BASE_ENDPOINT_ROUTE } from '../../../../common/endpoint/constants';
-import { ROLE } from '../../../../../../test/security_solution_endpoint_api_int/services/roles_users';
-import { login, loginWithRole } from '../tasks/login';
+import { login, loginWithRole, ROLE } from '../tasks/login';
 
 import { getArtifactsListTestsData } from './mocks/artifacts_page';
 import { runEndpointLoaderScript } from '../tasks/run_endpoint_loader';
