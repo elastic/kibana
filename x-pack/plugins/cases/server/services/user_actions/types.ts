@@ -143,8 +143,15 @@ export interface ServiceContext {
   auditLogger: AuditLogger;
 }
 
-export type CaseConnectors = Array<{
+export interface CaseConnectorActivity {
   connectorId: string;
   fields: SavedObject<CaseUserActionResponse>;
   push?: SavedObject<CaseUserActionResponse>;
-}>;
+}
+
+export type CaseConnectorFields = Map<string, SavedObject<CaseUserActionResponse>>;
+
+export interface PushInfo {
+  date: Date;
+  connectorId: string;
+}

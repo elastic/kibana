@@ -29,6 +29,8 @@ export const getUserActionsRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
 
+      await casesClient.userActions.getConnectors({ caseId });
+
       return response.ok({
         body: await casesClient.userActions.getAll({ caseId }),
       });

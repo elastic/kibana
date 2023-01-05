@@ -42,7 +42,7 @@ import {
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
 import { buildFilter, combineFilters } from '../../client/utils';
-import type { CaseConnectors, ServiceContext } from './types';
+import type { CaseConnectorActivity, CaseConnectorFields, PushInfo, ServiceContext } from './types';
 import { defaultSortField, isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
@@ -62,18 +62,34 @@ interface MostRecentResults {
   };
 }
 
-interface ConnectorInfoAggsResult {
+interface ConnectorActivityAggsResult {
   references: {
     connectors: {
       ids: {
         buckets: Array<{
           key: string;
-          connectorFields: {
-            connector: MostRecentResults;
-            createCase: MostRecentResults;
+          reverse: {
+            connectorActivity: {
+              buckets: {
+                changeConnector: MostRecentResults;
+                createCase: MostRecentResults;
+                pushInfo: MostRecentResults;
+              };
+            };
           };
-          pushInfo: MostRecentResults;
         }>;
+      };
+    };
+  };
+}
+
+interface ConnectorFieldsBeforePushAggsResult {
+  references: {
+    connectors: {
+      reverse: {
+        ids: {
+          buckets: Record<string, MostRecentResults>;
+        };
       };
     };
   };
@@ -90,10 +106,174 @@ export class CaseUserActionService {
     return this._creator;
   }
 
+  public async getConnectorFieldsBeforePushes(
+    caseId: string,
+    pushes: PushInfo[]
+  ): Promise<CaseConnectorFields> {
+    try {
+      this.context.log.debug(
+        `Attempting to retrieve the connector fields before the last push for case id: ${caseId}`
+      );
+
+      const connectorsFilter = buildFilter({
+        filters: [ActionTypes.connector, ActionTypes.create_case],
+        field: 'type',
+        operator: 'or',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+      });
+
+      const response = await this.context.unsecuredSavedObjectsClient.find<
+        CaseUserActionAttributesWithoutConnectorId,
+        ConnectorFieldsBeforePushAggsResult
+      >({
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: CaseUserActionService.buildConnectorFieldsBeforePushAggs(pushes),
+        filter: connectorsFilter,
+      });
+
+      console.log('getConnectorFieldsBeforePushes', JSON.stringify(response, null, 2));
+
+      return this.createCaseConnectorFieldsBeforePushes(response.aggregations);
+    } catch (error) {
+      this.context.log.error(
+        `Error while retrieving the connector fields before the last push: ${caseId}: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  private static buildConnectorFieldsBeforePushAggs(
+    pushes: PushInfo[]
+  ): Record<string, estypes.AggregationsAggregationContainer> {
+    const filters: estypes.AggregationsBuckets<estypes.QueryDslQueryContainer> = {};
+
+    /**
+     * Group the user actions by the unique connector ids and bound the time range
+     * for that connector's push event
+     */
+    for (const push of pushes) {
+      filters[push.connectorId] = {
+        bool: {
+          filter: [
+            {
+              range: {
+                [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
+                  lt: push.date.toISOString(),
+                },
+              },
+            },
+            {
+              nested: {
+                path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        term: {
+                          [`${CASE_USER_ACTION_SAVED_OBJECT}.references.id`]: {
+                            value: push.connectorId,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      };
+    }
+
+    console.log('fields before push filters', JSON.stringify(filters, null, 2));
+
+    return {
+      references: {
+        nested: {
+          path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
+        },
+        aggregations: {
+          connectors: {
+            filter: {
+              term: {
+                [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]: 'action',
+              },
+            },
+            aggregations: {
+              reverse: {
+                reverse_nested: {},
+                aggregations: {
+                  ids: {
+                    filters: {
+                      filters,
+                    },
+                    aggregations: {
+                      mostRecent: {
+                        top_hits: {
+                          sort: [
+                            {
+                              [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
+                                order: 'desc',
+                              },
+                            },
+                          ],
+                          size: 1,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+  }
+
+  private createCaseConnectorFieldsBeforePushes(
+    aggsResults?: ConnectorFieldsBeforePushAggsResult
+  ): CaseConnectorFields {
+    const connectorFields: CaseConnectorFields = new Map();
+
+    if (!aggsResults) {
+      return connectorFields;
+    }
+
+    for (const connectorId of Object.keys(aggsResults.references.connectors.reverse.ids.buckets)) {
+      const fields = aggsResults.references.connectors.reverse.ids.buckets[connectorId];
+
+      if (fields.mostRecent.hits.hits.length > 0) {
+        const rawFieldsDoc = fields.mostRecent.hits.hits[0];
+        const doc =
+          this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
+            rawFieldsDoc
+          );
+
+        const fieldsDoc = transformToExternalModel(
+          doc,
+          this.context.persistableStateAttachmentTypeRegistry
+        );
+
+        connectorFields.set(connectorId, fieldsDoc);
+      }
+    }
+
+    return connectorFields;
+  }
+
   public async getMostRecentUserAction(
     caseId: string
   ): Promise<SavedObject<CaseUserActionResponse> | undefined> {
     try {
+      this.context.log.debug(
+        `Attempting to retrieve the most recent user action for case id: ${caseId}`
+      );
+
       const id = caseId;
       const type = CASE_SAVED_OBJECT;
 
@@ -134,23 +314,16 @@ export class CaseUserActionService {
         this.context.persistableStateAttachmentTypeRegistry
       );
     } catch (error) {
-      this.context.log.error(`Error on GET case user action case id: ${caseId}: ${error}`);
+      this.context.log.error(
+        `Error while retrieving the most recent user action for case id: ${caseId}: ${error}`
+      );
       throw error;
     }
   }
 
-  public async getCaseConnectorInformation(caseId: string): Promise<CaseConnectors> {
+  public async getCaseConnectorInformation(caseId: string): Promise<CaseConnectorActivity[]> {
     try {
-      this.context.log.debug('Attempting to find connector information');
-
-      /*
-1. Get all unique IDs of the connectors used in a case with an aggregation. Let's say the query return [1, 2, 3]
-2. Get all user actions in descending order where (connectorID === 1 or connectorID === 2 or connectorID === 3) && ((action === "update" && type === "connector") || (action === "push" type === "push")).
-  The first three results contain the fields of each connector. For simplicity, I left the case where the fields are in the create case UA.
-3. Get all user actions in descending order filtering out the ones that we do not support pushing. For example, updating a connector, changing the status, etc.
-  Set the page to 1. The result is the latest UA.
-4. For each UA connector record from step 2 check if connectorUpdateUA.createdAt < latestUA.createAt. If true then the connector needs to be pushed.
-      */
+      this.context.log.debug(`Attempting to find connector information for case id: ${caseId}`);
 
       const connectorsFilter = buildFilter({
         filters: [ActionTypes.connector, ActionTypes.create_case, ActionTypes.pushed],
@@ -161,7 +334,7 @@ export class CaseUserActionService {
 
       const response = await this.context.unsecuredSavedObjectsClient.find<
         CaseUserActionAttributesWithoutConnectorId,
-        ConnectorInfoAggsResult
+        ConnectorActivityAggsResult
       >({
         type: CASE_USER_ACTION_SAVED_OBJECT,
         hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
@@ -176,29 +349,35 @@ export class CaseUserActionService {
 
       return this.createCaseConnectorInformation(response.aggregations);
     } catch (error) {
-      this.context.log.error(`Error finding status changes: ${error}`);
+      this.context.log.error(
+        `Error while retrieving the connector information for case id: ${caseId} ${error}`
+      );
       throw error;
     }
   }
 
-  private createCaseConnectorInformation(aggsResults?: ConnectorInfoAggsResult): CaseConnectors {
-    const caseConnectorInfo: CaseConnectors = [];
+  private createCaseConnectorInformation(
+    aggsResults?: ConnectorActivityAggsResult
+  ): CaseConnectorActivity[] {
+    const caseConnectorInfo: CaseConnectorActivity[] = [];
 
     if (!aggsResults) {
       return caseConnectorInfo;
     }
 
     for (const connectorInfo of aggsResults.references.connectors.ids.buckets) {
+      const changeConnector = connectorInfo.reverse.connectorActivity.buckets.changeConnector;
+      const createCase = connectorInfo.reverse.connectorActivity.buckets.createCase;
       let rawFieldsDoc: SavedObjectsRawDoc | undefined;
 
-      if (connectorInfo.connectorFields.connector.mostRecent.hits.hits.length > 0) {
-        rawFieldsDoc = connectorInfo.connectorFields.connector.mostRecent.hits.hits[0];
-      } else if (connectorInfo.connectorFields.createCase.mostRecent.hits.hits.length > 0) {
+      if (changeConnector.mostRecent.hits.hits.length > 0) {
+        rawFieldsDoc = changeConnector.mostRecent.hits.hits[0];
+      } else if (createCase.mostRecent.hits.hits.length > 0) {
         /**
          * If there is ever a connector update user action that takes precedence over the information stored
          * in the create case user action because it indicates that the connector's fields were changed
          */
-        rawFieldsDoc = connectorInfo.connectorFields.createCase.mostRecent.hits.hits[0];
+        rawFieldsDoc = createCase.mostRecent.hits.hits[0];
       }
 
       let fieldsDoc: SavedObject<CaseUserActionResponse> | undefined;
@@ -214,9 +393,11 @@ export class CaseUserActionService {
         );
       }
 
+      const pushInfo = connectorInfo.reverse.connectorActivity.buckets.pushInfo;
       let pushDoc: SavedObject<CaseUserActionResponse> | undefined;
-      if (connectorInfo.pushInfo.mostRecent.hits.hits.length > 0) {
-        const rawPushDoc = connectorInfo.pushInfo.mostRecent.hits.hits[0];
+
+      if (pushInfo.mostRecent.hits.hits.length > 0) {
+        const rawPushDoc = pushInfo.mostRecent.hits.hits[0];
 
         const doc =
           this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
@@ -269,10 +450,10 @@ export class CaseUserActionService {
                   reverse: {
                     reverse_nested: {},
                     aggregations: {
-                      connectorFields: {
+                      connectorActivity: {
                         filters: {
                           filters: {
-                            connector: {
+                            changeConnector: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
                                   ActionTypes.connector,
@@ -284,28 +465,12 @@ export class CaseUserActionService {
                                   ActionTypes.create_case,
                               },
                             },
-                          },
-                        },
-                        aggregations: {
-                          mostRecent: {
-                            top_hits: {
-                              sort: [
-                                {
-                                  [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
-                                    order: 'desc',
-                                  },
-                                },
-                              ],
-                              size: 1,
+                            pushInfo: {
+                              term: {
+                                [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
+                                  ActionTypes.pushed,
+                              },
                             },
-                          },
-                        },
-                      },
-                      pushInfo: {
-                        filter: {
-                          term: {
-                            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                              ActionTypes.pushed,
                           },
                         },
                         aggregations: {

@@ -8,7 +8,8 @@
 import type { GetCaseConnectorsResponse } from '../../../common/api';
 import type { ICaseUserActionsResponse } from '../typedoc_interfaces';
 import type { CasesClientArgs } from '../types';
-import { get, getConnectors } from './get';
+import { get } from './get';
+import { getConnectors } from './connectors';
 import type { GetConnectorsRequest, UserActionGet } from './types';
 
 /**

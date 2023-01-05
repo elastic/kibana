@@ -94,6 +94,9 @@ type FakeUserActionService = PublicMethodsOf<CaseUserActionService> & {
 export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
   const service: FakeUserActionService = {
     creator: createUserActionPersisterServiceMock(),
+    getConnectorFieldsBeforePushes: jest.fn(),
+    getMostRecentUserAction: jest.fn(),
+    getCaseConnectorInformation: jest.fn(),
     getAll: jest.fn(),
     findStatusChanges: jest.fn(),
     getUniqueConnectors: jest.fn(),
