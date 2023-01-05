@@ -50,4 +50,7 @@ export const i18nTexts = {
       defaultMessage: 'Drag and drop to upload new files',
     }
   ),
+  delete: i18n.translate('sharedUXPackages.filePicker.delete', {
+    defaultMessage: 'Delete',
+  }),
 };

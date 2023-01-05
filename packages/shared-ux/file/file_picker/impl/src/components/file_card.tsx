@@ -17,6 +17,7 @@ import { isImage } from '@kbn/shared-ux-file-util';
 import { FileImage as Image } from '@kbn/shared-ux-file-image';
 import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 import { useFilePickerContext } from '../context';
+import { i18nTexts } from '../i18n_texts';
 
 import './file_card.scss';
 
@@ -99,7 +100,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
   const deleteButton = (
     <EuiButtonIcon
       iconType="trash"
-      aria-label="Delete"
+      aria-label={i18nTexts.delete}
       color="danger"
       css={{
         position: 'absolute',
