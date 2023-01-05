@@ -29,6 +29,8 @@ import {
   Direction,
   XYChartElementEvent,
   Tooltip,
+  GeometryValue,
+  XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
@@ -116,6 +118,10 @@ declare global {
      */
     _echDebugStateFlag?: boolean;
   }
+}
+
+interface XYMultipleClickElement extends GeometryValue {
+  seriesIdentifier: XYChartSeriesIdentifier;
 }
 
 export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
@@ -547,9 +553,9 @@ export function XYChart({
     valueLabels !== ValueLabelModes.HIDE &&
     getValueLabelsStyling(shouldRotate);
 
-  const multiClickHandler: ElementClickListener = (values: any) => {
+  const multiClickHandler = (values: XYMultipleClickElement[]) => {
     const layerIndexes: number[] = [];
-    values.forEach((v: any) => {
+    values.forEach((v) => {
       const index = dataLayers.findIndex((l) =>
         v.seriesIdentifier.seriesKeys.some((key: string | number) =>
           l.accessors.some(
@@ -569,10 +575,8 @@ export function XYChart({
       if (layer.splitAccessors?.length !== 1) return;
 
       const splitAccessor = getAccessorByDimension(layer.splitAccessors![0], table.columns);
-      const filterValues = values
-        .map((v: any) => v.datum[splitAccessor])
-        .filter((item: any) => item);
-      const finalValues = filterValues.map((v: any) => {
+      const filterValues = values.map((v) => v.datum[splitAccessor]).filter((item) => item);
+      const finalValues = filterValues.map((v) => {
         const splitPointRowIndex = formattedDatatables[layer.layerId].table.rows.findIndex(
           (row) => {
             if (Array.isArray(v)) {
@@ -823,12 +827,15 @@ export function XYChart({
               !args.detailedTooltip && hasTooltipActions
                 ? [
                     {
-                      label: () =>
+                      label: (selected) =>
                         i18n.translate('expressionXY.tooltipActions.filterValues', {
-                          defaultMessage: 'Filter selected series',
+                          defaultMessage:
+                            'Filter selected {seriesNumber, plural, one {# serie} other {# series}}',
+                          values: { seriesNumber: selected.length },
                         }),
-                      onSelect: (values: any) => {
-                        multiClickHandler(values);
+                      onSelect: (values) => {
+                        const selectedValues = values as unknown as XYMultipleClickElement[];
+                        multiClickHandler(selectedValues);
                       },
                     },
                   ]
