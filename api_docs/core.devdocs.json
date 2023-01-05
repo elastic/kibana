@@ -9151,68 +9151,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.IHttpFetchError.req",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "req",
-            "description": [],
-            "signature": [
-              "Request"
-            ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0\n\nNote to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,\nso TS and code-reference navigation might not highlight them.",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-browser-internal",
-                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-browser-internal",
-                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
-              }
-            ]
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.IHttpFetchError.res",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "res",
-            "description": [],
-            "signature": [
-              "Response | undefined"
-            ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0\n\nNote to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,\nso TS and code-reference navigation might not highlight them.",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core-http-browser-internal",
-                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-browser-internal",
-                "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
-              }
-            ]
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-public.IHttpFetchError.body",
             "type": "Uncategorized",
             "tags": [],
@@ -35353,6 +35291,22 @@
             ],
             "signature": [
               "Error | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/socket.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IKibanaSocket.remoteAddress",
+            "type": "string",
+            "tags": [],
+            "label": "remoteAddress",
+            "description": [
+              "\nThe string representation of the remote IP address. For example,`'74.125.127.100'` or\n`'2001:4860:a005::68'`. Value may be `undefined` if the socket is destroyed (for example, if\nthe client disconnected)."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/socket.ts",
             "deprecated": false,
