@@ -34,12 +34,12 @@ import { FileUpload } from '@kbn/shared-ux-file-upload';
 import { FilePicker } from '@kbn/shared-ux-file-picker';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { FileImageMetadata, imageEmbeddableFileKind } from '../imports';
 import { ImageConfig } from '../types';
 import { ImageViewer } from '../image_viewer/image_viewer'; // use eager version to avoid flickering
 import { ValidateUrlFn } from '../utils/validate_url';
 import { validateImageConfig, DraftImageConfig } from '../utils/validate_image_config';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
 /**
  * Shared sizing css for image, upload placeholder, empty and not found state
@@ -431,7 +431,9 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
       {isFilePickerOpen && (
         <FilePicker
           kind={imageEmbeddableFileKind.id}
-          deleteButtonPredicate={(file) => props.user ? props.user.profile_uid === file.user?.id : false}
+          deleteButtonPredicate={(file) =>
+            props.user ? props.user.profile_uid === file.user?.id : false
+          }
           multiple={false}
           onClose={() => {
             setIsFilePickerOpen(false);

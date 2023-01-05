@@ -11,6 +11,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 import { skip, take, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { ImageConfig } from '../types';
 import { ImageEditorFlyout } from './image_editor_flyout';
 import { ImageViewerContext } from '../image_viewer';
@@ -22,7 +23,6 @@ import {
   ThemeServiceStart,
 } from '../imports';
 import { ValidateUrlFn } from '../utils/validate_url';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
 /**
  * @throws in case user cancels
