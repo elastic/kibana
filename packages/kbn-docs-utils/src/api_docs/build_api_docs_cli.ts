@@ -13,7 +13,7 @@ import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Project } from 'ts-morph';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
@@ -29,6 +29,7 @@ import { countEslintDisableLines, EslintDisableCounts } from './count_eslint_dis
 import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
 import { trimDeletedDocsFromNav } from './trim_deleted_docs_from_nav';
 import { getAllDocFileIds } from './mdx/get_all_doc_file_ids';
+import { getPathsByPackage } from './get_paths_by_package';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -40,7 +41,9 @@ export function runBuildApiDocsCli() {
       const collectReferences = flags.references as boolean;
       const stats = flags.stats && typeof flags.stats === 'string' ? [flags.stats] : flags.stats;
       const pluginFilter =
-        flags.plugin && typeof flags.plugin === 'string' ? [flags.plugin] : flags.plugin;
+        flags.plugin && typeof flags.plugin === 'string'
+          ? [flags.plugin]
+          : (flags.plugin as string[] | undefined);
 
       if (pluginFilter && !isStringArray(pluginFilter)) {
         throw createFlagError('expected --plugin must only contain strings');
@@ -68,7 +71,7 @@ export function runBuildApiDocsCli() {
 
       const plugins = findPlugins();
 
-      // if the output folder already exists and we don't have a plugin filter, delete all the files in the output folder
+      // if the output folder already exists, and we don't have a plugin filter, delete all the files in the output folder
       if (Fs.existsSync(outputFolder) && !pluginFilter) {
         await Fsp.rm(outputFolder, { recursive: true });
       }
@@ -84,20 +87,19 @@ export function runBuildApiDocsCli() {
         unreferencedDeprecations,
         referencedDeprecations,
         adoptionTrackedAPIs,
-      } = getPluginApiMap(project, plugins, log, {
-        collectReferences,
-        pluginFilter: pluginFilter as string[],
-      });
+      } = getPluginApiMap(project, plugins, log, { collectReferences, pluginFilter });
 
       const reporter = CiStatsReporter.fromEnv(log);
+      const pathsByPlugin = await getPathsByPackage(plugins);
 
       const allPluginStats: { [key: string]: PluginMetaInfo & ApiStats & EslintDisableCounts } = {};
       for (const plugin of plugins) {
         const id = plugin.manifest.id;
         const pluginApi = pluginApiMap[id];
+        const paths = pathsByPlugin.get(plugin) ?? [];
 
         allPluginStats[id] = {
-          ...(await countEslintDisableLines(plugin.directory)),
+          ...(await countEslintDisableLines(paths)),
           ...collectApiStatsForPlugin(
             pluginApi,
             missingApiItems,
@@ -117,7 +119,7 @@ export function runBuildApiDocsCli() {
         // be parsed in order to correctly determine reference links, and ensure that `removeBrokenLinks`
         // doesn't remove more links than necessary.
         if (pluginFilter && !pluginFilter.includes(plugin.manifest.id)) {
-          return;
+          continue;
         }
 
         const id = plugin.manifest.id;
@@ -210,7 +212,7 @@ export function runBuildApiDocsCli() {
             d.label
           )}`;
 
-        if (collectReferences && pluginFilter === plugin.manifest.id) {
+        if (collectReferences && pluginFilter?.includes(plugin.manifest.id)) {
           if (referencedDeprecations[id] && pluginStats.deprecatedAPIsReferencedCount > 0) {
             log.info(`${referencedDeprecations[id].length} deprecated APIs used`);
             // eslint-disable-next-line no-console

@@ -129,7 +129,7 @@
               "InjectedMetadataClusterInfo",
               ", []>; getPlugins: jest.MockInstance<",
               "InjectedMetadataPlugin",
-              "[], []>; getAnonymousStatusPage: jest.MockInstance<boolean, []>; getLegacyMetadata: jest.MockInstance<{ uiSettings: { defaults: Record<string, any>; user?: Record<string, any> | undefined; }; }, []>; getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]>; getInjectedVars: jest.MockInstance<{ [key: string]: unknown; }, []>; } & ",
+              "[], []>; getAnonymousStatusPage: jest.MockInstance<boolean, []>; getLegacyMetadata: jest.MockInstance<{ uiSettings: { defaults: Record<string, any>; user?: Record<string, any> | undefined; }; globalUiSettings: { defaults: Record<string, any>; user?: Record<string, any> | undefined; }; }, []>; getInjectedVar: jest.MockInstance<unknown, [name: string, defaultValue?: any]>; getInjectedVars: jest.MockInstance<{ [key: string]: unknown; }, []>; } & ",
               "InternalInjectedMetadataSetup"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-http-setup-browser/src/http_test_setup.ts",

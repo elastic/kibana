@@ -15,7 +15,11 @@ import {
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
 } from './task';
-import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  savedObjectsServiceMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import { TaskStore, SearchOpts, AggregationOpts } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -25,6 +29,7 @@ import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = savedObjectsServiceMock.createSerializer();
+const logger = loggingSystemMock.create().get();
 const adHocTaskCounter = new AdHocTaskCounter();
 
 const randomId = () => `id-${_.random(1, 20)}`;
@@ -67,6 +72,7 @@ describe('TaskStore', () => {
       store = new TaskStore({
         index: 'tasky',
         taskManagerId: '',
+        logger,
         serializer,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
@@ -233,6 +239,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
@@ -302,6 +309,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
@@ -400,6 +408,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
@@ -503,11 +512,104 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
       });
+    });
+
+    test('correctly returns errors from saved object bulk update', async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: '',
+      };
+
+      savedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: task.id,
+            type: task.taskType,
+            attributes: {
+              runAt: mockedDate.toISOString(),
+              scheduledAt: mockedDate.toISOString(),
+              startedAt: null,
+              retryAt: null,
+              params: `{ "hello": "world" }`,
+              state: `{ "foo": "bar" }`,
+              taskType: 'report',
+              attempts: 3,
+              status: 'idle' as TaskStatus,
+              ownerId: null,
+              traceparent: '',
+            },
+            error: {
+              error: `Not a conflict`,
+              message: `Some error that's not a conflict`,
+              statusCode: 404,
+            },
+            references: [],
+          },
+        ],
+      });
+      const result = await store.bulkUpdate([task]);
+      expect(result).toEqual([
+        {
+          error: {
+            entity: {
+              attempts: 3,
+              id: 'task:324242',
+              ownerId: null,
+              params: { hello: 'world' },
+              retryAt: null,
+              runAt: mockedDate,
+              scheduledAt: mockedDate,
+              startedAt: null,
+              state: { foo: 'bar' },
+              status: 'idle',
+              taskType: 'report',
+              traceparent: '',
+              version: '123',
+            },
+            error: {
+              attributes: {
+                attempts: 3,
+                ownerId: null,
+                params: '{ "hello": "world" }',
+                retryAt: null,
+                runAt: mockedDate.toISOString(),
+                scheduledAt: mockedDate.toISOString(),
+                startedAt: null,
+                state: '{ "foo": "bar" }',
+                status: 'idle',
+                taskType: 'report',
+                traceparent: '',
+              },
+              error: {
+                error: 'Not a conflict',
+                message: "Some error that's not a conflict",
+                statusCode: 404,
+              },
+              id: 'task:324242',
+              references: [],
+              type: 'report',
+            },
+          },
+          tag: 'err',
+        },
+      ]);
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -544,6 +646,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
@@ -578,6 +681,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
@@ -612,6 +716,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
@@ -697,6 +802,7 @@ describe('TaskStore', () => {
             index: 'tasky',
             taskManagerId: '',
             serializer,
+            logger,
             esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
             definitions: taskDefinitions,
             savedObjectsRepository: savedObjectsClient,
@@ -717,6 +823,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
@@ -735,6 +842,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
@@ -753,6 +861,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
