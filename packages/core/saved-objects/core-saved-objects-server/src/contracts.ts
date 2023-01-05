@@ -22,7 +22,7 @@ import type {
 import type { SavedObjectsType } from './saved_objects_type';
 import type { ISavedObjectTypeRegistry } from './type_registry';
 import type { ISavedObjectsExporter } from './export';
-import type { ISavedObjectsImporter } from './import';
+import type { ISavedObjectsImporter, SavedObjectsImporterOptions } from './import';
 import type { SavedObjectsExtensions } from './extensions/extensions';
 
 /**
@@ -200,7 +200,10 @@ export interface SavedObjectsServiceStart {
   /**
    * Creates an {@link ISavedObjectsImporter | importer} bound to given client.
    */
-  createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
+  createImporter: (
+    client: SavedObjectsClientContract,
+    options?: SavedObjectsImporterOptions
+  ) => ISavedObjectsImporter;
   /**
    * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
    * {@link SavedObjectsType | saved object types}
