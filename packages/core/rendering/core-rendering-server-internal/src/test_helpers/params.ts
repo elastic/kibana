@@ -17,7 +17,7 @@ const httpPreboot = httpServiceMock.createInternalPrebootContract();
 const httpSetup = httpServiceMock.createInternalSetupContract();
 const status = statusServiceMock.createInternalSetupContract();
 const elasticsearch = elasticsearchServiceMock.createInternalSetup();
-const customBranding = customBrandingServiceMock.create();
+const customBranding = customBrandingServiceMock.createSetupContract();
 
 function createUiPlugins() {
   return {

@@ -195,8 +195,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerSwitcher: deps.capabilities.registerSwitcher,
     },
     customBranding: {
-      register: () => {
-        deps.customBranding.register(plugin.name);
+      register: (fetchFn) => {
+        deps.customBranding.register(plugin.name, fetchFn);
       },
     },
     docLinks: deps.docLinks,
