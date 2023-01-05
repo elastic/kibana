@@ -321,6 +321,78 @@
           "url": "https://localhost:5601"
         }
       ]
+    },
+    "/s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all": {
+      "post": {
+        "summary": "Mute all alerts.",
+        "operationId": "muteAllAlerts",
+        "description": "This API snoozes the notifications for the rule indefinitely. The rule checks continue to occur but alerts will not trigger any actions. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're creating. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have read privileges for the **Management > Actions and Connectors** feature.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all": {
+      "post": {
+        "summary": "Unmute all alerts.",
+        "operationId": "unmuteAllAlerts",
+        "description": "If the rule has its notifications snoozed indefinitely, this API cancels the snooze. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're creating. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have read privileges for the **Management > Actions and Connectors** feature.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
     }
   },
   "components": {
