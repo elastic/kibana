@@ -548,42 +548,48 @@ export function XYChart({
     getValueLabelsStyling(shouldRotate);
 
   const multiClickHandler: ElementClickListener = (values: any) => {
-    // this cast is safe because we are rendering a cartesian chart
-    const layerIndex = dataLayers.findIndex((l) =>
-      values[0].seriesIdentifier.seriesKeys.some((key: string | number) =>
-        l.accessors.some(
-          (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
+    const layerIndexes: number[] = [];
+    values.forEach((v: any) => {
+      const index = dataLayers.findIndex((l) =>
+        v.seriesIdentifier.seriesKeys.some((key: string | number) =>
+          l.accessors.some(
+            (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
+          )
         )
-      )
-    );
-
-    if (layerIndex === -1) {
-      return;
-    }
-
-    const layer = dataLayers[layerIndex];
-    const { table } = layer;
-
-    if (layer.splitAccessors?.length !== 1) return;
-
-    const splitAccessor = getAccessorByDimension(layer.splitAccessors![0], table.columns);
-    const filterValues = values.map((v: any) => v.datum[splitAccessor]);
-    const finalValues = filterValues.map((v: any) => {
-      const splitPointRowIndex = formattedDatatables[layer.layerId].table.rows.findIndex((row) => {
-        if (Array.isArray(v)) {
-          return v.includes(row[splitAccessor]);
-        }
-        return row[splitAccessor] === v;
-      });
-      return table.rows[splitPointRowIndex][splitAccessor];
+      );
+      if (!layerIndexes.includes(index) && index !== -1) {
+        layerIndexes.push(index);
+      }
     });
+    if (!layerIndexes.length) return;
+    layerIndexes.forEach((layerIndex) => {
+      const layer = dataLayers[layerIndex];
+      const { table } = layer;
 
-    onClickMultiValue({
-      data: {
-        column: table.columns.findIndex((column) => column.id === splitAccessor),
-        value: finalValues,
-        table,
-      },
+      if (layer.splitAccessors?.length !== 1) return;
+
+      const splitAccessor = getAccessorByDimension(layer.splitAccessors![0], table.columns);
+      const filterValues = values
+        .map((v: any) => v.datum[splitAccessor])
+        .filter((item: any) => item);
+      const finalValues = filterValues.map((v: any) => {
+        const splitPointRowIndex = formattedDatatables[layer.layerId].table.rows.findIndex(
+          (row) => {
+            if (Array.isArray(v)) {
+              return v.includes(row[splitAccessor]);
+            }
+            return row[splitAccessor] === v;
+          }
+        );
+        return table.rows[splitPointRowIndex][splitAccessor];
+      });
+      onClickMultiValue({
+        data: {
+          column: table.columns.findIndex((column) => column.id === splitAccessor),
+          value: finalValues,
+          table,
+        },
+      });
     });
   };
 
@@ -775,6 +781,8 @@ export function XYChart({
     overflowX: 'hidden',
     position: uiState ? 'absolute' : 'relative',
   });
+  // enable the tooltip actions only if there is at least one splitAccessor to the dataLayer
+  const hasTooltipActions = dataLayers.some((dataLayer) => dataLayer.splitAccessors);
 
   return (
     <div css={chartContainerStyle}>
@@ -812,7 +820,7 @@ export function XYChart({
                 : undefined
             }
             actions={
-              !args.detailedTooltip
+              !args.detailedTooltip && hasTooltipActions
                 ? [
                     {
                       label: () =>
