@@ -8,7 +8,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
+  rootDir: '../../..',
   roots: ['<rootDir>/packages/security-solution/kbn-securitysolution-exception-list-components'],
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
