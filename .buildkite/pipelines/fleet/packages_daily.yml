@@ -7,16 +7,6 @@ steps:
 
   - wait
 
-  - command: .buildkite/scripts/steps/build_kibana.sh
-    label: Build Kibana Distribution and Plugins
-    agents:
-      queue: c2-16
-    key: build
-    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
-    timeout_in_minutes: 60
-
-  - wait
-
   - command: .buildkite/scripts/steps/fleet/install_all_packages.sh
     label: Install All Packages
     agents:
