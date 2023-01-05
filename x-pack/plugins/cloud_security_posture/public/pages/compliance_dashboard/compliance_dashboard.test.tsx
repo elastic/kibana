@@ -17,7 +17,11 @@ import {
   useKspmComplianceDashboardDataApi,
   useCspmComplianceDashboardDataApi,
 } from '../../common/api/use_compliance_dashboard_data_api';
-import { DASHBOARD_CONTAINER } from './test_subjects';
+import {
+  CLOUD_DASHBOARD_CONTAINER,
+  DASHBOARD_CONTAINER,
+  KUBERNETES_DASHBOARD_CONTAINER,
+} from './test_subjects';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
@@ -356,6 +360,198 @@ describe('<ComplianceDashboard />', () => {
     expectIdsInDoc({
       be: [DASHBOARD_CONTAINER],
       notToBe: [
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Show Kubernetes dashboard if there are KSPM findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed', installedPolicyTemplates: ['cspm', 'kspm'] },
+      })
+    );
+    (useKspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: mockDashboardData,
+    }));
+    (useCspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: undefined,
+    }));
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [KUBERNETES_DASHBOARD_CONTAINER],
+      notToBe: [
+        CLOUD_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Show Cloud dashboard if there are CSPM findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed', installedPolicyTemplates: ['cspm', 'kspm'] },
+      })
+    );
+    (useKspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: undefined,
+    }));
+    (useCspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: mockDashboardData,
+    }));
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [CLOUD_DASHBOARD_CONTAINER],
+      notToBe: [
+        KUBERNETES_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Show Cloud dashboard "no findings prompt" if the CSPM integration is installed without findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed', installedPolicyTemplates: ['cspm'] },
+      })
+    );
+    (useKspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+    (useCspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [CLOUD_DASHBOARD_CONTAINER, NO_FINDINGS_STATUS_TEST_SUBJ.NO_FINDINGS],
+      notToBe: [
+        KUBERNETES_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Show Kubernetes dashboard "no findings prompt" if the KSPM integration is installed without findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed', installedPolicyTemplates: ['kspm'] },
+      })
+    );
+    (useKspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+    (useCspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [KUBERNETES_DASHBOARD_CONTAINER, NO_FINDINGS_STATUS_TEST_SUBJ.NO_FINDINGS],
+      notToBe: [
+        CLOUD_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Prefer Cloud dashboard if both integration are installed', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed', installedPolicyTemplates: ['cspm', 'kspm'] },
+      })
+    );
+    (useKspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+    (useCspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [CLOUD_DASHBOARD_CONTAINER, NO_FINDINGS_STATUS_TEST_SUBJ.NO_FINDINGS],
+      notToBe: [
+        KUBERNETES_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Prefer Cloud dashboard if both integration have findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed', installedPolicyTemplates: ['cspm', 'kspm'] },
+      })
+    );
+    (useKspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: mockDashboardData,
+    }));
+    (useCspmComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: mockDashboardData,
+    }));
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [CLOUD_DASHBOARD_CONTAINER],
+      notToBe: [
+        KUBERNETES_DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,

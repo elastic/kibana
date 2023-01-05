@@ -21,7 +21,11 @@ import {
   KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
   CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
 } from '../../components/cloud_posture_page';
-import { DASHBOARD_CONTAINER } from './test_subjects';
+import {
+  CLOUD_DASHBOARD_CONTAINER,
+  DASHBOARD_CONTAINER,
+  KUBERNETES_DASHBOARD_CONTAINER,
+} from './test_subjects';
 import {
   useCspmComplianceDashboardDataApi,
   useKspmComplianceDashboardDataApi,
@@ -128,7 +132,7 @@ const IntegrationPostureDashboard = ({
       // height is calculated for the screen height minus the kibana header, page title, and tabs
       <div style={{ height: 'calc(100vh - 265px)', display: 'flex', justifyContent: 'center' }}>
         <EuiEmptyPrompt
-          data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT}
+          data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.NO_FINDINGS}
           color="plain"
           icon={<EuiIcon type="logoSecurity" size="xl" />}
           title={
@@ -217,13 +221,18 @@ export const ComplianceDashboard = () => {
         onClick: () => setSelectedTab(CSPM_POLICY_TEMPLATE),
         content: (
           <CloudPosturePage query={getCspmDashboardData}>
-            <IntegrationPostureDashboard
-              complianceData={getCspmDashboardData.data!}
-              notInstalledConfig={getNotInstalledConfig(CSPM_POLICY_TEMPLATE, cspmIntegrationLink)}
-              isIntegrationInstalled={getSetupStatus.data?.installedPolicyTemplates.includes(
-                CSPM_POLICY_TEMPLATE
-              )}
-            />
+            <div data-test-subj={CLOUD_DASHBOARD_CONTAINER}>
+              <IntegrationPostureDashboard
+                complianceData={getCspmDashboardData.data!}
+                notInstalledConfig={getNotInstalledConfig(
+                  CSPM_POLICY_TEMPLATE,
+                  cspmIntegrationLink
+                )}
+                isIntegrationInstalled={getSetupStatus.data?.installedPolicyTemplates.includes(
+                  CSPM_POLICY_TEMPLATE
+                )}
+              />
+            </div>
           </CloudPosturePage>
         ),
       },
@@ -235,13 +244,18 @@ export const ComplianceDashboard = () => {
         onClick: () => setSelectedTab(KSPM_POLICY_TEMPLATE),
         content: (
           <CloudPosturePage query={getKspmDashboardData}>
-            <IntegrationPostureDashboard
-              complianceData={getKspmDashboardData.data!}
-              notInstalledConfig={getNotInstalledConfig(KSPM_POLICY_TEMPLATE, kspmIntegrationLink)}
-              isIntegrationInstalled={getSetupStatus.data?.installedPolicyTemplates.includes(
-                KSPM_POLICY_TEMPLATE
-              )}
-            />
+            <div data-test-subj={KUBERNETES_DASHBOARD_CONTAINER}>
+              <IntegrationPostureDashboard
+                complianceData={getKspmDashboardData.data!}
+                notInstalledConfig={getNotInstalledConfig(
+                  KSPM_POLICY_TEMPLATE,
+                  kspmIntegrationLink
+                )}
+                isIntegrationInstalled={getSetupStatus.data?.installedPolicyTemplates.includes(
+                  KSPM_POLICY_TEMPLATE
+                )}
+              />
+            </div>
           </CloudPosturePage>
         ),
       },
