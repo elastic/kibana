@@ -373,7 +373,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should navigate to alert results via view in app link', async () => {
       await testSubjects.click('selectDataViewExpression');
       await testSubjects.click('indexPattern-switcher--input');
-      if (await testSubjects.find('clearSearchButton')) {
+      if (await testSubjects.exists('clearSearchButton')) {
         await testSubjects.click('clearSearchButton');
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
