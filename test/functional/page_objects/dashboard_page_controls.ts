@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { takeRight } from 'lodash';
+
 import expect from '@kbn/expect';
 import {
   OPTIONS_LIST_CONTROL,
@@ -14,8 +16,8 @@ import {
 } from '@kbn/controls-plugin/common';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 import { FtrService } from '../ftr_provider_context';
 
 const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
@@ -48,6 +50,7 @@ export class DashboardPageControls extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
   private readonly common = this.ctx.getPageObject('common');
@@ -388,11 +391,26 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListPopoverGetAvailableOptions() {
     this.log.debug(`getting available options from options list`);
+    const optionsCount = await this.optionsListPopoverGetAvailableOptionsCount();
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
 
-    const suggestionElements = await availableOptions.findAllByClassName(
+    let suggestionElements = await availableOptions.findAllByClassName(
       'optionsList__validSuggestion'
     );
+    /* When virtualized=true, EuiSelectable dynamically loads the options as the user scrolls. So, if there are still
+      remaining options, we need to scroll to the bottom of the list to get the unloaded items */
+    const missingItemCount = optionsCount - suggestionElements.length;
+    if (missingItemCount > 0) {
+      this.log.debug(`...need to scroll to get unloaded elements`);
+      const selectableList = await availableOptions.findByClassName('euiSelectableList__list');
+      await selectableList._webElement.sendKeys(this.browser.keys.ARROW_UP); // scrolls to the bottom of the list
+      const missingItems = takeRight(
+        await availableOptions.findAllByClassName('optionsList__validSuggestion'),
+        missingItemCount
+      );
+      suggestionElements = [...suggestionElements, ...missingItems];
+    }
+
     const suggestions: { [key: string]: number } = await suggestionElements.reduce(
       async (promise, option) => {
         const acc = await promise;
