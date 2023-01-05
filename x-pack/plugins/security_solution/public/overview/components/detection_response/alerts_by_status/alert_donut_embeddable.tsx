@@ -7,7 +7,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { DonutChartWrapper } from '../../../../common/components/charts/donutchart';
 import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
-import { getAlertsBySeverityAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_donut';
+import { getAlertsBySeverityAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_severity_donut';
 import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
 import type { EmbeddableData } from '../../../../common/components/visualization_actions/types';
 import { parseVisualizationData } from '../../../../common/components/visualization_actions/utils';
