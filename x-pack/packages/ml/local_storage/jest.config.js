@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { MlStorageContextProvider, useStorage } from './storage_context';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/local_storage'],
+};
