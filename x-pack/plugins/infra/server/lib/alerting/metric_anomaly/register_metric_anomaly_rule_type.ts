@@ -23,7 +23,6 @@ import { METRIC_ANOMALY_ALERT_TYPE_ID } from '../../../../common/alerting/metric
 import { InfraBackendLibs } from '../../infra_types';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 import { alertStateActionVariableDescription } from '../common/messages';
-import { metricAlertRegistration } from '../get_alert_registration';
 
 export type MetricAnomalyAllowedActionGroups = typeof FIRED_ACTIONS_ID;
 
@@ -115,5 +114,4 @@ export const registerMetricAnomalyRuleType = (
       },
     ],
   },
-  alerts: metricAlertRegistration,
 });

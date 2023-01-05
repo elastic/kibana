@@ -24,7 +24,6 @@ import { TlsTranslations } from '../../../../common/translations';
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 import { UptimeEsClient } from '../lib';
 import { ACTION_VARIABLES, ALERT_DETAILS_URL } from './action_variables';
-import { alertRegistration } from './get_alert_registration';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 
@@ -129,7 +128,6 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
   },
   isExportable: true,
-  alerts: alertRegistration,
   minimumLicenseRequired: 'basic',
   doesSetRecoveryContext: true,
   async executor({

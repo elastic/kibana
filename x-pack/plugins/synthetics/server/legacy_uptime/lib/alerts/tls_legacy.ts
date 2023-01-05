@@ -24,7 +24,6 @@ import {
   DEFAULT_SIZE,
   DEFAULT_TO,
 } from '../../../../common/requests/get_certs_request_body';
-import { alertRegistration } from './get_alert_registration';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_LEGACY>;
 
@@ -113,7 +112,6 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
   },
   isExportable: true,
   minimumLicenseRequired: 'basic',
-  alerts: alertRegistration,
   async executor({ services: { alertFactory, scopedClusterClient, savedObjectsClient }, state }) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 

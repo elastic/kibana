@@ -112,6 +112,7 @@ export class AlertsService implements IAlertsService {
 
         this.initialized = true;
       } catch (err) {
+        this.options.logger.error(`Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted.`);
         this.initialized = false;
       }
 

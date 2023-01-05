@@ -19,7 +19,6 @@ import {
   alertDetailUrlActionVariableDescription,
   groupByKeysActionVariableDescription,
 } from '../common/messages';
-import { logAlertRegistration } from '../get_alert_registration';
 
 const timestampActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.timestampActionVariableDescription',
@@ -146,7 +145,6 @@ export async function registerLogThresholdRuleType(
       ],
     },
     producer: 'logs',
-    alerts: logAlertRegistration,
     getSummarizedAlerts: libs.logsRules.createGetSummarizedAlerts(),
   });
 }

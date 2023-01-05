@@ -49,7 +49,6 @@ import { getMLJobs } from '../../../service_map/get_service_anomalies';
 import { apmActionVariables } from '../../action_variables';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
-import { alertRegistration } from '../get_alert_registration';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -107,7 +106,6 @@ export function registerAnomalyRuleType({
       producer: 'apm',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      alerts: alertRegistration,
       executor: async ({ params, services, spaceId }) => {
         if (!ml) {
           return {};

@@ -237,9 +237,6 @@ export class AlertingPlugin {
           .getStartServices()
           .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       });
-      // TODO - should an initialization failure throw an error?
-      // we do retry all resource installation steps but if all the retries fail
-      // do we just disable alerts writing?
       this.alertsService!.initialize();
     }
 

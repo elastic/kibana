@@ -51,7 +51,6 @@ import {
   VIEW_IN_APP_URL,
 } from './action_variables';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
-import { alertRegistration } from './get_alert_registration';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 
@@ -334,7 +333,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     ],
     state: [...commonMonitorStateI18, ...commonStateTranslations],
   },
-  alerts: alertRegistration,
   isExportable: true,
   minimumLicenseRequired: 'basic',
   doesSetRecoveryContext: true,

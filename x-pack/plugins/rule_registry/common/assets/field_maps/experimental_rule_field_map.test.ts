@@ -13,12 +13,10 @@ it('matches snapshot', () => {
   expect(experimentalRuleFieldMap).toMatchInlineSnapshot(`
     Object {
       "kibana.alert.evaluation.threshold": Object {
-        "required": false,
         "scaling_factor": 100,
         "type": "scaled_float",
       },
       "kibana.alert.evaluation.value": Object {
-        "required": false,
         "scaling_factor": 100,
         "type": "scaled_float",
       },
