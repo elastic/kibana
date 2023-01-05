@@ -111,9 +111,13 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     });
     await retry.tryForTime(2 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
-      const text = await page.textContent(`${byTestId('dataGridRowCell')} .euiLink`, {
-        timeout: 5 * 1000,
-      });
+      expect(
+        await page.isVisible(`text=1 Alert`, {
+          timeout: 5 * 1000,
+        })
+      ).toBe(true);
+
+      const text = await page.textContent(`${byTestId('dataGridRowCell')} .euiLink`);
 
       expect(text).toBe(reasonMessage);
       expect(await page.isVisible(`text=1 Alert`)).toBe(true);
