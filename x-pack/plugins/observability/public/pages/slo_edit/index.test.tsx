@@ -102,64 +102,104 @@ describe('SLO Edit Page', () => {
     });
   });
 
-  it('renders the SLO Edit page in pristine state when no sloId route param is passed', async () => {
-    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
+  describe('when no sloId route param is provided', () => {
+    it('renders the SLO Edit page in pristine state', async () => {
+      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
 
-    useFetchSloMock.mockReturnValue({ loading: false, slo: undefined });
-    useFetchIndicesMock.mockReturnValue({
-      loading: false,
-      indices: [{ name: 'some-index' }],
+      useFetchSloMock.mockReturnValue({ loading: false, slo: undefined });
+      useFetchIndicesMock.mockReturnValue({
+        loading: false,
+        indices: [{ name: 'some-index' }],
+      });
+      useCreateOrUpdateSloMock.mockReturnValue({
+        loading: false,
+        success: false,
+        error: '',
+        createSlo: jest.fn(),
+        updateSlo: jest.fn(),
+      });
+
+      render(<SloEditPage />, config);
+
+      expect(screen.queryByTestId('slosEditPage')).toBeTruthy();
+      expect(screen.queryByTestId('sloForm')).toBeTruthy();
+
+      expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(
+        SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type
+      );
+
+      expect(screen.queryByTestId('sloFormCustomKqlIndexInput')).toHaveValue(
+        SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.index
+      );
+      expect(screen.queryByTestId('sloFormCustomKqlFilterQueryInput')).toHaveValue(
+        SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
+          ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.filter
+          : ''
+      );
+      expect(screen.queryByTestId('sloFormCustomKqlGoodQueryInput')).toHaveValue(
+        SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
+          ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.good
+          : ''
+      );
+      expect(screen.queryByTestId('sloFormCustomKqlTotalQueryInput')).toHaveValue(
+        SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
+          ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.total
+          : ''
+      );
+
+      expect(screen.queryByTestId('sloFormBudgetingMethodSelect')).toHaveValue(
+        SLO_EDIT_FORM_DEFAULT_VALUES.budgetingMethod
+      );
+      expect(screen.queryByTestId('sloFormTimeWindowDurationSelect')).toHaveValue(
+        SLO_EDIT_FORM_DEFAULT_VALUES.timeWindow.duration as any
+      );
+      expect(screen.queryByTestId('sloFormObjectiveTargetInput')).toHaveValue(
+        SLO_EDIT_FORM_DEFAULT_VALUES.objective.target
+      );
+
+      expect(screen.queryByTestId('sloFormNameInput')).toHaveValue(
+        SLO_EDIT_FORM_DEFAULT_VALUES.name
+      );
+      expect(screen.queryByTestId('sloFormDescriptionTextArea')).toHaveValue(
+        SLO_EDIT_FORM_DEFAULT_VALUES.description
+      );
     });
-    useCreateOrUpdateSloMock.mockReturnValue({
-      loading: false,
-      success: false,
-      error: '',
-      createSlo: jest.fn(),
-      updateSlo: jest.fn(),
+
+    it('calls the createSlo hook if all required values are filled in', async () => {
+      // Note: the `anSLO` object is considered to have (at least)
+      // values for all required fields.
+
+      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
+      useFetchIndicesMock.mockReturnValue({
+        loading: false,
+        indices: [{ name: 'some-index' }],
+      });
+      useFetchSloMock.mockReturnValue({ loading: false, slo: undefined });
+      const mockCreate = jest.fn();
+      const mockUpdate = jest.fn();
+      useCreateOrUpdateSloMock.mockReturnValue({
+        loading: false,
+        success: false,
+        error: '',
+        createSlo: mockCreate,
+        updateSlo: mockUpdate,
+      });
+
+      render(<SloEditPage />, config);
+
+      userEvent.type(screen.getByTestId('sloFormCustomKqlIndexInput'), 'some-index');
+      userEvent.type(screen.getByTestId('sloFormCustomKqlFilterQueryInput'), 'irrelevant');
+      userEvent.type(screen.getByTestId('sloFormCustomKqlGoodQueryInput'), 'irrelevant');
+      userEvent.type(screen.getByTestId('sloFormCustomKqlTotalQueryInput'), 'irrelevant');
+      userEvent.type(screen.getByTestId('sloFormNameInput'), 'irrelevant');
+      userEvent.type(screen.getByTestId('sloFormDescriptionTextArea'), 'irrelevant');
+
+      await waitFor(() => expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled());
+
+      fireEvent.click(screen.queryByTestId('sloFormSubmitButton')!);
+
+      expect(mockCreate).toMatchSnapshot();
     });
-
-    render(<SloEditPage />, config);
-
-    expect(screen.queryByTestId('slosEditPage')).toBeTruthy();
-    expect(screen.queryByTestId('sloForm')).toBeTruthy();
-
-    expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(
-      SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type
-    );
-
-    expect(screen.queryByTestId('sloFormCustomKqlIndexInput')).toHaveValue(
-      SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.index
-    );
-    expect(screen.queryByTestId('sloFormCustomKqlFilterQueryInput')).toHaveValue(
-      SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
-        ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.filter
-        : ''
-    );
-    expect(screen.queryByTestId('sloFormCustomKqlGoodQueryInput')).toHaveValue(
-      SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
-        ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.good
-        : ''
-    );
-    expect(screen.queryByTestId('sloFormCustomKqlTotalQueryInput')).toHaveValue(
-      SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
-        ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.total
-        : ''
-    );
-
-    expect(screen.queryByTestId('sloFormBudgetingMethodSelect')).toHaveValue(
-      SLO_EDIT_FORM_DEFAULT_VALUES.budgetingMethod
-    );
-    expect(screen.queryByTestId('sloFormTimeWindowDurationSelect')).toHaveValue(
-      SLO_EDIT_FORM_DEFAULT_VALUES.timeWindow.duration as any
-    );
-    expect(screen.queryByTestId('sloFormObjectiveTargetInput')).toHaveValue(
-      SLO_EDIT_FORM_DEFAULT_VALUES.objective.target
-    );
-
-    expect(screen.queryByTestId('sloFormNameInput')).toHaveValue(SLO_EDIT_FORM_DEFAULT_VALUES.name);
-    expect(screen.queryByTestId('sloFormDescriptionTextArea')).toHaveValue(
-      SLO_EDIT_FORM_DEFAULT_VALUES.description
-    );
   });
 
   it('renders the SLO Edit page with prefilled form values if sloId route param is passed', async () => {
@@ -260,43 +300,7 @@ describe('SLO Edit Page', () => {
     });
   });
 
-  describe('in Create mode', () => {
-    it('calls the createSlo hook if all required values are filled in', async () => {
-      // Note: the `anSLO` object is considered to have (at least)
-      // values for all required fields.
-
-      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
-      useFetchIndicesMock.mockReturnValue({
-        loading: false,
-        indices: [{ name: 'some-index' }],
-      });
-      useFetchSloMock.mockReturnValue({ loading: false, slo: undefined });
-      const mockCreate = jest.fn();
-      const mockUpdate = jest.fn();
-      useCreateOrUpdateSloMock.mockReturnValue({
-        loading: false,
-        success: false,
-        error: '',
-        createSlo: mockCreate,
-        updateSlo: mockUpdate,
-      });
-
-      render(<SloEditPage />, config);
-
-      userEvent.type(screen.getByTestId('sloFormCustomKqlIndexInput'), 'some-index');
-      userEvent.type(screen.getByTestId('sloFormCustomKqlFilterQueryInput'), 'irrelevant');
-      userEvent.type(screen.getByTestId('sloFormCustomKqlGoodQueryInput'), 'irrelevant');
-      userEvent.type(screen.getByTestId('sloFormCustomKqlTotalQueryInput'), 'irrelevant');
-      userEvent.type(screen.getByTestId('sloFormNameInput'), 'irrelevant');
-      userEvent.type(screen.getByTestId('sloFormDescriptionTextArea'), 'irrelevant');
-
-      await waitFor(() => expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled());
-
-      fireEvent.click(screen.queryByTestId('sloFormSubmitButton')!);
-
-      expect(mockCreate).toMatchSnapshot();
-    });
-  });
+  describe('in Create mode', () => {});
 
   describe('if submitting has completed successfully', () => {
     it('renders a success toast', async () => {
