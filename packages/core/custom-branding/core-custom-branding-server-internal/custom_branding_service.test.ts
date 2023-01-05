@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CustomBrandingService } from './custom_branding_service';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { CustomBrandingService } from './custom_branding_service';
 
 describe('#setup', () => {
   const coreContext: ReturnType<typeof mockCoreContext.create> = mockCoreContext.create();
