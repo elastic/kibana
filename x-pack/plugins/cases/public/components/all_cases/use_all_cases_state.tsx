@@ -12,11 +12,13 @@ import { isEqual } from 'lodash';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { parse, stringify } from 'query-string';
 
-import { DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
+import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 import { parseUrlQueryParams } from './utils';
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 
 import type {
+  FilterOptions,
+  PartialFilterOptions,
   LocalStorageQueryParams,
   ParsedUrlQueryParams,
   QueryParams,
@@ -25,7 +27,12 @@ import type {
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 export const getQueryParamsLocalStorageKey = (appId: string) => {
-  const filteringKey = LOCAL_STORAGE_KEYS.casesFiltering;
+  const filteringKey = LOCAL_STORAGE_KEYS.casesQueryParams;
+  return `${appId}.${filteringKey}`;
+};
+
+export const getFilterOptionsLocalStorageKey = (appId: string) => {
+  const filteringKey = LOCAL_STORAGE_KEYS.casesFilterOptions;
   return `${appId}.${filteringKey}`;
 };
 
@@ -43,7 +50,11 @@ const getQueryParams = (
     localStorageQueryParams?.perPage ??
     DEFAULT_QUERY_PARAMS.perPage;
 
-  result.sortField = params.sortField ?? queryParams.sortField ?? DEFAULT_QUERY_PARAMS.sortField;
+  result.sortField =
+    params.sortField ??
+    urlParams.sortField ??
+    localStorageQueryParams?.sortField ??
+    DEFAULT_QUERY_PARAMS.sortField;
 
   result.sortOrder =
     params.sortOrder ??
@@ -56,16 +67,44 @@ const getQueryParams = (
   return result;
 };
 
-export function useAllCasesQueryParams(isModalView: boolean = false) {
+const getFilterOptions = (
+  filterOptions: FilterOptions,
+  params: FilterOptions,
+  localStorageFilterOptions?: PartialFilterOptions
+): FilterOptions => {
+  const severity = params.severity ?? localStorageFilterOptions?.severity;
+  const status = params.status ?? localStorageFilterOptions?.status;
+  // const tags = params.tags ?? localStorageFilterOptions?.tags;
+
+  return {
+    ...filterOptions,
+    ...params,
+    ...(severity && { severity }),
+    ...(status && { status }),
+    // ...(tags && { tags }),
+  };
+};
+
+export function useAllCasesState(
+  isModalView: boolean = false,
+  initialFilterOptions?: PartialFilterOptions
+) {
   const { appId } = useCasesContext();
   const location = useLocation();
   const history = useHistory();
   const isFirstRenderRef = useRef(true);
 
   const [queryParams, setQueryParams] = useState<QueryParams>({ ...DEFAULT_QUERY_PARAMS });
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    ...DEFAULT_FILTER_OPTIONS,
+    ...initialFilterOptions,
+  });
 
   const [localStorageQueryParams, setLocalStorageQueryParams] =
     useLocalStorage<LocalStorageQueryParams>(getQueryParamsLocalStorageKey(appId));
+
+  const [localStorageFilterOptions, setLocalStorageFilterOptions] =
+    useLocalStorage<PartialFilterOptions>(getFilterOptionsLocalStorageKey(appId));
 
   const persistAndUpdateQueryParams = useCallback(
     (params) => {
@@ -84,6 +123,7 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
       );
       const newLocalStorageQueryParams = {
         perPage: newQueryParams.perPage,
+        sortField: newQueryParams.sortField,
         sortOrder: newQueryParams.sortOrder,
       };
       const newUrlParams = {
@@ -121,15 +161,42 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
     ]
   );
 
+  const persistAndUpdateFilterOptions = useCallback(
+    (params) => {
+      if (isModalView) {
+        setFilterOptions((prevParams) => ({ ...prevParams, ...params }));
+        return;
+      }
+
+      const newFilterOptions: FilterOptions = getFilterOptions(
+        filterOptions,
+        params,
+        localStorageFilterOptions
+      );
+      const newLocalStorageFilterOptions = {
+        ...localStorageFilterOptions,
+        ...(newFilterOptions.severity && { severity: newFilterOptions.severity }),
+        ...(newFilterOptions.status && { status: newFilterOptions.status }),
+      };
+
+      setLocalStorageFilterOptions(newLocalStorageFilterOptions);
+      setFilterOptions(newFilterOptions);
+    },
+    [isModalView, filterOptions, localStorageFilterOptions, setLocalStorageFilterOptions]
+  );
+
   useEffect(() => {
     if (isFirstRenderRef.current) {
       persistAndUpdateQueryParams(isModalView ? DEFAULT_QUERY_PARAMS : {});
+      persistAndUpdateFilterOptions(isModalView ? DEFAULT_QUERY_PARAMS : {});
       isFirstRenderRef.current = false;
     }
-  }, [isModalView, persistAndUpdateQueryParams]);
+  }, [isModalView, persistAndUpdateFilterOptions, persistAndUpdateQueryParams]);
 
   return {
     queryParams,
     setQueryParams: persistAndUpdateQueryParams,
+    filterOptions,
+    setFilterOptions: persistAndUpdateFilterOptions,
   };
 }

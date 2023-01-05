@@ -10,10 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { TestProviders } from '../../common/mock';
-import {
-  useAllCasesQueryParams,
-  getQueryParamsLocalStorageKey,
-} from './use_all_cases_query_params';
+import { useAllCasesState, getQueryParamsLocalStorageKey } from './use_all_cases_state';
 import { DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 import { stringify } from 'query-string';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
@@ -53,7 +50,7 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('calls setState with default values on first run', () => {
-    const { result } = renderHook(() => useAllCasesQueryParams(), {
+    const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -63,7 +60,7 @@ describe('useAllCasesQueryParams', () => {
   it('updates localstorage with default values on first run', () => {
     expect(global.localStorage.getItem(LOCALSTORAGE_KEY)).toStrictEqual(null);
 
-    renderHook(() => useAllCasesQueryParams(), {
+    renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -73,7 +70,7 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('calls history.replace with default values on first run', () => {
-    renderHook(() => useAllCasesQueryParams(), {
+    renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -87,7 +84,7 @@ describe('useAllCasesQueryParams', () => {
 
     global.localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(existingLocalStorageValues));
 
-    const { result } = renderHook(() => useAllCasesQueryParams(), {
+    const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -106,7 +103,7 @@ describe('useAllCasesQueryParams', () => {
 
     mockLocation.search = stringify(nonDefaultUrlParams);
 
-    renderHook(() => useAllCasesQueryParams(), {
+    renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -116,7 +113,7 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('calls history.replace on first run and history.push onwards', () => {
-    const { result } = renderHook(() => useAllCasesQueryParams(), {
+    const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -139,7 +136,7 @@ describe('useAllCasesQueryParams', () => {
 
     mockLocation.search = stringify(nonDefaultUrlParams);
 
-    renderHook(() => useAllCasesQueryParams(), {
+    renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
@@ -160,7 +157,7 @@ describe('useAllCasesQueryParams', () => {
       JSON.stringify({ perPage: DEFAULT_TABLE_LIMIT + 10 }) // existingLocalStorageValues
     );
 
-    const { result } = renderHook(() => useAllCasesQueryParams(), {
+    const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 

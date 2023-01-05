@@ -106,6 +106,7 @@ export type ParsedUrlQueryParams = Partial<Omit<QueryParams, 'page' | 'perPage'>
 };
 
 export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;
+
 export interface FilterOptions {
   search: string;
   searchFields: string[];
@@ -116,6 +117,7 @@ export interface FilterOptions {
   reporters: User[];
   owner: string[];
 }
+export type PartialFilterOptions = Partial<FilterOptions>;
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
 export type SingleCaseMetricsFeature =
