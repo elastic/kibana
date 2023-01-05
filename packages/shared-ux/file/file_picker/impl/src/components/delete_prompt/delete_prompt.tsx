@@ -14,9 +14,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { useFilePickerContext } from '../../context';
 import { i18nTexts } from '../../i18n_texts';
 
-interface Props {}
-
-export const DeletePrompt: FunctionComponent<Props> = ({}) => {
+export const DeletePrompt: FunctionComponent = () => {
   const [deleting, setDeleting] = React.useState(false);
   const isMounted = useMountedState();
   const { state } = useFilePickerContext();
