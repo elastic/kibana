@@ -51,6 +51,17 @@ const packageNotInstalledRenderer = (cisIntegrationLink?: string) => (
       data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
       css={css`
         max-width: 950px;
+        div:nth-child(3) {
+          display: flex;
+          margin: auto;
+          max-width: 463px;
+          button {
+            display: flex;
+            margin: auto;
+            max-width: 463px;
+            margin-top: 16px;
+          }
+        }
       `}
       pageTitle={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {
         defaultMessage: 'Install Integration to get started',
