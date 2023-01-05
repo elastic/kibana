@@ -163,7 +163,7 @@ export const EmbeddedMapComponent = ({
     return () => {
       canceled = true;
     };
-  }, [availableDataViews, isFieldInIndexPattern]);
+  }, [addError, availableDataViews, isFieldInIndexPattern]);
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
   // own component tree instead of the embeddables (default). This is necessary to have access to
