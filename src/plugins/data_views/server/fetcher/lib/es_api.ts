@@ -9,6 +9,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
+import { DataViewMissingIndices } from '../../../common/lib';
 
 /**
  *  Call the index.getAlias API for a list of indices.
@@ -65,13 +66,14 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     indices,
     indexFilter,
     fieldCapsOptions = {
-      allow_no_indices: false,
+      allow_no_indices: true, // CHANGE TO DEFAULT TO TRUE
       include_unmapped: false,
     },
     fields = ['*'],
   } = params;
   try {
-    return await callCluster.fieldCaps(
+    // console.log('*** ABOUT TO CALL CLUSTER');
+    const a = await callCluster.fieldCaps(
       {
         index: indices,
         fields,
@@ -81,7 +83,14 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
       },
       { meta: true }
     );
+    if (a.body.indices.length === 0) {
+      throw new DataViewMissingIndices(indices);
+    }
+    // console.log('*** CALLED CLUSTER', a);
+    return a;
   } catch (error) {
+    // console.log('*** CALLED CLUSTER ERROR', error);
+    // console.log('*** meta', error.meta.meta.request.params);
     throw convertEsError(indices, error);
   }
 }
