@@ -52,7 +52,6 @@ type ApmApiClientKey =
   | 'noAccessUser'
   | 'readUser'
   | 'writeUser'
-  | 'superuser'
   | 'annotationWriterUser'
   | 'noMlAccessUser'
   | 'manageOwnAgentKeysUser'
@@ -146,10 +145,6 @@ export function createTestConfig(
             monitorClusterAndIndicesUser: await getApmApiClient({
               kibanaServer,
               username: ApmUsername.apmMonitorClusterAndIndices,
-            }),
-            superuser: await getApmApiClient({
-              kibanaServer,
-              username: ApmUsername.superuser,
             }),
           };
         },
