@@ -9,7 +9,7 @@
 import Path from 'path';
 import del from 'del';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   createTestServers,
@@ -106,7 +106,8 @@ async function createRoot({ logFileName }: CreateRootConfig) {
 // suite is very long, the 10mins default can cause timeouts
 jest.setTimeout(15 * 60 * 1000);
 
-describe('migration v2', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/148263
+describe.skip('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let rootA: Root;
   let rootB: Root;
