@@ -17,7 +17,9 @@ interface StartServices {
   openModal: OverlayStart['openModal'];
 }
 
-export const createHelloWorldActionDefinition = (getStartServices: () => Promise<StartServices>) => ({
+export const createHelloWorldActionDefinition = (
+  getStartServices: () => Promise<StartServices>
+) => ({
   id: ACTION_HELLO_WORLD,
   type: ACTION_HELLO_WORLD,
   getDisplayName: () => 'Hello World!',
