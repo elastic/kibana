@@ -187,12 +187,12 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />, config);
 
-      userEvent.type(screen.getByTestId('sloFormCustomKqlIndexInput'), 'some-index');
-      userEvent.type(screen.getByTestId('sloFormCustomKqlFilterQueryInput'), 'irrelevant');
-      userEvent.type(screen.getByTestId('sloFormCustomKqlGoodQueryInput'), 'irrelevant');
-      userEvent.type(screen.getByTestId('sloFormCustomKqlTotalQueryInput'), 'irrelevant');
-      userEvent.type(screen.getByTestId('sloFormNameInput'), 'irrelevant');
-      userEvent.type(screen.getByTestId('sloFormDescriptionTextArea'), 'irrelevant');
+      await userEvent.type(screen.getByTestId('sloFormCustomKqlIndexInput'), 'some-index');
+      await userEvent.type(screen.getByTestId('sloFormCustomKqlFilterQueryInput'), 'irrelevant');
+      await userEvent.type(screen.getByTestId('sloFormCustomKqlGoodQueryInput'), 'irrelevant');
+      await userEvent.type(screen.getByTestId('sloFormCustomKqlTotalQueryInput'), 'irrelevant');
+      await userEvent.type(screen.getByTestId('sloFormNameInput'), 'irrelevant');
+      await userEvent.type(screen.getByTestId('sloFormDescriptionTextArea'), 'irrelevant');
 
       await waitFor(() => expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled());
 
