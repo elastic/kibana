@@ -71,7 +71,10 @@ import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { DetectionPageFilterSet } from '../../components/detection_page_filters';
-import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
+import type {
+  FilterGroupHandler,
+  FilterGroupProps,
+} from '../../../common/components/filter_group/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -130,6 +133,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     FilterGroupHandler | undefined
   >();
 
+  const [isDetectionPageFiltersLoading, setIsDetectionPageFiltersLoading] = useState(true);
+
   const {
     indexPattern,
     runtimeMappings,
@@ -150,6 +155,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
 
   useEffect(() => {
     if (!detectionPageFilterHandler) return;
+    // if Alert is reloaded because of action by the user.
+    // We want reload the values in the detection Page filters
     if (!isTableLoading) detectionPageFilterHandler.reload();
   }, [isTableLoading, detectionPageFilterHandler]);
 
@@ -256,6 +263,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     setDetectionPageFilters(newFilters);
   }, []);
 
+  const detectionPageFiltersInitHandler: FilterGroupProps['onInit'] = useCallback(
+    (filterGroup, isFilterloading) => {
+      setDetectionPageFilterHandler(filterGroup);
+      setIsDetectionPageFiltersLoading(isFilterloading);
+    },
+    []
+  );
+
   const isAlertTableLoading = useMemo(
     () => loading || !Array.isArray(detectionPageFilters),
     [loading, detectionPageFilters]
@@ -344,7 +359,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                   mode: 'absolute',
                 }}
                 chainingSystem="HIERARCHICAL"
-                onInit={setDetectionPageFilterHandler}
+                onInit={detectionPageFiltersInitHandler}
               />
 
               <EuiSpacer size="l" />

@@ -34,7 +34,8 @@
     "uiActions",
     "unifiedSearch",
     "files",
-    "controls"
+    "controls",
+    "dataViews"
   ],
   "optionalPlugins": [
     "cloudExperiments",

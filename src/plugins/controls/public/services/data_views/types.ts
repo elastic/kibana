@@ -12,6 +12,4 @@ export interface ControlsDataViewsService {
   get: DataViewsPublicPluginStart['get'];
   getDefaultId: DataViewsPublicPluginStart['getDefaultId'];
   getIdsWithTitle: DataViewsPublicPluginStart['getIdsWithTitle'];
-  clearCache: DataViewsPublicPluginStart['clearCache'];
-  clearInstanceCache: DataViewsPublicPluginStart['clearInstanceCache'];
 }

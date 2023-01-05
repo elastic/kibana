@@ -6,16 +6,44 @@
  */
 
 import type { ComponentProps } from 'react';
-import React, { useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
+import { EuiFlexItem } from '@elastic/eui';
+import { FilterGroupLoading } from '../../../common/components/filter_group/loading';
+import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
 import { FilterGroup } from '../../../common/components/filter_group';
 
 type FilterItemSetProps = Omit<ComponentProps<typeof FilterGroup>, 'initialControls'>;
 
 const FilterItemSetComponent = (props: FilterItemSetProps) => {
-  const { dataViewId, onFilterChange, ...restFilterItemGroupProps } = props;
+  const { dataViewId, onFilterChange, onInit, ...restFilterItemGroupProps } = props;
+
+  const [loadingPageFilters, setLoadingPageFilters] = useState(true);
+
+  const {
+    services: { dataViews: dataViewService },
+  } = useKibana();
+
+  useEffect(() => {
+    // this makes sure, that if fields are not present in existing copy of the
+    // dataView, clear the cache before filter group is loaded. This is only
+    // applicable to `alert` page as new alert mappings are added when first alert
+    // is encountered
+    (async () => {
+      const dataView = await dataViewService.get(dataViewId ?? '');
+      for (const filter of DEFAULT_DETECTION_PAGE_FILTERS) {
+        const fieldExists = dataView.getFieldByName(filter.fieldName);
+        if (!fieldExists) {
+          dataViewService.clearInstanceCache(dataViewId ?? '');
+          setLoadingPageFilters(false);
+          return;
+        }
+        setLoadingPageFilters(false);
+      }
+    })();
+  }, [dataViewId, dataViewService]);
 
   const [initialFilterControls] = useState(DEFAULT_DETECTION_PAGE_FILTERS);
 
@@ -33,10 +61,20 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
           },
         };
       });
+
       onFilterChange(updatedFilters);
     },
     [onFilterChange]
   );
+
+  if (loadingPageFilters) {
+    return (
+      <EuiFlexItem grow={true}>
+        <FilterGroupLoading />
+      </EuiFlexItem>
+    );
+  }
+
   return (
     <FilterGroup
       dataViewId={dataViewId}

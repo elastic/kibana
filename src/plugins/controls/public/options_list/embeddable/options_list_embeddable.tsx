@@ -24,7 +24,7 @@ import {
   buildExistsFilter,
 } from '@kbn/es-query';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
-import { DataView, type DataViewField } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -201,22 +201,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     );
   };
 
-  /*
-   *
-   * retryGetFieldFromDataView invalidates dataViewService  cache
-   * and tried to fetch the field again to see if updated dataview contains the field
-   *
-   * @param fieldName field that needs to be fetched from dataView
-   *
-   */
-  private retryGetFieldFromDataView = async (
-    fieldName: string
-  ): Promise<DataViewField | undefined> => {
-    this.dataViewsService.clearInstanceCache(this.dataView?.id);
-    this.dataView = await this.dataViewsService.get(this.dataView?.id as string);
-    return this.dataView.getFieldByName(fieldName);
-  };
-
   private getCurrentDataViewAndField = async (): Promise<{
     dataView?: DataView;
     field?: OptionsListField;
@@ -250,18 +234,14 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     if (this.dataView && (!this.field || this.field.name !== fieldName)) {
       try {
-        let originalField = this.dataView.getFieldByName(fieldName);
+        const originalField = this.dataView.getFieldByName(fieldName);
         if (!originalField) {
-          // retry once to see if we get the missing field with updated data view.
-          originalField = await this.retryGetFieldFromDataView(fieldName);
-          if (!originalField) {
-            throw new Error(
-              i18n.translate('controls.optionsList.errors.fieldNotFound', {
-                defaultMessage: 'Could not locate field: {fieldName}',
-                values: { fieldName },
-              })
-            );
-          }
+          throw new Error(
+            i18n.translate('controls.optionsList.errors.fieldNotFound', {
+              defaultMessage: 'Could not locate field: {fieldName}',
+              values: { fieldName },
+            })
+          );
         }
 
         // pair up keyword / text fields for case insensitive search
