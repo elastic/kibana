@@ -21,7 +21,6 @@ export {
   apmServiceInventoryOptimizedSorting,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
-  apmOperationsTab,
   apmLabsButton,
   enableInfrastructureHostsView,
   enableAwsLambdaMetrics,
