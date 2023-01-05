@@ -64,7 +64,6 @@ export const PROJECTS = [
   }),
   createProject('x-pack/plugins/apm/ftr_e2e/tsconfig.json', {
     name: 'apm/ftr_e2e',
-    disableTypeCheck: true,
   }),
   createProject('x-pack/plugins/fleet/cypress/tsconfig.json', {
     name: 'fleet/cypress',
