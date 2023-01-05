@@ -21,6 +21,7 @@ import { ControlOutput, OptionsListEmbeddableInput } from '../..';
 describe('Options list popover', () => {
   const defaultProps = {
     width: 500,
+    isLoading: false,
     updateSearchString: jest.fn(),
   };
 

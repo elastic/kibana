@@ -8,14 +8,15 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { css } from '@emotion/react';
+import { EuiSelectable } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { EuiSpacer, EuiIcon, useEuiTheme, EuiText, EuiSelectable, EuiToolTip } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
+import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
+import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
 
 interface OptionsListPopoverSuggestionsProps {
   isLoading: boolean;
@@ -33,7 +34,6 @@ export const OptionsListPopoverSuggestions = ({
     actions: { replaceSelection, deselectOption, selectOption, selectExists },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
-  const { euiTheme } = useEuiTheme();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
@@ -67,10 +67,6 @@ export const OptionsListPopoverSuggestions = ({
   }, [existsSelected]);
 
   const suggestionsSelectableOptions = useMemo<EuiSelectableOption[]>(() => {
-    if (!suggestions || suggestions.length === 0) {
-      return [];
-    }
-
     const options: EuiSelectableOption[] =
       suggestions?.map((key) => {
         return {
@@ -84,23 +80,7 @@ export const OptionsListPopoverSuggestions = ({
               : 'optionsList__validSuggestion',
           append:
             !showOnlySelected && availableOptions?.[key] ? (
-              <EuiToolTip
-                content={OptionsListStrings.popover.getDocumentCountTooltip(
-                  availableOptions[key].doc_count
-                )}
-                position={'right'}
-              >
-                <EuiText
-                  className="eui-textNumber"
-                  size="xs"
-                  color={euiTheme.colors.subduedText}
-                  css={css`
-                    font-weight: ${euiTheme.font.weight.medium};
-                  `}
-                >
-                  {`${availableOptions[key].doc_count.toLocaleString()}`}
-                </EuiText>
-              </EuiToolTip>
+              <OptionsListPopoverSuggestionBadge documentCount={availableOptions[key].doc_count} />
             ) : undefined,
           'aria-label': availableOptions?.[key]
             ? OptionsListStrings.popover.getSuggestionAriaLabel(
@@ -115,7 +95,6 @@ export const OptionsListPopoverSuggestions = ({
       ? [existsSelectableOption, ...options]
       : options;
   }, [
-    euiTheme,
     hideExists,
     suggestions,
     existsSelected,
@@ -133,47 +112,30 @@ export const OptionsListPopoverSuggestions = ({
   }, [suggestionsSelectableOptions]);
 
   return (
-    <>
-      <EuiSelectable
-        isLoading={isLoading}
-        options={suggestionsTest}
-        aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(fieldName)}
-        listProps={{ onFocusBadge: false }} // isVirtualized: false
-        emptyMessage={
-          <span
-            className="euiFilterSelect__note"
-            data-test-subj={`optionsList-control-${
-              showOnlySelected ? 'selectionsEmptyMessage' : 'noSelectionsMessage'
-            }`}
-          >
-            <span className="euiFilterSelect__noteContent">
-              <EuiIcon type="minusInCircle" />
-              <EuiSpacer size="xs" />
-              {showOnlySelected
-                ? OptionsListStrings.popover.getSelectionsEmptyMessage()
-                : OptionsListStrings.popover.getEmptyMessage()}
-            </span>
-          </span>
-        }
-        onChange={(newSuggestions, _, changedOption) => {
-          setSuggestionsTest(newSuggestions);
+    <EuiSelectable
+      isLoading={isLoading}
+      options={suggestionsTest}
+      listProps={{ onFocusBadge: false }}
+      aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(fieldName)}
+      emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
+      onChange={(newSuggestions, _, changedOption) => {
+        setSuggestionsTest(newSuggestions);
 
-          const key = changedOption.key ?? changedOption.label;
-          if (key === 'exists-option') {
-            dispatch(selectExists(!Boolean(existsSelected)));
-          } else if (showOnlySelected) {
-            dispatch(deselectOption(key));
-          } else if (selectedOptionsSet.has(key)) {
-            dispatch(deselectOption(key));
-          } else if (singleSelect) {
-            dispatch(replaceSelection(key));
-          } else {
-            dispatch(selectOption(key));
-          }
-        }}
-      >
-        {(list) => list}
-      </EuiSelectable>
-    </>
+        const key = changedOption.key ?? changedOption.label;
+        if (key === 'exists-option') {
+          dispatch(selectExists(!Boolean(existsSelected)));
+        } else if (showOnlySelected) {
+          dispatch(deselectOption(key));
+        } else if (selectedOptionsSet.has(key)) {
+          dispatch(deselectOption(key));
+        } else if (singleSelect) {
+          dispatch(replaceSelection(key));
+        } else {
+          dispatch(selectOption(key));
+        }
+      }}
+    >
+      {(list) => list}
+    </EuiSelectable>
   );
 };
