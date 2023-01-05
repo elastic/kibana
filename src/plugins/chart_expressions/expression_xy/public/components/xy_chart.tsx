@@ -828,12 +828,17 @@ export function XYChart({
               !args.detailedTooltip && hasTooltipActions
                 ? [
                     {
+                      disabled: (selected) => selected.length < 1,
                       label: (selected) =>
-                        i18n.translate('expressionXY.tooltipActions.filterValues', {
-                          defaultMessage:
-                            'Filter selected {seriesNumber, plural, one {# serie} other {# series}}',
-                          values: { seriesNumber: selected.length },
-                        }),
+                        selected.length === 0
+                          ? i18n.translate('expressionXY.tooltipActions.emptyFilterSelection', {
+                              defaultMessage: 'Select at least one series to filter',
+                            })
+                          : i18n.translate('expressionXY.tooltipActions.filterValues', {
+                              defaultMessage:
+                                'Filter selected {seriesNumber, plural, one {# serie} other {# series}}',
+                              values: { seriesNumber: selected.length },
+                            }),
                       onSelect: filterSelectedTooltipValues,
                     },
                   ]
