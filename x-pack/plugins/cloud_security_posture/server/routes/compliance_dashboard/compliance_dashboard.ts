@@ -40,6 +40,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
       path: STATS_ROUTE_PATH,
       validate: {
         params: schema.object({
+          // TODO: CIS AWS - replace with strict policy template values once available
           policy_template: schema.string(),
         }),
       },
