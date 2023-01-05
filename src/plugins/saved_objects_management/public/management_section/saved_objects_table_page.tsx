@@ -83,7 +83,6 @@ const SavedObjectsTablePage = ({
         actionRegistry={actionRegistry}
         columnRegistry={columnRegistry}
         taggingApi={taggingApi}
-        savedObjectsClient={coreStart.savedObjects.client}
         dataViews={dataViewsApi}
         search={dataStart.search}
         http={coreStart.http}
