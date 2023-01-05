@@ -119,6 +119,7 @@ export async function closePointInTime(esClient: ElasticsearchClient, pitId: str
 }
 
 export async function getAgentTags(
+  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options: ListWithKuery & {
     showInactive: boolean;
@@ -137,11 +138,14 @@ export async function getAgentTags(
 
   const kueryNode = _joinFilters(filters);
   const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
   try {
     const result = await esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
       index: AGENTS_INDEX,
       size: 0,
       body,
+      fields: Object.keys(runtimeFields),
+      runtime_mappings: runtimeFields,
       aggs: {
         tags: {
           terms: { field: 'tags', size: SO_SEARCH_LIMIT },
