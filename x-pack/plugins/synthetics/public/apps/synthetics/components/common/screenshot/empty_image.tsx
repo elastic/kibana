@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   useEuiTheme,
@@ -22,17 +21,17 @@ export const IMAGE_HEIGHT = 203;
 export const IMAGE_WIDTH_M = 200;
 export const IMAGE_HEIGHT_M = 114;
 
-export const imageStyle = css`
-  padding: 0;
-  margin: auto;
-  width: ${IMAGE_WIDTH}px;
-  height: ${IMAGE_HEIGHT}px;
-  object-fit: contain;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
+export const imageStyle = {
+  padding: 0,
+  margin: 'auto',
+  width: IMAGE_WIDTH,
+  height: IMAGE_HEIGHT,
+  objectFit: 'contain' as const,
+  overflow: 'hidden',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
 
 export const EmptyImage = ({ size, isLoading = false }: { isLoading: boolean; size?: 'm' }) => {
   const { euiTheme } = useEuiTheme();
@@ -46,32 +45,32 @@ export const EmptyImage = ({ size, isLoading = false }: { isLoading: boolean; si
       role="img"
       aria-label={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : SCREENSHOT_NOT_AVAILABLE}
       title={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : SCREENSHOT_NOT_AVAILABLE}
-      css={css`
-        ${imageStyle};
-        width: ${imgWidth}px;
-        height: ${imgHeight}px;
-        background: ${useEuiBackgroundColor('subdued')};
-        border: ${euiTheme.border.thin};
-      `}
+      style={{
+        ...imageStyle,
+        width: imgWidth,
+        height: imgHeight,
+        background: useEuiBackgroundColor('subdued'),
+        border: euiTheme.border.thin,
+      }}
     >
       {isLoading ? (
         <EuiLoadingContent
           lines={1}
           data-test-subj="stepScreenshotPlaceholderLoading"
-          css={css`
-            width: 100%;
-            height: 8%;
-            transform: scale(1, 13); // To create a skeleton loading effect
-          `}
+          css={{
+            width: '100%',
+            height: '8%',
+            transform: 'scale(1, 13)', // To create a skeleton loading effect
+          }}
         />
       ) : (
         <div
-          css={css({
+          style={{
             border: 'none',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-          })}
+          }}
         >
           <EuiIcon
             data-test-subj="stepScreenshotNotAvailable"
