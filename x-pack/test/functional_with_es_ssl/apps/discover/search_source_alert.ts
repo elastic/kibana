@@ -363,6 +363,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await input.type('search-source-alert-o*');
       await testSubjects.click('explore-matching-indices-button');
 
+      const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+      expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nsearch-source-alert-o*');
+
       await testSubjects.click('saveRuleButton');
 
       const errorElem = await testSubjects.find('esQueryAlertExpressionError');
