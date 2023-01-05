@@ -16,10 +16,10 @@ import { StepDetails } from '../test_run_details/components/step_details';
 import { PanelWithTitle } from '../common/components/panel_with_title';
 import { useErrorFailedTests } from './hooks/use_error_failed_tests';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
-import { StepImage } from '../step_details_page/components/step_image';
 import { FailedTestsList } from './components/failed_tests_list';
 import { ErrorTimeline } from './components/error_timeline';
 import { useErrorDetailsBreadcrumbs } from './hooks/use_error_details_breadcrumbs';
+import { StepImage } from '../step_details_page/step_screenshot/step_image';
 
 export function ErrorDetailsPage() {
   const { failedTests, loading } = useErrorFailedTests();
