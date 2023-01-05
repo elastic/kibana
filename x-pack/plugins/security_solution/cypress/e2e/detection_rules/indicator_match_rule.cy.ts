@@ -102,7 +102,7 @@ import {
 import { goBackToRuleDetails } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
-import { goBackToAllRulesTable, getDetails } from '../../tasks/rule_details';
+import { goBackToRulesTable, getDetails } from '../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL, RULE_CREATION } from '../../urls/navigation';
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
@@ -537,7 +537,7 @@ describe('indicator match', () => {
       it('Allows the rule to be duplicated from the table', () => {
         duplicateFirstRule();
         goBackToRuleDetails();
-        goBackToAllRulesTable();
+        goBackToRulesTable();
         checkDuplicatedRule();
       });
 
@@ -551,7 +551,7 @@ describe('indicator match', () => {
         goToRuleDetails();
         duplicateRuleFromMenu();
         goBackToRuleDetails();
-        goBackToAllRulesTable();
+        goBackToRulesTable();
         checkDuplicatedRule();
       });
     });
