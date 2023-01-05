@@ -11,13 +11,7 @@ get:
   tags:
     - alerting
   parameters:
-    - name: ruleId
-      in: path
-      required: true
-      description: The ID of the rule that you want to retrieve.
-      schema:
-        type: string
-      example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+    - $ref: '../components/parameters/rule_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
@@ -29,6 +23,28 @@ get:
           examples:
             updateRuleResponse:
               $ref: '../components/examples/get_rule_response.yaml'
+
+delete:
+  summary: Deletes a rule.
+  operationId: deleteRule
+  description: >
+    You must have `all` privileges for the appropriate Kibana features, depending
+    on the `consumer` and `rule_type_id` of the rule you're deleting. For example,
+    the **Management** > **Stack Rules** feature, **Analytics** > **Discover** or
+    **Machine Learning** features, **Observability**, or **Security** features.
+    WARNING: After you delete a rule, you cannot recover it.
+  tags:
+    - alerting
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: '../components/parameters/rule_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '204':
+      description: Indicates a successful call.
+  servers:
+    - url: https://localhost:5601
+
 put:
   summary: Updates the attributes for a rule.
   operationId: updateRule
@@ -50,13 +66,8 @@ put:
   tags:
     - alerting
   parameters:
-    - name: ruleId
-      in: path
-      required: true
-      description: The ID of the rule that you want to update.
-      schema:
-        type: string
-      example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: '../components/parameters/rule_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'
   requestBody:
     required: true

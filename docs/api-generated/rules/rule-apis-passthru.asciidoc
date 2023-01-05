@@ -18,12 +18,52 @@ Any modifications made to this file will be overwritten.
   <div class="method-summary"></div>
   <h4><a href="#Alerting">Alerting</a></h4>
   <ul>
+  <li><a href="#deleteRule"><code><span class="http-method">delete</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
   <li><a href="#findRules"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rules/_find</code></a></li>
   <li><a href="#getRule"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
   <li><a href="#updateRule"><code><span class="http-method">put</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
   </ul>
 
   <h1><a name="Alerting">Alerting</a></h1>
+  <div class="method"><a name="deleteRule"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></pre></div>
+    <div class="method-summary">Deletes a rule. (<span class="nickname">deleteRule</span>)</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the appropriate Kibana features, depending on the <code>consumer</code> and <code>rule_type_id</code> of the rule you're deleting. For example, the <strong>Management</strong> &gt; <strong>Stack Rules</strong> feature, <strong>Analytics</strong> &gt; <strong>Discover</strong> or <strong>Machine Learning</strong> features, <strong>Observability</strong>, or <strong>Security</strong> features. WARNING: After you delete a rule, you cannot recover it.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
   <div class="method"><a name="findRules"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
@@ -214,7 +254,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">ruleId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The ID of the rule that you want to retrieve. default: null </div><div class="param">spaceId (required)</div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
@@ -313,7 +353,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">ruleId (required)</div>
 
-      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The ID of the rule that you want to update. default: null </div><div class="param">spaceId (required)</div>
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
 
       <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
     </div>  <!-- field-items -->
@@ -332,6 +372,13 @@ Any modifications made to this file will be overwritten.
 
     </div>  <!-- field-items -->
 
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+
+    </div>  <!-- field-items -->
 
 
 

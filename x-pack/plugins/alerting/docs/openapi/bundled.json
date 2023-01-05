@@ -35,14 +35,7 @@
         ],
         "parameters": [
           {
-            "name": "ruleId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the rule that you want to retrieve.",
-            "schema": {
-              "type": "string"
-            },
-            "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+            "$ref": "#/components/parameters/rule_id"
           },
           {
             "$ref": "#/components/parameters/space_id"
@@ -66,6 +59,35 @@
           }
         }
       },
+      "delete": {
+        "summary": "Deletes a rule.",
+        "operationId": "deleteRule",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're deleting. For example, the **Management** > **Stack Rules** feature, **Analytics** > **Discover** or **Machine Learning** features, **Observability**, or **Security** features. WARNING: After you delete a rule, you cannot recover it.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
       "put": {
         "summary": "Updates the attributes for a rule.",
         "operationId": "updateRule",
@@ -75,14 +97,10 @@
         ],
         "parameters": [
           {
-            "name": "ruleId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the rule that you want to update.",
-            "schema": {
-              "type": "string"
-            },
-            "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
           },
           {
             "$ref": "#/components/parameters/space_id"
@@ -318,6 +336,16 @@
       }
     },
     "parameters": {
+      "rule_id": {
+        "in": "path",
+        "name": "ruleId",
+        "description": "An identifier for the rule.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+        }
+      },
       "space_id": {
         "in": "path",
         "name": "spaceId",
@@ -327,6 +355,14 @@
           "type": "string",
           "example": "default"
         }
+      },
+      "kbn_xsrf": {
+        "schema": {
+          "type": "string"
+        },
+        "in": "header",
+        "name": "kbn-xsrf",
+        "required": true
       }
     },
     "schemas": {
