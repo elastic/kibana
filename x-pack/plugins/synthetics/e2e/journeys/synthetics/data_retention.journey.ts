@@ -43,6 +43,7 @@ journey(`DataRetentionPage`, async ({ page, params }) => {
         'tbody div:has-text("synthetics-synthetics.browser-default_policy(opens in a new tab or window)")'
       ),
     ]);
+    await page1.setDefaultTimeout(60 * 1000);
     await page1.click('text=Edit policy synthetics-synthetics.browser-default_policy');
     await page1.click('text=Save as new policy');
   });
@@ -60,8 +61,12 @@ journey(`DataRetentionPage`, async ({ page, params }) => {
 
     await page1.fill(byTestId('ilmSearchBar'), 'copy');
 
-    await page1.click(byTestId('addPolicyToTemplate'));
-    await page1.click(byTestId('addPolicyToTemplate'));
+    await page1.hover(byTestId('addPolicyToTemplate'));
+    await page1.click(byTestId('addPolicyToTemplate'), { delay: 1000 });
+
+    if (!(await page1.isVisible(byTestId('confirmModalConfirmButton')))) {
+      await page1.click(byTestId('addPolicyToTemplate'));
+    }
 
     await page1.click(byTestId('comboBoxToggleListButton'));
     await page1.fill(byTestId('comboBoxSearchInput'), 'synthetics-browser');
