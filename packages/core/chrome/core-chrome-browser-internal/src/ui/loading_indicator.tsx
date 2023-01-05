@@ -58,18 +58,12 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
   render() {
     const className = classNames(!this.state.visible && 'kbnLoadingIndicator-hidden');
 
-    const testSubj = () => {
-      if (this.state.visible && this.props.showPlainSpinner) {
-        return 'globalLoadingIndicator';
-      } else if (this.state.visible) {
-        return 'globalElasticLoadingIndicator';
-      } else if (this.props.showPlainSpinner) {
-        return 'globalLoadingIndicator-hidden';
-      }
-      return 'globalElasticLoadingIndicator-hidden';
-    };
+    const testSubj =
+      this.state.visible || this.props.showPlainSpinner
+        ? 'globalLoadingIndicator'
+        : 'globalLoadingIndicator-hidden';
 
-    const ariaHidden = this.state.visible ? false : true;
+    const ariaHidden = !this.state.visible;
 
     const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
       defaultMessage: 'Loading content',
@@ -79,7 +73,7 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       this.state.visible || this.props.showPlainSpinner ? (
         <EuiLoadingSpinner
           size="l"
-          data-test-subj={testSubj()}
+          data-test-subj={testSubj}
           aria-hidden={false}
           aria-label={ariaLabel}
         />
@@ -87,7 +81,7 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
         <EuiIcon
           type={'logoElastic'}
           size="l"
-          data-test-subj={testSubj()}
+          data-test-subj={testSubj}
           className="chrHeaderLogo__cluster"
           aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
             defaultMessage: 'Elastic Logo',
@@ -100,7 +94,7 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
     ) : (
       <EuiProgress
         className={className}
-        data-test-subj={testSubj()}
+        data-test-subj={testSubj}
         aria-hidden={ariaHidden}
         aria-label={ariaLabel}
         position="fixed"

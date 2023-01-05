@@ -15,7 +15,7 @@ import { LoadingIndicator } from './loading_indicator';
 describe('kbnLoadingIndicator', () => {
   it('is hidden by default', () => {
     const wrapper = shallow(<LoadingIndicator loadingCount$={new BehaviorSubject(0)} />);
-    expect(wrapper.prop('data-test-subj')).toBe('globalElasticLoadingIndicator-hidden');
+    expect(wrapper.prop('data-test-subj')).toBe('globalLoadingIndicator-hidden');
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -23,7 +23,7 @@ describe('kbnLoadingIndicator', () => {
     const wrapper = shallow(<LoadingIndicator loadingCount$={new BehaviorSubject(1)} />);
     // Pause the check beyond the 250ms delay that it has
     setTimeout(() => {
-      expect(wrapper.prop('data-test-subj')).toBe('globalElasticLoadingIndicator');
+      expect(wrapper.prop('data-test-subj')).toBe('globalLoadingIndicator');
     }, 300);
     expect(wrapper).toMatchSnapshot();
   });
