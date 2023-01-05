@@ -13,6 +13,7 @@ import { PromiseType } from 'utility-types';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 
 import { esArchiverUnload } from './tasks/es_archiver';
+import { TestReporter } from './test_reporter';
 
 export interface ArgParams {
   headless: boolean;
@@ -103,10 +104,14 @@ export class SyntheticsRunner {
           height: 900,
           width: 1600,
         },
+        recordVideo: {
+          dir: '.journeys/videos',
+        },
       },
       match: match === 'undefined' ? '' : match,
       pauseOnError,
       screenshots: 'only-on-failure',
+      reporter: TestReporter,
     });
 
     await this.assertResults(results);
@@ -115,7 +120,8 @@ export class SyntheticsRunner {
   assertResults(results: PromiseType<ReturnType<typeof syntheticsRun>>) {
     Object.entries(results).forEach(([_journey, result]) => {
       if (result.status !== 'succeeded') {
-        throw new Error('Tests failed');
+        process.exitCode = 1;
+        process.exit();
       }
     });
   }

@@ -27,8 +27,13 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 
+import { useStorage } from '@kbn/ml-local-storage';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
-import { DV_RANDOM_SAMPLER_PREFERENCE, useStorage } from '../../hooks/use_storage';
+import {
+  DV_RANDOM_SAMPLER_PREFERENCE,
+  type DVKey,
+  type DVStorageMapped,
+} from '../../types/storage';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import {
   DataVisualizerTable,
@@ -58,7 +63,7 @@ import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
-import { RANDOM_SAMPLER_OPTION, RandomSamplerOption } from '../../constants/random_sampler';
+import { RANDOM_SAMPLER_OPTION } from '../../constants/random_sampler';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -126,18 +131,17 @@ export interface IndexDataVisualizerViewProps {
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
   const euiTheme = useCurrentEuiTheme();
 
-  const [savedRandomSamplerPreference, saveRandomSamplerPreference] =
-    useStorage<RandomSamplerOption>(
-      DV_RANDOM_SAMPLER_PREFERENCE,
-      RANDOM_SAMPLER_OPTION.ON_AUTOMATIC
-    );
+  const [savedRandomSamplerPreference, saveRandomSamplerPreference] = useStorage<
+    DVKey,
+    DVStorageMapped<typeof DV_RANDOM_SAMPLER_PREFERENCE>
+  >(DV_RANDOM_SAMPLER_PREFERENCE, RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
 
   const restorableDefaults = useMemo(
     () =>
       getDefaultDataVisualizerListState({
         rndSamplerPref: savedRandomSamplerPreference,
       }),
-    // We just  need to load the saved preference when the page is first loaded
+    // We just need to load the saved preference when the page is first loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );

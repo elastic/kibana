@@ -51,20 +51,20 @@ const getSLOParamsSchema = t.type({
 });
 
 const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
-const sortBySchema = t.union([t.literal('name'), t.literal('indicator_type')]);
+const sortBySchema = t.union([t.literal('name'), t.literal('indicatorType')]);
 
 const findSLOParamsSchema = t.partial({
   query: t.partial({
     name: t.string,
-    indicator_types: indicatorTypesArraySchema,
+    indicatorTypes: indicatorTypesArraySchema,
     page: t.string,
-    per_page: t.string,
-    sort_by: sortBySchema,
-    sort_direction: sortDirectionSchema,
+    perPage: t.string,
+    sortBy: sortBySchema,
+    sortDirection: sortDirectionSchema,
   }),
 });
 
-const SLOResponseSchema = t.type({
+const sloResponseSchema = t.type({
   id: t.string,
   name: t.string,
   description: t.string,
@@ -78,12 +78,12 @@ const SLOResponseSchema = t.type({
   updatedAt: dateType,
 });
 
-const SLOWithSummaryResponseSchema = t.intersection([
-  SLOResponseSchema,
+const sloWithSummaryResponseSchema = t.intersection([
+  sloResponseSchema,
   t.type({ summary: summarySchema }),
 ]);
 
-const getSLOResponseSchema = SLOWithSummaryResponseSchema;
+const getSLOResponseSchema = sloWithSummaryResponseSchema;
 
 const updateSLOParamsSchema = t.type({
   path: t.type({
@@ -100,17 +100,17 @@ const updateSLOParamsSchema = t.type({
   }),
 });
 
-const updateSLOResponseSchema = SLOResponseSchema;
+const updateSLOResponseSchema = sloResponseSchema;
 
 const findSLOResponseSchema = t.type({
   page: t.number,
   perPage: t.number,
   total: t.number,
-  results: t.array(SLOWithSummaryResponseSchema),
+  results: t.array(sloWithSummaryResponseSchema),
 });
 
-type SLOResponse = t.OutputOf<typeof SLOResponseSchema>;
-type SLOWithSummaryResponse = t.OutputOf<typeof SLOWithSummaryResponseSchema>;
+type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
+type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>;
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>;
@@ -123,25 +123,29 @@ type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
+type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
+
 export {
-  SLOResponseSchema,
   createSLOParamsSchema,
   deleteSLOParamsSchema,
-  getSLOParamsSchema,
-  getSLOResponseSchema,
-  updateSLOParamsSchema,
-  updateSLOResponseSchema,
   findSLOParamsSchema,
   findSLOResponseSchema,
+  getSLOParamsSchema,
+  getSLOResponseSchema,
+  sloResponseSchema,
+  sloWithSummaryResponseSchema,
+  updateSLOParamsSchema,
+  updateSLOResponseSchema,
 };
 export type {
-  SLOResponse,
-  SLOWithSummaryResponse,
+  BudgetingMethod,
   CreateSLOParams,
   CreateSLOResponse,
-  GetSLOResponse,
-  UpdateSLOParams,
-  UpdateSLOResponse,
   FindSLOParams,
   FindSLOResponse,
+  GetSLOResponse,
+  SLOResponse,
+  SLOWithSummaryResponse,
+  UpdateSLOParams,
+  UpdateSLOResponse,
 };
