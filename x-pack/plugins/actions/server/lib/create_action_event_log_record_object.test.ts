@@ -5,32 +5,33 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 
 describe('createActionEventLogRecordObject', () => {
   test('created action event "execute-start"', async () => {
-    expect(
-      createActionEventLogRecordObject({
-        actionId: '1',
-        action: 'execute-start',
-        consumer: 'test-consumer',
-        timestamp: '1970-01-01T00:00:00.000Z',
-        task: {
-          scheduled: '1970-01-01T00:00:00.000Z',
-          scheduleDelay: 0,
+    const event = createActionEventLogRecordObject({
+      actionId: '1',
+      action: 'execute-start',
+      consumer: 'test-consumer',
+      timestamp: '1970-01-01T00:00:00.000Z',
+      task: {
+        scheduled: '1970-01-01T00:00:00.000Z',
+        scheduleDelay: 0,
+      },
+      executionId: '123abc',
+      savedObjects: [
+        {
+          id: '1',
+          type: 'action',
+          typeId: 'test',
+          relation: 'primary',
         },
-        executionId: '123abc',
-        savedObjects: [
-          {
-            id: '1',
-            type: 'action',
-            typeId: 'test',
-            relation: 'primary',
-          },
-        ],
-        spaceId: 'default',
-      })
-    ).toStrictEqual({
+      ],
+      spaceId: 'default',
+      name: 'test name',
+    });
+    expect(omit(event, 'action.uuid')).toStrictEqual({
       '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-start',
@@ -59,29 +60,31 @@ describe('createActionEventLogRecordObject', () => {
           scheduled: '1970-01-01T00:00:00.000Z',
         },
       },
+      action: {
+        name: 'test name',
+      },
     });
   });
 
   test('created action event "execute"', async () => {
-    expect(
-      createActionEventLogRecordObject({
-        actionId: '1',
-        name: 'test name',
-        action: 'execute',
-        message: 'action execution start',
-        namespace: 'default',
-        executionId: '123abc',
-        consumer: 'test-consumer',
-        savedObjects: [
-          {
-            id: '2',
-            type: 'action',
-            typeId: '.email',
-            relation: 'primary',
-          },
-        ],
-      })
-    ).toStrictEqual({
+    const event = createActionEventLogRecordObject({
+      actionId: '1',
+      name: 'test name',
+      action: 'execute',
+      message: 'action execution start',
+      namespace: 'default',
+      executionId: '123abc',
+      consumer: 'test-consumer',
+      savedObjects: [
+        {
+          id: '2',
+          type: 'action',
+          typeId: '.email',
+          relation: 'primary',
+        },
+      ],
+    });
+    expect(omit(event, 'action.uuid')).toStrictEqual({
       event: {
         action: 'execute',
         kind: 'action',
@@ -106,27 +109,29 @@ describe('createActionEventLogRecordObject', () => {
         ],
       },
       message: 'action execution start',
+      action: {
+        name: 'test name',
+      },
     });
   });
 
   test('created action event "execute" with no kibana.alert.rule fields', async () => {
-    expect(
-      createActionEventLogRecordObject({
-        actionId: '1',
-        name: 'test name',
-        action: 'execute',
-        message: 'action execution start',
-        namespace: 'default',
-        savedObjects: [
-          {
-            id: '2',
-            type: 'action',
-            typeId: '.email',
-            relation: 'primary',
-          },
-        ],
-      })
-    ).toStrictEqual({
+    const event = createActionEventLogRecordObject({
+      actionId: '1',
+      name: 'test name',
+      action: 'execute',
+      message: 'action execution start',
+      namespace: 'default',
+      savedObjects: [
+        {
+          id: '2',
+          type: 'action',
+          typeId: '.email',
+          relation: 'primary',
+        },
+      ],
+    });
+    expect(omit(event, 'action.uuid')).toStrictEqual({
       event: {
         action: 'execute',
         kind: 'action',
@@ -143,28 +148,31 @@ describe('createActionEventLogRecordObject', () => {
         ],
       },
       message: 'action execution start',
+      action: {
+        name: 'test name',
+      },
     });
   });
 
   test('created action event "execute-timeout"', async () => {
-    expect(
-      createActionEventLogRecordObject({
-        actionId: '1',
-        action: 'execute-timeout',
-        task: {
-          scheduled: '1970-01-01T00:00:00.000Z',
+    const event = createActionEventLogRecordObject({
+      actionId: '1',
+      action: 'execute-timeout',
+      task: {
+        scheduled: '1970-01-01T00:00:00.000Z',
+      },
+      executionId: '123abc',
+      savedObjects: [
+        {
+          id: '1',
+          type: 'action',
+          typeId: 'test',
+          relation: 'primary',
         },
-        executionId: '123abc',
-        savedObjects: [
-          {
-            id: '1',
-            type: 'action',
-            typeId: 'test',
-            relation: 'primary',
-          },
-        ],
-      })
-    ).toStrictEqual({
+      ],
+      name: 'test name',
+    });
+    expect(omit(event, 'action.uuid')).toStrictEqual({
       event: {
         action: 'execute-timeout',
         kind: 'action',
@@ -190,36 +198,38 @@ describe('createActionEventLogRecordObject', () => {
           scheduled: '1970-01-01T00:00:00.000Z',
         },
       },
+      action: {
+        name: 'test name',
+      },
     });
   });
 
   test('created action event "execute" with related saved object', async () => {
-    expect(
-      createActionEventLogRecordObject({
-        actionId: '1',
-        name: 'test name',
-        action: 'execute',
-        message: 'action execution start',
-        namespace: 'default',
-        executionId: '123abc',
-        consumer: 'test-consumer',
-        savedObjects: [
-          {
-            id: '2',
-            type: 'action',
-            typeId: '.email',
-            relation: 'primary',
-          },
-        ],
-        relatedSavedObjects: [
-          {
-            type: 'alert',
-            typeId: '.rule-type',
-            id: '123',
-          },
-        ],
-      })
-    ).toStrictEqual({
+    const event = createActionEventLogRecordObject({
+      actionId: '1',
+      name: 'test name',
+      action: 'execute',
+      message: 'action execution start',
+      namespace: 'default',
+      executionId: '123abc',
+      consumer: 'test-consumer',
+      savedObjects: [
+        {
+          id: '2',
+          type: 'action',
+          typeId: '.email',
+          relation: 'primary',
+        },
+      ],
+      relatedSavedObjects: [
+        {
+          type: 'alert',
+          typeId: '.rule-type',
+          id: '123',
+        },
+      ],
+    });
+    expect(omit(event, 'action.uuid')).toStrictEqual({
       event: {
         action: 'execute',
         kind: 'action',
@@ -252,6 +262,9 @@ describe('createActionEventLogRecordObject', () => {
         ],
       },
       message: 'action execution start',
+      action: {
+        name: 'test name',
+      },
     });
   });
 });

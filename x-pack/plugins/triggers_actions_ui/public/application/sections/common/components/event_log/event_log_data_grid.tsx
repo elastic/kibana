@@ -54,7 +54,7 @@ type ExecutionLog = IExecutionLog | IConnectorsExecutionLog;
 
 export interface EventLogDataGrid {
   columns: EuiDataGridColumn[];
-  logs: ExecutionLog[]; // TODO
+  logs: ExecutionLog[];
   pagination: Pagination;
   sortingColumns: EuiDataGridSorting['columns'];
   visibleColumns: string[];
@@ -162,13 +162,10 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
     dateFormat,
     visibleColumns,
     selectedRunLog,
-    // showRuleNameAndIdColumns = false,
-    // showSpaceColumns = false,
     setVisibleColumns,
     setSortingColumns,
     onChangeItemsPerPage,
     onChangePage,
-    // onFilterChange,
     onFlyoutOpen,
   } = props;
 
@@ -316,7 +313,7 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
     if (columnId === 'num_errored_actions' && runLog && onFlyoutOpen) {
       return (
         <EuiBadge
-          data-test-subj="ruleEventLogDataGridErroredActionBadge"
+          data-test-subj="eventLogDataGridErroredActionBadge"
           style={{
             cursor: 'pointer',
             borderRadius: euiTheme.border.radius.medium,

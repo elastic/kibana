@@ -252,9 +252,9 @@ describe.skip('rule_event_log_list', () => {
     });
 
     // Filter by success
-    wrapper.find('[data-test-subj="ruleEventLogStatusFilterButton"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="eventLogStatusFilterButton"]').at(0).simulate('click');
 
-    wrapper.find('[data-test-subj="ruleEventLogStatusFilter-success"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="eventLogStatusFilter-success"]').at(0).simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -272,9 +272,9 @@ describe.skip('rule_event_log_list', () => {
     );
 
     // Filter by failure as well
-    wrapper.find('[data-test-subj="ruleEventLogStatusFilterButton"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="eventLogStatusFilterButton"]').at(0).simulate('click');
 
-    wrapper.find('[data-test-subj="ruleEventLogStatusFilter-failure"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="eventLogStatusFilter-failure"]').at(0).simulate('click');
 
     await act(async () => {
       await nextTick();
@@ -549,7 +549,7 @@ describe.skip('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
       'Showing 0 of 0 log entries'
     );
   });
@@ -576,7 +576,7 @@ describe.skip('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
       'Showing 1 - 1 of 1 log entry'
     );
   });
@@ -603,7 +603,7 @@ describe.skip('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
       'Showing 1 - 10 of 85 log entries'
     );
 
@@ -614,7 +614,7 @@ describe.skip('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
       'Showing 11 - 20 of 85 log entries'
     );
 
@@ -625,7 +625,7 @@ describe.skip('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="eventLogPaginationStatus"]').first().text()).toEqual(
       'Showing 81 - 85 of 85 log entries'
     );
   });
@@ -674,10 +674,7 @@ describe.skip('rule_event_log_list', () => {
     expect(wrapper.find('[data-test-subj="ruleActionErrorBadge"]').first().text()).toEqual('4');
 
     // Click to open flyout
-    wrapper
-      .find('[data-test-subj="ruleEventLogDataGridErroredActionBadge"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="eventLogDataGridErroredActionBadge"]').first().simulate('click');
     expect(wrapper.find('[data-test-subj="ruleActionErrorLogFlyout"]').exists()).toBeTruthy();
   });
 
