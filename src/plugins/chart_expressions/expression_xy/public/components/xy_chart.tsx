@@ -835,8 +835,7 @@ export function XYChart({
                               defaultMessage: 'Select at least one series to filter',
                             })
                           : i18n.translate('expressionXY.tooltipActions.filterValues', {
-                              defaultMessage:
-                                'Filter selected {seriesNumber, plural, one {# serie} other {# series}}',
+                              defaultMessage: 'Filter {seriesNumber} series',
                               values: { seriesNumber: selected.length },
                             }),
                       onSelect: filterSelectedTooltipValues,
