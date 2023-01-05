@@ -6,12 +6,14 @@
  */
 
 import * as t from 'io-ts';
+import { PingType } from '..';
 
 export const OverviewStatusMetaDataCodec = t.interface({
   monitorQueryId: t.string,
   configId: t.string,
   location: t.string,
   status: t.string,
+  ping: PingType,
 });
 
 export const OverviewStatusCodec = t.interface({
