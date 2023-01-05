@@ -9,7 +9,7 @@ import { RulesClient } from '../..';
 import { AggregateOptions } from '../../rules_client';
 import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '../../types';
 
-interface AggregateResult {
+export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
   ruleLastRunOutcome: { [status: string]: number };
   ruleEnabledStatus?: { enabled: number; disabled: number };
