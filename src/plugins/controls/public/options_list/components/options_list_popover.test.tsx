@@ -93,13 +93,12 @@ describe('Options list popover', () => {
       explicitInput: { selectedOptions: selections },
     });
     clickShowOnlySelections(popover);
-    const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    availableOptionsDiv
-      .childAt(0)
-      .children()
-      .forEach((child, i) => {
-        expect(child.text()).toBe(selections[i]);
-      });
+    const availableOptions = popover.find(
+      '[data-test-subj="optionsList-control-available-options"] ul'
+    );
+    availableOptions.children().forEach((child, i) => {
+      expect(child.text()).toBe(`${selections[i]} - Checked option.`);
+    });
   });
 
   test('disable search and sort when show only selected toggle is true', async () => {
@@ -133,7 +132,10 @@ describe('Options list popover', () => {
       },
     });
     const validSelection = findTestSubject(popover, 'optionsList-control-selection-bark');
-    expect(validSelection.text()).toEqual('bark75');
+    expect(validSelection.find('.euiSelectableListItem__text').text()).toEqual(
+      'bark - Checked option.'
+    );
+    expect(validSelection.find('.euiSelectableListItem__append').text().trim()).toEqual('75');
     const title = findTestSubject(popover, 'optionList__ignoredSelectionLabel').text();
     expect(title).toEqual('Ignored selection');
     const invalidSelection = findTestSubject(popover, 'optionsList-control-ignored-selection-woof');
@@ -222,8 +224,10 @@ describe('Options list popover', () => {
       explicitInput: { existsSelected: true },
     });
     clickShowOnlySelections(popover);
-    const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    expect(availableOptionsDiv.children().at(0).text()).toBe('Exists');
+    const availableOptions = popover.find(
+      '[data-test-subj="optionsList-control-available-options"] ul'
+    );
+    expect(availableOptions.text()).toBe('Exists - Checked option.');
   });
 
   test('when sorting suggestions, show both sorting types for keyword field', async () => {

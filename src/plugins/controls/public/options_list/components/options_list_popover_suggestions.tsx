@@ -56,7 +56,9 @@ export const OptionsListPopoverSuggestions = ({
     return showOnlySelected ? selectedOptions : Object.keys(availableOptions ?? {});
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
-  const existsSelectableOption = useMemo<EuiSelectableOption>(() => {
+  const existsSelectableOption = useMemo<EuiSelectableOption | undefined>(() => {
+    if (hideExists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
+
     return {
       key: 'exists-option',
       checked: existsSelected ? 'on' : undefined,
@@ -64,40 +66,34 @@ export const OptionsListPopoverSuggestions = ({
       className: 'optionsList__existsFilter',
       'data-test-subj': 'optionsList-control-selection-exists',
     };
-  }, [existsSelected]);
+  }, [suggestions, existsSelected, showOnlySelected, hideExists]);
 
   const suggestionsSelectableOptions = useMemo<EuiSelectableOption[]>(() => {
-    const options: EuiSelectableOption[] =
-      suggestions?.map((key) => {
-        return {
-          key,
-          label: key,
-          checked: selectedOptionsSet?.has(key) ? 'on' : undefined,
-          'data-test-subj': `optionsList-control-selection-${key}`,
-          className:
-            showOnlySelected && invalidSelectionsSet.has(key)
-              ? 'optionsList__selectionInvalid'
-              : 'optionsList__validSuggestion',
-          append:
-            !showOnlySelected && availableOptions?.[key] ? (
-              <OptionsListPopoverSuggestionBadge documentCount={availableOptions[key].doc_count} />
-            ) : undefined,
-          'aria-label': availableOptions?.[key]
-            ? OptionsListStrings.popover.getSuggestionAriaLabel(
-                key,
-                availableOptions[key].doc_count ?? 0
-              )
-            : key,
-        };
-      }) ?? [];
-
-    return !hideExists && !(showOnlySelected && !existsSelected)
-      ? [existsSelectableOption, ...options]
-      : options;
+    const options: EuiSelectableOption[] = (suggestions ?? []).map((key) => {
+      return {
+        key,
+        label: key,
+        checked: selectedOptionsSet?.has(key) ? 'on' : undefined,
+        'data-test-subj': `optionsList-control-selection-${key}`,
+        className:
+          showOnlySelected && invalidSelectionsSet.has(key)
+            ? 'optionsList__selectionInvalid'
+            : 'optionsList__validSuggestion',
+        append:
+          !showOnlySelected && availableOptions?.[key] ? (
+            <OptionsListPopoverSuggestionBadge documentCount={availableOptions[key].doc_count} />
+          ) : undefined,
+        'aria-label': availableOptions?.[key]
+          ? OptionsListStrings.popover.getSuggestionAriaLabel(
+              key,
+              availableOptions[key].doc_count ?? 0
+            )
+          : key,
+      };
+    });
+    return existsSelectableOption ? [existsSelectableOption, ...options] : options;
   }, [
-    hideExists,
     suggestions,
-    existsSelected,
     availableOptions,
     showOnlySelected,
     selectedOptionsSet,
