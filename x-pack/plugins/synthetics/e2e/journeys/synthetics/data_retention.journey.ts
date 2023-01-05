@@ -30,6 +30,7 @@ journey(`DataRetentionPage`, async ({ page, params }) => {
     await page.click('text=Data retention');
     expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/data-retention');
     await page.click('text=Synthetics data is configured by managed index lifecycle policies');
+
     await page.click('text=0 Bytes');
     await page.click('text=365 days + rollover');
     await page.click('text=14 days + rollover');
@@ -38,6 +39,23 @@ journey(`DataRetentionPage`, async ({ page, params }) => {
     await page.click(':nth-match(:text("365 days + rollover"), 3)');
     await page.click(':nth-match(:text("365 days + rollover"), 4)');
     await page.click('tbody div:has-text("synthetics(opens in a new tab or window)")');
+  });
+
+  step('validate data sizes', async () => {
+    const allChecks = await page.textContent(`tr:has-text("All Checks") span:has-text("KB")`);
+    const browserChecks = await page.textContent(
+      `tr:has-text("Browser Checks") span:has-text("KB")`
+    );
+    const networkChecks = await page.textContent(
+      `tr:has-text("Browser Network Requests") span:has-text("KB")`
+    );
+    const screenshotChecks = await page.textContent(
+      `tr:has-text("Browser Screenshots") span:has-text("KB")`
+    );
+    expect(Number(allChecks?.split('KB')[0])).toBeGreaterThan(500);
+    expect(Number(browserChecks?.split('KB')[0])).toBeGreaterThan(70);
+    expect(Number(networkChecks?.split('KB')[0])).toBeGreaterThan(350);
+    expect(Number(screenshotChecks?.split('KB')[0])).toBeGreaterThan(40);
   });
 
   step('it can click through for policy', async () => {
