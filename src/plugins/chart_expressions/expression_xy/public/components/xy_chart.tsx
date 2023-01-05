@@ -29,8 +29,8 @@ import {
   Direction,
   XYChartElementEvent,
   Tooltip,
-  GeometryValue,
   XYChartSeriesIdentifier,
+  TooltipValue,
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
@@ -118,10 +118,6 @@ declare global {
      */
     _echDebugStateFlag?: boolean;
   }
-}
-
-interface XYMultipleClickElement extends GeometryValue {
-  seriesIdentifier: XYChartSeriesIdentifier;
 }
 
 export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
@@ -553,9 +549,11 @@ export function XYChart({
     valueLabels !== ValueLabelModes.HIDE &&
     getValueLabelsStyling(shouldRotate);
 
-  const multiClickHandler = (values: XYMultipleClickElement[]) => {
+  const filterSelectedTooltipValues = (
+    tooltipSelectedValues: Array<TooltipValue<Record<string, unknown>, XYChartSeriesIdentifier>>
+  ) => {
     const layerIndexes: number[] = [];
-    values.forEach((v) => {
+    tooltipSelectedValues.forEach((v) => {
       const index = dataLayers.findIndex((l) =>
         v.seriesIdentifier.seriesKeys.some((key: string | number) =>
           l.accessors.some(
@@ -567,6 +565,7 @@ export function XYChart({
         layerIndexes.push(index);
       }
     });
+
     if (!layerIndexes.length) return;
     layerIndexes.forEach((layerIndex) => {
       const layer = dataLayers[layerIndex];
@@ -574,8 +573,10 @@ export function XYChart({
 
       if (layer.splitAccessors?.length !== 1) return;
 
-      const splitAccessor = getAccessorByDimension(layer.splitAccessors![0], table.columns);
-      const filterValues = values.map((v) => v.datum[splitAccessor]).filter((item) => item);
+      const splitAccessor = getAccessorByDimension(layer.splitAccessors[0], table.columns);
+      const filterValues = tooltipSelectedValues
+        .map((v) => v.datum?.[splitAccessor])
+        .filter((item) => item);
       const finalValues = filterValues.map((v) => {
         const splitPointRowIndex = formattedDatatables[layer.layerId].table.rows.findIndex(
           (row) => {
@@ -810,7 +811,7 @@ export function XYChart({
         }}
       >
         <Chart ref={chartRef}>
-          <Tooltip
+          <Tooltip<Record<string, unknown>, XYChartSeriesIdentifier>
             boundary={document.getElementById('app-fixed-viewport') ?? undefined}
             headerFormatter={
               !args.detailedTooltip
@@ -833,10 +834,7 @@ export function XYChart({
                             'Filter selected {seriesNumber, plural, one {# serie} other {# series}}',
                           values: { seriesNumber: selected.length },
                         }),
-                      onSelect: (values) => {
-                        const selectedValues = values as unknown as XYMultipleClickElement[];
-                        multiClickHandler(selectedValues);
-                      },
+                      onSelect: filterSelectedTooltipValues,
                     },
                   ]
                 : undefined
