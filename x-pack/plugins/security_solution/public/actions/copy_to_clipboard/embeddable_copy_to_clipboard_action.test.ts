@@ -8,7 +8,7 @@
 import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
-import { CopyToClipboardAction } from './copy_to_clipboard_action';
+import { EmbeddableCopyToClipboardAction } from './embeddable_copy_to_clipboard_action';
 import { KibanaServices } from '../../common/lib/kibana';
 import { APP_UI_ID } from '../../../common/constants';
 import { Subject } from 'rxjs';
@@ -41,8 +41,8 @@ const columnMeta = {
 };
 const data: CellValueContext['data'] = [{ columnMeta, value: 'the value' }];
 
-describe('CopyToClipboardAction', () => {
-  const addToTimelineAction = new CopyToClipboardAction();
+describe('EmbeddableCopyToClipboardAction', () => {
+  const copyToClipboardAction = new EmbeddableCopyToClipboardAction();
 
   beforeEach(() => {
     currentAppId$.next(APP_UI_ID);
@@ -50,17 +50,17 @@ describe('CopyToClipboardAction', () => {
   });
 
   it('should return display name', () => {
-    expect(addToTimelineAction.getDisplayName()).toEqual('Copy to clipboard');
+    expect(copyToClipboardAction.getDisplayName()).toEqual('Copy to Clipboard');
   });
 
   it('should return icon type', () => {
-    expect(addToTimelineAction.getIconType()).toEqual('copyClipboard');
+    expect(copyToClipboardAction.getIconType()).toEqual('copyClipboard');
   });
 
   describe('isCompatible', () => {
     it('should return false if error embeddable', async () => {
       expect(
-        await addToTimelineAction.isCompatible({
+        await copyToClipboardAction.isCompatible({
           embeddable: new ErrorEmbeddable('some error', {} as EmbeddableInput),
           data,
         })
@@ -69,7 +69,7 @@ describe('CopyToClipboardAction', () => {
 
     it('should return false if not lens embeddable', async () => {
       expect(
-        await addToTimelineAction.isCompatible({
+        await copyToClipboardAction.isCompatible({
           embeddable: new MockEmbeddable('not_lens') as unknown as IEmbeddable,
           data,
         })
@@ -78,7 +78,7 @@ describe('CopyToClipboardAction', () => {
 
     it('should return false if data is empty', async () => {
       expect(
-        await addToTimelineAction.isCompatible({
+        await copyToClipboardAction.isCompatible({
           embeddable: lensEmbeddable,
           data: [],
         })
@@ -87,7 +87,7 @@ describe('CopyToClipboardAction', () => {
 
     it('should return false if data do not have column meta', async () => {
       expect(
-        await addToTimelineAction.isCompatible({
+        await copyToClipboardAction.isCompatible({
           embeddable: lensEmbeddable,
           data: [{}],
         })
@@ -97,7 +97,7 @@ describe('CopyToClipboardAction', () => {
     it('should return false if data column meta do not have field', async () => {
       const { field, ...testColumnMeta } = columnMeta;
       expect(
-        await addToTimelineAction.isCompatible({
+        await copyToClipboardAction.isCompatible({
           embeddable: lensEmbeddable,
           data: [{ columnMeta: testColumnMeta }],
         })
@@ -107,7 +107,7 @@ describe('CopyToClipboardAction', () => {
     it('should return false if data column meta field is blacklisted', async () => {
       const testColumnMeta = { ...columnMeta, field: 'signal.reason' };
       expect(
-        await addToTimelineAction.isCompatible({
+        await copyToClipboardAction.isCompatible({
           embeddable: lensEmbeddable,
           data: [{ columnMeta: testColumnMeta }],
         })
@@ -117,7 +117,7 @@ describe('CopyToClipboardAction', () => {
     it('should return false if not in Security', async () => {
       currentAppId$.next('not security');
       expect(
-        await addToTimelineAction.isCompatible({
+        await copyToClipboardAction.isCompatible({
           embeddable: lensEmbeddable,
           data,
         })
@@ -126,7 +126,7 @@ describe('CopyToClipboardAction', () => {
 
     it('should return true if everything is okay', async () => {
       expect(
-        await addToTimelineAction.isCompatible({
+        await copyToClipboardAction.isCompatible({
           embeddable: lensEmbeddable,
           data,
         })
@@ -136,7 +136,7 @@ describe('CopyToClipboardAction', () => {
 
   describe('execute', () => {
     it('should execute normally', async () => {
-      await addToTimelineAction.execute({
+      await copyToClipboardAction.execute({
         embeddable: lensEmbeddable,
         data,
       });
@@ -145,7 +145,7 @@ describe('CopyToClipboardAction', () => {
     });
 
     it('should execute with multiple values', async () => {
-      await addToTimelineAction.execute({
+      await copyToClipboardAction.execute({
         embeddable: lensEmbeddable,
         data: [
           ...data,
@@ -158,9 +158,9 @@ describe('CopyToClipboardAction', () => {
       expect(mockSuccessToast).toHaveBeenCalled();
     });
 
-    it('should show warning if no provider added', async () => {
+    it('should not show success message if no provider added', async () => {
       mockCopy.mockReturnValue(false);
-      await addToTimelineAction.execute({
+      await copyToClipboardAction.execute({
         embeddable: lensEmbeddable,
         data: [],
       });

@@ -492,3 +492,6 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
     fieldName: 'host.name',
   },
 ];
+
+export const SECURITY_SOLUTION_ACTION_TRIGGER = 'security-solution-default';
+export const TIMELINE_ACTION_TRIGGER = 'security-solution-timeline';

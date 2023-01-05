@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { AddToTimelineAction } from './add_to_timeline_action';
+export { createAddToTimelineAction } from './add_to_timeline';
+export { EmbeddableAddToTimelineAction } from './embeddable_add_to_timeline_action';

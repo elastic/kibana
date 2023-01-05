@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { EmbeddableCopyToClipboardAction as CopyToClipboardAction } from './embeddable_copy_to_clipboard_action';
+export { createFilterInAction } from './filter_in';
+export { createFilterOutAction } from './filter_out';
+
+export { createTimelineFilterInAction } from './timeline_filter_in';
+export { createTimelineFilterOutAction } from './timeline_filter_out';

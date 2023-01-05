@@ -7,13 +7,13 @@
 
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import copy from 'copy-to-clipboard';
 import { KibanaServices } from '../../common/lib/kibana';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../utils';
+import { COPY_TO_CLIPBOARD, COPY_TO_CLIPBOARD_ICON, COPY_TO_CLIPBOARD_SUCCESS } from './constants';
 
-export const ACTION_ID = 'copyToClipboard';
+export const ACTION_ID = 'embeddable_copyToClipboard';
 
 function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   return (
@@ -23,12 +23,10 @@ function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   );
 }
 
-export class CopyToClipboardAction implements Action<CellValueContext> {
+export class EmbeddableCopyToClipboardAction implements Action<CellValueContext> {
   public readonly type = ACTION_ID;
   public readonly id = ACTION_ID;
   public order = 2;
-
-  private icon = 'copyClipboard';
 
   private toastsService;
   private currentAppId: string | undefined;
@@ -43,13 +41,11 @@ export class CopyToClipboardAction implements Action<CellValueContext> {
   }
 
   public getDisplayName() {
-    return i18n.translate('xpack.securitySolution.actions.cellValue.copyToClipboard.displayName', {
-      defaultMessage: 'Copy to clipboard',
-    });
+    return COPY_TO_CLIPBOARD;
   }
 
   public getIconType() {
-    return this.icon;
+    return COPY_TO_CLIPBOARD_ICON;
   }
 
   public async isCompatible({ embeddable, data }: CellValueContext) {
@@ -70,10 +66,7 @@ export class CopyToClipboardAction implements Action<CellValueContext> {
 
     if (isSuccess) {
       this.toastsService.addSuccess({
-        title: i18n.translate(
-          'xpack.securitySolution.actions.cellValue.copyToClipboard.successMessage',
-          { defaultMessage: 'Copied to the clipboard' }
-        ),
+        title: COPY_TO_CLIPBOARD_SUCCESS,
         toastLifeTimeMs: 800,
       });
     }

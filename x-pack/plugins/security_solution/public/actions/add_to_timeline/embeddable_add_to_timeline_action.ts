@@ -7,17 +7,22 @@
 
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { KibanaServices } from '../../common/lib/kibana';
 import type { SecurityAppStore } from '../../common/store/types';
 import { addProvider, showTimeline } from '../../timelines/store/timeline/actions';
 import type { DataProvider } from '../../../common/types';
 import { TimelineId } from '../../../common/types';
-import { createDataProviders } from './data_provider';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../utils';
+import {
+  ADD_TO_TIMELINE,
+  ADD_TO_TIMELINE_FAILED_TEXT,
+  ADD_TO_TIMELINE_FAILED_TITLE,
+  ADD_TO_TIMELINE_ICON,
+} from './constants';
+import { createDataProviders } from './data_provider';
 
-export const ACTION_ID = 'addToTimeline';
+export const ACTION_ID = 'embeddable_addToTimeline';
 
 function isDataColumnsFilterable(data?: CellValueContext['data']): boolean {
   return (
@@ -33,12 +38,12 @@ function isDataColumnsFilterable(data?: CellValueContext['data']): boolean {
   );
 }
 
-export class AddToTimelineAction implements Action<CellValueContext> {
+export class EmbeddableAddToTimelineAction implements Action<CellValueContext> {
   public readonly type = ACTION_ID;
   public readonly id = ACTION_ID;
   public order = 1;
 
-  private icon = 'timeline';
+  private icon = ADD_TO_TIMELINE_ICON;
   private toastsService;
   private store;
   private currentAppId: string | undefined;
@@ -54,9 +59,7 @@ export class AddToTimelineAction implements Action<CellValueContext> {
   }
 
   public getDisplayName() {
-    return i18n.translate('xpack.securitySolution.actions.cellValue.addToTimeline.displayName', {
-      defaultMessage: 'Add to timeline',
-    });
+    return ADD_TO_TIMELINE;
   }
 
   public getIconType() {
@@ -93,14 +96,8 @@ export class AddToTimelineAction implements Action<CellValueContext> {
       this.store.dispatch(showTimeline({ id: TimelineId.active, show: true }));
     } else {
       this.toastsService.addWarning({
-        title: i18n.translate(
-          'xpack.securitySolution.actions.cellValue.addToTimeline.warningTitle',
-          { defaultMessage: 'Unable to add to timeline' }
-        ),
-        text: i18n.translate(
-          'xpack.securitySolution.actions.cellValue.addToTimeline.warningMessage',
-          { defaultMessage: 'Filter received is empty or cannot be added to timeline' }
-        ),
+        title: ADD_TO_TIMELINE_FAILED_TITLE,
+        text: ADD_TO_TIMELINE_FAILED_TEXT,
       });
     }
   }

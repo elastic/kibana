@@ -7,14 +7,89 @@
 
 import { CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type * as H from 'history';
 import type { SecurityAppStore } from '../common/store/types';
-import { AddToTimelineAction } from './add_to_timeline';
-import { CopyToClipboardAction } from './copy_to_clipboard';
+import type { StartPlugins, StartServices } from '../types';
+import { EmbeddableCopyToClipboardAction } from './copy_to_clipboard/embeddable_copy_to_clipboard_action';
+import { createFilterInAction } from './filter/filter_in';
+import { createFilterOutAction } from './filter/filter_out';
+import { createAddToTimelineAction, EmbeddableAddToTimelineAction } from './add_to_timeline';
+import { createShowTopNAction } from './show_top_n/show_top_n';
+import { SECURITY_SOLUTION_ACTION_TRIGGER, TIMELINE_ACTION_TRIGGER } from '../../common/constants';
+import { createCopyToClipboardAction } from './copy_to_clipboard/copy_to_clipboard';
+import { createTimelineFilterInAction, createTimelineFilterOutAction } from './filter';
 
-export const registerActions = (uiActions: UiActionsStart, store: SecurityAppStore) => {
-  const addToTimelineAction = new AddToTimelineAction(store);
+export const registerActions = (
+  plugins: StartPlugins,
+  store: SecurityAppStore,
+  history: H.History,
+  services: StartServices
+) => {
+  registerEmbeddableActions(plugins.uiActions, store);
+  registerUiActions(plugins.uiActions, store, history, services);
+  registerTimelineUiActions(plugins.uiActions, store, history, services);
+};
+
+const registerEmbeddableActions = (uiActions: UiActionsStart, store: SecurityAppStore) => {
+  const addToTimelineAction = new EmbeddableAddToTimelineAction(store);
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, addToTimelineAction);
 
-  const copyToClipboardAction = new CopyToClipboardAction();
+  const copyToClipboardAction = new EmbeddableCopyToClipboardAction();
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
+};
+
+const registerUiActions = (
+  uiActions: UiActionsStart,
+  store: SecurityAppStore,
+  history: H.History,
+  services: StartServices
+) => {
+  const filterInAction = createFilterInAction({
+    order: 1,
+  });
+  const filterOutAction = createFilterOutAction({
+    order: 2,
+  });
+  const addToTimeline = createAddToTimelineAction({ store, order: 3 });
+  const showTopNAction = createShowTopNAction({ store, history, services, order: 4 });
+  const copyAction = createCopyToClipboardAction({ order: 5 });
+
+  uiActions.registerTrigger({
+    id: SECURITY_SOLUTION_ACTION_TRIGGER,
+  });
+
+  uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, copyAction);
+  uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, filterInAction);
+  uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, filterOutAction);
+  uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, showTopNAction);
+  uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, addToTimeline);
+};
+
+const registerTimelineUiActions = (
+  uiActions: UiActionsStart,
+  store: SecurityAppStore,
+  history: H.History,
+  services: StartServices
+) => {
+  const filterInAction = createTimelineFilterInAction({
+    store,
+    order: 1,
+  });
+  const filterOutAction = createTimelineFilterOutAction({
+    store,
+    order: 2,
+  });
+  const addToTimeline = createAddToTimelineAction({ store, order: 3 });
+  const showTopNAction = createShowTopNAction({ store, history, services, order: 4 });
+  const copyAction = createCopyToClipboardAction({ order: 5 });
+
+  uiActions.registerTrigger({
+    id: TIMELINE_ACTION_TRIGGER,
+  });
+
+  uiActions.addTriggerAction(TIMELINE_ACTION_TRIGGER, copyAction);
+  uiActions.addTriggerAction(TIMELINE_ACTION_TRIGGER, filterInAction);
+  uiActions.addTriggerAction(TIMELINE_ACTION_TRIGGER, filterOutAction);
+  uiActions.addTriggerAction(TIMELINE_ACTION_TRIGGER, showTopNAction);
+  uiActions.addTriggerAction(TIMELINE_ACTION_TRIGGER, addToTimeline);
 };
