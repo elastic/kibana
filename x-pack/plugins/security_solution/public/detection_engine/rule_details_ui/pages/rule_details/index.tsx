@@ -831,10 +831,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         filters={alertMergedFilters}
                         query={query}
                         runtimeMappings={runtimeMappings}
-                        showBuildingBlockAlerts={showBuildingBlockAlerts}
-                        showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
                         signalIndexName={signalIndexName}
-                        status={filterGroup}
                         updateDateRange={updateDateRangeCallback}
                       />
                       <EuiSpacer />
