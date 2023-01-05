@@ -43,6 +43,12 @@ jest.mock('../../../../common/lib/kibana', () => ({
       },
     },
   }),
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+    remove: jest.fn(),
+  }),
 }));
 
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
