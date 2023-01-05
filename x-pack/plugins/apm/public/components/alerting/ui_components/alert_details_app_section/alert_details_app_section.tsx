@@ -63,9 +63,7 @@ export function AlertDetailsAppSection({
 }: AlertDetailsAppSectionProps) {
   const params = rule.params;
   const environment = String(params.environment) || ENVIRONMENT_ALL.value;
-  const latencyAggregationType = getAggsTypeFromRule(
-    params.aggregationType as string
-  );
+  const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
 
   // duration is us, convert it to MS
   const alertDurationMS = alert.fields[ALERT_DURATION]! / 1000;
