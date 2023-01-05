@@ -149,7 +149,10 @@ export class UiActionsService {
     return actions as Action[];
   };
 
-  public readonly getTriggerCompatibleActions = async (triggerId: string, context: object): Promise<Action[]> => {
+  public readonly getTriggerCompatibleActions = async (
+    triggerId: string,
+    context: object
+  ): Promise<Action[]> => {
     const actions = this.getTriggerActions!(triggerId);
     const isCompatibles = await Promise.all(
       actions.map((action) =>
