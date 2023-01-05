@@ -10,23 +10,26 @@ import React, { createContext, useContext, useMemo, useEffect } from 'react';
 import type { FunctionComponent } from 'react';
 import { useFilesContext, FilesContextValue } from '@kbn/shared-ux-file-context';
 import { FilePickerState, createFilePickerState } from './file_picker_state';
+import { FileJSON } from '@kbn/shared-ux-file-types';
 
 interface FilePickerContextValue extends FilesContextValue {
   state: FilePickerState;
   kind: string;
+  deleteButtonPredicate?: (file: FileJSON) => boolean;
 }
 
 const FilePickerCtx = createContext<FilePickerContextValue>(
   null as unknown as FilePickerContextValue
 );
 
-interface FilePickerContextProps {
-  kind: string;
+interface FilePickerContextProps extends Pick<FilePickerContextValue, 'kind' | 'deleteButtonPredicate'> {
   pageSize: number;
   multiple: boolean;
 }
+
 export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
   kind,
+  deleteButtonPredicate,
   pageSize,
   multiple,
   children,
@@ -39,7 +42,7 @@ export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
   );
   useEffect(() => state.dispose, [state]);
   return (
-    <FilePickerCtx.Provider value={{ state, kind, ...filesContext }}>
+    <FilePickerCtx.Provider value={{ state, kind, deleteButtonPredicate, ...filesContext }}>
       {children}
     </FilePickerCtx.Provider>
   );
