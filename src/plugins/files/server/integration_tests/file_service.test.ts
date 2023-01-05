@@ -223,7 +223,7 @@ describe('FileService', () => {
 
     expect(result2.files.length).toBe(1);
     expect(result2.files[0].name).toBe("Marry's file");
-    
+
     const result3 = await fileService.find({
       user: ['456', '123'],
     });
