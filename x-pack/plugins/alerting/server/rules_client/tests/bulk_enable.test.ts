@@ -280,7 +280,7 @@ describe('bulkEnableRules', () => {
     });
   });
 
-  test('should thrrow an error if number of matched rules greater than 10,000', async () => {
+  test('should throw an error if number of matched rules greater than 10,000', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       aggregations: {
         alertTypeId: {
