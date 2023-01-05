@@ -203,7 +203,7 @@ export class QuickJobCreator extends QuickJobCreatorBase {
       const { min, max } = this.timeFilter.calculateBounds({ to, from });
       start = min?.valueOf();
       end = max?.valueOf();
-      
+
       if (start === undefined || end === undefined || isNaN(start) || isNaN(end)) {
         throw Error(
           i18n.translate('xpack.ml.newJob.fromLens.createJob.error.timeRange', {
