@@ -22,6 +22,7 @@ import {
   ThemeServiceStart,
 } from '../imports';
 import { ValidateUrlFn } from '../utils/validate_url';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
 /**
  * @throws in case user cancels
@@ -34,6 +35,7 @@ export async function configureImage(
     currentAppId$: ApplicationStart['currentAppId$'];
     validateUrl: ValidateUrlFn;
     getImageDownloadHref: (fileId: string) => string;
+    user?: AuthenticatedUser;
   },
   initialImageConfig?: ImageConfig
 ): Promise<ImageConfig> {
@@ -69,6 +71,7 @@ export async function configureImage(
               onSave={onSave}
               initialImageConfig={initialImageConfig}
               validateUrl={deps.validateUrl}
+              user={deps.user}
             />
           </ImageViewerContext.Provider>
         </FilesContext>,

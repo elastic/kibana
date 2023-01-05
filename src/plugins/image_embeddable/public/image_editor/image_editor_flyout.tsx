@@ -39,6 +39,7 @@ import { ImageConfig } from '../types';
 import { ImageViewer } from '../image_viewer/image_viewer'; // use eager version to avoid flickering
 import { ValidateUrlFn } from '../utils/validate_url';
 import { validateImageConfig, DraftImageConfig } from '../utils/validate_image_config';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
 /**
  * Shared sizing css for image, upload placeholder, empty and not found state
@@ -56,6 +57,7 @@ export interface ImageEditorFlyoutProps {
   onSave: (imageConfig: ImageConfig) => void;
   initialImageConfig?: ImageConfig;
   validateUrl: ValidateUrlFn;
+  user?: AuthenticatedUser;
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
@@ -429,6 +431,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
       {isFilePickerOpen && (
         <FilePicker
           kind={imageEmbeddableFileKind.id}
+          deleteButtonPredicate={(file) => props.user ? props.user.profile_uid === file.user?.id : false}
           multiple={false}
           onClose={() => {
             setIsFilePickerOpen(false);

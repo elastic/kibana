@@ -9,5 +9,6 @@
   },
   "description": "Image embeddable",
   "requiredPlugins": ["embeddable", "files"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact"],
+  "optionalPlugins": ["security"]
 }
