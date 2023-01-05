@@ -27,6 +27,7 @@ const BAZEL_PACKAGE_DIRS = [
   'packages/core/*',
   'packages/home',
   'packages/content-management',
+  'packages/security-solution',
   'x-pack/packages/ml',
 ];
 
