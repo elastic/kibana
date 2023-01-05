@@ -29,6 +29,7 @@ import {
   SmallMultiples,
   VerticalAlignment,
   XYChartSeriesIdentifier,
+  Tooltip,
 } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
@@ -3286,14 +3287,11 @@ describe('XYChart component', () => {
           }}
         />
       );
-      const settings = component.find(Settings);
-      const tooltip = settings.prop('tooltip');
-      expect(tooltip).toEqual(
-        expect.objectContaining({
-          headerFormatter: undefined,
-          customTooltip: expect.any(Function),
-        })
-      );
+      const tooltip = component.find(Tooltip);
+      const customTooltip = tooltip.prop('customTooltip');
+      expect(customTooltip).not.toBeUndefined();
+      const headerFormatter = tooltip.prop('headerFormatter');
+      expect(headerFormatter).toBeUndefined();
     });
 
     it('should render default tooltip, if detailed tooltip is hidden', () => {
@@ -3308,14 +3306,11 @@ describe('XYChart component', () => {
           }}
         />
       );
-      const settings = component.find(Settings);
-      const tooltip = settings.prop('tooltip');
-      expect(tooltip).toEqual(
-        expect.objectContaining({
-          headerFormatter: expect.any(Function),
-          customTooltip: undefined,
-        })
-      );
+      const tooltip = component.find(Tooltip);
+      const customTooltip = tooltip.prop('customTooltip');
+      expect(customTooltip).toBeUndefined();
+      const headerFormatter = tooltip.prop('headerFormatter');
+      expect(headerFormatter).not.toBeUndefined();
     });
   });
 });

@@ -28,7 +28,7 @@ import {
   Placement,
   Direction,
   XYChartElementEvent,
-  Tooltip as TooltipSpec,
+  Tooltip,
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
@@ -102,7 +102,7 @@ import {
 } from './annotations';
 import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
-import { Tooltip } from './tooltip';
+import { Tooltip as CustomTooltip } from './tooltip';
 import { XYCurrentTime } from './xy_current_time';
 
 import './xy_chart.scss';
@@ -798,7 +798,7 @@ export function XYChart({
         }}
       >
         <Chart ref={chartRef}>
-          <TooltipSpec
+          <Tooltip
             boundary={document.getElementById('app-fixed-viewport') ?? undefined}
             headerFormatter={
               !args.detailedTooltip
@@ -829,7 +829,7 @@ export function XYChart({
             customTooltip={
               args.detailedTooltip
                 ? ({ header, values }) => (
-                    <Tooltip
+                    <CustomTooltip
                       header={header}
                       values={values}
                       titles={titles}
