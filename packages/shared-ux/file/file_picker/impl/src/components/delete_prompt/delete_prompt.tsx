@@ -22,19 +22,18 @@ export const DeletePrompt: FunctionComponent<Props> = ({ }) => {
   if (!file) return null;
 
   const onYes = () => {};
-  const onNo = () => {};
 
   return (
     <EuiConfirmModal
-      title="Delete file"
-      onConfirm={onYes}
-      onCancel={onNo}
-      cancelButtonText="Cancel"
-      confirmButtonText={i18nTexts.delete}
       buttonColor="danger"
       defaultFocusedButton="confirm"
+      title={i18nTexts.deleteFile}
+      confirmButtonText={i18nTexts.delete}
+      cancelButtonText={i18nTexts.cancel}
+      onCancel={state.hideDeletePrompt}
+      onConfirm={onYes}
     >
-      <p>{`Are you sure you want to delete "${file.name}"?`}</p>
+      <p>{i18nTexts.deleteFileQuestion(file.name)}</p>
     </EuiConfirmModal>
   );
 };
