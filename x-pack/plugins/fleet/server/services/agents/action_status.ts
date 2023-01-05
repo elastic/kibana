@@ -224,7 +224,7 @@ async function _getActions(
   );
 }
 
-export const rolloutPeriodHasPassed = (source: FleetServerAgentAction) =>
+export const hasRolloutPeriodPassed = (source: FleetServerAgentAction) =>
   source.type === 'UPGRADE' && source.rollout_duration_seconds
     ? Date.now() >
       moment(source.start_time ?? Date.now())
