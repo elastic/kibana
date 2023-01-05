@@ -141,7 +141,7 @@ Observability::
 
 Osquery::
 
-* Allows users to deploy Osquery across all {agent} policies or on specified policies only {kibana-pull}143948[#143948]
+Allows users to deploy Osquery across all {agent} policies or on specified policies only {kibana-pull}143948[#143948]
 
 Platform::
 Adds notifications plugin, offering basic email service {kibana-pull}143303[#143303]
