@@ -264,6 +264,7 @@ export const AlertsByStatus = ({
                           label={STATUS_OPEN}
                           title={<ChartLabel count={openCount} />}
                           totalCount={openCount}
+                          isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
                         />
                       )}
                     </StyledFlexItem>
@@ -286,6 +287,7 @@ export const AlertsByStatus = ({
                           label={STATUS_ACKNOWLEDGED}
                           title={<ChartLabel count={acknowledgedCount} />}
                           totalCount={acknowledgedCount}
+                          isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
                         />
                       )}
                     </StyledFlexItem>
@@ -305,6 +307,7 @@ export const AlertsByStatus = ({
                           label={STATUS_CLOSED}
                           title={<ChartLabel count={closedCount} />}
                           totalCount={closedCount}
+                          isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
                         />
                       )}
                     </StyledFlexItem>
