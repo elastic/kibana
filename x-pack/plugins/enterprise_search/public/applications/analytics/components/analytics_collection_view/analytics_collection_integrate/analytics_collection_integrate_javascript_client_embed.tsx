@@ -58,10 +58,10 @@ export const javascriptClientEmbedSteps = (analyticsDNSUrl: string) => [
           </p>
           <EuiCodeBlock language="bash" isCopyable>
             {`import {
-createTracker,
-trackPageView,
-trackEvent,
-} from "@elastic/behavioural-analytics-javascript-tracker";`}
+  createTracker,
+  trackPageView,
+  trackEvent,
+} from "@elastic/behavioral-analytics-javascript-tracker";`}
           </EuiCodeBlock>
         </EuiText>
       </>
@@ -133,7 +133,9 @@ trackEvent,
             )}
           </p>
           <EuiCodeBlock language="javascript" isCopyable>
-            {`// track a page view in React
+            {`import { useEffect } from 'react';
+
+// track a page view in React
 
 const SearchPage = (props) => {
   useEffect(() => {
@@ -159,7 +161,7 @@ const SearchPage = (props) => {
           </p>
           <EuiCodeBlock language="javascript" isCopyable>
             {`// track a custom event in React
-import { trackEvent } from '@elastic/behavioural-analytics-javascript-tracker';
+import { trackEvent } from '@elastic/behavioral-analytics-javascript-tracker';
 
 const ProductDetailPage = (props) => {
 
@@ -173,8 +175,7 @@ const ProductDetailPage = (props) => {
           label: "product_id",
           value: "123"
         })
-      }} />
-      }}>Add to Basket</input>
+      }} value="Add to Basket"/>
     </div>
     )
   }
