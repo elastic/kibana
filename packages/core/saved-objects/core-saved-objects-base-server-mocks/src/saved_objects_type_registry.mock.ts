@@ -16,7 +16,7 @@ const createRegistryMock = (): jest.Mocked<
     registerType: jest.fn(),
     getType: jest.fn(),
     getVisibleTypes: jest.fn(),
-    getUnhiddenFromHttpApisVisibleTypes: jest.fn(),
+    getVisibleToHttpApisTypes: jest.fn(),
     getAllTypes: jest.fn(),
     getImportableAndExportableTypes: jest.fn(),
     isNamespaceAgnostic: jest.fn(),
@@ -43,7 +43,7 @@ const createRegistryMock = (): jest.Mocked<
   mock.isMultiNamespace.mockImplementation((type: string) => type === 'shared');
   mock.isShareable.mockImplementation((type: string) => type === 'shared');
   mock.isImportableAndExportable.mockReturnValue(true);
-  mock.getUnhiddenFromHttpApisVisibleTypes.mockReturnValue(false);
+  mock.getVisibleToHttpApisTypes.mockReturnValue(false);
 
   return mock;
 };

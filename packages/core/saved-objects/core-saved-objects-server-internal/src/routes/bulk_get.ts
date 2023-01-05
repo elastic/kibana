@@ -9,11 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import {
-  catchAndReturnBoomErrors,
-  removeHiddenFromBulkRequest,
-  throwOnGloballyHiddenTypes,
-} from './utils';
+import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
@@ -27,7 +23,6 @@ export const registerBulkGetRoute = (
     {
       path: '/_bulk_get',
       validate: {
-        query: schema.object({ ignoreHidden: schema.maybe(schema.boolean()) }),
         body: schema.arrayOf(
           schema.object({
             type: schema.string(),
@@ -39,36 +34,21 @@ export const registerBulkGetRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      let itemsToGet = req.body;
-      const { ignoreHidden } = req.query;
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsBulkGet({ request: req }).catch(() => {});
 
-      const { getClient, typeRegistry } = (await context.core).savedObjects;
-      const client = getClient();
-      // filter out types that aren't exposed to the http API's and return a new response for the combined result OR
-      // check that all types provided are exposed to the http API's; if not, throw error
-      const allTypesVisibleToHttpApis = typeRegistry
-        .getVisibleToHttpApisTypes() // only types with hidden:false && hiddenFromHttpApis:false
-        .map((fullType) => fullType.name);
-      /* now we have options:
-       1. throw on types hidden from the HTTP API's
-          1.a. using a request query param to ignore hiddenFromHttpApis for the whole request (all items) as an override
-          1.b. optional configuration option to only override some APIs? Config would need to be per type, potentially as a Map or array of end-points or per-endpoint string
-       2. filter out the types hidden from the HTTP API and pass the rest along, adding error to the response body for those types
-       3. do nothing
-      */
-      if (!ignoreHidden) {
-        throwOnGloballyHiddenTypes(
-          // note: this will also throw if there are any hidden:true SO's in the request body.}
-          allTypesVisibleToHttpApis,
-          req.body.map(({ type }) => type)
-        );
+      const { savedObjects } = await context.core;
+      // throw if request body contains any types hidden from the HTTP APIs
+      const typesToThrowOn = [...new Set(req.body.map(({ type }) => type))].filter((tname) => {
+        const fullType = savedObjects.typeRegistry.getType(tname);
+        if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
+          return fullType.name;
+        }
+      });
+      if (typesToThrowOn.length > 0) {
+        throwOnHttpHiddenTypes(typesToThrowOn);
       }
-      if (ignoreHidden) {
-        itemsToGet = removeHiddenFromBulkRequest(itemsToGet, allTypesVisibleToHttpApis);
-      }
-      const result = await client.bulkGet([...itemsToGet]);
+      const result = await savedObjects.client.bulkGet(req.body);
       return res.ok({ body: result });
     })
   );

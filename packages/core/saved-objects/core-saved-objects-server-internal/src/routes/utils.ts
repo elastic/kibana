@@ -89,30 +89,36 @@ export const catchAndReturnBoomErrors: RequestHandlerWrapper = (handler) => {
  * @param {string[]} exposedVisibleTypes all registered types with hidden:false and hiddenFromHttpApis:false|undefined
  * @param {string[]} typesToCheck saved object types provided to the httpApi request
  */
-export function throwOnGloballyHiddenTypes(exposedVisibleTypes: string[], typesToCheck: string[]) {
+export function throwOnGloballyHiddenTypes(
+  allHttpApisVisibleTypes: string[],
+  typesToCheck: string[]
+) {
+  if (!typesToCheck.length) {
+    return;
+  }
   const denyRequestForTypes = typesToCheck.filter(
-    (type: string) => !exposedVisibleTypes.includes(type)
+    (type: string) => !allHttpApisVisibleTypes.includes(type)
   );
   if (denyRequestForTypes.length > 0) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
-      `Request denied for type(s): ${denyRequestForTypes.join(', ')}`
+      `Unsupported saved object type(s): ${denyRequestForTypes.join(', ')}`
     );
   }
 }
+/**
+ * @param {string[]} unsupportedTypes saved object types registered with hidden=false and hiddenFromHttpApis=true
+ */
 
+export function throwOnHttpHiddenTypes(unsupportedTypes: string[]) {
+  if (unsupportedTypes.length > 0) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `Unsupported saved object type(s): ${unsupportedTypes.join(', ')}`
+    );
+  }
+}
 export interface BulkGetItem {
   type: string;
   id: string;
   fields?: string[];
   namespaces?: string[];
-}
-
-export function removeHiddenFromBulkRequest(
-  itemsToGet: BulkGetItem[],
-  allTypesVisibleToHttpAPI: string[]
-) {
-  const filtered = itemsToGet.filter((item) => {
-    return !allTypesVisibleToHttpAPI.includes(item.type);
-  });
-  return filtered;
 }

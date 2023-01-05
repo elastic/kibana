@@ -10,7 +10,7 @@ import {
   createSavedObjectsStreamFromNdJson,
   validateTypes,
   validateObjects,
-  throwOnGloballyHiddenTypes,
+  throwOnHttpHiddenTypes,
 } from './utils';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
@@ -242,23 +242,17 @@ describe('catchAndReturnBoomErrors', () => {
   });
 });
 
-describe('throwOnGloballyHiddenTypes', () => {
-  const exposedVisibleTypes = ['config', 'index-pattern', 'dashboard'];
-
-  it('should throw on hidden types', () => {
+describe('throwOnHttpHiddenTypes', () => {
+  it('should throw on types hidden from the HTTP Apis', () => {
     expect(() => {
-      throwOnGloballyHiddenTypes(exposedVisibleTypes, ['not-allowed-type']);
+      throwOnHttpHiddenTypes(['not-allowed-type']);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Request denied for type(s): not-allowed-type: Bad Request"`
+      `"Unsupported saved object type(s): not-allowed-type: Bad Request"`
     );
     expect(() => {
-      throwOnGloballyHiddenTypes(exposedVisibleTypes, [
-        'index-pattern',
-        'not-allowed-type',
-        'not-allowed-type-2',
-      ]);
+      throwOnHttpHiddenTypes(['index-pattern', 'not-allowed-type', 'not-allowed-type-2']);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Request denied for type(s): not-allowed-type, not-allowed-type-2: Bad Request"`
+      `"Unsupported saved object type(s): index-pattern, not-allowed-type, not-allowed-type-2: Bad Request"`
     );
   });
 });

@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors, throwOnGloballyHiddenTypes } from './utils';
+import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
@@ -67,17 +67,6 @@ export const registerFindRoute = (
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsFind({ request: req }).catch(() => {});
 
-      // check if type or array of types are exposed to the global SO Http API's.
-      const findForTypes = Array.isArray(query.type) ? query.type : [query.type];
-      const { typeRegistry } = (await context.core).savedObjects;
-      // Only implement blocking behavior for visible types.
-      // Hidden types are taken care of in the repository
-      // Assumes hiddenFromHttpApis can only be configured for visible types (hidden:false)
-      const allTypesVisibleToHttpAPI = typeRegistry
-        .getVisibleToHttpApisTypes() // only types with hidden:false && hiddenFromHttpApis:false
-        .map((fullType) => fullType.name);
-      throwOnGloballyHiddenTypes(allTypesVisibleToHttpAPI, findForTypes); // note: this will also throw if there are any hidden:true SO's in the request body.
-
       // manually validate to avoid using JSON.parse twice
       let aggs;
       if (query.aggs) {
@@ -92,6 +81,21 @@ export const registerFindRoute = (
         }
       }
       const { savedObjects } = await context.core;
+
+      // check if registered type(s)are exposed to the global SO Http API's.
+      const findForTypes = Array.isArray(query.type) ? query.type : [query.type];
+
+      const typesToThrowOn = [...new Set(findForTypes)].filter((tname) => {
+        const fullType = savedObjects.typeRegistry.getType(tname);
+        // pass unknown types through to the registry to handle
+        if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
+          return fullType.name;
+        }
+      });
+      if (typesToThrowOn.length > 0) {
+        throwOnHttpHiddenTypes(typesToThrowOn);
+      }
+
       const result = await savedObjects.client.find({
         perPage: query.per_page,
         page: query.page,

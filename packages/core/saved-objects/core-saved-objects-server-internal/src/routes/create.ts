@@ -56,12 +56,12 @@ export const registerCreateRoute = (
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});
-      // Only implement blocking behavior for visible types.
-      // Hidden types are taken care of in the repository
-      // Assumes hiddenFromHttpApis can only be configured for visible types (hidden:false)
-      const { typeRegistry } = (await context.core).savedObjects;
-      if (typeRegistry.isHiddenFromHttpApis(type)) {
-        throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type); // visible type is not exposed to the HTTP API
+
+      const { savedObjects } = await context.core;
+
+      const fullType = savedObjects.typeRegistry.getType(type);
+      if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
+        throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
       }
 
       const options = {
@@ -72,7 +72,6 @@ export const registerCreateRoute = (
         references,
         initialNamespaces,
       };
-      const { savedObjects } = await context.core;
       const result = await savedObjects.client.create(type, attributes, options);
       return res.ok({ body: result });
     })

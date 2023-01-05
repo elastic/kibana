@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
@@ -55,6 +55,15 @@ export const registerBulkCreateRoute = (
       usageStatsClient.incrementSavedObjectsBulkCreate({ request: req }).catch(() => {});
 
       const { savedObjects } = await context.core;
+      const typesToThrowOn = [...new Set(req.body.map(({ type }) => type))].filter((tname) => {
+        const fullType = savedObjects.typeRegistry.getType(tname);
+        if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
+          return fullType.name;
+        }
+      });
+      if (typesToThrowOn.length > 0) {
+        throwOnHttpHiddenTypes(typesToThrowOn);
+      }
       const result = await savedObjects.client.bulkCreate(req.body, { overwrite });
       return res.ok({ body: result });
     })

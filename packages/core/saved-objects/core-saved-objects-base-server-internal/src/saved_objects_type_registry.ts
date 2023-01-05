@@ -43,9 +43,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getVisibleToHttpApisTypes}  */
   public getVisibleToHttpApisTypes() {
-    return this.getAllTypes().filter(
-      (type) => !this.isHidden && !this.isHiddenFromHttpApis(type.name)
-    );
+    return [...this.types.values()].filter((type) => !this.isHiddenFromHttpApis(type.name));
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getAllTypes} */
@@ -82,12 +80,12 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
 
   /** {@inheritDoc ISavedObjectTypeRegistry.isHidden} */
   public isHidden(type: string) {
-    return this.types.get(type)?.hidden ?? false; // trouble is that with current validation, if hidden=true we need to have hiddenFromHttpApis as true too
+    return this.types.get(type)?.hidden ?? false;
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistry.isHiddenFromHttpApi} */
   public isHiddenFromHttpApis(type: string) {
-    return this.types.get(type)?.hiddenFromHttpApis ?? false; // defaults to false
+    return !!this.types.get(type)?.hiddenFromHttpApis;
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getType} */
@@ -115,9 +113,9 @@ const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObj
     }
   }
   // throw error if a type is registered as `hidden:true` and `hiddenFromHttpApis:false` explicitly
-  if (hidden && hiddenFromHttpApis === false) {
+  if (hidden === true && hiddenFromHttpApis === false) {
     throw new Error(
-      `Type ${name}: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden:true'`
+      `Type ${name}: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden' as 'true'`
     );
   }
 };
