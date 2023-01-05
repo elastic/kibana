@@ -13,6 +13,7 @@ import {
   InjectedMetadataExternalUrlPolicy,
   InjectedMetadataPlugin,
 } from '@kbn/core-injected-metadata-common-internal';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
 
 /** @internal */
 export interface InjectedMetadataParams {
@@ -61,7 +62,7 @@ export interface InternalInjectedMetadataSetup {
   getInjectedVars: () => {
     [key: string]: unknown;
   };
-  getCustomBranding: () => unknown;
+  getCustomBranding: () => CustomBranding;
 }
 
 /** @internal */

@@ -1,3 +1,3 @@
 # @kbn/core-custom-branding-browser-internal
 
-Internal implementaton of @kbn/core-custom-branding-browser
+This package contains the implementation and internal types of the browser-side `customBranding` service.

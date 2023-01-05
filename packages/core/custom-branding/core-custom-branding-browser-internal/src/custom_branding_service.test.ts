@@ -11,13 +11,14 @@ import { CustomBrandingSetupDeps } from '@kbn/core-custom-branding-browser';
 import { take } from 'rxjs';
 
 describe('custom branding service', () => {
+  const injectedMetadata = {
+    getCustomBranding: () => {
+      return { customizedLogo: 'customizedLogo' };
+    },
+  };
+
   describe('#start', () => {
     let service: CustomBrandingService;
-    const injectedMetadata = {
-      getCustomBranding: () => {
-        return { customizedLogo: 'customizedLogo' };
-      },
-    };
 
     beforeEach(() => {
       service = new CustomBrandingService();
@@ -35,6 +36,24 @@ describe('custom branding service', () => {
       const customBranding = await customBranding$.pipe(take(1)).toPromise();
       expect(customBranding).toEqual({ customizedLogo: 'customizedLogo' });
     });
+
+    it('throws if called before setup', async () => {
+      const customBrandingService = new CustomBrandingService();
+      expect(() => customBrandingService.start()).toThrow('Setup needs to be called before start');
+    });
+  });
+
+  describe('#setup', () => {
+    it('customBranding$ returns the correct value', async () => {
+      const service = new CustomBrandingService();
+      const { customBranding$, hasCustomBranding$ } = service.setup({
+        injectedMetadata,
+      } as CustomBrandingSetupDeps);
+      const customBranding = await customBranding$.pipe(take(1)).toPromise();
+      expect(customBranding).toEqual({ customizedLogo: 'customizedLogo' });
+      const hasCustomBranding = await hasCustomBranding$.pipe(take(1)).toPromise();
+      expect(hasCustomBranding).toBe(true);
+    });
   });
 
   describe('#stop', () => {
@@ -45,6 +64,7 @@ describe('custom branding service', () => {
 
     it('stops customBranding$ and hasCustomBranding$', async () => {
       const service = new CustomBrandingService();
+      service.setup({ injectedMetadata } as CustomBrandingSetupDeps);
       const { hasCustomBranding$, customBranding$ } = service.start();
 
       let hasCustomBrandingCompleted = false;

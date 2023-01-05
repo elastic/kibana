@@ -16,9 +16,7 @@ import type {
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 export class CustomBrandingService {
-  private customBranding$: BehaviorSubject<CustomBranding> = new BehaviorSubject<CustomBranding>(
-    {}
-  );
+  private customBranding$: BehaviorSubject<CustomBranding> | undefined;
   private stop$ = new Subject<void>();
 
   /**

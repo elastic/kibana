@@ -1,3 +1,4 @@
 # @kbn/core-custom-branding-browser-mocks
 
-Mock for custom-branding-browser service
+Contains the mocks for Core's internal `customBranding` browser-side service.
+

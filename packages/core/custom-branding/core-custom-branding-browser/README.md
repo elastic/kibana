@@ -1,3 +1,3 @@
 # @kbn/core-custom-branding-browser
 
-This package contains the public types for the browser-side custom-branding service.
+Contains the public types of Core's browser-side `customBranding` service.
