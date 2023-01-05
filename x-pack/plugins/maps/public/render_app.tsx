@@ -19,7 +19,6 @@ import {
   getCoreChrome,
   getCoreI18n,
   getMapsCapabilities,
-  getToasts,
   getEmbeddableService,
   getDocLinks,
   getCore,
@@ -75,7 +74,7 @@ export async function renderApp(
   }
 ) {
   goToSpecifiedPath = (path) => history.push(path);
-  
+
   const stateTransfer = getEmbeddableService().getStateTransfer();
 
   registerLayerWizards();
