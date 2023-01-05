@@ -21,10 +21,15 @@ import { OptionsListPopoverInvalidSelections } from './options_list_popover_inva
 
 export interface OptionsListPopoverProps {
   width: number;
+  isLoading: boolean;
   updateSearchString: (newSearchString: string) => void;
 }
 
-export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPopoverProps) => {
+export const OptionsListPopover = ({
+  width,
+  isLoading,
+  updateSearchString,
+}: OptionsListPopoverProps) => {
   // Redux embeddable container Context
   const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
     OptionsListReduxState,
@@ -57,7 +62,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
         data-test-subj={`optionsList-control-available-options`}
         data-option-count={Object.keys(availableOptions ?? {}).length}
       >
-        <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected} />
+        <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected} isLoading={isLoading} />
         {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
           <OptionsListPopoverInvalidSelections />
         )}

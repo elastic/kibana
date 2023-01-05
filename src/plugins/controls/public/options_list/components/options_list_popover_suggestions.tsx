@@ -18,10 +18,12 @@ import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
 
 interface OptionsListPopoverSuggestionsProps {
+  isLoading: boolean;
   showOnlySelected: boolean;
 }
 
 export const OptionsListPopoverSuggestions = ({
+  isLoading,
   showOnlySelected,
 }: OptionsListPopoverSuggestionsProps) => {
   // Redux embeddable container Context
@@ -43,7 +45,6 @@ export const OptionsListPopoverSuggestions = ({
   const hideExists = select((state) => state.explicitInput.hideExists);
   const fieldName = select((state) => state.explicitInput.fieldName);
 
-  const loading = select((state) => state.output.loading);
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
   const invalidSelectionsSet = useMemo(
@@ -55,7 +56,7 @@ export const OptionsListPopoverSuggestions = ({
     return showOnlySelected ? selectedOptions : Object.keys(availableOptions ?? {});
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
-  const existsOption = useMemo<EuiSelectableOption>(() => {
+  const existsSelectableOption = useMemo<EuiSelectableOption>(() => {
     return {
       key: 'exists-option',
       checked: existsSelected ? 'on' : undefined,
@@ -65,7 +66,11 @@ export const OptionsListPopoverSuggestions = ({
     };
   }, [existsSelected]);
 
-  const suggestionsOptions = useMemo<EuiSelectableOption[]>(() => {
+  const suggestionsSelectableOptions = useMemo<EuiSelectableOption[]>(() => {
+    if (!suggestions || suggestions.length === 0) {
+      return [];
+    }
+
     const options: EuiSelectableOption[] =
       suggestions?.map((key) => {
         return {
@@ -105,80 +110,66 @@ export const OptionsListPopoverSuggestions = ({
             : key,
         };
       }) ?? [];
+
     return !hideExists && !(showOnlySelected && !existsSelected)
-      ? [existsOption, ...options]
+      ? [existsSelectableOption, ...options]
       : options;
   }, [
+    euiTheme,
     hideExists,
     suggestions,
-    existsOption,
     existsSelected,
     availableOptions,
     showOnlySelected,
     selectedOptionsSet,
     invalidSelectionsSet,
-    euiTheme.colors.subduedText,
-    euiTheme.font.weight.medium,
+    existsSelectableOption,
   ]);
 
   const [suggestionsTest, setSuggestionsTest] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
-    /* make the suggestionsOptions responsive to search, show only selected, and clear selections */
-    setSuggestionsTest(suggestionsOptions);
-  }, [suggestionsOptions]);
-
-  if (
-    !loading &&
-    (!suggestions || suggestions.length === 0) &&
-    !(showOnlySelected && existsSelected)
-  ) {
-    return (
-      <div
-        className="euiFilterSelect__note"
-        data-test-subj={`optionsList-control-${
-          showOnlySelected ? 'selectionsEmptyMessage' : 'noSelectionsMessage'
-        }`}
-      >
-        <div className="euiFilterSelect__noteContent">
-          <EuiIcon type="minusInCircle" />
-          <EuiSpacer size="xs" />
-          <p>
-            {showOnlySelected
-              ? OptionsListStrings.popover.getSelectionsEmptyMessage()
-              : OptionsListStrings.popover.getEmptyMessage()}
-          </p>
-        </div>
-      </div>
-    );
-  }
+    /* This useEffect makes suggestionsSelectableOptions responsive to search, show only selected, and clear selections */
+    setSuggestionsTest(suggestionsSelectableOptions);
+  }, [suggestionsSelectableOptions]);
 
   return (
     <>
       <EuiSelectable
+        isLoading={isLoading}
+        options={suggestionsTest}
         aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(fieldName)}
         listProps={{ onFocusBadge: false }} // isVirtualized: false
-        options={suggestionsTest}
+        emptyMessage={
+          <span
+            className="euiFilterSelect__note"
+            data-test-subj={`optionsList-control-${
+              showOnlySelected ? 'selectionsEmptyMessage' : 'noSelectionsMessage'
+            }`}
+          >
+            <span className="euiFilterSelect__noteContent">
+              <EuiIcon type="minusInCircle" />
+              <EuiSpacer size="xs" />
+              {showOnlySelected
+                ? OptionsListStrings.popover.getSelectionsEmptyMessage()
+                : OptionsListStrings.popover.getEmptyMessage()}
+            </span>
+          </span>
+        }
         onChange={(newSuggestions, _, changedOption) => {
           setSuggestionsTest(newSuggestions);
 
           const key = changedOption.key ?? changedOption.label;
           if (key === 'exists-option') {
             dispatch(selectExists(!Boolean(existsSelected)));
-            return;
-          }
-          if (showOnlySelected) {
+          } else if (showOnlySelected) {
             dispatch(deselectOption(key));
-            return;
-          }
-          if (singleSelect) {
+          } else if (selectedOptionsSet.has(key)) {
+            dispatch(deselectOption(key));
+          } else if (singleSelect) {
             dispatch(replaceSelection(key));
-            return;
+          } else {
+            dispatch(selectOption(key));
           }
-          if (selectedOptionsSet.has(key)) {
-            dispatch(deselectOption(key));
-            return;
-          }
-          dispatch(selectOption(key));
         }}
       >
         {(list) => list}
