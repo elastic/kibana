@@ -31,8 +31,8 @@ import { EmptyPrompt } from './components/empty_prompt';
 import { FileGrid } from './components/file_grid';
 import { SearchField } from './components/search_field';
 import { ModalFooter } from './components/modal_footer';
-
 import { ClearFilterButton } from './components/clear_filter_button';
+import { DeletePrompt } from './components/delete_prompt/delete_prompt';
 
 export interface Props<Kind extends string = string> {
   /**
@@ -80,7 +80,7 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
     <ModalFooter kind={kind} onDone={onDone} onUpload={onUpload} multiple={multiple} />
   );
 
-  return (
+  const modal = (
     <EuiModal
       data-test-subj="filePickerModal"
       className="filesFilePicker filesFilePicker--fixed"
@@ -132,6 +132,13 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
         </>
       )}
     </EuiModal>
+  );
+
+  return (
+    <>
+      {modal}
+      <DeletePrompt />
+    </>
   );
 };
 

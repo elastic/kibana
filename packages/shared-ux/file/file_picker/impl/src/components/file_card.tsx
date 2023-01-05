@@ -108,7 +108,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
         top: `${euiTheme.size.s}`,
         display: 'none',
       }}
-      onClick={() => {}}
+      onClick={() => state.showDeletePrompt(file)}
     />
   );
 
