@@ -18,7 +18,7 @@ interface ActionContext {
 
 export const ACTION_ADD_BOOK_TO_LIBRARY = 'ACTION_ADD_BOOK_TO_LIBRARY';
 
-export const createAddBookToLibraryAction = () => ({
+export const createAddBookToLibraryActionDefinition = () => ({
   getDisplayName: () =>
     i18n.translate('embeddableExamples.book.addToLibrary', {
       defaultMessage: 'Add Book To Library',

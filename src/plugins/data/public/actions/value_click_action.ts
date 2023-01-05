@@ -31,7 +31,7 @@ export interface ValueClickContext {
   };
 }
 
-export function createValueClickAction(
+export function createValueClickActionDefinition(
   getStartServices: () => { uiActions: UiActionsStart }
 ): UiActionsActionDefinition<ValueClickContext> {
   return {

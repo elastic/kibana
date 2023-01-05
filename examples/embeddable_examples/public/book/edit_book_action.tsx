@@ -38,7 +38,7 @@ interface ActionContext {
 
 export const ACTION_EDIT_BOOK = 'ACTION_EDIT_BOOK';
 
-export const createEditBookAction = (getStartServices: () => Promise<StartServices>) => ({
+export const createEditBookActionDefinition = (getStartServices: () => Promise<StartServices>) => ({
   getDisplayName: () =>
     i18n.translate('embeddableExamples.book.edit', { defaultMessage: 'Edit Book' }),
   id: ACTION_EDIT_BOOK,

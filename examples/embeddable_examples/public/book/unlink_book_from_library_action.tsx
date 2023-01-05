@@ -18,7 +18,7 @@ interface ActionContext {
 
 export const ACTION_UNLINK_BOOK_FROM_LIBRARY = 'ACTION_UNLINK_BOOK_FROM_LIBRARY';
 
-export const createUnlinkBookFromLibraryAction = () => ({
+export const createUnlinkBookFromLibraryActionDefinition = () => ({
   getDisplayName: () =>
     i18n.translate('embeddableExamples.book.unlinkFromLibrary', {
       defaultMessage: 'Unlink Book from Library Item',

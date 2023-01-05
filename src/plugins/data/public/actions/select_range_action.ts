@@ -25,7 +25,7 @@ export interface SelectRangeActionContext {
 
 export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
 
-export function createSelectRangeAction(
+export function createSelectRangeActionDefinition(
   getStartServices: () => { uiActions: UiActionsStart }
 ): UiActionsActionDefinition<SelectRangeActionContext> {
   return {

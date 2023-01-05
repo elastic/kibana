@@ -8,10 +8,11 @@
 
 import { ViewMode } from '../../types';
 import { IEmbeddable } from '../..';
+import { UiActionsActionDefinition } from '../../ui_actions';
 
 export const EDIT_MODE_ACTION = 'EDIT_MODE_ACTION';
 
-export function createEditModeAction() {
+export function createEditModeActionDefinition(): UiActionsActionDefinition {
   return {
     id: EDIT_MODE_ACTION,
     type: EDIT_MODE_ACTION,
