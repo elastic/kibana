@@ -20,6 +20,8 @@ import { ArtifactsElasticsearchError } from '../../errors';
 
 import { isElasticsearchVersionConflictError } from '../../errors/utils';
 
+import { withPackageSpan } from '../epm/packages/utils';
+
 import { isElasticsearchItemNotFoundError } from './utils';
 import type {
   Artifact,
@@ -80,6 +82,50 @@ export const createArtifact = async (
   }
 
   return esSearchHitToArtifact({ _id: id, _source: newArtifactData });
+};
+
+export const bulkCreateArtifacts = async (
+  esClient: ElasticsearchClient,
+  artifacts: NewArtifact[],
+  refresh = false
+): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> => {
+  const ids = artifacts.map((artifact) => uniqueIdFromArtifact(artifact));
+  const newArtifactsData = artifacts.map((artifact) =>
+    newArtifactToElasticsearchProperties(artifact)
+  );
+
+  const body = ids
+    .map((id, index) => [
+      {
+        create: {
+          _id: id,
+        },
+      },
+      newArtifactsData[index],
+    ])
+    .flatMap((arr) => arr);
+
+  const res = await withPackageSpan('Bulk create fleet artifacts', () =>
+    esClient.bulk({
+      index: FLEET_SERVER_ARTIFACTS_INDEX,
+      body,
+      refresh,
+    })
+  );
+  if (res.errors) {
+    const nonConflictErrors = res.items
+      .filter((item) => item.create?.status !== 409)
+      .map((item) => new Error(item.create?.error?.reason));
+    if (nonConflictErrors.length > 0) {
+      return { errors: nonConflictErrors };
+    }
+  }
+
+  return {
+    artifacts: ids.map((id, index) =>
+      esSearchHitToArtifact({ _id: id, _source: newArtifactsData[index] })
+    ),
+  };
 };
 
 export const deleteArtifact = async (esClient: ElasticsearchClient, id: string): Promise<void> => {
