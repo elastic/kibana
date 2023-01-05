@@ -93,7 +93,10 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
           isSuccessful = true;
           break;
         }
-        await page.click(this.byTestId('euiCollapsedItemActionsButton'), { delay: 800 });
+        await page.click(this.byTestId('euiCollapsedItemActionsButton'), {
+          delay: 800,
+          force: true,
+        });
         await page.click(`.euiContextMenuPanel ${this.byTestId('syntheticsMonitorDeleteAction')}`, {
           delay: 800,
         });
@@ -106,9 +109,12 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       return isSuccessful;
     },
 
-    async navigateToEditMonitor() {
+    async navigateToEditMonitor(monitorName: string) {
+      await this.adjustRows();
       await page.waitForSelector('text=Showing');
-      await this.clickByTestSubj('euiCollapsedItemActionsButton');
+      await page.click(
+        `tr:has-text("${monitorName}") [data-test-subj="euiCollapsedItemActionsButton"]`
+      );
       await page.click(`.euiContextMenuPanel ${this.byTestId('syntheticsMonitorEditAction')}`, {
         timeout: 2 * 60 * 1000,
         delay: 800,
@@ -166,6 +172,12 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
 
     async fillCodeEditor(value: string) {
       await page.fill('[data-test-subj=codeEditorContainer] textarea', value);
+    },
+
+    async adjustRows() {
+      await page.click('[data-test-subj="tablePaginationPopoverButton"]');
+      await page.click('text="100 rows"');
+      await page.waitForTimeout(3e3);
     },
 
     async createBasicHTTPMonitorDetails({
