@@ -9,7 +9,7 @@
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getVisualizeInformation, useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
@@ -277,13 +277,25 @@ export const useDiscoverHistogram = ({
   // Initialized when the first search has been requested or
   // when in SQL mode since search sessions are not supported
   const isInitialized = Boolean(searchSessionId) || isPlainRecord;
+  const skipRefetch = useRef<boolean>();
+
+  // Skip refetching when showing the chart since Lens will
+  // automatically fetch when the chart is shown
+  useEffect(() => {
+    if (skipRefetch.current === undefined) {
+      skipRefetch.current = false;
+    } else {
+      skipRefetch.current = !hideChart;
+    }
+  }, [hideChart]);
 
   // Trigger a unified histogram refetch when savedSearchFetch$ is triggered
   useEffect(() => {
     const subscription = savedSearchFetch$.subscribe(() => {
-      if (isInitialized) {
+      if (isInitialized && !skipRefetch.current) {
         input$.next({ type: 'refetch' });
       }
+      skipRefetch.current = false;
     });
 
     return () => {
