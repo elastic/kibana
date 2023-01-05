@@ -32,7 +32,7 @@ export const AlertSummaryWidget = ({
     timeRange,
   });
 
-  if (isLoading) return <EuiLoadingSpinner />;
+  if (isLoading) return <EuiLoadingSpinner data-test-subj="alertSummaryWidgetLoading" />;
   if (error) return <AlertSummaryWidgetError />;
 
   return fullSize ? (

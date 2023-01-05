@@ -56,7 +56,7 @@ export const AlertsSummaryWidgetFullSize = ({
   return (
     <EuiPanel
       element="div"
-      data-test-subj="alertSummaryWidget"
+      data-test-subj="alertSummaryWidgetFullSize"
       hasShadow={false}
       paddingSize="none"
     >
