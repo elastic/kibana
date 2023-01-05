@@ -7,7 +7,7 @@
 
 import type { GetLensAttributes, LensAttributes } from '../../../types';
 
-export const getAlertsBySeverityAttributes: GetLensAttributes = (
+export const getAlertsByStatusAttributes: GetLensAttributes = (
   stackByField = 'kibana.alert.workflow_status',
   extraOptions
 ) =>

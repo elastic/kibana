@@ -63,9 +63,10 @@ export interface DonutChartWrapperProps {
 
 /* Make this position absolute in order to overlap the text onto the donut */
 export const DonutTextWrapper = styled(EuiFlexGroup)<
-  EuiFlexGroupProps & { $isChartEmbeddablesEnabled?: boolean }
+  EuiFlexGroupProps & { $isChartEmbeddablesEnabled?: boolean; $dataExists?: boolean }
 >`
-  top: ${({ $isChartEmbeddablesEnabled }) => ($isChartEmbeddablesEnabled ? `66%` : `34%;`)};
+  top: ${({ $isChartEmbeddablesEnabled, $dataExists }) =>
+    $isChartEmbeddablesEnabled && !$dataExists ? `66%` : `34%;`};
   width: 100%;
   max-width: 77px;
   position: absolute;
@@ -101,6 +102,7 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
     >
       <StyledEuiFlexItem grow={isChartEmbeddablesEnabled}>
         <DonutTextWrapper
+          $dataExists={dataExists}
           $isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
           alignItems="center"
           direction="column"
