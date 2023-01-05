@@ -511,6 +511,28 @@ export const RULE_DETAILS = {
       defaultMessage: 'Alert if the average shard size is larger than the configured threshold.',
     }),
   },
+  [RULE_DATA_QUALITY]: {
+    label: i18n.translate('xpack.monitoring.alerts.dataQuality.label', {
+      defaultMessage: 'Data quality',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.dataQuality.description', {
+      defaultMessage: 'Alert when the data quality errors are happening.',
+    }),
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.dataQuality.paramDetails.threshold.label', {
+          defaultMessage: `Notify when data quality check is over`,
+        }),
+        type: AlertParamType.Number,
+      } as CommonAlertParamDetail,
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.dataQuality.paramDetails.duration.label', {
+          defaultMessage: `Look back duration`,
+        }),
+        type: AlertParamType.Duration,
+      } as CommonAlertParamDetail,
+    },
+  },
 };
 
 export const RULE_PANEL_MENU = [
@@ -524,6 +546,7 @@ export const RULE_PANEL_MENU = [
       { ruleName: RULE_ELASTICSEARCH_VERSION_MISMATCH },
       { ruleName: RULE_KIBANA_VERSION_MISMATCH },
       { ruleName: RULE_LOGSTASH_VERSION_MISMATCH },
+      { ruleName: RULE_DATA_QUALITY },
     ],
   },
   {

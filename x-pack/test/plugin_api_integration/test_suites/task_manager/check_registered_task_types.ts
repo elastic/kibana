@@ -89,6 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:monitoring_alert_thread_pool_write_rejections',
         'alerting:monitoring_ccr_read_exceptions',
         'alerting:monitoring_shard_size',
+        'alerting:monitoring_data_quality',
         'alerting:siem.eqlRule',
         'alerting:siem.indicatorRule',
         'alerting:siem.mlRule',

@@ -36,7 +36,7 @@ async function fetchKibanaNodeDataQuality(
   clusters: AlertCluster[],
   startMs: number,
   endMs: number,
-  max_bucket_size: number,
+  maxBucketSize: number,
   filterQuery: string | undefined
 ): Promise<AlertDataQualityStats[]> {
   // TODO use Andrew's APIs here for each index

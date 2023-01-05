@@ -39,8 +39,10 @@ import {
   RULE_ELASTICSEARCH_VERSION_MISMATCH,
   RULE_CCR_READ_EXCEPTIONS,
   RULE_LARGE_SHARD_SIZE,
+  RULE_DATA_QUALITY,
 } from '../../common/constants';
 import { CommonAlertParams } from '../../common/types/alerts';
+import { DataQualityRule } from './data_quality_rule';
 
 const BY_TYPE = {
   [RULE_CLUSTER_HEALTH]: ClusterHealthRule,
@@ -57,6 +59,7 @@ const BY_TYPE = {
   [RULE_ELASTICSEARCH_VERSION_MISMATCH]: ElasticsearchVersionMismatchRule,
   [RULE_CCR_READ_EXCEPTIONS]: CCRReadExceptionsRule,
   [RULE_LARGE_SHARD_SIZE]: LargeShardSizeRule,
+  [RULE_DATA_QUALITY]: DataQualityRule,
 };
 
 export class AlertsFactory {

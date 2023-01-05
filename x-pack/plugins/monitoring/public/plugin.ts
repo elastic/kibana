@@ -38,6 +38,7 @@ import {
   MonitoringStartPluginDependencies,
   LegacyMonitoringStartPluginDependencies,
 } from './types';
+import { createDataQualityAlertType } from './alerts/data_quality_alert/data_quality_alert';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -178,6 +179,7 @@ export class MonitoringPlugin
     );
     ruleTypeRegistry.register(createCCRReadExceptionsAlertType(config));
     ruleTypeRegistry.register(createLargeShardSizeAlertType(config));
+    ruleTypeRegistry.register(createDataQualityAlertType(config));
     const legacyAlertTypes = createLegacyAlertTypes(config);
     for (const legacyAlertType of legacyAlertTypes) {
       ruleTypeRegistry.register(legacyAlertType);

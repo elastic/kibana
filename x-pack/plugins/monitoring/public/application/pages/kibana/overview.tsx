@@ -94,6 +94,13 @@ const KibanaOverview = ({ data }: { data: any }) => {
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
+              <EuiFlexGroup>
+                <MonitoringTimeseriesContainer
+                  series={data.metrics.kibana_data_quality}
+                  onBrush={onBrush}
+                  zoomInfo={zoomInfo}
+                />
+              </EuiFlexGroup>
             </>
           )}
         </EuiPageContent>

@@ -20,4 +20,5 @@ export { NodesChangedRule } from './nodes_changed_rule';
 export { ElasticsearchVersionMismatchRule } from './elasticsearch_version_mismatch_rule';
 export { KibanaVersionMismatchRule } from './kibana_version_mismatch_rule';
 export { LogstashVersionMismatchRule } from './logstash_version_mismatch_rule';
+export { DataQualityRule } from './data_quality_rule';
 export { AlertsFactory } from './alerts_factory';

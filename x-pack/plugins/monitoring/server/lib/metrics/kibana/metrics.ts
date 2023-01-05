@@ -458,4 +458,20 @@ export const metrics = {
     isNotSupportedInInternalCollection: true,
     technicalPreview: true,
   }),
+  kibana_data_quality: new KibanaClusterRuleMetric({
+    field: 'kibana.data_quality.issues',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.dataQualityIssuesCountLabel', {
+      defaultMessage: 'Data Quality Issues Count',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP50Description',
+      {
+        defaultMessage: 'Average failures alerting rules are queued.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+    technicalPreview: true,
+  }),
 };

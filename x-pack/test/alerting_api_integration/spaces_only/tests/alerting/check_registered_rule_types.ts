@@ -61,6 +61,7 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
         'monitoring_alert_elasticsearch_version_mismatch',
         'monitoring_ccr_read_exceptions',
         'monitoring_shard_size',
+        'monitoring_data_quality',
         'apm.transaction_duration',
         'apm.anomaly',
         'apm.error_rate',
