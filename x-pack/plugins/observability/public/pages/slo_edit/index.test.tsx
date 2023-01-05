@@ -166,9 +166,6 @@ describe('SLO Edit Page', () => {
     });
 
     it('calls the createSlo hook if all required values are filled in', async () => {
-      // Note: the `anSLO` object is considered to have (at least)
-      // values for all required fields.
-
       jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
       useFetchIndicesMock.mockReturnValue({
         loading: false,
@@ -187,12 +184,17 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />, config);
 
-      await userEvent.type(screen.getByTestId('sloFormCustomKqlIndexInput'), 'some-index');
-      await userEvent.type(screen.getByTestId('sloFormCustomKqlFilterQueryInput'), 'irrelevant');
-      await userEvent.type(screen.getByTestId('sloFormCustomKqlGoodQueryInput'), 'irrelevant');
-      await userEvent.type(screen.getByTestId('sloFormCustomKqlTotalQueryInput'), 'irrelevant');
-      await userEvent.type(screen.getByTestId('sloFormNameInput'), 'irrelevant');
-      await userEvent.type(screen.getByTestId('sloFormDescriptionTextArea'), 'irrelevant');
+      userEvent.selectOptions(screen.getByTestId('sloFormIndicatorTypeSelect'), 'sli.kql.custom');
+      userEvent.type(screen.getByTestId('sloFormCustomKqlIndexInput'), 'some-index');
+      userEvent.type(screen.getByTestId('sloFormCustomKqlFilterQueryInput'), 'irrelevant');
+      userEvent.type(screen.getByTestId('sloFormCustomKqlGoodQueryInput'), 'irrelevant');
+      userEvent.type(screen.getByTestId('sloFormCustomKqlTotalQueryInput'), 'irrelevant');
+      userEvent.selectOptions(screen.getByTestId('sloFormBudgetingMethodSelect'), 'occurrences');
+      userEvent.selectOptions(screen.getByTestId('sloFormTimeWindowDurationSelect'), '7d');
+      userEvent.clear(screen.getByTestId('sloFormObjectiveTargetInput'));
+      userEvent.type(screen.getByTestId('sloFormObjectiveTargetInput'), '98.5');
+      userEvent.type(screen.getByTestId('sloFormNameInput'), 'irrelevant');
+      userEvent.type(screen.getByTestId('sloFormDescriptionTextArea'), 'irrelevant');
 
       await waitFor(() => expect(screen.queryByTestId('sloFormSubmitButton')).toBeEnabled());
 

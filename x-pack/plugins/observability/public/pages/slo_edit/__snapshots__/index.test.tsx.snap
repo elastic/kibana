@@ -60,10 +60,10 @@ exports[`SLO Edit Page when no sloId route param is provided calls the createSlo
         },
         "name": "irrelevant",
         "objective": Object {
-          "target": 0.995,
+          "target": 0.985,
         },
         "timeWindow": Object {
-          "duration": "30d",
+          "duration": "7d",
           "isRolling": true,
         },
       },
