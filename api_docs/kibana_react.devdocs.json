@@ -3175,7 +3175,7 @@
           "Omit<",
           "EuiPageProps",
           ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSideBarProps",
+          "EuiPageSideBarProps_Deprecated",
           " | undefined; pageHeader?: ",
           "EuiPageHeaderProps",
           " | undefined; pageBodyProps?: ",
@@ -3333,14 +3333,6 @@
             "docId": "kibKbnCoreThemeBrowserPluginApi",
             "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
-          },
-          " | undefined; injectedMetadata?: ",
-          {
-            "pluginId": "@kbn/core-injected-metadata-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreInjectedMetadataBrowserPluginApi",
-            "section": "def-common.InjectedMetadataStart",
-            "text": "InjectedMetadataStart"
           },
           " | undefined; }"
         ],
