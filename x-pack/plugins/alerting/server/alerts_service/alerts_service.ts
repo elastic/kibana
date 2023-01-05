@@ -180,7 +180,6 @@ export class AlertsService implements IAlertsService {
           }),
         { logger: this.options.logger }
       );
-      // await new Promise((r) => setTimeout(r, 15000));
       this.options.logger.info(`DONE Installing ILM policy ${ILM_POLICY_NAME}`);
     } catch (err) {
       this.options.logger.error(`Error installing ILM policy ${ILM_POLICY_NAME} - ${err.message}`);
@@ -198,7 +197,6 @@ export class AlertsService implements IAlertsService {
       await retryTransientEsErrors(() => esClient.cluster.putComponentTemplate(template), {
         logger: this.options.logger,
       });
-      // await new Promise((r) => setTimeout(r, 15000));
       this.options.logger.info(`DONE Installing component template ${template.name}`);
     } catch (err) {
       this.options.logger.error(
@@ -269,7 +267,6 @@ export class AlertsService implements IAlertsService {
       await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(indexTemplate), {
         logger: this.options.logger,
       });
-      // await new Promise((r) => setTimeout(r, 15000));
       this.options.logger.info(`DONE Installing index template ${indexPatterns.template}`);
     } catch (err) {
       this.options.logger.error(
@@ -444,7 +441,6 @@ export class AlertsService implements IAlertsService {
             logger: this.options.logger,
           }
         );
-        // await new Promise((r) => setTimeout(r, 15000));
         this.options.logger.info(`DONE Creating concrete write index - ${indexPatterns.name}`);
       } catch (error) {
         this.options.logger.error(`Error creating concrete write index - ${error.message}`);
