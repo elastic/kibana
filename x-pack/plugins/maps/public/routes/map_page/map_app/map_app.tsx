@@ -146,7 +146,7 @@ export class MapApp extends React.Component<Props, State> {
       )
       .subscribe();
 
-    // syncGlobalQueryStateWithUrl mutates global state by merging combining with default state
+    // syncGlobalQueryStateWithUrl mutates global state by merging URL state with Kibana QueryStart state
     // capture _initialTimeFromUrl before global state is mutated
     this._initialTimeFromUrl = this._getGlobalState()?.time;
     const { stop } = syncGlobalQueryStateWithUrl(getData().query, this._kbnUrlStateStorage);
