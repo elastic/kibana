@@ -37,7 +37,6 @@ import {
   getSpacesApi,
   getTimeFilter,
   getToasts,
-  getUiSettings,
 } from '../../../kibana_services';
 import {
   AppStateManager,
@@ -108,7 +107,7 @@ export class MapApp extends React.Component<Props, State> {
   _prevIndexPatternIds: string[] | null = null;
   _isMounted: boolean = false;
   _kbnUrlStateStorage: IKbnUrlStateStorage;
-  _intitialTimeFromUrl: TimeRange | undefined;
+  _initialTimeFromUrl: TimeRange | undefined;
 
   constructor(props: Props) {
     super(props);
@@ -213,7 +212,7 @@ export class MapApp extends React.Component<Props, State> {
   };
 
   _getGlobalState() {
-    return this._kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g');
+    return this._kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g') ?? {};
   }
 
   _updateGlobalState(newState: GlobalQueryStateFromUrl) {
