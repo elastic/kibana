@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
+import type { MaybeImmutable } from '../../../../../../../common/endpoint/types';
 import { ArgumentSelectorWrapper } from '../components/argument_selector_wrapper';
 import type { ParsedCommandInterface } from '../../../service/types';
 import type { EnteredCommand } from '../../console_state/types';
@@ -21,8 +22,8 @@ export class EnteredInput {
   constructor(
     private leftOfCursorText: string,
     private rightOfCursorText: string,
-    private readonly parsedInput: ParsedCommandInterface,
-    private readonly enteredCommand: undefined | EnteredCommand
+    parsedInput: MaybeImmutable<ParsedCommandInterface>,
+    enteredCommand: undefined | MaybeImmutable<EnteredCommand>
   ) {
     this.leftOfCursorContent = leftOfCursorText.split('');
     this.rightOfCursorContent = leftOfCursorText.split('');

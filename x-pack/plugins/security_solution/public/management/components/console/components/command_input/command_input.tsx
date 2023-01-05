@@ -90,8 +90,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   useInputHints();
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
-  const { rightOfCursorText, leftOfCursorText, fullTextEntered, parsedInput, enteredCommand } =
-    useWithInputTextEntered();
+  const { rightOfCursorText, leftOfCursorText, fullTextEntered } = useWithInputTextEntered();
   const visibleState = useWithInputVisibleState();
   const isPopoverOpen = !!useWithInputShowPopover();
 
@@ -165,11 +164,15 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       // Update the store with the updated text that was entered
       dispatch({
         type: 'updateInputTextEnteredState',
-        payload: ({ leftOfCursorText: prevLeftOfCursor, rightOfCursorText: prevRightOfCursor }) => {
+        payload: ({
+          leftOfCursorText: prevLeftOfCursor,
+          rightOfCursorText: prevRightOfCursor,
+          enteredCommand,
+          parsedInput,
+        }) => {
           let inputText = new EnteredInput(
             prevLeftOfCursor,
             prevRightOfCursor,
-            // FIXME:PT get parsedInput and enteredCommand from action callback arguments
             parsedInput,
             enteredCommand
           );
@@ -190,6 +193,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             // ENTER  = Execute command and blank out the input area
             case 13:
               setCommandToExecute(inputText.getFullText());
+              // FIXME:PT add `clear()` method to `EnteredInput` and remove code below
               inputText = new EnteredInput('', '', parsedInput, enteredCommand);
               break;
 
@@ -221,7 +225,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         },
       });
     },
-    [dispatch, enteredCommand, parsedInput]
+    [dispatch]
   );
 
   // Execute the command if one was ENTER'd.

@@ -6,6 +6,7 @@
  */
 
 import type { Dispatch, Reducer } from 'react';
+import type { Immutable } from '../../../../../../common/endpoint/types';
 import type { ParsedCommandInterface } from '../../service/types';
 import type { CommandInputProps } from '../command_input';
 import type {
@@ -148,7 +149,8 @@ export type ConsoleDataAction =
   | {
       type: 'updateInputTextEnteredState';
       payload: PayloadValueOrFunction<
-        Pick<ConsoleDataState['input'], 'leftOfCursorText' | 'rightOfCursorText'>
+        Pick<ConsoleDataState['input'], 'leftOfCursorText' | 'rightOfCursorText'>,
+        Immutable<ConsoleDataState['input']>
       >;
     }
   | {
@@ -180,9 +182,9 @@ export type ConsoleDataAction =
       payload?: never;
     };
 
-type PayloadValueOrFunction<T extends object = object, R extends object = T> =
+type PayloadValueOrFunction<T extends object = object, TCallbackArgs extends object = object> =
   | T
-  | ((options: Required<T>) => R);
+  | ((options: TCallbackArgs) => T);
 
 export interface ConsoleStore {
   state: ConsoleDataState;

@@ -11,22 +11,19 @@ import type { ConsoleDataState } from '../../components/console_state/types';
 
 type InputTextEntered = Pick<
   ConsoleDataState['input'],
-  'leftOfCursorText' | 'rightOfCursorText' | 'parsedInput' | 'enteredCommand'
+  'leftOfCursorText' | 'rightOfCursorText'
 > & {
   fullTextEntered: string;
 };
 
 export const useWithInputTextEntered = (): InputTextEntered => {
-  const { leftOfCursorText, rightOfCursorText, parsedInput, enteredCommand } =
-    useConsoleStore().state.input;
+  const { leftOfCursorText, rightOfCursorText } = useConsoleStore().state.input;
 
   return useMemo(() => {
     return {
       leftOfCursorText,
       rightOfCursorText,
-      parsedInput,
-      enteredCommand,
       fullTextEntered: leftOfCursorText + rightOfCursorText,
     };
-  }, [leftOfCursorText, rightOfCursorText, parsedInput, enteredCommand]);
+  }, [leftOfCursorText, rightOfCursorText]);
 };

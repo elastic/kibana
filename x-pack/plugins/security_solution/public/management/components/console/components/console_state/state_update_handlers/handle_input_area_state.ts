@@ -70,14 +70,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
     case 'updateInputTextEnteredState':
       const { leftOfCursorText: newTextEntered, rightOfCursorText: newRightOfCursor = '' } =
-        typeof payload === 'function'
-          ? payload({
-              leftOfCursorText: state.input.leftOfCursorText,
-              rightOfCursorText: state.input.rightOfCursorText,
-              enteredCommand: state.input.enteredCommand,
-              parsedInput: state.input.parsedInput,
-            })
-          : payload;
+        typeof payload === 'function' ? payload(state.input) : payload;
 
       if (
         state.input.leftOfCursorText !== newTextEntered ||
