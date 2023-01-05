@@ -111,7 +111,6 @@ export function TraceExplorer({ children }: { children: React.ReactElement }) {
                   transactionId: '',
                   waterfallItemId: '',
                   detailTab: TransactionTab.timeline,
-                  flyoutDetailTab: '',
                 },
               })}
               isSelected={routePath === '/traces/explorer/waterfall'}

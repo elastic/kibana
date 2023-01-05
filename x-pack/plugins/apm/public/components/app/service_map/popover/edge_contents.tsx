@@ -59,7 +59,6 @@ export function EdgeContents({ elementData }: ContentsProps) {
       transactionId: '',
       detailTab: TransactionTab.timeline,
       showCriticalPath: false,
-      flyoutDetailTab: '',
     },
   });
 

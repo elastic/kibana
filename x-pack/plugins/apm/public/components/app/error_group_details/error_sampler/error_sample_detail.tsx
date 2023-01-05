@@ -156,7 +156,6 @@ export function ErrorSampleDetails({
       transactionId: '',
       waterfallItemId: '',
       detailTab: TransactionTab.timeline,
-      flyoutDetailTab: '',
     },
   });
 

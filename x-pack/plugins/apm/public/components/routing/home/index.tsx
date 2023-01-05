@@ -159,17 +159,21 @@ export const home = {
               '/traces/explorer/waterfall': {
                 element: <TraceExplorerWaterfall />,
                 params: t.type({
-                  query: t.type({
-                    traceId: t.string,
-                    transactionId: t.string,
-                    waterfallItemId: t.string,
-                    flyoutDetailTab: t.string,
-                    detailTab: t.union([
-                      t.literal(TransactionTab.timeline),
-                      t.literal(TransactionTab.metadata),
-                      t.literal(TransactionTab.logs),
-                    ]),
-                  }),
+                  query: t.intersection([
+                    t.type({
+                      traceId: t.string,
+                      transactionId: t.string,
+                      waterfallItemId: t.string,
+                      detailTab: t.union([
+                        t.literal(TransactionTab.timeline),
+                        t.literal(TransactionTab.metadata),
+                        t.literal(TransactionTab.logs),
+                      ]),
+                    }),
+                    t.partial({
+                      flyoutDetailTab: t.string,
+                    }),
+                  ]),
                 }),
                 defaults: {
                   query: {
@@ -177,7 +181,6 @@ export const home = {
                     traceId: '',
                     transactionId: '',
                     detailTab: TransactionTab.timeline,
-                    flyoutDetailTab: '',
                   },
                 },
               },
