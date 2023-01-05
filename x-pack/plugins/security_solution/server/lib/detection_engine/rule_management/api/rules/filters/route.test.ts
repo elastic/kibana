@@ -24,6 +24,11 @@ describe('Rule management filters route', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+    clients.rulesClient.aggregate.mockResolvedValue({
+      tags: {
+        buckets: [{ key: 'a' }, { key: 'b' }, { key: 'c' }],
+      },
+    });
 
     getRuleManagementFilters(server.router);
   });
@@ -34,17 +39,18 @@ describe('Rule management filters route', () => {
         getRuleManagementFiltersRequest(),
         requestContextMock.convertContext(context)
       );
+
       expect(response.status).toEqual(200);
     });
 
     test('catch error when finding rules throws error', async () => {
-      clients.rulesClient.find.mockImplementation(async () => {
-        throw new Error('Test error');
-      });
+      clients.rulesClient.find.mockRejectedValue(new Error('Test error'));
+
       const response = await server.inject(
         getRuleManagementFiltersRequest(),
         requestContextMock.convertContext(context)
       );
+
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -56,11 +62,7 @@ describe('Rule management filters route', () => {
   describe('responses', () => {
     test('1 rule installed, 1 custom rule and 3 tags', async () => {
       clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      clients.rulesClient.aggregate.mockResolvedValue({
-        alertExecutionStatus: {},
-        ruleLastRunOutcome: {},
-        ruleTags: ['a', 'b', 'c'],
-      });
+
       const request = getRuleManagementFiltersRequest();
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
