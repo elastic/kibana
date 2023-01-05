@@ -21,7 +21,7 @@ import { ActionRunner } from './action_runner';
 
 import type { GetAgentsOptions } from './crud';
 import { bulkUpdateAgents } from './crud';
-import { createErrorActionResults, createAgentAction } from './actions';
+import { createErrorActionResults, createAgentAction, NO_EXPIRATION } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
@@ -154,12 +154,14 @@ const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: n
     return {
       start_time: startTime ?? now,
       rollout_duration_seconds: upgradeDurationSeconds,
+      expiration: NO_EXPIRATION,
     };
   }
   // Schedule without rolling upgrade (Immediately after start_time)
   if (startTime && !upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
+      expiration: NO_EXPIRATION,
     };
   } else {
     // Regular bulk upgrade (non scheduled, non rolling)
