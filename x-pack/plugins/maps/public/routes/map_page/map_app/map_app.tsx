@@ -297,7 +297,6 @@ export class MapApp extends React.Component<Props, State> {
     return !this.props.savedMap.hasSaveAndReturnConfig() && serializedMapState?.timeFilters
       ? serializedMapState.timeFilters
       : getTimeFilter().getTime();
-    }
   }
 
   _initMapAndLayerSettings(serializedMapState?: SerializedMapState) {
