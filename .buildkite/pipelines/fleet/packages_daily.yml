@@ -21,7 +21,9 @@ steps:
     label: Install All Packages
     agents:
       queue: n2-2
-    key: linting
+    env:
+      # ensure that the FTR logs all output for these tests
+      DISABLE_CI_LOG_OUTPUT_CAPTURE: 'true'
     timeout_in_minutes: 90
 
   - wait: ~
