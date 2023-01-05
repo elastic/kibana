@@ -318,6 +318,68 @@ describe('Alerts Service', () => {
       });
     });
 
+    test('should not install component template for context fieldMap is empty', async () => {
+      alertsService.register({
+        context: 'empty',
+        fieldMap: { },
+      });
+      await new Promise((r) => setTimeout(r, 50));
+      expect(await alertsService.isContextInitialized('empty')).toEqual(
+        true
+      );
+
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+      const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
+      expect(componentTemplate1.name).toEqual('alerts-common-component-template');
+
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        {
+          name: `.alerts-empty-default-template`,
+          body: {
+            index_patterns: [`.alerts-empty-default-*`],
+            composed_of: [
+              'alerts-common-component-template',
+            ],
+            template: {
+              settings: {
+                auto_expand_replicas: '0-1',
+                hidden: true,
+                'index.lifecycle': {
+                  name: 'alerts-default-ilm-policy',
+                  rollover_alias: `.alerts-empty-default`,
+                },
+                'index.mapping.total_fields.limit': 2500,
+              },
+              mappings: {
+                dynamic: false,
+              },
+            },
+            _meta: {
+              managed: true,
+            },
+          },
+        }
+      );
+      expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
+        index: '.alerts-empty-default-*',
+      });
+      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.create).toHaveBeenCalledWith({
+        index: '.alerts-empty-default-000001',
+        body: {
+          aliases: {
+            '.alerts-empty-default': {
+              is_write_index: true,
+            },
+          },
+        },
+      });
+    });
+
     test('should skip initialization if context already exists', async () => {
       alertsService.register(TestRegistrationContext);
       alertsService.register(TestRegistrationContext);

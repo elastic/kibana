@@ -112,7 +112,9 @@ export class AlertsService implements IAlertsService {
 
         this.initialized = true;
       } catch (err) {
-        this.options.logger.error(`Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted.`);
+        this.options.logger.error(
+          `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted.`
+        );
         this.initialized = false;
       }
 
@@ -144,19 +146,28 @@ export class AlertsService implements IAlertsService {
     const indexTemplateAndPattern = getIndexTemplateAndPattern(context);
 
     // Context specific initialization installs component template, index template and write index
-    const initFns = [
-      async () =>
-        await this.createOrUpdateComponentTemplate(
-          esClient,
-          getComponentTemplate(fieldMap, context)
-        ),
-      async () =>
-        await this.createOrUpdateIndexTemplate(esClient, indexTemplateAndPattern, [
-          getComponentTemplateName(),
-          getComponentTemplateName(context),
-        ]),
-      async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
-    ];
+    // If fieldMap is empty, don't create context specific component template
+    const initFns = isEmpty(fieldMap)
+      ? [
+          async () =>
+            await this.createOrUpdateIndexTemplate(esClient, indexTemplateAndPattern, [
+              getComponentTemplateName(),
+            ]),
+          async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
+        ]
+      : [
+          async () =>
+            await this.createOrUpdateComponentTemplate(
+              esClient,
+              getComponentTemplate(fieldMap, context)
+            ),
+          async () =>
+            await this.createOrUpdateIndexTemplate(esClient, indexTemplateAndPattern, [
+              getComponentTemplateName(),
+              getComponentTemplateName(context),
+            ]),
+          async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
+        ];
 
     for (const fn of initFns) {
       await this.installWithTimeout(async () => await fn(), timeoutMs);

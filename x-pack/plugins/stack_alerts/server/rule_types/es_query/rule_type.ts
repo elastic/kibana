@@ -187,5 +187,9 @@ export function getRuleType(
     },
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
+    alerts: {
+      context: 'stack',
+      fieldMap: {},
+    },
   };
 }
