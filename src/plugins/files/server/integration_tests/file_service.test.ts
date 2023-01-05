@@ -184,12 +184,45 @@ describe('FileService', () => {
       createDisposableFile({ fileKind, name: 'My pic', mime: 'image/png' }),
       createDisposableFile({ fileKind, name: 'Vern payslip', mime: 'application/pdf' }),
     ]);
-    const result1 = await fileService.find({ kind: [fileKind], mimeType: ['image/png'] });
+
+    const result1 = await fileService.find({
+      kind: [fileKind],
+      mimeType: ['image/png']
+    });
+
     expect(result1.files.length).toBe(1);
     expect(result1.files[0].name).toBe('My pic');
-    const result2 = await fileService.find({ kind: [fileKind], mimeType: ['application/pdf'] });
+
+    const result2 = await fileService.find({
+      kind: [fileKind],
+      mimeType: ['application/pdf']
+    });
+
     expect(result2.files.length).toBe(1);
     expect(result2.files[0].name).toBe('Vern payslip');
+  });
+
+  it('filters files by user ID', async () => {
+    await Promise.all([
+      createDisposableFile({ fileKind, name: 'Johnny\'s file', user: { id: '123' } }),
+      createDisposableFile({ fileKind, name: 'Marry\'s file', user: { id: '456' } }),
+    ]);
+
+    const result1 = await fileService.find({
+      kind: [fileKind],
+      user: ['123'],
+    });
+
+    expect(result1.files.length).toBe(1);
+    expect(result1.files[0].name).toBe('Johnny\'s file');
+    
+    const result2 = await fileService.find({
+      kind: [fileKind],
+      user: ['456'],
+    });
+
+    expect(result2.files.length).toBe(1);
+    expect(result2.files[0].name).toBe('Marry\'s file');
   });
 
   it('deletes files', async () => {

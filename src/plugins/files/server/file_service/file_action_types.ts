@@ -99,6 +99,10 @@ export interface FindFileArgs extends Pagination {
    */
   status?: string[];
   /**
+   * ID of user who created the file.
+   */
+  user?: string[];
+  /**
    * File metadata values. These values are governed by the consumer.
    */
   meta?: Record<string, string>;
