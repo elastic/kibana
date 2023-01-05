@@ -84,7 +84,7 @@ image::management/connectors/images/tines-webhook-url-fallback.png[Tines Webhook
 
 [float]
 [[tines-story-library]]
-=== Tines Story Libary
+=== Tines story library
 
 In order to simplify the integration with Elastic, Tines offers a set of pre-defined Elastic stories in the Story library.
 They can be found by searching for "Elastic" in the Tines Story library:
