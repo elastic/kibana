@@ -33,7 +33,6 @@ import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
 import { getAlertsTableLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_table';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import type { Status } from '../../../../../common/detection_engine/schemas/common';
 import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
