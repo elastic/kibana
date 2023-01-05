@@ -165,8 +165,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const onControlGroupLoadHandler = useCallback(
     (controlGroupContainer: ControlGroupContainer) => {
+      if (onInit) onInit(controlGroupContainer);
       setControlGroup(controlGroupContainer);
-      if (onInit) onInit(controlGroupContainer, false);
     },
     [onInit]
   );

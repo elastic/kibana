@@ -71,10 +71,7 @@ import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { DetectionPageFilterSet } from '../../components/detection_page_filters';
-import type {
-  FilterGroupHandler,
-  FilterGroupProps,
-} from '../../../common/components/filter_group/types';
+import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -93,10 +90,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).graphEventId
-  );
-
-  const totalCount = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).totalCount
   );
 
   const isTableLoading = useShallowEqualSelector(
@@ -132,8 +125,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   const [detectionPageFilterHandler, setDetectionPageFilterHandler] = useState<
     FilterGroupHandler | undefined
   >();
-
-  const [isDetectionPageFiltersLoading, setIsDetectionPageFiltersLoading] = useState(true);
 
   const {
     indexPattern,
@@ -263,21 +254,17 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     setDetectionPageFilters(newFilters);
   }, []);
 
-  const detectionPageFiltersInitHandler: FilterGroupProps['onInit'] = useCallback(
-    (filterGroup, isFilterloading) => {
-      setDetectionPageFilterHandler(filterGroup);
-      setIsDetectionPageFiltersLoading(isFilterloading);
-    },
-    []
-  );
+  const areDetectionPageFiltersLoading = useMemo(() => {
+    return !Array.isArray(detectionPageFilters);
+  }, [detectionPageFilters]);
 
   const isAlertTableLoading = useMemo(
-    () => loading || !Array.isArray(detectionPageFilters),
-    [loading, detectionPageFilters]
+    () => loading || areDetectionPageFiltersLoading,
+    [loading, areDetectionPageFiltersLoading]
   );
   const isChartPanelLoading = useMemo(
-    () => isLoadingIndexPattern || !Array.isArray(detectionPageFilters),
-    [isLoadingIndexPattern, detectionPageFilters]
+    () => isLoadingIndexPattern || areDetectionPageFiltersLoading,
+    [isLoadingIndexPattern, areDetectionPageFiltersLoading]
   );
 
   if (loading) {
@@ -359,7 +346,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                   mode: 'absolute',
                 }}
                 chainingSystem="HIERARCHICAL"
-                onInit={detectionPageFiltersInitHandler}
+                onInit={setDetectionPageFilterHandler}
               />
 
               <EuiSpacer size="l" />

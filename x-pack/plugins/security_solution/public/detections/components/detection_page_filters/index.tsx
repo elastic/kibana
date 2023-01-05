@@ -18,7 +18,7 @@ import { FilterGroup } from '../../../common/components/filter_group';
 type FilterItemSetProps = Omit<ComponentProps<typeof FilterGroup>, 'initialControls'>;
 
 const FilterItemSetComponent = (props: FilterItemSetProps) => {
-  const { dataViewId, onFilterChange, onInit, ...restFilterItemGroupProps } = props;
+  const { dataViewId, onFilterChange, ...restFilterItemGroupProps } = props;
 
   const [loadingPageFilters, setLoadingPageFilters] = useState(true);
 
