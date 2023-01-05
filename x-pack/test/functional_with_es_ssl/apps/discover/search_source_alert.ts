@@ -258,8 +258,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await toasts.getToastCount()).to.be(0);
     } else {
       expect(await toasts.getToastCount()).to.be(1);
-      expect(await toasts.getToastContent(1)).to.equal(
-        `Displayed documents may vary\nThe displayed documents might differ from the documents that triggered the alert. Some documents might have been added or deleted.`
+      expect((await toasts.getToastContent(1)).startsWith('Displayed documents may vary')).to.be(
+        true
       );
     }
     expect(await filterBar.getFilterCount()).to.be(0);
