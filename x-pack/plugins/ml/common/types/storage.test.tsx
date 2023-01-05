@@ -5,33 +5,38 @@
  * 2.0.
  */
 
+import React, { FC } from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { MlStorageContextProvider, useStorage } from './storage_context';
-import { MlStorageKey } from '../../../../common/types/storage';
+
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { StorageContextProvider, useStorage } from '@kbn/ml-local-storage';
+
+import { ML_STORAGE_KEYS } from './storage';
 
 const mockSet = jest.fn();
 const mockRemove = jest.fn();
+const mockStorage: Storage = {
+  set: mockSet,
+  get: jest.fn((key: string) => {
+    switch (key) {
+      case 'ml.gettingStarted.isDismissed':
+        return true;
+      default:
+        return;
+    }
+  }),
+  remove: mockRemove,
+  store: jest.fn() as any,
+  clear: jest.fn(),
+};
 
-jest.mock('../kibana', () => ({
-  useMlKibana: () => {
-    return {
-      services: {
-        storage: {
-          set: mockSet,
-          get: jest.fn((key: MlStorageKey) => {
-            switch (key) {
-              case 'ml.gettingStarted.isDismissed':
-                return true;
-              default:
-                return;
-            }
-          }),
-          remove: mockRemove,
-        },
-      },
-    };
-  },
-}));
+const Provider: FC = ({ children }) => {
+  return (
+    <StorageContextProvider storage={mockStorage} storageKeys={ML_STORAGE_KEYS}>
+      {children}
+    </StorageContextProvider>
+  );
+};
 
 describe('useStorage', () => {
   afterEach(() => {
@@ -40,7 +45,7 @@ describe('useStorage', () => {
 
   test('returns the default value', () => {
     const { result } = renderHook(() => useStorage('ml.jobSelectorFlyout.applyTimeRange', true), {
-      wrapper: MlStorageContextProvider,
+      wrapper: Provider,
     });
 
     expect(result.current[0]).toBe(true);
@@ -48,7 +53,7 @@ describe('useStorage', () => {
 
   test('returns the value from storage', () => {
     const { result } = renderHook(() => useStorage('ml.gettingStarted.isDismissed', false), {
-      wrapper: MlStorageContextProvider,
+      wrapper: Provider,
     });
 
     expect(result.current[0]).toBe(true);
@@ -58,7 +63,7 @@ describe('useStorage', () => {
     const { result, waitForNextUpdate } = renderHook(
       () => useStorage('ml.gettingStarted.isDismissed'),
       {
-        wrapper: MlStorageContextProvider,
+        wrapper: Provider,
       }
     );
 
@@ -79,7 +84,7 @@ describe('useStorage', () => {
     const { result, waitForNextUpdate } = renderHook(
       () => useStorage('ml.gettingStarted.isDismissed'),
       {
-        wrapper: MlStorageContextProvider,
+        wrapper: Provider,
       }
     );
 
@@ -100,7 +105,7 @@ describe('useStorage', () => {
     const { result, waitForNextUpdate } = renderHook(
       () => useStorage('ml.gettingStarted.isDismissed'),
       {
-        wrapper: MlStorageContextProvider,
+        wrapper: Provider,
       }
     );
 
