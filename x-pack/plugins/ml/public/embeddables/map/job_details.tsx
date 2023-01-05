@@ -80,6 +80,13 @@ export const JobDetails: FC<Props> = ({
         }),
         errorText: error.message ?? error,
       });
+
+      return {
+        jobCreated: { success: false },
+        datafeedCreated: { success: false },
+        jobOpened: { success: false },
+        datafeedStarted: { success: false },
+      };
     }
   }
 

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import type { MapEmbeddable, ILayer } from '@kbn/maps-plugin/public';
+import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyoutFooter,
@@ -21,6 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { Layer } from './layer';
+import { LayerResult, VisualizationExtractor } from '../../application/jobs/new_job/job_from_map';
 
 interface Props {
   embeddable: MapEmbeddable;
@@ -29,26 +30,19 @@ interface Props {
 
 export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
   const { euiTheme } = useEuiTheme();
-  const [layers, setLayers] = useState<ILayer[]>([]);
+  const [layerResults, setLayerResults] = useState<LayerResult[]>([]);
 
   useEffect(() => {
-    if (embeddable !== undefined) {
-      // Keep track of geoFields for layers as they can be repeated
-      const layerGeoFields: Record<string, any> = {};
-      const currentLayers = embeddable.getLayerList().filter((layer) => {
-        const geoField = layer.getGeoFieldNames().length ? layer.getGeoFieldNames()[0] : undefined;
-        if (
-          geoField &&
-          layerGeoFields[geoField] === undefined &&
-          layer.getIndexPatternIds().length
-        ) {
-          layerGeoFields[geoField] = true;
-          return true;
-        }
-        return false;
+    const visExtractor = new VisualizationExtractor();
+    visExtractor
+      .getResultLayersFromEmbeddable(embeddable)
+      .then(setLayerResults)
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('Layers could not be extracted from embeddable', error);
+        onClose();
       });
-      setLayers(currentLayers);
-    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [embeddable]);
 
   return (
@@ -72,8 +66,8 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={{ backgroundColor: euiTheme.colors.lightestShade }}>
-        {layers.map((layer, i) => (
-          <Layer key={`${layer.getId()}`} layer={layer} layerIndex={i} embeddable={embeddable} />
+        {layerResults.map((layer, i) => (
+          <Layer key={`${layer.layerId}`} layer={layer} layerIndex={i} embeddable={embeddable} />
         ))}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

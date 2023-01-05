@@ -56,7 +56,7 @@ interface Props {
   layer?: LayerResult;
   layerIndex?: number;
   embeddable: Embeddable | MapEmbeddable;
-  incomingCreateError: { errorText: string };
+  incomingCreateError?: { text: string; errorText: string };
 }
 
 enum STATE {

@@ -20,10 +20,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MapEmbeddable, ILayer } from '@kbn/maps-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import { JobDetails } from '../job_details';
-import { categoryFieldTypes } from '../../../../common/util/fields_utils';
+import type { LayerResult } from '../../../application/jobs/new_job/job_from_map';
 
 interface DropDownLabel {
   label: string;
@@ -32,31 +31,12 @@ interface DropDownLabel {
 
 interface Props {
   embeddable: MapEmbeddable;
-  layer: ILayer;
+  layer: LayerResult;
   layerIndex: number;
-  sourceDataView: DataView;
 }
 
-export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex, sourceDataView }) => {
+export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) => {
   const [selectedSplitField, setSelectedSplitField] = useState<string | null>(null);
-
-  const splitFieldOptionsForSelectedGeoField: EuiComboBoxOptionOption[] = useMemo(() => {
-    const sortedFields =
-      sourceDataView?.fields.getAll().sort((a, b) => a.name.localeCompare(b.name)) ?? [];
-
-    const categoryFields = sortedFields.filter((f) => {
-      return categoryFieldTypes.some((type) => f.esTypes?.includes(type));
-    });
-
-    const optionsFromFields = categoryFields.map((field) => {
-      return {
-        label: field.name,
-        field: field.name,
-      };
-    });
-
-    return optionsFromFields;
-  }, [sourceDataView]);
 
   const splitFieldSelection: EuiComboBoxOptionOption[] = useMemo(() => {
     const selectedOptions: EuiComboBoxOptionOption[] = [];
@@ -92,14 +72,14 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex, sour
                 id="xpack.ml.embeddables.geoJobFlyout.createJobCalloutTitle.multiMetric"
                 defaultMessage="The {geoField} field can be used to create a geo job for {sourceDataViewTitle}"
                 values={{
-                  geoField: layer.getGeoFieldNames()[0],
-                  sourceDataViewTitle: sourceDataView?.getIndexPattern(),
+                  geoField: layer.geoField,
+                  sourceDataViewTitle: layer.dataView?.getIndexPattern(),
                 }}
               />
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {splitFieldOptionsForSelectedGeoField.length ? (
+        {layer.splitFieldOptions?.length ? (
           <>
             <EuiSpacer size="m" />
             <EuiAccordion
@@ -122,7 +102,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex, sour
               >
                 <EuiComboBox
                   singleSelection={{ asPlainText: true }}
-                  options={splitFieldOptionsForSelectedGeoField}
+                  options={layer.splitFieldOptions}
                   selectedOptions={splitFieldSelection}
                   onChange={onSplitFieldChange}
                   isClearable={true}
@@ -132,12 +112,12 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex, sour
             </EuiAccordion>
           </>
         ) : null}
-        {sourceDataView ? (
+        {layer.dataView ? (
           <JobDetails
             layerIndex={layerIndex}
             embeddable={embeddable}
-            sourceDataView={sourceDataView}
-            geoField={layer.getGeoFieldNames()[0]}
+            sourceDataView={layer.dataView}
+            geoField={layer.geoField}
             splitField={selectedSplitField}
           />
         ) : null}
