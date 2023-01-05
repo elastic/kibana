@@ -9,11 +9,6 @@ import {
   ALERT_ACTION_GROUP,
   ALERT_DURATION,
   ALERT_END,
-  ALERT_EVALUATION_RESULTS,
-  ALERT_EVALUATION_RESULTS_THRESHOLDS_COMPARATOR,
-  ALERT_EVALUATION_RESULTS_THRESHOLDS_TYPE,
-  ALERT_EVALUATION_RESULTS_THRESHOLDS_VALUE,
-  ALERT_EVALUATION_RESULTS_VALUE,
   ALERT_FLAPPING,
   ALERT_ID,
   ALERT_REASON,
@@ -146,31 +141,6 @@ export const alertFieldMap = {
   [ALERT_RULE_TAGS]: {
     type: 'keyword',
     array: true,
-    required: false,
-  },
-  [ALERT_EVALUATION_RESULTS]: {
-    type: 'object',
-    array: true,
-    required: false,
-  },
-  [ALERT_EVALUATION_RESULTS_THRESHOLDS_COMPARATOR]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [ALERT_EVALUATION_RESULTS_THRESHOLDS_TYPE]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [ALERT_EVALUATION_RESULTS_THRESHOLDS_VALUE]: {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  [ALERT_EVALUATION_RESULTS_VALUE]: {
-    type: 'float',
-    array: false,
     required: false,
   },
   [ALERT_FLAPPING]: {

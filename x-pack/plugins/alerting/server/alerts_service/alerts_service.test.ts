@@ -321,12 +321,10 @@ describe('Alerts Service', () => {
     test('should not install component template for context fieldMap is empty', async () => {
       alertsService.register({
         context: 'empty',
-        fieldMap: { },
+        fieldMap: {},
       });
       await new Promise((r) => setTimeout(r, 50));
-      expect(await alertsService.isContextInitialized('empty')).toEqual(
-        true
-      );
+      expect(await alertsService.isContextInitialized('empty')).toEqual(true);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
 
@@ -334,34 +332,30 @@ describe('Alerts Service', () => {
       const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
       expect(componentTemplate1.name).toEqual('alerts-common-component-template');
 
-      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
-        {
-          name: `.alerts-empty-default-template`,
-          body: {
-            index_patterns: [`.alerts-empty-default-*`],
-            composed_of: [
-              'alerts-common-component-template',
-            ],
-            template: {
-              settings: {
-                auto_expand_replicas: '0-1',
-                hidden: true,
-                'index.lifecycle': {
-                  name: 'alerts-default-ilm-policy',
-                  rollover_alias: `.alerts-empty-default`,
-                },
-                'index.mapping.total_fields.limit': 2500,
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
+        name: `.alerts-empty-default-template`,
+        body: {
+          index_patterns: [`.alerts-empty-default-*`],
+          composed_of: ['alerts-common-component-template'],
+          template: {
+            settings: {
+              auto_expand_replicas: '0-1',
+              hidden: true,
+              'index.lifecycle': {
+                name: 'alerts-default-ilm-policy',
+                rollover_alias: `.alerts-empty-default`,
               },
-              mappings: {
-                dynamic: false,
-              },
+              'index.mapping.total_fields.limit': 2500,
             },
-            _meta: {
-              managed: true,
+            mappings: {
+              dynamic: false,
             },
           },
-        }
-      );
+          _meta: {
+            managed: true,
+          },
+        },
+      });
       expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
         index: '.alerts-empty-default-*',
       });

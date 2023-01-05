@@ -65,7 +65,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
     });
 
     it('should install context specific alerts as data resources on startup', async () => {
-      const componentTemplateName = 'alerts-test.always-firing-default-component-template';
+      const componentTemplateName = 'alerts-test.always-firing-component-template';
       const indexTemplateName = '.alerts-test.always-firing-default-template';
       const indexName = '.alerts-test.always-firing-default-000001';
       const contextSpecificMappings = {
@@ -115,7 +115,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       ]);
       expect(contextIndexTemplate.index_template.composed_of).to.eql([
         'alerts-common-component-template',
-        'alerts-test.always-firing-component-default-template',
+        'alerts-test.always-firing-component-template',
       ]);
       expect(contextIndexTemplate.index_template.template!.mappings).to.eql({
         dynamic: false,
@@ -143,6 +143,14 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       expect(contextIndex[indexName].aliases).to.eql({
         '.alerts-test.always-firing-default': {
           is_write_index: true,
+        },
+      });
+
+      expect(contextIndex[indexName].mappings).to.eql({
+        dynamic: 'false',
+        properties: {
+          ...contextSpecificMappings,
+          ...commonFrameworkMappings.properties,
         },
       });
 
