@@ -96,6 +96,7 @@ const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const mockTaskManager = taskManagerMock.createSetup();
 const configurationUtilities = actionsConfigMock.create();
+const getEventLogClient = jest.fn();
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -139,6 +140,7 @@ beforeEach(() => {
     auditLogger,
     usageCounter: mockUsageCounter,
     connectorTokenClient,
+    getEventLogClient,
   });
   (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
   (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
@@ -566,6 +568,7 @@ describe('create()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
     });
 
     const savedObjectCreateResult = {
@@ -687,6 +690,7 @@ describe('get()', () => {
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
       });
 
       await actionsClient.get({ id: 'testPreconfigured' });
@@ -747,6 +751,7 @@ describe('get()', () => {
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
@@ -869,6 +874,7 @@ describe('get()', () => {
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
     });
 
     const result = await actionsClient.get({ id: 'testPreconfigured' });
@@ -942,6 +948,7 @@ describe('getAll()', () => {
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
       });
       return actionsClient.getAll();
     }
@@ -1084,6 +1091,7 @@ describe('getAll()', () => {
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
     });
     const result = await actionsClient.getAll();
     expect(result).toEqual([
@@ -1166,6 +1174,7 @@ describe('getBulk()', () => {
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
       });
       return actionsClient.getBulk(['1', 'testPreconfigured']);
     }
@@ -1302,6 +1311,7 @@ describe('getBulk()', () => {
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
     });
     const result = await actionsClient.getBulk(['1', 'testPreconfigured']);
     expect(result).toEqual([
@@ -1361,6 +1371,7 @@ describe('getOAuthAccessToken()', () => {
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
     });
     return actionsClient.getOAuthAccessToken(requestBody, configurationUtilities);
   }
@@ -2525,6 +2536,7 @@ describe('isPreconfigured()', () => {
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
       }),
+      getEventLogClient,
     });
 
     expect(actionsClient.isPreconfigured('testPreconfigured')).toEqual(true);
@@ -2563,6 +2575,7 @@ describe('isPreconfigured()', () => {
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
       }),
+      getEventLogClient,
     });
 
     expect(actionsClient.isPreconfigured(uuid.v4())).toEqual(false);
