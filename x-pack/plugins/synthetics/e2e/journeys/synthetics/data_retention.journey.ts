@@ -7,6 +7,7 @@
 
 import { journey, step, expect, Page } from '@elastic/synthetics';
 import { assertText, byTestId } from '@kbn/observability-plugin/e2e/utils';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import { recordVideo } from '../../helpers/record_video';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
@@ -15,6 +16,9 @@ journey(`DataRetentionPage`, async ({ page, params }) => {
   page.setDefaultTimeout(60 * 1000);
   recordVideo(page);
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+
+  const getService = params.getService;
+  const retry: RetryService = getService('retry');
 
   step('Go to monitor-management', async () => {
     await syntheticsApp.navigateToMonitorManagement(true);
@@ -43,6 +47,7 @@ journey(`DataRetentionPage`, async ({ page, params }) => {
         'tbody div:has-text("synthetics-synthetics.browser-default_policy(opens in a new tab or window)")'
       ),
     ]);
+    recordVideo(page1, 'data_retention_policy_change');
     await page1.setDefaultTimeout(60 * 1000);
     await page1.click('text=Edit policy synthetics-synthetics.browser-default_policy');
     await page1.click('text=Save as new policy');
@@ -61,12 +66,12 @@ journey(`DataRetentionPage`, async ({ page, params }) => {
 
     await page1.fill(byTestId('ilmSearchBar'), 'copy');
 
-    await page1.hover(byTestId('addPolicyToTemplate'));
-    await page1.click(byTestId('addPolicyToTemplate'), { delay: 1000 });
-
-    if (!(await page1.isVisible(byTestId('confirmModalConfirmButton')))) {
-      await page1.click(byTestId('addPolicyToTemplate'));
-    }
+    await retry.tryForTime(30 * 1000, async () => {
+      await page1.click(byTestId('addPolicyToTemplate'), { clickCount: 2, timeout: 5000 });
+      expect(await page1.isVisible(byTestId('confirmModalConfirmButton'), { timeout: 5000 })).toBe(
+        true
+      );
+    });
 
     await page1.click(byTestId('comboBoxToggleListButton'));
     await page1.fill(byTestId('comboBoxSearchInput'), 'synthetics-browser');
