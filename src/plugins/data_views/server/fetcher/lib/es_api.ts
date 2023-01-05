@@ -84,7 +84,8 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
       { meta: true }
     );
     if (a.body.indices.length === 0) {
-      throw new DataViewMissingIndices(indices);
+      const pattern = Array.isArray(indices) ? indices.join(',') : indices;
+      throw new DataViewMissingIndices(pattern);
     }
     // console.log('*** CALLED CLUSTER', a);
     return a;
