@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export function isDefined<T>(argument: T | undefined | null): argument is T {
-  return argument !== undefined && argument !== null;
-}
+export { isDefined } from './src/is_defined';
