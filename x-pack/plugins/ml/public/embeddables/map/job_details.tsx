@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
@@ -29,6 +30,8 @@ export const JobDetails: FC<Props> = ({
   splitField,
   layerIndex,
 }) => {
+  const [createError, setCreateError] = useState<{ text: string; errorText: string } | undefined>();
+
   const {
     services: {
       data,
@@ -55,18 +58,29 @@ export const JobDetails: FC<Props> = ({
     startJob,
     runInRealTime,
   }: CreateADJobParams) {
-    const result = await quickJobCreator.createAndSaveGeoJob({
-      jobId,
-      bucketSpan,
-      embeddable: mapEmbeddable as MapEmbeddable,
-      startJob,
-      runInRealTime,
-      sourceDataView,
-      geoField,
-      splitField,
-    });
+    try {
+      const result = await quickJobCreator.createAndSaveGeoJob({
+        jobId,
+        bucketSpan,
+        embeddable: mapEmbeddable as MapEmbeddable,
+        startJob,
+        runInRealTime,
+        sourceDataView,
+        geoField,
+        splitField,
+      });
 
-    return result;
+      return result;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      setCreateError({
+        text: i18n.translate('xpack.ml.embeddables.geoJobFlyout.jobCreationError', {
+          defaultMessage: 'Job could not be created.',
+        }),
+        errorText: error.message ?? error,
+      });
+    }
   }
 
   return (
@@ -75,6 +89,7 @@ export const JobDetails: FC<Props> = ({
         createADJob={createADJob}
         createADJobInWizard={createGeoJobInWizard}
         embeddable={embeddable}
+        incomingCreateError={createError}
       />
     </>
   );

@@ -203,7 +203,7 @@ export class QuickJobCreator extends QuickJobCreatorBase {
       const { min, max } = this.timeFilter.calculateBounds({ to, from });
       start = min?.valueOf();
       end = max?.valueOf();
-
+      
       if (start === undefined || end === undefined || isNaN(start) || isNaN(end)) {
         throw Error(
           i18n.translate('xpack.ml.newJob.fromLens.createJob.error.timeRange', {
@@ -238,7 +238,6 @@ export class QuickJobCreator extends QuickJobCreatorBase {
     geoField,
     splitField,
   }: VisDescriptor) {
-    // TODO: return error for missing dataview or any error that occurs so user knows it failed
     const dataView: DataView = sourceDataView
       ? sourceDataView
       : await getDataViews().get(dataViewId!, true);

@@ -56,6 +56,7 @@ interface Props {
   layer?: LayerResult;
   layerIndex?: number;
   embeddable: Embeddable | MapEmbeddable;
+  incomingCreateError: { errorText: string };
 }
 
 enum STATE {
@@ -73,6 +74,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
   layer,
   layerIndex,
   embeddable,
+  incomingCreateError,
 }) => {
   const {
     services: {
@@ -214,7 +216,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
 
   return (
     <>
-      {state !== STATE.SAVE_SUCCESS && state !== STATE.SAVING ? (
+      {(state !== STATE.SAVE_SUCCESS && state !== STATE.SAVING) || incomingCreateError ? (
         <>
           {children ?? null}
           <EuiSpacer size="m" />
@@ -389,7 +391,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
         </>
       ) : null}
 
-      {state === STATE.SAVING ? (
+      {state === STATE.SAVING && incomingCreateError === undefined ? (
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup>
@@ -411,6 +413,14 @@ export const MlJobAdditionalSettings: FC<Props> = ({
           <EuiSpacer />
           <EuiCallOut color="danger" title={createError.text}>
             {createError.errorText}
+          </EuiCallOut>
+        </>
+      ) : null}
+      {incomingCreateError ? (
+        <>
+          <EuiSpacer />
+          <EuiCallOut color="danger" title={incomingCreateError.text}>
+            {incomingCreateError.errorText}
           </EuiCallOut>
         </>
       ) : null}

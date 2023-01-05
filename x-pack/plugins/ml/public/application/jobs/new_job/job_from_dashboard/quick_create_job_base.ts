@@ -22,6 +22,7 @@ import type { ErrorType } from '../../../../../common/util/errors';
 import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
+import { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 
 export type Dashboard = Embeddable['parent'];
 
@@ -57,12 +58,12 @@ export class QuickJobCreatorBase {
     runInRealTime,
   }: {
     jobId: string;
-    datafeedConfig: any;
-    jobConfig: any;
+    datafeedConfig: Datafeed;
+    jobConfig: Job;
     createdByLabel: CREATED_BY_LABEL;
     dashboard: any;
-    start: any;
-    end: any;
+    start: number | undefined;
+    end: number | undefined;
     startJob: boolean;
     runInRealTime: boolean;
   }) {
