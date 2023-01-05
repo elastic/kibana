@@ -110,6 +110,7 @@ const allowlistBaseEventFields: AllowlistFields = {
       ...baseAllowlistFields,
     },
   },
+  url: true,
   user: {
     id: true,
   },

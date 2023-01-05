@@ -214,6 +214,12 @@ describe('TelemetryEventsSender', () => {
           threat: {
             ignored_object: true, // this field is not allowlisted
           },
+          url: {
+            domain: 'elastic.co',
+            full: 'https://elastic.co',
+            path: '/',
+            scheme: 'http',
+          },
           Persistence: {
             name: 'foo',
             path: '/foo/bar',
@@ -394,6 +400,12 @@ describe('TelemetryEventsSender', () => {
                 id: 1234,
               },
             },
+          },
+          url: {
+            domain: 'elastic.co',
+            full: 'https://elastic.co',
+            path: '/',
+            scheme: 'http',
           },
           Persistence: {
             name: 'foo',
