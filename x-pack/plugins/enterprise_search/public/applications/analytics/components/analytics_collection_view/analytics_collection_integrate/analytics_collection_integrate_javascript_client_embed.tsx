@@ -177,8 +177,7 @@ const ProductDetailPage = (props) => {
         })
       }} value="Add to Basket"/>
     </div>
-    )
-  }
+  )
 }`}
           </EuiCodeBlock>
         </EuiText>
