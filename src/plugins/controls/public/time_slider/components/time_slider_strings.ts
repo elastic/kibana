@@ -15,11 +15,11 @@ export const TimeSliderStrings = {
         defaultMessage: 'Clear time selection',
       }),
     getPinStart: () =>
-      i18n.translate('controls.timeSlider.settings.unanchorStartSwitchLabel', {
-        defaultMessage: 'Unpin start',
+      i18n.translate('controls.timeSlider.settings.pinStart', {
+        defaultMessage: 'Pin start',
       }),
     getUnpinStart: () =>
-      i18n.translate('controls.timeSlider.settings.unanchorStartSwitchLabel', {
+      i18n.translate('controls.timeSlider.settings.unpinStart', {
         defaultMessage: 'Unpin start',
       }),
   },
