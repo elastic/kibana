@@ -31,7 +31,7 @@ import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 
-async function fetchKibanaNodeRules(
+async function fetchKibanaNodeDataQuality(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   startMs: number,
@@ -39,6 +39,7 @@ async function fetchKibanaNodeRules(
   max_bucket_size: number,
   filterQuery: string | undefined
 ): Promise<AlertDataQualityStats[]> {
+  // TODO use Andrew's APIs here for each index
   throw new Error('Function not implemented.');
 }
 
@@ -75,7 +76,7 @@ export class DataQualityRule extends BaseRule {
     const duration = parseDuration(params.duration);
     const endMs = +new Date();
     const startMs = endMs - duration;
-    const stats = await fetchKibanaNodeRules(
+    const stats = await fetchKibanaNodeDataQuality(
       esClient,
       clusters,
       startMs,
