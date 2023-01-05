@@ -11697,22 +11697,22 @@ cypress-react-selector@^3.0.0:
   dependencies:
     resq "1.10.2"
 
-cypress-real-events@^1.7.4:
-  version "1.7.4"
-  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.7.4.tgz#87780ee0f6669ee30ce52016c4bfc94d094a6e3d"
-  integrity sha512-bAlIf3w6uJa72hcbLFpQIl/hBoNGYnSVzFMgohefWcooyZz2WbFZdFAEDOl5qOPATtAU01o92sWvc2QW9eT8aA==
+cypress-real-events@^1.7.6:
+  version "1.7.6"
+  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.7.6.tgz#6f17e0b2ceea1d6dc60f6737d8f84cc517bbbb4c"
+  integrity sha512-yP6GnRrbm6HK5q4DH6Nnupz37nOfZu/xn1xFYqsE2o4G73giPWQOdu6375QYpwfU1cvHNCgyD2bQ2hPH9D7NMw==
 
-cypress-recurse@^1.24.0:
-  version "1.24.0"
-  resolved "https://registry.yarnpkg.com/cypress-recurse/-/cypress-recurse-1.24.0.tgz#d2d24024629573c84ee73b57955a728d6607046c"
-  integrity sha512-yH2XF71go+muxWjUbF7onNK0rzoVn27gzOPMTV3thg+Nv//jK2tV/z4hF0FWv88O3CAtmh7JZWhVNqFq4ghMZg==
+cypress-recurse@^1.26.0:
+  version "1.26.0"
+  resolved "https://registry.yarnpkg.com/cypress-recurse/-/cypress-recurse-1.26.0.tgz#e897b8c849af25214ce8785c57479a7fd98d20a5"
+  integrity sha512-FioASB4kPgO8G0l4SkjPyFnm2VMvfG0zbjr3N/FqOiiq+YRtsXqGvFIYK9jKay90Ciqq3hKVLTuMCaNpniXYfA==
   dependencies:
     humanize-duration "^3.27.3"
 
-cypress@^12.2.0:
-  version "12.2.0"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-12.2.0.tgz#86ddc1ecfffadf57a8689e211cfb4437735f4e92"
-  integrity sha512-kvl95ri95KK8mAy++tEU/wUgzAOMiIciZSL97LQvnOinb532m7dGvwN0mDSIGbOd71RREtmT9o4h088RjK5pKw==
+cypress@^12.3.0:
+  version "12.3.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-12.3.0.tgz#ae3fb0540aef4b5eab1ef2bcd0760caf2992b8bf"
+  integrity sha512-ZQNebibi6NBt51TRxRMYKeFvIiQZ01t50HSy7z/JMgRVqBUey3cdjog5MYEbzG6Ktti5ckDt1tfcC47lmFwXkw==
   dependencies:
     "@cypress/request" "^2.88.10"
     "@cypress/xvfb" "^1.2.4"
