@@ -38,6 +38,6 @@ export function sortPackageJson(json) {
         'engines',
         'resolutions',
       ],
-    }) + '\n'
+    })
   );
 }
