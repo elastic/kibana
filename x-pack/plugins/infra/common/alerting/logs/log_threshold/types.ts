@@ -268,10 +268,21 @@ const chartPreviewHistogramBucket = rt.type({
   doc_count: rt.number,
 });
 
+const AdditionalContext = rt.type({
+  hits: rt.type({
+    hits: rt.array(
+      rt.type({
+        _source: rt.record(rt.string, rt.UnknownRecord)
+      })
+    )
+  })
+});
+
 const ChartPreviewBucketsRT = rt.partial({
   histogramBuckets: rt.type({
     buckets: rt.array(chartPreviewHistogramBucket),
   }),
+  additionalContext: AdditionalContext
 });
 
 // ES query responses //
@@ -284,6 +295,7 @@ const hitsRT = rt.type({
 const bucketFieldsRT = rt.type({
   key: rt.record(rt.string, rt.string),
   doc_count: rt.number,
+  additionalContext: AdditionalContext
 });
 
 const afterKeyRT = rt.partial({

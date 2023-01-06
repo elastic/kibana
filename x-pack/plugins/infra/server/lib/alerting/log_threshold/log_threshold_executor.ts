@@ -48,7 +48,7 @@ import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
 import { InfraBackendLibs } from '../../infra_types';
-import { getAlertDetailsUrl, getGroupByObject, UNGROUPED_FACTORY_KEY } from '../common/utils';
+import { AdditionalContext, getAlertDetailsUrl, getGroupByObject, UNGROUPED_FACTORY_KEY } from '../common/utils';
 import {
   getReasonMessageForGroupedCountAlert,
   getReasonMessageForGroupedRatioAlert,
@@ -346,6 +346,8 @@ export const processUngroupedResults = (
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
+  const additionalContextHits = results.aggregations?.additionalContext?.hits?.hits;
+  const additionalContext = additionalContextHits && additionalContextHits.length > 0 ? additionalContextHits[0]._source : undefined;
   const reasonMessage = getReasonMessageForUngroupedCountAlert(
     documentCount,
     count.value,
@@ -364,6 +366,7 @@ export const processUngroupedResults = (
           group: null,
           isRatio: false,
           reason: reasonMessage,
+          ...additionalContext
         },
       },
     ];
@@ -425,6 +428,7 @@ const getRatio = (numerator: number, denominator: number) => {
 interface ReducedGroupByResult {
   name: string;
   documentCount: number;
+  context?: AdditionalContext;
 }
 
 type ReducedGroupByResults = ReducedGroupByResult[];
@@ -440,14 +444,21 @@ const getReducedGroupByResults = (
   if (isOptimizedGroupedSearchQueryResponse(results)) {
     for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
-      reducedGroupByResults.push({ name: groupName, documentCount: groupBucket.doc_count });
+      const additionalContextHits = groupBucket.additionalContext?.hits?.hits;
+      reducedGroupByResults.push({
+        name: groupName,
+        documentCount: groupBucket.doc_count,
+        context: additionalContextHits.length > 0 ? additionalContextHits[0]._source : undefined
+      });
     }
   } else {
     for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
+      const additionalContextHits = groupBucket.additionalContext?.hits?.hits;
       reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,
+        context: additionalContextHits.length > 0 ? additionalContextHits[0]._source : undefined
       });
     }
   }
@@ -499,6 +510,7 @@ export const processGroupByResults = (
             groupByKeys: groupByKeysObjectMapping[group.name],
             isRatio: false,
             reason: reasonMessage,
+            ...group.context
           },
         },
       ];
@@ -566,6 +578,7 @@ export const processGroupByRatioResults = (
             groupByKeys: groupByKeysObjectMapping[numeratorGroup.name],
             isRatio: true,
             reason: reasonMessage,
+            ...numeratorGroup.context
           },
         },
       ];
@@ -675,6 +688,9 @@ export const getGroupedESQuery = (
             },
           })),
         },
+        aggs: {         
+          ...getContextAggregation(params),
+        },
       },
     };
 
@@ -717,6 +733,7 @@ export const getGroupedESQuery = (
               },
             },
           },
+          ...getContextAggregation(params),
         },
       },
     };
@@ -741,6 +758,38 @@ export const getGroupedESQuery = (
   }
 };
 
+const getContextAggregation = (params: any) => {
+  const validPrefixForContext = ["host", "cloud", "orchestrator", "labels", "tags"];
+  const positiveComparators = getPositiveComparators();
+  const positiveCriteria = params.criteria.filter((criterion: any) =>
+    positiveComparators.includes(criterion.comparator)
+  );
+
+  const includesFromGroupBy = params.groupBy ? getIncludeSet(params.groupBy, validPrefixForContext) : new Set<string>();
+  const includesFromCriteria = getIncludeSet(positiveCriteria.map((criterion: any) => criterion.field), validPrefixForContext);
+  const includesList = Array.from(new Set<string>([...includesFromGroupBy, ...includesFromCriteria]));
+
+  const excludesList = includesList.includes("host")
+    ? ['host.cpu.*', 'host.disk.*', 'host.network.*']
+    : [];
+
+  const additionalContextAgg = includesList.length > 0
+    ? {
+      additionalContext: {
+        top_hits: {
+          size: 1,
+          _source: {
+            includes: includesList,
+            excludes: excludesList,
+          },
+        },
+      },
+    }
+    : null;
+
+  return additionalContextAgg;
+}
+
 export const getUngroupedESQuery = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
@@ -762,6 +811,9 @@ export const getUngroupedESQuery = (
         filter: [rangeFilter, ...mustFilters],
         ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
       },
+    },
+    aggregations: {
+      ...getContextAggregation(params)
     },
     runtime_mappings: runtimeMappings,
     size: 0,
@@ -977,3 +1029,27 @@ export const FIRED_ACTIONS: ActionGroup<'logs.threshold.fired'> = {
     defaultMessage: 'Fired',
   }),
 };
+
+export const getIncludeSet = (
+  groupBy: string | string[] | undefined,
+  validPrefix: string[]
+): Set<string> => {
+  const includesList = [];
+  if (groupBy) {
+    if (Array.isArray(groupBy)) {
+      groupBy.forEach((group) => {
+        const groupPrefix = group.split('.')[0];
+        if (validPrefix.includes(groupPrefix)) {
+          includesList.push(groupPrefix);
+        }
+      });
+    }
+    else {
+      const groupPrefix = groupBy.split('.')[0];
+      if (validPrefix.includes(groupPrefix)) {
+        includesList.push(groupPrefix);
+      }
+    }
+  }
+  return new Set<string>(includesList);
+}
