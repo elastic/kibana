@@ -26,5 +26,6 @@
     "@kbn/std",
     "@kbn/import-locator",
     "@kbn/repo-file-maps",
+    "@kbn/some-dev-log",
   ]
 }

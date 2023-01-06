@@ -69,7 +69,6 @@
     "@kbn/actions-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/config-schema",
-    "@kbn/repo-info",
     "@kbn/ml-url-state",
     "@kbn/ml-nested-property",
     "@kbn/ml-local-storage",
