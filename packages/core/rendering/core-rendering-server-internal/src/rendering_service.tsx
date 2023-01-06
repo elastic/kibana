@@ -84,7 +84,10 @@ export class RenderingService {
   private async render(
     { elasticsearch, http, uiPlugins, status }: RenderOptions,
     request: KibanaRequest,
-    uiSettings: IUiSettingsClient,
+    uiSettings: {
+      client: IUiSettingsClient;
+      globalClient: IUiSettingsClient;
+    },
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
     const env = {
@@ -95,8 +98,12 @@ export class RenderingService {
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
     const settings = {
-      defaults: uiSettings.getRegistered() ?? {},
-      user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
+      defaults: uiSettings.client?.getRegistered() ?? {},
+      user: isAnonymousPage ? {} : await uiSettings.client?.getUserProvided(),
+    };
+    const globalSettings = {
+      defaults: uiSettings.globalClient?.getRegistered() ?? {},
+      user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
     };
 
     let clusterInfo = {};
@@ -168,6 +175,7 @@ export class RenderingService {
         ),
         legacyMetadata: {
           uiSettings: settings,
+          globalUiSettings: globalSettings,
         },
       },
     };

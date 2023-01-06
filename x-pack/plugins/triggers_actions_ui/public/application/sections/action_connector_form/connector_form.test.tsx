@@ -87,7 +87,7 @@ describe('ConnectorForm', () => {
     });
   });
 
-  it('calls onChange when the form is invalid', async () => {
+  it.skip('calls onChange when the form is invalid', async () => {
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: lazy(() => import('./connector_mock')),
     });

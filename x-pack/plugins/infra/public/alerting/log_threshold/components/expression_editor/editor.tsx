@@ -92,7 +92,7 @@ export const ExpressionEditor: React.FC<
   const isInternal = props.metadata?.isInternal ?? false;
   const [logViewId] = useSourceId();
   const {
-    services: { http, logViews },
+    services: { logViews },
   } = useKibanaContextForPlugin(); // injected during alert registration
 
   return (
@@ -102,7 +102,7 @@ export const ExpressionEditor: React.FC<
           <Editor {...props} />
         </SourceStatusWrapper>
       ) : (
-        <LogViewProvider logViewId={logViewId} logViews={logViews.client} fetch={http.fetch}>
+        <LogViewProvider logViewId={logViewId} logViews={logViews.client}>
           <SourceStatusWrapper {...props}>
             <Editor {...props} />
           </SourceStatusWrapper>

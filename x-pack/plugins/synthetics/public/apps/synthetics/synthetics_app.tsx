@@ -31,7 +31,6 @@ import { store, storage, setBasePath } from './state';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
 
-// added a comment to trigger test
 const Application = (props: SyntheticsAppProps) => {
   const {
     basePath,
@@ -92,6 +91,7 @@ const Application = (props: SyntheticsAppProps) => {
                 observability: startPlugins.observability,
                 cases: startPlugins.cases,
                 spaces: startPlugins.spaces,
+                fleet: startPlugins.fleet,
               }}
             >
               <Router history={appMountParameters.history}>
