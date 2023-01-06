@@ -63,7 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('editFieldFormat');
         await PageObjects.settings.setFieldType('Long');
         await PageObjects.settings.setFieldScriptWithoutToggle('emit(6);');
-        await PageObjects.settings.setFieldFormat('Bytes');
         await testSubjects.find('changeWarning');
         await PageObjects.settings.clickSaveField();
         await PageObjects.settings.confirmSave();
