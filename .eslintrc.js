@@ -8,11 +8,7 @@
 
 require('@kbn/babel-register').install();
 
-const Path = require('path');
-const Fs = require('fs');
-
-const normalizePath = require('normalize-path');
-const { discoverPackageManifestPaths, Jsonc } = require('@kbn/repo-packages');
+const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const APACHE_2_0_LICENSE_HEADER = `
@@ -124,10 +120,7 @@ const VENN_DIAGRAM_HEADER = `
 `;
 
 /** Packages which should not be included within production code. */
-const DEV_PACKAGE_DIRS = discoverPackageManifestPaths(REPO_ROOT).flatMap((path) => {
-  const manifest = Jsonc.parse(Fs.readFileSync(path, 'utf8'));
-  return !!manifest.devOnly ? normalizePath(Path.relative(REPO_ROOT, Path.dirname(path))) : [];
-});
+const DEV_PACKAGE_DIRS = getPackages(REPO_ROOT).flatMap((pkg) =>  pkg.isDevOnly ? pkg.normalizedRepoRelativeDir : []);
 
 /** Directories (at any depth) which include dev-only code. */
 const DEV_DIRECTORIES = [
