@@ -9,8 +9,8 @@ import type { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import type { RowRenderer } from '../../../../../../../common/types/timeline';
-import { RowRendererId } from '../../../../../../../common/types/timeline';
+import type { RowRenderer } from '@kbn/row-renderer-types';
+import { RowRendererId } from '@kbn/row-renderer-types';
 
 import { RowRendererContainer } from '../row_renderer';
 import { AuditdGenericDetails } from './generic_details';

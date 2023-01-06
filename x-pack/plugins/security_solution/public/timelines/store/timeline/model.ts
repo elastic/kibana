@@ -7,6 +7,7 @@
 
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { RowRendererId } from '@kbn/row-renderer-types';
 import type { ExpandedDetailTimeline, SessionViewConfig } from '../../../../common/types';
 import type {
   EqlOptionsSelected,
@@ -21,7 +22,6 @@ import type {
   SortColumnTimeline,
   ColumnHeaderOptions,
   DataProvider,
-  RowRendererId,
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
 import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
