@@ -36,12 +36,7 @@ describe('useTotalHits', () => {
       status: UnifiedHistogramFetchStatus.uninitialized,
       total: undefined,
     },
-    chart: {
-      hidden: true,
-      timeInterval: 'auto',
-    },
     chartVisible: false,
-    breakdown: undefined,
     filters: [],
     query: { query: '', language: 'kuery' },
     getTimeRange: () => timeRange,

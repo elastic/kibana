@@ -14,8 +14,6 @@ import { MutableRefObject, useEffect, useRef } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { catchError, filter, lastValueFrom, map, Observable, of } from 'rxjs';
 import {
-  UnifiedHistogramBreakdownContext,
-  UnifiedHistogramChartContext,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
   UnifiedHistogramInputMessage,
@@ -29,9 +27,7 @@ export const useTotalHits = ({
   dataView,
   request,
   hits,
-  chart,
   chartVisible,
-  breakdown,
   filters,
   query,
   getTimeRange,
@@ -42,9 +38,7 @@ export const useTotalHits = ({
   dataView: DataView;
   request: UnifiedHistogramRequestContext | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
-  chart: UnifiedHistogramChartContext | undefined;
   chartVisible: boolean;
-  breakdown: UnifiedHistogramBreakdownContext | undefined;
   filters: Filter[];
   query: Query | AggregateQuery;
   getTimeRange: () => TimeRange;

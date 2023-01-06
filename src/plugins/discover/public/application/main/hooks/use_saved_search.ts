@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, filter, share, Subject, tap } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -171,15 +171,22 @@ export const useSavedSearch = ({
         searchSessionManager,
         searchSource,
         initialFetchStatus,
-      }),
+      }).pipe(
+        filter(() => validateTimeRange(timefilter.getTime(), services.toastNotifications)),
+        tap(() => inspectorAdapters.requests.reset()),
+        share()
+      ),
     [
       data,
       initialFetchStatus,
+      inspectorAdapters.requests,
       main$,
       refetch$,
       searchSessionManager,
       searchSource,
+      services.toastNotifications,
       setAutoRefreshDone,
+      timefilter,
     ]
   );
 
@@ -191,11 +198,6 @@ export const useSavedSearch = ({
     let abortController: AbortController;
 
     const subscription = fetch$.subscribe(async (val) => {
-      if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
-        return;
-      }
-
-      inspectorAdapters.requests.reset();
       abortController?.abort();
       abortController = new AbortController();
 

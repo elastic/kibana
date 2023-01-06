@@ -93,7 +93,7 @@ export const useRefetch = ({
   return useMemo(
     () =>
       input$.pipe(
-        filter((message) => message?.type === 'refetch'),
+        filter((message) => message.type === 'refetch'),
         tap(beforeRefetch),
         share()
       ),
