@@ -152,14 +152,20 @@ const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: n
   const now = new Date().toISOString();
   // Perform a rolling upgrade
   if (upgradeDurationSeconds) {
+    const minExecutionDuration = Math.min(
+      MINIMUM_EXECUTION_DURATION_SECONDS,
+      upgradeDurationSeconds
+    );
     return {
       start_time: startTime ?? now,
-      minimum_execution_duration: Math.min(
-        MINIMUM_EXECUTION_DURATION_SECONDS,
-        upgradeDurationSeconds
-      ),
+      minimum_execution_duration: minExecutionDuration,
       expiration: moment(startTime ?? now)
-        .add(upgradeDurationSeconds, 'seconds')
+        .add(
+          upgradeDurationSeconds <= MINIMUM_EXECUTION_DURATION_SECONDS
+            ? minExecutionDuration * 2
+            : upgradeDurationSeconds,
+          'seconds'
+        )
         .toISOString(),
     };
   }
