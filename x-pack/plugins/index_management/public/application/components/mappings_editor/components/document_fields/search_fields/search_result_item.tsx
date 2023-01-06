@@ -115,7 +115,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
                   ? i18n.translate('xpack.idxMgmt.mappingsEditor.multiFieldBadgeLabel', {
                       defaultMessage: '{dataType} multi-field',
                       values: {
-                        dataType: TYPE_DEFINITION[source.type].label,
+                        dataType: TYPE_DEFINITION[source.type]?.label ?? '',
                       },
                     })
                   : getTypeLabelFromField(source)}
