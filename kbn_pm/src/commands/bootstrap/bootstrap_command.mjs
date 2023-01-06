@@ -14,7 +14,7 @@ import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } f
 import { setupRemoteCache } from './setup_remote_cache.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { regeneratePackageMap } from './regenerate_package_map.mjs';
-import { regenerateTsconfigMap } from './regenerate_tsconfig_map.mjs';
+import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
 import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
@@ -82,6 +82,9 @@ export const command = {
       time('regenerate package map', async () => {
         await regeneratePackageMap(packages, plugins, log);
       }),
+      time('regenerate tsconfig map', async () => {
+        await regenerateTsconfigPaths(tsConfigsPaths, log);
+      }),
       time('update package json', async () => {
         await updatePackageJson(packages, log);
       }),
@@ -110,9 +113,6 @@ export const command = {
     await Promise.all([
       time('regenerate tsconfig.base.json', async () => {
         await regenerateBaseTsconfig();
-      }),
-      time('regenerate tsconfig map', async () => {
-        await regenerateTsconfigMap(tsConfigsPaths, log);
       }),
       time('sort package json', async () => {
         await sortPackageJson(log);

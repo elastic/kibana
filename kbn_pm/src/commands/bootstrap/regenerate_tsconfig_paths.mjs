@@ -16,7 +16,7 @@ import { REPO_ROOT } from '../../lib/paths.mjs';
  * @param {string[]} tsconfigPaths
  * @param {import('@kbn/some-dev-log').SomeDevLog} log
  */
-export async function regenerateTsconfigMap(tsconfigPaths, log) {
+export async function regenerateTsconfigPaths(tsconfigPaths, log) {
   const path = Path.resolve(REPO_ROOT, 'packages/kbn-ts-projects/config-paths.json');
   const existingContent = Fs.existsSync(path) ? await Fsp.readFile(path, 'utf8') : undefined;
 
@@ -27,6 +27,6 @@ export async function regenerateTsconfigMap(tsconfigPaths, log) {
   const content = JSON.stringify(entries, null, 2);
   if (content !== existingContent) {
     await Fsp.writeFile(path, content);
-    log.warning('updated tsconfig.json map');
+    log.warning('updated tsconfig.json paths');
   }
 }
