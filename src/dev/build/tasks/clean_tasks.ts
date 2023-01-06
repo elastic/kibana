@@ -260,7 +260,7 @@ export const DeleteBazelPackagesFromBuildRoot: Task = {
     'Deleting bazel packages outputs from build folder root as they are now installed as node_modules',
 
   async run(config, log, build) {
-    const bazelPackagesOnBuildRoot = (getPackages(REPO_ROOT)).flatMap((pkg) => {
+    const bazelPackagesOnBuildRoot = getPackages(REPO_ROOT).flatMap((pkg) => {
       const bldSrc = build.resolvePath(pkg.normalizedRepoRelativeDir);
 
       if (pkg.manifest.type.startsWith('plugin-')) {

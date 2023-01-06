@@ -120,7 +120,9 @@ const VENN_DIAGRAM_HEADER = `
 `;
 
 /** Packages which should not be included within production code. */
-const DEV_PACKAGE_DIRS = getPackages(REPO_ROOT).flatMap((pkg) =>  pkg.isDevOnly ? pkg.normalizedRepoRelativeDir : []);
+const DEV_PACKAGE_DIRS = getPackages(REPO_ROOT).flatMap((pkg) =>
+  pkg.isDevOnly ? pkg.normalizedRepoRelativeDir : []
+);
 
 /** Directories (at any depth) which include dev-only code. */
 const DEV_DIRECTORIES = [

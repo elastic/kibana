@@ -13,31 +13,29 @@ import sorter from 'sort-package-json';
  * @returns
  */
 export function sortPackageJson(json) {
-  return (
-    sorter(typeof json === 'string' ? json : JSON.stringify(json, null, 2), {
-      // top level keys in the order they were written when this was implemented
-      sortOrder: [
-        'name',
-        'description',
-        'keywords',
-        'private',
-        'version',
-        'branch',
-        'main',
-        'browser',
-        'types',
-        'tsdocMetadata',
-        'build',
-        'homepage',
-        'bugs',
-        'license',
-        'kibana',
-        'author',
-        'scripts',
-        'repository',
-        'engines',
-        'resolutions',
-      ],
-    })
-  );
+  return sorter(typeof json === 'string' ? json : JSON.stringify(json, null, 2), {
+    // top level keys in the order they were written when this was implemented
+    sortOrder: [
+      'name',
+      'description',
+      'keywords',
+      'private',
+      'version',
+      'branch',
+      'main',
+      'browser',
+      'types',
+      'tsdocMetadata',
+      'build',
+      'homepage',
+      'bugs',
+      'license',
+      'kibana',
+      'author',
+      'scripts',
+      'repository',
+      'engines',
+      'resolutions',
+    ],
+  });
 }
