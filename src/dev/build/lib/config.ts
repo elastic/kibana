@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { dirname, resolve, relative } from 'path';
+import { resolve, relative } from 'path';
 import os from 'os';
 
-import loadJsonFile from 'load-json-file';
 import { getPackages, type Package } from '@kbn/repo-packages';
 import { REPO_ROOT, kibanaPackageJson, KibanaPackageJson } from '@kbn/repo-info';
 
@@ -207,9 +206,7 @@ export class Config {
   private _prodPackages: Package[] | undefined;
   async getProductionPackages() {
     if (!this._prodPackages) {
-      this._prodPackages = (getPackages(REPO_ROOT)).filter(
-        (pkg) => !pkg.isDevOnly
-      );
+      this._prodPackages = getPackages(REPO_ROOT).filter((pkg) => !pkg.isDevOnly);
     }
 
     return this._prodPackages;

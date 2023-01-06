@@ -47,7 +47,13 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
         fromRoot('config'),
         ...pluginPaths,
         ...pluginScanDirs,
-        ...getPackages(REPO_ROOT).flatMap(p => p.manifest.type === 'plugin-server' || p.manifest.type === 'shared-server' || p.manifest.type === 'shared-common' ? p.directory : []),
+        ...getPackages(REPO_ROOT).flatMap((p) =>
+          p.manifest.type === 'plugin-server' ||
+          p.manifest.type === 'shared-server' ||
+          p.manifest.type === 'shared-common'
+            ? p.directory
+            : []
+        ),
       ].map((path) => Path.resolve(path))
     )
   ).filter((path) => Fs.existsSync(fromRoot(path)));
