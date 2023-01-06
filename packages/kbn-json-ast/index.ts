@@ -15,3 +15,4 @@ export {
 } from './src/references';
 export { setExtends } from './src/extends';
 export { setProp } from './src/props';
+export { snip } from './src/snip';

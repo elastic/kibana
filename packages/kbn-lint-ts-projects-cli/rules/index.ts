@@ -15,6 +15,7 @@ import { validBaseTsconfig } from './valid_base_tsconfig';
 import { requiredExcludes } from './required_excludes';
 import { requiredFileSelectors } from './required_file_selectors';
 import { referenceUsedPkgs } from './reference_used_pkgs';
+import { tsconfigIndentation } from './tsconfig_indentation';
 
 export const RULES: TsProjectRule[] = [
   forbiddenCompilerOptions,
@@ -24,4 +25,5 @@ export const RULES: TsProjectRule[] = [
   requiredExcludes,
   requiredFileSelectors,
   referenceUsedPkgs,
+  tsconfigIndentation,
 ];

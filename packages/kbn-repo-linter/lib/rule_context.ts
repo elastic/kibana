@@ -7,6 +7,7 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
 import { SomeDevLog } from '@kbn/some-dev-log';
 import { RepoPath } from '@kbn/repo-path';
@@ -20,7 +21,8 @@ export class RuleContext {
     private readonly rule: Rule<any>,
     private readonly ruleCache: Map<Rule<any>, unknown>,
     private readonly allFiles: Iterable<RepoPath>,
-    public readonly log: SomeDevLog
+    public readonly log: SomeDevLog,
+    private readonly fileCache: Map<string, string>
   ) {}
 
   getCache<T>(init: () => T) {
@@ -54,5 +56,19 @@ export class RuleContext {
 
   getAllFiles() {
     return Array.from(this.allFiles);
+  }
+
+  /**
+   * Get the contents of the file at the relative path (relative to root of package/ts project)
+   */
+  get(rel: string) {
+    const cached = this.fileCache.get(rel);
+    if (cached) {
+      return cached;
+    }
+
+    const content = Fs.readFileSync(this.resolve(rel), 'utf8');
+    this.fileCache.set(rel, content);
+    return content;
   }
 }

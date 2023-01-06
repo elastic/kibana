@@ -33,11 +33,12 @@ export abstract class Rule<T extends LintTarget> {
     target: T,
     ruleCache: Map<Rule<any>, unknown>,
     allFiles: Iterable<RepoPath>,
-    log: SomeDevLog
+    log: SomeDevLog,
+    fileCache: Map<string, string>
   ) {
     const failures: NamedViolation[] = [];
 
-    const ctx = new RuleContext(failures, target.dir, this, ruleCache, allFiles, log);
+    const ctx = new RuleContext(failures, target.dir, this, ruleCache, allFiles, log, fileCache);
     const extraFailures = (await this.fn.call(ctx, target)) ?? [];
 
     for (const failure of Array.isArray(extraFailures) ? extraFailures : [extraFailures]) {

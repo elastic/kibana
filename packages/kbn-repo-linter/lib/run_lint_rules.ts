@@ -34,7 +34,8 @@ export async function runLintRules<T extends LintTarget, R extends Rule<T>>(
     log.debug('starting to lint package:', target.repoRel);
 
     const unfixedErrors: NamedViolation[] = [];
-    const fixedFileContent = new Map<string, string>();
+    const fixedFiles = new Set<string>();
+    const fileCache = new Map<string, string>();
 
     function getSourceToFix(pkgRel: string) {
       try {
@@ -53,7 +54,7 @@ export async function runLintRules<T extends LintTarget, R extends Rule<T>>(
       for (const rule of rules) {
         if (refreshTsProject) {
           refreshTsProject = false;
-          const fixedTsConfig = fixedFileContent.get('tsconfig.json');
+          const fixedTsConfig = fileCache.get('tsconfig.json');
           if (!fixedTsConfig) {
             throw new Error(
               'unable to refresh tsProject if there is no fixed tsconfig.json content'
@@ -66,7 +67,13 @@ export async function runLintRules<T extends LintTarget, R extends Rule<T>>(
 
         log.debug('rule:', rule.name);
         await log.indent(4, async () => {
-          const errors = await rule.check(target, ruleCache, options.getFiles(target), log);
+          const errors = await rule.check(
+            target,
+            ruleCache,
+            options.getFiles(target),
+            log,
+            fileCache
+          );
 
           for (const error of errors) {
             const fixes = error.fixes ? Object.entries(error.fixes) : [];
@@ -84,7 +91,7 @@ export async function runLintRules<T extends LintTarget, R extends Rule<T>>(
 
             for (const [pkgRel, fix] of fixes) {
               let update;
-              const current = fixedFileContent.get(pkgRel) ?? getSourceToFix(pkgRel);
+              const current = fileCache.get(pkgRel) ?? getSourceToFix(pkgRel);
               try {
                 update = fix(current);
               } catch (e) {
@@ -92,7 +99,8 @@ export async function runLintRules<T extends LintTarget, R extends Rule<T>>(
               }
 
               if (update !== undefined && update !== current) {
-                fixedFileContent.set(pkgRel, update);
+                fileCache.set(pkgRel, update);
+                fixedFiles.add(pkgRel);
                 if (pkgRel === 'tsconfig.json') {
                   refreshTsProject = true;
                 }
@@ -105,7 +113,12 @@ export async function runLintRules<T extends LintTarget, R extends Rule<T>>(
       }
     });
 
-    for (const [pkgRel, content] of fixedFileContent) {
+    for (const pkgRel of fixedFiles) {
+      const content = fileCache.get(pkgRel);
+      if (content === undefined) {
+        throw new Error(`file cache doesn't have the fixed version of ${pkgRel}`);
+      }
+
       Fs.writeFileSync(target.resolve(pkgRel), content, 'utf8');
       fixedCount += 1;
       log.debug('fixed', pkgRel);
