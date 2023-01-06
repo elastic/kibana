@@ -17,10 +17,10 @@ servers:
 paths:
   '/s/{spaceId}/api/alerting/rule/{ruleId}':
     $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}.yaml'
-# '/s/{spaceId}/api/alerting/rule/{ruleId}/_disable':
-#   $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_disable.yaml'
-# '/s/{spaceId}/api/alerting/rule/{ruleId}/_enable':
-#  $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_enable.yaml'
+  '/s/{spaceId}/api/alerting/rule/{ruleId}/_disable':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_disable.yaml'
+  '/s/{spaceId}/api/alerting/rule/{ruleId}/_enable':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_enable.yaml'
   '/s/{spaceId}/api/alerting/rules/_find':
     $ref: 'paths/s@{spaceid}@api@alerting@rules@_find.yaml'
 #  '/s/{spaceId}/api/alerting/_health':

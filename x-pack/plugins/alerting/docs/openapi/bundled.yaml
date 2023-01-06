@@ -86,6 +86,44 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/rule/{ruleId}/_disable:
+    post:
+      summary: Disable a rule.
+      operationId: disableRule
+      description: |
+        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/rule_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/rule/{ruleId}/_enable:
+    post:
+      summary: Enable a rule.
+      operationId: enableRule
+      description: |
+        This API supports token-based authentication only. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/rule_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rules/_find:
     get:
       summary: Retrieves information about rules.
@@ -200,7 +238,7 @@ paths:
       summary: Mute all alerts.
       operationId: muteAllAlerts
       description: |
-        This API snoozes the notifications for the rule indefinitely. The rule checks continue to occur but alerts will not trigger any actions. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're creating. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have read privileges for the **Management > Actions and Connectors** feature.
+        This API snoozes the notifications for the rule indefinitely. The rule checks continue to occur but alerts will not trigger any actions. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.
       tags:
         - alerting
       parameters:
@@ -219,7 +257,7 @@ paths:
       summary: Unmute all alerts.
       operationId: unmuteAllAlerts
       description: |
-        If the rule has its notifications snoozed indefinitely, this API cancels the snooze. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're creating. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have read privileges for the **Management > Actions and Connectors** feature.
+        If the rule has its notifications snoozed indefinitely, this API cancels the snooze. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.
       tags:
         - alerting
       parameters:
