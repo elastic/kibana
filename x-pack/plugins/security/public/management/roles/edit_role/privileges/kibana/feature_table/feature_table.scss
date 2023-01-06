@@ -1,10 +1,14 @@
+$subfeatureTab: 30px;
+
 .subFeaturePrivilegeExpandedRegion {
-  background-color: $euiColorLightestShade;
-  padding: $euiSizeS $euiSizeS $euiSizeS $euiSizeXXL;
-  margin-top: $euiSizeS;
+  margin-left: $subfeatureTab;
 }
 
 .featurePrivilegeDescription {
-  padding-left: $euiSizeXXL;
+  margin-left: $subfeatureTab;
   max-width: 70%;
+}
+
+.euiAccordionWithDescription:hover {
+  text-decoration: none;
 }

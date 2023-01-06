@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import type { SecuredFeature } from '../../../../model';
@@ -35,8 +35,20 @@ export const FeatureTableCell = ({ feature }: Props) => {
   }
 
   return (
-    <span data-test-subj={`featureTableCell`}>
-      {feature.name} {tooltipElement}
-    </span>
+    <EuiFlexGroup direction="column" gutterSize="none" component="span">
+      <EuiFlexItem data-test-subj={`featureTableCell`} component="span">
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>{feature.name}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{tooltipElement}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      {feature.description && (
+        <EuiFlexItem>
+          <EuiText color="subdued" size="xs" data-test-subj="featurePrivilegeDescriptionText">
+            {feature.description}
+          </EuiText>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };

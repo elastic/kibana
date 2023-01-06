@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -66,9 +65,9 @@ export const SubFeatureForm = (props: Props) => {
     return null;
   }
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem className="eui-textTruncate" grow={3}>
-        <EuiFlexGroup gutterSize="s" direction="column">
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={3}>
+        <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem>
             <EuiText size="s">
               {props.subFeature.name} {getTooltip()}
@@ -76,16 +75,9 @@ export const SubFeatureForm = (props: Props) => {
           </EuiFlexItem>
           {props.subFeature.description && (
             <EuiFlexItem>
-              <EuiToolTip content={props.subFeature.description}>
-                <EuiText
-                  color={'subdued'}
-                  size={'xs'}
-                  className="eui-textTruncate"
-                  data-test-subj="subFeatureDescription"
-                >
-                  {props.subFeature.description}
-                </EuiText>
-              </EuiToolTip>
+              <EuiText color={'subdued'} size={'xs'} data-test-subj="subFeatureDescription">
+                {props.subFeature.description}
+              </EuiText>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

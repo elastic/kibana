@@ -17,11 +17,12 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiIconTip,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
+import type { CSSObject } from '@emotion/react';
 import type { ReactElement } from 'react';
 import React, { Component } from 'react';
 
@@ -36,6 +37,10 @@ import { FeatureTableCell } from '../feature_table_cell';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
+
+const subFeatureTabSpacing: CSSObject = {
+  'margin-left': '30px',
+};
 
 interface Props {
   role: Role;
@@ -109,7 +114,7 @@ export class FeatureTable extends Component<Props, State> {
         >
           {category.euiIconType ? (
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={category.euiIconType} />
+              <EuiIcon size="m" type={category.euiIconType} className="could it be this" />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={1}>
@@ -159,7 +164,7 @@ export class FeatureTable extends Component<Props, State> {
                 <EuiSpacer size="s" />
               </>
             )}
-            <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexGroup direction="column" gutterSize="none">
               {featuresInCategory.map((feature) => (
                 <EuiFlexItem key={feature.id}>
                   {this.renderPrivilegeControlsForFeature(feature)}
@@ -227,6 +232,7 @@ export class FeatureTable extends Component<Props, State> {
               id={`featurePrivilegeControls_${feature.id}`}
               data-test-subj="featurePrivilegeControls"
               buttonContent={buttonContent}
+              buttonClassName="euiAccordionWithDescription"
               extraAction={extraAction}
               forceState={hasSubFeaturePrivileges ? undefined : 'closed'}
               arrowDisplay={hasSubFeaturePrivileges ? 'left' : 'none'}
@@ -242,39 +248,23 @@ export class FeatureTable extends Component<Props, State> {
                 });
               }}
             >
-              <>
-                {feature.description && (
-                  <div className="featurePrivilegeDescription">
-                    <EuiToolTip content={feature.description} anchorClassName="eui-textTruncate">
-                      <EuiText
-                        color="subdued"
-                        size="xs"
-                        data-test-subj="featurePrivilegeDescriptionText"
-                      >
-                        <p className="eui-displayInlineBlock eui-textTruncate">
-                          {feature.description}
-                        </p>
-                      </EuiText>
-                    </EuiToolTip>
-                  </div>
-                )}
-                <div className="subFeaturePrivilegeExpandedRegion">
-                  <FeatureTableExpandedRow
-                    feature={feature}
-                    privilegeIndex={this.props.privilegeIndex}
-                    onChange={this.props.onChange}
-                    privilegeCalculator={this.props.privilegeCalculator}
-                    selectedFeaturePrivileges={
-                      this.props.role.kibana[this.props.privilegeIndex].feature[feature.id] ?? []
-                    }
-                    allSpacesSelected={this.props.allSpacesSelected}
-                    disabled={this.props.disabled}
-                    licenseAllowsSubFeatPrivCustomization={
-                      this.props.canCustomizeSubFeaturePrivileges
-                    }
-                  />
-                </div>
-              </>
+              <EuiSpacer size="s" />
+              <EuiPanel color="subdued" paddingSize="s" css={subFeatureTabSpacing}>
+                <FeatureTableExpandedRow
+                  feature={feature}
+                  privilegeIndex={this.props.privilegeIndex}
+                  onChange={this.props.onChange}
+                  privilegeCalculator={this.props.privilegeCalculator}
+                  selectedFeaturePrivileges={
+                    this.props.role.kibana[this.props.privilegeIndex].feature[feature.id] ?? []
+                  }
+                  allSpacesSelected={this.props.allSpacesSelected}
+                  disabled={this.props.disabled}
+                  licenseAllowsSubFeatPrivCustomization={
+                    this.props.canCustomizeSubFeaturePrivileges
+                  }
+                />
+              </EuiPanel>
             </EuiAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -285,9 +275,14 @@ export class FeatureTable extends Component<Props, State> {
 
     if (feature.reserved && primaryFeaturePrivileges.length === 0) {
       const buttonContent = (
-        <>
-          {<EuiIcon type="empty" size="l" />} <FeatureTableCell feature={feature} />
-        </>
+        <EuiFlexGroup gutterSize="xs" direction="row">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="empty" size="l" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FeatureTableCell feature={feature} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
 
       const extraAction = (
@@ -354,10 +349,16 @@ export class FeatureTable extends Component<Props, State> {
 
     const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
     const buttonContent = (
-      <>
-        {!hasSubFeaturePrivileges && <EuiIcon type="empty" size="l" />}{' '}
-        <FeatureTableCell feature={feature} />
-      </>
+      <EuiFlexGroup gutterSize="xs">
+        {!hasSubFeaturePrivileges && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="empty" size="l" />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
+          <FeatureTableCell feature={feature} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
 
     const extraAction = (
