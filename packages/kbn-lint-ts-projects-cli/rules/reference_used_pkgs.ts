@@ -9,13 +9,13 @@
 import { asyncForEachWithLimit } from '@kbn/std';
 import { addReferences, removeReferences, removeAllReferences } from '@kbn/json-ast';
 
-import { TS_PROJECTS, type TsProjectWithPkg } from '@kbn/ts-projects';
+import { TS_PROJECTS, type RefableTsProject } from '@kbn/ts-projects';
 import { parseKbnImportReq } from '@kbn/repo-packages';
 import { TsProjectRule } from '@kbn/repo-linter';
 import { ImportLocator } from '@kbn/import-locator';
 
 function createCache() {
-  const importable = new Map<string, Set<TsProjectWithPkg>>();
+  const importable = new Map<string, Set<RefableTsProject>>();
 
   for (const proj of TS_PROJECTS) {
     if (!proj.isRefable()) {
@@ -68,7 +68,7 @@ export const referenceUsedPkgs = TsProjectRule.create('referenceUsedPkgs', {
     const { importLocator, importableTsProjects, tsProjectsByRootImportReq } =
       this.getCache(createCache);
 
-    const usedTsProjects = new Set<TsProjectWithPkg>();
+    const usedTsProjects = new Set<RefableTsProject>();
     await asyncForEachWithLimit(this.getAllFiles(), 30, async (path) => {
       const reqs = Array.from(await importLocator.read(path.abs)).flatMap(
         (req) => parseKbnImportReq(req) ?? []
@@ -99,8 +99,8 @@ export const referenceUsedPkgs = TsProjectRule.create('referenceUsedPkgs', {
         typeof r === 'string' ? tsProjectsByRootImportReq.get(r) || r : []
       )
     );
-    const missing = new Set<TsProjectWithPkg>();
-    const extra = new Set<TsProjectWithPkg | string>(refs);
+    const missing = new Set<RefableTsProject>();
+    const extra = new Set<RefableTsProject | string>(refs);
     for (const used of usedTsProjects) {
       extra.delete(used);
       if (!refs.has(used)) {

@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { TsProject, TsProjectWithPkg } from './ts_project';
+export type { TsProject, RefableTsProject } from './ts_project';
 export { TS_PROJECTS } from './ts_projects';
 export type { TsConfig } from './ts_configfile';
