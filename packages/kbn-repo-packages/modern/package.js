@@ -120,9 +120,7 @@ class Package {
      * @type {boolean}
      * @readonly
      */
-    this.isPlugin =
-      manifest.type === 'plugin-browser' ||
-      manifest.type === 'plugin-server';
+    this.isPlugin = manifest.type === 'plugin-browser' || manifest.type === 'plugin-server';
 
     /**
      * Is this package highlighted as a "dev only" package? If so it will always
