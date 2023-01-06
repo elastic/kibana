@@ -47,7 +47,7 @@ export function getFieldTypeDescription(type?: string) {
     case KNOWN_FIELD_TYPES.COUNTER:
       return i18n.translate('unifiedFieldList.fieldNameDescription.counterField', {
         defaultMessage:
-          'A number that only increases or resets to 0 (zero). Only available for numeric and aggregate_metric_double fields.',
+          'A number that only increases or resets to 0 (zero). Available only for numeric and aggregate_metric_double fields.',
       });
     case KNOWN_FIELD_TYPES.DATE:
       return i18n.translate('unifiedFieldList.fieldNameDescription.dateField', {
