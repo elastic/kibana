@@ -11,7 +11,6 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlyout } from '@elastic/eui';
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { EntityType } from '@kbn/timelines-plugin/common';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
@@ -26,7 +25,6 @@ import { dataTableSelectors } from '../../../common/store/data_table';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
-  entityType?: EntityType;
   handleOnPanelClosed?: () => void;
   isFlyoutView?: boolean;
   runtimeMappings: MappingRuntimeFields;
@@ -43,7 +41,6 @@ interface DetailsPanelProps {
 export const DetailsPanel = React.memo(
   ({
     browserFields,
-    entityType,
     handleOnPanelClosed,
     isFlyoutView,
     runtimeMappings,
@@ -96,7 +93,6 @@ export const DetailsPanel = React.memo(
       visiblePanel = (
         <EventDetailsPanel
           browserFields={browserFields}
-          entityType={entityType}
           expandedEvent={currentTabDetail?.params}
           handleOnEventClosed={closePanel}
           isDraggable={isDraggable}

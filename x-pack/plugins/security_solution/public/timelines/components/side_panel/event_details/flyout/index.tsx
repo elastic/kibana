@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { EntityType } from '@kbn/timelines-plugin/common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -32,7 +31,6 @@ export const useToGetInternalFlyout = () => {
 
   const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
     {
-      entityType: EntityType.EVENTS,
       indexName: alert.indexName ?? '',
       eventId: alert.id ?? '',
       runtimeMappings,

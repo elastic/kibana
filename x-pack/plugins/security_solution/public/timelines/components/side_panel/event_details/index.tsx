@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 
 import deepEqual from 'fast-deep-equal';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { EntityType } from '@kbn/timelines-plugin/common';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -24,7 +23,6 @@ import { HostIsolationPanel } from '../../../../detections/components/host_isola
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
-  entityType?: EntityType;
   expandedEvent: {
     eventId: string;
     indexName: string;
@@ -41,7 +39,6 @@ interface EventDetailsPanelProps {
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   browserFields,
-  entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,
   handleOnEventClosed,
   isDraggable,
@@ -56,7 +53,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const eventIndex = getAlertIndexAlias(indexName, currentSpaceId) ?? indexName;
   const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
     {
-      entityType,
       indexName: eventIndex ?? '',
       eventId: expandedEvent.eventId ?? '',
       runtimeMappings,

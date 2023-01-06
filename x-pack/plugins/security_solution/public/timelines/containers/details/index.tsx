@@ -13,7 +13,6 @@ import { Subscription } from 'rxjs';
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import { EntityType } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
   SearchHit,
@@ -32,7 +31,6 @@ export interface EventsArgs {
 }
 
 export interface UseTimelineEventsDetailsProps {
-  entityType?: EntityType;
   indexName: string;
   eventId: string;
   runtimeMappings: MappingRuntimeFields;
@@ -40,7 +38,6 @@ export interface UseTimelineEventsDetailsProps {
 }
 
 export const useTimelineEventsDetails = ({
-  entityType = EntityType.EVENTS,
   indexName,
   eventId,
   runtimeMappings,
@@ -124,7 +121,6 @@ export const useTimelineEventsDetails = ({
     setTimelineDetailsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        entityType,
         indexName,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
@@ -135,7 +131,7 @@ export const useTimelineEventsDetails = ({
       }
       return prevRequest;
     });
-  }, [entityType, eventId, indexName, runtimeMappings]);
+  }, [eventId, indexName, runtimeMappings]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);
