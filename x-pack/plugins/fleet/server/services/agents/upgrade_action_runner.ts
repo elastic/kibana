@@ -8,6 +8,7 @@
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import uuid from 'uuid';
+import moment from 'moment';
 
 import { isAgentUpgradeable } from '../../../common/services';
 
@@ -21,7 +22,7 @@ import { ActionRunner } from './action_runner';
 
 import type { GetAgentsOptions } from './crud';
 import { bulkUpdateAgents } from './crud';
-import { createErrorActionResults, createAgentAction, NO_EXPIRATION } from './actions';
+import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
@@ -149,19 +150,22 @@ export const MINIMUM_EXECUTION_DURATION_SECONDS = 60 * 60 * 2; // 2h
 
 const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
   const now = new Date().toISOString();
+  const expiration = moment(startTime ?? now)
+    .add(1, 'year')
+    .toISOString();
   // Perform a rolling upgrade
   if (upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
       rollout_duration_seconds: upgradeDurationSeconds,
-      expiration: NO_EXPIRATION,
+      expiration,
     };
   }
   // Schedule without rolling upgrade (Immediately after start_time)
   if (startTime && !upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
-      expiration: NO_EXPIRATION,
+      expiration,
     };
   } else {
     // Regular bulk upgrade (non scheduled, non rolling)
