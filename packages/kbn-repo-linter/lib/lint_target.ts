@@ -61,7 +61,7 @@ export abstract class LintTarget {
   }
 
   getPkg() {
-    return this.isPackage() ? this.pkg : this.isTsProject() ? this.tsProject.pkg : undefined;
+    return this.isPackage() ? this.pkg : undefined;
   }
 }
 

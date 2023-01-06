@@ -10,7 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
+import { getPackages } from '@kbn/repo-packages';
 
 interface Options {
   pluginPaths: string[];
@@ -47,7 +47,7 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
         fromRoot('config'),
         ...pluginPaths,
         ...pluginScanDirs,
-        ...BAZEL_PACKAGE_DIRS,
+        ...getPackages(REPO_ROOT).flatMap(p => p.manifest.type === 'plugin-server' || p.manifest.type === 'shared-server' || p.manifest.type === 'shared-common' ? p.directory : []),
       ].map((path) => Path.resolve(path))
     )
   ).filter((path) => Fs.existsSync(fromRoot(path)));

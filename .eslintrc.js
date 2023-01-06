@@ -12,7 +12,7 @@ const Path = require('path');
 const Fs = require('fs');
 
 const normalizePath = require('normalize-path');
-const { discoverPackageManifestPaths, Jsonc } = require('@kbn/bazel-packages');
+const { discoverPackageManifestPaths, Jsonc } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const APACHE_2_0_LICENSE_HEADER = `

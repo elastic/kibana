@@ -10,7 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import Resolve from 'resolve';
-import { readPackageManifest, type KibanaPackageManifest } from '@kbn/bazel-packages';
+import { readPackageManifest, type KibanaPackageManifest } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { readPackageMap, PackageMap } from '@kbn/repo-packages';
 

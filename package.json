@@ -749,7 +749,6 @@
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
     "@kbn/babel-register": "link:packages/kbn-babel-register",
     "@kbn/babel-transform": "link:packages/kbn-babel-transform",
-    "@kbn/bazel-packages": "link:packages/kbn-bazel-packages",
     "@kbn/bazel-runner": "link:packages/kbn-bazel-runner",
     "@kbn/ci-stats-core": "link:packages/kbn-ci-stats-core",
     "@kbn/ci-stats-performance-metrics": "link:packages/kbn-ci-stats-performance-metrics",
@@ -1180,4 +1179,3 @@
     "yargs": "^15.4.1"
   }
 }
-

@@ -2813,10 +2813,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/bazel-packages@link:packages/kbn-bazel-packages":
-  version "0.0.0"
-  uid ""
-
 "@kbn/bazel-runner@link:packages/kbn-bazel-runner":
   version "0.0.0"
   uid ""
