@@ -20,7 +20,7 @@ interface Props {
     language: string;
     query: string;
   };
-  setPanelFilters: React.Dispatch<React.SetStateAction<null | Filter[]>>;
+  onFilterChange: (filters: Filter[]) => void;
 }
 
 // Disable refresh, allow our timerange changes to refresh the embeddable.
@@ -34,7 +34,7 @@ export const ControlsContent: React.FC<Props> = ({
   dataViewId,
   query,
   filters,
-  setPanelFilters,
+  onFilterChange,
 }) => {
   const [controlPanel, setControlPanels] = useControlPanels(dataViewId);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer | undefined>();
@@ -44,21 +44,17 @@ export const ControlsContent: React.FC<Props> = ({
       return;
     }
     const filtersSubscription = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
-      setPanelFilters([...newFilters]);
+      onFilterChange(newFilters);
     });
-    const inputSubscription = controlGroup
-      .getInput$()
-      .subscribe(({ panels, filters: currentFilters }) => {
-        setControlPanels(panels);
-        if (currentFilters?.length === 0) {
-          setPanelFilters([]);
-        }
-      });
+    const inputSubscription = controlGroup.getInput$().subscribe(({ panels }) => {
+      setControlPanels(panels);
+    });
+
     return () => {
       filtersSubscription.unsubscribe();
       inputSubscription.unsubscribe();
     };
-  }, [controlGroup, setControlPanels, setPanelFilters]);
+  }, [controlGroup, onFilterChange, setControlPanels]);
 
   return (
     <LazyControlsRenderer
