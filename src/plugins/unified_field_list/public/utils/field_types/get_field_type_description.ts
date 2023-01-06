@@ -60,7 +60,7 @@ export function getFieldTypeDescription(type?: string) {
     case KNOWN_FIELD_TYPES.GAUGE:
       return i18n.translate('unifiedFieldList.fieldNameDescription.gaugeField', {
         defaultMessage:
-          'A number that can increase or decrease. Only available for numeric and aggregate_metric_double fields.',
+          'A number that can increase or decrease. Available only for numeric and aggregate_metric_double fields.',
       });
     case KNOWN_FIELD_TYPES.GEO_POINT:
       return i18n.translate('unifiedFieldList.fieldNameDescription.geoPointField', {
