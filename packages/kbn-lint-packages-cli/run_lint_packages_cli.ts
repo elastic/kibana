@@ -76,7 +76,7 @@ run(
     });
 
     if (!lintingErrorCount) {
-      log.success('All TS files belong to a single ts project');
+      log.success('All packages linted successfully');
     } else {
       throw createFailError('see above errors');
     }

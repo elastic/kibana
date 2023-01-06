@@ -1701,13 +1701,6 @@ module.exports = {
     },
 
     /**
-     * Prettier disables all conflicting rules, listing as last override so it takes precedence
-     */
-    {
-      files: ['**/*'],
-      rules: require('eslint-config-prettier').rules,
-    },
-    /**
      * Enterprise Search Prettier override
      * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
      */
@@ -1728,5 +1721,23 @@ module.exports = {
         '@kbn/imports/no_unresolvable_imports': 'off',
       },
     },
+
+    /**
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     */
+    {
+      files: 'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+      rules: {
+        'max-classes-per-file': 'off',
+      },
+    },
   ],
 };
+
+/**
+ * Prettier disables all conflicting rules, listing as last override so it takes precedence
+ * people kept ignoring that this was last so it's now defined outside of the overrides list
+ */
+/** eslint-disable-next-line */
+module.exports.overrides.push({ files: ['**/*'], rules: require('eslint-config-prettier').rules });
+/** PLEASE DON'T PUT THINGS AFTER THIS */
