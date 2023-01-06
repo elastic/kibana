@@ -122,7 +122,6 @@ class Package {
      */
     this.isPlugin =
       manifest.type === 'plugin-browser' ||
-      manifest.type === 'plugin-legacy' ||
       manifest.type === 'plugin-server';
 
     /**

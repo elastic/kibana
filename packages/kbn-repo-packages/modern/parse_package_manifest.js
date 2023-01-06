@@ -41,36 +41,6 @@ const isValidOwner = (v) => typeof v === 'string' && v.startsWith('@');
 
 /**
  * @param {unknown} plugin
- * @returns {import('./types').LegacyPluginPackageManifest['plugin']} plugin
- */
-function validatePackageManifestLegacyPlugin(plugin) {
-  if (!isObj(plugin)) {
-    throw err('plugin', plugin, 'must be an object');
-  }
-
-  const { ui, server, extraPublicDirs, ...extra } = plugin;
-  const base = validatePackageManifestPlugin(extra);
-
-  if (typeof ui !== 'boolean') {
-    throw err('plugin.ui', ui, 'must be a boolean');
-  }
-  if (typeof server !== 'boolean') {
-    throw err('plugin.server', server, 'must be a boolean');
-  }
-  if (extraPublicDirs !== undefined && !isArrOfStrings(extraPublicDirs)) {
-    throw err(`plugin.extraPublicDirs`, extraPublicDirs, `must be an array of strings`);
-  }
-
-  return {
-    ui,
-    server,
-    extraPublicDirs,
-    ...base,
-  };
-}
-
-/**
- * @param {unknown} plugin
  * @returns {import('./types').PluginPackageManifest['plugin']}
  */
 function validatePackageManifestPlugin(plugin) {
@@ -251,14 +221,6 @@ function validatePackageManifest(parsed) {
     return {
       type,
       ...base,
-    };
-  }
-
-  if (type === 'plugin-legacy') {
-    return {
-      type,
-      ...base,
-      plugin: validatePackageManifestLegacyPlugin(plugin),
     };
   }
 

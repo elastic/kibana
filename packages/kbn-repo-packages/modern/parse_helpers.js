@@ -10,7 +10,6 @@
 const PACKAGE_TYPE_MAP = {
   'functional-tests': true,
   'plugin-browser': true,
-  'plugin-legacy': true,
   'plugin-server': true,
   'shared-browser': true,
   'shared-common': true,

@@ -35,7 +35,6 @@ export interface ParsedPackageJson {
 export type KibanaPackageType =
   | 'plugin-browser'
   | 'plugin-server'
-  | 'plugin-legacy'
   | 'shared-browser'
   | 'shared-server'
   | 'shared-common'
@@ -82,18 +81,6 @@ interface PackageManifestBaseFields {
   };
 }
 
-export interface LegacyPluginPackageManifest extends PackageManifestBaseFields {
-  type: 'plugin-legacy';
-  /**
-   * Details about the legacy plugin in this package
-   */
-  plugin: PluginPackageManifest['plugin'] & {
-    ui: boolean;
-    server: boolean;
-    extraPublicDirs?: string[];
-  };
-}
-
 export interface PluginPackageManifest extends PackageManifestBaseFields {
   type: 'plugin-browser' | 'plugin-server';
   /**
@@ -129,13 +116,12 @@ export interface BasePackageManifest extends PackageManifestBaseFields {
 }
 
 export type KibanaPackageManifest =
-  | LegacyPluginPackageManifest
   | PluginPackageManifest
   | SharedBrowserPackageManifest
   | BasePackageManifest;
 
 export type PluginPackage = Package & {
-  manifest: PluginPackageManifest | LegacyPluginPackageManifest;
+  manifest: PluginPackageManifest;
 };
 
 export interface PluginSelector {
