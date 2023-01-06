@@ -129,22 +129,20 @@ export async function runLintRules<T extends LintTarget, R extends Rule<T>>(
   }
 
   if (fixedCount) {
-    log.success(`Applied ${fixedCount} fixes to packages`);
+    log.success(`Applied ${fixedCount} fixes`);
   }
 
   if (errorCount) {
     if (options.fix) {
-      log.error(`Found ${errorCount} un-fixable errors when linting packages.`);
+      log.error(`Found ${errorCount} un-fixable errors when linting.`);
     } else {
-      log.error(`Found ${errorCount} errors when linting packages.`);
+      log.error(`Found ${errorCount} errors when linting.`);
       if (includeFixHint) {
         log.warning(
           'Some of those errors are fixable, but require that you pass "--fix" to be applied.'
         );
       }
     }
-  } else {
-    log.success('All packages linted successfully');
   }
 
   return {

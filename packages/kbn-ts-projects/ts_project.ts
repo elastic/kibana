@@ -11,11 +11,11 @@ import Fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { makeMatcher } from '@kbn/picomatcher';
-import { type Package, findPackageForPath } from '@kbn/repo-packages';
+import { findPackageInfoForPath } from '@kbn/repo-packages';
 
 import { readTsConfig, parseTsConfig, TsConfig } from './ts_configfile';
 
-export type TsProjectWithPkg = TsProject & { rootImportReq: string; pkg: Package };
+export type RefableTsProject = TsProject & { rootImportReq: string };
 
 export interface TsProjectOptions {
   disableTypeCheck?: boolean;
@@ -132,7 +132,7 @@ export class TsProject {
   /** The directory containing this ts project */
   public readonly directory: string;
   /** the package this tsconfig file is within, if any */
-  public readonly pkg?: Package;
+  public readonly pkgInfo?: { id: string; repoRel: string };
   /**
    * if this project is within a package then this will
    * be set to the import request that maps to the root of this project
@@ -163,35 +163,20 @@ export class TsProject {
       Path.basename(this.repoRel, '.json') + '.type_check.json'
     );
 
-    this.pkg = findPackageForPath(REPO_ROOT, this.path);
-    this.rootImportReq = this.pkg
-      ? Path.join(this.pkg.id, Path.relative(this.pkg.directory, this.dir))
+    this.pkgInfo = findPackageInfoForPath(REPO_ROOT, this.path);
+    this.rootImportReq = this.pkgInfo
+      ? Path.join(
+          this.pkgInfo.id,
+          Path.relative(Path.resolve(REPO_ROOT, this.pkgInfo.repoRel), this.dir)
+        )
       : undefined;
 
     this._disableTypeCheck = !!opts?.disableTypeCheck;
   }
 
-  private _name: string | undefined;
-  /** name of this project */
   public get name() {
-    if (this._name !== undefined) {
-      return this._name;
-    }
-
-    const basename = Path.basename(this.repoRel);
-    if (!this.pkg) {
-      return (this._name =
-        basename === 'tsconfig.json' ? Path.dirname(this.repoRel) : this.repoRel);
-    }
-
-    const id = 'plugin' in this.pkg.manifest ? this.pkg.manifest.plugin.id : this.pkg.manifest.id;
-    return (this._name = Path.join(
-      id,
-      Path.relative(
-        this.pkg.directory,
-        basename === 'tsconfig.json' ? Path.dirname(this.path) : this.path
-      )
-    ));
+    /** we will be revamping this soon to inteligently pick a good name for the project, but we need to migrate all plugins to packages first */
+    return this.repoRel;
   }
 
   public isTypeCheckDisabled() {
@@ -238,12 +223,12 @@ export class TsProject {
     );
   }
 
-  hasPkg(): this is TsProjectWithPkg {
-    return !!this.rootImportReq && !!this.pkg;
+  isRefable(): this is RefableTsProject {
+    return !!this.rootImportReq;
   }
 
-  private _importMapCache = new WeakMap<TsProject[], Map<string, TsProjectWithPkg>>();
-  private getImportMap(tsProjects: TsProject[]): Map<string, TsProjectWithPkg> {
+  private _importMapCache = new WeakMap<TsProject[], Map<string, RefableTsProject>>();
+  private getImportMap(tsProjects: TsProject[]): Map<string, RefableTsProject> {
     const cached = this._importMapCache.get(tsProjects);
     if (cached) {
       return cached;
@@ -251,7 +236,7 @@ export class TsProject {
 
     const importMap = new Map(
       tsProjects.flatMap((p) => {
-        if (p.hasPkg()) {
+        if (p.isRefable()) {
           return [[p.rootImportReq, p]];
         }
         return [];

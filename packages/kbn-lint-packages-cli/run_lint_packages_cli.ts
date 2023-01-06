@@ -49,7 +49,7 @@ run(
             TS_PROJECTS.find((ts) => ts.repoRelDir === p.normalizedRepoRelativeDir)
           )
       )
-      .sort((a, b) => b.repoRel.localeCompare(a.repoRel));
+      .sort((a, b) => b.repoRel.length - a.repoRel.length);
 
     const toLint = Array.from(
       new Set(

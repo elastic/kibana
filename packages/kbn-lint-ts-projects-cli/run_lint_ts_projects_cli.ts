@@ -12,47 +12,115 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { RepoPath } from '@kbn/repo-path';
 import { getRepoFiles } from '@kbn/get-repo-files';
+import { SomeDevLog } from '@kbn/some-dev-log';
 import { PackageFileMap, TsProjectFileMap } from '@kbn/repo-file-maps';
-import { getPackages, Package } from '@kbn/repo-packages';
+import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { TS_PROJECTS, TsProject } from '@kbn/ts-projects';
 import { runLintRules, TsProjectLintTarget } from '@kbn/repo-linter';
 
 import { RULES } from './rules';
 
-function getFilter(input: string, packages: Package[]) {
+function getFilter(input: string) {
   const abs = Path.resolve(input);
 
-  return ({ tsProject }: TsProjectLintTarget) => {
-    if (
-      tsProject.name === input ||
-      tsProject.repoRel === input ||
-      tsProject.repoRelDir === input ||
-      tsProject.path === abs ||
-      tsProject.directory === abs ||
-      abs.startsWith(tsProject.directory + '/')
-    ) {
-      return true;
+  return ({ tsProject }: TsProjectLintTarget) =>
+    tsProject.name === input ||
+    tsProject.repoRel === input ||
+    tsProject.repoRelDir === input ||
+    tsProject.path === abs ||
+    tsProject.directory === abs ||
+    abs.startsWith(tsProject.directory + '/') ||
+    tsProject.pkg?.normalizedRepoRelativeDir === input ||
+    tsProject.pkg?.directory === abs ||
+    (tsProject.pkg && abs.startsWith(tsProject.pkg.directory + '/'));
+}
+
+function validateProjectOwnership(
+  allTargets: TsProjectLintTarget[],
+  allFiles: Iterable<RepoPath>,
+  fileMap: TsProjectFileMap,
+  log: SomeDevLog
+) {
+  let failed = false;
+
+  const isInMultipleTsProjects = new Map<string, Set<TsProject>>();
+  const pathsToTsProject = new Map<string, TsProject>();
+  for (const proj of allTargets) {
+    for (const path of fileMap.getFiles(proj.tsProject)) {
+      const existing = pathsToTsProject.get(path.repoRel);
+      if (!existing) {
+        pathsToTsProject.set(path.repoRel, proj.tsProject);
+        continue;
+      }
+
+      if (path.isTypeScriptAmbient()) {
+        continue;
+      }
+
+      const multi = isInMultipleTsProjects.get(path.repoRel);
+      if (multi) {
+        multi.add(proj.tsProject);
+      } else {
+        isInMultipleTsProjects.set(path.repoRel, new Set([existing, proj.tsProject]));
+      }
+    }
+  }
+
+  if (isInMultipleTsProjects.size) {
+    failed = true;
+    const details = Array.from(isInMultipleTsProjects)
+      .map(
+        ([repoRel, list]) =>
+          ` - ${repoRel}:\n${Array.from(list)
+            .map((p) => `   - ${p.repoRel}`)
+            .join('\n')}`
+      )
+      .join('\n');
+
+    log.error(
+      `The following files belong to multiple tsconfig.json files listed in packages/kbn-ts-projects/projects.ts\n${details}`
+    );
+  }
+
+  const isNotInTsProject: RepoPath[] = [];
+  for (const path of allFiles) {
+    if (!path.isTypeScript()) {
+      continue;
     }
 
-    const pkg = packages.find((p) => p.normalizedRepoRelativeDir === tsProject.repoRelDir);
-    return pkg && input === pkg.id;
-  };
+    const proj = pathsToTsProject.get(path.repoRel);
+    if (proj === undefined && !path.repoRel.includes('__fixtures__')) {
+      isNotInTsProject.push(path);
+    }
+  }
+
+  if (isNotInTsProject.length) {
+    failed = true;
+    log.error(
+      `The following files do not belong to a tsconfig.json file, or that tsconfig.json file is not listed in packages/kbn-ts-projects/projects.ts\n${isNotInTsProject
+        .map((file) => ` - ${file.repoRel}`)
+        .join('\n')}`
+    );
+  }
+
+  return failed;
 }
 
 run(
   async ({ log, flagsReader }) => {
     const filter = flagsReader.getPositionals();
     const packages = getPackages(REPO_ROOT);
-    const allTargets = Array.from(TS_PROJECTS, (p) => new TsProjectLintTarget(p)).sort((a, b) =>
-      b.repoRel.localeCompare(a.repoRel)
+    const allTargets = Array.from(TS_PROJECTS, (p) => new TsProjectLintTarget(p)).sort(
+      (a, b) => b.repoRel.length - a.repoRel.length
     );
+
     const toLint = Array.from(
       new Set(
         !filter.length
           ? allTargets
           : filter.map((input) => {
-              const pkg = allTargets.find(getFilter(input, packages));
+              const pkg = allTargets.find(getFilter(input));
 
               if (!pkg) {
                 throw createFailError(
@@ -80,72 +148,14 @@ run(
       }
     );
 
-    let failed = lintingErrorCount > 0;
-
-    const isInMultipleTsProjects = new Map<string, Set<TsProject>>();
-    const pathsToTsProject = new Map<string, TsProject>();
-    for (const proj of allTargets) {
-      for (const path of fileMap.getFiles(proj.tsProject)) {
-        const existing = pathsToTsProject.get(path.repoRel);
-        if (!existing) {
-          pathsToTsProject.set(path.repoRel, proj.tsProject);
-          continue;
-        }
-
-        if (path.isTypeScriptAmbient()) {
-          continue;
-        }
-
-        const multi = isInMultipleTsProjects.get(path.repoRel);
-        if (multi) {
-          multi.add(proj.tsProject);
-        } else {
-          isInMultipleTsProjects.set(path.repoRel, new Set([existing, proj.tsProject]));
-        }
-      }
-    }
-
-    if (isInMultipleTsProjects.size) {
-      failed = true;
-      const details = Array.from(isInMultipleTsProjects)
-        .map(
-          ([repoRel, list]) =>
-            ` - ${repoRel}:\n${Array.from(list)
-              .map((p) => `   - ${p.repoRel}`)
-              .join('\n')}`
-        )
-        .join('\n');
-
-      log.error(
-        `The following files belong to multiple tsconfig.json files listed in packages/kbn-ts-projects/projects.ts\n${details}`
-      );
-    }
-
-    const isNotInTsProject: RepoPath[] = [];
-    for (const path of allFiles) {
-      if (!path.isTypeScript()) {
-        continue;
-      }
-
-      const proj = pathsToTsProject.get(path.repoRel);
-      if (proj === undefined && !path.repoRel.includes('__fixtures__')) {
-        isNotInTsProject.push(path);
-      }
-    }
-
-    if (isNotInTsProject.length) {
-      failed = true;
-      log.error(
-        `The following files do not belong to a tsconfig.json file, or that tsconfig.json file is not listed in packages/kbn-ts-projects/projects.ts\n${isNotInTsProject
-          .map((file) => ` - ${file.repoRel}`)
-          .join('\n')}`
-      );
-    }
+    const failed =
+      lintingErrorCount > 0 ||
+      (filter.length > 0 ? false : validateProjectOwnership(allTargets, allFiles, fileMap, log));
 
     if (failed) {
       throw createFailError('see above errors');
     } else {
-      log.success('All TS files belong to a single TS project');
+      log.success('All TS projects linted successfully');
     }
   },
   {

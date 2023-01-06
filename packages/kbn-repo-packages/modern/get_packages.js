@@ -12,12 +12,21 @@ const Fs = require('fs');
 const { readPackageMap } = require('./pkg_map');
 const { Package } = require('./package');
 
-/** @typedef {Map<string, import('./package').Package>} PkgDirMap */
-
 /**
  * @type {Map<any, any>}
  */
 const CACHE = new Map();
+
+function getPkgMap() {
+  const cached = CACHE.get(readPackageMap);
+  if (cached) {
+    return cached;
+  }
+
+  const pkgMap = readPackageMap();
+  CACHE.set(readPackageMap, pkgMap);
+  return pkgMap;
+}
 
 /**
  * Resolves to an array of BazelPackage instances which parse the manifest files,
@@ -31,29 +40,31 @@ function getPackages(repoRoot) {
     return cached;
   }
 
-  const paths = Array.from(readPackageMap().values(), (rel) =>
+  const paths = Array.from(getPkgMap().values(), (rel) =>
     Path.resolve(repoRoot, rel, 'kibana.jsonc')
   );
 
-  const packages = paths.flatMap((path) => Fs.existsSync(path) ? Package.fromManifest(repoRoot, path) : []).sort(Package.sorter);
+  const packages = paths
+    .flatMap((path) => (Fs.existsSync(path) ? Package.fromManifest(repoRoot, path) : []))
+    .sort(Package.sorter);
   CACHE.set(repoRoot, packages);
   return packages;
 }
 
 /**
- * Get a map of repoRelative directories to packages
- * @param {string} repoRoot
+ * Get a map of repoRelative directories to package ids
  */
-function getPkgDirMap(repoRoot) {
-  const packages = getPackages(repoRoot);
-  /** @type {PkgDirMap | undefined} */
-  const cached = CACHE.get(packages);
+function getPkgDirMap() {
+  /** @type {Map<string, string> | undefined} */
+  const cached = CACHE.get(getPkgDirMap);
   if (cached) {
     return cached;
   }
 
-  const pkgDirMap = new Map(packages.map((p) => [p.normalizedRepoRelativeDir, p]));
-  CACHE.set(packages, pkgDirMap);
+  const pkgMap = getPkgMap();
+  /** @type {Map<string, string>} */
+  const pkgDirMap = new Map(Array.from(pkgMap, ([k, v]) => [v, k]));
+  CACHE.set(getPkgDirMap, pkgDirMap);
   return pkgDirMap;
 }
 
@@ -62,26 +73,26 @@ function getPkgDirMap(repoRoot) {
  * @param {string} repoRoot
  * @param {string} path absolute path to a file
  */
-function findPackageForPath(repoRoot, path) {
-  const pkgDirMap = getPkgDirMap(repoRoot);
+function findPackageInfoForPath(repoRoot, path) {
+  const pkgDirMap = getPkgDirMap();
   const repoRelDir = Path.relative(repoRoot, Path.dirname(path));
+
   let cur = repoRelDir;
   while (true) {
-    const pkg = pkgDirMap.get(cur);
-    if (pkg) {
-      return pkg;
+    if (cur === '.') {
+      break;
     }
 
-    if (cur !== '.') {
-      const next = Path.dirname(cur);
-      if (next !== '.') {
-        cur = next;
-        continue;
-      }
+    const pkgId = pkgDirMap.get(cur);
+    if (pkgId) {
+      return {
+        id: pkgId,
+        repoRel: cur,
+      };
     }
 
-    break;
+    cur = Path.dirname(cur);
   }
 }
 
-module.exports = { getPackages, getPkgDirMap, findPackageForPath };
+module.exports = { getPackages, findPackageInfoForPath };

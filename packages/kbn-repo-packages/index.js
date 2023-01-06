@@ -15,9 +15,8 @@
 /** @typedef {import('./modern/types').KbnImportReq} KbnImportReq */
 /** @typedef {import('./modern/types').PluginTypeInfo} PluginTypeInfo */
 /** @typedef {Map<string, string>} PackageMap */
-/** @typedef {import('./modern/get_packages').PkgDirMap} PkgDirMap */
 
-const { getPackages, getPkgDirMap, findPackageForPath } = require('./modern/get_packages');
+const { getPackages, findPackageInfoForPath } = require('./modern/get_packages');
 const {
   parsePackageManifest,
   readPackageManifest,
@@ -38,8 +37,7 @@ module.exports = {
   readHashOfPackageMap,
   readPackageMap,
   getPackages,
-  getPkgDirMap,
-  findPackageForPath,
+  findPackageInfoForPath,
   parsePackageManifest,
   readPackageManifest,
   validatePackageManifest,

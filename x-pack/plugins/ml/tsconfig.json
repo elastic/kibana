@@ -13,6 +13,10 @@
     "public/**/*.json",
     "server/**/*.json"
   ],
+  "exclude": [
+    "target/**/*",
+    "server/routes/apidoc_scripts/**",
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/embeddable-plugin",
@@ -70,8 +74,5 @@
     "@kbn/ml-nested-property",
     "@kbn/ml-local-storage",
     "@kbn/ml-is-defined",
-  ],
-  "exclude": [
-    "target/**/*",
   ]
 }

@@ -18,7 +18,7 @@ function createCache() {
   const importable = new Map<string, Set<TsProjectWithPkg>>();
 
   for (const proj of TS_PROJECTS) {
-    if (!proj.hasPkg()) {
+    if (!proj.isRefable()) {
       continue;
     }
 
@@ -39,7 +39,7 @@ function createCache() {
   return {
     importLocator: new ImportLocator(),
     tsProjectsByRootImportReq: new Map(
-      TS_PROJECTS.flatMap((p) => (p.hasPkg() ? [[p.rootImportReq, p]] : []))
+      TS_PROJECTS.flatMap((p) => (p.isRefable() ? [[p.rootImportReq, p]] : []))
     ),
     importableTsProjects: new Map(
       Array.from(importable, ([k, v]) => {
@@ -70,11 +70,11 @@ export const referenceUsedPkgs = TsProjectRule.create('referenceUsedPkgs', {
 
     const usedTsProjects = new Set<TsProjectWithPkg>();
     await asyncForEachWithLimit(this.getAllFiles(), 30, async (path) => {
-      for (const req of Array.from(await importLocator.read(path.abs), parseKbnImportReq)) {
-        if (!req) {
-          continue;
-        }
+      const reqs = Array.from(await importLocator.read(path.abs)).flatMap(
+        (req) => parseKbnImportReq(req) ?? []
+      );
 
+      for (const req of reqs) {
         const options = importableTsProjects.get(req.pkgId);
         if (!options) {
           continue;
