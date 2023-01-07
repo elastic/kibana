@@ -291,18 +291,12 @@ describe('Log threshold executor', () => {
                     additionalContext: {
                       top_hits: {
                         _source: {
-                          excludes: [
-                            "host.cpu.*",
-                            "host.disk.*",
-                            "host.network.*",
-                          ],
-                          includes: [
-                            "host",
-                          ]
+                          excludes: ['host.cpu.*', 'host.disk.*', 'host.network.*'],
+                          includes: ['host'],
                         },
                         size: 1,
-                      }
-                    }
+                      },
+                    },
                   },
                   composite: {
                     size: 2000,
@@ -389,17 +383,11 @@ describe('Log threshold executor', () => {
                     additionalContext: {
                       top_hits: {
                         _source: {
-                          excludes: [
-                            "host.cpu.*",
-                            "host.disk.*",
-                            "host.network.*",
-                          ],
-                          includes: [
-                            "host",
-                          ]
+                          excludes: ['host.cpu.*', 'host.disk.*', 'host.network.*'],
+                          includes: ['host'],
                         },
                         size: 1,
-                      }
+                      },
                     },
                     filtered_results: {
                       filter: {

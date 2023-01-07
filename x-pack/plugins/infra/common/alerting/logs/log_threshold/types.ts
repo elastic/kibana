@@ -272,17 +272,17 @@ const AdditionalContext = rt.type({
   hits: rt.type({
     hits: rt.array(
       rt.type({
-        _source: rt.record(rt.string, rt.UnknownRecord)
+        _source: rt.record(rt.string, rt.UnknownRecord),
       })
-    )
-  })
+    ),
+  }),
 });
 
 const ChartPreviewBucketsRT = rt.partial({
   histogramBuckets: rt.type({
     buckets: rt.array(chartPreviewHistogramBucket),
   }),
-  additionalContext: AdditionalContext
+  additionalContext: AdditionalContext,
 });
 
 // ES query responses //
