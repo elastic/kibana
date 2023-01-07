@@ -31,12 +31,13 @@ import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
-import { HISTOGRAM_ACTIONS_BUTTON_CLASS, VisualizationActions } from '../visualization_actions';
+import { VisualizationActions } from '../visualization_actions';
 import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
+import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -248,7 +249,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     <>
       <HoverVisibilityContainer
         show={!isInitialLoading}
-        targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}
+        targetClassNames={[VISUALIZATION_ACTIONS_BUTTON_CLASS]}
       >
         <HistogramPanel
           data-test-subj={`${id}Panel`}

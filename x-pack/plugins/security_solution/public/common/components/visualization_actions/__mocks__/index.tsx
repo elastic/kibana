@@ -7,5 +7,3 @@
 import React from 'react';
 
 export const VisualizationActions = () => <div data-test-subj="visualizationActions" />;
-
-export const HISTOGRAM_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';

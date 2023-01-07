@@ -8,6 +8,8 @@
 import type { Filter } from '@kbn/es-query';
 import type { Request } from './types';
 
+export const VISUALIZATION_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
+
 export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
   hostName
     ? [

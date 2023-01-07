@@ -92,6 +92,7 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
     }),
     [euiTheme.colors.disabled]
   );
+  const className = isChartEmbeddablesEnabled ? undefined : 'eui-textTruncate';
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -110,10 +111,10 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
           justifyContent="center"
         >
           <EuiFlexItem>{title}</EuiFlexItem>
-          <EuiFlexItem className={isChartEmbeddablesEnabled ? undefined : 'eui-textTruncate'}>
+          <EuiFlexItem className={className}>
             <EuiToolTip content={label}>
               <EuiText
-                className={isChartEmbeddablesEnabled ? undefined : 'eui-textTruncate'}
+                className={className}
                 size="s"
                 style={dataExists ? undefined : emptyLabelStyle}
               >

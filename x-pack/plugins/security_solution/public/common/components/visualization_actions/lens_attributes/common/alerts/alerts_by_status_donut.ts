@@ -57,28 +57,6 @@ export const getAlertsByStatusAttributes: GetLensAttributes = (
             },
           },
         },
-        {
-          meta: {
-            type: 'phrases',
-            key: '_index',
-            params: ['.alerts-security.alerts-default'],
-            alias: null,
-            negate: false,
-            disabled: false,
-          },
-          query: {
-            bool: {
-              should: [
-                {
-                  match_phrase: {
-                    _index: '.alerts-security.alerts-default',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        },
       ],
       datasourceStates: {
         formBased: {

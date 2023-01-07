@@ -77,12 +77,12 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       onlyField={onlyField}
       paddingSize={paddingSize}
       query={query}
-      runtimeMappings={runtimeMappings}
       showLegend={showLegend}
       showLinkToAlerts={onlyField == null ? true : false}
       showStackBy={onlyField == null}
       showTotalAlertsCount={true}
       signalIndexName={signalIndexName}
+      runtimeMappings={runtimeMappings}
       title={i18n.ALERT_TREND}
       titleSize={onlyField == null ? 'm' : 's'}
       updateDateRange={updateDateRangeCallback}
