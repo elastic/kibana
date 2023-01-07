@@ -22,11 +22,14 @@ export class EnteredInput {
   constructor(
     private leftOfCursorText: string,
     private rightOfCursorText: string,
-    parsedInput: MaybeImmutable<ParsedCommandInterface>,
+    parsedInput_: MaybeImmutable<ParsedCommandInterface>,
     enteredCommand: undefined | MaybeImmutable<EnteredCommand>
   ) {
+    // Cast the `parseInput` to remove `Immutable` type from it
+    const parsedInput = parsedInput_ as ParsedCommandInterface;
+
     this.leftOfCursorContent = leftOfCursorText.split('');
-    this.rightOfCursorContent = leftOfCursorText.split('');
+    this.rightOfCursorContent = rightOfCursorText.split('');
 
     // Determine if any argument value selector should be inserted
     if (parsedInput.hasArgs && enteredCommand && enteredCommand.argsWithValueSelectors) {
@@ -51,10 +54,7 @@ export class EnteredInput {
 
           if (parsedInput.hasArg(argName) && pos !== -1) {
             const argChrLength = argNameMatch.length;
-            const replaceValues: Array<symbol | ReactNode> = Array.from(
-              { length: argChrLength },
-              () => null
-            );
+            const replaceValues: ReactNode[] = Array.from({ length: argChrLength }, () => null);
 
             replaceValues[0] = <ArgumentSelectorWrapper argName={argName} argDefinition={argDef} />;
 
@@ -86,6 +86,26 @@ export class EnteredInput {
 
   getFullText(): string {
     return this.leftOfCursorText + this.rightOfCursorText;
+  }
+
+  getLeftOfCursorRenderingContent(): ReactNode {
+    return (
+      <>
+        {this.leftOfCursorContent.map((item, index) => {
+          return <React.Fragment key={`left.${index}`}>{item}</React.Fragment>;
+        })}
+      </>
+    );
+  }
+
+  getRightOfCursorRenderingContent(): ReactNode {
+    return (
+      <>
+        {this.rightOfCursorContent.map((item, index) => {
+          return <React.Fragment key={`right.${index}`}>{item}</React.Fragment>;
+        })}
+      </>
+    );
   }
 
   moveCursorTo(direction: 'left' | 'right' | 'end' | 'home') {
@@ -148,5 +168,13 @@ export class EnteredInput {
     } else if (this.leftOfCursorText) {
       this.leftOfCursorText = this.leftOfCursorText.substring(0, this.leftOfCursorText.length - 1);
     }
+  }
+
+  clear() {
+    this.leftOfCursorText = '';
+    this.rightOfCursorText = '';
+
+    this.leftOfCursorContent = [];
+    this.rightOfCursorContent = [];
   }
 }

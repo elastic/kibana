@@ -90,7 +90,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   useInputHints();
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
-  const { rightOfCursorText, leftOfCursorText, fullTextEntered } = useWithInputTextEntered();
+  const { rightOfCursorText, leftOfCursorText, fullTextEntered, enteredCommand, parsedInput } =
+    useWithInputTextEntered();
   const visibleState = useWithInputVisibleState();
   const isPopoverOpen = !!useWithInputShowPopover();
 
@@ -111,6 +112,10 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   }, [isKeyInputBeingCaptured, isPopoverOpen, visibleState]);
 
   const disableArrowButton = useMemo(() => fullTextEntered.trim().length === 0, [fullTextEntered]);
+
+  const userInput = useMemo(() => {
+    return new EnteredInput(leftOfCursorText, rightOfCursorText, parsedInput, enteredCommand);
+  }, [enteredCommand, leftOfCursorText, parsedInput, rightOfCursorText]);
 
   const handleOnResize = useCallback<EuiResizeObserverProps['onResize']>(({ width }) => {
     if (width > 0) {
@@ -167,14 +172,14 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         payload: ({
           leftOfCursorText: prevLeftOfCursor,
           rightOfCursorText: prevRightOfCursor,
-          enteredCommand,
-          parsedInput,
+          enteredCommand: prevEnteredCommand,
+          parsedInput: prevParsedInput,
         }) => {
           let inputText = new EnteredInput(
             prevLeftOfCursor,
             prevRightOfCursor,
-            parsedInput,
-            enteredCommand
+            prevParsedInput,
+            prevEnteredCommand
           );
 
           inputText.addValue(value ?? '', selection);
@@ -194,7 +199,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             case 13:
               setCommandToExecute(inputText.getFullText());
               // FIXME:PT add `clear()` method to `EnteredInput` and remove code below
-              inputText = new EnteredInput('', '', parsedInput, enteredCommand);
+              inputText = new EnteredInput('', '', prevParsedInput, prevEnteredCommand);
               break;
 
             // ARROW LEFT
@@ -263,7 +268,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                     <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
                       <EuiFlexItem grow={false}>
                         <div data-test-subj={getTestId('cmdInput-leftOfCursor')}>
-                          {leftOfCursorText}
+                          {userInput.getLeftOfCursorRenderingContent()}
                         </div>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -271,7 +276,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>
-                          {rightOfCursorText}
+                          {userInput.getRightOfCursorRenderingContent()}
                         </div>
                       </EuiFlexItem>
                     </EuiFlexGroup>
