@@ -47,6 +47,8 @@ const renderUseAlertsByStatus = (props: Partial<UseAlertsByStatusProps> = {}) =>
       useAlertsByStatus({
         queryId: 'test',
         signalIndexName: 'signal-alerts',
+        from: '2023-01-07T00:00:00.000Z',
+        to: '2023-01-07T23:59:59.999Z',
         ...props,
       }),
     {

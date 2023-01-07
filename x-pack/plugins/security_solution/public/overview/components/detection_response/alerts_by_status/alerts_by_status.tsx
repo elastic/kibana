@@ -57,6 +57,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { AlertDonutEmbeddable } from './alert_donut_embeddable';
 import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   padding: 0 4px;
@@ -68,9 +69,9 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
 `;
 
 interface AlertsByStatusProps {
-  signalIndexName: string | null;
-  entityFilter?: EntityFilter;
   additionalFilters?: ESBoolQuery[];
+  entityFilter?: EntityFilter;
+  signalIndexName: string | null;
 }
 
 const legendField = 'kibana.alert.severity';
@@ -80,7 +81,6 @@ const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
   { key: 'medium', label: STATUS_MEDIUM_LABEL, color: SEVERITY_COLOR.medium },
   { key: 'low', label: STATUS_LOW_LABEL, color: SEVERITY_COLOR.low },
 ];
-const DETECTION_RESPONSE_ALERTS_BY_STATUS_ID = 'detection-response-alerts-by-status';
 
 const eventKindSignalFilter: EntityFilter = {
   field: 'event.kind',
@@ -99,7 +99,7 @@ export const AlertsByStatus = ({
   });
 
   const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
-  const { to, from, setQuery } = useGlobalTime();
+  const { to, from } = useGlobalTime();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   const isLargerBreakpoint = useIsWithinMinBreakpoint('xl');
@@ -127,6 +127,8 @@ export const AlertsByStatus = ({
     signalIndexName,
     skip: !toggleStatus || isChartEmbeddablesEnabled,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
+    to,
+    from,
   });
   const legendItems: LegendItem[] = useMemo(
     () =>
@@ -208,8 +210,7 @@ export const AlertsByStatus = ({
                     <StyledFlexItem key="alerts-status-open" grow={isChartEmbeddablesEnabled}>
                       {isChartEmbeddablesEnabled ? (
                         <AlertDonutEmbeddable
-                          status={'open'}
-                          setQuery={setQuery}
+                          status="open"
                           timerange={timerange}
                           label={STATUS_OPEN}
                         />
@@ -231,8 +232,7 @@ export const AlertsByStatus = ({
                     >
                       {isChartEmbeddablesEnabled ? (
                         <AlertDonutEmbeddable
-                          status={'acknowledged'}
-                          setQuery={setQuery}
+                          status="acknowledged"
                           timerange={timerange}
                           label={STATUS_ACKNOWLEDGED}
                         />
@@ -251,8 +251,7 @@ export const AlertsByStatus = ({
                     <StyledFlexItem key="alerts-status-closed" grow={isChartEmbeddablesEnabled}>
                       {isChartEmbeddablesEnabled ? (
                         <AlertDonutEmbeddable
-                          status={'closed'}
-                          setQuery={setQuery}
+                          status="closed"
                           timerange={timerange}
                           label={STATUS_CLOSED}
                         />

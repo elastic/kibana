@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import { DonutChartWrapper } from '../../../../common/components/charts/donutchart';
 import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 import { getAlertsByStatusAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_status_donut';
@@ -12,22 +13,22 @@ import { LensEmbeddable } from '../../../../common/components/visualization_acti
 import type { EmbeddableData } from '../../../../common/components/visualization_actions/types';
 import { parseVisualizationData } from '../../../../common/components/visualization_actions/utils';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { inputsSelectors } from '../../../../common/store/inputs';
+import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { ChartLabel } from './chart_label';
 import type { AlertDonutEmbeddableProps, VisualizationAlertsByStatusResponse } from './types';
-import { AlertsByStatusQueryId } from './types';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
 
 const ChartSize = '135px';
 
 const AlertDonutEmbeddableComponent: React.FC<AlertDonutEmbeddableProps> = ({
   status,
-  setQuery,
   timerange,
   label,
 }) => {
-  const queryId = AlertsByStatusQueryId[`${status}AlertsQuery`];
+  const dispatch = useDispatch();
+  const queryId = `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${status}`;
   const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
     inputId: InputsModelId.global,
     queryId,
@@ -40,28 +41,34 @@ const AlertDonutEmbeddableComponent: React.FC<AlertDonutEmbeddableProps> = ({
 
   const onEmbeddableLoad = useCallback(
     ({ requests, responses, isLoading }: EmbeddableData) => {
-      setQuery({
-        id: queryId,
-        searchSessionId,
-        refetch: refetchByRestartingSession,
-        loading: isLoading,
-        inspect: { dsl: requests, response: responses },
-      });
+      dispatch(
+        inputsActions.setQuery({
+          inputId: InputsModelId.global,
+          id: queryId,
+          searchSessionId,
+          refetch: refetchByRestartingSession,
+          loading: isLoading,
+          inspect: { dsl: requests, response: responses },
+        })
+      );
     },
-    [queryId, refetchByRestartingSession, searchSessionId, setQuery]
+    [dispatch, queryId, refetchByRestartingSession, searchSessionId]
   );
 
   const extraOptions = useMemo(() => ({ status }), [status]);
 
   useEffect(() => {
-    setQuery({
-      id: `alertsStatus${status}`,
-      searchSessionId,
-      refetch: refetchByRestartingSession,
-      loading: false,
-      inspect: null,
-    });
-  }, [refetchByRestartingSession, searchSessionId, setQuery, status]);
+    dispatch(
+      inputsActions.setQuery({
+        inputId: InputsModelId.global,
+        id: queryId,
+        searchSessionId,
+        refetch: refetchByRestartingSession,
+        loading: false,
+        inspect: null,
+      })
+    );
+  }, [dispatch, queryId, refetchByRestartingSession, searchSessionId, status]);
 
   const dataExists = visualizationData != null && visualizationData[0].hits.total !== 0;
 
@@ -81,7 +88,7 @@ const AlertDonutEmbeddableComponent: React.FC<AlertDonutEmbeddableProps> = ({
         getLensAttributes={getAlertsByStatusAttributes}
         stackByField="kibana.alert.workflow_status"
         scopeId={SourcererScopeName.detections}
-        id={`alertsStatus${status}`}
+        id={queryId}
       />
     </DonutChartWrapper>
   );

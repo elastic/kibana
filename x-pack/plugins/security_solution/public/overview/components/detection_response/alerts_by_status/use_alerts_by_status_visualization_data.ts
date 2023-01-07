@@ -9,18 +9,18 @@ import { parseVisualizationData } from '../../../../common/components/visualizat
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import type { VisualizationAlertsByStatusResponse } from './types';
-import { AlertsByStatusQueryId } from './types';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
 
 export const useAlertsByStatusVisualizationData = () => {
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { inspect: inspectOpenAlerts } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, AlertsByStatusQueryId.openAlertsQuery)
+    getGlobalQuery(state, `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-open`)
   );
   const { inspect: inspectAcknowledgedAlerts } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, AlertsByStatusQueryId.acknowledgedAlertsQuery)
+    getGlobalQuery(state, `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-acknowledged`)
   );
   const { inspect: inspectClosedAlerts } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, AlertsByStatusQueryId.closedAlertsQuery)
+    getGlobalQuery(state, `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-closed`)
   );
   const visualizationOpenAlertsData =
     inspectOpenAlerts != null

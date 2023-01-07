@@ -7,7 +7,6 @@
 
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ESQuery } from '../../../../../common/typed_json';
-import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 
 interface StatusBySeverity {
   doc_count_error_upper_bound: number;
@@ -80,7 +79,6 @@ export type AlertsByStatus = 'open' | 'acknowledged' | 'closed';
 
 export interface AlertDonutEmbeddableProps {
   status: AlertsByStatus;
-  setQuery: GlobalTimeArgs['setQuery'];
   timerange: { from: string; to: string };
   label: string;
 }
@@ -95,8 +93,4 @@ export interface VisualizationInspectQuery {
   response: VisualizationAlertsByStatusResponse[];
 }
 
-export enum AlertsByStatusQueryId {
-  'openAlertsQuery' = 'openAlertsQuery',
-  'acknowledgedAlertsQuery' = 'acknowledgedAlertsQuery',
-  'closedAlertsQuery' = 'closedAlertsQuery',
-}
+export const DETECTION_RESPONSE_ALERTS_BY_STATUS_ID = 'detection-response-alerts-by-status';
