@@ -172,6 +172,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
     inputId: InputsModelId.global,
     queryId: id,
+    skip: !isChartEmbeddablesEnabled,
   });
 
   const matrixHistogramRequest = {
