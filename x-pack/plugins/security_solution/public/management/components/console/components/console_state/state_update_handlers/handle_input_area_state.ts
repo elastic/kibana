@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
+import type { ParsedCommandInterface } from '../../../service/types';
 import { parseCommandInput } from '../../../service/parsed_command_input';
 import type {
   ConsoleDataAction,
@@ -21,6 +22,19 @@ export const INPUT_DEFAULT_PLACEHOLDER_TEXT = i18n.translate(
     defaultMessage: 'Submit response action',
   }
 );
+
+const setArgSelectorValueToParsedArgs = (
+  parsedInput: ParsedCommandInterface,
+  enteredCommand: EnteredCommand | undefined
+) => {
+  if (enteredCommand && enteredCommand.argsWithValueSelectors) {
+    for (const [argName, argState] of Object.entries(enteredCommand.argState)) {
+      if (parsedInput.hasArg(argName)) {
+        parsedInput.args[argName] = argState.map((itemState) => itemState.value);
+      }
+    }
+  }
+};
 
 type InputAreaStateAction = ConsoleDataAction & {
   type:
@@ -77,8 +91,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         state.input.leftOfCursorText !== newTextEntered ||
         state.input.rightOfCursorText !== newRightOfCursor
       ) {
-        const fullCommandText = newTextEntered + newRightOfCursor;
-        const parsedInput = parseCommandInput(fullCommandText);
+        const parsedInput = parseCommandInput(newTextEntered + newRightOfCursor);
 
         let enteredCommand: ConsoleDataState['input']['enteredCommand'] =
           state.input.enteredCommand;
@@ -113,7 +126,8 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           }
         }
 
-        // FIXME:PT need to update `parsedInput` to include Argument Value selector values
+        // Update parsed input with any values that were selected via argument selectors
+        setArgSelectorValueToParsedArgs(parsedInput, enteredCommand);
 
         return {
           ...state,
@@ -164,10 +178,17 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           },
         };
 
+        // store a new version of parsed input that contains the updated selector value
+        const updatedParsedInput = parseCommandInput(
+          state.input.leftOfCursorText + state.input.rightOfCursorText
+        );
+        setArgSelectorValueToParsedArgs(updatedParsedInput, updatedEnteredCommand);
+
         return {
           ...state,
           input: {
             ...state.input,
+            parsedInput: updatedParsedInput,
             enteredCommand: updatedEnteredCommand,
           },
         };

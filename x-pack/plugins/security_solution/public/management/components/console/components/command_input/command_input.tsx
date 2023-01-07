@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@el
 import styled from 'styled-components';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
+import type { ExecuteCommandPayload } from '../console_state/types';
 import { useWithInputShowPopover } from '../../hooks/state_selectors/use_with_input_show_popover';
 import { EnteredInput } from './lib/entered_input';
 import type { InputCaptureProps } from './components/input_capture';
@@ -96,7 +97,9 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   const isPopoverOpen = !!useWithInputShowPopover();
 
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
-  const [commandToExecute, setCommandToExecute] = useState('');
+  const [commandToExecute, setCommandToExecute] = useState<ExecuteCommandPayload | undefined>(
+    undefined
+  );
   const [popoverWidth, setPopoverWidth] = useState('94vw');
 
   const _focusRef: InputCaptureProps['focusRef'] = useRef(null);
@@ -124,7 +127,14 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   }, []);
 
   const handleSubmitButton = useCallback<MouseEventHandler>(() => {
-    setCommandToExecute(leftOfCursorText + rightOfCursorText);
+    setCommandToExecute({
+      input: fullTextEntered,
+      enteredCommand,
+      parsedInput,
+    });
+
+    // FIXME:PT reset input state
+
     dispatch({
       type: 'updateInputTextEnteredState',
       payload: {
@@ -132,7 +142,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         rightOfCursorText: '',
       },
     });
-  }, [dispatch, leftOfCursorText, rightOfCursorText]);
+  }, [dispatch, enteredCommand, fullTextEntered, parsedInput]);
 
   const handleOnChangeFocus = useCallback<NonNullable<InputCaptureProps['onChangeFocus']>>(
     (hasFocus) => {
@@ -197,8 +207,14 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
             // ENTER  = Execute command and blank out the input area
             case 13:
-              setCommandToExecute(inputText.getFullText());
+              setCommandToExecute({
+                input: inputText.getFullText(),
+                enteredCommand: prevEnteredCommand,
+                parsedInput: prevParsedInput,
+              });
+
               // FIXME:PT add `clear()` method to `EnteredInput` and remove code below
+
               inputText = new EnteredInput('', '', prevParsedInput, prevEnteredCommand);
               break;
 
@@ -236,8 +252,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   // Execute the command if one was ENTER'd.
   useEffect(() => {
     if (commandToExecute) {
-      dispatch({ type: 'executeCommand', payload: { input: commandToExecute } });
-      setCommandToExecute('');
+      dispatch({ type: 'executeCommand', payload: commandToExecute });
+      setCommandToExecute(undefined);
     }
   }, [commandToExecute, dispatch]);
 

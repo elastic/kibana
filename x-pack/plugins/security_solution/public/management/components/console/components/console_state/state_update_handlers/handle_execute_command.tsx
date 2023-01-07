@@ -22,7 +22,6 @@ import type {
   ConsoleDataState,
   ConsoleStoreReducer,
 } from '../types';
-import { parseCommandInput } from '../../../service/parsed_command_input';
 import { UnknownCommand } from '../../unknown_comand';
 import { BadArgument } from '../../bad_argument';
 import { ValidationError } from '../../validation_error';
@@ -131,17 +130,13 @@ const createCommandHistoryEntry = (
 export const handleExecuteCommand: ConsoleStoreReducer<
   ConsoleDataAction & { type: 'executeCommand' }
 > = (state, action) => {
-  // FIXME:PT need to get parsedInput from `store` and ensure input state is reset
-  const parsedInput = parseCommandInput(action.payload.input);
+  const { parsedInput, enteredCommand } = action.payload;
 
   if (parsedInput.name === '') {
     return state;
   }
 
-  const { commands } = state;
-  const commandDefinition: CommandDefinition | undefined = commands.find(
-    (definition) => definition.name === parsedInput.name
-  );
+  const commandDefinition: CommandDefinition | undefined = enteredCommand?.commandDefinition;
 
   // Unknown command
   if (!commandDefinition) {

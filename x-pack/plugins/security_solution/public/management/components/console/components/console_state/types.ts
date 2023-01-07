@@ -125,11 +125,20 @@ export interface CommandExecutionState {
   store: Record<string, unknown>;
 }
 
+export interface ExecuteCommandPayload {
+  input: string;
+  parsedInput: ParsedCommandInterface;
+  enteredCommand: ConsoleDataState['input']['enteredCommand'];
+}
+
 export type ConsoleDataAction =
   | { type: 'scrollDown' }
   | { type: 'addFocusToKeyCapture' }
   | { type: 'removeFocusFromKeyCapture' }
-  | { type: 'executeCommand'; payload: { input: string } }
+  | {
+      type: 'executeCommand';
+      payload: ExecuteCommandPayload;
+    }
   | { type: 'clear' }
   | {
       type: 'showSidePanel';
