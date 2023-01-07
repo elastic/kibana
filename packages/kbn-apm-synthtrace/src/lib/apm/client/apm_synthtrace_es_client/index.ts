@@ -13,13 +13,14 @@ import {
   SynthtraceESAction,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
-import { castArray } from 'lodash';
+import { castArray, merge, once } from 'lodash';
 import { PassThrough, pipeline, Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { ValuesType } from 'utility-types';
 import { Logger } from '../../../utils/create_logger';
 import { fork, sequential } from '../../../utils/stream_utils';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
+import { createServiceMetricsAggregator } from '../../aggregators/create_service_metrics_aggregator';
 import { createSpanMetricsAggregator } from '../../aggregators/create_span_metrics_aggregator';
 import { createTransactionMetricsAggregator } from '../../aggregators/create_transaction_metrics_aggregator';
 import { getApmServerMetadataTransform } from './get_apm_server_metadata_transform';
@@ -92,14 +93,16 @@ export class ApmSynthtraceEsClient {
       name,
     });
 
-    const template = response.component_templates[0];
-
-    await this.client.cluster.putComponentTemplate({
-      name,
-      template: {
-        ...modify(template.component_template.template),
-      },
-    });
+    await Promise.all(
+      response.component_templates.map((template) => {
+        return this.client.cluster.putComponentTemplate({
+          name: template.name,
+          template: {
+            ...modify(template.component_template.template),
+          },
+        });
+      })
+    );
 
     this.logger.info(`Updated component template: ${name}`);
   }
@@ -118,7 +121,14 @@ export class ApmSynthtraceEsClient {
     return (base: Readable) => {
       const aggregators = [
         createTransactionMetricsAggregator('1m'),
+        createTransactionMetricsAggregator('10m'),
+        createTransactionMetricsAggregator('60m'),
+        createServiceMetricsAggregator('1m'),
+        createServiceMetricsAggregator('10m'),
+        createServiceMetricsAggregator('60m'),
         createSpanMetricsAggregator('1m'),
+        createSpanMetricsAggregator('10m'),
+        createSpanMetricsAggregator('60m'),
       ];
 
       const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
@@ -150,7 +160,51 @@ export class ApmSynthtraceEsClient {
     return this.version;
   }
 
+  bootstrap = once(async () => {
+    await this.updateComponentTemplate(ComponentTemplateName.MetricsInternal, (template) => {
+      return merge({}, template, {
+        mappings: {
+          properties: {
+            event: {
+              properties: {
+                success_count: {
+                  type: 'aggregate_metric_double',
+                  metrics: ['sum', 'value_count'],
+                  default_metric: 'sum',
+                },
+              },
+            },
+            transaction: {
+              properties: {
+                duration: {
+                  properties: {
+                    summary: {
+                      type: 'aggregate_metric_double',
+                      metrics: ['min', 'max', 'sum', 'value_count'],
+                      default_metric: 'max',
+                    },
+                  },
+                },
+              },
+            },
+            metricset: {
+              properties: {
+                interval: {
+                  // TODO: change this to a constant keyword as soon as the updated
+                  // package containing the new data streams for continuous rollups are available
+                  type: 'keyword' as const,
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+  });
+
   async index(streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<ApmFields>>) {
+    await this.bootstrap();
+
     this.logger.debug(`Bulk indexing ${castArray(streamOrGenerator).length} stream(s)`);
 
     const allStreams = castArray(streamOrGenerator).map((obj) => {

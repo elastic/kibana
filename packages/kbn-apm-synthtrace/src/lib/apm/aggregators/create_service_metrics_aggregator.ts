@@ -21,7 +21,7 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
 export function createServiceMetricsAggregator(flushInterval: string) {
   return createApmMetricAggregator(
     {
-      filter: (event) => true,
+      filter: (event) => event['processor.event'] === 'transaction',
       getAggregateKey: (event) => {
         // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
         return hashKeysOf(event, KEY_FIELDS);
@@ -33,6 +33,7 @@ export function createServiceMetricsAggregator(flushInterval: string) {
         return {
           ...set,
           'metricset.name': 'service',
+          'metricset.interval': flushInterval,
           'processor.event': 'metric',
           'processor.name': 'metric',
           'transaction.duration.histogram': createLosslessHistogram(),
@@ -42,7 +43,7 @@ export function createServiceMetricsAggregator(flushInterval: string) {
             value_count: 0,
             sum: 0,
           },
-          'event.outcome_numeric': {
+          'event.success_count': {
             sum: 0,
             value_count: 0,
           },
@@ -50,26 +51,24 @@ export function createServiceMetricsAggregator(flushInterval: string) {
       },
     },
     (metric, event) => {
-      if (event['processor.event'] === 'transaction') {
-        const duration = event['transaction.duration.us']!;
+      const duration = event['transaction.duration.us']!;
 
-        metric['transaction.duration.histogram'].record(duration);
+      metric['transaction.duration.histogram'].record(duration);
 
-        if (event['event.outcome'] === 'success' || event['event.outcome'] === 'failure') {
-          metric['event.outcome_numeric'].value_count += 1;
-        }
-
-        if (event['event.outcome'] === 'success') {
-          metric['event.outcome_numeric'].sum += 1;
-        }
-
-        const summary = metric['transaction.duration.summary'];
-
-        summary.min = Math.min(duration, metric['transaction.duration.summary'].min);
-        summary.max = Math.max(duration, metric['transaction.duration.summary'].max);
-        summary.sum += duration;
-        summary.value_count += 1;
+      if (event['event.outcome'] === 'success' || event['event.outcome'] === 'failure') {
+        metric['event.success_count'].value_count += 1;
       }
+
+      if (event['event.outcome'] === 'success') {
+        metric['event.success_count'].sum += 1;
+      }
+
+      const summary = metric['transaction.duration.summary'];
+
+      summary.min = Math.min(duration, metric['transaction.duration.summary'].min);
+      summary.max = Math.max(duration, metric['transaction.duration.summary'].max);
+      summary.sum += duration;
+      summary.value_count += 1;
     },
     (metric) => {
       const serialized = metric['transaction.duration.histogram'].serialize();
@@ -80,6 +79,7 @@ export function createServiceMetricsAggregator(flushInterval: string) {
       };
       // @ts-expect-error
       metric._doc_count = serialized.total;
+
       return metric;
     }
   );
