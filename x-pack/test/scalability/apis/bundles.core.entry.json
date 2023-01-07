@@ -4,7 +4,7 @@
     "responseTimeThreshold": {
       "threshold1": 1000,
       "threshold2": 3000,
-      "threshold3": 10000
+      "threshold3": 5000
     },
     "warmup": [
       {
@@ -17,8 +17,8 @@
       {
         "action": "rampUsersPerSec",
         "minUsersCount": 10,
-        "maxUsersCount": 1200,
-        "duration": "238s"
+        "maxUsersCount": 1400,
+        "duration": "278s"
       }
     ],
     "maxDuration": "6m"
