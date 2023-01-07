@@ -56,11 +56,7 @@ import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { AlertDonutEmbeddable } from './alert_donut_embeddable';
-import { inputsSelectors } from '../../../../common/store';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { parseVisualizationData } from '../../../../common/components/visualization_actions/utils';
-import type { VisualizationAlertsByStatusResponse } from './types';
-import { AlertsByStatusQueryId } from './types';
+import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   padding: 0 4px;
@@ -91,7 +87,6 @@ const eventKindSignalFilter: EntityFilter = {
   value: 'signal',
 };
 
-// eslint-disable-next-line complexity
 export const AlertsByStatus = ({
   additionalFilters,
   signalIndexName,
@@ -102,38 +97,6 @@ export const AlertsByStatus = ({
   const { onClick: goToAlerts, href } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.alerts,
   });
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const { inspect: inspectOpenAlerts } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, AlertsByStatusQueryId.openAlertsQuery)
-  );
-  const { inspect: inspectAcknowledgedAlerts } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, AlertsByStatusQueryId.acknowledgedAlertsQuery)
-  );
-  const { inspect: inspectClosedAlerts } = useDeepEqualSelector((state) =>
-    getGlobalQuery(state, AlertsByStatusQueryId.closedAlertsQuery)
-  );
-  const visualizationOpenAlertsData =
-    inspectOpenAlerts != null
-      ? parseVisualizationData<VisualizationAlertsByStatusResponse>(inspectOpenAlerts?.response)[0]
-          .hits.total
-      : 0;
-  const visualizationAcknowledgedAlertsData =
-    inspectAcknowledgedAlerts != null
-      ? parseVisualizationData<VisualizationAlertsByStatusResponse>(
-          inspectAcknowledgedAlerts?.response
-        )[0].hits.total
-      : 0;
-  const visualizationClosedAlertsData =
-    inspectClosedAlerts != null
-      ? parseVisualizationData<VisualizationAlertsByStatusResponse>(
-          inspectClosedAlerts?.response
-        )[0].hits.total
-      : 0;
-
-  const visualizationTotalAlertsData =
-    visualizationOpenAlertsData +
-      visualizationAcknowledgedAlertsData +
-      visualizationClosedAlertsData ?? 0;
 
   const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
   const { to, from, setQuery } = useGlobalTime();
@@ -182,6 +145,10 @@ export const AlertsByStatus = ({
   const totalAlerts =
     loading || donutData == null ? 0 : openCount + acknowledgedCount + closedCount;
 
+  const { total: visualizationTotalAlerts } = useAlertsByStatusVisualizationData();
+
+  const totalAlertsCount = isChartEmbeddablesEnabled ? visualizationTotalAlerts : totalAlerts;
+
   const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
     return chartConfigs.find((cfg) => cfg.label === d.dataName)?.color ?? emptyDonutColor;
   }, []);
@@ -225,24 +192,14 @@ export const AlertsByStatus = ({
               <EuiFlexGroup justifyContent="center" gutterSize="none">
                 <EuiFlexItem grow={isChartEmbeddablesEnabled}>
                   {totalAlerts !== 0 ||
-                    (visualizationTotalAlertsData !== 0 && (
+                    (visualizationTotalAlerts !== 0 && (
                       <EuiText className="eui-textCenter" size="s">
                         <>
                           <b>
-                            <FormattedCount
-                              count={
-                                isChartEmbeddablesEnabled
-                                  ? visualizationTotalAlertsData
-                                  : totalAlerts
-                              }
-                            />
+                            <FormattedCount count={totalAlertsCount} />
                           </b>
                           <> </>
-                          <small>
-                            {ALERTS(
-                              isChartEmbeddablesEnabled ? visualizationTotalAlertsData : totalAlerts
-                            )}
-                          </small>
+                          <small>{ALERTS(totalAlertsCount)}</small>
                         </>
                       </EuiText>
                     ))}
