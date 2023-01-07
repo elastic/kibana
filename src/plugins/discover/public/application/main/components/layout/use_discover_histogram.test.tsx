@@ -73,6 +73,15 @@ jest.mock('@kbn/unified-field-list-plugin/public', () => {
   return {
     ...originalModule,
     getVisualizeInformation: jest.fn(() => Promise.resolve(mockCanVisualize)),
+    useQuerySubscriber: jest.fn(() => ({
+      query: {
+        query: 'query',
+        language: 'kuery',
+      },
+      filters: [],
+      fromDate: 'now-15m',
+      toDate: 'now',
+    })),
   };
 });
 
@@ -121,6 +130,7 @@ describe('useDiscoverHistogram', () => {
       recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
       foundDocuments: true,
     }) as DataMain$,
+    savedSearchFetch$ = new Subject() as DataFetch$,
   }: {
     isPlainRecord?: boolean;
     isTimeBased?: boolean;
@@ -132,6 +142,7 @@ describe('useDiscoverHistogram', () => {
     inspectorAdapters?: InspectorAdapters;
     totalHits$?: DataTotalHits$;
     main$?: DataMain$;
+    savedSearchFetch$?: DataFetch$;
   } = {}) => {
     mockStorage = storage;
     mockCanVisualize = canVisualize;
@@ -145,8 +156,6 @@ describe('useDiscoverHistogram', () => {
       fetchStatus: FetchStatus.COMPLETE,
       fields: [] as string[],
     }) as AvailableFields$;
-
-    const savedSearchFetch$: DataFetch$ = new Subject();
 
     const savedSearchData$ = {
       main$,
@@ -192,11 +201,20 @@ describe('useDiscoverHistogram', () => {
     return { hook, initialProps };
   };
 
-  it('should return undefined if there is no search session', async () => {
-    const {
-      hook: { result },
-    } = await renderUseDiscoverHistogram({ searchSessionId: null });
-    expect(result.current).toBeUndefined();
+  describe('result', () => {
+    it('should return undefined if there is no search session', async () => {
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram({ searchSessionId: null });
+      expect(result.current).toBeUndefined();
+    });
+
+    it('it should not return undefined if there is no search session, but isPlainRecord is true', async () => {
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram({ searchSessionId: null, isPlainRecord: true });
+      expect(result.current).toBeDefined();
+    });
   });
 
   describe('contexts', () => {
@@ -264,6 +282,21 @@ describe('useDiscoverHistogram', () => {
       expect(inspectorAdapters.lensRequests).toBeDefined();
       hook.rerender({ ...initialProps, isPlainRecord: true });
       expect(inspectorAdapters.lensRequests).toBeUndefined();
+    });
+  });
+
+  describe('search params', () => {
+    it('should return the correct query, filters, and timeRange', async () => {
+      const { hook } = await renderUseDiscoverHistogram();
+      expect(hook.result.current?.query).toEqual({
+        query: 'query',
+        language: 'kuery',
+      });
+      expect(hook.result.current?.filters).toEqual([]);
+      expect(hook.result.current?.timeRange).toEqual({
+        from: 'now-15m',
+        to: 'now',
+      });
     });
   });
 
@@ -488,6 +521,65 @@ describe('useDiscoverHistogram', () => {
         result: undefined,
       });
       expect(mockCheckHitCount).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('refetching', () => {
+    it("should call input$.next({ type: 'refetch' }) when savedSearchFetch$ is triggered", async () => {
+      const savedSearchFetch$ = new BehaviorSubject(undefined);
+      const { hook } = await renderUseDiscoverHistogram({ savedSearchFetch$ });
+      const onRefetch = jest.fn();
+      hook.result.current?.input$.subscribe(onRefetch);
+      act(() => {
+        savedSearchFetch$.next(undefined);
+      });
+      expect(onRefetch).toHaveBeenCalledWith({ type: 'refetch' });
+    });
+
+    it("should not call input$.next({ type: 'refetch' }) when searchSessionId is not set", async () => {
+      const savedSearchFetch$ = new BehaviorSubject(undefined);
+      const { hook } = await renderUseDiscoverHistogram({
+        savedSearchFetch$,
+        searchSessionId: null,
+      });
+      const onRefetch = jest.fn();
+      hook.result.current?.input$.subscribe(onRefetch);
+      act(() => {
+        savedSearchFetch$.next(undefined);
+      });
+      expect(onRefetch).not.toHaveBeenCalled();
+    });
+
+    it("should call input$.next({ type: 'refetch' }) when searchSessionId is not set and isPlainRecord is true", async () => {
+      const savedSearchFetch$ = new BehaviorSubject(undefined);
+      const { hook } = await renderUseDiscoverHistogram({
+        savedSearchFetch$,
+        searchSessionId: null,
+        isPlainRecord: true,
+      });
+      const onRefetch = jest.fn();
+      hook.result.current?.input$.subscribe(onRefetch);
+      act(() => {
+        savedSearchFetch$.next(undefined);
+      });
+      expect(onRefetch).toHaveBeenCalledWith({ type: 'refetch' });
+    });
+
+    it('should skip the next refetch when state.hideChart changes from true to false', async () => {
+      const savedSearchFetch$ = new BehaviorSubject(undefined);
+      const { hook } = await renderUseDiscoverHistogram({ savedSearchFetch$ });
+      const onRefetch = jest.fn();
+      hook.result.current?.input$.subscribe(onRefetch);
+      act(() => {
+        hook.result.current?.onChartHiddenChange(true);
+      });
+      act(() => {
+        hook.result.current?.onChartHiddenChange(false);
+      });
+      act(() => {
+        savedSearchFetch$.next(undefined);
+      });
+      expect(onRefetch).not.toHaveBeenCalled();
     });
   });
 });

@@ -137,7 +137,6 @@ export function Chart({
     query: originalQuery,
     filters: originalFilters,
     timeRange: originalTimeRange,
-    request,
   });
 
   const refetch$ = useRefetch({
