@@ -295,7 +295,6 @@ const hitsRT = rt.type({
 const bucketFieldsRT = rt.type({
   key: rt.record(rt.string, rt.string),
   doc_count: rt.number,
-  additionalContext: AdditionalContext
 });
 
 const afterKeyRT = rt.partial({

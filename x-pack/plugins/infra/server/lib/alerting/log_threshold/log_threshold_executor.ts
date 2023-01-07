@@ -448,17 +448,17 @@ const getReducedGroupByResults = (
       reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.doc_count,
-        context: additionalContextHits.length > 0 ? additionalContextHits[0]._source : undefined
+        context: additionalContextHits && additionalContextHits.length > 0 ? additionalContextHits[0]._source : undefined
       });
     }
   } else {
     for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
-      const additionalContextHits = groupBucket.additionalContext?.hits?.hits;
+      const additionalContextHits = groupBucket.filtered_results.additionalContext?.hits?.hits;
       reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,
-        context: additionalContextHits.length > 0 ? additionalContextHits[0]._source : undefined
+        context: additionalContextHits && additionalContextHits.length > 0 ? additionalContextHits[0]._source : undefined
       });
     }
   }
