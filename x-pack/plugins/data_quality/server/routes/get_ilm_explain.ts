@@ -26,10 +26,10 @@ export const getILMExplainRoute = (router: IRouter) => {
         const { client } = (await context.core).elasticsearch;
         const decodedIndexName = decodeURIComponent(request.params.pattern);
 
-        const stats = await fetchILMExplain(client, decodedIndexName);
+        const ilmExplain = await fetchILMExplain(client, decodedIndexName);
 
         return response.ok({
-          body: stats.indices,
+          body: ilmExplain.indices,
         });
       } catch (err) {
         const error = transformError(err);
