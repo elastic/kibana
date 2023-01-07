@@ -216,6 +216,7 @@ describe('Log threshold executor', () => {
           ignore_unavailable: true,
           body: {
             track_total_hits: true,
+            aggregations: {},
             query: {
               bool: {
                 filter: [
@@ -286,6 +287,23 @@ describe('Log threshold executor', () => {
               },
               aggregations: {
                 groups: {
+                  aggs: {
+                    additionalContext: {
+                      top_hits: {
+                        _source: {
+                          excludes: [
+                            "host.cpu.*",
+                            "host.disk.*",
+                            "host.network.*",
+                          ],
+                          includes: [
+                            "host",
+                          ]
+                        },
+                        size: 1,
+                      }
+                    }
+                  },
                   composite: {
                     size: 2000,
                     sources: [
@@ -368,6 +386,21 @@ describe('Log threshold executor', () => {
                     ],
                   },
                   aggregations: {
+                    additionalContext: {
+                      top_hits: {
+                        _source: {
+                          excludes: [
+                            "host.cpu.*",
+                            "host.disk.*",
+                            "host.network.*",
+                          ],
+                          includes: [
+                            "host",
+                          ]
+                        },
+                        size: 1,
+                      }
+                    },
                     filtered_results: {
                       filter: {
                         bool: {
