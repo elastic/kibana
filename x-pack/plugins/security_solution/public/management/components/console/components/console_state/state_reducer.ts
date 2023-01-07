@@ -104,6 +104,7 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
     case 'updateInputTextEnteredState':
     case 'updateInputPlaceholderState':
     case 'setInputState':
+    case 'updateInputCommandArgState':
       newState = handleInputAreaState(state, action);
       break;
 

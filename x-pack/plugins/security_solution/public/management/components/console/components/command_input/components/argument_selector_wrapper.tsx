@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-// import { useWithCommandArgumentState } from '../../../hooks/state_selectors/use_with_command_argument_state';
-import type { CommandArgDefinition } from '../../../types';
+import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
+import { useWithCommandArgumentState } from '../../../hooks/state_selectors/use_with_command_argument_state';
+import type { CommandArgDefinition, CommandArgumentValueSelectorProps } from '../../../types';
 
 // Type to ensure that `SelectorComponent` is defined
 type ArgDefinitionWithRequiredSelector = Omit<CommandArgDefinition, 'SelectorComponent'> &
@@ -24,32 +25,23 @@ export interface ArgumentSelectorWrapperProps {
  */
 export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
   ({ argName, argDefinition: { SelectorComponent } }) => {
-    // const dispatch = useConsoleStateDispatch();
+    const dispatch = useConsoleStateDispatch();
+    const { valueText, value } = useWithCommandArgumentState(argName);
 
-    // FIXME:PT retrieve argument selector state
-    // const { valueText, value } = useWithCommandArgumentState(argName);
-
-    const valueText = 'something value Text';
-    const value = 'something value';
-
-    // FIXME:PT get `Command` (the interface that is normally passed to the execute command) from store
-
-    const handleSelectorComponentOnChange = () => {};
-
-    // const handleSelectorComponentOnChange = useCallback<
-    //   CommandArgumentValueSelectorProps['onChange']
-    // >(
-    //   (updates) => {
-    //     dispatch({
-    //       type: 'updateInputCommandArgState',
-    //       payload: {
-    //         name: argName,
-    //         state: updates,
-    //       },
-    //     });
-    //   },
-    //   [argName, dispatch]
-    // );
+    const handleSelectorComponentOnChange = useCallback<
+      CommandArgumentValueSelectorProps['onChange']
+    >(
+      (updates) => {
+        dispatch({
+          type: 'updateInputCommandArgState',
+          payload: {
+            name: argName,
+            state: updates,
+          },
+        });
+      },
+      [argName, dispatch]
+    );
 
     // FIXME:PT wrapper component needs to have bounds on width and overflow so that it does not disrupt the Input UI
     return (

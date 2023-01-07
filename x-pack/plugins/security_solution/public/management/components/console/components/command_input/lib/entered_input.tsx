@@ -16,8 +16,8 @@ import type { EnteredCommand } from '../../console_state/types';
  * Class that manages the command entered and how that is displayed to the left and right of the cursor
  */
 export class EnteredInput {
-  private leftOfCursorContent: string[];
-  private rightOfCursorContent: string[];
+  private leftOfCursorContent: ReactNode[];
+  private rightOfCursorContent: ReactNode[];
 
   constructor(
     private leftOfCursorText: string,

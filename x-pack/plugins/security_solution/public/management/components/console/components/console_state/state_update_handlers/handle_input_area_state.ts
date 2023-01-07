@@ -29,7 +29,8 @@ type InputAreaStateAction = ConsoleDataAction & {
     | 'clearInputHistoryState'
     | 'updateInputTextEnteredState'
     | 'updateInputPlaceholderState'
-    | 'setInputState';
+    | 'setInputState'
+    | 'updateInputCommandArgState';
 };
 
 export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
@@ -146,6 +147,28 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           input: {
             ...state.input,
             visibleState: payload.value,
+          },
+        };
+      }
+      break;
+
+    case 'updateInputCommandArgState':
+      if (state.input.enteredCommand) {
+        const { name: argName, state: newArgState } = payload;
+
+        const updatedEnteredCommand = {
+          ...state.input.enteredCommand,
+          argState: {
+            ...state.input.enteredCommand.argState,
+            [argName]: [newArgState],
+          },
+        };
+
+        return {
+          ...state,
+          input: {
+            ...state.input,
+            enteredCommand: updatedEnteredCommand,
           },
         };
       }

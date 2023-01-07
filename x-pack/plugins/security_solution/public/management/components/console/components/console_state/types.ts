@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { Dispatch, Reducer } from 'react';
 import type { Immutable } from '../../../../../../common/endpoint/types';
 import type { ParsedCommandInterface } from '../../service/types';
@@ -86,6 +88,12 @@ export interface ConsoleDataState {
   };
 }
 
+/** State that is provided/received to Argument Value Selectors */
+interface ArgSelectorState {
+  value: any;
+  valueText: string | undefined;
+}
+
 export interface EnteredCommand {
   commandDefinition: CommandDefinition;
 
@@ -95,11 +103,7 @@ export interface EnteredCommand {
   argState: {
     // Each arg has an array (just like the parsed input) and keeps the
     // state that is provided to that instance of the argument on the input.
-    [argName: string]: Array<{
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      value: any;
-      valueText: string | undefined;
-    }>;
+    [argName: string]: ArgSelectorState[];
   };
 }
 
@@ -175,6 +179,14 @@ export type ConsoleDataAction =
       type: 'updateInputHistoryState';
       payload: {
         command: string;
+      };
+    }
+  | {
+      type: 'updateInputCommandArgState';
+      payload: {
+        /** Name of argument */
+        name: string;
+        state: ArgSelectorState;
       };
     }
   | {

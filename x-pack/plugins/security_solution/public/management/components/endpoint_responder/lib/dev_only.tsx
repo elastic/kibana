@@ -25,7 +25,9 @@ export const getUploadCommand = ({
   return {
     name: 'upload',
     about: 'Upload and execute a file on host machine',
-    RenderComponent: () => {
+    RenderComponent: (props) => {
+      window.console.log(`upload command rendering...`);
+      window.console.log(props);
       return <div>{'rendered!'}</div>;
     },
     meta: {
