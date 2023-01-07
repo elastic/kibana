@@ -7,33 +7,37 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import {
+  EnterpriseSearchEngine,
+  EnterpriseSearchEnginesResponse,
+} from '../../../../../common/types/engines';
+
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 
 import { flashAPIErrors } from '../../../shared/flash_messages';
 
 import {
   EnginesListAPIArguments,
-  EnginesListAPIResponse,
   FetchEnginesAPILogic,
 } from '../../api/engines/fetch_engines_api_logic';
 
-import { DEFAULT_META, EngineListDetails, Meta, updateMetaPageIndex } from './types';
+import { DEFAULT_META, Meta, updateMetaPageIndex } from './types';
 
 type EnginesListActions = Pick<
-  Actions<EnginesListAPIArguments, EnginesListAPIResponse>,
+  Actions<EnginesListAPIArguments, EnterpriseSearchEnginesResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
-  fetchEngines({ meta, searchQuery }: { meta: Meta; searchQuery?: string }): {
+  fetchEngines({ meta }: { meta: Meta }): {
     meta: Meta;
-    searchQuery?: string;
+    // searchQuery?: string;
   };
   onPaginate(pageNumber: number): { pageNumber: number };
 };
 interface EngineListValues {
   data: typeof FetchEnginesAPILogic.values.data;
   meta: Meta;
-  results: EngineListDetails[]; // stores engine list value from data
-  parameters: { meta: Meta; searchQuery?: string }; // Added this variable to store to the search Query value as well
+  results: EnterpriseSearchEngine[]; // stores engine list value from data
+  parameters: { meta: Meta }; // Added this variable to store to the search Query value as well
   status: typeof FetchEnginesAPILogic.values.status;
 }
 
@@ -44,9 +48,9 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
   },
   path: ['enterprise_search', 'content', 'engine_list_logic'],
   actions: {
-    fetchEngines: ({ meta, searchQuery }) => ({
+    fetchEngines: ({ meta }) => ({
       meta,
-      searchQuery,
+      // searchQuery,
     }),
 
     onPaginate: (pageNumber) => ({ pageNumber }),
@@ -55,9 +59,8 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     parameters: [
       { meta: DEFAULT_META },
       {
-        apiSuccess: (_, { meta, searchQuery }) => ({
+        apiSuccess: (_, { meta }) => ({
           meta,
-          searchQuery,
         }),
         onPaginate: (state, { pageNumber }) => ({
           ...state,
@@ -72,9 +75,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
   }),
   listeners: ({ actions }) => ({
-    apiError: (e) => {
-      flashAPIErrors(e);
-    },
+    apiError: (e) => flashAPIErrors(e),
     fetchEngines: async (input) => {
       actions.makeRequest(input);
     },

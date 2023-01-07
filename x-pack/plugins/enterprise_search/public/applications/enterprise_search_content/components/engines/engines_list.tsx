@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -25,14 +25,14 @@ import { EnginesListLogic } from './engines_list_logic';
 export const EnginesList: React.FC = () => {
   const { fetchEngines, onPaginate } = useActions(EnginesListLogic);
   const { meta, results } = useValues(EnginesListLogic);
-  const [searchQuery, setSearchValue] = useState('');
+  // const [searchQuery, setSearchValue] = useState('');
 
   useEffect(() => {
     fetchEngines({
       meta,
-      searchQuery,
+      // searchQuery,
     });
-  }, [meta, searchQuery]);
+  }, [meta.from, meta.size]);
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -76,7 +76,7 @@ export const EnginesList: React.FC = () => {
       <EuiSpacer />
       <div>
         <EuiFieldSearch
-          value={searchQuery}
+          value={''}
           placeholder={i18n.translate('xpack.enterpriseSearch.content.engines.searchPlaceholder', {
             defaultMessage: 'Search engines',
           })}
@@ -84,8 +84,8 @@ export const EnginesList: React.FC = () => {
             defaultMessage: 'Search engines',
           })}
           fullWidth
-          onChange={(event) => {
-            setSearchValue(event.currentTarget.value);
+          onChange={() => {
+            // setSearchValue(event.currentTarget.value);
           }}
         />
       </div>
