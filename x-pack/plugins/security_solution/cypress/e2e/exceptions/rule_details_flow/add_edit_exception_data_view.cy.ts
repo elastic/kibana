@@ -12,8 +12,8 @@ import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   addExceptionFromFirstAlert,
-  goToClosedAlerts,
-  goToOpenedAlerts,
+  goToClosedAlertsOnRuleDetailsPage,
+  goToOpenedAlertsOnRuleDetailsPage,
 } from '../../../tasks/alerts';
 import {
   addExceptionConditions,
@@ -108,7 +108,7 @@ describe('Add exception using data views from rule details', () => {
     cy.get(EMPTY_ALERT_TABLE).should('exist');
 
     // Closed alert should appear in table
-    goToClosedAlerts();
+    goToClosedAlertsOnRuleDetailsPage();
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
 
@@ -125,7 +125,7 @@ describe('Add exception using data views from rule details', () => {
 
     // now that there are no more exceptions, the docs should match and populate alerts
     goToAlertsTab();
-    goToOpenedAlerts();
+    goToOpenedAlertsOnRuleDetailsPage();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
@@ -158,7 +158,7 @@ describe('Add exception using data views from rule details', () => {
     cy.get(EMPTY_ALERT_TABLE).should('exist');
 
     // Closed alert should appear in table
-    goToClosedAlerts();
+    goToClosedAlertsOnRuleDetailsPage();
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
 
@@ -175,7 +175,7 @@ describe('Add exception using data views from rule details', () => {
 
     // now that there are no more exceptions, the docs should match and populate alerts
     goToAlertsTab();
-    goToOpenedAlerts();
+    goToOpenedAlertsOnRuleDetailsPage();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
