@@ -41,11 +41,16 @@ export const createThreatSignal = async ({
   exceptionFilter,
   unprocessedExceptions,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  // console.log('threatMappingzzz', JSON.stringify(threatMapping, null, 2));
+  // console.log('currentThreatList', JSON.stringify(currentThreatList, null, 2));
+
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentThreatList,
     entryKey: 'value',
   });
+
+  // console.log('threatFilterzzz', JSON.stringify(threatFilter, null, 2));
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
@@ -70,6 +75,8 @@ export const createThreatSignal = async ({
       `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
     );
 
+    // console.log('threatFilterxx', JSON.stringify(threatFilter, null, 2));
+
     const result = await searchAfterAndBulkCreate({
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
       bulkCreate,
@@ -90,6 +97,14 @@ export const createThreatSignal = async ({
       primaryTimestamp,
       secondaryTimestamp,
     });
+
+    // console.log(
+    //   `${
+    //     threatFilter.query?.bool.should.length
+    //   } items have completed match checks and the total times to search were ${
+    //     result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
+    //   }ms`
+    // );
 
     ruleExecutionLogger.debug(
       `${

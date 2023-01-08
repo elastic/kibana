@@ -28,7 +28,7 @@ export const buildThreatMappingFilter = ({
   chunkSize,
   entryKey = 'value',
 }: BuildThreatMappingFilterOptions): Filter => {
-  console.log('currentThreatList', JSON.stringify(threatList, null, 2));
+  // console.log('currentThreatList', JSON.stringify(threatList, null, 2));
   const computedChunkSize = chunkSize ?? MAX_CHUNK_SIZE;
   if (computedChunkSize > 1024) {
     throw new TypeError('chunk sizes cannot exceed 1024 in size');
@@ -60,8 +60,18 @@ export const filterThreatMapping = ({
 }: FilterThreatMappingOptions): ThreatMapping =>
   threatMapping
     .map((threatMap) => {
+      // console.log('threatMap', JSON.stringify(threatMap, null, 2));
       const atLeastOneItemMissingInThreatList = threatMap.entries.some((entry) => {
-        const itemValue = get(entry[entryKey], threatListItem.fields);
+        // console.log('entry', JSON.stringify(entry, null, 2));
+        // console.log('threatListItem', JSON.stringify(threatListItem, null, 2));
+        let itemValue = get(entry[entryKey], threatListItem.fields);
+        if (entry[entryKey].includes('vuln.affected')) {
+          itemValue = get(
+            `[0]['${entry[entryKey].split('vuln.affected.')[1]}']`,
+            threatListItem.fields?.['vuln.affected']
+          );
+        }
+        // console.log('itemValue', entry[entryKey], JSON.stringify(itemValue, null, 2));
         return itemValue == null || itemValue.length !== 1;
       });
       if (atLeastOneItemMissingInThreatList) {
@@ -77,9 +87,31 @@ export const createInnerAndClauses = ({
   threatListItem,
   entryKey,
 }: CreateInnerAndClausesOptions): BooleanFilter[] => {
+  // console.log('threatMappingEntries', JSON.stringify(threatMappingEntries, null, 2));
   return threatMappingEntries.reduce<BooleanFilter[]>((accum, threatMappingEntry) => {
-    const value = get(threatMappingEntry[entryKey], threatListItem.fields);
-    console.log('value', value, entryKey);
+    let value = get(threatMappingEntry[entryKey], threatListItem.fields);
+
+    if (threatMappingEntry[entryKey].includes('vuln.affected')) {
+      value = get(
+        threatMappingEntry[entryKey].split('vuln.affected.')[1],
+        threatListItem.fields['vuln.affected'][0]
+      );
+    }
+
+    // console.log(
+    //   'value',
+    //   value,
+    //   entryKey,
+    //   threatMappingEntry[entryKey],
+    //   threatMappingEntry[entryKey].split('vuln.affected.')[1],
+    //   threatListItem.fields['vuln.affected'][0],
+    //   threatListItem._source.vuln.affected[0],
+    //   get(
+    //     threatMappingEntry[entryKey].split('vuln.affected.')[1],
+    //     threatListItem._source.vuln.affected[0]
+    //   )
+    // );
+
     if (value != null && value.length === 1) {
       if (isString(value[0]) || entryKey === 'field') {
         // These values could be potentially 10k+ large so mutating the array intentionally
@@ -103,16 +135,14 @@ export const createInnerAndClauses = ({
             minimum_should_match: 1,
           },
         });
-      } else {
+      } else if (threatMappingEntry[entryKey].includes('vuln.affected.ranges.range')) {
         accum.push({
           bool: {
             should: [
               {
                 range: {
-                  [threatMappingEntry.field]: get(
-                    threatMappingEntry[entryKey],
-                    threatListItem._source
-                  ),
+                  [threatMappingEntry.field]:
+                    threatListItem._source.vuln.affected[0].ranges[0].range,
                 },
               },
             ],
@@ -153,12 +183,14 @@ export const buildEntriesMappingFilter = ({
   chunkSize,
   entryKey,
 }: BuildEntriesMappingFilterOptions): BooleanFilter => {
+  // console.log('buuildddd', JSON.stringify(threatMapping, null, 2));
   const combinedShould = threatList.reduce<BooleanFilter[]>((accum, threatListSearchItem) => {
     const filteredEntries = filterThreatMapping({
       threatMapping,
       threatListItem: threatListSearchItem,
       entryKey,
     });
+    // console.log('filteredEntries', JSON.stringify(filteredEntries, null, 2));
     const queryWithAndOrClause = createAndOrClauses({
       threatMapping: filteredEntries,
       threatListItem: threatListSearchItem,

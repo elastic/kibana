@@ -57,6 +57,10 @@ export const createEventSignal = async ({
     entryKey: 'field',
   });
 
+  // console.log('currentEventList', JSON.stringify(currentEventList, null, 2));
+
+  // console.log('threatFilter', JSON.stringify(threatFilter, null, 2));
+
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
     // a hit so opt to return the existing result.
@@ -84,6 +88,8 @@ export const createEventSignal = async ({
     });
 
     const signalMatches = getSignalMatchesFromThreatList(threatListHits);
+
+    // console.log('signalMatches', signalMatches);
 
     const ids = signalMatches.map((item) => item.signalId);
 

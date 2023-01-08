@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
+import { get, lowerCase } from 'lodash/fp';
 
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
@@ -42,6 +42,17 @@ export const buildSeverityFromMapping = ({
   severity,
   severityMapping,
 }: BuildSeverityFromMappingProps): BuildSeverityFromMappingReturn => {
+  console.log(
+    'original severity',
+    get('threat.enrichments.[0].indicator.database_specific.severity', eventSource)
+  );
+  if (get('threat.enrichments.[0].indicator.database_specific.severity', eventSource)) {
+    return overriddenSeverity(
+      lowerCase(get('threat.enrichments.[0].indicator.database_specific.severity', eventSource)),
+      'threat.enrichments.indicator.database_specific.severity'
+    );
+  }
+
   if (!severityMapping || !severityMapping.length) {
     return defaultSeverity(severity);
   }

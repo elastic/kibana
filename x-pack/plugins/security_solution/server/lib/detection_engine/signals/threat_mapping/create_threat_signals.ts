@@ -150,14 +150,18 @@ export const createThreatSignals = async ({
     let list = await getDocumentList({ searchAfter: undefined });
     let documentCount = totalDocumentCount;
 
+    // console.log('list', list);
+
     while (list.hits.hits.length !== 0) {
       verifyExecutionCanProceed();
       const chunks = chunk(itemsPerSearch, list.hits.hits);
       ruleExecutionLogger.debug(`${chunks.length} concurrent indicator searches are starting.`);
       const concurrentSearchesPerformed =
         chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(createSignal);
+      // console.log('test');
       const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
       results = combineConcurrentResults(results, searchesPerformed);
+      // console.log('dupa', results);
       documentCount -= list.hits.hits.length;
       ruleExecutionLogger.debug(
         `Concurrent indicator match searches completed with ${results.createdSignalsCount} signals found`,
@@ -179,115 +183,117 @@ export const createThreatSignals = async ({
     }
   };
 
-  if (eventCount < threatListCount) {
-    await createSignals({
-      totalDocumentCount: eventCount,
-      getDocumentList: async ({ searchAfter }) =>
-        getEventList({
-          services,
-          ruleExecutionLogger,
-          filters: allEventFilters,
-          query,
-          language,
-          index: inputIndex,
-          searchAfter,
-          perPage,
-          tuple,
-          runtimeMappings,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
-        }),
+  console.log('eventCount', eventCount, threatListCount);
 
-      createSignal: (slicedChunk) =>
-        createEventSignal({
-          alertId,
-          bulkCreate,
-          completeRule,
-          currentEventList: slicedChunk,
-          currentResult: results,
-          eventsTelemetry,
-          filters: allEventFilters,
-          inputIndex,
-          language,
-          listClient,
-          outputIndex,
-          query,
-          reassignThreatPitId,
-          ruleExecutionLogger,
-          savedId,
-          searchAfterSize,
-          services,
-          threatEnrichment,
-          threatFilters: allThreatFilters,
-          threatIndex,
-          threatIndicatorPath,
-          threatLanguage,
-          threatMapping,
-          threatPitId,
-          threatQuery,
-          tuple,
-          type,
-          wrapHits,
-          runtimeMappings,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
-          unprocessedExceptions,
-        }),
-    });
-  } else {
-    await createSignals({
-      totalDocumentCount: threatListCount,
-      getDocumentList: async ({ searchAfter }) =>
-        getThreatList({
-          esClient: services.scopedClusterClient.asCurrentUser,
-          threatFilters: allThreatFilters,
-          query: threatQuery,
-          language: threatLanguage,
-          index: threatIndex,
-          searchAfter,
-          ruleExecutionLogger,
-          perPage,
-          threatListConfig,
-          pitId: threatPitId,
-          reassignPitId: reassignThreatPitId,
-          runtimeMappings,
-          listClient,
-          exceptionFilter,
-        }),
+  // if (eventCount < threatListCount) {
+  //   await createSignals({
+  //     totalDocumentCount: eventCount,
+  //     getDocumentList: async ({ searchAfter }) =>
+  //       getEventList({
+  //         services,
+  //         ruleExecutionLogger,
+  //         filters: allEventFilters,
+  //         query,
+  //         language,
+  //         index: inputIndex,
+  //         searchAfter,
+  //         perPage,
+  //         tuple,
+  //         runtimeMappings,
+  //         primaryTimestamp,
+  //         secondaryTimestamp,
+  //         exceptionFilter,
+  //       }),
 
-      createSignal: (slicedChunk) =>
-        createThreatSignal({
-          alertId,
-          bulkCreate,
-          completeRule,
-          currentResult: results,
-          currentThreatList: slicedChunk,
-          eventsTelemetry,
-          filters: allEventFilters,
-          inputIndex,
-          language,
-          listClient,
-          outputIndex,
-          query,
-          ruleExecutionLogger,
-          savedId,
-          searchAfterSize,
-          services,
-          threatEnrichment,
-          threatMapping,
-          tuple,
-          type,
-          wrapHits,
-          runtimeMappings,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
-          unprocessedExceptions,
-        }),
-    });
-  }
+  //     createSignal: (slicedChunk) =>
+  //       createEventSignal({
+  //         alertId,
+  //         bulkCreate,
+  //         completeRule,
+  //         currentEventList: slicedChunk,
+  //         currentResult: results,
+  //         eventsTelemetry,
+  //         filters: allEventFilters,
+  //         inputIndex,
+  //         language,
+  //         listClient,
+  //         outputIndex,
+  //         query,
+  //         reassignThreatPitId,
+  //         ruleExecutionLogger,
+  //         savedId,
+  //         searchAfterSize,
+  //         services,
+  //         threatEnrichment,
+  //         threatFilters: allThreatFilters,
+  //         threatIndex,
+  //         threatIndicatorPath,
+  //         threatLanguage,
+  //         threatMapping,
+  //         threatPitId,
+  //         threatQuery,
+  //         tuple,
+  //         type,
+  //         wrapHits,
+  //         runtimeMappings,
+  //         primaryTimestamp,
+  //         secondaryTimestamp,
+  //         exceptionFilter,
+  //         unprocessedExceptions,
+  //       }),
+  //   });
+  // } else {
+  await createSignals({
+    totalDocumentCount: threatListCount,
+    getDocumentList: async ({ searchAfter }) =>
+      getThreatList({
+        esClient: services.scopedClusterClient.asCurrentUser,
+        threatFilters: allThreatFilters,
+        query: threatQuery,
+        language: threatLanguage,
+        index: threatIndex,
+        searchAfter,
+        ruleExecutionLogger,
+        perPage,
+        threatListConfig,
+        pitId: threatPitId,
+        reassignPitId: reassignThreatPitId,
+        runtimeMappings,
+        listClient,
+        exceptionFilter,
+      }),
+
+    createSignal: (slicedChunk) =>
+      createThreatSignal({
+        alertId,
+        bulkCreate,
+        completeRule,
+        currentResult: results,
+        currentThreatList: slicedChunk,
+        eventsTelemetry,
+        filters: allEventFilters,
+        inputIndex,
+        language,
+        listClient,
+        outputIndex,
+        query,
+        ruleExecutionLogger,
+        savedId,
+        searchAfterSize,
+        services,
+        threatEnrichment,
+        threatMapping,
+        tuple,
+        type,
+        wrapHits,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
+        exceptionFilter,
+        unprocessedExceptions,
+      }),
+  });
+  // }
 
   try {
     await services.scopedClusterClient.asCurrentUser.closePointInTime({ id: threatPitId });

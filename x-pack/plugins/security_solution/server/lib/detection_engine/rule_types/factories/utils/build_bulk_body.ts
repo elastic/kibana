@@ -58,6 +58,8 @@ export const buildBulkBody = (
   const eventFields = buildEventTypeAlert(mergedDoc);
   const filteredSource = filterSource(mergedDoc);
 
+  console.log('mergedDoc', applyOverrides, JSON.stringify(mergedDoc, null, 2));
+
   const overrides = applyOverrides
     ? {
         nameOverride: buildRuleNameFromMapping({

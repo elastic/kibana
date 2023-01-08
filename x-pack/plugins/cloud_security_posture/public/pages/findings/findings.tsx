@@ -14,14 +14,15 @@ import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
+import { LatestFindingsVulnerabilitiesContainer } from './latest_findings_vulnerabilities/latest_findings_vulnerabilities_container';
 
 export const Findings = () => {
   const location = useLocation();
   const dataViewQuery = useLatestFindingsDataView();
   const getSetupStatus = useCspSetupStatusApi();
 
-  const hasFindings = getSetupStatus.data?.status === 'indexed';
-  if (!hasFindings) return <NoFindingsStates />;
+  // const hasFindings = getSetupStatus.data?.status === 'indexed';
+  // if (!hasFindings) return <NoFindingsStates />;
 
   return (
     <CloudPosturePage query={dataViewQuery}>
@@ -45,6 +46,10 @@ export const Findings = () => {
               <LatestFindingsContainer dataView={dataViewQuery.data!} />
             </TrackApplicationView>
           )}
+        />
+        <Route
+          path={findingsNavigation.findings_vulnerabilities.path}
+          render={() => <LatestFindingsVulnerabilitiesContainer dataView={dataViewQuery.data!} />}
         />
         <Route
           path={findingsNavigation.findings_by_resource.path}

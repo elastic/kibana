@@ -32,7 +32,20 @@ export const getMappingFilters = (threatMapping: ThreatMapping) => {
       };
       threatMap.entries.forEach((entry) => {
         eventMustClause.bool.must.push({ exists: { field: entry.field } });
-        indicatorMustClause.bool.must.push({ exists: { field: entry.value } });
+        if (entry.value.includes('vuln.affected')) {
+          indicatorMustClause.bool.must.push({
+            nested: {
+              path: 'vuln.affected',
+              query: {
+                bool: {
+                  must: [{ exists: { field: entry.value } }],
+                },
+              },
+            },
+          });
+        } else {
+          indicatorMustClause.bool.must.push({ exists: { field: entry.value } });
+        }
       });
       eventMappingFilter.query?.bool.should.push(eventMustClause);
       indicatorMappingFilter.query?.bool.should.push(indicatorMustClause);
