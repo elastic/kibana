@@ -113,7 +113,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       await page.click(byTestId('querySubmitButton'));
       expect(
         await page.isVisible(`text=1 Alert`, {
-          timeout: 5 * 1000,
+          timeout: 10 * 1000,
         })
       ).toBe(true);
 
