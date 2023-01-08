@@ -59,6 +59,10 @@ describe('Detections : Page Filters', () => {
     cleanKibana();
     login();
     createCustomRuleEnabled(getNewRule(), 'custom_rule_filters');
+  });
+
+  beforeEach(() => {
+    login();
     visit(ALERTS_URL);
     waitForAlerts();
     waitForPageFilters();
