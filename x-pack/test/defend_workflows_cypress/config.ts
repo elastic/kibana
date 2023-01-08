@@ -36,8 +36,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     kbnTestServer: {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
-        ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        // remove plugin mock services from the default config
+        ...xpackFunctionalTestsConfig
+          .get('kbnTestServer.serverArgs')
+          .filter((arg: string) => !arg.startsWith('--plugin-path=')),
         '--csp.strict=false',
+        '--csp.warnLegacyBrowsers=false',
+        '--csp.script_src=["self", "unsafe-eval", "unsafe-inline"]',
+        '--csp.disableUnsafeEval=true',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         // always install Endpoint package by default when Fleet sets up

@@ -11,6 +11,9 @@ import { runEndpointLoaderScript } from '../tasks/run_endpoint_loader';
 describe('Endpoints page', () => {
   before(() => {
     runEndpointLoaderScript();
+    login();
+    cy.visit('/app/security/administration/manage');
+    cy.window().its('__coverage__').should('be.a', 'object');
   });
 
   beforeEach(() => {
@@ -20,5 +23,27 @@ describe('Endpoints page', () => {
   it('Loads the endpoints page', () => {
     cy.visit('/app/security/administration/endpoints');
     cy.contains('Hosts running Elastic Defend').should('exist');
+    cy.getBySel('hostnameCellLink').first().click();
+    cy.visit('/app/security/administration/policy');
+    cy.getBySel('policyNameCellLink').first().parent().click();
+    cy.wait(2000);
+    cy.visit('/app/security/administration/trusted_apps');
+    cy.getBySel('trustedAppsListPage-emptyState-addButton').click();
+    cy.wait(2000);
+
+    cy.visit('/app/security/administration/event_filters');
+    cy.getBySel('EventFiltersListPage-emptyState-addButton').click();
+    cy.wait(2000);
+
+    cy.visit('/app/security/administration/host_isolation_exceptions');
+    cy.getBySel('hostIsolationExceptionsListPage-emptyState-addButton').click();
+    cy.wait(2000);
+
+    cy.visit('/app/security/administration/blocklist');
+    cy.getBySel('blocklistPage-emptyState-addButton').click();
+    cy.wait(2000);
+
+    cy.visit('/app/security/administration/response_actions_history');
+    cy.wait(2000);
   });
 });
