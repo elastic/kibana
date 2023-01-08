@@ -54,43 +54,33 @@ export const showErrorToast = (
 };
 
 export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => {
-  console.log('getFindingsQuery', query, sort);
-  if (sort.field === 'rule.section') {
-    console.log('in filter', query, sort);
-    return {
-      index: CSP_LATEST_FINDINGS_DATA_VIEW,
-      body: {
-        query,
-        sort: [
-          {
-            _script: {
-              type: 'string',
-              order: sort.direction,
-              script: {
-                source: "doc['rule.section'].value.toLowerCase()",
-                lang: 'painless',
-              },
-            },
-          },
-        ],
-        // sort: [{ [sort.field]: sort.direction }],
-        size: MAX_FINDINGS_TO_LOAD,
-        aggs: getFindingsCountAggQuery(),
-      },
-      ignore_unavailable: false,
-    };
-  }
   return {
     index: CSP_LATEST_FINDINGS_DATA_VIEW,
-    body: {
-      query,
-      sort: [{ [sort.field]: sort.direction }],
-      size: MAX_FINDINGS_TO_LOAD,
-      aggs: getFindingsCountAggQuery(),
-    },
+    query,
+    sort: getSortField(sort),
+    size: MAX_FINDINGS_TO_LOAD,
+    aggs: getFindingsCountAggQuery(),
     ignore_unavailable: false,
   };
 };
+
+const getSortField = (sort: Sort<CspFinding>) => {
+  if (requiredSortingByPainlessScript.includes(sort.field)) {
+    return {
+      _script: {
+        type: 'string',
+        order: sort.direction,
+        script: {
+          source: `doc["${sort.field}"].value.toLowerCase()`,
+          lang: 'painless',
+        },
+      },
+    };
+  }
+  return { [sort.field]: sort.direction };
+};
+
+const requiredSortingByPainlessScript = ['rule.section', 'resource.name', 'resource.type'];
 
 export const useLatestFindings = (options: UseFindingsOptions) => {
   const {
