@@ -11,9 +11,12 @@ import { runEndpointLoaderScript } from '../tasks/run_endpoint_loader';
 describe('Endpoints page', () => {
   before(() => {
     runEndpointLoaderScript();
-    login();
-    cy.visit('/app/security/administration/manage');
-    cy.window().its('__coverage__').should('be.a', 'object');
+    // Necessary to save coverage data
+    if (Cypress.env().coverage) {
+      login();
+      cy.visit('/app/security/administration/manage');
+      cy.window().its('__coverage__').should('be.a', 'object');
+    }
   });
 
   beforeEach(() => {
