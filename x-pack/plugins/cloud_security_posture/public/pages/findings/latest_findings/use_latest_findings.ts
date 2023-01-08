@@ -53,16 +53,44 @@ export const showErrorToast = (
   else toasts.addDanger(extractErrorMessage(error, SEARCH_FAILED_TEXT));
 };
 
-export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => ({
-  index: CSP_LATEST_FINDINGS_DATA_VIEW,
-  body: {
-    query,
-    sort: [{ [sort.field]: sort.direction }],
-    size: MAX_FINDINGS_TO_LOAD,
-    aggs: getFindingsCountAggQuery(),
-  },
-  ignore_unavailable: false,
-});
+export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => {
+  console.log('getFindingsQuery', query, sort);
+  if (sort.field === 'rule.section') {
+    console.log('in filter', query, sort);
+    return {
+      index: CSP_LATEST_FINDINGS_DATA_VIEW,
+      body: {
+        query,
+        sort: [
+          {
+            _script: {
+              type: 'string',
+              order: sort.direction,
+              script: {
+                source: "doc['rule.section'].value.toLowerCase()",
+                lang: 'painless',
+              },
+            },
+          },
+        ],
+        // sort: [{ [sort.field]: sort.direction }],
+        size: MAX_FINDINGS_TO_LOAD,
+        aggs: getFindingsCountAggQuery(),
+      },
+      ignore_unavailable: false,
+    };
+  }
+  return {
+    index: CSP_LATEST_FINDINGS_DATA_VIEW,
+    body: {
+      query,
+      sort: [{ [sort.field]: sort.direction }],
+      size: MAX_FINDINGS_TO_LOAD,
+      aggs: getFindingsCountAggQuery(),
+    },
+    ignore_unavailable: false,
+  };
+};
 
 export const useLatestFindings = (options: UseFindingsOptions) => {
   const {
