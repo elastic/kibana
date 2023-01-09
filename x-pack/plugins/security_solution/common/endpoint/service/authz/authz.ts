@@ -213,6 +213,13 @@ export const calculateEndpointAuthz = (
     'writeFileOperations'
   );
 
+  const canExecuteOsqueryCommands = hasKibanaPrivilege(
+    fleetAuthz,
+    isEndpointRbacEnabled,
+    hasEndpointManagementAccess,
+    'executeOsqueryCommands'
+  );
+
   return {
     canWriteSecuritySolution,
     canReadSecuritySolution,
@@ -234,7 +241,10 @@ export const calculateEndpointAuthz = (
     canGetRunningProcesses: canWriteProcessOperations && isEnterpriseLicense,
     canAccessResponseConsole:
       isEnterpriseLicense &&
-      (canIsolateHost || canWriteProcessOperations || canWriteFileOperations),
+      (canIsolateHost ||
+        canWriteProcessOperations ||
+        canWriteFileOperations ||
+        canExecuteOsqueryCommands),
     canWriteFileOperations: canWriteFileOperations && isEnterpriseLicense,
     // artifacts
     canWriteTrustedApplications,
@@ -246,6 +256,7 @@ export const calculateEndpointAuthz = (
     canReadBlocklist,
     canWriteEventFilters,
     canReadEventFilters,
+    canExecuteOsqueryCommands,
   };
 };
 
@@ -279,5 +290,6 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadBlocklist: false,
     canWriteEventFilters: false,
     canReadEventFilters: false,
+    canExecuteOsqueryCommands: false,
   };
 };

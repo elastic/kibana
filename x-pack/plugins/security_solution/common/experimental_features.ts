@@ -82,6 +82,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionGetFileEnabled: false,
 
   /**
+   * Enables the `osquery` endpoint response action
+   */
+  responseActionOsqueryEnabled: true,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: false,

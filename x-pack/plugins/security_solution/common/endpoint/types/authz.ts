@@ -70,6 +70,8 @@ export interface EndpointAuthz {
   canWriteEventFilters: boolean;
   /** if user has read permissions for event filters */
   canReadEventFilters: boolean;
+  /** if user has permission to execute Osquery commands */
+  canExecuteOsqueryCommands: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;

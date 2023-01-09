@@ -14,6 +14,7 @@ export const createMockConfig = (): ConfigType => {
   const enableExperimental: Array<keyof ExperimentalFeatures> = [
     // Remove property below once `get-file` FF is enabled or removed
     'responseActionGetFileEnabled',
+    'responseActionOsqueryEnabled',
   ];
 
   return {

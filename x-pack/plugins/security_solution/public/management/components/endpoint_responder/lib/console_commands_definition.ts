@@ -51,6 +51,19 @@ const pidValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
+const osqueryValidator = (command: Command): true | string => {
+  const args = Object.keys(command.args.args);
+  const filteredArgs = args?.filter((arg) => arg !== 'comment');
+  if (filteredArgs.length !== 1) {
+    return i18n.translate('xpack.securitySolution.endpointConsoleCommands.osqueryArguments', {
+      defaultMessage:
+        'Osquery call requires exactly one argument from the following: query, savedQueryId, packId',
+    });
+  }
+
+  return true;
+};
+
 const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, EndpointCapabilities>([
   ['isolate', 'isolation'],
   ['release', 'isolation'],
@@ -74,6 +87,7 @@ const getRbacControl = ({
     ['suspend-process', privileges.canSuspendProcess],
     ['processes', privileges.canGetRunningProcesses],
     ['get-file', privileges.canWriteFileOperations],
+    ['osquery', privileges.canExecuteOsqueryCommands],
   ]);
   return commandToPrivilegeMap.get(commandName as ConsoleResponseActionCommands) ?? false;
 };
@@ -137,6 +151,7 @@ export const getEndpointConsoleCommands = ({
   endpointPrivileges: EndpointPrivileges;
 }): CommandDefinition[] => {
   const isGetFileEnabled = ExperimentalFeaturesService.get().responseActionGetFileEnabled;
+  const isOsqueryCommandsEnabled = ExperimentalFeaturesService.get().responseActionOsqueryEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     const responderCapability = commandToCapabilitiesMap.get(commandName);
@@ -369,51 +384,6 @@ export const getEndpointConsoleCommands = ({
       helpDisabled: doesEndpointSupportCommand('processes') === false,
       helpHidden: !getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }),
     },
-    {
-      name: 'osquery',
-      about: getCommandAboutInfo({
-        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.osquery.about', {
-          defaultMessage: 'Call Osquery',
-        }),
-        isSupported: true,
-      }),
-      RenderComponent: OsqueryActionResult,
-      meta: {
-        endpointId: endpointAgentId,
-        // capabilities: endpointCapabilities,
-        // privileges: endpointPrivileges,
-      },
-      exampleUsage: 'osquery --query "select * from processes"',
-      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      // validate: capabilitiesAndPrivilegesValidator,
-      args: {
-        query: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
-        savedQueryId: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
-        packId: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
-        comment: {
-          required: false,
-          allowMultiples: false,
-          about: COMMENT_ARG_ABOUT,
-        },
-      },
-      helpGroupLabel: HELP_GROUPS.responseActions.label,
-      helpGroupPosition: HELP_GROUPS.responseActions.position,
-      helpCommandPosition: 1,
-      // helpDisabled: doesEndpointSupportCommand('release') === false,
-      // helpHidden: !getRbacControl({ commandName: 'release', privileges: endpointPrivileges }),
-    },
   ];
 
   // `get-file` is currently behind feature flag
@@ -464,6 +434,58 @@ export const getEndpointConsoleCommands = ({
         commandName: 'get-file',
         privileges: endpointPrivileges,
       }),
+    });
+  }
+
+  // `osquery` is currently behind feature flag
+  if (isOsqueryCommandsEnabled) {
+    consoleCommands.push({
+      name: 'osquery',
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.osquery.about', {
+          defaultMessage: 'Call Osquery',
+        }),
+        isSupported: true,
+      }),
+      RenderComponent: OsqueryActionResult,
+      meta: {
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: 'osquery --query "select * from processes"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: osqueryValidator,
+      args: {
+        // TODO provide proper i18n about info
+        query: {
+          required: false,
+          allowMultiples: false,
+          about: 'A query to be called',
+          validate: emptyArgumentValidator,
+        },
+        savedQueryId: {
+          required: false,
+          allowMultiples: false,
+          about: 'Id of the previously created Saved Query to be called',
+          validate: emptyArgumentValidator,
+        },
+        packId: {
+          required: false,
+          allowMultiples: false,
+          about: 'Id of the previously created Pack to be called',
+          validate: emptyArgumentValidator,
+        },
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 7,
+      // helpHidden: !getRbacControl({ commandName: 'osquery', privileges: endpointPrivileges }),
     });
   }
 
