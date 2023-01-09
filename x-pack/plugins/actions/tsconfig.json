@@ -32,7 +32,6 @@
     "@kbn/logging",
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
-    "@kbn/alerting-plugin",
   ],
   "exclude": [
     "target/**/*",
