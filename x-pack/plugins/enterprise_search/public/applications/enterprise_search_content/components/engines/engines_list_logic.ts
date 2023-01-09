@@ -9,8 +9,6 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 
-import { flashAPIErrors } from '../../../shared/flash_messages';
-
 import {
   EnginesListAPIArguments,
   EnginesListAPIResponse,
@@ -32,8 +30,8 @@ type EnginesListActions = Pick<
 interface EngineListValues {
   data: typeof FetchEnginesAPILogic.values.data;
   meta: Meta;
-  results: EngineListDetails[]; // stores engine list value from data
   parameters: { meta: Meta; searchQuery?: string }; // Added this variable to store to the search Query value as well
+  results: EngineListDetails[]; // stores engine list value from data
   status: typeof FetchEnginesAPILogic.values.status;
 }
 
@@ -72,9 +70,6 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
   }),
   listeners: ({ actions }) => ({
-    apiError: (e) => {
-      flashAPIErrors(e);
-    },
     fetchEngines: async (input) => {
       actions.makeRequest(input);
     },
