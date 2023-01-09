@@ -5,23 +5,32 @@
  * 2.0.
  */
 import { isObject } from 'lodash/fp';
-import type { SecurityFlyoutPanel } from './model';
+import type { SecurityFlyout, SecurityFlyoutPanel } from './model';
 
-// Helper to parse the flyout types to confirm they have the expected parameters
-export const isValidFlyoutType = (flyout: Record<string, unknown>) => {
-  if (!flyout || !flyout?.panelKind) return false;
+export const isValidSecurityFlyoutPanel = (panel: SecurityFlyoutPanel) => {
+  const hasParams = isObject(panel?.params);
+  const eventPanels = ['event', 'table', 'visualize', 'json'];
 
-  const flyoutPanel = flyout as SecurityFlyoutPanel;
-  const hasParams = isObject(flyoutPanel?.params);
-
-  if (flyoutPanel.panelKind === 'event' && hasParams) {
-    return flyoutPanel?.params?.eventId && flyoutPanel?.params?.indexName;
+  if (eventPanels.includes(panel.panelKind) && hasParams) {
+    return panel?.params?.eventId && panel?.params?.indexName;
   }
 
   return false;
 };
+// Helper to parse the flyout types to confirm they have the expected parameters
+const isValidSecurityFlyout = (flyout: Record<string, unknown>) => {
+  if (!flyout) return false;
 
-export const areValidSecurityFlyoutScopes = (unknownFlyoutReducer: unknown): boolean => {
+  const flyoutPanel = flyout as SecurityFlyout;
+  if (flyoutPanel.left && !isValidSecurityFlyoutPanel(flyoutPanel.left)) return false;
+  if (flyoutPanel.right && !isValidSecurityFlyoutPanel(flyoutPanel.right)) return false;
+  if (flyoutPanel.preview && !isValidSecurityFlyoutPanel(flyoutPanel.preview)) return false;
+
+  return true;
+};
+
+// This is primarily used for testing information from the url state.
+export const areUrlParamsValidSecurityFlyoutParams = (unknownFlyoutReducer: unknown): boolean => {
   // Confirm the unknownFlyoutReducer object exists
   if (!unknownFlyoutReducer || !isObject(unknownFlyoutReducer)) return false;
 
@@ -32,10 +41,10 @@ export const areValidSecurityFlyoutScopes = (unknownFlyoutReducer: unknown): boo
 
   const { globalFlyout, timelineFlyout } = objectFlyout;
 
-  if (globalFlyout && isObject(globalFlyout) && !isValidFlyoutType(globalFlyout)) {
+  if (globalFlyout && isObject(globalFlyout) && !isValidSecurityFlyout(globalFlyout)) {
     return false;
   }
-  if (timelineFlyout && isObject(timelineFlyout) && !isValidFlyoutType(timelineFlyout)){
+  if (timelineFlyout && isObject(timelineFlyout) && !isValidSecurityFlyout(timelineFlyout)) {
     return false;
   }
 

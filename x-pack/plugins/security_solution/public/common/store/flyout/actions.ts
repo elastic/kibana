@@ -10,10 +10,13 @@ import type { SecurityFlyout, SecurityFlyoutActionWithScope, SecurityFlyoutState
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/flyout');
 
-export const initializeSecurityFlyouts = actionCreator<SecurityFlyoutState>('INITIALIZE_FLYOUT');
+export const initializeSecurityFlyoutFromUrl = actionCreator<SecurityFlyoutState>(
+  'INITIALIZE_SECURITY_FLYOUT_FROM_URL'
+);
 
-export const initializeSecurityFlyoutByScope = actionCreator<
-  SecurityFlyoutActionWithScope<Required<SecurityFlyout>>
->('INITIALIZE_FLYOUT_BY_SCOPE');
+// Security flyout can be opened both in the global scope and the timeline scope
+export const openSecurityFlyoutByScope = actionCreator<
+  SecurityFlyoutActionWithScope<SecurityFlyout>
+>('OPEN_SECURITY_FLYOUT_BY_SCOPE');
 
-export const closeSecurityFlyout = actionCreator<SecurityFlyoutActionWithScope>('CLOSE_FLYOUT');
+export const closeSecurityFlyoutByScope = actionCreator<SecurityFlyoutActionWithScope>('CLOSE_FLYOUT');

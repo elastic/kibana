@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 
 import { useDispatch } from 'react-redux';
-import { initializeSecurityFlyouts } from '../../store/flyout/actions';
+import { initializeSecurityFlyoutFromUrl } from '../../store/flyout/actions';
 import type { SecurityFlyoutState } from '../../store/flyout/model';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../use_url_state';
@@ -19,7 +19,7 @@ export const useInitFlyoutsFromUrlParam = () => {
   const onInitialize = useCallback(
     (initialState: Required<SecurityFlyoutState> | null) => {
       if (initialState != null) {
-        dispatch(initializeSecurityFlyouts(initialState));
+        dispatch(initializeSecurityFlyoutFromUrl(initialState));
       }
     },
     [dispatch]

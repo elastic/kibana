@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import {
-  initializeSecurityFlyouts,
-  closeSecurityFlyout,
-  initializeSecurityFlyoutByScope,
+  initializeSecurityFlyoutFromUrl,
+  closeSecurityFlyoutByScope,
+  openSecurityFlyoutByScope,
 } from './actions';
-import { areValidSecurityFlyoutScopes } from './helpers';
+import { areUrlParamsValidSecurityFlyoutParams } from './helpers';
 import type { SecurityFlyoutState } from './model';
 
 export const initialFlyoutsState: SecurityFlyoutState = {};
@@ -21,8 +21,8 @@ export const flyoutsReducer = reducerWithInitialState(initialFlyoutsState)
   /**
    * Open the  flyout for the given flyoutScope
    */
-  .case(initializeSecurityFlyouts, (state, newFlyoutState) => {
-    if (areValidSecurityFlyoutScopes(newFlyoutState)) {
+  .case(initializeSecurityFlyoutFromUrl, (state, newFlyoutState) => {
+    if (areUrlParamsValidSecurityFlyoutParams(newFlyoutState)) {
       return merge({}, state, newFlyoutState);
     }
     return state;
@@ -30,18 +30,22 @@ export const flyoutsReducer = reducerWithInitialState(initialFlyoutsState)
   /**
    * Open the  flyout for the given flyoutScope
    */
-  .case(initializeSecurityFlyoutByScope, (state, { flyoutScope, panelKind, params }) => {
-    return merge({}, state, {
+  .case(openSecurityFlyoutByScope, (state, { flyoutScope, ...panelProps }) => {
+    // We use merge as the spread operator copies nested objects, rather than creating a new object
+    // The nested object may be opaque to a future developer so this protects against stale references
+    const newState = merge({}, state, {
       [flyoutScope]: {
-        panelKind,
-        params,
+        ...panelProps,
       },
     });
+    return newState;
   })
   /**
-   * Remove all the configuration to close a flyout
+   * Remove the flyoutScope from state to close the flyout and remove it from url state
    */
-  .case(closeSecurityFlyout, (state, { flyoutScope }) => {
-    return merge({}, state, { [flyoutScope]: {} });
+  .case(closeSecurityFlyoutByScope, (state, { flyoutScope }) => {
+    const newState = cloneDeep(state);
+    delete newState[flyoutScope];
+    return newState;
   })
   .build();
