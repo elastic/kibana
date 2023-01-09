@@ -62,7 +62,7 @@ export const deletePackagePolicyMock = (): DeletePackagePoliciesResponse => {
  * Creates mock `authz` object
  */
 export const createFleetAuthzMock = (): FleetAuthz => {
-  const endpointActions = ENDPOINT_PRIVILEGES.reduce((acc, privilege) => {
+  const endpointActions = Object.keys(ENDPOINT_PRIVILEGES).reduce((acc, privilege) => {
     return {
       ...acc,
       [privilege]: {
