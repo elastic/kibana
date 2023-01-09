@@ -8,8 +8,38 @@
 import { call, put } from 'redux-saga/effects';
 import { PayloadAction } from '@reduxjs/toolkit';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { ErrorToastOptions } from '@kbn/core-notifications-browser';
+import { toastTitle } from '../monitor_list/toast_title';
 import { kibanaService } from '../../../../utils/kibana_service';
 import { IHttpSerializedFetchError, serializeHttpFetchError } from './http_error';
+
+interface ToastParams<MessageType> {
+  message: MessageType;
+  lifetimeMs?: number;
+  testAttribute?: string;
+}
+
+interface ActionMessages {
+  success: ToastParams<string>;
+  error: ToastParams<ErrorToastOptions>;
+}
+
+export const sendSuccessToast = (payload: ToastParams<string>) => {
+  kibanaService.toasts.addSuccess({
+    title: toastTitle({
+      title: payload.message,
+      testAttribute: payload.testAttribute,
+    }),
+    toastLifeTimeMs: payload.lifetimeMs,
+  });
+};
+
+export const sendErrorToast = (payload: ToastParams<ErrorToastOptions>, error: Error) => {
+  kibanaService.toasts.addError(error, {
+    ...payload.message,
+    toastLifeTimeMs: payload.lifetimeMs,
+  });
+};
 
 /**
  * Factory function for a fetch effect. It expects three action creators,
@@ -48,6 +78,17 @@ export function fetchEffectFactory<T, R, S, F>(
         }
       } else {
         yield put(success(response as R));
+        const successMessage = (action.payload as unknown as ActionMessages)?.success;
+        if (successMessage?.message) {
+          kibanaService.toasts.addSuccess({
+            title: toastTitle({
+              title: successMessage.message,
+              testAttribute: successMessage.testAttribute,
+            }),
+            toastLifeTimeMs: successMessage.lifetimeMs,
+          });
+        }
+
         if (typeof onSuccess === 'function') {
           onSuccess?.(response as R);
         } else if (typeof onSuccess === 'string') {
@@ -57,6 +98,15 @@ export function fetchEffectFactory<T, R, S, F>(
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);
+      const errorMessage = (action.payload as unknown as ActionMessages)?.error;
+
+      if (errorMessage?.message) {
+        kibanaService.toasts.addError(error, {
+          ...errorMessage.message,
+          toastLifeTimeMs: errorMessage.lifetimeMs,
+        });
+      }
+
       yield put(fail(serializeHttpFetchError(error)));
       if (typeof onFailure === 'function') {
         onFailure?.(error);

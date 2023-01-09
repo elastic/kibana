@@ -22,8 +22,9 @@ import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
 import { useHistory, useParams } from 'react-router-dom';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 import { MONITOR_TYPES } from '../../../../../../common/constants';
-import { TestDetailsLink } from '../../common/links/test_details_link';
+import { getTestRunDetailLink, TestDetailsLink } from '../../common/links/test_details_link';
 import { ConfigKey, DataStream, Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
@@ -141,6 +142,8 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
     },
   ];
 
+  const selectedLocation = useSelectedLocation();
+
   const getRowProps = (item: Ping) => {
     if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
       return {};
@@ -156,7 +159,13 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
           targetElem.tagName !== 'path' &&
           !targetElem.parentElement?.classList.contains('euiLink')
         ) {
-          history.push(`/monitor/${monitorId}/test-run/${item.monitor.check_group}`);
+          history.push(
+            getTestRunDetailLink({
+              monitorId,
+              checkGroup: item.monitor.check_group,
+              locationId: selectedLocation?.id,
+            })
+          );
         }
       },
     };
