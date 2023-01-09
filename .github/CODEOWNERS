@@ -1031,6 +1031,7 @@ packages/shared-ux/button/exit_full_screen/types @elastic/kibana-global-experien
 packages/shared-ux/card/no_data/impl @elastic/kibana-global-experience
 packages/shared-ux/card/no_data/mocks @elastic/kibana-global-experience
 packages/shared-ux/card/no_data/types @elastic/kibana-global-experience
+packages/shared-ux/code_editor @elastic/shared-ux
 packages/shared-ux/file/context @elastic/kibana-global-experience
 packages/shared-ux/file/file_picker/impl @elastic/kibana-global-experience
 packages/shared-ux/file/file_upload/impl @elastic/kibana-global-experience
