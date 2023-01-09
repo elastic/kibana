@@ -11,12 +11,14 @@ import { ComponentSelector, css, CSSObject, SerializedStyles } from '@emotion/re
 import { ArrayCSSInterpolation } from '@emotion/serialize';
 import { Property } from 'csstype';
 
+// .react-monaco-editor-container .monaco-editor .inputarea:focus
 export const codeEditorMonacoStyles = () => css`
    {
     animation: none !important; // Removes textarea EUI blue underline animation from EUI
   }
 `;
 
+// .kibanaCodeEditor
 export const codeEditorStyles = () => css`
    {
     position: relative;
@@ -24,6 +26,46 @@ export const codeEditorStyles = () => css`
   }
 `;
 
+// &__placeholderContainer
+export const codeEditorPlaceholderContainerStyles = (subduedText: string) => css`
+   {
+    color: ${subduedText};
+    width: max-content;
+    pointer-events: none;
+  }
+`;
+
+// &__keyboardHint
+export const codeEditorKeyboardHintStyles = (levels: {
+  content: Property.ZIndex;
+  mask: Property.ZIndex;
+  toast: Property.ZIndex;
+  modal: Property.ZIndex;
+  navigation: Property.ZIndex;
+  menu: Property.ZIndex;
+  header: Property.ZIndex;
+  flyout: Property.ZIndex;
+  maskBelowHeader: Property.ZIndex;
+}) =>
+  css`
+     {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+
+      &:focus {
+        z-index: ${levels.mask};
+      }
+
+      &--isInactive {
+        display: none;
+      }
+    }
+  `;
+
+// &__controls
 export const codeEditorControlsStyles = (
   size: {
     base: string;
@@ -56,51 +98,17 @@ export const codeEditorControlsStyles = (
   }
 `;
 
-export const codeEditorFullScreenStyles = ({ euiTheme }: UseEuiTheme) => css`
+// &__isFullScreen
+export const codeEditorFullScreenStyles = () => css`
    {
     position: absolute;
     left: 0;
     top: 0;
-    .kibanaCodeEditor__controls {
-      top: ${euiTheme.size.l};
-      right: ${euiTheme.size.l};
-    }
   }
 `;
 
-export const codeEditorPlaceholderContainerStyles = (subduedText: string) => css`
-   {
-    color: ${subduedText};
-    width: max-content;
-    pointer-events: none;
-  }
-`;
-
-export const codeEditorKeyboardHintStyles = (levels: {
-  content: Property.ZIndex;
-  mask: Property.ZIndex;
-  toast: Property.ZIndex;
-  modal: Property.ZIndex;
-  navigation: Property.ZIndex;
-  menu: Property.ZIndex;
-  header: Property.ZIndex;
-  flyout: Property.ZIndex;
-  maskBelowHeader: Property.ZIndex;
-}) =>
-  css`
-     {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      left: 0;
-
-      &:focus {
-        z-index: ${levels.mask};
-      }
-
-      &--isInactive {
-        display: none;
-      }
-    }
-  `;
+// .kibanaCodeEditor_controls
+export const codeEditorControlsWithinFullScreenStyles = ({ euiTheme }: UseEuiTheme) => css`
+  top: ${euiTheme.size.l};
+  right: ${euiTheme.size.l};
+}`;

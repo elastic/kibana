@@ -21,7 +21,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -175,11 +174,11 @@ export const CodeEditor: React.FC<Props> = ({
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
 
   const [isHintActive, setIsHintActive] = useState(true);
-
   const defaultStyles = codeEditorStyles();
   const hintStyles = codeEditorKeyboardHintStyles(euiTheme.levels);
-  const styles = useMemo(() => {
-    return !isHintActive ? defaultStyles : { defaultStyles, hintStyles };
+
+  const promptClasses = useMemo(() => {
+    return isHintActive ? [defaultStyles, hintStyles] : [defaultStyles];
   }, [isHintActive, defaultStyles, hintStyles]);
 
   const _updateDimensions = useCallback(() => {
@@ -262,12 +261,14 @@ export const CodeEditor: React.FC<Props> = ({
             <p>
               {isReadOnly ? (
                 <FormattedMessage
+                  css={defaultStyles}
                   id="sharedUXPackages.codeEditor.startEditingReadOnly"
                   defaultMessage="Press {key} to start interacting with the code."
                   values={{ key: enterKey }}
                 />
               ) : (
                 <FormattedMessage
+                  css={defaultStyles}
                   id="sharedUXPackages.codeEditor.startEditing"
                   defaultMessage="Press {key} to start editing."
                   values={{ key: enterKey }}
@@ -277,12 +278,14 @@ export const CodeEditor: React.FC<Props> = ({
             <p>
               {isReadOnly ? (
                 <FormattedMessage
+                  css={defaultStyles}
                   id="sharedUXPackages.codeEditor.stopEditingReadOnly"
                   defaultMessage="Press {key} to stop interacting with the code."
                   values={{ key: escapeKey }}
                 />
               ) : (
                 <FormattedMessage
+                  css={defaultStyles}
                   id="sharedUXPackages.codeEditor.stopEditing"
                   defaultMessage="Press {key} to stop editing."
                   values={{ key: escapeKey }}
@@ -293,7 +296,7 @@ export const CodeEditor: React.FC<Props> = ({
         }
       >
         <div
-          css={styles}
+          css={promptClasses}
           id={htmlIdGenerator('codeEditor')()}
           ref={editorHint}
           tabIndex={0}
@@ -305,7 +308,7 @@ export const CodeEditor: React.FC<Props> = ({
         />
       </EuiToolTip>
     );
-  }, [onKeyDownHint, startEditing, ariaLabel, isReadOnly, styles]);
+  }, [onKeyDownHint, startEditing, ariaLabel, isReadOnly, promptClasses, defaultStyles]);
 
   const _editorWillMount = useCallback(
     (__monaco: unknown) => {
@@ -320,23 +323,27 @@ export const CodeEditor: React.FC<Props> = ({
 
       editorWillMount?.();
 
-      monaco.languages.onLanguage(languageId, () => {
-        if (suggestionProvider) {
-          monaco.languages.registerCompletionItemProvider(languageId, suggestionProvider);
-        }
+      monaco.languages.onLanguage(
+        languageId,
+        () => {
+          if (suggestionProvider) {
+            monaco.languages.registerCompletionItemProvider(languageId, suggestionProvider);
+          }
 
-        if (signatureProvider) {
-          monaco.languages.registerSignatureHelpProvider(languageId, signatureProvider);
-        }
+          if (signatureProvider) {
+            monaco.languages.registerSignatureHelpProvider(languageId, signatureProvider);
+          }
 
-        if (hoverProvider) {
-          monaco.languages.registerHoverProvider(languageId, hoverProvider);
-        }
+          if (hoverProvider) {
+            monaco.languages.registerHoverProvider(languageId, hoverProvider);
+          }
 
-        if (languageConfiguration) {
-          monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
+          if (languageConfiguration) {
+            monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
+          }
         }
-      });
+        // Register themes
+      );
     },
     [
       overrideEditorWillMount,
@@ -423,11 +430,11 @@ export const CodeEditor: React.FC<Props> = ({
 
   const controlStyles = useMemo(() => {
     const copyableStyles = [defaultStyles, codeEditorControlsStyles(euiTheme.size, euiTheme.base)];
-    return allowFullScreen || isCopyable ? copyableStyles : defaultStyles;
+    return allowFullScreen || isCopyable ? copyableStyles && defaultStyles : defaultStyles;
   }, [allowFullScreen, isCopyable, defaultStyles, euiTheme]);
 
   return (
-    <div css={styles} onKeyDown={onKeyDown} style={{ backgroundColor: 'yellowgreen' }}>
+    <div css={codeEditorStyles()} onKeyDown={onKeyDown}>
       {renderPrompt()}
 
       <FullScreenDisplay>
@@ -444,12 +451,12 @@ export const CodeEditor: React.FC<Props> = ({
           </div>
         ) : null}
         <MonacoEditor
-          // theme={transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
           language={languageId}
           value={value}
           onChange={onChange}
-          width={isFullScreen ? '100vw' : width}
-          height={isFullScreen ? '100vh' : height}
+          width={isFullScreen ? '100vw' : '100%'}
+          // previously defaulted to 100% but this makes it unviewable
+          height={isFullScreen ? '100vh' : '100px'}
           editorWillMount={_editorWillMount}
           editorDidMount={_editorDidMount}
           options={{
@@ -501,12 +508,6 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
   }, []);
 
   const FullScreenButton: React.FC = () => {
-    const { euiTheme } = useEuiTheme();
-    const styles = [
-      codeEditorStyles,
-      codeEditorFullScreenStyles(euiTheme as unknown as UseEuiTheme),
-    ];
-
     if (!allowFullScreen) return null;
     return (
       <EuiI18n
@@ -515,7 +516,7 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
       >
         {([fullscreenCollapse, fullscreenExpand]: string[]) => (
           <EuiButtonIcon
-            css={styles}
+            css={[codeEditorStyles(), codeEditorFullScreenStyles]}
             onClick={toggleFullScreen}
             iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
             color="text"
@@ -532,15 +533,15 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
       ({ children }: { children: Array<JSX.Element | null> | JSX.Element }) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const { euiTheme } = useEuiTheme();
+        const styles = codeEditorFullScreenStyles();
 
         if (!isFullScreen) return <>{children}</>;
-        const styles = codeEditorFullScreenStyles(euiTheme as unknown as UseEuiTheme);
 
         return (
           <EuiOverlayMask>
             <EuiFocusTrap clickOutsideDisables={true}>
               {/* className={'kibanaCodeEditor__isFullScreen'} */}
-              <div css={styles}>{children}</div>
+              <div css={[codeEditorStyles(), styles]}>{children}</div>
             </EuiFocusTrap>
           </EuiOverlayMask>
         );
@@ -562,10 +563,9 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
 
   const CopyButton = () => {
     if (!showCopyButton) return null;
-    const styles = codeEditorStyles();
 
     return (
-      <div css={styles}>
+      <div css={codeEditorStyles()}>
         <EuiI18n token="euiCodeBlock.copyButton" default="Copy">
           {(copyButton: string) => (
             <EuiCopy textToCopy={value}>
