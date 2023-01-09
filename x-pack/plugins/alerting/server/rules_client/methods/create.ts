@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 import { parseDuration } from '../../../common/parse_duration';
 import { RawRule, SanitizedRule, RuleTypeParams, RuleAction, Rule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -54,12 +55,14 @@ export async function create<Params extends RuleTypeParams = never>(
   const id = options?.id || SavedObjectsUtils.generateId();
 
   try {
-    await context.authorization.ensureAuthorized({
-      ruleTypeId: data.alertTypeId,
-      consumer: data.consumer,
-      operation: WriteOperations.Create,
-      entity: AlertingAuthorizationEntity.Rule,
-    });
+    await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
+      context.authorization.ensureAuthorized({
+        ruleTypeId: data.alertTypeId,
+        consumer: data.consumer,
+        operation: WriteOperations.Create,
+        entity: AlertingAuthorizationEntity.Rule,
+      })
+    );
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
@@ -82,7 +85,9 @@ export async function create<Params extends RuleTypeParams = never>(
   let createdAPIKey = null;
   try {
     createdAPIKey = data.enabled
-      ? await context.createAPIKey(generateAPIKeyName(ruleType.id, data.name))
+      ? await withSpan({ name: 'createAPIKey', type: 'rules' }, () =>
+          context.createAPIKey(generateAPIKeyName(ruleType.id, data.name))
+        )
       : null;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
@@ -100,7 +105,9 @@ export async function create<Params extends RuleTypeParams = never>(
   }
 
   await validateActions(context, ruleType, data);
-
+  await withSpan({ name: 'validateActions', type: 'rules' }, () =>
+    validateActions(context, ruleType, data)
+  );
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);
   if (
@@ -117,7 +124,9 @@ export async function create<Params extends RuleTypeParams = never>(
     references,
     params: updatedParams,
     actions,
-  } = await extractReferences(context, ruleType, data.actions, validatedAlertTypeParams);
+  } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
+    extractReferences(context, ruleType, data.actions, validatedAlertTypeParams)
+  );
 
   const createTime = Date.now();
   const lastRunTimestamp = new Date();
@@ -150,11 +159,13 @@ export async function create<Params extends RuleTypeParams = never>(
     rawRule.mapped_params = mappedParams;
   }
 
-  return await createRuleSavedObject(context, {
-    intervalInMs,
-    rawRule,
-    references,
-    ruleId: id,
-    options,
-  });
+  return await withSpan({ name: 'createRuleSavedObject', type: 'rules' }, () =>
+    createRuleSavedObject(context, {
+      intervalInMs,
+      rawRule,
+      references,
+      ruleId: id,
+      options,
+    })
+  );
 }
