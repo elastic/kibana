@@ -117,18 +117,25 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       scopedClusterClient,
       getAlertStartedDate,
       getAlertUuid,
-      getAlertByAlertUuid
+      getAlertByAlertUuid,
     } = services;
     const { basePath } = libs;
 
-    const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold, actions, additionalContext) => {
+    const alertFactory: LogThresholdAlertFactory = (
+      id,
+      reason,
+      value,
+      threshold,
+      actions,
+      additionalContext
+    ) => {
       const alert = alertWithLifecycle({
         id,
         fields: {
           [ALERT_EVALUATION_THRESHOLD]: threshold,
           [ALERT_EVALUATION_VALUE]: value,
           [ALERT_REASON]: reason,
-          ...additionalContext
+          ...additionalContext,
         },
       });
 
@@ -211,7 +218,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         spaceId,
         startedAt,
         validatedParams,
-        getAlertByAlertUuid
+        getAlertByAlertUuid,
       });
     } catch (e) {
       throw new Error(e);
@@ -383,7 +390,14 @@ export const processUngroupedResults = (
         },
       },
     ];
-    alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, documentCount, count.value, actions, additionalContext);
+    alertFactory(
+      UNGROUPED_FACTORY_KEY,
+      reasonMessage,
+      documentCount,
+      count.value,
+      actions,
+      additionalContext
+    );
     alertLimit.setLimitReached(alertLimit.getValue() <= 1);
   } else {
     alertLimit.setLimitReached(false);
@@ -426,11 +440,18 @@ export const processUngroupedRatioResults = (
           group: null,
           isRatio: true,
           reason: reasonMessage,
-          ...additionalContext
+          ...additionalContext,
         },
       },
     ];
-    alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value, actions, additionalContext);
+    alertFactory(
+      UNGROUPED_FACTORY_KEY,
+      reasonMessage,
+      ratio,
+      count.value,
+      actions,
+      additionalContext
+    );
     alertLimit.setLimitReached(alertLimit.getValue() <= 1);
   } else {
     alertLimit.setLimitReached(false);
@@ -607,7 +628,14 @@ export const processGroupByRatioResults = (
           },
         },
       ];
-      alertFactory(numeratorGroup.name, reasonMessage, ratio, count.value, actions, numeratorGroup.context);
+      alertFactory(
+        numeratorGroup.name,
+        reasonMessage,
+        ratio,
+        count.value,
+        actions,
+        numeratorGroup.context
+      );
     }
   }
 
@@ -715,7 +743,7 @@ export const getGroupedESQuery = (
         },
         aggregations: {
           ...getContextAggregation(params),
-        }
+        },
       },
     };
 
@@ -1000,7 +1028,7 @@ const processRecoveredAlerts = async ({
   spaceId,
   startedAt,
   validatedParams,
-  getAlertByAlertUuid
+  getAlertByAlertUuid,
 }: {
   basePath: IBasePath;
   getAlertStartedDate: (alertId: string) => string | null;
