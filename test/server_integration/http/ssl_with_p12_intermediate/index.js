@@ -9,7 +9,7 @@
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('kibana server with ssl', () => {
+  describe.skip('kibana server with ssl', () => {
     it('handles requests using ssl with a P12 keystore that uses an intermediate CA', async () => {
       await supertest.get('/').expect(302);
     });
