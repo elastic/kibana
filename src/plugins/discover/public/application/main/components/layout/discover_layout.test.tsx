@@ -24,6 +24,7 @@ import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_
 import {
   AvailableFields$,
   DataDocuments$,
+  DataFetch$,
   DataMain$,
   DataRefetch$,
   DataTotalHits$,
@@ -115,7 +116,7 @@ function mountComponent(
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchData$,
-    savedSearchFetch$: new Subject(),
+    savedSearchFetch$: new Subject() as DataFetch$,
     savedSearchRefetch$: new Subject() as DataRefetch$,
     searchSource: searchSourceMock,
     state: { columns: [], query, hideChart: false, interval: 'auto' },
