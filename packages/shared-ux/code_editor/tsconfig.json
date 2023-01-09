@@ -5,12 +5,13 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
@@ -19,5 +20,6 @@
     "@kbn/monaco",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/ambient-ui-types",
   ]
 }
