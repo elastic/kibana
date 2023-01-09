@@ -13,14 +13,14 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
-} from '../../mock';
-import type { State } from '../../store';
-import { createStore } from '../../store';
-import { useKibana } from '../../lib/kibana';
-import { InputsModelId } from '../../store/inputs/constants';
+} from '../../common/mock';
+import type { State } from '../../common/store';
+import { createStore } from '../../common/store';
+import { useKibana } from '../../common/lib/kibana';
+import { InputsModelId } from '../../common/store/inputs/constants';
 import { useRefetchByRestartingSession } from './use_refetch_by_session';
-import { inputsActions } from '../../store/actions';
-import type { Refetch } from '../../store/inputs/model';
+import { inputsActions } from '../../common/store/actions';
+import type { Refetch } from '../../common/store/inputs/model';
 
 const state: State = mockGlobalState;
 

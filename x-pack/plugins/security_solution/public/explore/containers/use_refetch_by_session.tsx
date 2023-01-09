@@ -7,12 +7,12 @@
 
 import { useCallback, useRef, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { useKibana } from '../../lib/kibana';
-import { inputsSelectors } from '../../store';
-import { inputsActions } from '../../store/actions';
-import { InputsModelId } from '../../store/inputs/constants';
-import type { Refetch } from '../../store/inputs/model';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { useKibana } from '../../common/lib/kibana';
+import { inputsSelectors } from '../../common/store';
+import { inputsActions } from '../../common/store/actions';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import type { Refetch } from '../../common/store/inputs/model';
 
 interface UseRefetchByRestartingSessionProps {
   inputId?: InputsModelId;
