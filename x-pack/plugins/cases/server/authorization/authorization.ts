@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AuthFilterHelpers, OwnerEntity } from './types';
-import { getOwnersFilter } from './utils';
+import { getOwnersFilter, groupByAuthorization } from './utils';
 import type { OperationDetails } from '.';
-import { AuthorizationAuditLogger } from '.';
+import { AuthorizationAuditLogger, Operations } from '.';
 import { createCaseError } from '../common/error';
 
 /**
@@ -125,30 +126,46 @@ export class Authorization {
    * Returns all authorized entities for an operation. It throws error if the user is not authorized
    * to any of the owners
    *
-   * @param entities an array of entities describing the case owners in conjunction with the saved object ID attempting
-   *  to be authorized
-   * @param operation information describing the operation attempting to be authorized
+   * @param savedObjects an array of saved objects to be authorized. Each saved objects should contain
+   * an ID and an owner
    */
-  public async getAuthorizedEntities({
-    entities,
-    operation,
+  public async getAndEnsureAuthorizedEntities<T extends { owner: string }>({
+    savedObjects,
   }: {
-    entities: OwnerEntity[];
-    operation: OperationDetails;
-  }) {
+    savedObjects: Array<SavedObject<T>>;
+  }): Promise<{ authorized: Array<SavedObject<T>>; unauthorized: Array<SavedObject<T>> }> {
+    const operation = Operations.bulkGetCases;
+    const entities = savedObjects.map((so) => ({
+      id: so.id,
+      owner: so.attributes.owner,
+    }));
+
     const { authorizedOwners } = await this.getAuthorizedOwners([operation]);
 
     if (!authorizedOwners.length) {
       const error = Boom.forbidden(
-        AuthorizationAuditLogger.createFailureMessage({ owners: authorizedOwners, operation })
+        AuthorizationAuditLogger.createFailureMessage({
+          owners: [],
+          operation,
+        })
       );
 
-      this.auditLogger.log({ error, operation });
+      this.logSavedObjects({ entities, error, operation });
 
       throw error;
     }
 
-    return entities.filter((entity) => authorizedOwners.includes(entity.owner));
+    const { authorized, unauthorized } = groupByAuthorization(savedObjects, authorizedOwners);
+
+    await this.ensureAuthorized({
+      operation,
+      entities: authorized.map((so) => ({
+        owner: so.attributes.owner,
+        id: so.id,
+      })),
+    });
+
+    return { authorized, unauthorized };
   }
 
   private async logSavedObjects({

@@ -25,20 +25,14 @@ import {
 import { getTypeProps } from '../../../common/api/runtime_types';
 import { createCaseError } from '../../common/error';
 import { asArray, flattenCaseSavedObject } from '../../common/utils';
-import { Operations } from '../../authorization';
 import type { CasesClientArgs } from '../types';
-import {
-  includeFieldsRequiredForAuthentication,
-  getAuthorizedAndUnauthorizedSavedObjects,
-} from '../../authorization/utils';
+import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import type { CaseSavedObject } from '../../common/types';
 
 type SOWithErrors = Array<CaseSavedObject & { error: SavedObjectError }>;
 
 /**
  * Retrieves multiple cases by ids.
- *
- * @ignore
  */
 export const bulkGet = async (
   params: CasesBulkGetRequest,
@@ -62,31 +56,15 @@ export const bulkGet = async (
     throwErrorIfCaseIdsReachTheLimit(request.ids);
     throwErrorIfFieldsAreInvalid(fields);
 
-    const finalFields = fields?.length ? [...fields, 'id', 'version'] : fields;
-    const cases = await caseService.getCases({ caseIds: request.ids, fields: finalFields });
+    const cases = await caseService.getCases({ caseIds: request.ids, fields });
 
     const [validCases, soBulkGetErrors] = partition(
       cases.saved_objects,
       (caseInfo) => caseInfo.error === undefined
     ) as [CaseSavedObject[], SOWithErrors];
 
-    const authorizedEntities = await authorization.getAuthorizedEntities({
-      operation: Operations.bulkGetCases,
-      entities: validCases.map((theCase) => ({ id: theCase.id, owner: theCase.attributes.owner })),
-    });
-
-    const [authorizedCases, unauthorizedCases] = getAuthorizedAndUnauthorizedSavedObjects(
-      validCases,
-      authorizedEntities
-    );
-
-    await authorization.ensureAuthorized({
-      operation: Operations.bulkGetCases,
-      entities: authorizedCases.map((theCase) => ({
-        owner: theCase.attributes.owner,
-        id: theCase.id,
-      })),
-    });
+    const { authorized: authorizedCases, unauthorized: unauthorizedCases } =
+      await authorization.getAndEnsureAuthorizedEntities({ savedObjects: validCases });
 
     const requestForTotals = ['totalComment', 'totalAlerts'].some(
       (totalKey) => !fields || fields.includes(totalKey)
@@ -111,11 +89,11 @@ export const bulkGet = async (
         totalAlerts: alerts,
       });
 
-      if (!finalFields?.length) {
+      if (!fields?.length) {
         return flattenedCase;
       }
 
-      return pick(flattenedCase, finalFields);
+      return pick(flattenedCase, [...fields, 'id', 'version']);
     });
 
     const typeToEncode = getTypeForCertainFieldsFromArray(CasesResponseRt, fields);

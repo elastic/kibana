@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import { nodeBuilder } from '@kbn/es-query';
 import { OWNER_FIELD } from '../../common/api';
 import {
   combineFilterWithAuthorizationFilter,
   ensureFieldIsSafeForQuery,
-  getAuthorizedAndUnauthorizedSavedObjects,
+  groupByAuthorization,
   getOwnersFilter,
   includeFieldsRequiredForAuthentication,
 } from './utils';
@@ -279,26 +278,30 @@ describe('utils', () => {
     });
   });
 
-  describe('getAuthorizedAndUnauthorizedSavedObjects', () => {
-    it('partitions authorized and unauthorized cases correctly', () => {
-      const cases = [{ id: '1' }, { id: '2' }, { id: '3' }] as unknown as SavedObject[];
-      const authorizedEntities = [{ id: '1', owner: 'cases' }];
+  describe('groupByAuthorization', () => {
+    const cases = [
+      { id: '1', type: 'cases', references: [], attributes: { owner: 'cases' } },
+      { id: '2', type: 'cases', references: [], attributes: { owner: 'securitySolution' } },
+      { id: '3', type: 'cases', references: [], attributes: { owner: 'securitySolution' } },
+    ];
 
-      const res = getAuthorizedAndUnauthorizedSavedObjects(cases, authorizedEntities);
-      expect(res).toEqual([[{ id: '1' }], [{ id: '2' }, { id: '3' }]]);
+    it('partitions authorized and unauthorized cases correctly', () => {
+      const authorizedOwners = ['cases'];
+
+      const res = groupByAuthorization(cases, authorizedOwners);
+      expect(res).toEqual({ authorized: [cases[0]], unauthorized: [cases[1], cases[2]] });
     });
 
     it('partitions authorized and unauthorized cases correctly when there are not authorized entities', () => {
-      const cases = [{ id: '1' }, { id: '2' }, { id: '3' }] as unknown as SavedObject[];
-
-      const res = getAuthorizedAndUnauthorizedSavedObjects(cases, []);
-      expect(res).toEqual([[], cases]);
+      const res = groupByAuthorization(cases, []);
+      expect(res).toEqual({ authorized: [], unauthorized: cases });
     });
 
     it('partitions authorized and unauthorized cases correctly when there are no saved objects', () => {
-      const authorizedEntities = [{ id: '1', owner: 'cases' }];
-      const res = getAuthorizedAndUnauthorizedSavedObjects([], authorizedEntities);
-      expect(res).toEqual([[], []]);
+      const authorizedOwners = ['cases'];
+
+      const res = groupByAuthorization([], authorizedOwners);
+      expect(res).toEqual({ authorized: [], unauthorized: [] });
     });
   });
 });

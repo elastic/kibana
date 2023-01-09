@@ -10,7 +10,6 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 import { OWNER_FIELD } from '../../common/api';
-import type { OwnerEntity } from './types';
 
 export const getOwnersFilter = (
   savedObjectType: string,
@@ -67,10 +66,13 @@ export const includeFieldsRequiredForAuthentication = (fields?: string[]): strin
   return uniq([...fields, OWNER_FIELD]);
 };
 
-export const getAuthorizedAndUnauthorizedSavedObjects = <T>(
+export const groupByAuthorization = <T extends { owner: string }>(
   savedObjects: Array<SavedObject<T>>,
-  authorizedEntities: OwnerEntity[]
-): [Array<SavedObject<T>>, Array<SavedObject<T>>] =>
-  partition(savedObjects, (so) =>
-    authorizedEntities.some((authorizedEntity) => authorizedEntity.id === so.id)
+  authorizedOwners: string[]
+): { authorized: Array<SavedObject<T>>; unauthorized: Array<SavedObject<T>> } => {
+  const [authorized, unauthorized] = partition(savedObjects, (so) =>
+    authorizedOwners.includes(so.attributes.owner)
   );
+
+  return { authorized, unauthorized };
+};

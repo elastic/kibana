@@ -337,8 +337,8 @@ Refer to the corresponding {es} logs for potential write errors.
 | `failure` | User is not authorized to access a case.
 
 .2+| `case_bulk_get`
-| `success` | User has accessed multiple case.
-| `failure` | User is not authorized to access multiple case.
+| `success` | User has accessed multiple cases.
+| `failure` | User is not authorized to access multiple cases.
 
 .2+| `case_resolve`
 | `success` | User has accessed a case.

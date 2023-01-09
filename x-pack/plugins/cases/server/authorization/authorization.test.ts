@@ -984,7 +984,7 @@ describe('authorization', () => {
     });
   });
 
-  describe('getAuthorizedEntities', () => {
+  describe('getAndEnsureAuthorizedEntities', () => {
     const feature = { id: '1', cases: ['a', 'b'] };
 
     let securityStart: ReturnType<typeof securityMock.createStart>;
@@ -1033,9 +1033,11 @@ describe('authorization', () => {
       });
 
       try {
-        await auth.getAuthorizedEntities({
-          entities: [{ id: '1', owner: 'b' }],
-          operation: Operations.bulkGetCases,
+        await auth.getAndEnsureAuthorizedEntities({
+          savedObjects: [
+            { id: '1', attributes: { owner: 'b' }, type: 'test', references: [] },
+            { id: '2', attributes: { owner: 'c' }, type: 'test', references: [] },
+          ],
         });
       } catch (error) {
         expect(error.message).toBe('Unauthorized to access cases of any owner');
@@ -1059,14 +1061,45 @@ describe('authorization', () => {
                   "access",
                 ],
               },
-              "message": "Failed attempt to access a cases as any owners",
+              "kibana": Object {
+                "saved_object": Object {
+                  "id": "1",
+                  "type": "cases",
+                },
+              },
+              "message": "Failed attempt to access cases [id=1] as owner \\"b\\"",
+            },
+          ],
+          Array [
+            Object {
+              "error": Object {
+                "code": "Error",
+                "message": "Unauthorized to access cases of any owner",
+              },
+              "event": Object {
+                "action": "case_bulk_get",
+                "category": Array [
+                  "database",
+                ],
+                "outcome": "failure",
+                "type": Array [
+                  "access",
+                ],
+              },
+              "kibana": Object {
+                "saved_object": Object {
+                  "id": "2",
+                  "type": "cases",
+                },
+              },
+              "message": "Failed attempt to access cases [id=2] as owner \\"c\\"",
             },
           ],
         ]
       `);
     });
 
-    it('does not throw an error or log when a feature owner exists and security is disabled', async () => {
+    it('does not throw an error when a feature owner exists and security is disabled but logs', async () => {
       expect.assertions(2);
 
       auth = await Authorization.create({
@@ -1077,21 +1110,65 @@ describe('authorization', () => {
         logger: loggingSystemMock.createLogger(),
       });
 
-      const helpersPromise = auth.getAuthorizedEntities({
-        entities: [
-          { id: '1', owner: 'blah' },
-          { id: '2', owner: 'something-else' },
+      const helpersPromise = auth.getAndEnsureAuthorizedEntities({
+        savedObjects: [
+          { id: '1', attributes: { owner: 'a' }, type: 'test', references: [] },
+          { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
         ],
-        operation: Operations.bulkGetCases,
       });
 
       await expect(helpersPromise).resolves.not.toThrow();
 
-      expect(mockLogger.log.mock.calls).toMatchInlineSnapshot(`Array []`);
+      expect(mockLogger.log.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "event": Object {
+                "action": "case_bulk_get",
+                "category": Array [
+                  "database",
+                ],
+                "outcome": "success",
+                "type": Array [
+                  "access",
+                ],
+              },
+              "kibana": Object {
+                "saved_object": Object {
+                  "id": "1",
+                  "type": "cases",
+                },
+              },
+              "message": "User has accessed cases [id=1] as owner \\"a\\"",
+            },
+          ],
+          Array [
+            Object {
+              "event": Object {
+                "action": "case_bulk_get",
+                "category": Array [
+                  "database",
+                ],
+                "outcome": "success",
+                "type": Array [
+                  "access",
+                ],
+              },
+              "kibana": Object {
+                "saved_object": Object {
+                  "id": "2",
+                  "type": "cases",
+                },
+              },
+              "message": "User has accessed cases [id=2] as owner \\"b\\"",
+            },
+          ],
+        ]
+      `);
     });
 
     describe('hasAllRequested: true', () => {
-      it('returns correct entities', async () => {
+      it('returns correct entities when the registered features (owners) are a and b', async () => {
         auth = await Authorization.create({
           request,
           spaces: spacesStart,
@@ -1100,45 +1177,102 @@ describe('authorization', () => {
           logger: loggingSystemMock.createLogger(),
         });
 
-        const res = await auth.getAuthorizedEntities({
-          entities: [
-            { id: '1', owner: 'a' },
-            { id: '2', owner: 'b' },
-            { id: '3', owner: 'c' },
+        const res = await auth.getAndEnsureAuthorizedEntities({
+          savedObjects: [
+            { id: '1', attributes: { owner: 'a' }, type: 'test', references: [] },
+            { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
+            { id: '3', attributes: { owner: 'c' }, type: 'test', references: [] },
           ],
-          operation: Operations.bulkGetCases,
         });
 
-        expect(res).toEqual([
-          { id: '1', owner: 'a' },
-          { id: '2', owner: 'b' },
-        ]);
-        expect(mockLogger.log.mock.calls).toMatchInlineSnapshot(`Array []`);
+        expect(res).toEqual({
+          authorized: [
+            { id: '1', attributes: { owner: 'a' }, type: 'test', references: [] },
+            { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
+          ],
+          unauthorized: [{ id: '3', attributes: { owner: 'c' }, type: 'test', references: [] }],
+        });
+
+        expect(mockLogger.log.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_bulk_get",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "access",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
+                },
+                "message": "User has accessed cases [id=1] as owner \\"a\\"",
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_bulk_get",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "access",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "2",
+                    "type": "cases",
+                  },
+                },
+                "message": "User has accessed cases [id=2] as owner \\"b\\"",
+              },
+            ],
+          ]
+        `);
       });
     });
 
     describe('hasAllRequested: false', () => {
-      beforeEach(async () => {
-        securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-          jest.fn(async () => ({
-            hasAllRequested: false,
-            username: 'super',
-            privileges: {
-              kibana: [
-                {
-                  authorized: true,
-                  privilege: 'a:getCase',
-                },
-                {
-                  authorized: true,
-                  privilege: 'b:getCase',
-                },
-                {
-                  authorized: false,
-                  privilege: 'c:getCase',
-                },
-              ],
+      const checkPrivilegesResponse = {
+        hasAllRequested: false,
+        username: 'super',
+        privileges: {
+          kibana: [
+            {
+              authorized: true,
+              privilege: 'a:getCase',
             },
+            {
+              authorized: true,
+              privilege: 'b:getCase',
+            },
+            {
+              authorized: false,
+              privilege: 'c:getCase',
+            },
+          ],
+        },
+      };
+
+      beforeEach(async () => {
+        securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValueOnce(
+          jest.fn(async () => checkPrivilegesResponse)
+        );
+
+        securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValueOnce(
+          jest.fn(async () => ({
+            ...checkPrivilegesResponse,
+            hasAllRequested: true,
           }))
         );
 
@@ -1164,20 +1298,22 @@ describe('authorization', () => {
         });
       });
 
-      it('returns only authorized entities', async () => {
-        const res = await auth.getAuthorizedEntities({
-          entities: [
-            { id: '1', owner: 'a' },
-            { id: '2', owner: 'b' },
-            { id: '3', owner: 'c' },
+      it('returns entities correctly when the kibana privileges are a and b', async () => {
+        const res = await auth.getAndEnsureAuthorizedEntities({
+          savedObjects: [
+            { id: '1', attributes: { owner: 'a' }, type: 'test', references: [] },
+            { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
+            { id: '3', attributes: { owner: 'c' }, type: 'test', references: [] },
           ],
-          operation: Operations.bulkGetCases,
         });
 
-        expect(res).toEqual([
-          { id: '1', owner: 'a' },
-          { id: '2', owner: 'b' },
-        ]);
+        expect(res).toEqual({
+          authorized: [
+            { id: '1', attributes: { owner: 'a' }, type: 'test', references: [] },
+            { id: '2', attributes: { owner: 'b' }, type: 'test', references: [] },
+          ],
+          unauthorized: [{ id: '3', attributes: { owner: 'c' }, type: 'test', references: [] }],
+        });
       });
     });
   });

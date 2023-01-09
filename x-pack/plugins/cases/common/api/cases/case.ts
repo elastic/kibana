@@ -325,10 +325,14 @@ export const AllTagsFindRequestRt = rt.partial({
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
-export const CasesBulkGetRequestRt = rt.type({
-  ids: rt.array(rt.string),
-  fields: rt.union([rt.undefined, rt.array(rt.string), rt.string]),
-});
+export const CasesBulkGetRequestRt = rt.intersection([
+  rt.type({
+    ids: rt.array(rt.string),
+  }),
+  rt.partial({
+    fields: rt.union([rt.undefined, rt.array(rt.string), rt.string]),
+  }),
+]);
 
 export const CasesBulkGetResponseRt = rt.type({
   cases: CasesResponseRt,
