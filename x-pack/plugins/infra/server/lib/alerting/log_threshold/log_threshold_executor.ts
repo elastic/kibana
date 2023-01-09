@@ -51,6 +51,7 @@ import { InfraBackendLibs } from '../../infra_types';
 import {
   AdditionalContext,
   getAlertDetailsUrl,
+  getContextForRecoveredAlerts,
   getGroupByObject,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
@@ -116,6 +117,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       scopedClusterClient,
       getAlertStartedDate,
       getAlertUuid,
+      getAlertByAlertUuid
     } = services;
     const { basePath } = libs;
 
@@ -209,6 +211,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         spaceId,
         startedAt,
         validatedParams,
+        getAlertByAlertUuid
       });
     } catch (e) {
       throw new Error(e);
@@ -989,7 +992,7 @@ type LogThresholdRecoveredAlert = {
   getId: () => string;
 } & LogThresholdAlert;
 
-const processRecoveredAlerts = ({
+const processRecoveredAlerts = async ({
   basePath,
   getAlertStartedDate,
   getAlertUuid,
@@ -997,6 +1000,7 @@ const processRecoveredAlerts = ({
   spaceId,
   startedAt,
   validatedParams,
+  getAlertByAlertUuid
 }: {
   basePath: IBasePath;
   getAlertStartedDate: (alertId: string) => string | null;
@@ -1005,6 +1009,7 @@ const processRecoveredAlerts = ({
   spaceId: string;
   startedAt: Date;
   validatedParams: RuleParams;
+  getAlertByAlertUuid: (alertUuid: string) => { [x: string]: any } | null;
 }) => {
   const groupByKeysObjectForRecovered = getGroupByObject(
     validatedParams.groupBy,
@@ -1016,7 +1021,8 @@ const processRecoveredAlerts = ({
     const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
     const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
     const alertUuid = getAlertUuid(recoveredAlertId);
-
+    const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
+    const additionalContext = getContextForRecoveredAlerts(alertHits);
     const viewInAppUrl = addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
 
     const baseContext = {
@@ -1025,6 +1031,7 @@ const processRecoveredAlerts = ({
       groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),
       viewInAppUrl,
+      ...additionalContext,
     };
 
     if (isRatioRuleParams(validatedParams)) {
