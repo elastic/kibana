@@ -18,7 +18,7 @@ export const imageClickTrigger: Trigger = {
     defaultMessage: 'Image click',
   }),
   description: i18n.translate('imageEmbeddable.triggers.imageClickDescription', {
-    defaultMessage: 'A click on the image',
+    defaultMessage: 'Clicking the image will trigger the action',
   }),
 };
 
