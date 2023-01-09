@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
   EuiButtonIcon,
@@ -17,16 +17,17 @@ import {
   EuiLink,
   EuiLoadingChart,
   EuiPopover,
-  EuiPortal,
   EuiText,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import {
+  useReduxEmbeddableContext,
+  withSuspense,
+  LazyFloatingActions,
+} from '@kbn/presentation-util-plugin/public';
 import { ControlGroupReduxState } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
@@ -35,6 +36,8 @@ import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { TIME_SLIDER_CONTROL } from '../../../common';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlGroupContainer } from '..';
+
+const FloatingActions = withSuspense(LazyFloatingActions);
 
 interface ControlFrameErrorProps {
   error: Error;
@@ -88,11 +91,7 @@ export const ControlFrame = ({
   embeddableType,
 }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const { euiTheme } = useEuiTheme();
   const [fatalError, setFatalError] = useState<Error>();
-  const [areFloatingActionsVisible, setFloatingActionsVisible] = useState<boolean>(false);
-  const showFloatingActions = () => setFloatingActionsVisible(true);
-  const hideFloatingActions = () => setFloatingActionsVisible(false);
 
   const { useEmbeddableSelector: select, embeddableInstance: controlGroup } =
     useReduxEmbeddableContext<
@@ -133,65 +132,6 @@ export const ControlFrame = ({
       errorSubscription?.unsubscribe();
     };
   }, [embeddable, embeddableRoot]);
-
-  const anchorRef = useRef<HTMLSpanElement>(null);
-
-  const anchorBoundingRect = anchorRef.current?.getBoundingClientRect();
-  const hiddenActionsStyles = `visibility: hidden;
-  opacity: 0;
-
-  // slower transition on hover leave in case the user accidentally stops hover
-  transition: visibility .3s, opacity .3s;`;
-  const visibleActionsStyles = `transition: visibility .1s, opacity .1s;
-  visibility: visible;
-  opacity: 1;`;
-  const floatingActionStyles = anchorBoundingRect
-    ? css`
-        top: ${anchorBoundingRect.top -
-        (usingTwoLineLayout ? parseInt(euiTheme.size.xs, 10) : parseInt(euiTheme.size.l, 10))}px;
-        left: ${anchorBoundingRect.right - parseInt(euiTheme.size.xxxxl, 10)}px;
-        ${areFloatingActionsVisible ? visibleActionsStyles : hiddenActionsStyles}
-      `
-    : undefined;
-
-  const floatingActions = (
-    <div
-      className={classNames('controlFrameFloatingActions', {
-        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
-        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
-      })}
-      css={floatingActionStyles}
-      onMouseOver={showFloatingActions}
-      onFocus={showFloatingActions}
-    >
-      {!fatalError && embeddableType !== TIME_SLIDER_CONTROL && (
-        <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
-          <EditControlButton embeddableId={embeddableId} />
-        </EuiToolTip>
-      )}
-      <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
-        <EuiButtonIcon
-          data-test-subj={`control-action-${embeddableId}-delete`}
-          aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
-          onClick={() =>
-            openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
-              confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
-              cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
-              title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
-              buttonColor: 'danger',
-            }).then((confirmed) => {
-              if (confirmed) {
-                controlGroup.removeEmbeddable(embeddableId);
-              }
-            })
-          }
-          iconType="cross"
-          color="danger"
-          tabIndex={0}
-        />
-      </EuiToolTip>
-    </div>
-  );
 
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
@@ -250,10 +190,48 @@ export const ControlFrame = ({
     </EuiFormControlLayout>
   );
 
+  const floatingActions = (
+    <>
+      {!fatalError && embeddableType !== TIME_SLIDER_CONTROL && (
+        <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
+          <EditControlButton embeddableId={embeddableId} />
+        </EuiToolTip>
+      )}
+      <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
+        <EuiButtonIcon
+          data-test-subj={`control-action-${embeddableId}-delete`}
+          aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
+          onClick={() =>
+            openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
+              confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
+              cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
+              title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
+              buttonColor: 'danger',
+            }).then((confirmed) => {
+              if (confirmed) {
+                controlGroup.removeEmbeddable(embeddableId);
+              }
+            })
+          }
+          iconType="cross"
+          color="danger"
+          tabIndex={0}
+        />
+      </EuiToolTip>
+    </>
+  );
+
   return (
     <>
-      {embeddable && enableActions && <EuiPortal>{floatingActions}</EuiPortal>}
-      <span ref={anchorRef} onMouseOver={showFloatingActions} onFocus={showFloatingActions}>
+      <FloatingActions
+        className={classNames('controlFrameFloatingActions', {
+          'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
+          'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
+        })}
+        usingTwoLineLayout={usingTwoLineLayout}
+        actions={floatingActions}
+        isEnabled={embeddable && enableActions}
+      >
         <EuiFormRow
           data-test-subj="control-frame-title"
           fullWidth
@@ -262,14 +240,10 @@ export const ControlFrame = ({
               ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
               : undefined
           }
-          onMouseOver={showFloatingActions}
-          onFocus={showFloatingActions}
-          onMouseLeave={hideFloatingActions}
-          onBlur={hideFloatingActions}
         >
           {form}
         </EuiFormRow>
-      </span>
+      </FloatingActions>
     </>
   );
 };
