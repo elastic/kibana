@@ -10,56 +10,91 @@ import {
   EuiFlexItem,
   EuiSelect,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { Environment } from '../../../../../../common/environment_rt';
+import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
+import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
-import { useFetcher } from '../../../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { push } from '../../../../shared/links/url_helpers';
 
 type MobileFilter =
   APIReturnType<'GET /internal/apm/services/{serviceName}/mobile/filters'>['mobileFilters'][0];
 
-interface Props {
-  end: string;
-  environment: Environment;
-  transactionType?: string;
-  kuery: string;
-  start: string;
-  filters: Record<MobileFilter['key'], string | undefined>;
-}
-
 const ALL_OPTION = {
   value: 'all',
   text: 'All',
 };
 
-export function MobileFilters({
-  end,
-  environment,
-  transactionType,
-  kuery,
-  start,
-  filters,
-}: Props) {
+const MOBILE_FILTERS: Array<{ key: MobileFilter['key']; label: string }> = [
+  {
+    key: 'device',
+    label: i18n.translate('xpack.apm.mobile.filters.device', {
+      defaultMessage: 'Device',
+    }),
+  },
+  {
+    key: 'osVersion',
+    label: i18n.translate('xpack.apm.mobile.filters.osVersion', {
+      defaultMessage: 'OS version',
+    }),
+  },
+  {
+    key: 'appVersion',
+    label: i18n.translate('xpack.apm.mobile.filters.appVersion', {
+      defaultMessage: 'App version',
+    }),
+  },
+  {
+    key: 'netConnectionType',
+    label: i18n.translate('xpack.apm.mobile.filters.nct', {
+      defaultMessage: 'NCT',
+    }),
+  },
+];
+
+export function MobileFilters() {
   const history = useHistory();
   const { isSmall, isLarge } = useBreakpoints();
   const { serviceName } = useApmServiceContext();
-  const { data = { mobileFilters: [] } } = useFetcher(
+
+  const {
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      netConnectionType,
+      device,
+      osVersion,
+      appVersion,
+      transactionType,
+    },
+  } = useAnyOfApmParams(
+    '/mobile-services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/transactions',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
+
+  const filters = { netConnectionType, device, osVersion, appVersion };
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { data = { mobileFilters: [] }, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
         'GET /internal/apm/services/{serviceName}/mobile/filters',
         {
           params: {
             path: { serviceName },
-            query: { end, environment, kuery, start, transactionType },
+            query: { start, end, environment, kuery, transactionType },
           },
         }
       );
     },
-    [end, environment, kuery, serviceName, start, transactionType]
+    [start, end, environment, kuery, serviceName, transactionType]
   );
 
   function toSelectOptions(items?: string[]) {
@@ -86,20 +121,25 @@ export function MobileFilters({
       responsive={false}
       direction={groupDirection}
     >
-      {data.mobileFilters.map((filter) => {
+      {MOBILE_FILTERS.map(({ key, label }) => {
+        const selectOptions =
+          data?.mobileFilters.find((filter: MobileFilter) => filter.key === key)
+            ?.options ?? [];
+
         return (
           <EuiFlexItem
             grow={false}
-            key={filter.key}
+            key={key}
             style={isLarge ? {} : { width: '225px' }}
           >
             <EuiSelect
               fullWidth={isSmall}
-              prepend={filter.label}
-              options={toSelectOptions(filter.options)}
-              value={filters[filter.key]}
+              isLoading={status === FETCH_STATUS.LOADING}
+              prepend={label}
+              options={toSelectOptions(selectOptions)}
+              value={filters?.[key]}
               onChange={(e) => {
-                onChangeFilter(filter.key, e.target.value);
+                onChangeFilter(key, e.target.value);
               }}
             />
           </EuiFlexItem>

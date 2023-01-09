@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce, sortedIndex } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isDefined } from '../../util/is_defined';
+import { isDefined } from '@kbn/ml-is-defined';
 import type { DocumentCountChartPoint } from './document_count_chart';
 import {
   RANDOM_SAMPLER_STEP,

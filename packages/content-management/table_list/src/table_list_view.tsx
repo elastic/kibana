@@ -41,7 +41,7 @@ import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './
 import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
-import { useUrlState } from './use_url_state';
+import { useInRouterContext, useUrlState } from './use_url_state';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -273,6 +273,14 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   } = useServices();
 
   const openContentEditor = useOpenContentEditor();
+
+  const isInRouterContext = useInRouterContext();
+
+  if (!isInRouterContext) {
+    throw new Error(
+      `<TableListView/> requires a React Router context. Ensure your component or React root is being rendered in the context of a <Router>.`
+    );
+  }
 
   const [urlState, setUrlState] = useUrlState<URLState, URLQueryParams>({
     queryParamsDeserializer: urlStateDeserializer,
@@ -877,40 +885,46 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         {showFetchError && renderFetchError()}
 
         {/* Table of items */}
-        <Table<T>
-          dispatch={dispatch}
-          items={items}
-          isFetchingItems={isFetchingItems}
-          searchQuery={searchQuery}
-          tableColumns={tableColumns}
-          hasUpdatedAtMetadata={hasUpdatedAtMetadata}
-          tableSort={tableSort}
-          pagination={pagination}
-          selectedIds={selectedIds}
-          entityName={entityName}
-          entityNamePlural={entityNamePlural}
-          tagsToTableItemMap={tagsToTableItemMap}
-          deleteItems={deleteItems}
-          tableCaption={tableListTitle}
-          onTableChange={onTableChange}
-          onTableSearchChange={onTableSearchChange}
-          onSortChange={onSortChange}
-          addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
-          addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
-          clearTagSelection={clearTagSelection}
-        />
-
-        {/* Delete modal */}
-        {showDeleteModal && (
-          <ConfirmDeleteModal<T>
-            isDeletingItems={isDeletingItems}
+        <div
+          data-test-subj={
+            hasInitialFetchReturned && !isFetchingItems ? 'table-is-ready' : 'table-is-loading'
+          }
+        >
+          <Table<T>
+            dispatch={dispatch}
+            items={items}
+            isFetchingItems={isFetchingItems}
+            searchQuery={searchQuery}
+            tableColumns={tableColumns}
+            hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+            tableSort={tableSort}
+            pagination={pagination}
+            selectedIds={selectedIds}
             entityName={entityName}
             entityNamePlural={entityNamePlural}
-            items={selectedItems}
-            onConfirm={deleteSelectedItems}
-            onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+            tagsToTableItemMap={tagsToTableItemMap}
+            deleteItems={deleteItems}
+            tableCaption={tableListTitle}
+            onTableChange={onTableChange}
+            onTableSearchChange={onTableSearchChange}
+            onSortChange={onSortChange}
+            addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
+            addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
+            clearTagSelection={clearTagSelection}
           />
-        )}
+
+          {/* Delete modal */}
+          {showDeleteModal && (
+            <ConfirmDeleteModal<T>
+              isDeletingItems={isDeletingItems}
+              entityName={entityName}
+              entityNamePlural={entityNamePlural}
+              items={selectedItems}
+              onConfirm={deleteSelectedItems}
+              onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+            />
+          )}
+        </div>
       </KibanaPageTemplate.Section>
     </PageTemplate>
   );

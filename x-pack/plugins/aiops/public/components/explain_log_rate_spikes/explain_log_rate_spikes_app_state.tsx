@@ -11,22 +11,26 @@ import { EuiCallOut } from '@elastic/eui';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
+import { UrlStateProvider } from '@kbn/ml-url-state';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
   SEARCH_QUERY_LANGUAGE,
   SearchQueryLanguage,
   SavedSearchSavedObject,
 } from '../../application/utils/search_utils';
-import { UrlStateProvider } from '../../hooks/use_url_state';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { SpikeAnalysisTableRowStateProvider } from '../spike_analysis_table/spike_analysis_table_row_provider';
 
 import { ExplainLogRateSpikesPage } from './explain_log_rate_spikes_page';
+
+const localStorage = new Storage(window.localStorage);
 
 export interface ExplainLogRateSpikesAppStateProps {
   /** The data view to analyze. */
@@ -40,6 +44,11 @@ export interface ExplainLogRateSpikesAppStateProps {
 const defaultSearchQuery = {
   match_all: {},
 };
+
+export interface AiOpsPageUrlState {
+  pageKey: 'AIOPS_INDEX_VIEWER';
+  pageUrlState: AiOpsIndexBasedAppState;
+}
 
 export interface AiOpsIndexBasedAppState {
   searchString?: Query['query'];
@@ -90,7 +99,9 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
         <SpikeAnalysisTableRowStateProvider>
-          <ExplainLogRateSpikesPage dataView={dataView} savedSearch={savedSearch} />
+          <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+            <ExplainLogRateSpikesPage dataView={dataView} savedSearch={savedSearch} />
+          </StorageContextProvider>
         </SpikeAnalysisTableRowStateProvider>
       </UrlStateProvider>
     </AiopsAppContext.Provider>

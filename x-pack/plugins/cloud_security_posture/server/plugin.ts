@@ -24,6 +24,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import type {
   CspServerPluginSetup,
@@ -37,10 +38,8 @@ import { setupSavedObjects } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
-  isCspPackage,
-  isCspPackageInstalled,
+  isCspPackagePolicyInstalled,
   onPackagePolicyPostCreateCallback,
-  removeCspRulesInstancesCallback,
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
@@ -135,7 +134,6 @@ export class CspPlugin
         ): Promise<PackagePolicy> => {
           if (isCspPackage(packagePolicy.package?.name)) {
             await this.initialize(core, plugins.taskManager);
-
             const soClient = (await context.core).savedObjects.client;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
 
@@ -152,11 +150,13 @@ export class CspPlugin
           for (const deletedPackagePolicy of deletedPackagePolicies) {
             if (isCspPackage(deletedPackagePolicy.package?.name)) {
               const soClient = core.savedObjects.createInternalRepository();
-              await removeCspRulesInstancesCallback(deletedPackagePolicy, soClient, this.logger);
-
-              const isPackageExists = await isCspPackageInstalled(soClient, this.logger);
-
-              if (isPackageExists) {
+              const packagePolicyService = plugins.fleet.packagePolicyService;
+              const isPackageExists = await isCspPackagePolicyInstalled(
+                packagePolicyService,
+                soClient,
+                this.logger
+              );
+              if (!isPackageExists) {
                 await this.uninstallResources(plugins.taskManager, this.logger);
               }
             }
