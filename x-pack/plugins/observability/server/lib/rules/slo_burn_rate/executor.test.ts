@@ -79,11 +79,7 @@ describe('BurnRateRuleExecutor', () => {
     alertFactoryMock = {
       create: jest.fn(),
       done: jest.fn(),
-      alertLimit: {
-        getValue: jest.fn(),
-        setLimitReached: jest.fn(),
-        getEarlyRecoveredAlerts: jest.fn(),
-      },
+      alertLimit: { getValue: jest.fn(), setLimitReached: jest.fn() },
     };
     loggerMock = loggingSystemMock.createLogger();
     servicesMock = {
