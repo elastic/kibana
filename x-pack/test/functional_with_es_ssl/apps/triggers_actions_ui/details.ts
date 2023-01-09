@@ -960,7 +960,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await refreshButton.click();
 
         // List, date picker, and status picker all exists
-        await testSubjects.existOrFail('ruleEventLogList');
+        await testSubjects.existOrFail('eventLogList');
         await testSubjects.existOrFail('ruleEventLogListDatePicker');
         await testSubjects.existOrFail('eventLogStatusFilterButton');
 

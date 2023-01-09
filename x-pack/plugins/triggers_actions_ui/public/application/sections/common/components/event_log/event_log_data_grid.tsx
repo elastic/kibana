@@ -321,7 +321,7 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
           color="hollow"
           onClick={() => onFlyoutOpen(runLog as IExecutionLog)}
           onClickAriaLabel={i18n.translate(
-            'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.openActionErrorsFlyout',
+            'xpack.triggersActionsUI.sections.eventLogColumn.openActionErrorsFlyout',
             {
               defaultMessage: 'Open action errors flyout',
             }

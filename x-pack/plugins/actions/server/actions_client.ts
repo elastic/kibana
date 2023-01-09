@@ -939,7 +939,7 @@ function parseDate(dateString: string | undefined, propertyName: string, default
   const parsedDate = parseIsoOrRelativeDate(dateString);
   if (parsedDate === undefined) {
     throw Boom.badRequest(
-      i18n.translate('xpack.alerting.rulesClient.invalidDate', {
+      i18n.translate('xpack.actions.actionsClient.invalidDate', {
         defaultMessage: 'Invalid date for parameter {field}: "{dateValue}"',
         values: {
           field: propertyName,
