@@ -448,7 +448,7 @@ export function ChangeDataView({
         buffer={8}
       >
         <div css={styles.popoverContent}>
-          <EuiContextMenuPanel size="s" items={getPanelItems()} key="dataview-picker-menu" />
+          <EuiContextMenuPanel size="s" items={getPanelItems()} />
         </div>
       </EuiPopover>
       {modal}
