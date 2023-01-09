@@ -12,14 +12,9 @@ import { useLensAttributes } from './use_lens_attributes';
 import { hostNameExistsFilter, getHostDetailsPageFilter, getIndexFilters } from './utils';
 
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
+import { useSourcererDataView } from '../../containers/sourcerer';
 
-jest.mock('../../containers/sourcerer', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-*'],
-    dataViewId: 'security-solution-default',
-  }),
-}));
-
+jest.mock('../../containers/sourcerer');
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {
@@ -31,6 +26,14 @@ jest.mock('../../utils/route/use_route_spy', () => ({
 }));
 
 describe('useLensAttributes', () => {
+  beforeEach(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      dataViewId: 'security-solution-default',
+      indicesExist: true,
+      selectedPatterns: ['auditbeat-*'],
+    });
+  });
+
   it('should add query', () => {
     const { result } = renderHook(
       () =>
@@ -95,5 +98,23 @@ describe('useLensAttributes', () => {
         id: 'security-solution-default',
       },
     ]);
+  });
+
+  it('should return null if no indices exist', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      dataViewId: 'security-solution-default',
+      indicesExist: false,
+      selectedPatterns: ['auditbeat-*'],
+    });
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current).toBeNull();
   });
 });

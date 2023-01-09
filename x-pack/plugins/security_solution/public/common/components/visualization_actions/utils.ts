@@ -8,6 +8,8 @@
 import type { Filter } from '@kbn/es-query';
 import type { Request } from './types';
 
+export const VISUALIZATION_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
+
 export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
   hostName
     ? [
@@ -147,8 +149,8 @@ export const getIndexFilters = (selectedPatterns: string[]) =>
       ]
     : [];
 
-export const getRequestsAndResponses = (requests: Request[]) => {
-  return requests.reduce(
+export const getRequestsAndResponses = (requests: Request[] | null | undefined) => {
+  return (requests ?? []).reduce(
     (acc: { requests: string[]; responses: string[] }, req: Request) => {
       return {
         requests: [
@@ -168,3 +170,12 @@ export const getRequestsAndResponses = (requests: Request[]) => {
     { requests: [], responses: [] }
   );
 };
+
+export const parseVisualizationData = <T>(data: string[]): T[] =>
+  data.reduce((acc, curr) => {
+    try {
+      return [...acc, JSON.parse(curr)];
+    } catch (e) {
+      return acc;
+    }
+  }, [] as T[]);
