@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
+import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
@@ -15,33 +15,39 @@ import { KibanaContextProvider } from '../../common/lib/kibana';
 import { queryClient } from '../../query_client';
 import { KibanaThemeProvider } from '../../shared_imports';
 import type { StartPlugins } from '../../types';
+import { OsqueryResults } from './osquery_results';
+import { OsqueryResultsWithQuery } from './osquery_results_with_query';
 import type { OsqueryActionResultsProps } from './types';
-import { OsqueryResult } from './osquery_result';
 
 const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   agentIds,
   ruleName,
   actionItems,
+  alertId,
+  actionId,
   ecsData,
-}) => (
-  <div data-test-subj={'osquery-results'}>
-    {actionItems?.map((item, index) => {
-      const actionIndex = item.fields?.action_id?.[0];
-      const startDate = item.fields?.['@timestamp'][0];
-      return (
-        <OsqueryResult
-          key={actionIndex + index}
-          actionId={actionIndex}
-          startDate={startDate}
-          ruleName={ruleName}
-          agentIds={agentIds}
-          ecsData={ecsData}
-        />
-      );
-    })}
-    <EuiSpacer size="s" />
-  </div>
-);
+}) => {
+  if (actionItems) {
+    return (
+      <OsqueryResults
+        agentIds={agentIds}
+        ruleName={ruleName}
+        actionItems={actionItems}
+        ecsData={ecsData}
+      />
+    );
+  }
+
+  return (
+    <OsqueryResultsWithQuery
+      agentIds={agentIds}
+      ruleName={ruleName}
+      actionId={actionId}
+      alertId={alertId}
+      ecsData={ecsData}
+    />
+  );
+};
 
 export const OsqueryActionResults = React.memo(OsqueryActionResultsComponent);
 

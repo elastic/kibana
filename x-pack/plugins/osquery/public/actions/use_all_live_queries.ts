@@ -10,7 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
-import type { ActionEdges, ActionsStrategyResponse, Direction } from '../../common/search_strategy';
+import type { ActionEdges, ActionsStrategyResponse } from '../../common/search_strategy';
 import type { ESTermQuery, ESExistsQuery, ESMatchPhraseQuery } from '../../common/typed_json';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -22,7 +22,6 @@ export interface UseAllLiveQueriesConfig {
   limit: number;
   sortField: string;
   skip?: boolean;
-  alertId?: string;
   actionId?: string;
   alertId?: string;
 }
@@ -68,10 +67,7 @@ export const useAllLiveQueries = ({
   const filterQuery = getFilterQuery(alertId, actionId);
 
   return useQuery(
-    [
-      ACTIONS_QUERY_KEY,
-      { activePage, direction, limit, sortField, actionId, alertId },
-    ],
+    [ACTIONS_QUERY_KEY, { activePage, direction, limit, sortField, actionId, alertId }],
     () =>
       http.get<{ data: Omit<ActionsStrategyResponse, 'edges'> & { items: ActionEdges } }>(
         '/api/osquery/live_queries',

@@ -6,14 +6,22 @@
  */
 
 import type { ActionEdges } from '../../../common/search_strategy';
-import type { AlertEcsData } from '../../common/contexts';
+import type { Ecs } from '../../../common/ecs';
 
-export interface OsqueryActionResultsProps {
+export interface OsqueryActionResultsCommonProps {
   agentIds?: string[];
   ruleName?: string[];
-  actionItems?: ActionEdges;
-
-  alertId?: string;
-  ecsData: AlertEcsData | null;
-  actionId?: string;
+  ecsData: Ecs | null;
 }
+
+// TODO FIX types, these 2 below should have more strict (required) types and then use proper guard + casting
+export type OsqueryActionResultsWithItems = OsqueryActionResultsCommonProps & {
+  actionItems?: ActionEdges;
+};
+
+export type OsqueryActionResultsWithIds = OsqueryActionResultsCommonProps & {
+  alertId?: string;
+  actionId?: string;
+};
+
+export type OsqueryActionResultsProps = OsqueryActionResultsWithItems & OsqueryActionResultsWithIds;
