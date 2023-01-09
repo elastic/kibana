@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import type { AgentEcs } from './agent';
+import type { Ecs } from '@kbn/ecs';
 import type { AuditdEcs } from './auditd';
 import type { DestinationEcs } from './destination';
 import type { DnsEcs } from './dns';
@@ -34,20 +35,40 @@ import type { Ransomware } from './ransomware';
 import type { MemoryProtection } from './memory_protection';
 import type { Target } from './target_type';
 
-export interface Ecs {
+// Security Common Schema
+export interface Scs
+  extends Omit<
+    Ecs,
+    | 'destination'
+    | 'dns'
+    | 'event'
+    | 'file'
+    | 'host'
+    | 'http'
+    | 'message'
+    | 'network'
+    | 'process'
+    | 'registry'
+  > {
   _id: string;
   _index?: string;
-  agent?: AgentEcs;
-  auditd?: AuditdEcs;
+  // overwrites to support multiple values for security entities
   destination?: DestinationEcs;
   dns?: DnsEcs;
-  endgame?: EndgameEcs;
+  message?: string[];
   event?: EventEcs;
-  geo?: GeoEcs;
   host?: HostEcs;
   network?: NetworkEcs;
   registry?: RegistryEcs;
   rule?: RuleEcs;
+  file?: FileEcs;
+  http?: HttpEcs;
+  process?: ProcessEcs;
+
+  // security specific Ecs
+  auditd?: AuditdEcs;
+  endgame?: EndgameEcs;
+  geo?: GeoEcs;
   kibana?: {
     alert: SignalEcsAAD;
   };
@@ -56,14 +77,10 @@ export interface Ecs {
   suricata?: SuricataEcs;
   tls?: TlsEcs;
   zeek?: ZeekEcs;
-  http?: HttpEcs;
   url?: UrlEcs;
   timestamp?: string;
-  message?: string[];
   user?: UserEcs;
   winlog?: WinlogEcs;
-  process?: ProcessEcs;
-  file?: FileEcs;
   system?: SystemEcs;
   threat?: ThreatEcs;
   // This should be temporary
