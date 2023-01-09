@@ -27,9 +27,9 @@ type EnginesListActions = Pick<
   Actions<EnginesListAPIArguments, EnterpriseSearchEnginesResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
-  fetchEngines({ meta }: { meta: Meta }): {
+  fetchEngines({ meta, searchQuery }: { meta: Meta; searchQuery?: string }): {
     meta: Meta;
-    // searchQuery?: string;
+    searchQuery?: string;
   };
   onPaginate(pageNumber: number): { pageNumber: number };
 };
@@ -37,7 +37,7 @@ interface EngineListValues {
   data: typeof FetchEnginesAPILogic.values.data;
   meta: Meta;
   results: EnterpriseSearchEngine[]; // stores engine list value from data
-  parameters: { meta: Meta }; // Added this variable to store to the search Query value as well
+  parameters: { meta: Meta; searchQuery?: string }; // Added this variable to store to the search Query value as well
   status: typeof FetchEnginesAPILogic.values.status;
 }
 
@@ -48,9 +48,9 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
   },
   path: ['enterprise_search', 'content', 'engine_list_logic'],
   actions: {
-    fetchEngines: ({ meta }) => ({
+    fetchEngines: ({ meta, searchQuery }) => ({
       meta,
-      // searchQuery,
+      searchQuery,
     }),
 
     onPaginate: (pageNumber) => ({ pageNumber }),

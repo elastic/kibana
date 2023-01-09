@@ -10,7 +10,6 @@ import React from 'react';
 import { CriteriaWithPagination, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedNumber } from '@kbn/i18n-react';
 
 import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
 
@@ -45,14 +44,6 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
         enlarge: true,
         width: '100%',
       },
-    },
-    {
-      field: 'document_count',
-      name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.documents', {
-        defaultMessage: 'Documents',
-      }),
-      dataType: 'number',
-      render: () => <FormattedNumber value={0} />,
     },
     {
       field: 'last_updated',

@@ -12,7 +12,7 @@ export interface Meta {
 }
 
 export const DEFAULT_META = {
-  from: 1,
+  from: 0,
   size: 10,
   total: 0,
 };
