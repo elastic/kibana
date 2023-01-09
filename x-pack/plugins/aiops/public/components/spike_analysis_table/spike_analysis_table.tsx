@@ -142,8 +142,9 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       name: i18n.translate('xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.fieldValueLabel', {
         defaultMessage: 'Field value',
       }),
-      render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
+      render: (_, { fieldValue }) => String(fieldValue),
       sortable: true,
+      textOnly: true,
       valign: 'top',
     },
     {

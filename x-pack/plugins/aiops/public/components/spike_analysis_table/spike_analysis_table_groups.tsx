@@ -83,31 +83,39 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
     useSpikeAnalysisTableRowContext();
 
+  const pushExpandedTableItem = (
+    expandedTableItems: FieldValuePair[],
+    items: FieldValuePair[],
+    appendString?: string
+  ) => {
+    for (const groupItem of items) {
+      const { fieldName, fieldValue } = groupItem;
+
+      expandedTableItems.push({
+        ...(changePoints.find(
+          (changePoint) =>
+            (changePoint.fieldName === fieldName ||
+              changePoint.fieldName === `${fieldName}.keyword`) &&
+            (changePoint.fieldValue === fieldValue ||
+              changePoint.fieldValue === `${fieldValue}.keyword`)
+        ) ?? {}),
+        fieldName: `${fieldName}`,
+        fieldValue: `${fieldValue} ${appendString ? appendString : ''}`,
+      });
+    }
+    return expandedTableItems;
+  };
+
   const toggleDetails = (item: GroupTableItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
       const { group, repeatedValues } = item;
+      const expandedTableItems: FieldValuePair[] = [];
 
-      const expandedTableItems = [];
-      const fullGroup: FieldValuePair[] = [...group, ...repeatedValues];
-
-      for (const fullGroupItem of fullGroup) {
-        const { fieldName, fieldValue } = fullGroupItem;
-
-        expandedTableItems.push({
-          ...(changePoints.find(
-            (changePoint) =>
-              (changePoint.fieldName === fieldName ||
-                changePoint.fieldName === `${fieldName}.keyword`) &&
-              (changePoint.fieldValue === fieldValue ||
-                changePoint.fieldValue === `${fieldValue}.keyword`)
-          ) ?? {}),
-          fieldName: `${fieldName}`,
-          fieldValue: `${fieldValue}`,
-        });
-      }
+      pushExpandedTableItem(expandedTableItems, group, '*');
+      pushExpandedTableItem(expandedTableItems, repeatedValues);
 
       itemIdToExpandedRowMapValues[item.id] = (
         <SpikeAnalysisTable
