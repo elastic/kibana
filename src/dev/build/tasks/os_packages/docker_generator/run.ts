@@ -50,7 +50,9 @@ export async function runDockerGenerator(
 
   // General docker var config
   const license = 'Elastic License';
-  const imageTag = `docker.elastic.co/kibana${flags.cloud ? '-ci' : ''}/kibana`;
+  const namespace = config.getDockerNamespace();
+  const imageRepo = namespace ? namespace : flags.cloud ? 'kibana-ci' : 'kibana';
+  const imageTag = `docker.elastic.co/${imageRepo}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
   const artifactPrefix = `kibana-${version}-linux`;
