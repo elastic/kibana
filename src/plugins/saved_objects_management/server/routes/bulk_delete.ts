@@ -23,15 +23,10 @@ export const registerBulkDeleteRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { getClient, typeRegistry } = (await context.core).savedObjects;
+      const { getClient } = (await context.core).savedObjects;
 
       const objects = req.body;
-      const uniqueTypes = objects.reduce((acc, { type }) => acc.add(type), new Set<string>());
-      const includedHiddenTypes = Array.from(uniqueTypes).filter(
-        (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
-      );
-
-      const client = getClient({ includedHiddenTypes });
+      const client = getClient();
       const response = await client.bulkDelete(objects, { force: true });
 
       return res.ok({ body: response.statuses });
