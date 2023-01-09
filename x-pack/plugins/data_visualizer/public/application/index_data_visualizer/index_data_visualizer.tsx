@@ -9,31 +9,36 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual, throttle } from 'lodash';
+import { EuiResizeObserver } from '@elastic/eui';
 import { encode } from '@kbn/rison';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { EuiResizeObserver } from '@elastic/eui';
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import {
+  Provider as UrlStateContextProvider,
+  parseUrlState,
+  isRisonSerializationRequired,
+  type Accessor,
+  type Dictionary,
+  type SetUrlState,
+} from '@kbn/ml-url-state';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
 } from './components/index_data_visualizer_view';
-import {
-  Accessor,
-  Provider as UrlStateContextProvider,
-  Dictionary,
-  parseUrlState,
-  SetUrlState,
-  getNestedProperty,
-  isRisonSerializationRequired,
-} from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
+import { DV_STORAGE_KEYS } from './types/storage';
+
+const localStorage = new Storage(window.localStorage);
 
 export interface DataVisualizerStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
@@ -316,10 +321,12 @@ export const IndexDataVisualizer: FC<{
   return (
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
       <KibanaContextProvider services={{ ...services }}>
-        <DataVisualizerStateContextProvider
-          IndexDataVisualizerComponent={IndexDataVisualizerView}
-          getAdditionalLinks={getAdditionalLinks}
-        />
+        <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
+          <DataVisualizerStateContextProvider
+            IndexDataVisualizerComponent={IndexDataVisualizerView}
+            getAdditionalLinks={getAdditionalLinks}
+          />
+        </StorageContextProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );

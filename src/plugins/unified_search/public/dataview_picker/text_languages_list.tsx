@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectable, EuiPanel, EuiBadge } from '@elastic/eui';
-import { TextBasedLanguages } from '.';
+import { TextBasedLanguages } from './data_view_picker';
 
 export interface TextBasedLanguagesListProps {
   textBasedLanguages: TextBasedLanguages[];

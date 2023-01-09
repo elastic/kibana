@@ -883,6 +883,7 @@ packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 packages/kbn-apm-synthtrace @elastic/apm-ui
+packages/kbn-apm-synthtrace-client @elastic/apm-ui
 packages/kbn-apm-utils @elastic/apm-ui
 packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-plugin-package-imports @elastic/kibana-operations
@@ -987,6 +988,7 @@ packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/apm-ui
 packages/kbn-shared-svg @elastic/apm-ui
 packages/kbn-shared-ux-utility @elastic/kibana-global-experience
+packages/kbn-slo-schema @elastic/actionable-observability
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-spec-to-console @elastic/platform-deployment-management
@@ -1066,5 +1068,9 @@ packages/shared-ux/storybook/mock @elastic/kibana-global-experience
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
 x-pack/packages/ml/aiops_utils @elastic/ml-ui
+x-pack/packages/ml/is_defined @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
+x-pack/packages/ml/local_storage @elastic/ml-ui
+x-pack/packages/ml/nested_property @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
+x-pack/packages/ml/url_state @elastic/ml-ui
