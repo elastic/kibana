@@ -9,6 +9,12 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { cloneDeep } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+/**
+ * Extends an exiting query with a clause to exclude the frozen tier.
+ *
+ * @param originalQuery - the original query
+ * @returns the original query exluding the frozen tier
+ */
 export const addExcludeFrozenToQuery = (originalQuery: QueryDslQueryContainer | undefined) => {
   const FROZEN_TIER_TERM = {
     term: {
@@ -31,11 +37,11 @@ export const addExcludeFrozenToQuery = (originalQuery: QueryDslQueryContainer | 
   delete query.match_all;
 
   if (isPopulatedObject(query.bool)) {
-    // Must_not can be both arrays or singular object
+    // `must_not` can be both arrays or singular object
     if (Array.isArray(query.bool.must_not)) {
       query.bool.must_not.push(FROZEN_TIER_TERM);
     } else {
-      // If there's already a must_not condition
+      // If there's already a `must_not` condition
       if (isPopulatedObject(query.bool.must_not)) {
         query.bool.must_not = [query.bool.must_not, FROZEN_TIER_TERM];
       }
