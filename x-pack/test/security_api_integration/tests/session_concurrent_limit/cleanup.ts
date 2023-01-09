@@ -8,6 +8,7 @@
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
+import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '@kbn/security-plugin/common';
 import {
   AggregateName,
@@ -133,6 +134,15 @@ export default function ({ getService }: FtrProviderContext) {
     return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
   }
 
+  async function toggleSessionCleanupTask(enabled: boolean) {
+    await supertest
+      .post('/session/toggle_cleanup_task')
+      .set('kbn-xsrf', 'xxx')
+      .auth(adminTestUser.username, adminTestUser.password)
+      .send({ enabled })
+      .expect(200);
+  }
+
   describe('Session Concurrent Limit cleanup', () => {
     before(async () => {
       await security.user.create('anonymous_user', {
@@ -147,6 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
+      await toggleSessionCleanupTask(false);
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
       await esDeleteAllIndices('.kibana_security_session*');
     });
@@ -166,6 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Cleanup routine runs every 30s, let's wait for 40s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
+      await toggleSessionCleanupTask(true);
       await setTimeoutAsync(60000);
 
       // The oldest session should have been removed, but the rest should still be valid.
@@ -194,6 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Cleanup routine runs every 30s, let's wait for 60s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
+      await toggleSessionCleanupTask(true);
       await setTimeoutAsync(60000);
 
       // The oldest session should have been removed, but the rest should still be valid.
@@ -260,6 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Cleanup routine runs every 30s, let's wait for 60s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
+      await toggleSessionCleanupTask(true);
       await setTimeoutAsync(60000);
 
       // The oldest session should have been removed, but the rest should still be valid.
@@ -287,6 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Cleanup routine runs every 30s, let's wait for 60s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
+      await toggleSessionCleanupTask(true);
       await setTimeoutAsync(60000);
 
       // The oldest session should have been removed, but the rest should still be valid.
@@ -309,6 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Cleanup routine runs every 30s, let's wait for 40s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
+      await toggleSessionCleanupTask(true);
       await setTimeoutAsync(60000);
 
       // The oldest session should have been removed, but the rest should still be valid.
@@ -337,6 +353,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Cleanup routine runs every 30s, let's wait for 40s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
+      await toggleSessionCleanupTask(true);
       await setTimeoutAsync(60000);
 
       // The oldest session should have been removed, but the rest should still be valid.

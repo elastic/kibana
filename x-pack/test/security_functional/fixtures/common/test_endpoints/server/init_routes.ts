@@ -8,8 +8,14 @@
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import { PluginStartDependencies } from '.';
 
-export function initRoutes(initializerContext: PluginInitializerContext, core: CoreSetup) {
+export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
+
+export function initRoutes(
+  initializerContext: PluginInitializerContext,
+  core: CoreSetup<PluginStartDependencies>
+) {
   const logger = initializerContext.logger.get();
 
   const authenticationAppOptions = { simulateUnauthorized: false };
@@ -94,6 +100,35 @@ export function initRoutes(initializerContext: PluginInitializerContext, core: C
 
         throw err;
       }
+    }
+  );
+
+  router.post(
+    {
+      path: '/session/toggle_cleanup_task',
+      validate: { body: schema.object({ enabled: schema.boolean() }) },
+    },
+    async (context, request, response) => {
+      const [, { taskManager }] = await core.getStartServices();
+      logger.info(`Toggle session cleanup task (enabled: ${request.body.enabled}).`);
+      try {
+        if (request.body.enabled) {
+          await taskManager.bulkEnable([SESSION_INDEX_CLEANUP_TASK_NAME]);
+        } else {
+          await taskManager.bulkDisable([SESSION_INDEX_CLEANUP_TASK_NAME]);
+        }
+      } catch (err) {
+        logger.error(
+          `Failed to toggle session cleanup task (enabled: ${request.body.enabled}): ${
+            err?.message || err
+          }.`
+        );
+        throw err;
+      }
+
+      logger.info(`Successfully toggled session cleanup task (enabled: ${request.body.enabled}).`);
+
+      return response.ok();
     }
   );
 }

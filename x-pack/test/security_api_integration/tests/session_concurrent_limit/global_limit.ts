@@ -17,6 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const security = getService('security');
   const config = getService('config');
+  const log = getService('log');
   const randomness = getService('randomness');
   const kibanaServerConfig = config.get('servers.kibana');
   const testUser = { username: 'test_user', password: 'changeme' };
@@ -103,8 +104,19 @@ export default function ({ getService }: FtrProviderContext) {
     return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
   }
 
+  async function toggleSessionCleanupTask(enabled: boolean) {
+    await supertest
+      .post('/session/toggle_cleanup_task')
+      .set('kbn-xsrf', 'xxx')
+      .auth(adminTestUser.username, adminTestUser.password)
+      .send({ enabled })
+      .expect(200);
+  }
+
   describe('Session Global Concurrent Limit', () => {
     before(async () => {
+      // Disable cleanup task to not interfere with the tests.
+      await toggleSessionCleanupTask(false);
       await security.user.create('anonymous_user', {
         password: 'changeme',
         roles: [],
@@ -113,6 +125,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // Enable cleanup task again.
+      await toggleSessionCleanupTask(true);
       await security.user.delete('anonymous_user');
     });
 
@@ -200,6 +214,8 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', basicSessionCookie.cookieString());
         statusCodes.push(statusCode);
       }
+
+      log.debug(`Collected status codes: ${JSON.stringify(statusCodes)}.`);
 
       expect(statusCodes.filter((statusCode) => statusCode === 200)).to.have.length(2);
       expect(statusCodes.filter((statusCode) => statusCode === 401)).to.have.length(8);

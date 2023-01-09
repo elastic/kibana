@@ -17,6 +17,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const idpPath = resolve(__dirname, './fixtures/saml/idp_metadata.xml');
 
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../security_functional/fixtures/common/test_endpoints'
+  );
+
   return {
     testFiles: [resolve(__dirname, './tests/session_concurrent_limit')],
     services,
@@ -41,6 +46,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${testEndpointsPlugin}`,
         '--xpack.security.session.concurrentSessions.maxSessions=2',
         '--xpack.security.session.cleanupInterval=30s',
         `--xpack.security.authc.providers=${JSON.stringify({

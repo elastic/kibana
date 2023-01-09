@@ -5,11 +5,25 @@
  * 2.0.
  */
 
-import { PluginInitializer, Plugin } from '@kbn/core/server';
+import { PluginInitializer, Plugin, CoreSetup } from '@kbn/core/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { initRoutes } from './init_routes';
 
-export const plugin: PluginInitializer<void, void> = (initializerContext): Plugin => ({
-  setup: (core) => initRoutes(initializerContext, core),
+export interface PluginSetupDependencies {
+  taskManager: TaskManagerSetupContract;
+}
+
+export interface PluginStartDependencies {
+  taskManager: TaskManagerStartContract;
+}
+
+export const plugin: PluginInitializer<void, void> = (
+  initializerContext
+): Plugin<void, void, PluginSetupDependencies, PluginStartDependencies> => ({
+  setup: (core: CoreSetup<PluginStartDependencies>) => initRoutes(initializerContext, core),
   start: () => {},
   stop: () => {},
 });
