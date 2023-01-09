@@ -710,8 +710,10 @@ export const getGroupedESQuery = (
             },
           })),
         },
+        aggregations: {
+          ...getContextAggregation(params),
+        }
       },
-      ...getContextAggregation(params),
     };
 
     const body: estypes.SearchRequest['body'] = {
