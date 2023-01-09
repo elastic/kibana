@@ -10,6 +10,7 @@ import type {
   SortOrder,
   AggregationsAggregationContainer,
   Id as EsId,
+  SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 
@@ -176,7 +177,7 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
    * await savedObjectsClient.closePointInTime(page2.pit_id);
    * ```
    */
-  sort?: string[];
+  sort?: SortResults;
 }
 
 /**
