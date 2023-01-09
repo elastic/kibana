@@ -435,8 +435,16 @@ export function App({
     };
   }, []);
 
+  // remember latest URL based on the configuration
+  // url_panel_content has a similar logic
+  const shareURLCache = useRef({ params: '', url: '' });
+
   const shortUrlService = useCallback(
     async (params: LensAppLocatorParams) => {
+      const cacheKey = JSON.stringify(params);
+      if (shareURLCache.current.params === cacheKey) {
+        return shareURLCache.current.url;
+      }
       if (locator && shortUrls) {
         // This is a stripped down version of what the share URL plugin is doing
         const relativeUrl = await shortUrls.create({ locator, params });
@@ -444,6 +452,7 @@ export function App({
           path: `/r/s/${relativeUrl.data.slug}`,
           absolute: true,
         });
+        shareURLCache.current = { params: cacheKey, url: absoluteShortUrl };
         return absoluteShortUrl;
       }
       return '';
