@@ -294,7 +294,6 @@ export async function installKibanaSavedObjects({
         overwrite: true,
         readStream: createListStream(toBeSavedObjects),
         createNewCopies: false,
-        refresh: false,
       })
     );
 
