@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ContentStorage } from './content_storage';
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
@@ -22,11 +21,11 @@ export class ContentCore {
   setup() {}
 
   start() {
-    const crud = <T extends ContentStorage = ContentStorage>(contentType: string) => {
-      return new ContentCrud(contentType, {
+    const crud = <UniqueFields extends object = Record<string, unknown>>(contentType: string) => {
+      return new ContentCrud<UniqueFields>(contentType, {
         contentRegistry: this.contentRegistry,
         eventBus: this.eventBus,
-      }) as unknown as T;
+      });
     };
 
     return {

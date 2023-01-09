@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { ContentStorage } from './content_storage';
 import type { EventBus } from './event_bus';
 import type { ContentRegistry } from './registry';
-import { CommonFields, InternalFields, KibanaContent, SearchOptions } from './types';
+import { ContentStorage, CommonFields, InternalFields, SearchOptions } from './types';
 
-export class ContentCrud implements ContentStorage {
-  private storage: ContentStorage;
+export class ContentCrud<UniqueFields extends object = Record<string, unknown>>
+  implements ContentStorage<UniqueFields>
+{
+  private storage: ContentStorage<UniqueFields>;
   private eventBus: EventBus;
   public contentType: string;
 
@@ -24,11 +24,11 @@ export class ContentCrud implements ContentStorage {
     }
   ) {
     this.contentType = contentType;
-    this.storage = deps.contentRegistry.getStorage(contentType);
+    this.storage = deps.contentRegistry.getStorage<UniqueFields>(contentType);
     this.eventBus = deps.eventBus;
   }
 
-  public get(contentId: string, options?: unknown): Promise<KibanaContent> {
+  public get(contentId: string, options?: unknown) {
     this.eventBus.emit({
       type: 'getItemStart',
       contentId,
@@ -59,15 +59,15 @@ export class ContentCrud implements ContentStorage {
       });
   }
 
-  public mget(ids: string[], options?: unknown): Promise<KibanaContent[]> {
+  public mget(ids: string[], options?: unknown) {
     return this.storage.mget(ids, options);
   }
 
-  public create(fields: CommonFields, options?: unknown): Promise<KibanaContent> {
+  public create(fields: UniqueFields & CommonFields, options?: unknown) {
     return this.storage.create(fields, options);
   }
 
-  public update<T extends Partial<CommonFields>>(
+  public update<T extends Partial<UniqueFields & CommonFields>>(
     id: string,
     fields: T,
     options?: unknown
@@ -75,11 +75,11 @@ export class ContentCrud implements ContentStorage {
     return this.storage.update(id, fields, options);
   }
 
-  public delete(id: string, options?: unknown): Promise<KibanaContent> {
+  public delete(id: string, options?: unknown) {
     return this.storage.delete(id, options);
   }
 
-  public search<O extends SearchOptions = SearchOptions>(options: O): Promise<KibanaContent> {
+  public search<O extends SearchOptions = SearchOptions>(options: O) {
     return this.storage.search(options);
   }
 }

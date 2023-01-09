@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ContentStorage } from './content_storage';
-import type { ContentConfig } from './types';
+import type { ContentStorage, ContentConfig } from './types';
 
 export class ContentRegistry {
   private contents = new Map<string, ContentConfig<ContentStorage>>();
@@ -23,11 +22,11 @@ export class ContentRegistry {
     this.contents.set(contentType, config);
   }
 
-  getStorage<T extends ContentStorage = ContentStorage>(contentType: string) {
+  getStorage<UniqueFields extends object = Record<string, unknown>>(contentType: string) {
     const contentConfig = this.contents.get(contentType);
     if (!contentConfig) {
       throw new Error(`Content [${contentType}] is not registered.`);
     }
-    return contentConfig.storage as T;
+    return contentConfig.storage as ContentStorage<UniqueFields>;
   }
 }

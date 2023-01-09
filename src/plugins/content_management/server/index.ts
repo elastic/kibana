@@ -12,3 +12,13 @@ import { ContentManagementPlugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ContentManagementPlugin(initializerContext);
 }
+
+export type {
+  ContentCore,
+  ContentStorage,
+  CommonFields,
+  ContentConfig,
+  InternalFields,
+  KibanaContent,
+  SearchOptions,
+} from './core';

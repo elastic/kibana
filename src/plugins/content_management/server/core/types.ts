@@ -6,7 +6,32 @@
  * Side Public License, v 1.
  */
 
-import type { ContentStorage } from './content_storage';
+export interface ContentStorage<
+  UniqueFields extends object = Record<string, unknown>,
+  UserFields extends CommonFields = UniqueFields & CommonFields,
+  Content extends KibanaContent = InternalFields & UserFields
+> {
+  /** Get a single item */
+  get(id: string, options?: unknown): Promise<Content>;
+
+  /** Get multiple items */
+  mget(ids: string[], options?: unknown): Promise<Content[]>;
+
+  /** Create an item */
+  create(fields: UserFields, options?: unknown): Promise<Content>;
+
+  // /** Update an item */
+  update<T extends Partial<UserFields>>(
+    id: string,
+    fields: T,
+    options?: unknown
+  ): Promise<Partial<T & InternalFields>>;
+
+  /** Delete an item */
+  delete(id: string, options?: unknown): Promise<Content>;
+
+  search<O extends SearchOptions = SearchOptions>(options: O): Promise<KibanaContent>;
+}
 
 // --- CONFIG
 

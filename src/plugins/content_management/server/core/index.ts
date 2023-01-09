@@ -8,8 +8,8 @@
 
 export { ContentCore } from './core';
 
-export type { ContentRegistry } from './registry';
 export type {
+  ContentStorage,
   CommonFields,
   ContentConfig,
   InternalFields,
