@@ -45,7 +45,14 @@ export const useRulesListUiState = ({
   isInitialLoadingRuleTypes,
   isInitialLoadingRules,
   hasData,
-}: UseUiProps) => {
+}: UseUiProps): {
+  showSpinner: boolean;
+  showRulesList: boolean;
+  showNoAuthPrompt: boolean;
+  showCreateFirstRulePrompt: boolean;
+  showHeaderWithoutCreateButton: boolean;
+  showHeaderWithCreateButton: boolean;
+} => {
   const hasEmptyTypesFilter = hasDefaultRuleTypesFiltersOn ? true : isEmpty(filters.types);
   const isFilterApplied = getFilterApplied({ hasEmptyTypesFilter, filters });
   const isInitialLoading = isInitialLoadingRuleTypes || isInitialLoadingRules;

@@ -777,7 +777,7 @@ export const RulesList = ({
           />
         )}
         <EuiSpacer size="xs" />
-        {showRulesList ? (
+        {showRulesList && (
           <>
             <RulesListFiltersBar
               inputText={inputText}
@@ -934,7 +934,7 @@ export const RulesList = ({
               />
             )}
           </>
-        ) : null}
+        )}
         {ruleFlyoutVisible && (
           <Suspense fallback={<div />}>
             <RuleAdd

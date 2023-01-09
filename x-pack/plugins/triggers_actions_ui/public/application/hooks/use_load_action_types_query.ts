@@ -31,7 +31,7 @@ export const useLoadActionTypesQuery = () => {
     );
   };
 
-  const { data = [], isLoading } = useQuery({
+  const { data = [] } = useQuery({
     queryKey: ['loadActionTypes'],
     queryFn,
     onError: onErrorFn,
@@ -43,6 +43,5 @@ export const useLoadActionTypesQuery = () => {
 
   return {
     actionTypes: sortedResult,
-    isLoading,
   };
 };

@@ -9,11 +9,27 @@ import { useQuery } from '@tanstack/react-query';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { loadRuleTypes } from '../lib/rule_api';
 import { useKibana } from '../../common/lib/kibana';
-import { RuleTypeIndex } from '../../types';
+import { RuleType, RuleTypeIndex } from '../../types';
 
 interface UseLoadRuleTypesQueryProps {
   filteredRuleTypes: string[];
 }
+
+const getFilteredIndex = (data: Array<RuleType<string, string>>, filteredRuleTypes: string[]) => {
+  const index: RuleTypeIndex = new Map();
+  for (const ruleType of data) {
+    index.set(ruleType.id, ruleType);
+  }
+  let filteredIndex = index;
+  if (filteredRuleTypes?.length) {
+    filteredIndex = new Map(
+      [...index].filter(([k, v]) => {
+        return filteredRuleTypes.includes(v.id);
+      })
+    );
+  }
+  return filteredIndex;
+};
 
 export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
   const { filteredRuleTypes } = props;
@@ -40,22 +56,7 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
     onError: onErrorFn,
   });
 
-  let filteredIndex = new Map();
-  if (data) {
-    const index: RuleTypeIndex = new Map();
-    for (const ruleType of data) {
-      index.set(ruleType.id, ruleType);
-    }
-    let newFilteredIndex = index;
-    if (filteredRuleTypes && filteredRuleTypes.length > 0) {
-      newFilteredIndex = new Map(
-        [...index].filter(([k, v]) => {
-          return filteredRuleTypes.includes(v.id);
-        })
-      );
-    }
-    filteredIndex = newFilteredIndex;
-  }
+  const filteredIndex = data ? getFilteredIndex(data, filteredRuleTypes) : new Map();
 
   const hasAnyAuthorizedRuleType = filteredIndex.size > 0;
   const authorizedRuleTypes = [...filteredIndex.values()];
