@@ -12,24 +12,52 @@ import { ArgumentSelectorWrapper } from '../components/argument_selector_wrapper
 import type { ParsedCommandInterface } from '../../../service/types';
 import type { EnteredCommand } from '../../console_state/types';
 
+interface InputCharacter {
+  value: string;
+  renderValue: ReactNode;
+  isArgSelector: boolean;
+  argName: string;
+  argInstance: number; // zero based
+}
+
+const createInputCharacter = (overrides: Partial<InputCharacter> = {}): InputCharacter => {
+  return {
+    value: '',
+    renderValue: null,
+    isArgSelector: false,
+    argName: '',
+    argInstance: 0,
+    ...overrides,
+  };
+};
+
+const getInputCharacters = (input: string): InputCharacter[] => {
+  return input.split('').map((char) => {
+    return createInputCharacter({
+      value: char,
+      renderValue: char,
+    });
+  });
+};
+
 /**
  * Class that manages the command entered and how that is displayed to the left and right of the cursor
  */
 export class EnteredInput {
-  private leftOfCursorContent: ReactNode[];
-  private rightOfCursorContent: ReactNode[];
+  private leftOfCursorContent: InputCharacter[];
+  private rightOfCursorContent: InputCharacter[];
 
   constructor(
-    private leftOfCursorText: string,
-    private rightOfCursorText: string,
+    leftOfCursorText: string,
+    rightOfCursorText: string,
     parsedInput_: MaybeImmutable<ParsedCommandInterface>,
     enteredCommand: undefined | MaybeImmutable<EnteredCommand>
   ) {
     // Cast the `parseInput` to remove `Immutable` type from it
     const parsedInput = parsedInput_ as ParsedCommandInterface;
 
-    this.leftOfCursorContent = leftOfCursorText.split('');
-    this.rightOfCursorContent = rightOfCursorText.split('');
+    this.leftOfCursorContent = getInputCharacters(leftOfCursorText);
+    this.rightOfCursorContent = getInputCharacters(rightOfCursorText);
 
     // Determine if any argument value selector should be inserted
     if (parsedInput.hasArgs && enteredCommand && enteredCommand.argsWithValueSelectors) {
@@ -45,6 +73,8 @@ export class EnteredInput {
       ];
 
       for (const [argName, argDef] of Object.entries(enteredCommand.argsWithValueSelectors)) {
+        const argInstance = 0;
+
         // Loop through the input pieces (left and right side of cursor) looking for the Argument name
         for (const { input, items } of inputPieces) {
           // TODO:PT Support multiple occurrences of the argument
@@ -54,9 +84,18 @@ export class EnteredInput {
 
           if (parsedInput.hasArg(argName) && pos !== -1) {
             const argChrLength = argNameMatch.length;
-            const replaceValues: ReactNode[] = Array.from({ length: argChrLength }, () => null);
+            const replaceValues: InputCharacter[] = Array.from(
+              { length: argChrLength },
+              createInputCharacter
+            );
 
-            replaceValues[0] = <ArgumentSelectorWrapper argName={argName} argDefinition={argDef} />;
+            replaceValues[0] = createInputCharacter({
+              value: argNameMatch,
+              renderValue: <ArgumentSelectorWrapper argName={argName} argDefinition={argDef} />,
+              isArgSelector: true,
+              argName,
+              argInstance,
+            });
 
             items.splice(pos, argChrLength, ...replaceValues);
           }
@@ -66,33 +105,34 @@ export class EnteredInput {
   }
 
   private replaceSelection(selection: string, newValue: string) {
-    const prevFullTextEntered = this.leftOfCursorText + this.rightOfCursorText;
-
-    this.leftOfCursorText =
-      prevFullTextEntered.substring(0, prevFullTextEntered.indexOf(selection)) + newValue;
-
-    this.rightOfCursorText = prevFullTextEntered.substring(
-      prevFullTextEntered.indexOf(selection) + selection.length
-    );
+    // FIXME:PT implement text replacement
+    // const prevFullTextEntered = this.getFullText();
+    //
+    // this.leftOfCursorText =
+    //   prevFullTextEntered.substring(0, prevFullTextEntered.indexOf(selection)) + newValue;
+    //
+    // this.rightOfCursorText = prevFullTextEntered.substring(
+    //   prevFullTextEntered.indexOf(selection) + selection.length
+    // );
   }
 
   getLeftOfCursorText(): string {
-    return this.leftOfCursorText;
+    return this.leftOfCursorContent.map((item) => item.value).join('');
   }
 
   getRightOfCursorText(): string {
-    return this.rightOfCursorText;
+    return this.rightOfCursorContent.map((item) => item.value).join('');
   }
 
   getFullText(): string {
-    return this.leftOfCursorText + this.rightOfCursorText;
+    return this.getLeftOfCursorText() + this.getRightOfCursorText();
   }
 
   getLeftOfCursorRenderingContent(): ReactNode {
     return (
       <>
         {this.leftOfCursorContent.map((item, index) => {
-          return <React.Fragment key={`left.${index}`}>{item}</React.Fragment>;
+          return <React.Fragment key={`left.${index}`}>{item.renderValue}</React.Fragment>;
         })}
       </>
     );
@@ -102,7 +142,7 @@ export class EnteredInput {
     return (
       <>
         {this.rightOfCursorContent.map((item, index) => {
-          return <React.Fragment key={`right.${index}`}>{item}</React.Fragment>;
+          return <React.Fragment key={`right.${index}`}>{item.renderValue}</React.Fragment>;
         })}
       </>
     );
@@ -111,36 +151,30 @@ export class EnteredInput {
   moveCursorTo(direction: 'left' | 'right' | 'end' | 'home') {
     switch (direction) {
       case 'end':
-        this.leftOfCursorText = this.leftOfCursorText + this.rightOfCursorText;
-        this.rightOfCursorText = '';
+        this.leftOfCursorContent.push(...this.rightOfCursorContent.splice(0));
         break;
 
       case 'home':
-        this.rightOfCursorText = this.leftOfCursorText + this.rightOfCursorText;
-        this.leftOfCursorText = '';
+        this.rightOfCursorContent.unshift(...this.leftOfCursorContent.splice(0));
         break;
 
       case 'left':
-        if (this.leftOfCursorText.length) {
-          // Add last character on the left, to the right side of the cursor
-          this.rightOfCursorText =
-            this.leftOfCursorText.charAt(this.leftOfCursorText.length - 1) + this.rightOfCursorText;
+        if (this.leftOfCursorContent.length) {
+          const itemToMove = this.leftOfCursorContent.pop();
 
-          // Remove the last character from the left (it's now on the right side of cursor)
-          this.leftOfCursorText = this.leftOfCursorText.substring(
-            0,
-            this.leftOfCursorText.length - 1
-          );
+          if (itemToMove) {
+            this.rightOfCursorContent.unshift(itemToMove);
+          }
         }
         break;
 
       case 'right':
-        if (this.rightOfCursorText.length) {
-          // MOve the first character from the Right side, to the left side of the cursor
-          this.leftOfCursorText = this.leftOfCursorText + this.rightOfCursorText.charAt(0);
+        if (this.rightOfCursorContent.length) {
+          const itemToMove = this.rightOfCursorContent.shift();
 
-          // Remove the first character from the Right side of the cursor (now on the left)
-          this.rightOfCursorText = this.rightOfCursorText.substring(1);
+          if (itemToMove) {
+            this.leftOfCursorContent.push(itemToMove);
+          }
         }
         break;
     }
@@ -149,31 +183,28 @@ export class EnteredInput {
   addValue(value: string, replaceSelection: string = '') {
     if (replaceSelection.length && value.length) {
       this.replaceSelection(replaceSelection, value);
-    } else {
-      this.leftOfCursorText += value;
+    } else if (value) {
+      this.leftOfCursorContent.push(createInputCharacter({ value }));
     }
   }
 
   deleteChar(replaceSelection: string = '') {
     if (replaceSelection) {
       this.replaceSelection(replaceSelection, '');
-    } else if (this.rightOfCursorText) {
-      this.rightOfCursorText = this.rightOfCursorText.substring(1);
+    } else {
+      this.rightOfCursorContent.shift();
     }
   }
 
   backspaceChar(replaceSelection: string = '') {
     if (replaceSelection) {
       this.replaceSelection(replaceSelection, '');
-    } else if (this.leftOfCursorText) {
-      this.leftOfCursorText = this.leftOfCursorText.substring(0, this.leftOfCursorText.length - 1);
+    } else {
+      this.leftOfCursorContent.pop();
     }
   }
 
   clear() {
-    this.leftOfCursorText = '';
-    this.rightOfCursorText = '';
-
     this.leftOfCursorContent = [];
     this.rightOfCursorContent = [];
   }
