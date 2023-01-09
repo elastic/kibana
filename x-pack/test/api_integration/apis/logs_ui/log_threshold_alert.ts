@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
             ],
-            undefined
+            undefined,
           ]);
           expect(alertLimit.setLimitReached.calledOnceWith(false)).to.be(true);
         });
@@ -145,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
             ],
-            undefined
+            undefined,
           ]);
           expect(alertLimit.setLimitReached.calledOnceWith(true)).to.be(true);
         });
@@ -206,7 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
             ],
-            undefined
+            undefined,
           ]);
           expect(alertLimit.setLimitReached.calledOnceWith(true)).to.be(true);
         });
@@ -267,7 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
             ],
-            undefined
+            undefined,
           ]);
           expect(alertLimit.setLimitReached.calledOnceWith(false)).to.be(true);
         });
@@ -329,7 +329,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
             ],
-            undefined
+            undefined,
           ]);
           expect(alertLimit.setLimitReached.calledOnceWith(false)).to.be(true);
         });
