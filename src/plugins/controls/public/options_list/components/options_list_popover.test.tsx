@@ -57,13 +57,14 @@ describe('Options list popover', () => {
 
   test('available options list width responds to container size', async () => {
     let popover = await mountComponent({ popoverProps: { width: 301 } });
-    let availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    expect(availableOptionsDiv.getDOMNode().getAttribute('style')).toBe('width: 301px;');
+    let popoverDiv = findTestSubject(popover, 'optionsList-control-popover');
+    // console.log(availableOptionsDiv.getDOMNode().scrollWidth);
+    expect(popoverDiv.getDOMNode().getAttribute('style')).toBe('width: 301px;');
 
     // the div cannot be smaller than 301 pixels wide
     popover = await mountComponent({ popoverProps: { width: 300 } });
-    availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    expect(availableOptionsDiv.getDOMNode().getAttribute('style')).toBe(null);
+    popoverDiv = findTestSubject(popover, 'optionsList-control-available-options');
+    expect(popoverDiv.getDOMNode().getAttribute('style')).toBe(null);
   });
 
   test('no available options', async () => {

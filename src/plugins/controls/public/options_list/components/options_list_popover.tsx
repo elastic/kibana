@@ -13,6 +13,7 @@ import { EuiPopoverTitle } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListReduxState } from '../types';
+import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
@@ -42,12 +43,19 @@ export const OptionsListPopover = ({
   const field = select((state) => state.componentState.field);
 
   const hideExclude = select((state) => state.explicitInput.hideExclude);
+  const fieldName = select((state) => state.explicitInput.fieldName);
   const title = select((state) => state.explicitInput.title);
+  const id = select((state) => state.explicitInput.id);
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   return (
-    <>
+    <div
+      id={`control-popover-${id}`}
+      style={{ width: width > 300 ? width : undefined }}
+      data-test-subj={`optionsList-control-popover`}
+      aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
+    >
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
       {field?.type !== 'boolean' && (
         <OptionsListPopoverActionBar
@@ -57,8 +65,6 @@ export const OptionsListPopover = ({
         />
       )}
       <div
-        className="optionsList__items"
-        style={{ width: width > 300 ? width : undefined }}
         data-test-subj={`optionsList-control-available-options`}
         data-option-count={Object.keys(availableOptions ?? {}).length}
       >
@@ -68,6 +74,6 @@ export const OptionsListPopover = ({
         )}
       </div>
       {!hideExclude && <OptionsListPopoverFooter />}
-    </>
+    </div>
   );
 };

@@ -151,13 +151,11 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         anchorClassName="optionsList__anchorOverride"
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
-        <span id={`control-popover-${id}`}>
-          <OptionsListPopover
-            width={dimensions.width}
-            isLoading={debouncedLoading}
-            updateSearchString={updateSearchString}
-          />
-        </span>
+        <OptionsListPopover
+          width={dimensions.width}
+          isLoading={debouncedLoading}
+          updateSearchString={updateSearchString}
+        />
       </EuiPopover>
     </EuiFilterGroup>
   );
