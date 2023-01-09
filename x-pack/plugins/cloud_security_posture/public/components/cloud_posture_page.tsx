@@ -96,10 +96,13 @@ export const CspNoDataPage = ({
   />
 );
 
-const packageNotInstalledRenderer = (
-  kspmIntegrationLink?: string,
-  cspmIntegrationLink?: string
-) => {
+const packageNotInstalledRenderer = ({
+  kspmIntegrationLink,
+  cspmIntegrationLink,
+}: {
+  kspmIntegrationLink?: string;
+  cspmIntegrationLink?: string;
+}) => {
   return (
     <FullSizeCenteredPage>
       <EuiEmptyPrompt
@@ -267,7 +270,7 @@ export const CloudPosturePage = <TData, TError>({
     }
 
     if (getSetupStatus.data.status === 'not-installed') {
-      return packageNotInstalledRenderer(kspmIntegrationLink, cspmIntegrationLink);
+      return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
     }
 
     if (!query) {

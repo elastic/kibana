@@ -195,7 +195,7 @@ export const aggregateLatestFindings = async (
       scoreIndexQueryResult.aggregations.score_by_policy_template.buckets;
 
     // iterating over the buckets and return promises which will index a modified document into the scores index
-    const docIndexingPromises = scoresByPolicyTemplatesBuckets.map(async (policyTemplateTrend) => {
+    const docIndexingPromises = scoresByPolicyTemplatesBuckets.map((policyTemplateTrend) => {
       // creating score per cluster id objects
       const clustersStats = Object.fromEntries(
         policyTemplateTrend.score_by_cluster_id.buckets.map((clusterStats) => {
@@ -213,7 +213,7 @@ export const aggregateLatestFindings = async (
       );
 
       // each document contains the policy template and its scores
-      return await esClient.index({
+      return esClient.index({
         index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
         document: {
           policy_template: policyTemplateTrend.key,

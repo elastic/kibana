@@ -15,7 +15,6 @@ import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
 import { getTrends, Trends } from './get_trends';
-import {} from '../../../common/constants';
 
 export interface KeyDocCount<TKey = string> {
   key: TKey;

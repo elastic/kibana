@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './use_compliance_dashboard_data_api';
+export * from '@kbn/cloud-security-posture-plugin/public/common/api/use_stats_api';

@@ -158,7 +158,7 @@ export const CloudPostureScoreChart = ({
             <EuiFlexGroup
               justifyContent="flexEnd"
               gutterSize="none"
-              alignItems={compact ? 'center' : 'flexStart'}
+              alignItems={'baseline'}
               style={{ paddingRight: euiTheme.size.xl }}
             >
               <CounterLink

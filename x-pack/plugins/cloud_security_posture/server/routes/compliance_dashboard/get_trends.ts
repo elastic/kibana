@@ -38,13 +38,7 @@ export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate) => ({
   sort: '@timestamp:desc',
   query: {
     bool: {
-      filter: [
-        {
-          term: {
-            policy_template: policyTemplate,
-          },
-        },
-      ],
+      filter: [{ term: { policy_template: policyTemplate } }],
       must: {
         range: {
           '@timestamp': {

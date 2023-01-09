@@ -17,15 +17,18 @@ import type {
   ListResult,
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
-import { CspSetupStatus } from '../../common/types';
-import { truthy } from '../../common/utils/helpers';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
+import { PosturePolicyTemplate } from '../../common/types';
+import { SUPPORTED_POLICY_TEMPLATES } from '../../common/constants';
+import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
   BenchmarksQueryParams,
 } from '../../common/schemas/benchmark';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
+
+const isPolicyTemplate = (input: any): input is PosturePolicyTemplate =>
+  SUPPORTED_POLICY_TEMPLATES.includes(input);
 
 const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): string => {
   const integrationNameQuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`;
@@ -47,11 +50,11 @@ export const getAgentStatusesByAgentPolicies = async (
   const internalAgentService = agentService.asInternalUser;
   const result: AgentStatusByAgentPolicyMap = {};
 
-  for (const agentPolicy of agentPolicies) {
-    result[agentPolicy.id] = await internalAgentService.getAgentStatusForAgentPolicy(
-      agentPolicy.id
-    );
-  }
+  // for (const agentPolicy of agentPolicies) {
+  //   result[agentPolicy.id] = await internalAgentService.getAgentStatusForAgentPolicy(
+  //     agentPolicy.id
+  //   );
+  // }
 
   return result;
 };
@@ -90,7 +93,7 @@ export const getInstalledPolicyTemplates = async (
   try {
     // getting all installed csp package policies
     const queryResult = await packagePolicyClient.list(soClient, {
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`,
+      kuery: CSP_FLEET_PACKAGE_KUERY,
       perPage: 1000,
     });
 
@@ -99,7 +102,7 @@ export const getInstalledPolicyTemplates = async (
       .map((policy) => {
         return policy.inputs.find((input) => input.enabled)?.policy_template;
       })
-      .filter(truthy) as CspSetupStatus['installedPolicyTemplates'];
+      .filter(isPolicyTemplate);
 
     // removing duplicates
     return [...new Set(enabledPolicyTemplates)];

@@ -93,7 +93,7 @@ export const CloudBenchmarksSection = ({
         <React.Fragment key={cluster.meta.clusterId}>
           <EuiFlexGroup
             key={cluster.meta.clusterId}
-            style={{ borderBottom: euiTheme.border.thin, padding: '16px 0' }}
+            style={{ borderBottom: euiTheme.border.thin, padding: `${euiTheme.size.base} 0` }}
           >
             <EuiFlexItem grow={dashboardColumnsGrow.first}>
               <ClusterDetailsBox cluster={cluster} />
