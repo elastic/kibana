@@ -608,20 +608,19 @@
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions @elastic/security-solution-platform @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/server/routes @elastic/security-detections-response @elastic/security-threat-hunting
 
-
-## Security Solution sub teams - security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/public/management/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/public/common/lib/endpoint*/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/common/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/server/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/server/lists_integration/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/server/lib/license/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/test/security_solution_endpoint_api_int/ @elastic/security-onboarding-and-lifecycle-mgt
+## Security Solution sub teams - security-defend-workflows
+/x-pack/plugins/security_solution/public/management/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/common/lib/endpoint*/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/common/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/server/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/server/lists_integration/endpoint/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/server/lib/license/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-defend-workflows
+/x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-defend-workflows
+/x-pack/test/security_solution_endpoint_api_int/ @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
@@ -644,11 +643,11 @@ x-pack/plugins/threat_intelligence @elastic/protections-experience
 x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections-experience
 x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
-# Security Asset Management
-/x-pack/plugins/osquery @elastic/security-asset-management
-/x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-asset-management
-/x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-asset-management
-/x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-asset-management
+# Security Defend Workflows - OSQuery Ownership
+/x-pack/plugins/osquery @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
 
 # Cloud Security Posture
 /x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
