@@ -160,7 +160,7 @@ export const ActionNotifyWhen = ({
         100
       );
     },
-    [onNotifyWhenChange, setNotifyWhenValue, onThrottleChange, throttleUnit]
+    [onNotifyWhenChange, setNotifyWhenValue, onThrottleChange, throttle, throttleUnit]
   );
 
   const labelForRuleRenotify = [
