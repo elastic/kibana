@@ -15,7 +15,7 @@ import { FilePickerState, createFilePickerState } from './file_picker_state';
 interface FilePickerContextValue extends FilesContextValue {
   state: FilePickerState;
   kind: string;
-  deleteButtonPredicate?: (file: FileJSON) => boolean;
+  shouldAllowDelete?: (file: FileJSON) => boolean;
 }
 
 const FilePickerCtx = createContext<FilePickerContextValue>(
@@ -23,14 +23,14 @@ const FilePickerCtx = createContext<FilePickerContextValue>(
 );
 
 interface FilePickerContextProps
-  extends Pick<FilePickerContextValue, 'kind' | 'deleteButtonPredicate'> {
+  extends Pick<FilePickerContextValue, 'kind' | 'shouldAllowDelete'> {
   pageSize: number;
   multiple: boolean;
 }
 
 export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
   kind,
-  deleteButtonPredicate,
+  shouldAllowDelete,
   pageSize,
   multiple,
   children,
@@ -43,7 +43,7 @@ export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
   );
   useEffect(() => state.dispose, [state]);
   return (
-    <FilePickerCtx.Provider value={{ state, kind, deleteButtonPredicate, ...filesContext }}>
+    <FilePickerCtx.Provider value={{ state, kind, shouldAllowDelete, ...filesContext }}>
       {children}
     </FilePickerCtx.Provider>
   );

@@ -26,7 +26,7 @@ interface Props {
 }
 
 export const FileCard: FunctionComponent<Props> = ({ file }) => {
-  const { kind, state, client, deleteButtonPredicate } = useFilePickerContext();
+  const { kind, state, client, shouldAllowDelete } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const displayImage = isImage({ type: file.mimeType });
   const isSelected$ = useMemo(() => state.watchFileSelected$(file.id), [file.id, state]);
@@ -97,7 +97,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
     </>
   );
 
-  const deleteButton = deleteButtonPredicate && deleteButtonPredicate(file) && (
+  const deleteButton = shouldAllowDelete && shouldAllowDelete(file) && (
     <EuiButtonIcon
       iconType="trash"
       aria-label={i18nTexts.delete}

@@ -431,7 +431,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
       {isFilePickerOpen && (
         <FilePicker
           kind={imageEmbeddableFileKind.id}
-          deleteButtonPredicate={(file) =>
+          shouldAllowDelete={(file) =>
             props.user ? props.user.profile_uid === file.user?.id : false
           }
           multiple={false}

@@ -42,7 +42,7 @@ export interface Props<Kind extends string = string> {
   /**
    * A function which determines whether to show a delete button for a file.
    */
-  deleteButtonPredicate?: (file: FileJSON) => boolean;
+  shouldAllowDelete?: (file: FileJSON) => boolean;
   /**
    * Will be called when the modal is closed
    */
@@ -149,7 +149,7 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
 export const FilePicker: FunctionComponent<Props> = ({
   pageSize = 20,
   kind,
-  deleteButtonPredicate,
+  shouldAllowDelete,
   multiple = false,
   onUpload = () => {},
   ...rest
@@ -158,7 +158,7 @@ export const FilePicker: FunctionComponent<Props> = ({
     pageSize={pageSize}
     kind={kind}
     multiple={multiple}
-    deleteButtonPredicate={deleteButtonPredicate}
+    shouldAllowDelete={shouldAllowDelete}
   >
     <Component {...rest} {...{ pageSize, kind, multiple, onUpload }} />
   </FilePickerContext>
