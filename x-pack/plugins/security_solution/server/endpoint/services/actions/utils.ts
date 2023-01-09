@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { every, isEmpty, some } from 'lodash';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_DS,
@@ -35,6 +34,7 @@ import type {
 } from '../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
 import type { EndpointMetadataService } from '../metadata';
+import { calculateOsqueryResponses } from './calculate_osquery_responses';
 
 /**
  * Type guard to check if a given Action is in the shape of the Endpoint Action.
@@ -320,8 +320,10 @@ const mapActionResponsesByAgentId = (
     if (actionResponse.type === 'fleetResponse') {
       thisAgentActionResponses.fleetResponse = actionResponse;
     } else if (actionResponse.type === 'osqueryResponse') {
+      // OSQUERY only
       rootActionId = actionResponse.item.data.EndpointActions.root_action_id;
 
+      // Initialize new or add actionResponse to existing array per rootActionId
       if (!thisAgentActionResponses.osqueryResponses[rootActionId]) {
         thisAgentActionResponses.osqueryResponses[rootActionId] = [actionResponse];
       } else {
@@ -349,29 +351,12 @@ const mapActionResponsesByAgentId = (
           thisAgentActionResponses.endpointResponse?.item.data['@timestamp'];
         thisAgentActionResponses.wasSuccessful = true;
       } else if (thisAgentActionResponses.osqueryResponses[rootActionId]?.length) {
-        thisAgentActionResponses.completedAt =
-          thisAgentActionResponses.osqueryResponses[rootActionId][0]?.item.data['@timestamp'];
-        const allSuccessful = every(
-          thisAgentActionResponses.osqueryResponses[rootActionId],
-          ({ item }) => {
-            return isEmpty(item.data.EndpointActions.error);
-          }
+        const osqueryStatus = calculateOsqueryResponses(
+          thisAgentActionResponses.osqueryResponses[rootActionId]
         );
-        if (allSuccessful) {
-          thisAgentActionResponses.wasSuccessful = true;
-          thisAgentActionResponses.partiallySuccessful = false;
-        } else {
-          const partiallySuccessful = some(
-            thisAgentActionResponses.osqueryResponses[rootActionId],
-            ({ item }) => {
-              return isEmpty(item.data.EndpointActions.error);
-            }
-          );
-          if (partiallySuccessful) {
-            thisAgentActionResponses.partiallySuccessful = true;
-            thisAgentActionResponses.wasSuccessful = true;
-          }
-        }
+        thisAgentActionResponses.completedAt = osqueryStatus.completedAt;
+        thisAgentActionResponses.partiallySuccessful = osqueryStatus.partiallySuccessful;
+        thisAgentActionResponses.wasSuccessful = osqueryStatus.wasSuccessful;
       } else if (
         // Check if perhaps the Fleet action response returned an error, in which case, the Fleet Agent
         // failed to deliver the Action to the Endpoint. If that's the case, we are not going to get
