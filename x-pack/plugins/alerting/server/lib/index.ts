@@ -38,22 +38,6 @@ export { isRuleSnoozed, getRuleSnoozeEndTime } from './is_rule_snoozed';
 export { convertRuleIdsToKueryNode } from './convert_rule_ids_to_kuery_node';
 export { convertEsSortToEventLogSort } from './convert_es_sort_to_event_log_sort';
 export * from './snooze';
-export { parseIsoOrRelativeDate } from './iso_or_relative_date';
 export { setFlapping } from './set_flapping';
 export { determineAlertsToReturn } from './determine_alerts_to_return';
 export { updateFlappingHistory, isFlapping } from './flapping_utils';
-export {
-  formatSortForTermSort,
-  formatSortForBucketSort,
-  formatExecutionLogResult,
-  getProviderAndActionFilter,
-  buildDslFilterQuery,
-  EMPTY_EXECUTION_LOG_RESULT,
-  DEFAULT_MAX_BUCKETS_LIMIT,
-  DEFAULT_MAX_KPI_BUCKETS_LIMIT,
-} from './get_execution_log_aggregation';
-export type {
-  ExcludeExecuteStartAggResult,
-  ExcludeExecuteStartKpiAggResult,
-  IExecutionLogAggOptions,
-} from './get_execution_log_aggregation';

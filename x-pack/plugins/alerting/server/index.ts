@@ -41,7 +41,7 @@ export type {
   BulkEditOptionsIds,
 } from './rules_client';
 export type { PublicAlert as Alert } from './alert';
-export { parseDuration, isRuleSnoozed, parseIsoOrRelativeDate } from './lib';
+export { parseDuration, isRuleSnoozed } from './lib';
 export { getEsErrorMessage } from './lib/errors';
 export type { AlertingRulesConfig } from './config';
 export {

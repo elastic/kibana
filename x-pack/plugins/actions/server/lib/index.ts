@@ -34,3 +34,4 @@ export {
   isHttpRequestExecutionSource,
 } from './action_execution_source';
 export { validateEmptyStrings } from './validate_empty_strings';
+export { parseIsoOrRelativeDate } from './iso_or_relative_date';

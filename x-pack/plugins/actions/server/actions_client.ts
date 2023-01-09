@@ -23,7 +23,6 @@ import {
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
-import { parseIsoOrRelativeDate } from '@kbn/alerting-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
 import {
@@ -39,6 +38,7 @@ import {
   ActionExecutorContract,
   validateConnector,
   ActionExecutionSource,
+  parseIsoOrRelativeDate,
 } from './lib';
 import {
   ActionResult,
