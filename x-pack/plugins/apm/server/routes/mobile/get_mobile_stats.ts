@@ -130,7 +130,7 @@ export async function getMobileStats({
       timeseries:
         response.aggregations?.timeseries?.buckets.map((bucket) => ({
           x: bucket.key,
-          y: bucket.maxLoadTime.value,
+          y: bucket.maxLoadTime?.value,
         })) ?? [],
     },
     crashCount: {

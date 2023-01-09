@@ -63,10 +63,6 @@ const mobileStats = createApmServerRoute({
       environmentRt,
       t.partial({
         transactionType: t.string,
-        device: t.string,
-        osVersion: t.string,
-        appVersion: t.string,
-        netConnectionType: t.string,
       }),
     ]),
   }),
