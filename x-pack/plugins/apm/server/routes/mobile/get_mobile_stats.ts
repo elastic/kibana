@@ -24,7 +24,7 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 
 type Timeseries = Array<{ x: number; y: number | null }>;
-interface MobileStats {
+export interface MobileStats {
   sessions: { value?: number; timeseries: Timeseries };
   requests: { value?: number | null; timeseries: Timeseries };
   maxLoadTime: { value?: number | null; timeseries: Timeseries };

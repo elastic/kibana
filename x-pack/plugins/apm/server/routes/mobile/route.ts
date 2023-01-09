@@ -10,7 +10,7 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getMobileFilters } from './get_mobile_filters';
-import { getMobileStats } from './get_mobile_stats';
+import { getMobileStats, MobileStats } from './get_mobile_stats';
 
 const mobileFilters = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -71,15 +71,13 @@ const mobileStats = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<Awaited<ReturnType<typeof getMobileStats>>> => {
+  handler: async (resources): Promise<MobileStats> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
     const { kuery, environment, start, end, transactionType } = params.query;
 
-    const mobileMetrics = await getMobileStats({
+    const stats = await getMobileStats({
       kuery,
       environment,
       transactionType,
@@ -89,7 +87,7 @@ const mobileStats = createApmServerRoute({
       apmEventClient,
     });
 
-    return mobileMetrics;
+    return stats;
   },
 });
 
