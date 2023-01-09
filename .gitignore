@@ -94,8 +94,7 @@ report.asciidoc
 
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
-tsconfig.base.type_check.json
-tsconfig.type_check.json
+*.type_check.json
 
 # Yarn local mirror content
 .yarn-local-mirror
@@ -111,5 +110,6 @@ elastic-agent-*
 fleet-server-*
 elastic-agent.yml
 fleet-server.yml
-/packages/kbn-synthetic-package-map/synthetic-packages.json
-
+/packages/kbn-package-map/package-map.json
+/packages/kbn-synthetic-package-map/
+**/.synthetics/

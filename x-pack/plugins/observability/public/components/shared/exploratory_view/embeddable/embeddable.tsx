@@ -8,7 +8,6 @@
 import { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import styled from 'styled-components';
 import {
   FormulaPublicApi,
   LensEmbeddableInput,
@@ -16,6 +15,7 @@ import {
   XYState,
 } from '@kbn/lens-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
+import styled from 'styled-components';
 import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
 import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
 import { AllSeries, ReportTypes, useTheme } from '../../../..';
