@@ -100,7 +100,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private subscriptions: Subscription = new Subscription();
 
   private initialized$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  private initializeStartTime: number;
+  private dashboardCreationStartTime: number;
   private savedObjectLoadTime?: number;
 
   private initialSavedDashboardId?: string;
@@ -123,6 +123,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   constructor(
     initialInput: DashboardContainerInput,
+    dashboardCreationStartTime: number,
     parent?: Container,
     creationOptions?: DashboardCreationOptions
   ) {
@@ -158,7 +159,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       : this.input.savedObjectId;
     this.creationOptions = creationOptions;
 
-    this.initializeStartTime = performance.now();
+    this.dashboardCreationStartTime = dashboardCreationStartTime;
     this.initializeDashboard(readyToInitializeChildren$, creationOptions);
   }
 
@@ -362,15 +363,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       const panelCount = Object.keys(
         this.getReduxEmbeddableTools().getState().explicitInput.panels
       ).length;
+      const totalDuration = stats.panelsRenderDoneTime - this.dashboardCreationStartTime;
       reportPerformanceMetricEvent(this.analyticsService, {
         eventName: DASHBOARD_LOADED_EVENT,
-        duration: stats.panelsRenderDoneTime - stats.panelsRenderStartTime,
+        duration: totalDuration,
         key1: 'time_to_data',
         value1: (stats.lastTimeToData || stats.panelsRenderDoneTime) - stats.panelsRenderStartTime,
         key2: 'num_of_panels',
         value2: panelCount,
         key3: 'total_load_time',
-        value3: stats.panelsRenderDoneTime - this.initializeStartTime,
+        value3: totalDuration,
         key4: 'saved_object_load_time',
         value4: this.savedObjectLoadTime,
       });
