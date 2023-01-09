@@ -70,7 +70,7 @@ describe('trimRecoveredAlerts', () => {
     expect(trimmedAlerts).toEqual([alert5]);
 
     expect(logger.warn).toBeCalledWith(
-      'Recovered alerts have exceeded the max alert limit: dropping 1 alert.'
+      'Recovered alerts have exceeded the max alert limit of 2 : dropping 1 alert.'
     );
   });
 
