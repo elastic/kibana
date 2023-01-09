@@ -112,7 +112,7 @@ export function AlertDetailsAppSection({
   });
 
   const transactionType = getTransactionType({
-    transactionType: String(alert.fields[TRANSACTION_TYPE]),
+    transactionType: alert.fields[TRANSACTION_TYPE],
     transactionTypes,
     agentName,
   });
