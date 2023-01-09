@@ -5,5 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { registerLanguage } from '@kbn/monaco';
+import { CssLang, HandlebarsLang, MarkdownLang, YamlLang, HJson } from './languages';
 
-export { CodeEditor } from './code_editor';
+registerLanguage(CssLang);
+registerLanguage(HandlebarsLang);
+registerLanguage(MarkdownLang);
+registerLanguage(YamlLang);
+registerLanguage(HJson);

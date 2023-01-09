@@ -5,5 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { LangModuleType } from '@kbn/monaco';
+import { lexerRules, languageConfiguration } from './language';
 
-export { CodeEditor } from './code_editor';
+export const Lang: LangModuleType = { ID: 'css', lexerRules, languageConfiguration };

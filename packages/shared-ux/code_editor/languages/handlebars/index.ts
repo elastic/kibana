@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { CodeEditor } from './code_editor';
+import { LangModuleType } from '@kbn/monaco';
+import { languageConfiguration, lexerRules } from './language';
+
+export const Lang: LangModuleType = { ID: 'handlebars', languageConfiguration, lexerRules };

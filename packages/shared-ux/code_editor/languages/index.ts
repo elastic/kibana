@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { CodeEditor } from './code_editor';
+import { Lang as CssLang } from './css';
+import { Lang as HandlebarsLang } from './handlebars';
+import { Lang as MarkdownLang } from './markdown';
+import { Lang as YamlLang } from './yaml';
+import { Lang as HJson } from './hjson';
+
+export { CssLang, HandlebarsLang, MarkdownLang, YamlLang, HJson };
