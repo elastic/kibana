@@ -23,7 +23,7 @@ import {
   hostActionVariableDescription,
   labelsActionVariableDescription,
   orchestratorActionVariableDescription,
-  tagsActionVariableDescription
+  tagsActionVariableDescription,
 } from '../common/messages';
 
 const timestampActionVariableDescription = i18n.translate(
