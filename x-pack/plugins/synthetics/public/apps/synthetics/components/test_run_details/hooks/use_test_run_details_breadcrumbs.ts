@@ -22,8 +22,6 @@ export const useTestRunDetailsBreadcrumbs = (
   const { monitor } = useSelectedMonitor();
   const selectedLocation = useSelectedLocation();
 
-  const selectedLocation = useSelectedLocation();
-
   useBreadcrumbs([
     {
       text: MONITOR_MANAGEMENT_CRUMB,
