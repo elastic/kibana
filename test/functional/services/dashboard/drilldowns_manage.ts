@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Key } from 'selenium-webdriver';
@@ -76,7 +77,7 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
     }: {
       drilldownName: string;
       destinationURLTemplate: string;
-      trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER';
+      trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER' | 'IMAGE_CLICK_TRIGGER';
     }) {
       await this.fillInDrilldownName(drilldownName);
       await this.selectTriggerIfNeeded(trigger);
@@ -91,7 +92,9 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       await comboBox.set(DESTINATION_DASHBOARD_SELECT, title);
     }
 
-    async selectTriggerIfNeeded(trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER') {
+    async selectTriggerIfNeeded(
+      trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER' | 'IMAGE_CLICK_TRIGGER'
+    ) {
       if (await testSubjects.exists(`triggerPicker`)) {
         const container = await testSubjects.find(`triggerPicker-${trigger}`);
         const radio = await container.findByCssSelector('input[type=radio]');
