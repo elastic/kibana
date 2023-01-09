@@ -2845,6 +2845,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/code-editor-mocks@link:packages/shared-ux/code_editor/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/code-editor-types@link:packages/shared-ux/code_editor/types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/code-editor@link:packages/shared-ux/code-editor":
   version "0.0.0"
   uid ""
