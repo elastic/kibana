@@ -2682,6 +2682,20 @@
           },
           {
             "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldListGroupedProps.localStorageKeyPrefix",
+            "type": "string",
+            "tags": [],
+            "label": "localStorageKeyPrefix",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_list_grouped/field_list_grouped.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
             "id": "def-public.FieldListGroupedProps.datatestsubj",
             "type": "string",
             "tags": [],
