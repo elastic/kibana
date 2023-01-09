@@ -195,6 +195,8 @@ export function useAllCasesState(
     const stateUrlParams = {
       ...parsedUrlParams,
       ...queryParams,
+      page: queryParams.page.toString(),
+      perPage: queryParams.perPage.toString(),
       severity: filterOptions.severity,
       status: filterOptions.status,
     };
