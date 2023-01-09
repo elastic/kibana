@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { UseEuiTheme } from '@elastic/eui';
 import { ComponentSelector, css, CSSObject, SerializedStyles } from '@emotion/react';
 import { ArrayCSSInterpolation } from '@emotion/serialize';
 import { Property } from 'csstype';
@@ -108,7 +107,7 @@ export const codeEditorFullScreenStyles = () => css`
 `;
 
 // .kibanaCodeEditor_controls
-export const codeEditorControlsWithinFullScreenStyles = ({ euiTheme }: UseEuiTheme) => css`
-  top: ${euiTheme.size.l};
-  right: ${euiTheme.size.l};
+export const codeEditorControlsWithinFullScreenStyles = (size: string) => css`
+  top: ${size};
+  right: ${size};
 }`;

@@ -31,6 +31,7 @@ import { remeasureFonts } from './remeasure_fonts';
 import { PlaceholderWidget } from './placeholder_widget';
 import {
   codeEditorControlsStyles,
+  codeEditorControlsWithinFullScreenStyles,
   codeEditorFullScreenStyles,
   codeEditorKeyboardHintStyles,
   codeEditorStyles,
@@ -40,7 +41,7 @@ export interface Props {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
 
-  /** Height of editor. Defaults to 100%. */
+  /** Height of editor. Defaults to 100px. */
   height?: string | number;
 
   /** ID of the editor language */
@@ -528,25 +529,30 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
     );
   };
 
+  const { euiTheme } = useEuiTheme();
+
   const FullScreenDisplay = useMemo(
     () =>
       ({ children }: { children: Array<JSX.Element | null> | JSX.Element }) => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const { euiTheme } = useEuiTheme();
-        const styles = codeEditorFullScreenStyles();
-
         if (!isFullScreen) return <>{children}</>;
 
         return (
           <EuiOverlayMask>
             <EuiFocusTrap clickOutsideDisables={true}>
-              {/* className={'kibanaCodeEditor__isFullScreen'} */}
-              <div css={[codeEditorStyles(), styles]}>{children}</div>
+              <div
+                css={[
+                  codeEditorStyles(),
+                  codeEditorFullScreenStyles(),
+                  codeEditorControlsWithinFullScreenStyles(euiTheme.size.l),
+                ]}
+              >
+                {children}
+              </div>
             </EuiFocusTrap>
           </EuiOverlayMask>
         );
       },
-    [isFullScreen]
+    [isFullScreen, euiTheme]
   );
 
   return {
@@ -565,7 +571,7 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
     if (!showCopyButton) return null;
 
     return (
-      <div css={codeEditorStyles()}>
+      <div css={codeEditorStyles()} className="euiCodeBlock__copyButton">
         <EuiI18n token="euiCodeBlock.copyButton" default="Copy">
           {(copyButton: string) => (
             <EuiCopy textToCopy={value}>
