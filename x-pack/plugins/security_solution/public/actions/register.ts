@@ -15,7 +15,10 @@ import { createFilterInAction } from './filter/filter_in';
 import { createFilterOutAction } from './filter/filter_out';
 import { createAddToTimelineAction, EmbeddableAddToTimelineAction } from './add_to_timeline';
 import { createShowTopNAction } from './show_top_n/show_top_n';
-import { SECURITY_SOLUTION_ACTION_TRIGGER, TIMELINE_ACTION_TRIGGER } from '../../common/constants';
+import {
+  CELL_ACTIONS_DEFAULT_TRIGGER,
+  CELL_ACTIONS_TIMELINE_TRIGGER,
+} from '../../common/constants';
 import { createCopyToClipboardAction } from './copy_to_clipboard/copy_to_clipboard';
 import { createTimelineFilterInAction, createTimelineFilterOutAction } from './filter';
 
@@ -55,14 +58,14 @@ const registerUiActions = (
   const copyAction = createCopyToClipboardAction({ order: 5 });
 
   uiActions.registerTrigger({
-    id: SECURITY_SOLUTION_ACTION_TRIGGER,
+    id: CELL_ACTIONS_DEFAULT_TRIGGER,
   });
 
-  uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, copyAction);
-  uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, filterInAction);
-  uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, filterOutAction);
-  uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, showTopNAction);
-  uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, addToTimeline);
+  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, copyAction);
+  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, filterInAction);
+  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, filterOutAction);
+  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, showTopNAction);
+  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, addToTimeline);
 };
 
 const registerTimelineUiActions = (
@@ -84,12 +87,12 @@ const registerTimelineUiActions = (
   const copyAction = createCopyToClipboardAction({ order: 5 });
 
   uiActions.registerTrigger({
-    id: TIMELINE_ACTION_TRIGGER,
+    id: CELL_ACTIONS_TIMELINE_TRIGGER,
   });
 
-  uiActions.addTriggerAction(TIMELINE_ACTION_TRIGGER, copyAction);
-  uiActions.addTriggerAction(TIMELINE_ACTION_TRIGGER, filterInAction);
-  uiActions.addTriggerAction(TIMELINE_ACTION_TRIGGER, filterOutAction);
-  uiActions.addTriggerAction(TIMELINE_ACTION_TRIGGER, showTopNAction);
-  uiActions.addTriggerAction(TIMELINE_ACTION_TRIGGER, addToTimeline);
+  uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, copyAction);
+  uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, filterInAction);
+  uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, filterOutAction);
+  uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, showTopNAction);
+  uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, addToTimeline);
 };
