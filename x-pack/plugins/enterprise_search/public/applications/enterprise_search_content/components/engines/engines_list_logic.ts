@@ -9,8 +9,6 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 
-import { flashAPIErrors } from '../../../shared/flash_messages';
-
 import {
   EnginesListAPIArguments,
   EnginesListAPIResponse,
@@ -32,17 +30,12 @@ type EnginesListActions = Pick<
 interface EngineListValues {
   data: typeof FetchEnginesAPILogic.values.data;
   meta: Meta;
-  results: EngineListDetails[]; // stores engine list value from data
   parameters: { meta: Meta; searchQuery?: string }; // Added this variable to store to the search Query value as well
+  results: EngineListDetails[]; // stores engine list value from data
   status: typeof FetchEnginesAPILogic.values.status;
 }
 
 export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListActions>>({
-  connect: {
-    actions: [FetchEnginesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
-    values: [FetchEnginesAPILogic, ['data', 'status']],
-  },
-  path: ['enterprise_search', 'content', 'engine_list_logic'],
   actions: {
     fetchEngines: ({ meta, searchQuery }) => ({
       meta,
@@ -51,6 +44,16 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
 
     onPaginate: (pageNumber) => ({ pageNumber }),
   },
+  connect: {
+    actions: [FetchEnginesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    values: [FetchEnginesAPILogic, ['data', 'status']],
+  },
+  listeners: ({ actions }) => ({
+    fetchEngines: async (input) => {
+      actions.makeRequest(input);
+    },
+  }),
+  path: ['enterprise_search', 'content', 'engine_list_logic'],
   reducers: ({}) => ({
     parameters: [
       { meta: DEFAULT_META },
@@ -66,17 +69,8 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
       },
     ],
   }),
-
   selectors: ({ selectors }) => ({
-    results: [() => [selectors.data], (data) => data?.results ?? []],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
-  }),
-  listeners: ({ actions }) => ({
-    apiError: (e) => {
-      flashAPIErrors(e);
-    },
-    fetchEngines: async (input) => {
-      actions.makeRequest(input);
-    },
+    results: [() => [selectors.data], (data) => data?.results ?? []],
   }),
 });
