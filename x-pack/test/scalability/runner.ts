@@ -6,6 +6,7 @@
  */
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
 import path from 'path';
 import fs from 'fs';
