@@ -164,7 +164,7 @@ export class FeatureTable extends Component<Props, State> {
                 <EuiSpacer size="s" />
               </>
             )}
-            <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexGroup direction="column" gutterSize="s">
               {featuresInCategory.map((feature) => (
                 <EuiFlexItem key={feature.id}>
                   {this.renderPrivilegeControlsForFeature(feature)}
@@ -225,7 +225,7 @@ export class FeatureTable extends Component<Props, State> {
       const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
 
       return (
-        <EuiFlexGroup gutterSize="s" alignItems="center" className="eui-fullWidth">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>{infoIcon}</EuiFlexItem>
           <EuiFlexItem className="eui-fullWidth">
             <EuiAccordion
