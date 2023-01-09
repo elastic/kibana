@@ -63,24 +63,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('editFieldFormat');
         await PageObjects.settings.setFieldType('Long');
         await PageObjects.settings.setFieldScriptWithoutToggle('emit(6);');
-        await PageObjects.settings.setFieldFormat('Bytes');
+        await PageObjects.settings.toggleRow('formatRow');
+        await PageObjects.settings.setFieldFormat('bytes');
         await testSubjects.find('changeWarning');
         await PageObjects.settings.clickSaveField();
         await PageObjects.settings.confirmSave();
       });
 
-      it('should save field format', async function () {
-        // set formatter on field
-        await PageObjects.settings.filterField(fieldName);
+      it('verify field format', async function () {
         await testSubjects.click('editFieldFormat');
-        await PageObjects.settings.setFieldFormat('Bytes');
-        await PageObjects.settings.clickSaveField();
-        await PageObjects.settings.confirmSave();
-
-        // verify formatter on field is still there
-        await PageObjects.settings.filterField(fieldName);
-        await testSubjects.click('editFieldFormat');
-        await testSubjects.find('dateEditorPattern');
+        const select = await testSubjects.find('editorSelectedFormatId');
+        expect(await select.getAttribute('value')).to.be('bytes');
+        await PageObjects.settings.closeIndexPatternFieldEditor();
       });
 
       it('should delete runtime field', async function () {
