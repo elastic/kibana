@@ -1,0 +1,505 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import http from 'http';
+import expect from '@kbn/expect';
+
+import { CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  createCase,
+  createComment,
+  deleteAllCaseItems,
+  pushCase,
+  updateCase,
+} from '../../../../common/lib/utils';
+import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
+import {
+  createCaseWithConnector,
+  createConnector,
+  getConnectors,
+  getJiraConnector,
+  getServiceNowConnector,
+  getServiceNowSimulationServer,
+} from '../../../../common/lib/connectors';
+
+// eslint-disable-next-line import/no-default-export
+export default ({ getService }: FtrProviderContext): void => {
+  const supertest = getService('supertest');
+  const es = getService('es');
+  const actionsRemover = new ActionsRemover(supertest);
+
+  describe.only('get_connectors', () => {
+    let serviceNowSimulatorURL: string = '';
+    let serviceNowServer: http.Server;
+
+    before(async () => {
+      const { server, url } = await getServiceNowSimulationServer();
+      serviceNowServer = server;
+      serviceNowSimulatorURL = url;
+    });
+
+    afterEach(async () => {
+      await deleteAllCaseItems(es);
+      await actionsRemover.removeAll();
+    });
+
+    after(async () => {
+      serviceNowServer.close();
+    });
+
+    it('retrieves a single connector using the create case user action', async () => {
+      const { postedCase, connector } = await createCaseWithConnector({
+        supertest,
+        serviceNowSimulatorURL,
+        actionsRemover,
+      });
+
+      const theCase = await pushCase({
+        supertest,
+        caseId: postedCase.id,
+        connectorId: connector.id,
+      });
+
+      const connectors = await getConnectors({ caseId: theCase.id, supertest });
+      expect(connectors.length).to.be(1);
+      expect(connectors[0].fields).to.eql({
+        category: 'software',
+        impact: '2',
+        severity: '2',
+        subcategory: 'os',
+        urgency: '2',
+      });
+
+      expect(connectors[0].needsToBePushed).to.be(false);
+      expect(connectors[0].name).to.be('ServiceNow Connector');
+      expect(connectors[0].id).to.be(connector.id);
+    });
+
+    it('retrieves a single connector using the connector user action', async () => {
+      const postedCase = await createCase(supertest, getPostCaseRequest());
+
+      const jiraConnector = await createConnector({
+        supertest,
+        req: {
+          ...getJiraConnector(),
+        },
+      });
+
+      actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
+
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              connector: {
+                id: jiraConnector.id,
+                name: 'Jira',
+                type: ConnectorTypes.jira,
+                fields: { issueType: 'Task', priority: null, parent: null },
+              },
+            },
+          ],
+        },
+      });
+
+      const connectors = await getConnectors({ caseId: postedCase.id, supertest });
+
+      expect(connectors.length).to.be(1);
+      expect(connectors[0].id).to.be(jiraConnector.id);
+    });
+
+    it('retrieves multiple connectors', async () => {
+      const { postedCase, connector: serviceNowConnector } = await createCaseWithConnector({
+        supertest,
+        serviceNowSimulatorURL,
+        actionsRemover,
+      });
+
+      const jiraConnector = await createConnector({
+        supertest,
+        req: {
+          ...getJiraConnector(),
+        },
+      });
+
+      actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
+
+      const theCase = await pushCase({
+        supertest,
+        caseId: postedCase.id,
+        connectorId: serviceNowConnector.id,
+      });
+
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              connector: {
+                id: jiraConnector.id,
+                name: 'Jira',
+                type: ConnectorTypes.jira,
+                fields: { issueType: 'Task', priority: null, parent: null },
+              },
+            },
+          ],
+        },
+      });
+
+      const connectors = await getConnectors({ caseId: theCase.id, supertest });
+      expect(connectors.length).to.be(2);
+      expect(connectors[0].id).to.be(serviceNowConnector.id);
+      expect(connectors[1].id).to.be(jiraConnector.id);
+    });
+
+    describe('fields', () => {
+      it('returns the fields of the connector update after a case was created with a connector', async () => {
+        const { postedCase, connector: serviceNowConnector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        // change urgency to 3
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                connector: {
+                  id: serviceNowConnector.id,
+                  name: 'SN',
+                  type: ConnectorTypes.serviceNowITSM,
+                  fields: {
+                    urgency: '3',
+                    impact: '2',
+                    severity: '2',
+                    category: 'software',
+                    subcategory: 'os',
+                  },
+                },
+              },
+            ],
+          },
+        });
+
+        const connectors = await getConnectors({ caseId: postedCase.id, supertest });
+
+        expect(connectors.length).to.be(1);
+        expect(connectors[0].fields).to.eql({
+          urgency: '3',
+          impact: '2',
+          severity: '2',
+          category: 'software',
+          subcategory: 'os',
+        });
+      });
+    });
+
+    describe('push', () => {
+      it('sets needs to push to true when a push has not occurred', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        const connectors = await getConnectors({ caseId: postedCase.id, supertest });
+
+        expect(connectors.length).to.be(1);
+        expect(connectors[0].id).to.be(connector.id);
+        expect(connectors[0].needsToBePushed).to.be(true);
+      });
+
+      it('sets needs to push to false when a push has occurred', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        await pushCase({
+          supertest,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+        });
+
+        const connectors = await getConnectors({ caseId: postedCase.id, supertest });
+
+        expect(connectors.length).to.be(1);
+        expect(connectors[0].id).to.be(connector.id);
+        expect(connectors[0].needsToBePushed).to.be(false);
+      });
+
+      it('sets needs to push to true when a comment was created after the last push', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        await pushCase({
+          supertest,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
+
+        const connectors = await getConnectors({ caseId: postedCase.id, supertest });
+
+        expect(connectors.length).to.be(1);
+        expect(connectors[0].id).to.be(connector.id);
+        expect(connectors[0].needsToBePushed).to.be(true);
+      });
+
+      it('sets needs to push to false when the severity of a case was changed after the last push', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        await pushCase({
+          supertest,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+        });
+
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                severity: CaseSeverity.CRITICAL,
+              },
+            ],
+          },
+        });
+
+        const connectors = await getConnectors({ caseId: postedCase.id, supertest });
+
+        expect(connectors.length).to.be(1);
+        expect(connectors[0].id).to.be(connector.id);
+        expect(connectors[0].needsToBePushed).to.be(false);
+      });
+
+      it('sets needs to push to false the service now connector and true for jira', async () => {
+        const { postedCase, connector: serviceNowConnector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        await pushCase({
+          supertest,
+          caseId: postedCase.id,
+          connectorId: serviceNowConnector.id,
+        });
+
+        const jiraConnector = await createConnector({
+          supertest,
+          req: {
+            ...getJiraConnector(),
+          },
+        });
+
+        actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
+
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                connector: {
+                  id: jiraConnector.id,
+                  name: 'Jira',
+                  type: ConnectorTypes.jira,
+                  fields: { issueType: 'Task', priority: null, parent: null },
+                },
+              },
+            ],
+          },
+        });
+
+        const connectors = await getConnectors({ caseId: postedCase.id, supertest });
+
+        expect(connectors.length).to.be(2);
+        expect(connectors[0].id).to.be(serviceNowConnector.id);
+        expect(connectors[0].needsToBePushed).to.be(false);
+        expect(connectors[1].id).to.be(jiraConnector.id);
+        expect(connectors[1].needsToBePushed).to.be(true);
+      });
+
+      describe('changing connector fields', () => {
+        it('sets needs to push to false when the latest connector fields matches those used in the push', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const serviceNowConnector = await createConnector({
+            supertest,
+            req: {
+              ...getServiceNowConnector(),
+              config: { apiUrl: serviceNowSimulatorURL },
+            },
+          });
+
+          actionsRemover.add('default', serviceNowConnector.id, 'action', 'actions');
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  connector: {
+                    id: serviceNowConnector.id,
+                    name: 'SN',
+                    type: ConnectorTypes.serviceNowITSM,
+                    fields: {
+                      urgency: '2',
+                      impact: '2',
+                      severity: '2',
+                      category: 'software',
+                      subcategory: 'os',
+                    },
+                  },
+                },
+              ],
+            },
+          });
+
+          const pushedCase = await pushCase({
+            supertest,
+            caseId: postedCase.id,
+            connectorId: serviceNowConnector.id,
+          });
+
+          // switch urgency to 3
+          const updatedCases = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: pushedCase.id,
+                  version: pushedCase.version,
+                  connector: {
+                    id: serviceNowConnector.id,
+                    name: 'SN',
+                    type: ConnectorTypes.serviceNowITSM,
+                    fields: {
+                      urgency: '3',
+                      impact: '2',
+                      severity: '2',
+                      category: 'software',
+                      subcategory: 'os',
+                    },
+                  },
+                },
+              ],
+            },
+          });
+
+          // switch urgency back to 2
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: updatedCases[0].id,
+                  version: updatedCases[0].version,
+                  connector: {
+                    id: serviceNowConnector.id,
+                    name: 'SN',
+                    type: ConnectorTypes.serviceNowITSM,
+                    fields: {
+                      urgency: '2',
+                      impact: '2',
+                      severity: '2',
+                      category: 'software',
+                      subcategory: 'os',
+                    },
+                  },
+                },
+              ],
+            },
+          });
+
+          const connectors = await getConnectors({ caseId: postedCase.id, supertest });
+
+          expect(connectors.length).to.be(1);
+          expect(connectors[0].id).to.be(serviceNowConnector.id);
+          expect(connectors[0].needsToBePushed).to.be(false);
+        });
+
+        it('sets needs to push to true when the latest connector fields do not match those used in the push', async () => {
+          const { postedCase, connector: serviceNowConnector } = await createCaseWithConnector({
+            supertest,
+            serviceNowSimulatorURL,
+            actionsRemover,
+          });
+
+          const pushedCase = await pushCase({
+            supertest,
+            caseId: postedCase.id,
+            connectorId: serviceNowConnector.id,
+          });
+
+          // switch urgency to 3
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: pushedCase.id,
+                  version: pushedCase.version,
+                  connector: {
+                    id: serviceNowConnector.id,
+                    name: 'SN',
+                    type: ConnectorTypes.serviceNowITSM,
+                    fields: {
+                      urgency: '3',
+                      impact: '2',
+                      severity: '2',
+                      category: 'software',
+                      subcategory: 'os',
+                    },
+                  },
+                },
+              ],
+            },
+          });
+
+          const connectors = await getConnectors({ caseId: postedCase.id, supertest });
+
+          expect(connectors.length).to.be(1);
+          expect(connectors[0].id).to.be(serviceNowConnector.id);
+          expect(connectors[0].needsToBePushed).to.be(false);
+        });
+      });
+    });
+
+    describe('rbac', () => {});
+  });
+};

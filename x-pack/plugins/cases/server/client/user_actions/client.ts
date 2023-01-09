@@ -22,7 +22,6 @@ export interface UserActionsSubClient {
   getAll(clientArgs: UserActionGet): Promise<ICaseUserActionsResponse>;
   /**
    * Retrieves all the connectors used within a given case
-   * TODO: should this live in the cases client? or user actions?
    */
   getConnectors(clientArgs: GetConnectorsRequest): Promise<GetCaseConnectorsResponse>;
 }

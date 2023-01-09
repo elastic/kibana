@@ -135,8 +135,6 @@ export class CaseUserActionService {
         filter: connectorsFilter,
       });
 
-      console.log('getConnectorFieldsBeforePushes', JSON.stringify(response, null, 2));
-
       return this.createCaseConnectorFieldsBeforePushes(response.aggregations);
     } catch (error) {
       this.context.log.error(
@@ -188,8 +186,6 @@ export class CaseUserActionService {
         },
       };
     }
-
-    console.log('fields before push filters', JSON.stringify(filters, null, 2));
 
     return {
       references: {
@@ -279,8 +275,6 @@ export class CaseUserActionService {
 
       const connectorsFilter = buildFilter({
         filters: [
-          // do we want to signal a need to push if the settings, status change?
-          ActionTypes.assignees,
           ActionTypes.comment,
           ActionTypes.description,
           ActionTypes.severity,
@@ -344,8 +338,6 @@ export class CaseUserActionService {
         aggs: CaseUserActionService.buildConnectorInfoAggs(),
         filter: connectorsFilter,
       });
-
-      console.log('response', JSON.stringify(response, null, 2));
 
       return this.createCaseConnectorInformation(response.aggregations);
     } catch (error) {

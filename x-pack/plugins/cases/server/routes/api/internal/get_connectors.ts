@@ -6,35 +6,30 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-import { CASE_USER_ACTIONS_URL } from '../../../../common/constants';
+import { INTERNAL_CONNECTORS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
-/**
- * @deprecated since version 8.1.0
- */
-export const getUserActionsRoute = createCasesRoute({
+export const getConnectorsRoute = createCasesRoute({
   method: 'get',
-  path: CASE_USER_ACTIONS_URL,
+  path: INTERNAL_CONNECTORS_URL,
   params: {
     params: schema.object({
       case_id: schema.string(),
     }),
   },
-  options: { deprecated: true },
   handler: async ({ context, request, response }) => {
     try {
-      const caseContext = await context.cases;
-      const casesClient = await caseContext.getCasesClient();
+      const casesContext = await context.cases;
+      const casesClient = await casesContext.getCasesClient();
       const caseId = request.params.case_id;
 
       return response.ok({
-        body: await casesClient.userActions.getAll({ caseId }),
+        body: await casesClient.userActions.getConnectors({ caseId }),
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to retrieve case user actions in route case id: ${request.params.case_id}: ${error}`,
+        message: `Failed to retrieve connectors in route case id: ${request.params.case_id}: ${error}`,
         error,
       });
     }

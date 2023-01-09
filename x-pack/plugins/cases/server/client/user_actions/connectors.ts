@@ -62,8 +62,6 @@ export const getConnectors = async (
       });
     }
 
-    console.log('connectors response', JSON.stringify(results, null, 2));
-
     return GetCaseConnectorsResponseRt.encode(results);
   } catch (error) {
     throw createCaseError({
@@ -103,7 +101,7 @@ const checkConnectorsAuthorization = async ({
 
   await authorization.ensureAuthorized({
     entities,
-    operation: Operations.getUserActions,
+    operation: Operations.getConnectors,
   });
 };
 
