@@ -77,7 +77,8 @@ export type LogThresholdAlertFactory = (
   reason: string,
   value: number,
   threshold: number,
-  actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>
+  actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>,
+  additionalContext?: AdditionalContext
 ) => LogThresholdAlert;
 export type LogThresholdAlertLimit = RuleExecutorServices<
   LogThresholdAlertState,
@@ -118,13 +119,14 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     } = services;
     const { basePath } = libs;
 
-    const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold, actions) => {
+    const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold, actions, additionalContext) => {
       const alert = alertWithLifecycle({
         id,
         fields: {
           [ALERT_EVALUATION_THRESHOLD]: threshold,
           [ALERT_EVALUATION_VALUE]: value,
           [ALERT_REASON]: reason,
+          ...additionalContext
         },
       });
 
@@ -378,7 +380,7 @@ export const processUngroupedResults = (
         },
       },
     ];
-    alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, documentCount, count.value, actions);
+    alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, documentCount, count.value, actions, additionalContext);
     alertLimit.setLimitReached(alertLimit.getValue() <= 1);
   } else {
     alertLimit.setLimitReached(false);
@@ -396,6 +398,11 @@ export const processUngroupedRatioResults = (
 
   const numeratorCount = numeratorResults.hits.total.value;
   const denominatorCount = denominatorResults.hits.total.value;
+  const additionalContextHits = denominatorResults.aggregations?.additionalContext?.hits?.hits;
+  const additionalContext =
+    additionalContextHits && additionalContextHits.length > 0
+      ? additionalContextHits[0]._source
+      : undefined;
   const ratio = getRatio(numeratorCount, denominatorCount);
 
   if (ratio !== undefined && checkValueAgainstComparatorMap[count.comparator](ratio, count.value)) {
@@ -416,10 +423,11 @@ export const processUngroupedRatioResults = (
           group: null,
           isRatio: true,
           reason: reasonMessage,
+          ...additionalContext
         },
       },
     ];
-    alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value, actions);
+    alertFactory(UNGROUPED_FACTORY_KEY, reasonMessage, ratio, count.value, actions, additionalContext);
     alertLimit.setLimitReached(alertLimit.getValue() <= 1);
   } else {
     alertLimit.setLimitReached(false);
@@ -528,7 +536,7 @@ export const processGroupByResults = (
           },
         },
       ];
-      alertFactory(group.name, reasonMessage, documentCount, count.value, actions);
+      alertFactory(group.name, reasonMessage, documentCount, count.value, actions, group.context);
     }
   }
 
@@ -596,7 +604,7 @@ export const processGroupByRatioResults = (
           },
         },
       ];
-      alertFactory(numeratorGroup.name, reasonMessage, ratio, count.value, actions);
+      alertFactory(numeratorGroup.name, reasonMessage, ratio, count.value, actions, numeratorGroup.context);
     }
   }
 
@@ -702,10 +710,8 @@ export const getGroupedESQuery = (
             },
           })),
         },
-        aggs: {
-          ...getContextAggregation(params),
-        },
       },
+      ...getContextAggregation(params),
     };
 
     const body: estypes.SearchRequest['body'] = {

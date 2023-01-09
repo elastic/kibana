@@ -281,9 +281,12 @@ const AdditionalContext = rt.type({
 const ChartPreviewBucketsRT = rt.partial({
   histogramBuckets: rt.type({
     buckets: rt.array(chartPreviewHistogramBucket),
-  }),
-  additionalContext: AdditionalContext,
+  })
 });
+
+const additionalContextRT = rt.partial({
+    additionalContext: AdditionalContext
+})
 
 // ES query responses //
 const hitsRT = rt.type({
@@ -308,7 +311,7 @@ export const UngroupedSearchQueryResponseRT = rt.intersection([
       hits: hitsRT,
     }),
     rt.partial({
-      aggregations: ChartPreviewBucketsRT,
+      aggregations: rt.intersection([ChartPreviewBucketsRT, additionalContextRT])
     }),
   ]),
 ]);
@@ -329,6 +332,7 @@ export const UnoptimizedGroupedSearchQueryResponseRT = rt.intersection([
                   doc_count: rt.number,
                 }),
                 ChartPreviewBucketsRT,
+                additionalContextRT
               ]),
             })
           ),
@@ -350,7 +354,7 @@ export const OptimizedGroupedSearchQueryResponseRT = rt.intersection([
     aggregations: rt.type({
       groups: rt.intersection([
         rt.type({
-          buckets: rt.array(rt.intersection([bucketFieldsRT, ChartPreviewBucketsRT])),
+          buckets: rt.array(rt.intersection([bucketFieldsRT, ChartPreviewBucketsRT, additionalContextRT])),
         }),
         afterKeyRT,
       ]),
