@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
-import { useGetDataStreams } from '../../../../../../../../hooks';
+import { useConfig, useGetDataStreams } from '../../../../../../../../hooks';
 
 import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../services/package_prerelease';
 import type { ExperimentalDataStreamFeature } from '../../../../../../../../../common/types/models/epm';
@@ -71,6 +71,10 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     inputStreamValidationResults,
     forceShowErrors,
   }) => {
+    const config = useConfig();
+    const isExperimentalDataStreamSettingsEnabled =
+      config.enableExperimental?.includes('experimentalDataStreamSettings') ?? false;
+
     const {
       params: { packagePolicyId },
     } = useRouteMatch<{ packagePolicyId?: string }>();
@@ -305,13 +309,15 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       </>
                     )}
                     {/* Experimental index/datastream settings e.g. synthetic source */}
-                    <ExperimentDatastreamSettings
-                      registryDataStream={packageInputStream.data_stream}
-                      experimentalDataFeatures={
-                        packagePolicy.package?.experimental_data_stream_features
-                      }
-                      setNewExperimentalDataFeatures={setNewExperimentalDataFeatures}
-                    />
+                    {isExperimentalDataStreamSettingsEnabled && (
+                      <ExperimentDatastreamSettings
+                        registryDataStream={packageInputStream.data_stream}
+                        experimentalDataFeatures={
+                          packagePolicy.package?.experimental_data_stream_features
+                        }
+                        setNewExperimentalDataFeatures={setNewExperimentalDataFeatures}
+                      />
+                    )}
                   </>
                 ) : null}
               </Fragment>

@@ -112,5 +112,6 @@
     "@kbn/user-profile-components",
     "@kbn/apm-synthtrace-client",
     "@kbn/utils",
+    "@kbn/journeys",
   ]
 }
