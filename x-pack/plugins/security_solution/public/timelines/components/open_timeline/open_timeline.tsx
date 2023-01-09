@@ -172,12 +172,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         return ['export', 'selectable'];
       }
       return [];
-    }, [
-      timelineStatus,
-      onDeleteSelected,
-      deleteTimelines,
-      kibanaSecuritySolutionsPrivileges,
-    ]);
+    }, [timelineStatus, onDeleteSelected, deleteTimelines, kibanaSecuritySolutionsPrivileges]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
 
