@@ -6,6 +6,7 @@
  */
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import path from 'path';
 import fs from 'fs';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -36,7 +37,7 @@ async function sendReportMetricsToTelemetry(
         eventType: 'scalability_metric',
         eventName: 'capacity_test_summary',
         journeyName: journey.journeyName,
-        kibanaVersion: journey.kibanaVersion,
+        kibanaVersion: kibanaPackageJson.version,
         branch: process.env.BUILDKITE_BRANCH,
         ciBuildId: process.env.BUILDKITE_BUILD_ID,
         ciBuildJobId: process.env.BUILDKITE_JOB_ID,

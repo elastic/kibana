@@ -9,7 +9,6 @@ import { ScalabilitySetup } from '@kbn/journeys';
 
 export interface ScalabilityJourney {
   journeyName: string;
-  kibanaVersion: string;
   scalabilitySetup: ScalabilitySetup;
   testData?: {
     esArchives: string[];
