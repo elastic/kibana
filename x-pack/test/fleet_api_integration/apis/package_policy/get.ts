@@ -144,8 +144,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(403, {
             statusCode: 403,
             error: 'Forbidden',
-            message:
-              "Authorization denied to [package.name=filetest]. Allowed package.name's: endpoint",
+            message: 'Authorization denied to package: filetest. Allowed package(s): endpoint',
           });
       });
 
@@ -267,8 +266,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ ids: [packagePolicyId] })
           .expect(403, {
             error: 'Forbidden',
-            message:
-              "Authorization denied to [package.name=filetest]. Allowed package.name's: endpoint",
+            message: 'Authorization denied to package: filetest. Allowed package(s): endpoint',
             statusCode: 403,
           });
       });
