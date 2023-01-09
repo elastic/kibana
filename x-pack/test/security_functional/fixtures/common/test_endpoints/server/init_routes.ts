@@ -114,6 +114,7 @@ export function initRoutes(
       try {
         if (request.body.enabled) {
           await taskManager.bulkEnable([SESSION_INDEX_CLEANUP_TASK_NAME]);
+          await taskManager.runSoon(SESSION_INDEX_CLEANUP_TASK_NAME);
         } else {
           await taskManager.bulkDisable([SESSION_INDEX_CLEANUP_TASK_NAME]);
         }
