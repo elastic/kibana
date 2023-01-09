@@ -10,7 +10,7 @@ import {
   kqlQuery,
   rangeQuery,
 } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '../../../../observability/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -23,7 +23,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 
-type Timeseries = { x: number; y: number | null }[];
+type Timeseries = Array<{ x: number; y: number | null }>;
 interface MobileStats {
   sessions: { value?: number; timeseries: Timeseries };
   requests: { value?: number | null; timeseries: Timeseries };
