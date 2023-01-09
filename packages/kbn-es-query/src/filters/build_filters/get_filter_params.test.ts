@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { phraseFilter, phrasesFilter, rangeFilter, existsFilter } from '../stubs';
 import { getFilterParams } from './get_filter_params';
 

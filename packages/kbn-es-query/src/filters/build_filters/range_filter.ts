@@ -7,6 +7,7 @@
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, FilterMeta } from './types';
 import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 
@@ -37,7 +38,7 @@ const dateComparators = {
  * It is similar, but not identical to estypes.QueryDslRangeQuery
  * @public
  */
-export interface RangeFilterParams {
+export interface RangeFilterParams extends SerializableRecord {
   from?: number | string;
   to?: number | string;
   gt?: number | string;
@@ -53,7 +54,7 @@ export const hasRangeKeys = (params: RangeFilterParams) =>
   );
 
 export type RangeFilterMeta = FilterMeta & {
-  params: RangeFilterParams;
+  params?: RangeFilterParams;
   field?: string;
   formattedValue?: string;
 };
@@ -92,6 +93,9 @@ export type RangeFilter = Filter & {
  */
 export const isRangeFilter = (filter?: Filter): filter is RangeFilter => has(filter, 'query.range');
 
+export const isMetaRangeFilter = (filter?: Filter): filter is RangeFilter => {
+  return get(filter, 'meta.type') === 'range';
+};
 /**
  *
  * @param filter
@@ -133,6 +137,7 @@ export const buildRangeFilter = (
   indexPattern?: DataViewBase,
   formattedValue?: string
 ): RangeFilter | ScriptedRangeFilter | MatchAllRangeFilter => {
+  debugger;
   params = mapValues(params, (value: any) => (field.type === 'number' ? parseFloat(value) : value));
 
   if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
@@ -140,7 +145,9 @@ export const buildRangeFilter = (
 
   const totalInfinite = ['gt', 'lt'].reduce((acc, op) => {
     const key = op in params ? op : `${op}e`;
-    const isInfinite = Math.abs(get(params, key)) === Infinity;
+    const value = get(params, key);
+    const numericValue = typeof value === 'number' ? value : 0;
+    const isInfinite = Math.abs(numericValue) === Infinity;
 
     if (isInfinite) {
       acc++;

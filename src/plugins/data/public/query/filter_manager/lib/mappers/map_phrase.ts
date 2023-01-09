@@ -24,7 +24,7 @@ export function getPhraseDisplayValue(
   filter: PhraseFilter | ScriptedPhraseFilter,
   formatter?: FieldFormat
 ): string {
-  const value = filter.meta.value ?? filter.meta.params.query;
+  const value = filter.meta.value ?? filter.meta.params?.query;
   if (formatter?.convert) {
     return formatter.convert(value);
   }

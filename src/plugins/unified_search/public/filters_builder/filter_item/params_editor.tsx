@@ -8,6 +8,7 @@
 
 import React, { useCallback, useContext } from 'react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { EuiToolTip, EuiFormRow } from '@elastic/eui';
 import type { Operator } from '../../filter_bar/filter_editor';
 import { getFieldValidityAndErrorMessage } from '../../filter_bar/filter_editor/lib';
@@ -17,8 +18,8 @@ import { ParamsEditorInput } from './params_editor_input';
 interface ParamsEditorProps {
   dataView: DataView;
   params: unknown;
-  onHandleParamsChange: (params: unknown) => void;
-  onHandleParamsUpdate: (value: unknown) => void;
+  onHandleParamsChange: (params: Filter['meta']['params']) => void;
+  onHandleParamsUpdate: (value: string) => void;
   timeRangeForSuggestionsOverride?: boolean;
   field?: DataViewField;
   operator?: Operator;
