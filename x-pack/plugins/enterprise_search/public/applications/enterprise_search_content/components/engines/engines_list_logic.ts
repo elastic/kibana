@@ -70,7 +70,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     ],
   }),
   selectors: ({ selectors }) => ({
-    results: [() => [selectors.data], (data) => data?.results ?? []],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
+    results: [() => [selectors.data], (data) => data?.results ?? []],
   }),
 });
