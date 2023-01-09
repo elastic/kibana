@@ -28,7 +28,7 @@ export const executeEsQueryAPI = async ({
 }) => {
   const data = kibanaService.startPlugins.data;
 
-  const response = new Promise<IKibanaSearchResponse>((resolve) => {
+  const response = new Promise<IKibanaSearchResponse>((resolve, reject) => {
     const startTime = Date.now();
 
     const search$ = data.search
@@ -73,6 +73,7 @@ export const executeEsQueryAPI = async ({
           if (isErrorResponse(err)) {
             // eslint-disable-next-line no-console
             console.error(err);
+            reject(err);
             if (addInspectorRequest) {
               addInspectorRequest({
                 data: {
