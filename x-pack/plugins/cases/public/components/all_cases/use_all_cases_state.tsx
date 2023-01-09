@@ -20,8 +20,9 @@ import type {
   FilterOptions,
   PartialFilterOptions,
   LocalStorageQueryParams,
-  ParsedUrlQueryParams,
   QueryParams,
+  PartialQueryParams,
+  ParsedUrlQueryParams,
   UrlQueryParams,
 } from '../../../common/ui/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -37,11 +38,11 @@ export const getFilterOptionsLocalStorageKey = (appId: string) => {
 };
 
 const getQueryParams = (
-  params: UrlQueryParams,
-  queryParams: UrlQueryParams,
-  urlParams: UrlQueryParams,
+  params: PartialQueryParams,
+  queryParams: PartialQueryParams,
+  urlParams: PartialQueryParams,
   localStorageQueryParams?: LocalStorageQueryParams
-): QueryParams => {
+): [QueryParams, UrlQueryParams] => {
   const result = { ...DEFAULT_QUERY_PARAMS };
 
   result.perPage =
@@ -64,24 +65,31 @@ const getQueryParams = (
 
   result.page = params.page ?? urlParams.page ?? DEFAULT_QUERY_PARAMS.page;
 
-  return result;
+  return [result, { ...result, page: result.page.toString(), perPage: result.perPage.toString() }];
 };
 
 const getFilterOptions = (
   filterOptions: FilterOptions,
   params: FilterOptions,
+  urlParams?: PartialFilterOptions,
   localStorageFilterOptions?: PartialFilterOptions
 ): FilterOptions => {
-  const severity = params.severity ?? localStorageFilterOptions?.severity;
-  const status = params.status ?? localStorageFilterOptions?.status;
-  // const tags = params.tags ?? localStorageFilterOptions?.tags;
+  const severity =
+    params.severity ??
+    urlParams?.severity ??
+    localStorageFilterOptions?.severity ??
+    DEFAULT_FILTER_OPTIONS.severity;
+  const status =
+    params.status ??
+    urlParams?.status ??
+    localStorageFilterOptions?.status ??
+    DEFAULT_FILTER_OPTIONS.status;
 
   return {
     ...filterOptions,
     ...params,
     ...(severity && { severity }),
     ...(status && { status }),
-    // ...(tags && { tags }),
   };
 };
 
@@ -93,12 +101,14 @@ export function useAllCasesState(
   const location = useLocation();
   const history = useHistory();
   const isFirstRenderRef = useRef(true);
+  const isFirstHistoryUpdateRef = useRef(true);
 
   const [queryParams, setQueryParams] = useState<QueryParams>({ ...DEFAULT_QUERY_PARAMS });
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     ...DEFAULT_FILTER_OPTIONS,
     ...initialFilterOptions,
   });
+  const [stateUrlParams, setStateUrlParams] = useState<Partial<UrlQueryParams & FilterOptions>>({});
 
   const [localStorageQueryParams, setLocalStorageQueryParams] =
     useLocalStorage<LocalStorageQueryParams>(getQueryParamsLocalStorageKey(appId));
@@ -114,8 +124,8 @@ export function useAllCasesState(
       }
 
       const parsedUrlParams: ParsedUrlQueryParams = parse(location.search);
-      const urlParams: UrlQueryParams = parseUrlQueryParams(parsedUrlParams);
-      const newQueryParams: QueryParams = getQueryParams(
+      const urlParams: PartialQueryParams = parseUrlQueryParams(parsedUrlParams);
+      const [newQueryParams, newUrlQueryParams]: [QueryParams, UrlQueryParams] = getQueryParams(
         params,
         queryParams,
         urlParams,
@@ -126,38 +136,22 @@ export function useAllCasesState(
         sortField: newQueryParams.sortField,
         sortOrder: newQueryParams.sortOrder,
       };
-      const newUrlParams = {
-        page: newQueryParams.page,
-        ...newLocalStorageQueryParams,
-      };
 
-      if (!isEqual(newUrlParams, urlParams)) {
-        try {
-          const newHistory = {
-            ...location,
-            search: stringify({ ...parsedUrlParams, ...newUrlParams }),
-          };
-
-          if (isFirstRenderRef.current) {
-            history.replace(newHistory);
-          } else {
-            history.push(newHistory);
-          }
-        } catch {
-          // silently fail
-        }
-      }
+      setStateUrlParams((prevUrlParams) => ({
+        ...prevUrlParams,
+        ...newUrlQueryParams,
+      }));
 
       setLocalStorageQueryParams(newLocalStorageQueryParams);
       setQueryParams(newQueryParams);
     },
     [
       isModalView,
-      location,
-      localStorageQueryParams,
+      location.search,
       queryParams,
+      localStorageQueryParams,
+      setStateUrlParams,
       setLocalStorageQueryParams,
-      history,
     ]
   );
 
@@ -171,27 +165,82 @@ export function useAllCasesState(
       const newFilterOptions: FilterOptions = getFilterOptions(
         filterOptions,
         params,
+        parse(location.search),
         localStorageFilterOptions
       );
-      const newLocalStorageFilterOptions = {
-        ...localStorageFilterOptions,
+
+      const newPersistedFilterOptions: PartialFilterOptions = {
         ...(newFilterOptions.severity && { severity: newFilterOptions.severity }),
         ...(newFilterOptions.status && { status: newFilterOptions.status }),
       };
 
+      const newLocalStorageFilterOptions: PartialFilterOptions = {
+        ...localStorageFilterOptions,
+        ...newPersistedFilterOptions,
+      };
+
+      setStateUrlParams((prevUrlParams) => ({
+        ...prevUrlParams,
+        ...newPersistedFilterOptions,
+      }));
+
       setLocalStorageFilterOptions(newLocalStorageFilterOptions);
       setFilterOptions(newFilterOptions);
     },
-    [isModalView, filterOptions, localStorageFilterOptions, setLocalStorageFilterOptions]
+    [
+      filterOptions,
+      isModalView,
+      localStorageFilterOptions,
+      location.search,
+      setLocalStorageFilterOptions,
+      setStateUrlParams,
+    ]
   );
 
   useEffect(() => {
     if (isFirstRenderRef.current) {
       persistAndUpdateQueryParams(isModalView ? DEFAULT_QUERY_PARAMS : {});
-      persistAndUpdateFilterOptions(isModalView ? DEFAULT_QUERY_PARAMS : {});
+      persistAndUpdateFilterOptions(
+        isModalView
+          ? {
+              ...DEFAULT_FILTER_OPTIONS,
+              ...initialFilterOptions,
+            }
+          : {}
+      );
+
       isFirstRenderRef.current = false;
     }
-  }, [isModalView, persistAndUpdateFilterOptions, persistAndUpdateQueryParams]);
+  }, [
+    history,
+    initialFilterOptions,
+    isModalView,
+    location,
+    persistAndUpdateFilterOptions,
+    persistAndUpdateQueryParams,
+  ]);
+
+  useEffect(() => {
+    const parsedUrlParams = parse(location.search);
+
+    if (!isEqual(parsedUrlParams, stateUrlParams)) {
+      try {
+        const newHistory = {
+          ...location,
+          search: stringify({ ...parsedUrlParams, ...stateUrlParams }),
+        };
+
+        if (isFirstHistoryUpdateRef.current) {
+          history.replace(newHistory);
+          isFirstHistoryUpdateRef.current = false;
+        } else {
+          history.push(newHistory);
+        }
+      } catch {
+        // silently fail
+      }
+    }
+  }, [history, location, stateUrlParams]);
 
   return {
     queryParams,
