@@ -11,7 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-import { map, reduce } from 'lodash';
+import { reduce } from 'lodash';
 import {
   transformToEndpointActions,
   transformToEndpointResponse,
@@ -141,15 +141,9 @@ export const getActions = async ({
   const actionIds = reduce(
     transformedActions,
     (acc, action) => {
-      // TODO here, add only specific to the action responses
       const source = action._source as LogsEndpointAction | LogsOsqueryAction;
       if (isLogsOsqueryAction(source)) {
-        return [
-          ...acc,
-          ...map(source.EndpointActions.queries, (query) => {
-            return query.action_id;
-          }),
-        ] as string[];
+        return [...acc, ...source.EndpointActions.queriesIds];
       }
       return [...acc, source.EndpointActions.action_id];
     },

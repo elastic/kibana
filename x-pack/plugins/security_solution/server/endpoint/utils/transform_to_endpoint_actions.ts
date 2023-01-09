@@ -29,6 +29,7 @@ export const transformToEndpointActions = (
         _source: {
           EndpointActions: {
             ...source,
+            queriesIds: map(source.queries, (query) => query.action_id),
             data: {
               command: 'osquery',
             },

@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { every, isEmpty, some } from 'lodash';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_DS,
@@ -87,6 +88,9 @@ interface NormalizedActionRequest {
   command: ResponseActionsApiCommandNames;
   comment?: string;
   parameters?: EndpointActionDataParameterTypes;
+  // TODO FIX type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  additionalData?: Record<string, any>;
 }
 
 /**
@@ -107,6 +111,10 @@ export const mapToNormalizedActionRequest = (
         : [actionRequest.agent.id],
       // TODO pass alert id
       // alert: actionRequest.alert.id,
+      additionalData: {
+        // alert: actionRequest.alert.id,
+        queriesIds: actionRequest.EndpointActions.queriesIds,
+      },
       command: actionRequest.EndpointActions.data.command,
       comment: actionRequest.EndpointActions.data.comment,
       createdBy: actionRequest.user.id,
@@ -151,7 +159,7 @@ export const mapToNormalizedActionRequest = (
 type ActionCompletionInfo = Pick<
   Required<ActionDetails>,
   'isCompleted' | 'completedAt' | 'wasSuccessful' | 'errors' | 'outputs' | 'agentState'
->;
+> & { partiallySuccessful?: boolean };
 
 export const getActionCompletionInfo = (
   /** List of agents that the action was sent to */
@@ -168,7 +176,7 @@ export const getActionCompletionInfo = (
     agentState: {},
     isCompleted: Boolean(agentIds.length),
     wasSuccessful: Boolean(agentIds.length),
-    // TODO ADD WAS PARTIALLY SUCCESSFUL
+    partiallySuccessful: false,
   };
 
   const responsesByAgentId: ActionResponseByAgentId = mapActionResponsesByAgentId(actionResponses);
@@ -187,6 +195,7 @@ export const getActionCompletionInfo = (
     completedInfo.agentState[agentId] = {
       isCompleted: false,
       wasSuccessful: false,
+      partiallySuccessful: false,
       errors: undefined,
       completedAt: undefined,
     };
@@ -197,6 +206,7 @@ export const getActionCompletionInfo = (
       completedInfo.agentState[agentId].wasSuccessful = agentResponses.wasSuccessful;
       completedInfo.agentState[agentId].completedAt = agentResponses.completedAt;
       completedInfo.agentState[agentId].errors = agentResponses.errors;
+      completedInfo.agentState[agentId].partiallySuccessful = agentResponses.partiallySuccessful;
 
       if (
         agentResponses.endpointResponse &&
@@ -220,6 +230,7 @@ export const getActionCompletionInfo = (
       ) {
         completedInfo.completedAt = normalizedAgentResponse.completedAt;
       }
+      completedInfo.partiallySuccessful = normalizedAgentResponse.partiallySuccessful;
 
       if (!normalizedAgentResponse.wasSuccessful) {
         completedInfo.wasSuccessful = false;
@@ -241,16 +252,20 @@ export const getActionStatus = ({
   expirationDate,
   isCompleted,
   wasSuccessful,
+  partiallySuccessful,
 }: {
   expirationDate: string;
   isCompleted: boolean;
   wasSuccessful: boolean;
+  partiallySuccessful?: boolean;
 }): { status: ActionDetails['status']; isExpired: boolean } => {
   const isExpired = !isCompleted && expirationDate < new Date().toISOString();
   const status = isExpired
     ? 'failed'
     : isCompleted
-    ? wasSuccessful
+    ? partiallySuccessful
+      ? 'partial'
+      : wasSuccessful
       ? 'successful'
       : 'failed'
     : 'pending';
@@ -262,10 +277,11 @@ interface NormalizedAgentActionResponse {
   isCompleted: boolean;
   completedAt: undefined | string;
   wasSuccessful: boolean;
+  partiallySuccessful: boolean;
   errors: undefined | string[];
   fleetResponse: undefined | ActivityLogActionResponse;
   endpointResponse: undefined | EndpointActivityLogActionResponse;
-  osqueryResponse: undefined | OsqueryActivityLogActionResponse;
+  osqueryResponses: Record<string, OsqueryActivityLogActionResponse[]>;
 }
 
 type ActionResponseByAgentId = Record<string, NormalizedAgentActionResponse>;
@@ -291,19 +307,26 @@ const mapActionResponsesByAgentId = (
         isCompleted: false,
         completedAt: undefined,
         wasSuccessful: false,
+        partiallySuccessful: false,
         errors: undefined,
         fleetResponse: undefined,
         endpointResponse: undefined,
-        osqueryResponse: undefined,
+        osqueryResponses: {},
       };
 
       thisAgentActionResponses = response[agentId];
     }
-
+    let rootActionId = '';
     if (actionResponse.type === 'fleetResponse') {
       thisAgentActionResponses.fleetResponse = actionResponse;
     } else if (actionResponse.type === 'osqueryResponse') {
-      thisAgentActionResponses.osqueryResponse = actionResponse;
+      rootActionId = actionResponse.item.data.EndpointActions.root_action_id;
+
+      if (!thisAgentActionResponses.osqueryResponses[rootActionId]) {
+        thisAgentActionResponses.osqueryResponses[rootActionId] = [actionResponse];
+      } else {
+        thisAgentActionResponses.osqueryResponses[rootActionId].push(actionResponse);
+      }
     } else {
       thisAgentActionResponses.endpointResponse = actionResponse;
     }
@@ -311,7 +334,7 @@ const mapActionResponsesByAgentId = (
     thisAgentActionResponses.isCompleted =
       // Action is complete if an Endpoint Action Response was received
       Boolean(thisAgentActionResponses.endpointResponse) ||
-      Boolean(thisAgentActionResponses.osqueryResponse) ||
+      Boolean(thisAgentActionResponses.osqueryResponses[rootActionId]) ||
       // OR:
       // If we did not have an endpoint response and the Fleet response has `error`, then
       // action is complete. Elastic Agent was unable to deliver the action request to the
@@ -325,10 +348,30 @@ const mapActionResponsesByAgentId = (
         thisAgentActionResponses.completedAt =
           thisAgentActionResponses.endpointResponse?.item.data['@timestamp'];
         thisAgentActionResponses.wasSuccessful = true;
-      } else if (thisAgentActionResponses.osqueryResponse) {
+      } else if (thisAgentActionResponses.osqueryResponses[rootActionId]?.length) {
         thisAgentActionResponses.completedAt =
-          thisAgentActionResponses.osqueryResponse?.item.data['@timestamp'];
-        thisAgentActionResponses.wasSuccessful = true;
+          thisAgentActionResponses.osqueryResponses[rootActionId][0]?.item.data['@timestamp'];
+        const allSuccessful = every(
+          thisAgentActionResponses.osqueryResponses[rootActionId],
+          ({ item }) => {
+            return isEmpty(item.data.EndpointActions.error);
+          }
+        );
+        if (allSuccessful) {
+          thisAgentActionResponses.wasSuccessful = true;
+          thisAgentActionResponses.partiallySuccessful = false;
+        } else {
+          const partiallySuccessful = some(
+            thisAgentActionResponses.osqueryResponses[rootActionId],
+            ({ item }) => {
+              return isEmpty(item.data.EndpointActions.error);
+            }
+          );
+          if (partiallySuccessful) {
+            thisAgentActionResponses.partiallySuccessful = true;
+            thisAgentActionResponses.wasSuccessful = true;
+          }
+        }
       } else if (
         // Check if perhaps the Fleet action response returned an error, in which case, the Fleet Agent
         // failed to deliver the Action to the Endpoint. If that's the case, we are not going to get
@@ -366,7 +409,6 @@ const mapActionResponsesByAgentId = (
 
   return response;
 };
-
 /**
  * Given an Action response, this will return the Agent ID for that action response.
  * @param actionResponse
@@ -542,7 +584,6 @@ export const formatEndpointActionResults = (
 ): EndpointActivityLogAction[] => {
   return results?.length
     ? results?.map((e) => {
-        // TODO ad queries here
         return {
           type: ActivityLogItemTypes.ACTION,
           item: { id: e._id, data: e._source as LogsEndpointAction | LogsOsqueryAction },

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
+export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful', 'partial'] as const;
 export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
 
 /**

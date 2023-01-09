@@ -165,6 +165,8 @@ export interface LogsOsqueryResponse<TOutputContent extends object = object> {
   EndpointActions: ActionResponseFields & {
     action_id: string;
     data: OsqueryResponse;
+    error?: string;
+    root_action_id: string;
   };
   error?: EcsError;
 }
@@ -178,13 +180,12 @@ export interface LogsOsqueryAction {
     data: {
       command: 'osquery';
       comment: string;
-      // queries: source.queries,
     };
     action_id: string;
     input_type: 'osquery';
     expiration: string;
     type: 'INPUT_ACTION';
-    queries: Array<Record<string, unknown>>;
+    queriesIds: string[];
   };
   user: {
     id: string;
@@ -409,6 +410,7 @@ export interface ActionDetails<
     {
       isCompleted: boolean;
       wasSuccessful: boolean;
+      partiallySuccessful: boolean;
       errors: undefined | string[];
       completedAt: string | undefined;
     }
