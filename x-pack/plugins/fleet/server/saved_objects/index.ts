@@ -144,19 +144,8 @@ const getSavedObjectTypes = (
         ssl: { type: 'binary' },
         proxy_id: { type: 'keyword' },
         shipper: {
-          dynamic: false,
-          properties: {
-            disk_queue_enabled: { type: 'boolean' },
-            disk_queue_path: { type: 'keyword' },
-            disk_queue_max_size: { type: 'integer' },
-            disk_queue_encryption_enabled: { type: 'boolean' },
-            disk_queue_compression_enabled: { type: 'boolean' },
-            compression_level: { type: 'integer' },
-            loadbalance: { type: 'boolean' },
-            mem_queue_events: { type: 'integer' },
-            queue_flush_timeout: { type: 'integer' },
-            max_batch_bytes: { type: 'integer' },
-          },
+          dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+          properties: {},
         },
       },
     },
