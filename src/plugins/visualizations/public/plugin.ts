@@ -23,8 +23,8 @@ import {
   createStartServicesGetter,
   Storage,
   withNotifyOnErrors,
-  replaceUrlHashQuery,
 } from '@kbn/kibana-utils-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 

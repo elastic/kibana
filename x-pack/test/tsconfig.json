@@ -110,6 +110,8 @@
     "@kbn/core-saved-objects-common",
     "@kbn/alerting-fixture-plugin",
     "@kbn/user-profile-components",
+    "@kbn/apm-synthtrace-client",
     "@kbn/utils",
+    "@kbn/journeys",
   ]
 }
