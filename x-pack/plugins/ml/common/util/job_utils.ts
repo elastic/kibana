@@ -16,6 +16,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isDefined } from '@kbn/ml-is-defined';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
@@ -35,7 +36,6 @@ import { MLCATEGORY } from '../constants/field_types';
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
 import { getFirstKeyInObject } from './object_utils';
-import { isDefined } from '../types/guards';
 
 export interface ValidationResults {
   valid: boolean;
