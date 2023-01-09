@@ -665,15 +665,15 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async openSidebarFieldFilter() {
-    await this.testSubjects.click('toggleFieldFilterButton');
-    await this.testSubjects.existOrFail('filterSelectionPanel');
+    await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
+    await this.testSubjects.existOrFail('fieldListFiltersFieldTypeFilterOptions');
   }
 
   public async closeSidebarFieldFilter() {
-    await this.testSubjects.click('toggleFieldFilterButton');
+    await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
 
     await this.retry.waitFor('sidebar filter closed', async () => {
-      return !(await this.testSubjects.exists('filterSelectionPanel'));
+      return !(await this.testSubjects.exists('fieldListFiltersFieldTypeFilterOptions'));
     });
   }
 
