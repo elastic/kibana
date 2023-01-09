@@ -21,19 +21,13 @@ import { Status } from '../status/status';
 import { CaseStatuses } from '../status/types';
 import { IconWithCount } from './icon_with_count';
 import * as i18n from './translations';
+import type { CaseTooltipProps } from './types';
 
-interface TooltipProps {
-  title: string;
-  description: string;
-  status: CaseStatuses;
-  totalComments: number;
-  createdAt: string;
-  createdBy: { username?: string; fullName?: string };
-  dataTestSubj?: string;
-  className?: string;
+interface Props extends CaseTooltipProps {
   children: React.ReactNode;
 }
-const CaseTooltipComponent = React.memo<TooltipProps>(
+
+const CaseTooltipComponent = React.memo<Props>(
   ({
     title,
     description,
@@ -46,13 +40,14 @@ const CaseTooltipComponent = React.memo<TooltipProps>(
     className = '',
   }) => {
     const { euiTheme } = useEuiTheme();
+    const borderColor = euiTheme.colors.subduedText;
+
     const commonTextStyles: React.CSSProperties = {
       textOverflow: 'ellipsis',
       display: '-webkit-box',
       WebkitBoxOrient: 'vertical',
       overflow: 'hidden',
     };
-    const borderColor = euiTheme.colors.subduedText;
 
     return (
       <EuiToolTip
@@ -74,10 +69,17 @@ const CaseTooltipComponent = React.memo<TooltipProps>(
               <EuiText style={{ borderTop: `1px solid ${borderColor}` }}>
                 <EuiSpacer size="xs" />
                 {status === CaseStatuses.closed ? i18n.CLOSED : i18n.OPENED}{' '}
-                <FormattedRelative value={createdAt} /> {i18n.BY}{' '}
-                <strong data-test-subj="tooltip-username">
-                  {createdBy.username || createdBy.fullName || ''}
-                </strong>
+                <FormattedRelative value={createdAt} />
+                {createdBy.username || createdBy.fullName ? (
+                  <>
+                    {i18n.BY}{' '}
+                    <strong data-test-subj="tooltip-username">
+                      {createdBy.username || createdBy.fullName}
+                    </strong>
+                  </>
+                ) : (
+                  ''
+                )}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>

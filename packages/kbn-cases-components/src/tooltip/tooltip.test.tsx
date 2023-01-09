@@ -12,16 +12,14 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { Tooltip } from './tooltip';
 import { CaseStatuses } from '../status/types';
+import type { CaseTooltipProps } from './types';
 
 const elasticUser = {
   fullName: 'Elastic User',
   username: 'elastic',
 };
 
-const sampleText = 'This is a testing span!!';
-const TestSpan = () => <span data-test-subj="sample-span">{sampleText}</span>;
-
-const tooltipProps = {
+const tooltipProps: CaseTooltipProps = {
   title: 'Another horrible breach!!',
   description: 'Demo case banana Issue',
   createdAt: '2020-02-19T23:06:33.798Z',
@@ -29,6 +27,9 @@ const tooltipProps = {
   totalComments: 1,
   status: CaseStatuses.open,
 };
+
+const sampleText = 'This is a test span element!!';
+const TestSpan = () => <span data-test-subj="sample-span">{sampleText}</span>;
 
 describe('Tooltip', () => {
   it('renders correctly', async () => {
@@ -97,10 +98,11 @@ describe('Tooltip', () => {
     );
 
     fireEvent.mouseOver(res.getByTestId('sample-span'));
+    expect(await res.findByTestId('tooltip-username')).toBeInTheDocument();
     expect(await res.findByText(newUser.fullName)).toBeInTheDocument();
   });
 
-  it('renders full name when username or full name not available', async () => {
+  it('does not render username when no username or full name available', () => {
     const res = render(
       <I18nProvider>
         <Tooltip {...tooltipProps} createdBy={{}}>
@@ -110,6 +112,6 @@ describe('Tooltip', () => {
     );
 
     fireEvent.mouseOver(res.getByTestId('sample-span'));
-    expect(await res.findByTestId('tooltip-username')).toHaveTextContent('');
+    expect(res.queryByTestId('tooltip-username')).not.toBeInTheDocument();
   });
 });

@@ -16,13 +16,14 @@ import { Status, CaseStatuses } from '@kbn/cases-components';
 
 ### Tooltip
 
-The component renders the tooltip of a case details. Usage:
+The component renders the tooltip with case details on hover of an Element. Usage:
 
 ```
 import { Tooltip } from '@kbn/cases-components';
+import type { CaseTooltipProps } from '@kbn/cases-components';
 
 const tooltipProps = {
-  title: 'Case Title',
+  title: 'Case title',
   description: 'Case description',
   createdAt: '2020-02-19T23:06:33.798Z',
   createdBy: {
