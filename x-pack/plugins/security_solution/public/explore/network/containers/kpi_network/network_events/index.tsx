@@ -118,9 +118,7 @@ export const useNetworkKpiNetworkEvents = ({
       };
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
-
       asyncSearch();
-
       refetch.current = asyncSearch;
     },
     [data.search, addError, addWarning, skip]
