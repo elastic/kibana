@@ -24,14 +24,14 @@ export const useRefetchByRestartingSession = ({
   inputId,
   queryId,
 }: UseRefetchByRestartingSessionProps): {
-  searchSessionId: string | null;
+  searchSessionId?: string;
   refetchByRestartingSession: Refetch;
 } => {
   const dispatch = useDispatch();
   const { data } = useKibana().services;
 
   const session = useRef(data.search.session);
-  const [searchSessionId, setSearchSessionId] = useState<string | null>(null);
+  const [searchSessionId, setSearchSessionId] = useState<string | undefined>(undefined);
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
