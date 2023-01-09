@@ -35,7 +35,9 @@ export function WaterfallFlyout({
     query: { flyoutDetailTab },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer/waterfall',
+    '/dependencies/operation'
   );
   const currentItem = waterfall.items.find(
     (item) => item.id === waterfallItemId
