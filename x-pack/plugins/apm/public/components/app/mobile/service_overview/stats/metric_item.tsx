@@ -9,7 +9,7 @@ import { Chart, Settings, Metric, MetricDatum } from '@elastic/charts';
 import { DARK_THEME } from '@elastic/charts';
 import { EuiLoadingContent, EuiPanel } from '@elastic/eui';
 
-export const MetricItem = ({
+export function MetricItem({
   data,
   id,
   isLoading,
@@ -17,7 +17,7 @@ export const MetricItem = ({
   data: MetricDatum[];
   id: number;
   isLoading: boolean;
-}) => {
+}) {
   return (
     <div
       style={{
@@ -40,4 +40,4 @@ export const MetricItem = ({
       )}
     </div>
   );
-};
+}
