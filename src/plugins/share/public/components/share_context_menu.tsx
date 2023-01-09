@@ -34,7 +34,7 @@ export interface ShareContextMenuProps {
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
-  panelTitle?: string;
+  objectTypeTitle?: string;
   disabledShareUrl?: boolean;
 }
 
@@ -137,7 +137,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
         title: i18n.translate('share.contextMenuTitle', {
           defaultMessage: 'Share this {objectType}',
           values: {
-            objectType: this.props.panelTitle || this.props.objectType,
+            objectType: this.props.objectTypeTitle || this.props.objectType,
           },
         }),
         items: menuItems

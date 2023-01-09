@@ -602,7 +602,7 @@ export const LensTopNavMenu = ({
               shareableUrlForSavedObject: savedObjectURL.href,
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens_visualization',
-              panelTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
+              objectTypeTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
                 defaultMessage: 'Lens visualization',
               }),
               sharingData,
