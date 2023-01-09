@@ -25,8 +25,8 @@ export const PATTERN_OR_INDEX_TOOLTIP = i18n.translate(
   }
 );
 
-export const TOTAL_DOCS_TOOLTIP = (pattern: string) =>
-  i18n.translate('xpack.securitySolution.dataQuality.totalDocsTooltip', {
+export const PATTERN_DOCS_COUNT_TOOLTIP = (pattern: string) =>
+  i18n.translate('xpack.securitySolution.dataQuality.patternDocsCountTooltip', {
     values: { pattern },
     defaultMessage: 'The total count from all indices matching: {pattern}',
   });

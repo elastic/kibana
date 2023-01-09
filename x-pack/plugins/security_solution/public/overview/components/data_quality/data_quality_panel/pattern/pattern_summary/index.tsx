@@ -5,37 +5,32 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import * as i18n from './translations';
+import type { IlmExplainPhaseCounts } from '../../../types';
+import { PatternLabel } from './pattern_label';
 
 interface Props {
-  indexCount: number;
+  ilmExplainPhaseCounts: IlmExplainPhaseCounts;
   pattern: string;
-  totalDocsCount: number;
+  patternDocsCount: number;
 }
 
-const PatternSummaryComponent: React.FC<Props> = ({ indexCount, pattern, totalDocsCount }) => (
-  <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+const PatternSummaryComponent: React.FC<Props> = ({
+  ilmExplainPhaseCounts,
+  pattern,
+  patternDocsCount,
+}) => (
+  <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>
-      <EuiToolTip content={i18n.PATTERN_OR_INDEX_TOOLTIP}>
-        <EuiTitle size="s">
-          <h4>{pattern}</h4>
-        </EuiTitle>
-      </EuiToolTip>
-      <div>
-        <span>
-          {i18n.INDICES}
-          {': '}
-        </span>
-        <span>{indexCount}</span>
-      </div>
+      <PatternLabel ilmExplainPhaseCounts={ilmExplainPhaseCounts} pattern={pattern} />
     </EuiFlexItem>
 
     <EuiFlexItem grow={false}>
-      <EuiToolTip content={i18n.TOTAL_DOCS_TOOLTIP(pattern)}>
-        <EuiStat description={i18n.DOCS} reverse title={totalDocsCount} titleSize="s" />
+      <EuiToolTip content={i18n.PATTERN_DOCS_COUNT_TOOLTIP(pattern)}>
+        <EuiStat description={i18n.DOCS} reverse title={patternDocsCount} titleSize="s" />
       </EuiToolTip>
     </EuiFlexItem>
   </EuiFlexGroup>

@@ -11,14 +11,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { ErrorEmptyPrompt } from '../error_empty_prompt';
-import { getDocsCount, getIndexNames } from '../../helpers';
+import { getIlmExplainPhaseCounts, getIlmPhase } from './helpers';
+import { getDocsCount, getIndexNames, getTotalDocsCount } from '../../helpers';
 import { IndexProperties } from '../index_properties';
-import { IndexStats } from '../index_properties/index_stats';
+import { IndexSummary } from '../index_properties/index_summary';
 import { LoadingEmptyPrompt } from '../loading_empty_prompt';
 import { PatternSummary } from './pattern_summary';
+import { useIlmExplain } from '../../use_ilm_explain';
+import { useStats } from '../../use_stats';
 import * as i18n from './translations';
 import type { EcsMetadata } from '../../types';
-import { useStats } from '../../use_stats';
 
 export type AccordionState = 'closed' | 'open';
 
@@ -70,10 +72,22 @@ const PatternComponent: React.FC<Props> = ({
   pattern,
   version,
 }) => {
-  const { error, loading, stats } = useStats(pattern);
+  const { error: statsError, loading: loadingStats, stats } = useStats(pattern);
+  const { error: ilmExplainError, loading: loadingIlmExplain, ilmExplain } = useIlmExplain(pattern);
+  const loading = useMemo(
+    () => loadingStats || loadingIlmExplain,
+    [loadingIlmExplain, loadingStats]
+  );
+  const error = useMemo(() => statsError ?? ilmExplainError, [ilmExplainError, statsError]);
+
   const indexNames = useMemo(() => getIndexNames(stats), [stats]);
   const [accordionState, setAccordionState] = useState<AccordionState[]>(
     getInitialAccordionState({ expandFirstResult, indexNames })
+  );
+
+  const patternDocsCount = useMemo(
+    () => getTotalDocsCount({ indexNames, stats }),
+    [indexNames, stats]
   );
 
   useEffect(() => {
@@ -86,11 +100,13 @@ const PatternComponent: React.FC<Props> = ({
         (acc, indexName) => ({
           ...acc,
           [indexName]:
-            stats != null ? (
-              <IndexStats
+            stats != null && ilmExplain != null ? (
+              <IndexSummary
                 docsCount={getDocsCount({ stats, indexName })}
+                ilmPhase={getIlmPhase(ilmExplain[indexName])}
                 indexName={indexName}
                 pattern={pattern}
+                patternDocsCount={patternDocsCount}
               />
             ) : (
               indexName
@@ -98,26 +114,19 @@ const PatternComponent: React.FC<Props> = ({
         }),
         {}
       ),
-    [indexNames, pattern, stats]
+    [ilmExplain, indexNames, pattern, patternDocsCount, stats]
   );
 
-  const totalDocsCount: number = useMemo(
-    () =>
-      indexNames.reduce(
-        (acc: number, indexName: string) => acc + getDocsCount({ stats, indexName }),
-        0
-      ),
-    [indexNames, stats]
-  );
+  const ilmExplainPhaseCounts = useMemo(() => getIlmExplainPhaseCounts(ilmExplain), [ilmExplain]);
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>
           <PatternSummary
-            indexCount={indexNames.length}
+            ilmExplainPhaseCounts={ilmExplainPhaseCounts}
             pattern={pattern}
-            totalDocsCount={totalDocsCount}
+            patternDocsCount={patternDocsCount}
           />
           <EuiSpacer />
         </EuiFlexItem>

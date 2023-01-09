@@ -75,3 +75,13 @@ export interface UnallowedValueSearchResult {
     };
   };
 }
+
+export type IlmPhase = 'hot' | 'warm' | 'cold' | 'frozen' | 'unmanaged';
+
+export interface IlmExplainPhaseCounts {
+  hot: number;
+  warm: number;
+  cold: number;
+  frozen: number;
+  unmanaged: number;
+}

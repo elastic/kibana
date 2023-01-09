@@ -161,3 +161,15 @@ export const getDocsCount = ({
   indexName: string;
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): number => (stats && stats[indexName]?.total?.docs?.count) ?? 0;
+
+export const getTotalDocsCount = ({
+  indexNames,
+  stats,
+}: {
+  indexNames: string[];
+  stats: Record<string, IndicesStatsIndicesStats> | null;
+}): number =>
+  indexNames.reduce(
+    (acc: number, indexName: string) => acc + getDocsCount({ stats, indexName }),
+    0
+  );
