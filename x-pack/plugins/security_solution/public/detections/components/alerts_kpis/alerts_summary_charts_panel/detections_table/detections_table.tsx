@@ -17,11 +17,13 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ChartsPanelProps, DetectionsData, AlertType } from '../types';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { getDetectionsTableColumns } from '../columns';
 import * as i18n from '../translations';
+import { EVENT_TYPE_COLOUR } from '../helpers';
 
 const TABLE_HEIGHT = 200;
 
@@ -44,10 +46,6 @@ interface PalletteObject {
   color: string;
 }
 type PalletteArray = PalletteObject[];
-const EVENT_TYPE_COLOUR = {
-  Detection: '#54B399',
-  Prevention: '#D36086',
-};
 
 export const DetectionsTable: React.FC<ChartsPanelProps> = ({
   data,
@@ -78,9 +76,16 @@ export const DetectionsTable: React.FC<ChartsPanelProps> = ({
     }
   });
 
-  const palette = useMemo(
-    () =>
-      (Object.keys(holder) as AlertType[]).reduce((acc: PalletteArray, type: AlertType) => {
+  const sorting: { sort: { field: keyof DetectionsData; direction: SortOrder } } = {
+    sort: {
+      field: 'value',
+      direction: 'desc',
+    },
+  };
+
+  const palette = useMemo(() => {
+    const arr = (Object.keys(holder) as AlertType[]).reduce(
+      (acc: PalletteArray, type: AlertType) => {
         const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
         const newEntry: PalletteObject = {
           stop: previousStop + (holder[type] || 0),
@@ -88,9 +93,11 @@ export const DetectionsTable: React.FC<ChartsPanelProps> = ({
         };
         acc.push(newEntry);
         return acc;
-      }, [] as PalletteArray),
-    [holder]
-  );
+      },
+      [] as PalletteArray
+    );
+    return arr;
+  }, [holder]);
 
   return (
     <EuiFlexItem style={{ minWidth: 350 }}>
@@ -106,7 +113,12 @@ export const DetectionsTable: React.FC<ChartsPanelProps> = ({
             className="no-margin"
           />
           <Wrapper data-test-subj="alert-detections-table" className="eui-yScroll">
-            <EuiInMemoryTable columns={columns} items={items} loading={isLoading} />
+            <EuiInMemoryTable
+              columns={columns}
+              items={items}
+              loading={isLoading}
+              sorting={sorting}
+            />
           </Wrapper>
           {option === 1 && (
             <ColorPaletteWrapperOp1>
@@ -130,7 +142,7 @@ export const DetectionsTable: React.FC<ChartsPanelProps> = ({
                   </EuiFlexItem>
                 ))}
               </EuiFlexGroup>
-              <EuiSpacer size="xs" />
+              <EuiSpacer size="s" />
               <StyledEuiColorPaletteDisplay
                 className="risk-score-severity-bar"
                 data-test-subj="risk-score-severity-bar"

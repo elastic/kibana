@@ -135,6 +135,7 @@ export const getDetectionsTableColumns = (): Array<EuiBasicTableColumn<Detection
     field: 'value',
     name: i18n.COUNT_COULMN_TITLE,
     dataType: 'number',
+    sortable: true,
     'data-test-subj': 'detectionsTable-count',
     render: (count: number) => (
       <EuiText grow={false} size="xs">
@@ -147,7 +148,7 @@ export const getDetectionsTableColumns = (): Array<EuiBasicTableColumn<Detection
 
 export const getHostTableColumns = (): Array<EuiBasicTableColumn<HostData>> => [
   {
-    name: ALERTS_HEADERS_RULE,
+    name: i18n.HOST_TITLE,
     'data-test-subj': 'hostTable-host',
     render: ({ key, value, percentage }: { key: string; value: number; percentage: number }) => (
       <span style={{ width: 400 }}>
@@ -177,12 +178,12 @@ export const getHostTableColumns = (): Array<EuiBasicTableColumn<HostData>> => [
     name: i18n.COUNT_COULMN_TITLE,
     dataType: 'number',
     'data-test-subj': 'hostTable-count',
-    // sortable: true,
+    sortable: true,
     render: (count: number) => (
       <EuiText grow={false} size="xs">
         <FormattedCount count={count} />
       </EuiText>
     ),
-    width: '17%',
+    width: '23%',
   },
 ];

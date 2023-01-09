@@ -67,7 +67,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const [option, setOption] = useState(3);
+  const [option, setOption] = useState(1);
   const [detOption, setDetOption] = useState(1);
 
   // create a unique, but stable (across re-renders) query id
