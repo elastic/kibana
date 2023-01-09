@@ -2732,54 +2732,6 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-public.createStateHash",
-        "type": "Function",
-        "tags": [],
-        "label": "createStateHash",
-        "description": [],
-        "signature": [
-          "(json: string, existingJsonProvider: ((hash: string) => string | null) | undefined) => string"
-        ],
-        "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.createStateHash.$1",
-            "type": "string",
-            "tags": [],
-            "label": "json",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.createStateHash.$2",
-            "type": "Function",
-            "tags": [],
-            "label": "existingJsonProvider",
-            "description": [],
-            "signature": [
-              "((hash: string) => string | null) | undefined"
-            ],
-            "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
         "id": "def-public.createUrlTracker",
         "type": "Function",
         "tags": [],
@@ -3281,39 +3233,6 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-public.isStateHash",
-        "type": "Function",
-        "tags": [],
-        "label": "isStateHash",
-        "description": [],
-        "signature": [
-          "(str: string) => boolean"
-        ],
-        "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.isStateHash.$1",
-            "type": "string",
-            "tags": [],
-            "label": "str",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
         "id": "def-public.of",
         "type": "Function",
         "tags": [],
@@ -3731,118 +3650,6 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-public.replaceUrlHashQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "replaceUrlHashQuery",
-        "description": [],
-        "signature": [
-          "(rawUrl: string, queryReplacer: (query: ",
-          "ParsedQuery",
-          "<string>) => ",
-          "ParsedQuery",
-          "<string>) => string"
-        ],
-        "path": "src/plugins/kibana_utils/public/state_management/url/format.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.replaceUrlHashQuery.$1",
-            "type": "string",
-            "tags": [],
-            "label": "rawUrl",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/kibana_utils/public/state_management/url/format.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.replaceUrlHashQuery.$2",
-            "type": "Function",
-            "tags": [],
-            "label": "queryReplacer",
-            "description": [],
-            "signature": [
-              "(query: ",
-              "ParsedQuery",
-              "<string>) => ",
-              "ParsedQuery",
-              "<string>"
-            ],
-            "path": "src/plugins/kibana_utils/public/state_management/url/format.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-public.replaceUrlQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "replaceUrlQuery",
-        "description": [],
-        "signature": [
-          "(rawUrl: string, queryReplacer: (query: ",
-          "ParsedQuery",
-          "<string>) => ",
-          "ParsedQuery",
-          "<string>) => string"
-        ],
-        "path": "src/plugins/kibana_utils/public/state_management/url/format.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.replaceUrlQuery.$1",
-            "type": "string",
-            "tags": [],
-            "label": "rawUrl",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/kibana_utils/public/state_management/url/format.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.replaceUrlQuery.$2",
-            "type": "Function",
-            "tags": [],
-            "label": "queryReplacer",
-            "description": [],
-            "signature": [
-              "(query: ",
-              "ParsedQuery",
-              "<string>) => ",
-              "ParsedQuery",
-              "<string>"
-            ],
-            "path": "src/plugins/kibana_utils/public/state_management/url/format.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
         "id": "def-public.retrieveState",
         "type": "Function",
         "tags": [],
@@ -3881,10 +3688,12 @@
         "tags": [],
         "label": "setStateToKbnUrl",
         "description": [
-          "\nSets state to the url by key and returns a new url string.\nDoesn't actually updates history\n\ne.g.:\ngiven a url: http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')\nkey: '_a'\nand state: {tab: 'other'}\n\nwill return url:\nhttp://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:other)&_b=(f:test,i:'',l:'')\n\nBy default due to Kibana legacy reasons assumed that state is stored in a query inside a hash part of the URL:\nhttp://localhost:5601/oxf/app/kibana#/yourApp?_a={STATE}\n\n{ storeInHashQuery: false } option should be used in you want to store you state in a main query (not in a hash):\nhttp://localhost:5601/oxf/app/kibana?_a={STATE}#/yourApp"
+          "\nSets state to the url by key and returns a new url string.\nDoesn't actually updates history\n\ne.g.:\ngiven a url: http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')\nkey: '_a'\nand state: {tab: 'other'}\n\nwill return url:\nhttp://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:other)&_b=(f:test,i:'',l:'')\n\nBy default due to Kibana legacy reasons assumed that state is stored in a query inside a hash part of the URL:\nhttp://localhost:5601/oxf/app/kibana#/yourApp?_a={STATE}\n\n{ storeInHashQuery: false } option should be used in you want to store your state in a main query (not in a hash):\nhttp://localhost:5601/oxf/app/kibana?_a={STATE}#/yourApp"
         ],
         "signature": [
-          "(key: string, state: State, { useHash = false, storeInHashQuery = true }: { useHash: boolean; storeInHashQuery?: boolean | undefined; }, rawUrl: string) => string"
+          "(key: string, state: State, { useHash = false, storeInHashQuery = true }: ",
+          "SetStateToKbnUrlHashOptions",
+          ", rawUrl: string) => string"
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
         "deprecated": false,
@@ -3927,36 +3736,13 @@
             "tags": [],
             "label": "{ useHash = false, storeInHashQuery = true }",
             "description": [],
+            "signature": [
+              "SetStateToKbnUrlHashOptions"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaUtils",
-                "id": "def-public.setStateToKbnUrl.$3.useHash",
-                "type": "boolean",
-                "tags": [],
-                "label": "useHash",
-                "description": [],
-                "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "kibanaUtils",
-                "id": "def-public.setStateToKbnUrl.$3.storeInHashQuery",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "storeInHashQuery",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9667,6 +9453,144 @@
               "Promise<T>"
             ],
             "path": "src/plugins/kibana_utils/common/of.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-common.replaceUrlHashQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "replaceUrlHashQuery",
+        "description": [],
+        "signature": [
+          "(rawUrl: string, queryReplacer: (query: ",
+          "ParsedQuery",
+          "<string>) => ",
+          "ParsedQuery",
+          "<string>) => string"
+        ],
+        "path": "src/plugins/kibana_utils/common/state_management/format.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.replaceUrlHashQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "rawUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_management/format.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.replaceUrlHashQuery.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "queryReplacer",
+            "description": [],
+            "signature": [
+              "(query: ",
+              "ParsedQuery",
+              "<string>) => ",
+              "ParsedQuery",
+              "<string>"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_management/format.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-common.setStateToKbnUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "setStateToKbnUrl",
+        "description": [
+          "\nCommon version of setStateToKbnUrl which doesn't use session storage.\n\nSets state to the url by key and returns a new url string.\n\ne.g.:\ngiven a url: http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')\nkey: '_a'\nand state: {tab: 'other'}\n\nwill return url:\nhttp://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:other)&_b=(f:test,i:'',l:'')\n\nBy default due to Kibana legacy reasons assumed that state is stored in a query inside a hash part of the URL:\nhttp://localhost:5601/oxf/app/kibana#/yourApp?_a={STATE}\n\n{ storeInHashQuery: true } option should be used in you want to store you state in a main query (not in a hash):\nhttp://localhost:5601/oxf/app/kibana?_a={STATE}#/yourApp"
+        ],
+        "signature": [
+          "(key: string, state: State, hashOptions: ",
+          "SetStateToKbnUrlHashOptions",
+          ", rawUrl: string) => string"
+        ],
+        "path": "src/plugins/kibana_utils/common/state_management/set_state_to_kbn_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.setStateToKbnUrl.$1",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_management/set_state_to_kbn_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.setStateToKbnUrl.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_management/set_state_to_kbn_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.setStateToKbnUrl.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "hashOptions",
+            "description": [],
+            "signature": [
+              "SetStateToKbnUrlHashOptions"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_management/set_state_to_kbn_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.setStateToKbnUrl.$4",
+            "type": "string",
+            "tags": [],
+            "label": "rawUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_management/set_state_to_kbn_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
