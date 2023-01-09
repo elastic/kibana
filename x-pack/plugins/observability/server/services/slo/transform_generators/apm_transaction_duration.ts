@@ -17,6 +17,7 @@ import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo
 import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
 import { TransformGenerator } from '.';
 import { DEFAULT_APM_INDEX } from './constants';
+import { Query } from './types';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -39,7 +40,15 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionDurationIndicator) {
-    const queryFilter = [];
+    const queryFilter: Query[] = [
+      {
+        range: {
+          [slo.settings.timestampField]: {
+            gte: `now-${slo.timeWindow.duration.format()}`,
+          },
+        },
+      },
+    ];
     if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
         match: {

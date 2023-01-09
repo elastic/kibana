@@ -12,6 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
@@ -28,10 +29,10 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
     unifiedSearchDateRange,
     unifiedSearchQuery,
     unifiedSearchFilters,
+    controlPanelFilters,
     onSubmit,
     saveQuery,
     clearSavedQuery,
-    setPanelFilters,
   } = useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
@@ -42,6 +43,13 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
 
   const onQuerySubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
     onQueryChange({ payload });
+  };
+
+  const onPanelFiltersChange = (panelFilters: Filter[]) => {
+    // <ControlsContent /> triggers this event 2 times during its loading lifecycle
+    if (!deepEqual(controlPanelFilters, panelFilters)) {
+      onQueryChange({ panelFilters });
+    }
   };
 
   const onClearSavedQuery = () => {
@@ -55,11 +63,13 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   const onQueryChange = ({
     payload,
     filters,
+    panelFilters,
   }: {
     payload?: { dateRange: TimeRange; query?: Query };
     filters?: Filter[];
+    panelFilters?: Filter[];
   }) => {
-    onSubmit(payload?.query, payload?.dateRange, filters);
+    onSubmit({ query: payload?.query, dateRange: payload?.dateRange, filters, panelFilters });
   };
 
   return (
@@ -89,7 +99,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
         dataViewId={dataView.id ?? ''}
         query={unifiedSearchQuery}
         filters={unifiedSearchFilters}
-        setPanelFilters={setPanelFilters}
+        onFilterChange={onPanelFiltersChange}
       />
     </>
   );
