@@ -22,6 +22,7 @@ export {
 export {
   getTimeFilterRange,
   type GetTimeFieldRangeResponse,
+  type TimeRange,
 } from './src/services/full_time_range_selector_service';
 export { mlTimefilterRefresh$, type Refresh } from './src/services/timefilter_refresh_service';
 export { type FrozenTierPreference, FROZEN_TIER_PREFERENCE } from './src/storage';

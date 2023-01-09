@@ -32,6 +32,9 @@ import {
 } from '../services/full_time_range_selector_service';
 import { FROZEN_TIER_PREFERENCE, type FrozenTierPreference } from '../storage';
 
+/**
+ * FullTimeRangeSelectorProps React Component props interface
+ */
 export interface FullTimeRangeSelectorProps {
   frozenDataPreference: FrozenTierPreference;
   setFrozenDataPreference: (value: FrozenTierPreference | undefined) => void;
@@ -42,8 +45,13 @@ export interface FullTimeRangeSelectorProps {
   callback?: (a: GetTimeFieldRangeResponse) => void;
 }
 
-// Component for rendering a button which automatically sets the range of the time filter
-// to the time range of data in the index(es) mapped to the supplied Kibana data view or query.
+/**
+ * Component for rendering a button which automatically sets the range of the time filter
+ * to the time range of data in the index(es) mapped to the supplied Kibana data view or query.
+ *
+ * @param `FullTimeRangeSelectorProps` component props
+ * @returns
+ */
 export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = ({
   frozenDataPreference,
   setFrozenDataPreference,

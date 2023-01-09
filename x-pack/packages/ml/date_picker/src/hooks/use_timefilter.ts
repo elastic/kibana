@@ -14,11 +14,20 @@ import type { TimeRange } from '@kbn/es-query';
 
 import { useDatePickerContext } from './use_date_picker_context';
 
+/**
+ * Options interface for the `useTimefilter` custom hook.
+ */
 interface UseTimefilterOptions {
   timeRangeSelector?: boolean;
   autoRefreshSelector?: boolean;
 }
 
+/**
+ * Custom hook to get the timefilter from runtime dependencies.
+ *
+ * @param UseTimefilterOptions
+ * @returns timefilter
+ */
 export const useTimefilter = ({
   timeRangeSelector,
   autoRefreshSelector,
@@ -48,6 +57,11 @@ export const useTimefilter = ({
   return timefilter;
 };
 
+/**
+ * Custom hook to return refresh interval updates from the `refreshIntervalObservable$` observable.
+ *
+ * @returns refresh interval update
+ */
 export const useRefreshIntervalUpdates = () => {
   const timefilter = useTimefilter();
 
@@ -59,6 +73,12 @@ export const useRefreshIntervalUpdates = () => {
   return useObservable(refreshIntervalObservable$, timefilter.getRefreshInterval());
 };
 
+/**
+ * Custom hook to return time range updates from the `timeChangeObservable$` observable.
+ *
+ * @param absolute - flag to enforce absolute times
+ * @returns time range update
+ */
 export const useTimeRangeUpdates = (absolute = false): TimeRange => {
   const timefilter = useTimefilter();
 

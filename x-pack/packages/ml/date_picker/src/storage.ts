@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+/**
+ * Local storage options to include/exclude frozen tier.
+ */
 export const FROZEN_TIER_PREFERENCE = {
   EXCLUDE: 'exclude-frozen',
   INCLUDE: 'include-frozen',
 } as const;
 
+/**
+ * Union type of `FROZEN_TIER_PREFERENCE` options.
+ */
 export type FrozenTierPreference =
   typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];

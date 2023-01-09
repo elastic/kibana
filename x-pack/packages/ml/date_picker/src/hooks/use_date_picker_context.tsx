@@ -13,6 +13,9 @@ import type { CoreSetup, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/
 import type { HttpStart } from '@kbn/core/public';
 import type { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
+/**
+ * Date Picker Dependencies to be passed on via `DatePickerContextProvider`.
+ */
 export interface DatePickerDependencies {
   data: DataPublicPluginStart;
   http: HttpStart;
@@ -24,8 +27,15 @@ export interface DatePickerDependencies {
   toMountPoint: typeof toMountPoint;
 }
 
+/**
+ * The context holding the date picker dependencies.
+ */
 export const DatePickerContext = createContext<DatePickerDependencies | undefined>(undefined);
 
+/**
+ * Custom hook to return date picker dependencies.
+ * @returns `DatePickerDependencies`
+ */
 export const useDatePickerContext = (): DatePickerDependencies => {
   const datePickerContext = useContext(DatePickerContext);
 
@@ -37,9 +47,13 @@ export const useDatePickerContext = (): DatePickerDependencies => {
   return datePickerContext;
 };
 
+/**
+ * React Component that acts as a wrapper for DatePickerContext.
+ *
+ * @param props - `DatePickerDependencies`
+ * @returns JSX
+ */
 export const DatePickerContextProvider: FC<{ deps: DatePickerDependencies }> = ({
   children,
   deps,
-}) => {
-  return <DatePickerContext.Provider value={deps}>{children}</DatePickerContext.Provider>;
-};
+}) => <DatePickerContext.Provider value={deps}>{children}</DatePickerContext.Provider>;

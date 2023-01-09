@@ -67,12 +67,21 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
   mlTimefilterRefresh$.next({ lastRefresh: Date.now(), ...(timeRange ? { timeRange } : {}) });
 }
 
+/**
+ * DatePickerWrapper React Component props interface
+ */
 interface DatePickerWrapperProps {
   isAutoRefreshOnly?: boolean;
   isLoading?: boolean;
   showRefresh?: boolean;
 }
 
+/**
+ * DatePickerWrapper React Component
+ *
+ * @param `DatePickerWrapperProps` component props
+ * @returns JSX
+ */
 export const DatePickerWrapper: FC<DatePickerWrapperProps> = ({
   isAutoRefreshOnly,
   isLoading = false,

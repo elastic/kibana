@@ -7,9 +7,15 @@
 
 import { Subject } from 'rxjs';
 
+/**
+ * State definition of `mlTimefilterRefresh$` observable.
+ */
 export interface Refresh {
   lastRefresh: number;
   timeRange?: { start: string; end: string };
 }
 
+/**
+ * Observable to hold `Refresh` state.
+ */
 export const mlTimefilterRefresh$ = new Subject<Refresh>();
