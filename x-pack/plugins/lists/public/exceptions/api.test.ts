@@ -708,6 +708,7 @@ describe('Exceptions Lists API', () => {
         method: 'POST',
         query: {
           id: 'some-id',
+          include_expired_exceptions: 'true',
           list_id: 'list-id',
           namespace_type: 'single',
         },
