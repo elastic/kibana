@@ -24,6 +24,7 @@ jest.mock('../utils', () => ({
 }));
 
 describe('convertToPercentileRankColumn', () => {
+  const visType = 'heatmap';
   const dataView = stubLogstashDataView;
   const field = dataView.fields[0].displayName;
   const aggId = 'pr.10';
@@ -71,23 +72,27 @@ describe('convertToPercentileRankColumn', () => {
       Partial<PercentileRanksColumn> | null
     ]
   >([
-    ['null if no percents', [{ agg: { ...agg, aggId: 'pr' }, dataView }], null],
+    ['null if no percents', [{ agg: { ...agg, aggId: 'pr' }, dataView, visType }], null],
     [
       'null if no value',
-      [{ agg: { ...singlePercentileRankAgg, aggParams: undefined }, dataView }],
+      [{ agg: { ...singlePercentileRankAgg, aggParams: undefined }, dataView, visType }],
       null,
     ],
-    ['null if no aggId', [{ agg: { ...agg, aggId: undefined }, dataView }], null],
-    ['null if no aggParams', [{ agg: { ...agg, aggParams: undefined }, dataView }], null],
-    ['null if aggId is invalid', [{ agg: { ...agg, aggId: 'pr.invalid' }, dataView }], null],
+    ['null if no aggId', [{ agg: { ...agg, aggId: undefined }, dataView, visType }], null],
+    ['null if no aggParams', [{ agg: { ...agg, aggParams: undefined }, dataView, visType }], null],
+    [
+      'null if aggId is invalid',
+      [{ agg: { ...agg, aggId: 'pr.invalid' }, dataView, visType }],
+      null,
+    ],
     [
       'null if values are undefined',
-      [{ agg: { ...agg, aggParams: { values: undefined, field } }, dataView }],
+      [{ agg: { ...agg, aggParams: { values: undefined, field } }, dataView, visType }],
       null,
     ],
     [
       'null if values are empty',
-      [{ agg: { ...agg, aggParams: { values: [], field } }, dataView }],
+      [{ agg: { ...agg, aggParams: { values: [], field } }, dataView, visType }],
       null,
     ],
   ])('should return %s', (_, input, expected) => {
@@ -100,7 +105,7 @@ describe('convertToPercentileRankColumn', () => {
 
   test('should return null if field is not specified', () => {
     mockGetFieldNameFromField.mockReturnValue(null);
-    expect(convertToPercentileRankColumn({ agg, dataView })).toBeNull();
+    expect(convertToPercentileRankColumn({ agg, dataView, visType })).toBeNull();
     expect(mockGetFieldNameFromField).toBeCalledTimes(1);
     expect(dataView.getFieldByName).toBeCalledTimes(0);
   });
@@ -109,13 +114,13 @@ describe('convertToPercentileRankColumn', () => {
     mockGetFieldByName.mockReturnValueOnce(null);
     dataView.getFieldByName = mockGetFieldByName;
 
-    expect(convertToPercentileRankColumn({ agg, dataView })).toBeNull();
+    expect(convertToPercentileRankColumn({ agg, dataView, visType })).toBeNull();
     expect(mockGetFieldNameFromField).toBeCalledTimes(1);
     expect(dataView.getFieldByName).toBeCalledTimes(1);
   });
 
   test('should return percentile rank column for percentile ranks', () => {
-    expect(convertToPercentileRankColumn({ agg, dataView })).toEqual(
+    expect(convertToPercentileRankColumn({ agg, dataView, visType })).toEqual(
       expect.objectContaining({
         dataType: 'number',
         label: 'someOtherLabel',
@@ -130,7 +135,9 @@ describe('convertToPercentileRankColumn', () => {
   });
 
   test('should return percentile rank column for single percentile rank', () => {
-    expect(convertToPercentileRankColumn({ agg: singlePercentileRankAgg, dataView })).toEqual(
+    expect(
+      convertToPercentileRankColumn({ agg: singlePercentileRankAgg, dataView, visType })
+    ).toEqual(
       expect.objectContaining({
         dataType: 'number',
         label: 'someOtherLabel',

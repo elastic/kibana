@@ -847,6 +847,76 @@
       },
       {
         "parentPluginId": "uiActions",
+        "id": "def-public.CellActions",
+        "type": "Function",
+        "tags": [],
+        "label": "CellActions",
+        "description": [],
+        "signature": [
+          "({ field, triggerId, children, mode, showActionTooltips, visibleCellActions, metadata, }: React.PropsWithChildren<",
+          "CellActionsProps",
+          ">) => JSX.Element"
+        ],
+        "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  field,\n  triggerId,\n  children,\n  mode,\n  showActionTooltips = true,\n  visibleCellActions = 3,\n  metadata,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "CellActionsProps",
+              ">"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
+        "id": "def-public.CellActionsContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "CellActionsContextProvider",
+        "description": [],
+        "signature": [
+          "({ children, getTriggerCompatibleActions, }: React.PropsWithChildren<CellActionsContextProviderProps>) => JSX.Element"
+        ],
+        "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActionsContextProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  getTriggerCompatibleActions,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<CellActionsContextProviderProps>"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
         "id": "def-public.createAction",
         "type": "Function",
         "tags": [],
@@ -1322,6 +1392,22 @@
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.Action.showNotification",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showNotification",
+            "description": [
+              "\nDetermines if notification should be shown in menu for that action\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1544,6 +1630,22 @@
             "label": "disabled",
             "description": [
               "\naction is disabled or not\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.ActionDefinition.showNotification",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showNotification",
+            "description": [
+              "\nDetermines if notification should be shown in menu for that action\n"
             ],
             "signature": [
               "boolean | undefined"
@@ -2141,7 +2243,13 @@
                 "text": "SerializedFieldFormat"
               },
               "<{}, ",
-              "SerializableRecord",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
               ">> | undefined; runtimeFieldMap?: Record<string, ",
               {
                 "pluginId": "dataViews",
@@ -2200,7 +2308,13 @@
             "label": "query",
             "description": [],
             "signature": [
-              "AggregateQuery",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
               " | undefined"
             ],
             "path": "src/plugins/ui_actions/public/types.ts",
@@ -2211,7 +2325,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "uiActions",
+        "id": "def-public.CellActionsMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "CellActionsMode",
+        "description": [],
+        "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "uiActions",
@@ -2370,10 +2497,13 @@
           {
             "parentPluginId": "uiActions",
             "id": "def-public.rowClickTrigger.title",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "title",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2381,10 +2511,13 @@
           {
             "parentPluginId": "uiActions",
             "id": "def-public.rowClickTrigger.description",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "description",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/ui_actions/public/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false

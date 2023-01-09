@@ -17,7 +17,6 @@ import type { ProviderCollection } from '../providers';
 import { loadTracer } from '../load_tracer';
 import { decorateSnapshotUi } from '../snapshots/decorate_snapshot_ui';
 
-// @ts-expect-error not js yet
 import { decorateMochaUi } from './decorate_mocha_ui';
 
 type TestProvider = (ctx: GenericFtrProviderContext<any, any>) => void;
@@ -48,9 +47,6 @@ export const loadTests = ({
   updateBaselines,
   updateSnapshots,
 }: Options) => {
-  const dockerServers = config.get('dockerServers');
-  const isDockerGroup = dockerServers && Object.keys(dockerServers).length;
-
   const ctx: GenericFtrProviderContext<any, any> = {
     loadTestFile,
     getService: providers.getService as any,
@@ -80,8 +76,7 @@ export const loadTests = ({
 
   function withMocha(debugPath: string, fn: () => void) {
     // mocha.suite hocus-pocus comes from: https://git.io/vDnXO
-    const context = decorateMochaUi(log, lifecycle, global, {
-      isDockerGroup,
+    const context = decorateMochaUi(lifecycle, global, {
       rootTags: config.get('rootTags'),
     });
     mocha.suite.emit('pre-require', context, debugPath, mocha);

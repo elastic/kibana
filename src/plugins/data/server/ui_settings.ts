@@ -166,12 +166,12 @@ export function getUiSettings(
     },
     defaultIndex: {
       name: i18n.translate('data.advancedSettings.defaultIndexTitle', {
-        defaultMessage: 'Default index',
+        defaultMessage: 'Default data view',
       }),
       value: null,
       type: 'string',
       description: i18n.translate('data.advancedSettings.defaultIndexText', {
-        defaultMessage: 'The index to access if no index is set',
+        defaultMessage: 'Used by discover and visualizations when a data view is not set.',
       }),
       schema: schema.nullable(schema.string()),
     },
@@ -324,8 +324,8 @@ export function getUiSettings(
         defaultMessage: 'Time filter refresh interval',
       }),
       value: `{
-  "pause": false,
-  "value": 0
+  "pause": true,
+  "value": 60000
 }`,
       type: 'json',
       description: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsText', {
@@ -346,8 +346,18 @@ export function getUiSettings(
   "to": "now"
 }`,
       type: 'json',
-      description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsText', {
-        defaultMessage: 'The timefilter selection to use when Kibana is started without one',
+      description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsDescription', {
+        defaultMessage:
+          'The timefilter selection to use when Kibana is started without one. Must be an object containing "from" and "to" (see {acceptedFormatsLink}).',
+        values: {
+          acceptedFormatsLink:
+            `<a href=${docLinks.links.date.dateMath}
+            target="_blank" rel="noopener">` +
+            i18n.translate('data.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText', {
+              defaultMessage: 'accepted formats',
+            }) +
+            '</a>',
+        },
       }),
       requiresPageReload: true,
       schema: schema.object({

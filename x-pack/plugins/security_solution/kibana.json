@@ -16,9 +16,11 @@
     "cloudSecurityPosture",
     "dashboard",
     "data",
+    "dataViews",
     "embeddable",
     "eventLog",
     "features",
+    "guidedOnboarding",
     "inspector",
     "kubernetesSecurity",
     "lens",
@@ -32,7 +34,8 @@
     "triggersActionsUi",
     "uiActions",
     "unifiedSearch",
-    "files"
+    "files",
+    "controls"
   ],
   "optionalPlugins": [
     "cloudExperiments",

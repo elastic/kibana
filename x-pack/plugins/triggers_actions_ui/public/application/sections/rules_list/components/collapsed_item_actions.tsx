@@ -43,20 +43,25 @@ export type ComponentOpts = {
   onEditRule: (item: RuleTableItem) => void;
   onUpdateAPIKey: (id: string[]) => void;
   onRunRule: (item: RuleTableItem) => void;
-} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
+  onCloneRule: (ruleId: string) => void;
+} & Pick<
+  BulkOperationsComponentOpts,
+  'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'
+>;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   item,
   onLoading,
   onRuleChanged,
-  disableRule,
-  enableRule,
+  bulkDisableRules,
+  bulkEnableRules,
   setRulesToDelete,
   onEditRule,
   onUpdateAPIKey,
   snoozeRule,
   unsnoozeRule,
   onRunRule,
+  onCloneRule,
 }: ComponentOpts) => {
   const {
     ruleTypeRegistry,
@@ -190,9 +195,9 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             const enabled = !isDisabled;
             asyncScheduler.schedule(async () => {
               if (enabled) {
-                await disableRule({ ...item, enabled });
+                await bulkDisableRules({ ids: [item.id] });
               } else {
-                await enableRule({ ...item, enabled });
+                await bulkEnableRules({ ids: [item.id] });
               }
               onRuleChanged();
             }, 10);
@@ -208,6 +213,18 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
                 'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.disableTitle',
                 { defaultMessage: 'Disable' }
               ),
+        },
+        {
+          disabled: !item.isEditable || item.consumer === AlertConsumers.SIEM,
+          'data-test-subj': 'cloneRule',
+          onClick: async () => {
+            setIsPopoverOpen(!isPopoverOpen);
+            onCloneRule(item.id);
+          },
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.cloneRuleTitle',
+            { defaultMessage: 'Clone rule' }
+          ),
         },
         {
           disabled: !item.isEditable || !isRuleTypeEditableInContext,

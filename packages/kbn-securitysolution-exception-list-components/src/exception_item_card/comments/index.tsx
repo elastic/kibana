@@ -24,6 +24,7 @@ export interface ExceptionItemCardCommentsProps {
 
 export const ExceptionItemCardComments = memo<ExceptionItemCardCommentsProps>(
   ({ comments, dataTestSubj }) => {
+    if (!comments.length) return null;
     return (
       <EuiFlexItem data-test-subj={dataTestSubj}>
         <EuiAccordion

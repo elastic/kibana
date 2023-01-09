@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import React, { useEffect, useRef } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
-import { UnifiedSearchPublicPluginStart } from '../types';
+import type { UnifiedSearchPublicPluginStart } from '../types';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -38,12 +38,20 @@ export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
     useDefaultBehaviors?: boolean;
     savedQueryId?: string;
     onSavedQueryIdChange?: (savedQueryId?: string) => void;
+    onFiltersUpdated?: (filters: Filter[]) => void;
   };
 
 // Respond to user changing the filters
-const defaultFiltersUpdated = (queryService: QueryStart) => {
+const defaultFiltersUpdated = (
+  queryService: QueryStart,
+  onFiltersUpdated?: (filters: Filter[]) => void
+) => {
   return (filters: Filter[]) => {
-    queryService.filterManager.setFilters(filters);
+    if (onFiltersUpdated) {
+      onFiltersUpdated(filters);
+    } else {
+      queryService.filterManager.setFilters(filters);
+    }
   };
 };
 
@@ -70,8 +78,7 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
 
   return (payload: { dateRange: TimeRange; query?: QT | Query }) => {
     const isUpdate =
-      !_.isEqual(timefilter.getTime(), payload.dateRange) ||
-      !_.isEqual(payload.query, currentQuery);
+      !isEqual(timefilter.getTime(), payload.dateRange) || !isEqual(payload.query, currentQuery);
     if (isUpdate) {
       timefilter.setTime(payload.dateRange);
       if (payload.query) {
@@ -190,6 +197,7 @@ export function createSearchBar({
           showAutoRefreshOnly={props.showAutoRefreshOnly}
           showDatePicker={props.showDatePicker}
           showFilterBar={props.showFilterBar}
+          showQueryMenu={props.showQueryMenu}
           showQueryInput={props.showQueryInput}
           showSaveQuery={props.showSaveQuery}
           showSubmitButton={props.showSubmitButton}
@@ -205,7 +213,7 @@ export function createSearchBar({
           isRefreshPaused={refreshInterval.pause}
           filters={filters}
           query={query}
-          onFiltersUpdated={defaultFiltersUpdated(data.query)}
+          onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
           onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}

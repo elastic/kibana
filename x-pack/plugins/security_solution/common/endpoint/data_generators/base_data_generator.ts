@@ -68,6 +68,41 @@ const USERS = [
   'Genevieve',
 ];
 
+const toEsSearchHit = <T extends object = object>(
+  hitSource: T,
+  index: string = 'some-index'
+): estypes.SearchHit<T> => {
+  return {
+    _index: index,
+    _id: '123',
+    _score: 1.0,
+    _source: hitSource,
+  };
+};
+
+const toEsSearchResponse = <T extends object = object>(
+  hitsSource: Array<estypes.SearchHit<T>>
+): estypes.SearchResponse<T> => {
+  return {
+    took: 3,
+    timed_out: false,
+    _shards: {
+      total: 2,
+      successful: 2,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      total: {
+        value: hitsSource.length,
+        relation: 'eq',
+      },
+      max_score: 0,
+      hits: hitsSource,
+    },
+  };
+};
+
 /**
  * A generic base class to assist in creating domain specific data generators. It includes
  * several general purpose random data generators for use within the class and exposes one
@@ -193,12 +228,17 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
     hitSource: T,
     index: string = 'some-index'
   ): estypes.SearchHit<T> {
-    return {
-      _index: index,
-      _id: this.seededUUIDv4(),
-      _score: 1.0,
-      _source: hitSource,
-    };
+    const hit = toEsSearchHit<T>(hitSource, index);
+    hit._id = this.seededUUIDv4();
+
+    return hit;
+  }
+
+  static toEsSearchHit<T extends object = object>(
+    hitSource: T,
+    index: string = 'some-index'
+  ): estypes.SearchHit<T> {
+    return toEsSearchHit<T>(hitSource, index);
   }
 
   /**
@@ -209,23 +249,12 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   toEsSearchResponse<T extends object = object>(
     hitsSource: Array<estypes.SearchHit<T>>
   ): estypes.SearchResponse<T> {
-    return {
-      took: 3,
-      timed_out: false,
-      _shards: {
-        total: 2,
-        successful: 2,
-        skipped: 0,
-        failed: 0,
-      },
-      hits: {
-        total: {
-          value: hitsSource.length,
-          relation: 'eq',
-        },
-        max_score: 0,
-        hits: hitsSource,
-      },
-    };
+    return toEsSearchResponse<T>(hitsSource);
+  }
+
+  static toEsSearchResponse<T extends object = object>(
+    hitsSource: Array<estypes.SearchHit<T>>
+  ): estypes.SearchResponse<T> {
+    return toEsSearchResponse<T>(hitsSource);
   }
 }

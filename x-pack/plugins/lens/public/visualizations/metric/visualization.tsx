@@ -30,7 +30,7 @@ import {
   Suggestion,
 } from '../../types';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
-import { DimensionEditor } from './dimension_editor';
+import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { FormatSelectorOptions } from '../../datasources/form_based/dimension_panel/format_selector';
@@ -98,16 +98,16 @@ const getMetricLayerConfiguration = (
     const hasDynamicColoring = !!props.state.palette;
     return hasDynamicColoring
       ? {
-          triggerIcon: 'colorBy',
+          triggerIconType: 'colorBy',
           palette: stops.map(({ color }) => color),
         }
       : hasStaticColoring
       ? {
-          triggerIcon: 'color',
+          triggerIconType: 'color',
           color: props.state.color,
         }
       : {
-          triggerIcon: 'color',
+          triggerIconType: 'color',
           color: getDefaultColor(props.state),
         };
   };
@@ -141,6 +141,7 @@ const getMetricLayerConfiguration = (
           : [],
         supportsMoreColumns: !props.state.metricAccessor,
         filterOperations: isSupportedDynamicMetric,
+        isMetricDimension: true,
         enableDimensionEditor: true,
         enableFormatSelector: true,
         formatSelectorOptions: formatterOptions,
@@ -166,6 +167,7 @@ const getMetricLayerConfiguration = (
           : [],
         supportsMoreColumns: !props.state.secondaryMetricAccessor,
         filterOperations: isSupportedDynamicMetric,
+        isMetricDimension: true,
         enableDimensionEditor: true,
         enableFormatSelector: true,
         formatSelectorOptions: formatterOptions,
@@ -207,7 +209,7 @@ const getMetricLayerConfiguration = (
           ? [
               {
                 columnId: props.state.breakdownByAccessor,
-                triggerIcon: props.state.collapseFn ? ('aggregate' as const) : undefined,
+                triggerIconType: props.state.collapseFn ? ('aggregate' as const) : undefined,
               },
             ]
           : [],
@@ -454,6 +456,10 @@ export const getMetricVisualization = ({
     return newState;
   },
 
+  getRemoveOperation(state, layerId) {
+    return layerId === state.trendlineLayerId ? 'remove' : 'clear';
+  },
+
   getLayersToLinkTo(state, newLayerId: string): string[] {
     return newLayerId === state.trendlineLayerId ? [state.layerId] : [];
   },
@@ -617,6 +623,17 @@ export const getMetricVisualization = ({
     );
   },
 
+  renderDimensionEditorAdditionalSection(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <DimensionEditorAdditionalSection {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+
   getErrorMessages(state) {
     // Is it possible to break it?
     return undefined;
@@ -651,5 +668,58 @@ export const getMetricVisualization = ({
       },
     };
     return suggestion;
+  },
+
+  getVisualizationInfo(state: MetricVisualizationState) {
+    const dimensions = [];
+    if (state.metricAccessor) {
+      dimensions.push({
+        id: state.metricAccessor,
+        name: i18n.translate('xpack.lens.primaryMetric.label', {
+          defaultMessage: 'Primary metric',
+        }),
+        dimensionType: 'primary_metric',
+      });
+    }
+
+    if (state.secondaryMetricAccessor) {
+      dimensions.push({
+        id: state.secondaryMetricAccessor,
+        name: i18n.translate('xpack.lens.metric.secondaryMetric', {
+          defaultMessage: 'Secondary metric',
+        }),
+        dimensionType: 'secondary_metric',
+      });
+    }
+
+    if (state.maxAccessor) {
+      dimensions.push({
+        id: state.maxAccessor,
+        name: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
+        dimensionType: 'max',
+      });
+    }
+
+    if (state.breakdownByAccessor) {
+      dimensions.push({
+        id: state.breakdownByAccessor,
+        name: i18n.translate('xpack.lens.metric.breakdownBy', {
+          defaultMessage: 'Break down by',
+        }),
+        dimensionType: 'breakdown',
+      });
+    }
+
+    return {
+      layers: [
+        {
+          layerId: state.layerId,
+          layerType: state.layerType,
+          chartType: 'metric',
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
   },
 });

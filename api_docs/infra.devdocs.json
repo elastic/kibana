@@ -653,7 +653,13 @@
           "description": [],
           "signature": [
             "(savedObjectsClient: ",
-            "SavedObjectsClientContract",
+            {
+              "pluginId": "@kbn/core-saved-objects-api-server",
+              "scope": "common",
+              "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+              "section": "def-common.SavedObjectsClientContract",
+              "text": "SavedObjectsClientContract"
+            },
             ", sourceId?: string | undefined) => Promise<string>"
           ],
           "path": "x-pack/plugins/infra/server/types.ts",
@@ -668,7 +674,13 @@
               "label": "savedObjectsClient",
               "description": [],
               "signature": [
-                "SavedObjectsClientContract"
+                {
+                  "pluginId": "@kbn/core-saved-objects-api-server",
+                  "scope": "common",
+                  "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                  "section": "def-common.SavedObjectsClientContract",
+                  "text": "SavedObjectsClientContract"
+                }
               ],
               "path": "x-pack/plugins/infra/server/types.ts",
               "deprecated": false,

@@ -5,35 +5,33 @@
  * 2.0.
  */
 
-import {
-  AggregationsCalendarInterval,
-  MappingRuntimeFieldType,
-  TransformPutTransformRequest,
-} from '@elastic/elasticsearch/lib/api/types';
-import { ALL_VALUE, apmTransactionDurationIndicatorSchema } from '../../../types/schema';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_VALUE, apmTransactionDurationIndicatorSchema } from '@kbn/slo-schema';
+import { InvalidTransformError } from '../../../errors';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { SLO, APMTransactionDurationIndicator } from '../../../types/models';
+import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
 import { TransformGenerator } from '.';
+import { DEFAULT_APM_INDEX } from './constants';
+import { Query } from './types';
 
-const APM_SOURCE_INDEX = 'metrics-apm*';
-
-export class ApmTransactionDurationTransformGenerator implements TransformGenerator {
+export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
     if (!apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
-      throw new Error(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
+      throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(),
-      this.buildAggregations(slo.indicator)
+      this.buildCommonGroupBy(slo),
+      this.buildAggregations(slo.indicator),
+      this.buildSettings(slo)
     );
   }
 
@@ -42,7 +40,15 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionDurationIndicator) {
-    const queryFilter = [];
+    const queryFilter: Query[] = [
+      {
+        range: {
+          [slo.settings.timestampField]: {
+            gte: `now-${slo.timeWindow.duration.format()}`,
+          },
+        },
+      },
+    ];
     if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
         match: {
@@ -59,38 +65,25 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
       });
     }
 
-    if (indicator.params.transaction_name !== ALL_VALUE) {
+    if (indicator.params.transactionName !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.name': indicator.params.transaction_name,
+          'transaction.name': indicator.params.transactionName,
         },
       });
     }
 
-    if (indicator.params.transaction_type !== ALL_VALUE) {
+    if (indicator.params.transactionType !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.type': indicator.params.transaction_type,
+          'transaction.type': indicator.params.transactionType,
         },
       });
     }
 
     return {
-      index: APM_SOURCE_INDEX,
-      runtime_mappings: {
-        'slo.id': {
-          type: 'keyword' as MappingRuntimeFieldType,
-          script: {
-            source: `emit('${slo.id}')`,
-          },
-        },
-        'slo.revision': {
-          type: 'long' as MappingRuntimeFieldType,
-          script: {
-            source: `emit(${slo.revision})`,
-          },
-        },
-      },
+      index: indicator.params.index ?? DEFAULT_APM_INDEX,
+      runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
           filter: [
@@ -110,27 +103,6 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
     return {
       pipeline: SLO_INGEST_PIPELINE_NAME,
       index: SLO_DESTINATION_INDEX_NAME,
-    };
-  }
-
-  private buildGroupBy() {
-    return {
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
-        },
-      },
-      '@timestamp': {
-        date_histogram: {
-          field: '@timestamp',
-          calendar_interval: '1m' as AggregationsCalendarInterval,
-        },
-      },
     };
   }
 

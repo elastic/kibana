@@ -120,7 +120,7 @@ describe('metric visualization', () => {
             Object {
               "columnId": "metric-col-id",
               "palette": Array [],
-              "triggerIcon": "colorBy",
+              "triggerIconType": "colorBy",
             },
           ]
         `);
@@ -136,7 +136,7 @@ describe('metric visualization', () => {
             Object {
               "color": "#f5f7fa",
               "columnId": "metric-col-id",
-              "triggerIcon": "color",
+              "triggerIconType": "color",
             },
           ]
         `);
@@ -154,7 +154,7 @@ describe('metric visualization', () => {
             Object {
               "color": "static-color",
               "columnId": "metric-col-id",
-              "triggerIcon": "color",
+              "triggerIconType": "color",
             },
           ]
         `);
@@ -170,7 +170,7 @@ describe('metric visualization', () => {
             Object {
               "columnId": "metric-col-id",
               "palette": Array [],
-              "triggerIcon": "colorBy",
+              "triggerIconType": "colorBy",
             },
           ]
         `);
@@ -187,7 +187,7 @@ describe('metric visualization', () => {
           Array [
             Object {
               "columnId": "breakdown-col-id",
-              "triggerIcon": "aggregate",
+              "triggerIconType": "aggregate",
             },
           ]
         `);
@@ -202,7 +202,7 @@ describe('metric visualization', () => {
           Array [
             Object {
               "columnId": "breakdown-col-id",
-              "triggerIcon": undefined,
+              "triggerIconType": undefined,
             },
           ]
         `);
@@ -300,21 +300,18 @@ describe('metric visualization', () => {
           "chain": Array [
             Object {
               "arguments": Object {
-                "breakdownBy": Array [],
                 "color": Array [
                   "static-color",
                 ],
                 "inspectorTableId": Array [
                   "first",
                 ],
-                "max": Array [],
                 "maxCols": Array [
                   5,
                 ],
                 "metric": Array [
                   "metric-col-id",
                 ],
-                "minTiles": Array [],
                 "palette": Array [
                   Object {
                     "chain": Array [
@@ -370,7 +367,6 @@ describe('metric visualization', () => {
                 "inspectorTableId": Array [
                   "first",
                 ],
-                "max": Array [],
                 "maxCols": Array [
                   5,
                 ],
@@ -473,7 +469,6 @@ describe('metric visualization', () => {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "breakdownBy": Array [],
                   "inspectorTableId": Array [
                     "second",
                   ],
@@ -520,7 +515,6 @@ describe('metric visualization', () => {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "breakdownBy": Array [],
                   "inspectorTableId": Array [
                     "second",
                   ],
@@ -608,8 +602,8 @@ describe('metric visualization', () => {
             "type": "function",
           }
         `);
-        expect(ast.chain[1].arguments.minTiles).toHaveLength(0);
-        expect(ast.chain[1].arguments.breakdownBy).toHaveLength(0);
+        expect(ast.chain[1].arguments.minTiles).toBeUndefined();
+        expect(ast.chain[1].arguments.breakdownBy).toBeUndefined();
       });
 
       it('always applies max function to static max dimensions', () => {

@@ -23,11 +23,10 @@ export const EndpointGenericErrorsList = memo<PackageGenericErrorsListProps>(
     const globalEndpointErrors = useMemo(() => {
       const errors: PackageActionFormatter[] = [];
       packageErrors.forEach((unit) => {
-        if (unit.payload && unit.payload.error) {
+        if (unit.status === 'failed') {
           errors.push(
             new PackageActionFormatter(
-              unit.payload.error.code,
-              unit.payload.error.message,
+              unit,
               docLinks.links.securitySolution.packageActionTroubleshooting
             )
           );

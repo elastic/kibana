@@ -24,8 +24,14 @@
             "description": [],
             "signature": [
               "(httpClient: ",
-              "HttpSetup",
-              ") => void"
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              },
+              ", isCloudEnabled: boolean) => void"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
             "deprecated": false,
@@ -39,7 +45,28 @@
                 "label": "httpClient",
                 "description": [],
                 "signature": [
-                  "HttpSetup"
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-common.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.setup.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isCloudEnabled",
+                "description": [],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -51,16 +78,22 @@
           },
           {
             "parentPluginId": "guidedOnboarding",
-            "id": "def-public.GuidedOnboardingApi.fetchActiveGuideState$",
+            "id": "def-public.GuidedOnboardingApi.fetchPluginState$",
             "type": "Function",
             "tags": [],
-            "label": "fetchActiveGuideState$",
+            "label": "fetchPluginState$",
             "description": [],
             "signature": [
               "() => ",
               "Observable",
               "<",
-              "GuideState",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.PluginState",
+                "text": "PluginState"
+              },
               " | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -78,7 +111,13 @@
             "description": [],
             "signature": [
               "() => Promise<{ state: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
               "[]; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -89,16 +128,36 @@
           },
           {
             "parentPluginId": "guidedOnboarding",
-            "id": "def-public.GuidedOnboardingApi.updateGuideState",
+            "id": "def-public.GuidedOnboardingApi.updatePluginState",
             "type": "Function",
             "tags": [],
-            "label": "updateGuideState",
+            "label": "updatePluginState",
             "description": [],
             "signature": [
-              "(newState: ",
-              "GuideState",
-              ", panelState: boolean) => Promise<{ state: ",
-              "GuideState",
+              "(state: { status?: ",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.PluginStatus",
+                "text": "PluginStatus"
+              },
+              " | undefined; guide?: ",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
+              " | undefined; }, panelState: boolean) => Promise<{ pluginState: ",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.PluginState",
+                "text": "PluginState"
+              },
               "; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -107,22 +166,62 @@
             "children": [
               {
                 "parentPluginId": "guidedOnboarding",
-                "id": "def-public.GuidedOnboardingApi.updateGuideState.$1",
+                "id": "def-public.GuidedOnboardingApi.updatePluginState.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "newState",
+                "label": "state",
                 "description": [],
-                "signature": [
-                  "GuideState"
-                ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "children": [
+                  {
+                    "parentPluginId": "guidedOnboarding",
+                    "id": "def-public.GuidedOnboardingApi.updatePluginState.$1.status",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "status",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "guidedOnboarding",
+                        "scope": "common",
+                        "docId": "kibGuidedOnboardingPluginApi",
+                        "section": "def-common.PluginStatus",
+                        "text": "PluginStatus"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "src/plugins/guided_onboarding/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "guidedOnboarding",
+                    "id": "def-public.GuidedOnboardingApi.updatePluginState.$1.guide",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "guide",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/guided-onboarding",
+                        "scope": "common",
+                        "docId": "kibKbnGuidedOnboardingPluginApi",
+                        "section": "def-common.GuideState",
+                        "text": "GuideState"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "src/plugins/guided_onboarding/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               },
               {
                 "parentPluginId": "guidedOnboarding",
-                "id": "def-public.GuidedOnboardingApi.updateGuideState.$2",
+                "id": "def-public.GuidedOnboardingApi.updatePluginState.$2",
                 "type": "boolean",
                 "tags": [],
                 "label": "panelState",
@@ -147,11 +246,29 @@
             "description": [],
             "signature": [
               "(guideId: ",
-              "GuideId",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideId",
+                "text": "GuideId"
+              },
               ", guide?: ",
-              "GuideState",
-              " | undefined) => Promise<{ state: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
+              " | undefined) => Promise<{ pluginState: ",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.PluginState",
+                "text": "PluginState"
+              },
               "; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -166,7 +283,13 @@
                 "label": "guideId",
                 "description": [],
                 "signature": [
-                  "GuideId"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideId",
+                    "text": "GuideId"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -181,13 +304,73 @@
                 "label": "guide",
                 "description": [],
                 "signature": [
-                  "GuideState",
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideState",
+                    "text": "GuideState"
+                  },
                   " | undefined"
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.deactivateGuide",
+            "type": "Function",
+            "tags": [],
+            "label": "deactivateGuide",
+            "description": [],
+            "signature": [
+              "(guide: ",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
+              ") => Promise<{ pluginState: ",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.PluginState",
+                "text": "PluginState"
+              },
+              "; } | undefined>"
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.deactivateGuide.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "guide",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideState",
+                    "text": "GuideState"
+                  }
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -201,9 +384,21 @@
             "description": [],
             "signature": [
               "(guideId: ",
-              "GuideId",
-              ") => Promise<{ state: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideId",
+                "text": "GuideId"
+              },
+              ") => Promise<{ pluginState: ",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.PluginState",
+                "text": "PluginState"
+              },
               "; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -218,7 +413,13 @@
                 "label": "guideId",
                 "description": [],
                 "signature": [
-                  "GuideId"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideId",
+                    "text": "GuideId"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -237,9 +438,21 @@
             "description": [],
             "signature": [
               "(guideId: ",
-              "GuideId",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideId",
+                "text": "GuideId"
+              },
               ", stepId: ",
-              "GuideStepIds",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideStepIds",
+                "text": "GuideStepIds"
+              },
               ") => ",
               "Observable",
               "<boolean>"
@@ -256,7 +469,13 @@
                 "label": "guideId",
                 "description": [],
                 "signature": [
-                  "GuideId"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideId",
+                    "text": "GuideId"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -271,7 +490,90 @@
                 "label": "stepId",
                 "description": [],
                 "signature": [
-                  "GuideStepIds"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideStepIds",
+                    "text": "GuideStepIds"
+                  }
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.isGuideStepReadyToComplete$",
+            "type": "Function",
+            "tags": [],
+            "label": "isGuideStepReadyToComplete$",
+            "description": [],
+            "signature": [
+              "(guideId: ",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideId",
+                "text": "GuideId"
+              },
+              ", stepId: ",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideStepIds",
+                "text": "GuideStepIds"
+              },
+              ") => ",
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.isGuideStepReadyToComplete$.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "guideId",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideId",
+                    "text": "GuideId"
+                  }
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.isGuideStepReadyToComplete$.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "stepId",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideStepIds",
+                    "text": "GuideStepIds"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -290,11 +592,29 @@
             "description": [],
             "signature": [
               "(guideId: ",
-              "GuideId",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideId",
+                "text": "GuideId"
+              },
               ", stepId: ",
-              "GuideStepIds",
-              ") => Promise<{ state: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideStepIds",
+                "text": "GuideStepIds"
+              },
+              ") => Promise<{ pluginState: ",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.PluginState",
+                "text": "PluginState"
+              },
               "; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -309,7 +629,13 @@
                 "label": "guideId",
                 "description": [],
                 "signature": [
-                  "GuideId"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideId",
+                    "text": "GuideId"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -324,7 +650,13 @@
                 "label": "stepId",
                 "description": [],
                 "signature": [
-                  "GuideStepIds"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideStepIds",
+                    "text": "GuideStepIds"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -343,11 +675,29 @@
             "description": [],
             "signature": [
               "(guideId: ",
-              "GuideId",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideId",
+                "text": "GuideId"
+              },
               ", stepId: ",
-              "GuideStepIds",
-              ") => Promise<{ state: ",
-              "GuideState",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideStepIds",
+                "text": "GuideStepIds"
+              },
+              ") => Promise<{ pluginState: ",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.PluginState",
+                "text": "PluginState"
+              },
               "; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -362,7 +712,13 @@
                 "label": "guideId",
                 "description": [],
                 "signature": [
-                  "GuideId"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideId",
+                    "text": "GuideId"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -377,7 +733,13 @@
                 "label": "stepId",
                 "description": [],
                 "signature": [
-                  "GuideStepIds"
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideStepIds",
+                    "text": "GuideStepIds"
+                  }
                 ],
                 "path": "src/plugins/guided_onboarding/public/types.ts",
                 "deprecated": false,
@@ -429,8 +791,14 @@
             "label": "completeGuidedOnboardingForIntegration",
             "description": [],
             "signature": [
-              "(integration?: string | undefined) => Promise<{ state: ",
-              "GuideState",
+              "(integration?: string | undefined) => Promise<{ pluginState: ",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.PluginState",
+                "text": "PluginState"
+              },
               "; } | undefined>"
             ],
             "path": "src/plugins/guided_onboarding/public/types.ts",
@@ -457,6 +825,30 @@
           },
           {
             "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.skipGuidedOnboarding",
+            "type": "Function",
+            "tags": [],
+            "label": "skipGuidedOnboarding",
+            "description": [],
+            "signature": [
+              "() => Promise<{ pluginState: ",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.PluginState",
+                "text": "PluginState"
+              },
+              "; } | undefined>"
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
             "id": "def-public.GuidedOnboardingApi.isGuidePanelOpen$",
             "type": "Object",
             "tags": [],
@@ -469,6 +861,75 @@
             "path": "src/plugins/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.isLoading$",
+            "type": "Object",
+            "tags": [],
+            "label": "isLoading$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.getGuideConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getGuideConfig",
+            "description": [],
+            "signature": [
+              "(guideId: ",
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideId",
+                "text": "GuideId"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.GuideConfig",
+                "text": "GuideConfig"
+              },
+              " | undefined>"
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.getGuideConfig.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "guideId",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/guided-onboarding",
+                    "scope": "common",
+                    "docId": "kibKbnGuidedOnboardingPluginApi",
+                    "section": "def-common.GuideId",
+                    "text": "GuideId"
+                  }
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -476,64 +937,7 @@
     ],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "guidedOnboarding",
-        "id": "def-public.guidesConfig",
-        "type": "Object",
-        "tags": [],
-        "label": "guidesConfig",
-        "description": [],
-        "path": "src/plugins/guided_onboarding/public/constants/guides_config/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "guidedOnboarding",
-            "id": "def-public.guidesConfig.security",
-            "type": "Object",
-            "tags": [],
-            "label": "security",
-            "description": [],
-            "signature": [
-              "GuideConfig"
-            ],
-            "path": "src/plugins/guided_onboarding/public/constants/guides_config/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "guidedOnboarding",
-            "id": "def-public.guidesConfig.observability",
-            "type": "Object",
-            "tags": [],
-            "label": "observability",
-            "description": [],
-            "signature": [
-              "GuideConfig"
-            ],
-            "path": "src/plugins/guided_onboarding/public/constants/guides_config/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "guidedOnboarding",
-            "id": "def-public.guidesConfig.search",
-            "type": "Object",
-            "tags": [],
-            "label": "search",
-            "description": [],
-            "signature": [
-              "GuideConfig"
-            ],
-            "path": "src/plugins/guided_onboarding/public/constants/guides_config/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "objects": [],
     "setup": {
       "parentPluginId": "guidedOnboarding",
       "id": "def-public.GuidedOnboardingPluginSetup",
@@ -591,7 +995,150 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-server.testGuideConfig",
+        "type": "Object",
+        "tags": [],
+        "label": "testGuideConfig",
+        "description": [],
+        "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-server.testGuideConfig.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-server.testGuideConfig.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-server.testGuideConfig.guideName",
+            "type": "string",
+            "tags": [],
+            "label": "guideName",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-server.testGuideConfig.telemetryId",
+            "type": "string",
+            "tags": [],
+            "label": "telemetryId",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-server.testGuideConfig.completedGuideRedirectLocation",
+            "type": "Object",
+            "tags": [],
+            "label": "completedGuideRedirectLocation",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-server.testGuideConfig.completedGuideRedirectLocation.appID",
+                "type": "string",
+                "tags": [],
+                "label": "appID",
+                "description": [],
+                "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-server.testGuideConfig.completedGuideRedirectLocation.path",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-server.testGuideConfig.docs",
+            "type": "Object",
+            "tags": [],
+            "label": "docs",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-server.testGuideConfig.docs.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-server.testGuideConfig.docs.url",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-server.testGuideConfig.steps",
+            "type": "Array",
+            "tags": [],
+            "label": "steps",
+            "description": [],
+            "signature": [
+              "({ id: \"step1\"; title: string; descriptionList: string[]; location: { appID: string; path: string; }; integration: string; } | { id: \"step2\"; title: string; descriptionList: (string | { descriptionText: string; linkText: string; linkUrl: string; isLinkExternal: true; })[]; location: { appID: string; path: string; }; manualCompletion: { title: string; description: string; readyToCompleteOnNavigation: true; }; } | { id: \"step3\"; title: string; description: string; manualCompletion: { title: string; description: string; }; location: { appID: string; path: string; }; })[]"
+            ],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "guidedOnboarding",
       "id": "def-server.GuidedOnboardingPluginSetup",
@@ -602,7 +1149,83 @@
       "path": "src/plugins/guided_onboarding/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "guidedOnboarding",
+          "id": "def-server.GuidedOnboardingPluginSetup.registerGuideConfig",
+          "type": "Function",
+          "tags": [],
+          "label": "registerGuideConfig",
+          "description": [],
+          "signature": [
+            "(guideId: ",
+            {
+              "pluginId": "@kbn/guided-onboarding",
+              "scope": "common",
+              "docId": "kibKbnGuidedOnboardingPluginApi",
+              "section": "def-common.GuideId",
+              "text": "GuideId"
+            },
+            ", guideConfig: ",
+            {
+              "pluginId": "guidedOnboarding",
+              "scope": "common",
+              "docId": "kibGuidedOnboardingPluginApi",
+              "section": "def-common.GuideConfig",
+              "text": "GuideConfig"
+            },
+            ") => void"
+          ],
+          "path": "src/plugins/guided_onboarding/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "guidedOnboarding",
+              "id": "def-server.GuidedOnboardingPluginSetup.registerGuideConfig.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "guideId",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/guided-onboarding",
+                  "scope": "common",
+                  "docId": "kibKbnGuidedOnboardingPluginApi",
+                  "section": "def-common.GuideId",
+                  "text": "GuideId"
+                }
+              ],
+              "path": "src/plugins/guided_onboarding/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "guidedOnboarding",
+              "id": "def-server.GuidedOnboardingPluginSetup.registerGuideConfig.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "guideConfig",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "guidedOnboarding",
+                  "scope": "common",
+                  "docId": "kibGuidedOnboardingPluginApi",
+                  "section": "def-common.GuideConfig",
+                  "text": "GuideConfig"
+                }
+              ],
+              "path": "src/plugins/guided_onboarding/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -624,9 +1247,652 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.GuideConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "GuideConfig",
+        "description": [],
+        "path": "src/plugins/guided_onboarding/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.GuideConfig.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.GuideConfig.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.GuideConfig.guideName",
+            "type": "string",
+            "tags": [],
+            "label": "guideName",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.GuideConfig.telemetryId",
+            "type": "string",
+            "tags": [],
+            "label": "telemetryId",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.GuideConfig.docs",
+            "type": "Object",
+            "tags": [],
+            "label": "docs",
+            "description": [],
+            "signature": [
+              "{ text: string; url: string; } | undefined"
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.GuideConfig.completedGuideRedirectLocation",
+            "type": "Object",
+            "tags": [],
+            "label": "completedGuideRedirectLocation",
+            "description": [],
+            "signature": [
+              "{ appID: string; path: string; } | undefined"
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.GuideConfig.steps",
+            "type": "Array",
+            "tags": [],
+            "label": "steps",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.StepConfig",
+                "text": "StepConfig"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.PluginState",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginState",
+        "description": [],
+        "path": "src/plugins/guided_onboarding/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.PluginState.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"error\" | \"complete\" | \"not_started\" | \"in_progress\" | \"quit\" | \"skipped\""
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.PluginState.isActivePeriod",
+            "type": "boolean",
+            "tags": [],
+            "label": "isActivePeriod",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.PluginState.activeGuide",
+            "type": "Object",
+            "tags": [],
+            "label": "activeGuide",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideState",
+                "text": "GuideState"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.StepConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "StepConfig",
+        "description": [],
+        "path": "src/plugins/guided_onboarding/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.StepConfig.id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.StepConfig.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.StepConfig.description",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.StepDescriptionWithLink",
+                "text": "StepDescriptionWithLink"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.StepConfig.descriptionList",
+            "type": "Array",
+            "tags": [],
+            "label": "descriptionList",
+            "description": [],
+            "signature": [
+              "(string | ",
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "common",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-common.StepDescriptionWithLink",
+                "text": "StepDescriptionWithLink"
+              },
+              ")[] | undefined"
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.StepConfig.location",
+            "type": "Object",
+            "tags": [],
+            "label": "location",
+            "description": [],
+            "signature": [
+              "{ appID: string; path: string; } | undefined"
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.StepConfig.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.StepStatus",
+                "text": "StepStatus"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.StepConfig.integration",
+            "type": "string",
+            "tags": [],
+            "label": "integration",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.StepConfig.manualCompletion",
+            "type": "Object",
+            "tags": [],
+            "label": "manualCompletion",
+            "description": [],
+            "signature": [
+              "{ title: string; description: string; readyToCompleteOnNavigation?: boolean | undefined; } | undefined"
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.StepDescriptionWithLink",
+        "type": "Interface",
+        "tags": [],
+        "label": "StepDescriptionWithLink",
+        "description": [],
+        "path": "src/plugins/guided_onboarding/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.StepDescriptionWithLink.descriptionText",
+            "type": "string",
+            "tags": [],
+            "label": "descriptionText",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.StepDescriptionWithLink.linkText",
+            "type": "string",
+            "tags": [],
+            "label": "linkText",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.StepDescriptionWithLink.linkUrl",
+            "type": "string",
+            "tags": [],
+            "label": "linkUrl",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.StepDescriptionWithLink.isLinkExternal",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isLinkExternal",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.API_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "API_BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/guided_onboarding\""
+        ],
+        "path": "src/plugins/guided_onboarding/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.GuidesConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "GuidesConfig",
+        "description": [],
+        "signature": [
+          "{ search: ",
+          {
+            "pluginId": "guidedOnboarding",
+            "scope": "common",
+            "docId": "kibGuidedOnboardingPluginApi",
+            "section": "def-common.GuideConfig",
+            "text": "GuideConfig"
+          },
+          "; kubernetes: ",
+          {
+            "pluginId": "guidedOnboarding",
+            "scope": "common",
+            "docId": "kibGuidedOnboardingPluginApi",
+            "section": "def-common.GuideConfig",
+            "text": "GuideConfig"
+          },
+          "; siem: ",
+          {
+            "pluginId": "guidedOnboarding",
+            "scope": "common",
+            "docId": "kibGuidedOnboardingPluginApi",
+            "section": "def-common.GuideConfig",
+            "text": "GuideConfig"
+          },
+          "; testGuide: ",
+          {
+            "pluginId": "guidedOnboarding",
+            "scope": "common",
+            "docId": "kibGuidedOnboardingPluginApi",
+            "section": "def-common.GuideConfig",
+            "text": "GuideConfig"
+          },
+          "; }"
+        ],
+        "path": "src/plugins/guided_onboarding/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"guidedOnboarding\""
+        ],
+        "path": "src/plugins/guided_onboarding/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"guidedOnboarding\""
+        ],
+        "path": "src/plugins/guided_onboarding/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.PluginStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "PluginStatus",
+        "description": [
+          "\nGuided onboarding overall status:\n not_started: no guides have been started yet\n in_progress: a guide is currently active\n complete: at least one guide has been completed\n quit: the user quit a guide before completion\n skipped: the user skipped on the landing page\n error: unable to retrieve the plugin state from saved objects"
+        ],
+        "signature": [
+          "\"error\" | \"complete\" | \"not_started\" | \"in_progress\" | \"quit\" | \"skipped\""
+        ],
+        "path": "src/plugins/guided_onboarding/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.testGuideId",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "testGuideId",
+        "description": [],
+        "signature": [
+          "\"search\" | \"kubernetes\" | \"siem\" | \"testGuide\""
+        ],
+        "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "guidedOnboarding",
+        "id": "def-common.testGuideConfig",
+        "type": "Object",
+        "tags": [],
+        "label": "testGuideConfig",
+        "description": [],
+        "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.testGuideConfig.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.testGuideConfig.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.testGuideConfig.guideName",
+            "type": "string",
+            "tags": [],
+            "label": "guideName",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.testGuideConfig.telemetryId",
+            "type": "string",
+            "tags": [],
+            "label": "telemetryId",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.testGuideConfig.completedGuideRedirectLocation",
+            "type": "Object",
+            "tags": [],
+            "label": "completedGuideRedirectLocation",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-common.testGuideConfig.completedGuideRedirectLocation.appID",
+                "type": "string",
+                "tags": [],
+                "label": "appID",
+                "description": [],
+                "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-common.testGuideConfig.completedGuideRedirectLocation.path",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.testGuideConfig.docs",
+            "type": "Object",
+            "tags": [],
+            "label": "docs",
+            "description": [],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-common.testGuideConfig.docs.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-common.testGuideConfig.docs.url",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-common.testGuideConfig.steps",
+            "type": "Array",
+            "tags": [],
+            "label": "steps",
+            "description": [],
+            "signature": [
+              "({ id: \"step1\"; title: string; descriptionList: string[]; location: { appID: string; path: string; }; integration: string; } | { id: \"step2\"; title: string; descriptionList: (string | { descriptionText: string; linkText: string; linkUrl: string; isLinkExternal: true; })[]; location: { appID: string; path: string; }; manualCompletion: { title: string; description: string; readyToCompleteOnNavigation: true; }; } | { id: \"step3\"; title: string; description: string; manualCompletion: { title: string; description: string; }; location: { appID: string; path: string; }; })[]"
+            ],
+            "path": "src/plugins/guided_onboarding/common/test_guide_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

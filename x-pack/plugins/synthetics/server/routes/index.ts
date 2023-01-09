@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
+import { syncParamsSyntheticsParamsRoute } from './settings/sync_global_params';
+import { editSyntheticsParamsRoute } from './settings/edit_param';
+import { getSyntheticsParamsRoute } from './settings/params';
+import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
@@ -27,16 +32,21 @@ import { installIndexTemplatesRoute } from './synthetics_service/install_index_t
 import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
-import { syntheticsGetPingsRoute } from './pings';
+import { addSyntheticsProjectMonitorRouteLegacy } from './monitor_cruds/add_monitor_project_legacy';
+import { syntheticsGetPingsRoute, syntheticsGetPingStatusesRoute } from './pings';
 import { createGetCurrentStatusRoute } from './status/current_status';
 import {
   SyntheticsRestApiRouteFactory,
   SyntheticsStreamingRouteFactory,
 } from '../legacy_uptime/routes';
 import { getHasZipUrlMonitorRoute } from './fleet/get_has_zip_url_monitors';
+import { addSyntheticsParamsRoute } from './settings/add_param';
+import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
+import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
+  addSyntheticsProjectMonitorRoute,
   getSyntheticsEnablementRoute,
   deleteSyntheticsMonitorRoute,
   deleteSyntheticsMonitorProjectRoute,
@@ -54,10 +64,19 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
   syntheticsGetPingsRoute,
+  syntheticsGetPingStatusesRoute,
   getHasZipUrlMonitorRoute,
   createGetCurrentStatusRoute,
+  getIndexSizesRoute,
+  getSyntheticsParamsRoute,
+  editSyntheticsParamsRoute,
+  addSyntheticsParamsRoute,
+  syncParamsSyntheticsParamsRoute,
+  enableDefaultAlertingRoute,
+  getDefaultAlertingRoute,
+  updateDefaultAlertingRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
-  addSyntheticsProjectMonitorRoute,
+  addSyntheticsProjectMonitorRouteLegacy,
 ];

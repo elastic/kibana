@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiText, EuiAvatar } from '@elastic/eui';
-import { capitalize } from 'lodash';
+import { capitalize, omit } from 'lodash';
 import moment from 'moment';
 
 import type {
@@ -143,11 +143,12 @@ export const prepareExceptionItemsForBulkClose = (
   return exceptionItems.map((item: ExceptionListItemSchema) => {
     if (item.entries !== undefined) {
       const newEntries = item.entries.map((itemEntry: Entry | EntryNested) => {
+        const entry = omit(itemEntry, 'id') as Entry | EntryNested;
         return {
-          ...itemEntry,
-          field: itemEntry.field.startsWith('event.')
-            ? itemEntry.field.replace(/^event./, `${ALERT_ORIGINAL_EVENT}.`)
-            : itemEntry.field,
+          ...entry,
+          field: entry.field.startsWith('event.')
+            ? entry.field.replace(/^event./, `${ALERT_ORIGINAL_EVENT}.`)
+            : entry.field,
         };
       });
       return {

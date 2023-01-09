@@ -10,17 +10,31 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-        "id": "def-server.createMockOpsProcessMetrics",
+        "id": "def-common.createMockOpsProcessMetrics",
         "type": "Function",
         "tags": [],
         "label": "createMockOpsProcessMetrics",
         "description": [],
         "signature": [
           "() => ",
-          "OpsProcessMetrics"
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "common",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-common.OpsProcessMetrics",
+            "text": "OpsProcessMetrics"
+          }
         ],
         "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/process.mocks.ts",
         "deprecated": false,
@@ -36,7 +50,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-        "id": "def-server.collectorMock",
+        "id": "def-common.collectorMock",
         "type": "Object",
         "tags": [],
         "label": "collectorMock",
@@ -47,14 +61,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-            "id": "def-server.collectorMock.create",
+            "id": "def-common.collectorMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "MetricsCollector",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "common",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-common.MetricsCollector",
+                "text": "MetricsCollector"
+              },
               "<any>>"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/mocks.ts",
@@ -65,14 +85,20 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-            "id": "def-server.collectorMock.createOpsProcessMetrics",
+            "id": "def-common.collectorMock.createOpsProcessMetrics",
             "type": "Function",
             "tags": [],
             "label": "createOpsProcessMetrics",
             "description": [],
             "signature": [
               "() => ",
-              "OpsProcessMetrics"
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "common",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-common.OpsProcessMetrics",
+                "text": "OpsProcessMetrics"
+              }
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/mocks.ts",
             "deprecated": false,
@@ -85,7 +111,7 @@
       },
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-        "id": "def-server.metricsCollectorMock",
+        "id": "def-common.metricsCollectorMock",
         "type": "Object",
         "tags": [],
         "label": "metricsCollectorMock",
@@ -96,14 +122,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-            "id": "def-server.metricsCollectorMock.create",
+            "id": "def-common.metricsCollectorMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
             "description": [],
             "signature": [
               "<T = any>(collectReturnValue?: any) => jest.Mocked<",
-              "MetricsCollector",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "common",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-common.MetricsCollector",
+                "text": "MetricsCollector"
+              },
               "<T>>"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/collector.mock.ts",
@@ -113,7 +145,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-                "id": "def-server.metricsCollectorMock.create.$1",
+                "id": "def-common.metricsCollectorMock.create.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "collectReturnValue",
@@ -132,7 +164,7 @@
       },
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-        "id": "def-server.mocked",
+        "id": "def-common.mocked",
         "type": "Object",
         "tags": [],
         "label": "mocked",
@@ -143,16 +175,28 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-            "id": "def-server.mocked.createHistogram",
+            "id": "def-common.mocked.createHistogram",
             "type": "Function",
             "tags": [],
             "label": "createHistogram",
             "description": [],
             "signature": [
               "(overwrites?: Partial<",
-              "IntervalHistogram",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "common",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-common.IntervalHistogram",
+                "text": "IntervalHistogram"
+              },
               ">) => ",
-              "IntervalHistogram"
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "common",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-common.IntervalHistogram",
+                "text": "IntervalHistogram"
+              }
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
             "deprecated": false,
@@ -161,7 +205,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-                "id": "def-server.mocked.createHistogram.$1",
+                "id": "def-common.mocked.createHistogram.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "overwrites",
@@ -177,14 +221,20 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-            "id": "def-server.mocked.createEventLoopDelaysMonitor",
+            "id": "def-common.mocked.createEventLoopDelaysMonitor",
             "type": "Function",
             "tags": [],
             "label": "createEventLoopDelaysMonitor",
             "description": [],
             "signature": [
               "() => ",
-              "EventLoopDelaysMonitor"
+              {
+                "pluginId": "@kbn/core-metrics-collectors-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
+                "section": "def-common.EventLoopDelaysMonitor",
+                "text": "EventLoopDelaysMonitor"
+              }
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
             "deprecated": false,
@@ -196,13 +246,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

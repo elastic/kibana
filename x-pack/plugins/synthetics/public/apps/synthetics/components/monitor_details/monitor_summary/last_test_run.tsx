@@ -19,9 +19,9 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 
+import { useParams } from 'react-router-dom';
 import {
   ConfigKey,
   DataStream,
@@ -30,8 +30,7 @@ import {
 } from '../../../../../../common/runtime_types';
 import { formatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 
-import { useSyntheticsSettingsContext } from '../../../contexts';
-import { selectLatestPing, selectPingsLoading } from '../../../state';
+import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import { SinglePingResult } from '../../common/monitor_test_result/single_ping_result';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
@@ -39,15 +38,17 @@ import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/
 import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 
 export const LastTestRun = () => {
   const { euiTheme } = useEuiTheme();
-  const latestPing = useSelector(selectLatestPing);
-  const pingsLoading = useSelector(selectPingsLoading);
+  const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
+  const { lastRefresh } = useSyntheticsRefreshContext();
   const { monitor } = useSelectedMonitor();
 
   const { data: stepsData, loading: stepsLoading } = useJourneySteps(
-    latestPing?.monitor?.check_group
+    latestPing?.monitor?.check_group,
+    lastRefresh
   );
 
   const loading = stepsLoading || pingsLoading;
@@ -97,12 +98,14 @@ const PanelHeader = ({
   loading,
 }: {
   monitor: EncryptedSyntheticsSavedMonitor | null;
-  latestPing: Ping;
+  latestPing?: Ping;
   loading: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
 
   const { basePath } = useSyntheticsSettingsContext();
+
+  const { monitorId } = useParams<{ monitorId: string }>();
 
   const format = useKibanaDateFormat();
 
@@ -162,9 +165,7 @@ const PanelHeader = ({
               size="xs"
               iconType="inspect"
               iconSide="left"
-              href={`${basePath}/app/uptime/journey/${
-                latestPing?.monitor?.check_group ?? ''
-              }/steps`}
+              href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${latestPing?.monitor.check_group}`}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewTestRun', {
                 defaultMessage: 'View test run',

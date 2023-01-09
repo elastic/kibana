@@ -4,27 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import datemath from '@kbn/datemath';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
+import { KibanaRequest } from '@kbn/core/server';
+import datemath from '@kbn/datemath';
+import type { ESSearchResponse } from '@kbn/es-types';
+import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
   ALERT_SEVERITY,
 } from '@kbn/rule-data-utils';
-import { compact } from 'lodash';
-import type { ESSearchResponse } from '@kbn/es-types';
-import { KibanaRequest } from '@kbn/core/server';
-import { termQuery } from '@kbn/observability-plugin/server';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  ApmRuleType,
-  RULE_TYPES_CONFIG,
-  ANOMALY_ALERT_SEVERITY_TYPES,
-  formatAnomalyReason,
-} from '../../../../../common/rules/apm_rule_types';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { compact } from 'lodash';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
   ApmMlDetectorType,
@@ -35,17 +31,24 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
+import {
+  ANOMALY_ALERT_SEVERITY_TYPES,
+  ApmRuleType,
+  formatAnomalyReason,
+  RULE_TYPES_CONFIG,
+} from '../../../../../common/rules/apm_rule_types';
 import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
 import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getMLJobs } from '../../../service_map/get_service_anomalies';
 import { apmActionVariables } from '../../action_variables';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -64,11 +67,13 @@ const paramsSchema = schema.object({
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
 export function registerAnomalyRuleType({
-  logger,
-  ruleDataClient,
   alerting,
-  ml,
   basePath,
+  config$,
+  logger,
+  ml,
+  observability,
+  ruleDataClient,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     logger,
@@ -86,31 +91,38 @@ export function registerAnomalyRuleType({
       },
       actionVariables: {
         context: [
-          apmActionVariables.serviceName,
-          apmActionVariables.transactionType,
+          ...(observability.getAlertDetailsConfig()?.apm.enabled
+            ? [apmActionVariables.alertDetailsUrl]
+            : []),
           apmActionVariables.environment,
-          apmActionVariables.threshold,
-          apmActionVariables.triggerValue,
           apmActionVariables.reason,
+          apmActionVariables.serviceName,
+          apmActionVariables.threshold,
+          apmActionVariables.transactionType,
+          apmActionVariables.triggerValue,
           apmActionVariables.viewInAppUrl,
         ],
       },
       producer: 'apm',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ services, params }) => {
+      executor: async ({ params, services, spaceId }) => {
         if (!ml) {
           return {};
         }
+
+        const { savedObjectsClient, scopedClusterClient, getAlertUuid } =
+          services;
+
         const ruleParams = params;
         const request = {} as KibanaRequest;
         const { mlAnomalySearch } = ml.mlSystemProvider(
           request,
-          services.savedObjectsClient
+          savedObjectsClient
         );
         const anomalyDetectors = ml.anomalyDetectorsProvider(
           request,
-          services.savedObjectsClient
+          savedObjectsClient
         );
 
         const mlJobs = await getMLJobs(
@@ -145,6 +157,7 @@ export function registerAnomalyRuleType({
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
           body: {
+            track_total_hits: false,
             size: 0,
             query: {
               bool: {
@@ -160,8 +173,14 @@ export function registerAnomalyRuleType({
                       },
                     },
                   },
-                  ...termQuery('partition_field_value', ruleParams.serviceName),
-                  ...termQuery('by_field_value', ruleParams.transactionType),
+                  ...termQuery(
+                    'partition_field_value',
+                    ruleParams.serviceName,
+                    { queryEmptyString: false }
+                  ),
+                  ...termQuery('by_field_value', ruleParams.transactionType, {
+                    queryEmptyString: false,
+                  }),
                   ...termQuery(
                     'detector_index',
                     getApmMlDetectorIndex(ApmMlDetectorType.txLatency)
@@ -177,7 +196,8 @@ export function registerAnomalyRuleType({
                     { field: 'by_field_value' },
                     { field: 'job_id' },
                   ],
-                  size: 10000,
+                  size: 1000,
+                  order: { 'latest_score.record_score': 'desc' as const },
                 },
                 aggs: {
                   latest_score: {
@@ -187,6 +207,8 @@ export function registerAnomalyRuleType({
                         { field: 'partition_field_value' },
                         { field: 'by_field_value' },
                         { field: 'job_id' },
+                        { field: 'timestamp' },
+                        { field: 'bucket_span' },
                       ] as const),
                       sort: {
                         timestamp: 'desc' as const,
@@ -221,14 +243,35 @@ export function registerAnomalyRuleType({
                 transactionType: latest.by_field_value as string,
                 environment: job.environment,
                 score: latest.record_score as number,
+                timestamp: Date.parse(latest.timestamp as string),
+                bucketSpan: latest.bucket_span as number,
               };
             })
             .filter((anomaly) =>
               anomaly ? anomaly.score >= threshold : false
             ) ?? [];
 
-        compact(anomalies).forEach((anomaly) => {
-          const { serviceName, environment, transactionType, score } = anomaly;
+        for (const anomaly of compact(anomalies)) {
+          const {
+            serviceName,
+            environment,
+            transactionType,
+            score,
+            timestamp,
+            bucketSpan,
+          } = anomaly;
+
+          const eventSourceFields = await getServiceGroupFieldsForAnomaly({
+            config$,
+            scopedClusterClient,
+            savedObjectsClient,
+            serviceName,
+            environment,
+            transactionType,
+            timestamp,
+            bucketSpan,
+          });
+
           const severityLevel = getSeverity(score);
           const reasonMessage = formatAnomalyReason({
             measured: score,
@@ -238,28 +281,38 @@ export function registerAnomalyRuleType({
             windowUnit: params.windowUnit,
           });
 
+          const id = [
+            ApmRuleType.Anomaly,
+            serviceName,
+            environment,
+            transactionType,
+          ]
+            .filter((name) => name)
+            .join('_');
+
           const relativeViewInAppUrl = getAlertUrlTransaction(
             serviceName,
             getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
             transactionType
           );
 
-          const viewInAppUrl = basePath.publicBaseUrl
-            ? new URL(
-                basePath.prepend(relativeViewInAppUrl),
-                basePath.publicBaseUrl
-              ).toString()
-            : relativeViewInAppUrl;
+          const viewInAppUrl = addSpaceIdToPath(
+            basePath.publicBaseUrl,
+            spaceId,
+            relativeViewInAppUrl
+          );
+
+          const alertUuid = getAlertUuid(id);
+
+          const alertDetailsUrl = getAlertDetailsUrl(
+            basePath,
+            spaceId,
+            alertUuid
+          );
+
           services
             .alertWithLifecycle({
-              id: [
-                ApmRuleType.Anomaly,
-                serviceName,
-                environment,
-                transactionType,
-              ]
-                .filter((name) => name)
-                .join('_'),
+              id,
               fields: {
                 [SERVICE_NAME]: serviceName,
                 ...getEnvironmentEsField(environment),
@@ -269,18 +322,20 @@ export function registerAnomalyRuleType({
                 [ALERT_EVALUATION_VALUE]: score,
                 [ALERT_EVALUATION_THRESHOLD]: threshold,
                 [ALERT_REASON]: reasonMessage,
+                ...eventSourceFields,
               },
             })
             .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-              serviceName,
-              transactionType,
+              alertDetailsUrl,
               environment: getEnvironmentLabel(environment),
-              threshold: selectedOption?.label,
-              triggerValue: severityLevel,
               reason: reasonMessage,
+              serviceName,
+              threshold: selectedOption?.label,
+              transactionType,
+              triggerValue: severityLevel,
               viewInAppUrl,
             });
-        });
+        }
 
         return {};
       },

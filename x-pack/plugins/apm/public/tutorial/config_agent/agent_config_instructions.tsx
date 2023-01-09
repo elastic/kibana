@@ -25,7 +25,7 @@ export function AgentConfigInstructions({
 }) {
   const defaultValues = {
     apmServiceName: 'my-service-name',
-    apmEnvironment: 'production',
+    apmEnvironment: 'my-environment',
   };
 
   if (variantId === 'openTelemetry') {
@@ -60,7 +60,11 @@ export function AgentConfigInstructions({
       />
       <EuiSpacer />
 
-      <EuiCodeBlock isCopyable language="bash" data-test-subj="commands">
+      <EuiCodeBlock
+        isCopyable
+        language={variantId === 'java' ? variantId : 'bash'}
+        data-test-subj="commands"
+      >
         {commands}
       </EuiCodeBlock>
     </>

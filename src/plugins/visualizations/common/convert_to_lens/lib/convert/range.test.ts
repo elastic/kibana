@@ -60,7 +60,6 @@ describe('convertToRangeColumn', () => {
         params: {
           type: RANGE_MODES.Histogram,
           maxBars: 'auto',
-          ranges: [],
         },
       },
     ],

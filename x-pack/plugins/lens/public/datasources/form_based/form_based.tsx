@@ -11,11 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
@@ -25,6 +24,7 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -36,6 +36,8 @@ import type {
   IndexPatternField,
   IndexPattern,
   IndexPatternRef,
+  DatasourceLayerSettingsProps,
+  DataSourceInfo,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -64,17 +66,18 @@ import {
 
 import {
   getFiltersInLayer,
-  getTSDBRollupWarningMessages,
+  getShardFailuresWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
 } from './utils';
 import { isDraggedDataViewField } from '../../utils';
-import { normalizeOperationDataType } from './pure_utils';
+import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
+  getCurrentFieldsForOperation,
   getErrorMessages,
   insertNewColumn,
   operationDefinitionMap,
@@ -88,14 +91,15 @@ import {
 } from './operations/layer_helpers';
 import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
-import { Datasource, VisualizeEditorContext } from '../../types';
+import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
-import { DraggingIdentifier } from '../../drag_drop';
+import type { DraggingIdentifier } from '../../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
+import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer } from '../..';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
@@ -103,7 +107,7 @@ export { deleteColumn } from './operations';
 export function columnToOperation(
   column: GenericIndexPatternColumn,
   uniqueLabel?: string,
-  dataView?: IndexPattern
+  dataView?: IndexPattern | DataView
 ): OperationDescriptor {
   const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
   const fieldTypes =
@@ -139,7 +143,7 @@ export function getFormBasedDatasource({
   storage,
   data,
   unifiedSearch,
-  discover,
+  share,
   dataViews,
   fieldFormats,
   charts,
@@ -150,7 +154,7 @@ export function getFormBasedDatasource({
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  discover?: DiscoverStart;
+  share?: SharePluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
@@ -218,27 +222,47 @@ export function getFormBasedDatasource({
     removeLayer(state: FormBasedPrivateState, layerId: string) {
       const newLayers = { ...state.layers };
       delete newLayers[layerId];
+      const removedLayerIds: string[] = [layerId];
 
       // delete layers linked to this layer
       Object.keys(newLayers).forEach((id) => {
         const linkedLayers = newLayers[id]?.linkToLayers;
         if (linkedLayers && linkedLayers.includes(layerId)) {
           delete newLayers[id];
+          removedLayerIds.push(id);
         }
       });
 
       return {
-        ...state,
-        layers: newLayers,
+        removedLayerIds,
+        newState: {
+          ...state,
+          layers: newLayers,
+        },
       };
     },
 
     clearLayer(state: FormBasedPrivateState, layerId: string) {
+      const newLayers = { ...state.layers };
+
+      const removedLayerIds: string[] = [];
+      // delete layers linked to this layer
+      Object.keys(newLayers).forEach((id) => {
+        const linkedLayers = newLayers[id]?.linkToLayers;
+        if (linkedLayers && linkedLayers.includes(layerId)) {
+          delete newLayers[id];
+          removedLayerIds.push(id);
+        }
+      });
+
       return {
-        ...state,
-        layers: {
-          ...state.layers,
-          [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId].linkToLayers),
+        removedLayerIds,
+        newState: {
+          ...state,
+          layers: {
+            ...newLayers,
+            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId]?.linkToLayers),
+          },
         },
       };
     },
@@ -392,8 +416,34 @@ export function getFormBasedDatasource({
       return fields;
     },
 
-    toExpression: (state, layerId, indexPatterns) =>
-      toExpression(state, layerId, indexPatterns, uiSettings),
+    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) =>
+      toExpression(state, layerId, indexPatterns, uiSettings, dateRange, searchSessionId),
+
+    renderLayerSettings(
+      domElement: Element,
+      props: DatasourceLayerSettingsProps<FormBasedPrivateState>
+    ) {
+      render(
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <I18nProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+                unifiedSearch,
+                share,
+              }}
+            >
+              <LayerSettingsPanel {...props} />
+            </KibanaContextProvider>
+          </I18nProvider>
+        </KibanaThemeProvider>,
+        domElement
+      );
+    },
 
     renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<FormBasedPrivateState>) {
       const { onChangeIndexPattern, ...otherProps } = props;
@@ -410,7 +460,7 @@ export function getFormBasedDatasource({
                 fieldFormats,
                 charts,
                 unifiedSearch,
-                discover,
+                share,
               }}
             >
               <FormBasedDataPanel
@@ -463,10 +513,10 @@ export function getFormBasedDatasource({
       return columnLabelMap;
     },
 
-    isValidColumn: (state, indexPatterns, layerId, columnId) => {
+    isValidColumn: (state, indexPatterns, layerId, columnId, dateRange) => {
       const layer = state.layers[layerId];
 
-      return !isColumnInvalid(layer, columnId, indexPatterns[layer.indexPatternId]);
+      return !isColumnInvalid(layer, columnId, indexPatterns[layer.indexPatternId], dateRange);
     },
 
     renderDimensionTrigger: (
@@ -833,8 +883,8 @@ export function getFormBasedDatasource({
         ),
       ];
     },
-    getSearchWarningMessages: (state, warning) => {
-      return [...getTSDBRollupWarningMessages(state, warning)];
+    getSearchWarningMessages: (state, warning, request, response) => {
+      return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
     },
     getDeprecationMessages: () => {
       const deprecatedMessages: React.ReactNode[] = [];
@@ -920,6 +970,44 @@ export function getFormBasedDatasource({
     getUsedDataViews: (state) => {
       return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
     },
+
+    getDatasourceInfo: async (state, references, dataViewsService) => {
+      const layers = references ? injectReferences(state, references).layers : state.layers;
+      const indexPatterns: DataView[] = [];
+      for (const { indexPatternId } of Object.values(layers)) {
+        const dataView = await dataViewsService?.get(indexPatternId);
+        if (dataView) {
+          indexPatterns.push(dataView);
+        }
+      }
+      return Object.entries(layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
+        const dataView = indexPatterns?.find(
+          (indexPattern) => indexPattern.id === layer.indexPatternId
+        );
+
+        const columns = Object.entries(layer.columns).map(([colId, col]) => {
+          const fields = hasField(col) ? getCurrentFieldsForOperation(col) : undefined;
+          return {
+            id: colId,
+            role: col.isBucketed ? ('split' as const) : ('metric' as const),
+            operation: {
+              ...columnToOperation(col, undefined, dataView),
+              type: col.operationType,
+              fields,
+              filter: col.filter,
+            },
+          };
+        });
+
+        acc.push({
+          layerId: key,
+          columns,
+          dataView,
+        });
+
+        return acc;
+      }, []);
+    },
   };
 
   return formBasedDatasource;
@@ -931,5 +1019,6 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
     linkToLayers,
     columns: {},
     columnOrder: [],
+    sampling: 1,
   };
 }

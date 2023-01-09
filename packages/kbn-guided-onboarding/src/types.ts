@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type GuideId = 'observability' | 'security' | 'search';
+export type GuideId = 'kubernetes' | 'siem' | 'search' | 'testGuide';
 
-export type ObservabilityStepIds = 'add_data' | 'view_dashboard' | 'tour_observability';
-export type SecurityStepIds = 'add_data' | 'rules' | 'alertsCases';
-export type SearchStepIds = 'add_data' | 'browse_docs' | 'search_experience';
+type KubernetesStepIds = 'add_data' | 'view_dashboard' | 'tour_observability';
+type SiemStepIds = 'add_data' | 'rules' | 'alertsCases';
+type SearchStepIds = 'add_data' | 'search_experience';
+type TestGuideIds = 'step1' | 'step2' | 'step3';
 
-export type GuideStepIds = ObservabilityStepIds | SecurityStepIds | SearchStepIds;
+export type GuideStepIds = KubernetesStepIds | SiemStepIds | SearchStepIds | TestGuideIds;
 
 export interface GuideState {
   guideId: GuideId;

@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
 import { apiIndex, connectorIndex } from '../../../__mocks__/view_index.mock';
 
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
+import { nextTick } from '@kbn/test-jest-helpers';
+
 import { UpdatePipelineApiLogic } from '../../../api/connector/update_pipeline_api_logic';
+import { CachedFetchIndexApiLogic } from '../../../api/index/cached_fetch_index_api_logic';
 import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
-import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
+import { DetachMlInferencePipelineApiLogic } from '../../../api/pipelines/detach_ml_inference_pipeline';
 
 import { PipelinesLogic } from './pipelines_logic';
 
@@ -40,9 +44,12 @@ const DEFAULT_VALUES = {
 
 describe('PipelinesLogic', () => {
   const { mount } = new LogicMounter(PipelinesLogic);
-  const { mount: mountFetchIndexApiLogic } = new LogicMounter(FetchIndexApiLogic);
+  const { mount: mountFetchIndexApiWrapperLogic } = new LogicMounter(CachedFetchIndexApiLogic);
   const { mount: mountUpdatePipelineLogic } = new LogicMounter(UpdatePipelineApiLogic);
   const { mount: mountFetchCustomPipelineApiLogic } = new LogicMounter(FetchCustomPipelineApiLogic);
+  const { mount: mountDetachMlInferencePipelineApiLogic } = new LogicMounter(
+    DetachMlInferencePipelineApiLogic
+  );
   const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   const newPipeline = {
@@ -53,7 +60,8 @@ describe('PipelinesLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mountFetchIndexApiLogic();
+    mountFetchIndexApiWrapperLogic();
+    mountDetachMlInferencePipelineApiLogic();
     mountFetchCustomPipelineApiLogic();
     mountUpdatePipelineLogic();
     mount();
@@ -65,7 +73,7 @@ describe('PipelinesLogic', () => {
 
   describe('actions', () => {
     it('should set showModal to false and call fetchApiSuccess', async () => {
-      FetchIndexApiLogic.actions.apiSuccess(connectorIndex);
+      CachedFetchIndexApiLogic.actions.apiSuccess(connectorIndex);
       PipelinesLogic.actions.fetchIndexApiSuccess = jest.fn();
       PipelinesLogic.actions.setPipelineState(newPipeline);
       PipelinesLogic.actions.openModal();
@@ -127,7 +135,7 @@ describe('PipelinesLogic', () => {
     describe('apiSuccess', () => {
       it('should call flashSuccessToast', () => {
         PipelinesLogic.actions.apiSuccess({ connectorId: 'a', pipeline: newPipeline });
-        expect(flashSuccessToast).toHaveBeenCalledWith('Pipelines successfully updated');
+        expect(flashSuccessToast).toHaveBeenCalledWith('Pipelines updated');
       });
     });
     describe('createCustomPipelineError', () => {
@@ -143,7 +151,7 @@ describe('PipelinesLogic', () => {
         PipelinesLogic.actions.fetchCustomPipeline = jest.fn();
         PipelinesLogic.actions.fetchIndexApiSuccess(connectorIndex);
         PipelinesLogic.actions.createCustomPipelineSuccess({ created: ['a', 'b'] });
-        expect(flashSuccessToast).toHaveBeenCalledWith('Custom pipeline successfully created');
+        expect(flashSuccessToast).toHaveBeenCalledWith('Custom pipeline created');
         expect(PipelinesLogic.actions.setPipelineState).toHaveBeenCalledWith({
           ...PipelinesLogic.values.pipelineState,
           name: 'a',
@@ -233,6 +241,30 @@ describe('PipelinesLogic', () => {
           indexName,
           pipelineName: indexName,
         });
+      });
+    });
+    describe('detachMlPipelineSuccess', () => {
+      it('re-fetches pipeline data', async () => {
+        jest.spyOn(PipelinesLogic.actions, 'fetchMlInferenceProcessors');
+        jest.spyOn(PipelinesLogic.actions, 'fetchCustomPipeline');
+        CachedFetchIndexApiLogic.actions.apiSuccess(connectorIndex);
+        DetachMlInferencePipelineApiLogic.actions.apiSuccess({
+          updated: 'mock-pipeline-name',
+        });
+        await nextTick();
+        expect(PipelinesLogic.actions.fetchMlInferenceProcessors).toHaveBeenCalledWith({
+          indexName: connectorIndex.name,
+        });
+        expect(PipelinesLogic.actions.fetchCustomPipeline).toHaveBeenCalledWith({
+          indexName: connectorIndex.name,
+        });
+      });
+    });
+    describe('detachMlPipelineError', () => {
+      it('calls flashAPIErrors', () => {
+        DetachMlInferencePipelineApiLogic.actions.apiError('error' as any);
+        expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });

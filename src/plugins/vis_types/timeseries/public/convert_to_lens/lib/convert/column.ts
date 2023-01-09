@@ -32,7 +32,7 @@ interface ExtraColumnFields {
 
 const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].includes(format);
 
-export const getFormat = (series: Series): FormatParams => {
+export const getFormat = (series: Pick<Series, 'formatter' | 'value_template'>): FormatParams => {
   let suffix;
 
   if (!series.formatter || series.formatter === 'default') {

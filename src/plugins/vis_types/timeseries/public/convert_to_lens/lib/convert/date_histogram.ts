@@ -9,28 +9,36 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import uuid from 'uuid';
 import { DateHistogramParams, DataType } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { DateHistogramColumn } from './types';
-import type { Panel, Series } from '../../../../common/types';
+import { DateHistogramColumn, DateHistogramSeries } from './types';
+import type { Panel } from '../../../../common/types';
 
 const getInterval = (interval?: string) => {
   return interval && !interval?.includes('=') ? interval : 'auto';
 };
 
-export const convertToDateHistogramParams = (model: Panel, series: Series): DateHistogramParams => {
+export const convertToDateHistogramParams = (
+  model: Panel | undefined,
+  series: DateHistogramSeries,
+  includeEmptyRows: boolean = true
+): DateHistogramParams => {
   return {
-    interval: getInterval(series.override_index_pattern ? series.series_interval : model.interval),
+    interval: getInterval(series.override_index_pattern ? series.series_interval : model?.interval),
     dropPartials: series.override_index_pattern
       ? series.series_drop_last_bucket > 0
-      : model.drop_last_bucket > 0,
-    includeEmptyRows: true,
+      : (model?.drop_last_bucket ?? 0) > 0,
+    includeEmptyRows,
   };
 };
 
 export const convertToDateHistogramColumn = (
-  model: Panel,
-  series: Series,
+  model: Panel | undefined,
+  series: DateHistogramSeries,
   dataView: DataView,
-  { fieldName, isSplit }: { fieldName: string; isSplit: boolean }
+  {
+    fieldName,
+    isSplit,
+    includeEmptyRows = true,
+  }: { fieldName: string; isSplit: boolean; includeEmptyRows?: boolean }
 ): DateHistogramColumn | null => {
   const dateField = dataView.getFieldByName(fieldName);
 
@@ -38,7 +46,7 @@ export const convertToDateHistogramColumn = (
     return null;
   }
 
-  const params = convertToDateHistogramParams(model, series);
+  const params = convertToDateHistogramParams(model, series, includeEmptyRows);
 
   return {
     columnId: uuid(),

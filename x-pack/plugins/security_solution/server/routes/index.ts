@@ -70,8 +70,8 @@ import {
   getRiskScoreIndexStatusRoute,
   installRiskScoresRoute,
   readPrebuiltDevToolContentRoute,
-  restartTransformRoute,
 } from '../lib/risk_score/routes';
+import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -93,6 +93,7 @@ export const initRoutes = (
   registerLegacyRuleActionsRoutes(router, logger);
   registerPrebuiltRulesRoutes(router, config, security);
   registerRuleExceptionsRoutes(router);
+  registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
   registerRuleMonitoringRoutes(router);
   registerRulePreviewRoutes(
@@ -161,7 +162,6 @@ export const initRoutes = (
   deletePrebuiltSavedObjectsRoute(router, security);
   getRiskScoreIndexStatusRoute(router);
   installRiskScoresRoute(router, logger, security);
-  restartTransformRoute(router, logger);
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.

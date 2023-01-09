@@ -43,7 +43,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          "> ? E : never>"
+          ", any> ? E : never>"
         ],
         "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts",
         "deprecated": false,
@@ -112,7 +112,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              "> & { enhancements: { dynamicActions: ",
+              ", any> & { enhancements: { dynamicActions: ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "public",
@@ -273,7 +273,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          "> | undefined; }>[]"
+          ", any> | undefined; }>[]"
         ],
         "path": "x-pack/plugins/embeddable_enhanced/public/actions/drilldown_grouping.ts",
         "deprecated": false,

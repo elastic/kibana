@@ -124,8 +124,8 @@ export default function emailTest({ getService }: FtrProviderContext) {
               cc: null,
               bcc: null,
               subject: 'email-subject',
-              html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Kibana. <a href=\"https://localhost:5601\">Go to Kibana</a>.</p>\n`,
-              text: 'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
+              html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`,
+              text: 'email-message\n\n--\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).',
               headers: {},
             },
           });
@@ -147,10 +147,10 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .then((resp: any) => {
           const { text, html } = resp.body.data.message;
           expect(text).to.eql(
-            '_italic_ **bold** https://elastic.co link\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).'
+            '_italic_ **bold** https://elastic.co link\n\n--\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).'
           );
           expect(html).to.eql(
-            `<p><em>italic</em> <strong>bold</strong> <a href="https://elastic.co">https://elastic.co</a> link</p>\n<p>--</p>\n<p>This message was sent by Kibana. <a href=\"https://localhost:5601\">Go to Kibana</a>.</p>\n`
+            `<p><em>italic</em> <strong>bold</strong> <a href="https://elastic.co">https://elastic.co</a> link</p>\n<p>--</p>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`
           );
         });
     });
@@ -166,7 +166,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
             message: 'message',
             kibanaFooterLink: {
               path: '/my/path',
-              text: 'View my path in Kibana',
+              text: 'View my path in Elastic',
             },
           },
         })
@@ -174,10 +174,10 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .then((resp: any) => {
           const { text, html } = resp.body.data.message;
           expect(text).to.eql(
-            'message\n\n--\n\nThis message was sent by Kibana. [View my path in Kibana](https://localhost:5601/my/path).'
+            'message\n\n--\n\nThis message was sent by Elastic. [View my path in Elastic](https://localhost:5601/my/path).'
           );
           expect(html).to.eql(
-            `<p>message</p>\n<p>--</p>\n<p>This message was sent by Kibana. <a href=\"https://localhost:5601/my/path\">View my path in Kibana</a>.</p>\n`
+            `<p>message</p>\n<p>--</p>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601/my/path\">View my path in Elastic</a>.</p>\n`
           );
         });
     });
@@ -325,8 +325,8 @@ export default function emailTest({ getService }: FtrProviderContext) {
               cc: null,
               bcc: null,
               subject: 'email-subject',
-              html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Kibana. <a href=\"https://localhost:5601\">Go to Kibana</a>.</p>\n`,
-              text: 'email-message\n\n--\n\nThis message was sent by Kibana. [Go to Kibana](https://localhost:5601).',
+              html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`,
+              text: 'email-message\n\n--\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).',
               headers: {},
             },
           });

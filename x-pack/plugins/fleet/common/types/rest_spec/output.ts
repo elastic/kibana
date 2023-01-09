@@ -60,6 +60,7 @@ export interface PostOutputRequest {
       certificate?: string;
       key?: string;
     };
+    proxy_id?: string | null;
   };
 }
 

@@ -9,6 +9,7 @@ import React from 'react';
 
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { EuiPageSection } from '@elastic/eui';
 import * as i18n from './translations';
 import type { CreateCaseFormProps } from './form';
 import { CreateCaseForm } from './form';
@@ -23,7 +24,7 @@ export const CreateCase = React.memo<CreateCaseFormProps>(
     useCasesBreadcrumbs(CasesDeepLinkId.casesCreate);
 
     return (
-      <>
+      <EuiPageSection restrictWidth={true}>
         <HeaderPage
           showBackButton={true}
           data-test-subj="case-create-title"
@@ -36,7 +37,7 @@ export const CreateCase = React.memo<CreateCaseFormProps>(
           timelineIntegration={timelineIntegration}
           withSteps={withSteps}
         />
-      </>
+      </EuiPageSection>
     );
   }
 );

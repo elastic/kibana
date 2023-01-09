@@ -29,14 +29,8 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
-import type { AppenderConfigType, LoggingServiceSetup } from '@kbn/core-logging-server';
+import type { AppenderConfigType } from '@kbn/core-logging-server';
 import { appendersSchema } from '@kbn/core-logging-server-internal';
-import type {
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
-  AnalyticsServicePreboot,
-} from '@kbn/core-analytics-server';
 import type {
   ExecutionContextSetup,
   ExecutionContextStart,
@@ -46,31 +40,15 @@ import type {
   RequestHandler,
   KibanaResponseFactory,
   RouteMethod,
-  HttpServicePreboot,
   HttpServiceSetup,
-  HttpServiceStart,
 } from '@kbn/core-http-server';
-import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
-import type { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
-import {
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
-  ElasticsearchServicePreboot,
-} from '@kbn/core-elasticsearch-server';
 import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
 import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
-import type {
-  SavedObjectsServiceSetup,
-  SavedObjectsServiceStart,
-} from '@kbn/core-saved-objects-server';
-import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
-import type { CoreUsageDataStart, CoreUsageDataSetup } from '@kbn/core-usage-data-server';
-import type { I18nServiceSetup } from '@kbn/core-i18n-server';
-import type { StatusServiceSetup } from '@kbn/core-status-server';
-import type { UiSettingsServiceSetup, UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { HttpResources } from '@kbn/core-http-resources-server';
-import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
+import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-server-internal';
+
+export { bootstrap } from '@kbn/core-root-server-internal';
 
 export type { PluginOpaqueId } from '@kbn/core-base-common';
 export type {
@@ -89,8 +67,6 @@ export type {
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
-
-export { bootstrap } from './bootstrap';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   CapabilitiesProvider,
@@ -218,6 +194,8 @@ export type {
   HttpServerInfo,
   HttpServicePreboot,
   HttpServiceStart,
+  RawRequest,
+  FakeRawRequest,
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
@@ -236,25 +214,14 @@ export type {
   LoggerConfigType,
   AppenderConfigType,
 } from '@kbn/core-logging-server';
-export type {
-  Logger,
-  LoggerFactory,
-  Ecs,
-  EcsEventCategory,
-  EcsEventKind,
-  EcsEventOutcome,
-  EcsEventType,
-  LogMeta,
-  LogRecord,
-  LogLevel,
-} from '@kbn/logging';
+export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
+export type { Ecs, EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from '@kbn/ecs';
 
 export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 
 export { PluginType } from '@kbn/core-base-common';
 
 export type {
-  DiscoveredPlugin,
   PrebootPlugin,
   Plugin,
   AsyncPlugin,
@@ -263,12 +230,14 @@ export type {
   PluginInitializer,
   PluginInitializerContext,
   PluginManifest,
-  PluginName,
   SharedGlobalConfig,
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
-} from './plugins';
+} from '@kbn/core-plugins-server';
 
+export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
+
+export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type {
   SavedObject,
   SavedObjectAttribute,
@@ -289,6 +258,7 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
+  SavedObjectTypeIdTuple,
 } from '@kbn/core-saved-objects-common';
 export type {
   SavedObjectsBulkCreateObject,
@@ -338,15 +308,19 @@ export type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsPointInTimeFinderClient,
+  SavedObjectsBulkDeleteStatus,
 } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
   SavedObjectsClientProviderOptions,
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensionFactory,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
   SavedObjectsExportResultDetails,
   SavedObjectsExportExcludedObject,
@@ -382,6 +356,23 @@ export type {
   SavedObjectsValidationSpec,
   ISavedObjectsSerializer,
   SavedObjectsRequestHandlerContext,
+  EncryptedObjectDescriptor,
+  ISavedObjectsEncryptionExtension,
+  PerformAuthorizationParams,
+  AuthorizationTypeEntry,
+  AuthorizationTypeMap,
+  CheckAuthorizationResult,
+  EnforceAuthorizationParams,
+  AddAuditEventParams,
+  RedactNamespacesParams,
+  ISavedObjectsSecurityExtension,
+  ISavedObjectsSpacesExtension,
+  SavedObjectsExtensions,
+} from '@kbn/core-saved-objects-server';
+export {
+  ENCRYPTION_EXTENSION_ID,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
 } from '@kbn/core-saved-objects-server';
 export {
   SavedObjectsErrorHelpers,
@@ -430,7 +421,11 @@ export type {
   DeprecationsClient,
   DeprecationsRequestHandlerContext,
 } from '@kbn/core-deprecations-server';
-export type { DeprecationsDetails } from '@kbn/core-deprecations-common';
+export type {
+  DeprecationsDetails,
+  DomainDeprecationDetails,
+  DeprecationsGetResponse,
+} from '@kbn/core-deprecations-common';
 
 export type { AppCategory } from '@kbn/core-application-common';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
@@ -467,106 +462,12 @@ export type {
   PrebootCoreRequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
 
-/**
- * Context passed to the `setup` method of `preboot` plugins.
- * @public
- */
-export interface CorePreboot {
-  /** {@link AnalyticsServicePreboot} */
-  analytics: AnalyticsServicePreboot;
-  /** {@link ElasticsearchServicePreboot} */
-  elasticsearch: ElasticsearchServicePreboot;
-  /** {@link HttpServicePreboot} */
-  http: HttpServicePreboot<RequestHandlerContext>;
-  /** {@link PrebootServicePreboot} */
-  preboot: PrebootServicePreboot;
-}
-
-/**
- * Context passed to the `setup` method of `standard` plugins.
- *
- * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
- *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
- * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
- *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
- * @public
- */
-export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
-  /** {@link AnalyticsServiceSetup} */
-  analytics: AnalyticsServiceSetup;
-  /** {@link CapabilitiesSetup} */
-  capabilities: CapabilitiesSetup;
-  /** {@link DocLinksServiceSetup} */
-  docLinks: DocLinksServiceSetup;
-  /** {@link ElasticsearchServiceSetup} */
-  elasticsearch: ElasticsearchServiceSetup;
-  /** {@link ExecutionContextSetup} */
-  executionContext: ExecutionContextSetup;
-  /** {@link HttpServiceSetup} */
-  http: HttpServiceSetup<RequestHandlerContext> & {
-    /** {@link HttpResources} */
-    resources: HttpResources;
-  };
-  /** {@link I18nServiceSetup} */
-  i18n: I18nServiceSetup;
-  /** {@link LoggingServiceSetup} */
-  logging: LoggingServiceSetup;
-  /** {@link MetricsServiceSetup} */
-  metrics: MetricsServiceSetup;
-  /** {@link SavedObjectsServiceSetup} */
-  savedObjects: SavedObjectsServiceSetup;
-  /** {@link StatusServiceSetup} */
-  status: StatusServiceSetup;
-  /** {@link UiSettingsServiceSetup} */
-  uiSettings: UiSettingsServiceSetup;
-  /** {@link DeprecationsServiceSetup} */
-  deprecations: DeprecationsServiceSetup;
-  /** {@link StartServicesAccessor} */
-  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
-  /** @internal {@link CoreUsageDataSetup} */
-  coreUsageData: CoreUsageDataSetup;
-}
-
-/**
- * Allows plugins to get access to APIs available in start inside async handlers.
- * Promise will not resolve until Core and plugin dependencies have completed `start`.
- * This should only be used inside handlers registered during `setup` that will only be executed
- * after `start` lifecycle.
- *
- * @public
- */
-export type StartServicesAccessor<
-  TPluginsStart extends object = object,
-  TStart = unknown
-> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
-
-/**
- * Context passed to the plugins `start` method.
- *
- * @public
- */
-export interface CoreStart {
-  /** {@link AnalyticsServiceStart} */
-  analytics: AnalyticsServiceStart;
-  /** {@link CapabilitiesStart} */
-  capabilities: CapabilitiesStart;
-  /** {@link DocLinksServiceStart} */
-  docLinks: DocLinksServiceStart;
-  /** {@link ElasticsearchServiceStart} */
-  elasticsearch: ElasticsearchServiceStart;
-  /** {@link ExecutionContextStart} */
-  executionContext: ExecutionContextStart;
-  /** {@link HttpServiceStart} */
-  http: HttpServiceStart;
-  /** {@link MetricsServiceStart} */
-  metrics: MetricsServiceStart;
-  /** {@link SavedObjectsServiceStart} */
-  savedObjects: SavedObjectsServiceStart;
-  /** {@link UiSettingsServiceStart} */
-  uiSettings: UiSettingsServiceStart;
-  /** @internal {@link CoreUsageDataStart} */
-  coreUsageData: CoreUsageDataStart;
-}
+export type {
+  CorePreboot,
+  CoreSetup,
+  CoreStart,
+  StartServicesAccessor,
+} from '@kbn/core-lifecycle-server';
 
 export type {
   CapabilitiesSetup,

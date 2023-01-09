@@ -6,10 +6,11 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import {
+  CreateAlertParamsSchema,
   CloseAlertParamsSchema,
   ConfigSchema,
-  CreateAlertParamsSchema,
   SecretsSchema,
+  FailureResponse,
 } from './schema';
 import { OpsgenieSubActions } from '../../../../common';
 
@@ -30,3 +31,5 @@ export interface CloseAlertSubActionParams {
 }
 
 export type Params = CreateAlertSubActionParams | CloseAlertSubActionParams;
+
+export type FailureResponseType = TypeOf<typeof FailureResponse>;

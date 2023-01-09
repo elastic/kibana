@@ -8,4 +8,4 @@
 export * from './datatable_column';
 export * from './datatable';
 
-export type { DatatableProps } from './types';
+export type { DatatableProps, DatatableExpressionFunction } from './types';

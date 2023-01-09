@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export const sampleAreaVis = {
+
+const mockUiStateGet = jest.fn().mockReturnValue(() => {});
+export const sampleHeatmapVis = {
   type: {
     name: 'heatmap',
     title: 'Heatmap',
@@ -1788,5 +1790,10 @@ export const sampleAreaVis = {
     },
   },
   isHierarchical: () => false,
-  uiState: {},
+  uiState: {
+    vis: {
+      legendOpen: false,
+    },
+    get: mockUiStateGet,
+  },
 };

@@ -49,13 +49,23 @@ export function setupFleetServer() {
   });
 }
 
+export function deleteFleetServer() {
+  cy.task('deleteDocsByQuery', {
+    index: '.fleet-servers',
+    query: { match_all: {} },
+    ignoreUnavailable: true,
+  });
+}
+
 export function setFleetServerHost(host = 'https://fleetserver:8220') {
   cy.request({
-    method: 'PUT',
-    url: '/api/fleet/settings',
+    method: 'POST',
+    url: '/api/fleet/fleet_server_hosts',
     headers: { 'kbn-xsrf': 'xx' },
     body: {
-      fleet_server_hosts: [host],
+      name: 'Default host',
+      host_urls: [host],
+      is_default: true,
     },
   });
 }

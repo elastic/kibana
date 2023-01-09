@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
+import type { MaybePromise } from '@kbn/utility-types';
 import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { distinctUntilChanged, merge, of, switchMap } from 'rxjs';
 import { EditPanelAction } from '../actions';
-import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../embeddables';
 
 interface EmbeddablePanelErrorProps {
   editPanelAction?: EditPanelAction;
-  embeddable: IEmbeddable;
+  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput, MaybePromise<ReactNode>>;
   error: ErrorLike;
 }
 
@@ -26,26 +28,25 @@ export function EmbeddablePanelError({
   error,
 }: EmbeddablePanelErrorProps) {
   const [isEditable, setEditable] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
   const handleErrorClick = useMemo(
     () => (isEditable ? () => editPanelAction?.execute({ embeddable }) : undefined),
     [editPanelAction, embeddable, isEditable]
   );
 
-  const title = embeddable.getTitle();
-  const actionDisplayName = useMemo(
+  const label = useMemo(
     () => editPanelAction?.getDisplayName({ embeddable }),
     [editPanelAction, embeddable]
   );
+  const title = useMemo(() => embeddable.getTitle(), [embeddable]);
   const ariaLabel = useMemo(
     () =>
       !title
-        ? actionDisplayName
+        ? label
         : i18n.translate('embeddableApi.panel.editPanel.displayName', {
             defaultMessage: 'Edit {value}',
             values: { value: title },
           }),
-    [title, actionDisplayName]
+    [label, title]
   );
 
   useEffect(() => {
@@ -58,32 +59,29 @@ export function EmbeddablePanelError({
 
     return () => subscription.unsubscribe();
   }, [editPanelAction, embeddable]);
-  useEffect(() => {
-    if (!ref.current) {
-      return;
-    }
-
-    if (embeddable.renderError) {
-      return embeddable.renderError(ref.current, error);
-    }
-
-    const errorEmbeddable = new ErrorEmbeddable(error, { id: embeddable.id });
-    errorEmbeddable.render(ref.current);
-
-    return () => errorEmbeddable.destroy();
-  }, [embeddable, error]);
 
   return (
-    <EuiPanel
-      element="div"
-      className="embPanel__content embPanel__content--error"
-      color="transparent"
-      paddingSize="none"
-      data-test-subj="embeddableError"
-      panelRef={ref}
-      role={isEditable ? 'button' : undefined}
-      aria-label={isEditable ? ariaLabel : undefined}
-      onClick={handleErrorClick}
+    <EuiEmptyPrompt
+      body={
+        <EuiText size="s">
+          <Markdown
+            markdown={error.message}
+            openLinksInNewTab={true}
+            data-test-subj="errorMessageMarkdown"
+          />
+        </EuiText>
+      }
+      data-test-subj="embeddableStackError"
+      iconType="alert"
+      iconColor="danger"
+      layout="vertical"
+      actions={
+        isEditable && (
+          <EuiButtonEmpty aria-label={ariaLabel} onClick={handleErrorClick} size="s">
+            {label}
+          </EuiButtonEmpty>
+        )
+      }
     />
   );
 }

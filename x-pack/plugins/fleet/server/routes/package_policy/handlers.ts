@@ -13,7 +13,14 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
 
-import { agentPolicyService, appContextService, packagePolicyService } from '../../services';
+import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
+
+import {
+  agentPolicyService,
+  appContextService,
+  checkAllowedPackages,
+  packagePolicyService,
+} from '../../services';
 import type {
   GetPackagePoliciesRequestSchema,
   GetOnePackagePolicyRequestSchema,
@@ -43,16 +50,28 @@ import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/servi
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-export const getPackagePoliciesHandler: RequestHandler<
+export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagePoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.internalSoClient;
+  const limitedToPackages = fleetContext.limitedToPackages;
+
   try {
     const { items, total, page, perPage } = await packagePolicyService.list(
       soClient,
       request.query
     );
+
+    checkAllowedPackages(items, limitedToPackages, 'package.name');
+
+    if (request.query.withAgentCount) {
+      await populatePackagePolicyAssignedAgentsCount(esClient, items);
+    }
+
+    // agnostic to package-level RBAC
     return response.ok({
       body: {
         items,
@@ -66,19 +85,24 @@ export const getPackagePoliciesHandler: RequestHandler<
   }
 };
 
-export const bulkGetPackagePoliciesHandler: RequestHandler<
+export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof BulkGetPackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.internalSoClient;
+  const limitedToPackages = fleetContext.limitedToPackages;
   const { ids, ignoreMissing } = request.body;
+
   try {
     const items = await packagePolicyService.getByIDs(soClient, ids, {
       ignoreMissing,
     });
 
     const body: BulkGetPackagePoliciesResponse = { items: items ?? [] };
+
+    checkAllowedPackages(body.items, limitedToPackages, 'package.name');
 
     return response.ok({
       body,
@@ -94,17 +118,22 @@ export const bulkGetPackagePoliciesHandler: RequestHandler<
   }
 };
 
-export const getOnePackagePolicyHandler: RequestHandler<
+export const getOnePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof GetOnePackagePolicyRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.internalSoClient;
+  const limitedToPackages = fleetContext.limitedToPackages;
   const { packagePolicyId } = request.params;
   const notFoundResponse = () =>
     response.notFound({ body: { message: `Package policy ${packagePolicyId} not found` } });
 
   try {
     const packagePolicy = await packagePolicyService.get(soClient, packagePolicyId);
+
     if (packagePolicy) {
+      checkAllowedPackages([packagePolicy], limitedToPackages, 'package.name');
+
       return response.ok({
         body: {
           item: packagePolicy,
@@ -184,7 +213,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, package: pkg, ...newPolicy } = request.body;
@@ -204,6 +233,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         pkgName: pkg.name,
         pkgVersion: pkg.version,
         ignoreUnverified: force,
+        prerelease: true,
       });
       newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo, {
         experimental_data_stream_features: pkg.experimental_data_stream_features,
@@ -257,19 +287,30 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   }
 };
 
-export const updatePackagePolicyHandler: RequestHandler<
+export const updatePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackagePolicyRequestSchema.params>,
   unknown,
   TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const soClient = coreContext.savedObjects.client;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.internalSoClient;
+  const limitedToPackages = fleetContext.limitedToPackages;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
   if (!packagePolicy) {
     throw Boom.notFound('Package policy not found');
+  }
+
+  if (limitedToPackages && limitedToPackages.length) {
+    const packageName = packagePolicy?.package?.name;
+    if (packageName && !limitedToPackages.includes(packageName)) {
+      return response.forbidden({
+        body: { message: `Update for package name ${packageName} is not authorized.` },
+      });
+    }
   }
 
   try {

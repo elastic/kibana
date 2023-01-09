@@ -33,6 +33,7 @@ const areVisSchemasValid = (visSchemas: Schemas, unsupported: Array<keyof Schema
 };
 
 const createLayer = (
+  visType: string,
   visSchemas: Schemas,
   allMetrics: Array<SchemaConfig<METRIC_TYPES>>,
   metricsForLayer: Array<SchemaConfig<METRIC_TYPES>>,
@@ -52,7 +53,7 @@ const createLayer = (
   dropEmptyRowsInDateHistogram?: boolean
 ) => {
   const metricColumns = metricsForLayer.flatMap((m) =>
-    convertMetricToColumns(m, dataView, allMetrics, percentageModeConfig)
+    convertMetricToColumns({ agg: m, dataView, aggs: allMetrics, visType }, percentageModeConfig)
   );
   if (metricColumns.includes(null)) {
     return null;
@@ -60,6 +61,7 @@ const createLayer = (
   const metricColumnsWithoutNull = metricColumns as AggBasedColumn[];
 
   const { customBucketColumns, customBucketsMap } = getCustomBucketColumns(
+    visType,
     customBucketsWithMetricIds,
     metricColumnsWithoutNull,
     dataView,
@@ -72,6 +74,7 @@ const createLayer = (
   }
 
   const bucketColumns = getBucketColumns(
+    visType,
     visSchemas,
     buckets,
     dataView,
@@ -84,6 +87,7 @@ const createLayer = (
   }
 
   const splitBucketColumns = getBucketColumns(
+    visType,
     visSchemas,
     splits,
     dataView,
@@ -181,6 +185,7 @@ export const getColumnsFromVis = <T>(
         c.metricIds.some((m) => metricAggIds.includes(m))
       );
       const layer = createLayer(
+        vis.type.name,
         visSchemas,
         aggs,
         metrics,
@@ -197,6 +202,7 @@ export const getColumnsFromVis = <T>(
     }
   } else {
     const layer = createLayer(
+      vis.type.name,
       visSchemas,
       aggs,
       aggs,

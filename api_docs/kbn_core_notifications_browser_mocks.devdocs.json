@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-notifications-browser-mocks",
-        "id": "def-server.notificationServiceMock",
+        "id": "def-common.notificationServiceMock",
         "type": "Object",
         "tags": [],
         "label": "notificationServiceMock",
@@ -28,14 +36,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-notifications-browser-mocks",
-            "id": "def-server.notificationServiceMock.create",
+            "id": "def-common.notificationServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "NotificationsServiceContract",
+              {
+                "pluginId": "@kbn/core-notifications-browser-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserInternalPluginApi",
+                "section": "def-common.NotificationsServiceContract",
+                "text": "NotificationsServiceContract"
+              },
               ">"
             ],
             "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
@@ -46,16 +60,28 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-mocks",
-            "id": "def-server.notificationServiceMock.createSetupContract",
+            "id": "def-common.notificationServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
               "() => ",
-              "MockedKeys",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.MockedKeys",
+                "text": "MockedKeys"
+              },
               "<",
-              "NotificationsSetup",
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.NotificationsSetup",
+                "text": "NotificationsSetup"
+              },
               ">"
             ],
             "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
@@ -66,16 +92,28 @@
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-mocks",
-            "id": "def-server.notificationServiceMock.createStartContract",
+            "id": "def-common.notificationServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
             "description": [],
             "signature": [
               "() => ",
-              "MockedKeys",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.MockedKeys",
+                "text": "MockedKeys"
+              },
               "<",
-              "NotificationsStart",
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.NotificationsStart",
+                "text": "NotificationsStart"
+              },
               ">"
             ],
             "path": "packages/core/notifications/core-notifications-browser-mocks/src/notifications_service.mock.ts",
@@ -88,13 +126,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

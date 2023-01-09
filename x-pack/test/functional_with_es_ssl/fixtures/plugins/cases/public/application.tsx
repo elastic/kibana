@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiFlexGroup,
 } from '@elastic/eui';
+import { Router } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CommentType } from '@kbn/cases-plugin/common';
@@ -92,7 +93,7 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
 
 const CasesFixtureApp: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
   const { mountParams, coreStart, pluginsStart } = deps;
-  const { theme$ } = mountParams;
+  const { history, theme$ } = mountParams;
   const { cases } = pluginsStart;
 
   const CasesContext = cases.ui.getCasesContext();
@@ -108,9 +109,11 @@ const CasesFixtureApp: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
             }}
           >
             <StyledComponentsThemeProvider>
-              <CasesContext owner={[]} permissions={permissions}>
-                <CasesFixtureAppWithContext cases={cases} />
-              </CasesContext>
+              <Router history={history}>
+                <CasesContext owner={[]} permissions={permissions}>
+                  <CasesFixtureAppWithContext cases={cases} />
+                </CasesContext>
+              </Router>
             </StyledComponentsThemeProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>

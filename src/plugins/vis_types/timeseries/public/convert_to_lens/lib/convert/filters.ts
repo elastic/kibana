@@ -8,10 +8,9 @@
 
 import uuid from 'uuid';
 import { FiltersParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { FiltersColumn } from './types';
-import type { Series } from '../../../../common/types';
+import { FiltersColumn, FiltersSeries } from './types';
 
-export const convertToFiltersParams = (series: Series): FiltersParams => {
+export const convertToFiltersParams = (series: FiltersSeries): FiltersParams => {
   const splitFilters = [];
   if (series.split_mode === 'filter' && series.filter) {
     splitFilters.push({ filter: series.filter });
@@ -35,7 +34,10 @@ export const convertToFiltersParams = (series: Series): FiltersParams => {
   };
 };
 
-export const convertToFiltersColumn = (series: Series, isSplit: boolean): FiltersColumn | null => {
+export const convertToFiltersColumn = (
+  series: FiltersSeries,
+  isSplit: boolean
+): FiltersColumn | null => {
   const params = convertToFiltersParams(series);
   if (!params.filters.length) {
     return null;

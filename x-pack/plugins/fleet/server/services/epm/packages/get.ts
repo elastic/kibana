@@ -23,7 +23,12 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import { FleetError, PackageFailedVerificationError, PackageNotFoundError } from '../../../errors';
+import {
+  FleetError,
+  PackageFailedVerificationError,
+  PackageNotFoundError,
+  RegistryResponseError,
+} from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
@@ -49,8 +54,14 @@ export async function getPackages(
     excludeInstallStatus?: boolean;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient, experimental, category, excludeInstallStatus = false } = options;
-  const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
+  const {
+    savedObjectsClient,
+    category,
+    excludeInstallStatus = false,
+    prerelease = false,
+  } = options;
+
+  const registryItems = await Registry.fetchList({ category, prerelease }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
     );
@@ -87,11 +98,12 @@ export async function getPackages(
 // Get package names for packages which cannot have more than one package policy on an agent policy
 export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
+  prerelease?: boolean;
 }): Promise<string[]> {
-  const { savedObjectsClient } = options;
+  const { savedObjectsClient, prerelease } = options;
   const allPackages = await getPackages({
     savedObjectsClient,
-    experimental: true,
+    prerelease,
   });
   const installedPackages = allPackages.filter(
     (pkg) => pkg.status === installationStatuses.Installed
@@ -126,6 +138,7 @@ export async function getPackageInfo({
   pkgVersion,
   skipArchive = false,
   ignoreUnverified = false,
+  prerelease,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -133,10 +146,11 @@ export async function getPackageInfo({
   /** Avoid loading the registry archive into the cache (only use for performance reasons). Defaults to `false` */
   skipArchive?: boolean;
   ignoreUnverified?: boolean;
+  prerelease?: boolean;
 }): Promise<PackageInfo> {
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackageOrUndefined(pkgName),
+    Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease }),
   ]);
 
   if (!savedObject && !latestPackage) {
@@ -291,8 +305,22 @@ export async function getPackageFromSource(options: {
       }
     }
   } else {
-    res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
-    logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+    res = getArchivePackage({ name: pkgName, version: pkgVersion });
+
+    if (res) {
+      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from cache`);
+    } else {
+      try {
+        res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+        logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+      } catch (err) {
+        if (err instanceof RegistryResponseError && err.status === 404) {
+          res = await Registry.getBundledArchive(pkgName, pkgVersion);
+        } else {
+          throw err;
+        }
+      }
+    }
   }
   if (!res) {
     throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);
@@ -315,6 +343,18 @@ export async function getInstallationObject(options: {
   });
 }
 
+export async function getInstallationObjects(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgNames: string[];
+}) {
+  const { savedObjectsClient, pkgNames } = options;
+  const res = await savedObjectsClient.bulkGet<Installation>(
+    pkgNames.map((pkgName) => ({ id: pkgName, type: PACKAGES_SAVED_OBJECT_TYPE }))
+  );
+
+  return res.saved_objects.filter((so) => so?.attributes);
+}
+
 export async function getInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -322,6 +362,14 @@ export async function getInstallation(options: {
 }) {
   const savedObject = await getInstallationObject(options);
   return savedObject?.attributes;
+}
+
+export async function getInstallationsByName(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgNames: string[];
+}) {
+  const savedObjects = await getInstallationObjects(options);
+  return savedObjects.map((so) => so.attributes);
 }
 
 function sortByName(a: { name: string }, b: { name: string }) {

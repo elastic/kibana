@@ -6,14 +6,14 @@
  */
 
 import type { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import type { BulkAction } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
 /**
  * Only 2 bulk actions are supported for for confirmation dry run modal:
  * * export
  * * edit
  */
-export type BulkActionForConfirmation = BulkAction.export | BulkAction.edit;
+export type BulkActionForConfirmation = BulkActionType.export | BulkActionType.edit;
 
 /**
  * transformed results of dry run

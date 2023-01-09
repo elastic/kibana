@@ -11,14 +11,15 @@ import {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { RecursivePartial } from '@elastic/eui';
+import { isEmpty } from 'lodash';
+import { RULE_TAGS_TEMPLATE } from '../../../../common/opsgenie';
 import { OpsgenieSubActions } from '../../../../common';
 import type {
   OpsgenieActionConfig,
-  OpsgenieActionParams,
   OpsgenieActionSecrets,
 } from '../../../../server/connector_types/stack';
 import { DEFAULT_ALIAS } from './constants';
+import { OpsgenieConnectorTypeParams, ValidationParams } from './types';
 
 const SELECT_MESSAGE = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.selectMessageText',
@@ -34,48 +35,21 @@ const TITLE = i18n.translate('xpack.stackConnectors.components.opsgenie.connecto
 export const getConnectorType = (): ConnectorTypeModel<
   OpsgenieActionConfig,
   OpsgenieActionSecrets,
-  OpsgenieActionParams
+  OpsgenieConnectorTypeParams
 > => {
   return {
     id: '.opsgenie',
     iconClass: lazy(() => import('./logo')),
     selectMessage: SELECT_MESSAGE,
     actionTypeTitle: TITLE,
-    validateParams: async (
-      actionParams: RecursivePartial<OpsgenieActionParams>
-    ): Promise<GenericValidationResult<unknown>> => {
-      const translations = await import('./translations');
-      const errors = {
-        'subActionParams.message': new Array<string>(),
-        'subActionParams.alias': new Array<string>(),
-      };
-
-      const validationResult = {
-        errors,
-      };
-
-      if (
-        actionParams.subAction === OpsgenieSubActions.CreateAlert &&
-        !actionParams?.subActionParams?.message?.length
-      ) {
-        errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
-      }
-
-      if (
-        actionParams.subAction === OpsgenieSubActions.CloseAlert &&
-        !actionParams?.subActionParams?.alias?.length
-      ) {
-        errors['subActionParams.alias'].push(translations.ALIAS_IS_REQUIRED);
-      }
-
-      return validationResult;
-    },
+    validateParams,
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
     defaultActionParams: {
       subAction: OpsgenieSubActions.CreateAlert,
       subActionParams: {
         alias: DEFAULT_ALIAS,
+        tags: [RULE_TAGS_TEMPLATE],
       },
     },
     defaultRecoveredActionParams: {
@@ -85,4 +59,40 @@ export const getConnectorType = (): ConnectorTypeModel<
       },
     },
   };
+};
+
+const validateParams = async (
+  actionParams: ValidationParams
+): Promise<GenericValidationResult<unknown>> => {
+  const translations = await import('./translations');
+  const errors = {
+    'subActionParams.message': new Array<string>(),
+    'subActionParams.alias': new Array<string>(),
+    jsonEditorError: new Array<string>(),
+  };
+
+  const validationResult = {
+    errors,
+  };
+
+  if (actionParams.subAction === OpsgenieSubActions.CreateAlert) {
+    if (!actionParams?.subActionParams?.message?.length) {
+      errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
+    } else if (isEmpty(actionParams?.subActionParams?.message?.trim())) {
+      errors['subActionParams.message'].push(translations.MESSAGE_NON_WHITESPACE);
+    }
+  }
+  if (
+    actionParams.subAction === OpsgenieSubActions.CloseAlert &&
+    !actionParams?.subActionParams?.alias?.length
+  ) {
+    errors['subActionParams.alias'].push(translations.ALIAS_IS_REQUIRED);
+  }
+
+  if (actionParams.jsonEditorError) {
+    // This error doesn't actually get displayed it is used to cause the run/save button to fail within the action form
+    errors.jsonEditorError.push(translations.JSON_EDITOR_ERROR);
+  }
+
+  return validationResult;
 };

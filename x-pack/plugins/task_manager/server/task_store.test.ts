@@ -15,15 +15,24 @@ import {
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
 } from './task';
-import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  savedObjectsServiceMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import { TaskStore, SearchOpts, AggregationOpts } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
+import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = savedObjectsServiceMock.createSerializer();
+const logger = loggingSystemMock.create().get();
+const adHocTaskCounter = new AdHocTaskCounter();
+
+const randomId = () => `id-${_.random(1, 20)}`;
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -63,11 +72,17 @@ describe('TaskStore', () => {
       store = new TaskStore({
         index: 'tasky',
         taskManagerId: '',
+        logger,
         serializer,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
       });
+    });
+
+    afterEach(() => {
+      adHocTaskCounter.reset();
     });
 
     async function testSchedule(task: unknown) {
@@ -187,6 +202,31 @@ describe('TaskStore', () => {
       await expect(store.schedule(task)).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
+
+    test('increments adHocTaskCounter', async () => {
+      const task: TaskInstance = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      await testSchedule(task);
+      expect(adHocTaskCounter.count).toEqual(1);
+    });
+
+    test('does not increment adHocTaskCounter if the task is recurring', async () => {
+      const task: TaskInstance = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        schedule: { interval: '1m' },
+      };
+
+      await testSchedule(task);
+      expect(adHocTaskCounter.count).toEqual(0);
+    });
   });
 
   describe('fetch', () => {
@@ -199,9 +239,11 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
       });
     });
 
@@ -267,9 +309,11 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
       });
     });
 
@@ -364,9 +408,11 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
       });
     });
 
@@ -466,10 +512,104 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
       });
+    });
+
+    test('correctly returns errors from saved object bulk update', async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: '',
+      };
+
+      savedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: task.id,
+            type: task.taskType,
+            attributes: {
+              runAt: mockedDate.toISOString(),
+              scheduledAt: mockedDate.toISOString(),
+              startedAt: null,
+              retryAt: null,
+              params: `{ "hello": "world" }`,
+              state: `{ "foo": "bar" }`,
+              taskType: 'report',
+              attempts: 3,
+              status: 'idle' as TaskStatus,
+              ownerId: null,
+              traceparent: '',
+            },
+            error: {
+              error: `Not a conflict`,
+              message: `Some error that's not a conflict`,
+              statusCode: 404,
+            },
+            references: [],
+          },
+        ],
+      });
+      const result = await store.bulkUpdate([task]);
+      expect(result).toEqual([
+        {
+          error: {
+            entity: {
+              attempts: 3,
+              id: 'task:324242',
+              ownerId: null,
+              params: { hello: 'world' },
+              retryAt: null,
+              runAt: mockedDate,
+              scheduledAt: mockedDate,
+              startedAt: null,
+              state: { foo: 'bar' },
+              status: 'idle',
+              taskType: 'report',
+              traceparent: '',
+              version: '123',
+            },
+            error: {
+              attributes: {
+                attempts: 3,
+                ownerId: null,
+                params: '{ "hello": "world" }',
+                retryAt: null,
+                runAt: mockedDate.toISOString(),
+                scheduledAt: mockedDate.toISOString(),
+                startedAt: null,
+                state: '{ "foo": "bar" }',
+                status: 'idle',
+                taskType: 'report',
+                traceparent: '',
+              },
+              error: {
+                error: 'Not a conflict',
+                message: "Some error that's not a conflict",
+                statusCode: 404,
+              },
+              id: 'task:324242',
+              references: [],
+              type: 'report',
+            },
+          },
+          tag: 'err',
+        },
+      ]);
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -506,9 +646,11 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
       });
     });
 
@@ -529,6 +671,43 @@ describe('TaskStore', () => {
     });
   });
 
+  describe('bulkRemove', () => {
+    let store: TaskStore;
+
+    const tasksIdsToDelete = [randomId(), randomId()];
+
+    beforeAll(() => {
+      store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        logger,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+      });
+    });
+
+    test('removes the tasks with the specified ids', async () => {
+      const result = await store.bulkRemove(tasksIdsToDelete);
+      expect(result).toBeUndefined();
+      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: 'task', id: tasksIdsToDelete[0] },
+        { type: 'task', id: tasksIdsToDelete[1] },
+      ]);
+    });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.bulkDelete.mockRejectedValue(new Error('Failure'));
+      await expect(store.bulkRemove(tasksIdsToDelete)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure"`
+      );
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
+
   describe('get', () => {
     let store: TaskStore;
 
@@ -537,9 +716,11 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
       });
     });
 
@@ -621,9 +802,11 @@ describe('TaskStore', () => {
             index: 'tasky',
             taskManagerId: '',
             serializer,
+            logger,
             esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
             definitions: taskDefinitions,
             savedObjectsRepository: savedObjectsClient,
+            adHocTaskCounter,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -640,9 +823,11 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -657,9 +842,11 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -674,10 +861,16 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer,
+        logger,
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
       });
+    });
+
+    afterEach(() => {
+      adHocTaskCounter.reset();
     });
 
     async function testBulkSchedule(task: unknown) {
@@ -800,7 +993,30 @@ describe('TaskStore', () => {
       );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
+
+    test('increments adHocTaskCounter', async () => {
+      const task: TaskInstance = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const result = await testBulkSchedule([task]);
+      expect(adHocTaskCounter.count).toEqual(result.length);
+    });
+
+    test('does not increment adHocTaskCounter if the task is recurring', async () => {
+      const task: TaskInstance = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        schedule: { interval: '1m' },
+      };
+
+      await testBulkSchedule([task]);
+      expect(adHocTaskCounter.count).toEqual(0);
+    });
   });
 });
-
-const randomId = () => `id-${_.random(1, 20)}`;

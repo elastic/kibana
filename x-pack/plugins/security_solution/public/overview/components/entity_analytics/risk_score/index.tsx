@@ -4,42 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useDispatch } from 'react-redux';
-import { EnableRiskScore } from '../../../../risk_score/components/enable_risk_score';
+import { EnableRiskScore } from '../../../../explore/components/risk_score/enable_risk_score';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
-import { UsersTableType } from '../../../../users/store/model';
-import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
+import { UsersTableType } from '../../../../explore/users/store/model';
+import { SeverityFilterGroup } from '../../../../explore/components/risk_score/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
-import { HostsTableType, HostsType } from '../../../../hosts/store/model';
+import { HostsTableType, HostsType } from '../../../../explore/hosts/store/model';
 import { getRiskScoreColumns } from './columns';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { useRiskScore, useRiskScoreKpi } from '../../../../risk_score/containers';
+import { useRiskScore, useRiskScoreKpi } from '../../../../explore/containers/risk_score';
 
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
-import { generateSeverityFilter } from '../../../../hosts/store/helpers';
+import { generateSeverityFilter } from '../../../../explore/hosts/store/helpers';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { hostsActions } from '../../../../hosts/store';
+import { hostsActions } from '../../../../explore/hosts/store';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
-import { BasicTableWithoutBorderBottom } from '../common/basic_table_without_border_bottom';
+import { StyledBasicTable } from '../common/styled_basic_table';
 import { RISKY_HOSTS_DOC_LINK, RISKY_USERS_DOC_LINK } from '../../../../../common/constants';
-import { RiskScoreHeaderTitle } from '../../../../risk_score/components/risk_score_onboarding/risk_score_header_title';
-import { RiskScoresNoDataDetected } from '../../../../risk_score/components/risk_score_onboarding/risk_score_no_data_detected';
+import { RiskScoreHeaderTitle } from '../../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
+import { RiskScoresNoDataDetected } from '../../../../explore/components/risk_score/risk_score_onboarding/risk_score_no_data_detected';
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 import { Loader } from '../../../../common/components/loader';
 import { Panel } from '../../../../common/components/panel';
 import * as commonI18n from '../common/translations';
-import { usersActions } from '../../../../users/store';
+import { usersActions } from '../../../../explore/users/store';
+import { useNavigateToTimeline } from '../../detection_response/hooks/use_navigate_to_timeline';
+import type { TimeRange } from '../../../../common/store/inputs/model';
+import { openAlertsFilter } from '../../detection_response/utils';
 
 const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
@@ -90,8 +93,34 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     [dispatch, riskEntity]
   );
 
+  const { openTimelineWithFilters } = useNavigateToTimeline();
+
+  const openEntityInTimeline = useCallback(
+    (entityName: string, oldestAlertTimestamp?: string) => {
+      const timeRange: TimeRange | undefined = oldestAlertTimestamp
+        ? {
+            kind: 'relative',
+            from: oldestAlertTimestamp ?? '',
+            fromStr: oldestAlertTimestamp ?? '',
+            to: new Date().toISOString(),
+            toStr: 'now',
+          }
+        : undefined;
+
+      const filter = {
+        field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+        value: entityName,
+      };
+      openTimelineWithFilters([[filter, openAlertsFilter]], timeRange);
+    },
+    [riskEntity, openTimelineWithFilters]
+  );
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(entity.tableQueryId);
-  const columns = useMemo(() => getRiskScoreColumns(riskEntity), [riskEntity]);
+  const columns = useMemo(
+    () => getRiskScoreColumns(riskEntity, openEntityInTimeline),
+    [riskEntity, openEntityInTimeline]
+  );
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
@@ -146,6 +175,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     },
     timerange,
     riskEntity,
+    includeAlertsCount: true,
   });
 
   useQueryInspector({
@@ -243,12 +273,15 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
               <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <BasicTableWithoutBorderBottom
+              <StyledBasicTable
                 responsive={false}
                 items={data ?? []}
                 columns={columns}
                 loading={isTableLoading}
                 id={entity.tableQueryId}
+                rowProps={{
+                  className: 'EntityAnalyticsTableHoverActions',
+                }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

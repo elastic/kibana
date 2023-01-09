@@ -8,6 +8,7 @@
 
 import React from 'react';
 import moment from 'moment';
+import EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
 import { EuiBetaBadgeProps } from '@elastic/eui';
 import { parse } from 'query-string';
@@ -35,7 +36,6 @@ import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { NavigateToLensContext } from '../../../common';
 import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
@@ -66,11 +66,11 @@ export interface TopNavConfigParams {
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
-  editInLensConfig?: NavigateToLensContext | null;
   displayEditInLensItem: boolean;
   hideLensBadge: () => void;
   setNavigateToLens: (flag: boolean) => void;
   showBadge: boolean;
+  eventEmitter?: EventEmitter;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -97,11 +97,11 @@ export const getTopNavConfig = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
-    editInLensConfig,
     displayEditInLensItem,
     hideLensBadge,
     setNavigateToLens,
     showBadge,
+    eventEmitter,
   }: TopNavConfigParams,
   {
     data,
@@ -290,7 +290,6 @@ export const getTopNavConfig = (
               defaultMessage: 'Go to Lens with your current configuration',
             }),
             className: 'visNavItem__goToLens',
-            disableButton: !editInLensConfig,
             testId: 'visualizeEditInLensButton',
             ...(showBadge && {
               badge: {
@@ -301,14 +300,21 @@ export const getTopNavConfig = (
               },
             }),
             run: async () => {
+              // lens doesn't support saved searches, should unlink before transition
+              if (eventEmitter && visInstance.vis.data.savedSearchId) {
+                eventEmitter.emit('unlinkFromSavedSearch', false);
+              }
+              const navigateToLensConfig = await visInstance.vis.type.navigateToLens?.(
+                vis,
+                data.query.timefilter.timefilter
+              );
               const updatedWithMeta = {
-                ...editInLensConfig,
-                savedObjectId: visInstance.vis.id,
+                ...navigateToLensConfig,
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
                 originatingApp,
               };
-              if (editInLensConfig) {
+              if (navigateToLensConfig) {
                 hideLensBadge();
                 setNavigateToLens(true);
                 getUiActions()

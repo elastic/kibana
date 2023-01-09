@@ -99,6 +99,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
   filteredRuleTypes?: string[];
   connectorFeatureId?: string;
+  onChangeMetaData: (metadata: MetaData) => void;
 }
 
 export const RuleForm = ({
@@ -115,6 +116,7 @@ export const RuleForm = ({
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
   connectorFeatureId = AlertingConnectorFeatureId,
+  onChangeMetaData,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -167,6 +169,7 @@ export const RuleForm = ({
     ruleTypes,
     error: loadRuleTypesError,
     ruleTypeIndex,
+    ruleTypesIsLoading,
   } = useLoadRuleTypes({ filteredRuleTypes: ruleTypeToFilter });
 
   // load rule types
@@ -194,7 +197,7 @@ export const RuleForm = ({
           },
           []
         )
-        .filter((item) => item.ruleType && hasAllPrivilege(rule, item.ruleType))
+        .filter((item) => item.ruleType && hasAllPrivilege(rule.consumer, item.ruleType))
         .filter((item) =>
           rule.consumer === ALERTS_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
@@ -222,7 +225,7 @@ export const RuleForm = ({
     setSolutions(
       new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
     );
-  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule, ruleTypeRegistry]);
+  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule.consumer, ruleTypeRegistry]);
 
   useEffect(() => {
     if (loadRuleTypesError) {
@@ -383,7 +386,7 @@ export const RuleForm = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule size="full" margin="xs" />
-        <EuiListGroup flush={true} gutterSize="m" size="l" maxWidth={false}>
+        <EuiListGroup flush={true} gutterSize="m" size="m" maxWidth={false}>
           {items
             .sort((a, b) => ruleTypeCompare(a, b))
             .map((item, index) => {
@@ -522,6 +525,7 @@ export const RuleForm = ({
               data={data}
               dataViews={dataViews}
               unifiedSearch={unifiedSearch}
+              onChangeMetaData={onChangeMetaData}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -845,7 +849,7 @@ export const RuleForm = ({
           ) : null}
           {ruleTypeNodes}
         </>
-      ) : ruleTypeIndex ? (
+      ) : ruleTypeIndex && !ruleTypesIsLoading ? (
         <NoAuthorizedRuleTypes operation={operation} />
       ) : (
         <SectionLoading>
@@ -868,7 +872,7 @@ const NoAuthorizedRuleTypes = ({ operation }: { operation: string }) => (
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.ruleForm.error.noAuthorizedRuleTypesTitle"
-          defaultMessage="You have not been authorized to {operation} any Rule types"
+          defaultMessage="You have not been authorized to {operation} any rule types"
           values={{ operation }}
         />
       </h2>

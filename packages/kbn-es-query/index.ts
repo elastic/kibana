@@ -37,6 +37,7 @@ export type {
   ScriptedPhraseFilter,
   ScriptedRangeFilter,
   TimeRange,
+  CombinedFilter,
 } from './src/filters';
 
 export type {
@@ -53,6 +54,7 @@ export {
   decorateQuery,
   luceneStringToDsl,
   migrateFilter,
+  fromCombinedFilter,
   isOfQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,
@@ -104,9 +106,11 @@ export {
   toggleFilterPinned,
   uniqFilters,
   unpinFilter,
+  updateFilter,
   extractTimeFilter,
   extractTimeRange,
   convertRangeFilterToTimeRange,
+  BooleanRelation,
 } from './src/filters';
 
 export {

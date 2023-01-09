@@ -26,9 +26,9 @@ describe('getDerivedServiceAnnotations', () => {
   describe('with 0 versions', () => {
     it('returns no annotations', async () => {
       mock = await inspectSearchParams(
-        (setup) =>
+        ({ mockApmEventClient }) =>
           getDerivedServiceAnnotations({
-            setup,
+            apmEventClient: mockApmEventClient,
             serviceName: 'foo',
             environment: 'bar',
             searchAggregatedTransactions: false,
@@ -54,9 +54,9 @@ describe('getDerivedServiceAnnotations', () => {
   describe('with 1 version', () => {
     it('returns no annotations', async () => {
       mock = await inspectSearchParams(
-        (setup) =>
+        ({ mockApmEventClient }) =>
           getDerivedServiceAnnotations({
-            setup,
+            apmEventClient: mockApmEventClient,
             serviceName: 'foo',
             environment: 'bar',
             searchAggregatedTransactions: false,
@@ -87,9 +87,9 @@ describe('getDerivedServiceAnnotations', () => {
         versionsFirstSeen,
       ];
       mock = await inspectSearchParams(
-        (setup) =>
+        ({ mockApmEventClient }) =>
           getDerivedServiceAnnotations({
-            setup,
+            apmEventClient: mockApmEventClient,
             serviceName: 'foo',
             environment: 'bar',
             searchAggregatedTransactions: false,

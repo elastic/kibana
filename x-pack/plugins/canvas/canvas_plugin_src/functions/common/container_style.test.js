@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper, getElasticLogo } from '@kbn/presentation-util-plugin/common/lib';
+import { functionWrapper, getElasticLogo } from '@kbn/presentation-util-plugin/common';
 import { getFunctionErrors } from '../../../i18n';
 import { containerStyle } from './containerStyle';
 

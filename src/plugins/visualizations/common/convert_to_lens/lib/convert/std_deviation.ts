@@ -50,7 +50,7 @@ export const getStdDeviationFormula = (
 };
 
 export const convertToStdDeviationFormulaColumns = (
-  { agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.STD_DEV>,
+  { visType, agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.STD_DEV>,
   reducedTimeRange?: string
 ) => {
   const { aggId } = agg;
@@ -64,7 +64,7 @@ export const convertToStdDeviationFormulaColumns = (
     return null;
   }
   const field = dataView.getFieldByName(fieldName);
-  if (!isFieldValid(field, SUPPORTED_METRICS[agg.aggType])) {
+  if (!isFieldValid(visType, field, SUPPORTED_METRICS[agg.aggType])) {
     return null;
   }
 

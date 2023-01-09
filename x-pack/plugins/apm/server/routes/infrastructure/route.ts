@@ -6,7 +6,7 @@
  */
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getInfrastructureData } from './get_infrastructure_data';
 import { getContainerHostNames } from './get_host_names';
@@ -29,7 +29,7 @@ const infrastructureRoute = createApmServerRoute({
     hostNames: string[];
     podNames: string[];
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const infraMetricsClient = createInfraMetricsClient(resources);
 
     const { params } = resources;
@@ -40,7 +40,7 @@ const infrastructureRoute = createApmServerRoute({
     } = params;
 
     const infrastructureData = await getInfrastructureData({
-      setup,
+      apmEventClient,
       serviceName,
       environment,
       kuery,

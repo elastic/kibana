@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import {
-  AggregationsCalendarInterval,
-  MappingRuntimeFieldType,
-  TransformPutTransformRequest,
-} from '@elastic/elasticsearch/lib/api/types';
-import { ALL_VALUE, apmTransactionErrorRateIndicatorSchema } from '../../../types/schema';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_VALUE, apmTransactionErrorRateIndicatorSchema } from '@kbn/slo-schema';
+
+import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { TransformGenerator } from '.';
 import {
@@ -18,24 +16,26 @@ import {
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../assets/constants';
-import { APMTransactionErrorRateIndicator, SLO } from '../../../types/models';
+import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
+import { DEFAULT_APM_INDEX } from './constants';
+import { Query } from './types';
 
-const APM_SOURCE_INDEX = 'metrics-apm*';
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
 const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
 
-export class ApmTransactionErrorRateTransformGenerator implements TransformGenerator {
+export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
     if (!apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) {
-      throw new Error(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
+      throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(),
-      this.buildAggregations(slo, slo.indicator)
+      this.buildCommonGroupBy(slo),
+      this.buildAggregations(slo, slo.indicator),
+      this.buildSettings(slo)
     );
   }
 
@@ -44,7 +44,16 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
-    const queryFilter = [];
+    const queryFilter: Query[] = [
+      {
+        range: {
+          [slo.settings.timestampField]: {
+            gte: `now-${slo.timeWindow.duration.format()}`,
+          },
+        },
+      },
+    ];
+
     if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
         match: {
@@ -61,38 +70,25 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
       });
     }
 
-    if (indicator.params.transaction_name !== ALL_VALUE) {
+    if (indicator.params.transactionName !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.name': indicator.params.transaction_name,
+          'transaction.name': indicator.params.transactionName,
         },
       });
     }
 
-    if (indicator.params.transaction_type !== ALL_VALUE) {
+    if (indicator.params.transactionType !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.type': indicator.params.transaction_type,
+          'transaction.type': indicator.params.transactionType,
         },
       });
     }
 
     return {
-      index: APM_SOURCE_INDEX,
-      runtime_mappings: {
-        'slo.id': {
-          type: 'keyword' as MappingRuntimeFieldType,
-          script: {
-            source: `emit('${slo.id}')`,
-          },
-        },
-        'slo.revision': {
-          type: 'long' as MappingRuntimeFieldType,
-          script: {
-            source: `emit(${slo.revision})`,
-          },
-        },
-      },
+      index: indicator.params.index ?? DEFAULT_APM_INDEX,
+      runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
           filter: [
@@ -115,29 +111,8 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
     };
   }
 
-  private buildGroupBy() {
-    return {
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
-        },
-      },
-      '@timestamp': {
-        date_histogram: {
-          field: '@timestamp',
-          calendar_interval: '1m' as AggregationsCalendarInterval,
-        },
-      },
-    };
-  }
-
   private buildAggregations(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
-    const goodStatusCodesFilter = this.getGoodStatusCodesFilter(indicator.params.good_status_codes);
+    const goodStatusCodesFilter = this.getGoodStatusCodesFilter(indicator.params.goodStatusCodes);
 
     return {
       'slo.numerator': {

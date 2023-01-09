@@ -30,7 +30,7 @@ export const StepThree = (props: StepThreeProps) => {
 
   useEffect(() => {
     const subscription = guidedOnboardingApi
-      ?.isGuideStepActive$('search', 'search_experience')
+      ?.isGuideStepActive$('testGuide', 'step3')
       .subscribe((isStepActive) => {
         setIsTourStepOpen(isStepActive);
       });
@@ -53,9 +53,17 @@ export const StepThree = (props: StepThreeProps) => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="guidedOnboardingExample.guidesSelection.stepThree.explanation"
-              defaultMessage="The code on this page is listening to the guided setup state using an Observable subscription. If the state is set to
-              Search guide, step Search experience, a EUI tour will be displayed, pointing to the button below."
+              id="guidedOnboardingExample.guidesSelection.stepThree.explanation1"
+              defaultMessage="The code on this page is listening to the guided setup state using an Observable subscription.
+              If the state is set to Test, step 3, a EUI tour will be displayed, pointing to the button below."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="guidedOnboardingExample.guidesSelection.stepTwo.explanation2"
+              defaultMessage="This page is used for the manual completion of Test guide, step 3. After clicking the page,
+              the manual completion popover
+              should appear on the header button 'Setup guide' to open the panel and mark the step done."
             />
           </p>
         </EuiText>
@@ -73,12 +81,12 @@ export const StepThree = (props: StepThreeProps) => {
           }}
           step={1}
           stepsTotal={1}
-          title="Step Build search experience"
+          title="Step 3"
           anchorPosition="rightUp"
         >
           <EuiButton
             onClick={async () => {
-              await guidedOnboardingApi?.completeGuideStep('search', 'search_experience');
+              await guidedOnboardingApi?.completeGuideStep('testGuide', 'step3');
             }}
           >
             Complete step 3

@@ -52,9 +52,11 @@ import {
   ReferenceOrValueEmbeddable,
   SelfStyledEmbeddable,
   FilterableEmbeddable,
+  cellValueTrigger,
+  CELL_VALUE_TRIGGER,
+  type CellValueContext,
 } from '@kbn/embeddable-plugin/public';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
   Capabilities,
@@ -65,7 +67,7 @@ import type {
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { DataViewPersistableStateService, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -80,6 +82,7 @@ import {
   DatasourceMap,
   Datasource,
   IndexPatternMap,
+  GetCompatibleCellValueActions,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -87,7 +90,13 @@ import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
-import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
+import {
+  getActiveDatasourceIdFromDoc,
+  getActiveVisualizationIdFromDoc,
+  getIndexPatternsObjects,
+  getSearchWarningMessages,
+  inferTimeField,
+} from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import { convertDataViewIntoLensIndexPattern } from '../data_views_service/loader';
 
@@ -158,7 +167,7 @@ export interface LensEmbeddableDeps {
 }
 
 export interface ViewUnderlyingDataArgs {
-  indexPatternId: string;
+  dataViewSpec: DataViewSpec;
   timeRange: TimeRange;
   filters: Filter[];
   query: Query | AggregateQuery | undefined;
@@ -179,6 +188,8 @@ const getExpressionFromDocument = async (
 function getViewUnderlyingDataArgs({
   activeDatasource,
   activeDatasourceState,
+  activeVisualization,
+  activeVisualizationState,
   activeData,
   dataViews,
   capabilities,
@@ -190,6 +201,8 @@ function getViewUnderlyingDataArgs({
 }: {
   activeDatasource: Datasource;
   activeDatasourceState: unknown;
+  activeVisualization: Visualization;
+  activeVisualizationState: unknown;
   activeData: TableInspectorAdapter | undefined;
   dataViews: DataViewBase[] | undefined;
   capabilities: LensEmbeddableDeps['capabilities'];
@@ -202,6 +215,8 @@ function getViewUnderlyingDataArgs({
   const { error, meta } = getLayerMetaInfo(
     activeDatasource,
     activeDatasourceState,
+    activeVisualization,
+    activeVisualizationState,
     activeData,
     indexPatternsCache,
     timeRange,
@@ -232,8 +247,10 @@ function getViewUnderlyingDataArgs({
     esQueryConfig
   );
 
+  const dataViewSpec = indexPatternsCache[meta.id]!.spec;
+
   return {
-    indexPatternId: meta.id,
+    dataViewSpec,
     timeRange,
     filters: newFilters,
     query: aggregateQuery.length > 0 ? aggregateQuery[0] : newQuery,
@@ -283,6 +300,8 @@ export class Embeddable
     activeData?: TableInspectorAdapter;
     activeDatasource?: Datasource;
     activeDatasourceState?: unknown;
+    activeVisualization?: Visualization;
+    activeVisualizationState?: unknown;
   } = {};
 
   private indexPatterns: DataView[] = [];
@@ -489,11 +508,14 @@ export class Embeddable
     this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
 
     await this.initializeOutput();
+
     this.isInitialized = true;
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
-    if (this.handleContainerStateChanged(containerState) || this.errors?.length) this.reload();
+    if (this.handleContainerStateChanged(containerState)) {
+      this.reload();
+    }
   }
 
   handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
@@ -531,21 +553,30 @@ export class Embeddable
 
   private handleWarnings(adapters?: Partial<DefaultInspectorAdapters>) {
     const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-    if (!activeDatasourceId || !adapters?.requests) return;
+
+    if (!activeDatasourceId || !adapters?.requests) {
+      return;
+    }
+
     const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-    const warnings: React.ReactNode[] = [];
-    this.deps.data.search.showWarnings(adapters.requests, (warning) => {
-      const warningMessage = activeDatasource.getSearchWarningMessages?.(
-        docDatasourceState,
-        warning
-      );
 
-      warnings.push(...(warningMessage || []));
-      if (warningMessage && warningMessage.length) return true;
-    });
-    if (warnings && this.warningDomNode) {
-      render(<Warnings warnings={warnings} />, this.warningDomNode);
+    const requestWarnings = getSearchWarningMessages(
+      adapters.requests,
+      activeDatasource,
+      docDatasourceState,
+      {
+        searchService: this.deps.data.search,
+      }
+    );
+
+    if (requestWarnings.length && this.warningDomNode) {
+      render(
+        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <Warnings warnings={requestWarnings} compressed />
+        </KibanaThemeProvider>,
+        this.warningDomNode
+      );
     }
   }
 
@@ -631,6 +662,25 @@ export class Embeddable
     }
   }
 
+  private getError(): Error | undefined {
+    const message =
+      typeof this.errors?.[0]?.longMessage === 'string'
+        ? this.errors[0].longMessage
+        : this.errors?.[0]?.shortMessage;
+
+    if (message != null) {
+      return new Error(message);
+    }
+
+    if (!this.expression) {
+      return new Error(
+        i18n.translate('xpack.lens.embeddable.failure', {
+          defaultMessage: "Visualization couldn't be displayed",
+        })
+      );
+    }
+  }
+
   /**
    *
    * @param {HTMLElement} domNode
@@ -648,12 +698,19 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
+    const error = this.getError();
+
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
-      error: undefined,
+      error,
     });
-    this.renderComplete.dispatchInProgress();
+
+    if (error) {
+      this.renderComplete.dispatchError();
+    } else {
+      this.renderComplete.dispatchInProgress();
+    }
 
     const input = this.getInput();
 
@@ -679,21 +736,23 @@ export class Embeddable
           syncTooltips={input.syncTooltips}
           syncCursor={input.syncCursor}
           hasCompatibleActions={this.hasCompatibleActions}
+          getCompatibleCellValueActions={this.getCompatibleCellValueActions}
           className={input.className}
           style={input.style}
           executionContext={this.getExecutionContext()}
           canEdit={this.getIsEditable() && input.viewMode === 'edit'}
-          onRuntimeError={() => {
+          onRuntimeError={(message) => {
+            this.updateOutput({ error: new Error(message) });
             this.logError('runtime');
           }}
-          noPadding={this.visDisplayOptions?.noPadding}
+          noPadding={this.visDisplayOptions.noPadding}
         />
         <div
           css={css({
             position: 'absolute',
             zIndex: 2,
-            right: euiThemeVars.euiSizeM,
-            bottom: euiThemeVars.euiSizeM,
+            left: 0,
+            bottom: 0,
           })}
           ref={(el) => {
             if (el) {
@@ -723,6 +782,27 @@ export class Embeddable
     }
 
     return false;
+  };
+
+  private readonly getCompatibleCellValueActions: GetCompatibleCellValueActions = async (data) => {
+    const { getTriggerCompatibleActions } = this.deps;
+    if (getTriggerCompatibleActions) {
+      const embeddable = this;
+      const actions: Array<Action<CellValueContext>> = await getTriggerCompatibleActions(
+        CELL_VALUE_TRIGGER,
+        { data, embeddable }
+      );
+      return actions
+        .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
+        .map((action) => ({
+          id: action.id,
+          iconType: action.getIconType({ embeddable, data, trigger: cellValueTrigger })!,
+          displayName: action.getDisplayName({ embeddable, data, trigger: cellValueTrigger }),
+          execute: (cellData) =>
+            action.execute({ embeddable, data: cellData, trigger: cellValueTrigger }),
+        }));
+    }
+    return [];
   };
 
   /**
@@ -858,15 +938,22 @@ export class Embeddable
       return false;
     }
 
+    const activeVisualizationId = getActiveVisualizationIdFromDoc(this.savedVis);
+    if (!activeVisualizationId) {
+      return false;
+    }
+
     this.activeDataInfo.activeDatasource = this.deps.datasourceMap[activeDatasourceId];
+    this.activeDataInfo.activeVisualization = this.deps.visualizationMap[activeVisualizationId];
+
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
     const adHocDataviews = await Promise.all(
       Object.values(this.savedVis?.state.adHocDataViews || {})
         .map((persistedSpec) => {
-          return DataViewPersistableStateService.inject(
-            persistedSpec,
-            this.savedVis?.references || []
-          );
+          return DataViewPersistableStateService.inject(persistedSpec, [
+            ...(this.savedVis?.references || []),
+            ...(this.savedVis?.state.internalReferences || []),
+          ]);
         })
         .map((spec) => this.deps.dataViews.create(spec))
     );
@@ -891,9 +978,19 @@ export class Embeddable
       );
     }
 
+    if (!this.activeDataInfo.activeVisualizationState) {
+      this.activeDataInfo.activeVisualizationState =
+        this.activeDataInfo.activeVisualization.initialize(
+          () => '',
+          this.savedVis?.state.visualization
+        );
+    }
+
     const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
       activeDatasource: this.activeDataInfo.activeDatasource,
       activeDatasourceState: this.activeDataInfo.activeDatasourceState,
+      activeVisualization: this.activeDataInfo.activeVisualization,
+      activeVisualizationState: this.activeDataInfo.activeVisualizationState,
       activeData: this.activeDataInfo.activeData,
       dataViews: this.indexPatterns,
       capabilities: this.deps.capabilities,
@@ -1043,20 +1140,17 @@ export class Embeddable
 
   public getSelfStyledOptions() {
     return {
-      hideTitle: this.visDisplayOptions?.noPanelTitle,
+      hideTitle: this.visDisplayOptions.noPanelTitle,
     };
   }
 
-  private get visDisplayOptions(): VisualizationDisplayOptions | undefined {
-    if (
-      !this.savedVis?.visualizationType ||
-      !this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions
-    ) {
-      return;
+  private get visDisplayOptions(): VisualizationDisplayOptions {
+    if (!this.savedVis?.visualizationType) {
+      return {};
     }
 
     let displayOptions =
-      this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
+      this.deps.visualizationMap[this.savedVis.visualizationType]?.getDisplayOptions?.() ?? {};
 
     if (this.input.noPadding !== undefined) {
       displayOptions = {

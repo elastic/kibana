@@ -7,10 +7,10 @@
  */
 
 import _, { get } from 'lodash';
-import { Subscription } from 'rxjs';
+import { Subscription, ReplaySubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
@@ -29,7 +29,6 @@ import {
   IContainer,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
-  ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import {
   ExpressionAstExpression,
@@ -127,6 +126,10 @@ export class VisualizeEmbeddable
     VisualizeByValueInput,
     VisualizeByReferenceInput
   >;
+  private expressionVariables: Record<string, unknown> | undefined;
+  private readonly expressionVariablesSubject = new ReplaySubject<
+    Record<string, unknown> | undefined
+  >(1);
 
   constructor(
     timefilter: TimefilterContract,
@@ -401,6 +404,25 @@ export class VisualizeEmbeddable
       this.abortController.abort();
     }
     this.renderComplete.dispatchError();
+
+    if (isFallbackDataView(this.vis.data.indexPattern)) {
+      error = new Error(
+        i18n.translate('visualizations.missedDataView.errorMessage', {
+          defaultMessage: `Could not find the {type}: {id}`,
+          values: {
+            id: this.vis.data.indexPattern.id ?? '-',
+            type: this.vis.data.savedSearchId
+              ? i18n.translate('visualizations.noSearch.label', {
+                  defaultMessage: 'search',
+                })
+              : i18n.translate('visualizations.noDataView.label', {
+                  defaultMessage: 'data view',
+                }),
+          },
+        })
+      );
+    }
+
     this.updateOutput({
       ...this.getOutput(),
       rendered: true,
@@ -503,7 +525,7 @@ export class VisualizeEmbeddable
         const { error } = this.getOutput();
 
         if (error) {
-          this.renderError(this.domNode, error);
+          render(this.renderError(error), this.domNode);
         }
       })
     );
@@ -511,25 +533,21 @@ export class VisualizeEmbeddable
     await this.updateHandler();
   }
 
-  public renderError(domNode: HTMLElement, error: ErrorLike | string) {
+  private renderError(error: ErrorLike | string) {
     if (isFallbackDataView(this.vis.data.indexPattern)) {
-      render(
+      return (
         <VisualizationMissedSavedObjectError
-          viewMode={this.input.viewMode ?? ViewMode.VIEW}
           renderMode={this.input.renderMode ?? 'view'}
           savedObjectMeta={{
-            savedObjectId: this.vis.data.indexPattern.id,
             savedObjectType: this.vis.data.savedSearchId ? 'search' : DATA_VIEW_SAVED_OBJECT_TYPE,
           }}
           application={getApplication()}
-        />,
-        domNode
+          message={typeof error === 'string' ? error : error.message}
+        />
       );
-    } else {
-      render(<VisualizationError error={error} />, domNode);
     }
 
-    return () => unmountComponentAtNode(domNode);
+    return <VisualizationError error={error} />;
   }
 
   public destroy() {
@@ -567,6 +585,13 @@ export class VisualizeEmbeddable
   private async updateHandler() {
     const context = this.getExecutionContext();
 
+    this.expressionVariables = await this.vis.type.getExpressionVariables?.(
+      this.vis,
+      this.timefilter
+    );
+
+    this.expressionVariablesSubject.next(this.expressionVariables);
+
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
         timeRange: this.timeRange,
@@ -576,7 +601,7 @@ export class VisualizeEmbeddable
       },
       variables: {
         embeddableTitle: this.getTitle(),
-        ...(await this.vis.type.getExpressionVariables?.(this.vis, this.timefilter)),
+        ...this.expressionVariables,
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
@@ -621,6 +646,14 @@ export class VisualizeEmbeddable
 
   public supportedTriggers(): string[] {
     return this.vis.type.getSupportedTriggers?.(this.vis.params) ?? [];
+  }
+
+  public getExpressionVariables$() {
+    return this.expressionVariablesSubject.asObservable();
+  }
+
+  public getExpressionVariables() {
+    return this.expressionVariables;
   }
 
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {

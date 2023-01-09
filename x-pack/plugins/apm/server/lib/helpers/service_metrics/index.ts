@@ -7,7 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { METRICSET_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { METRICSET_NAME } from '../../../../common/es_fields/apm';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export async function getSearchServiceMetrics({
@@ -54,7 +54,7 @@ export async function getHasServicesMetrics({
       },
       body: {
         track_total_hits: 1,
-        size: 1,
+        size: 0,
         query: {
           bool: {
             filter: [

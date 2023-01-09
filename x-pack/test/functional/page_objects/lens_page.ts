@@ -38,7 +38,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Clicks the index pattern filters toggle.
      */
     async toggleIndexPatternFiltersPopover() {
-      await testSubjects.click('lnsIndexPatternFiltersToggle');
+      await testSubjects.click('lnsIndexPatternFieldTypeFilterToggle');
     },
 
     async findAllFields() {
@@ -600,6 +600,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.waitForVisualization();
     },
 
+    async dragRangeInput(testId: string, steps: number = 1, direction: 'left' | 'right' = 'right') {
+      const inputEl = await testSubjects.find(testId);
+      await inputEl.focus();
+      const browserKey = direction === 'left' ? browser.keys.LEFT : browser.keys.RIGHT;
+      while (steps--) {
+        await browser.pressKeys(browserKey);
+      }
+    },
+
+    async getRangeInputValue(testId: string) {
+      return (await testSubjects.find(testId)).getAttribute('value');
+    },
+
     async isTopLevelAggregation() {
       return await testSubjects.isEuiSwitchChecked('indexPattern-nesting-switch');
     },
@@ -697,6 +710,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async saveAndReturn() {
       await testSubjects.click('lnsApp_saveAndReturnButton');
+    },
+
+    async replaceInDashboard() {
+      await testSubjects.click('lnsApp_replaceInDashboardButton');
     },
 
     async expectSaveAndReturnButtonDisabled() {
@@ -1048,7 +1065,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         );
       } else {
         buttonEl = await find.byCssSelector(
-          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class$="selected"] [title^="Sort"]`
+          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class*="selected"] [title^="Sort"]`
         );
       }
       return buttonEl.click();
@@ -1115,6 +1132,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         'lnsPalettePanel_dynamicColoring_progression_custom_stops_value',
         String(value)
       );
+    },
+
+    async openLayerContextMenu(index: number = 0) {
+      await testSubjects.click(`lnsLayerSplitButton--${index}`);
     },
 
     async toggleColumnVisibility(dimension: string, no = 1) {
@@ -1212,14 +1233,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const tiles = await this.getMetricTiles();
       const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
 
-      const metricData = [];
+      const metricDataPromises = [];
       for (const tile of tiles) {
-        metricData.push({
-          ...(await this.getMetricDatum(tile)),
-          showingBar,
-        });
+        metricDataPromises.push(this.getMetricDatum(tile));
       }
-      return metricData;
+      const metricData = await Promise.all(metricDataPromises);
+      return metricData.map((d) => ({ ...d, showingBar }));
     },
 
     /**
@@ -1318,9 +1337,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('indexPattern-add-field');
     },
 
-    async createAdHocDataView(name: string) {
+    async createAdHocDataView(name: string, hasTimeField?: boolean) {
       await testSubjects.click('lns-dataView-switch-link');
-      await PageObjects.unifiedSearch.createNewDataView(name, true);
+      await PageObjects.unifiedSearch.createNewDataView(name, true, hasTimeField);
     },
 
     async switchToTextBasedLanguage(language: string) {
@@ -1620,6 +1639,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           return { stop: await stop.getAttribute('value'), color: colors[index] };
         })
       );
+    },
+
+    async findFieldIdsByType(
+      type: 'string' | 'number' | 'date' | 'geo_point' | 'ip_range',
+      group: 'available' | 'empty' | 'meta' = 'available'
+    ) {
+      const groupCapitalized = `${group[0].toUpperCase()}${group.slice(1).toLowerCase()}`;
+      const allFieldsForType = await find.allByCssSelector(
+        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .lnsFieldItem--${type}`
+      );
+      // map to testSubjId
+      return Promise.all(allFieldsForType.map((el) => el.getAttribute('data-test-subj')));
     },
   });
 }

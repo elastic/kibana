@@ -22,13 +22,19 @@ export type AgentStatus =
   | 'error'
   | 'online'
   | 'inactive'
-  | 'warning'
   | 'enrolling'
   | 'unenrolling'
+  | 'unenrolled'
   | 'updating'
   | 'degraded';
 
-export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
+export type SimplifiedAgentStatus =
+  | 'healthy'
+  | 'unhealthy'
+  | 'updating'
+  | 'offline'
+  | 'inactive'
+  | 'unenrolled';
 
 export type AgentActionType =
   | 'UNENROLL'
@@ -37,7 +43,8 @@ export type AgentActionType =
   | 'POLICY_REASSIGN'
   | 'CANCEL'
   | 'FORCE_UNENROLL'
-  | 'UPDATE_TAGS';
+  | 'UPDATE_TAGS'
+  | 'REQUEST_DIAGNOSTICS';
 
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
@@ -140,6 +147,15 @@ export interface ActionStatus {
   cancellationTime?: string;
   newPolicyId?: string;
   creationTime: string;
+}
+
+export interface AgentDiagnostics {
+  id: string;
+  name: string;
+  createTime: string;
+  filePath: string;
+  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS';
+  actionId: string;
 }
 
 // Generated from FleetServer schema.json

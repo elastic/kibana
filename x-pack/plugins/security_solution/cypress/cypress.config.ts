@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { defineConfig } from 'cypress';
+import { defineCypressConfig } from '@kbn/cypress-config';
 
-// eslint-disable-next-line import/no-default-export
-export default defineConfig({
-  defaultCommandTimeout: 20000,
-  execTimeout: 20000,
-  pageLoadTimeout: 20000,
+export default defineCypressConfig({
+  defaultCommandTimeout: 60000,
+  execTimeout: 60000,
+  pageLoadTimeout: 60000,
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
@@ -20,11 +19,5 @@ export default defineConfig({
   viewportWidth: 1680,
   e2e: {
     baseUrl: 'http://localhost:5601',
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
-    setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      return require('./plugins')(on, config);
-    },
   },
 });

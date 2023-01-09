@@ -8,6 +8,7 @@
 export * from './use_documentation_link';
 export * from './use_field_types';
 export * from './use_inspector';
+export * from './use_integrations';
 export * from './use_integrations_page_link';
 export * from './use_kibana';
 export * from './use_security_context';

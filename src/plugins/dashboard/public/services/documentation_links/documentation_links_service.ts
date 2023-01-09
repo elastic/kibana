@@ -21,14 +21,16 @@ export const documentationLinksServiceFactory: DocumentationLinksServiceFactory 
   const {
     docLinks: {
       links: {
-        kibana: { guide },
+        kibana,
         indexPatterns: { introduction },
+        dashboard,
       },
     },
   } = coreStart;
 
   return {
     indexPatternsDocLink: introduction,
-    kibanaGuideDocLink: guide,
+    kibanaGuideDocLink: kibana.guide,
+    dashboardDocLink: dashboard.guide,
   };
 };

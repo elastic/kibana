@@ -7,16 +7,12 @@
 
 import deepEqual from 'fast-deep-equal';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
 
 import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
-import {
-  UpdateSLOParams,
-  UpdateSLOResponse,
-  updateSLOResponseSchema,
-} from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
-import { SLO } from '../../types/models';
+import { SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
 
 export class UpdateSLO {
@@ -52,6 +48,10 @@ export class UpdateSLO {
       hasBreakingChange = true;
     }
 
+    if (!deepEqual(originalSlo.settings, updatedSlo.settings)) {
+      hasBreakingChange = true;
+    }
+
     if (hasBreakingChange) {
       updatedSlo.revision++;
     }
@@ -84,11 +84,13 @@ export class UpdateSLO {
       name: slo.name,
       description: slo.description,
       indicator: slo.indicator,
-      budgeting_method: slo.budgeting_method,
-      time_window: slo.time_window,
+      budgetingMethod: slo.budgetingMethod,
+      timeWindow: slo.timeWindow,
       objective: slo.objective,
-      created_at: slo.created_at,
-      updated_at: slo.updated_at,
+      settings: slo.settings,
+      revision: slo.revision,
+      createdAt: slo.createdAt,
+      updatedAt: slo.updatedAt,
     });
   }
 }

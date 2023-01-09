@@ -9,12 +9,13 @@
 import React, { ReactNode } from 'react';
 import { EuiCard, EuiText, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GuideId } from '../../types';
+import type { GuideCardUseCase } from './guide_card';
 
 type UseCaseConstants = {
   [key in UseCase]: {
     logAltText: string;
     betaBadgeLabel: string;
+    imageUrlPrefix: string;
   };
 };
 const constants: UseCaseConstants = {
@@ -25,35 +26,47 @@ const constants: UseCaseConstants = {
     betaBadgeLabel: i18n.translate('guidedOnboardingPackage.gettingStarted.search.betaBadgeLabel', {
       defaultMessage: 'search',
     }),
+    imageUrlPrefix: '/plugins/home/assets/solution_logos/search',
   },
-  observability: {
-    logAltText: i18n.translate('guidedOnboardingPackage.gettingStarted.observability.iconName', {
+  kubernetes: {
+    logAltText: i18n.translate('guidedOnboardingPackage.gettingStarted.kubernetes.iconName', {
       defaultMessage: 'Observability logo',
     }),
     betaBadgeLabel: i18n.translate(
-      'guidedOnboardingPackage.gettingStarted.observability.betaBadgeLabel',
+      'guidedOnboardingPackage.gettingStarted.kubernetes.betaBadgeLabel',
       {
         defaultMessage: 'observe',
       }
     ),
+    imageUrlPrefix: '/plugins/home/assets/solution_logos/kubernetes',
   },
-  security: {
-    logAltText: i18n.translate('guidedOnboardingPackage.gettingStarted.security.iconName', {
-      defaultMessage: 'Security logo',
+  infrastructure: {
+    logAltText: i18n.translate('guidedOnboardingPackage.gettingStarted.infrastructure.iconName', {
+      defaultMessage: 'Observability logo',
     }),
     betaBadgeLabel: i18n.translate(
-      'guidedOnboardingPackage.gettingStarted.security.betaBadgeLabel',
+      'guidedOnboardingPackage.gettingStarted.infrastructure.betaBadgeLabel',
       {
-        defaultMessage: 'security',
+        defaultMessage: 'observe',
       }
     ),
+    imageUrlPrefix: '/plugins/home/assets/solution_logos/observability',
+  },
+  siem: {
+    logAltText: i18n.translate('guidedOnboardingPackage.gettingStarted.siem.iconName', {
+      defaultMessage: 'Security logo',
+    }),
+    betaBadgeLabel: i18n.translate('guidedOnboardingPackage.gettingStarted.siem.betaBadgeLabel', {
+      defaultMessage: 'protect',
+    }),
+    imageUrlPrefix: '/plugins/home/assets/solution_logos/security',
   },
 };
 
-export type UseCase = 'search' | 'observability' | 'security';
+export type UseCase = GuideCardUseCase | 'infrastructure';
 
 export interface UseCaseCardProps {
-  useCase: GuideId;
+  useCase: UseCase;
   title: string;
   description: string;
   footer: ReactNode;
@@ -69,11 +82,8 @@ export const UseCaseCard = ({
   isDarkTheme,
   addBasePath,
 }: UseCaseCardProps) => {
-  const getImageUrl = (imageName: UseCase) => {
-    const imagePath = `/plugins/home/assets/solution_logos/${imageName}${
-      isDarkTheme ? '_dark' : ''
-    }.png`;
-
+  const getImageUrl = (imageUrlPrefix: string) => {
+    const imagePath = `${imageUrlPrefix}${isDarkTheme ? '_dark' : ''}.png`;
     return addBasePath(imagePath);
   };
 
@@ -84,19 +94,21 @@ export const UseCaseCard = ({
       </h4>
     </EuiText>
   );
-  const descriptionElement = (
-    <EuiText size="s" textAlign="center">
-      <p>{description}</p>
-    </EuiText>
-  );
+
   return (
     <EuiCard
-      display="subdued"
-      textAlign="left"
-      image={<EuiImage src={getImageUrl(useCase)} alt={constants[useCase].logAltText} />}
+      image={
+        <EuiImage
+          src={getImageUrl(constants[useCase].imageUrlPrefix)}
+          alt={constants[useCase].logAltText}
+          size={200}
+          margin="s"
+        />
+      }
       title={titleElement}
-      description={descriptionElement}
+      description={description}
       footer={footer}
+      paddingSize="l"
       betaBadgeProps={{
         label: constants[useCase].betaBadgeLabel,
       }}

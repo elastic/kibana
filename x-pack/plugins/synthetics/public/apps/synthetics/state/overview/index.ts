@@ -6,39 +6,32 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
+import { isStatusEnabled } from '../../../../../common/runtime_types/monitor_management/alert_config';
+import { MonitorOverviewState } from './models';
 
-import { MonitorOverviewResult, OverviewStatus } from '../../../../../common/runtime_types';
-
-import { IHttpSerializedFetchError } from '../utils/http_error';
-
-import { MonitorOverviewPageState } from './models';
 import {
   clearOverviewStatusErrorAction,
   fetchMonitorOverviewAction,
   fetchOverviewStatusAction,
   quietFetchOverviewAction,
-  setOverviewPerPageAction,
+  setFlyoutConfig,
+  setOverviewPageStateAction,
 } from './actions';
-
-export interface MonitorOverviewState {
-  data: MonitorOverviewResult;
-  pageState: MonitorOverviewPageState;
-  loading: boolean;
-  loaded: boolean;
-  error: IHttpSerializedFetchError | null;
-  status: OverviewStatus | null;
-  statusError: IHttpSerializedFetchError | null;
-}
+import { enableMonitorAlertAction } from '../monitor_list/actions';
+import { ConfigKey } from '../../components/monitor_add_edit/types';
 
 const initialState: MonitorOverviewState = {
   data: {
     total: 0,
     allMonitorIds: [],
-    pages: {},
+    monitors: [],
   },
   pageState: {
-    perPage: 20,
+    perPage: 16,
+    sortOrder: 'asc',
+    sortField: 'status',
   },
+  flyoutConfig: null,
   loading: false,
   loaded: false,
   error: null,
@@ -49,7 +42,6 @@ const initialState: MonitorOverviewState = {
 export const monitorOverviewReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(fetchMonitorOverviewAction.get, (state, action) => {
-      state.pageState = action.payload;
       state.loading = true;
       state.loaded = false;
     })
@@ -68,15 +60,42 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     .addCase(quietFetchOverviewAction.fail, (state, action) => {
       state.error = action.payload;
     })
-    .addCase(setOverviewPerPageAction, (state, action) => {
+    .addCase(setOverviewPageStateAction, (state, action) => {
       state.pageState = {
         ...state.pageState,
-        perPage: action.payload,
+        ...action.payload,
       };
       state.loaded = false;
     })
+    .addCase(fetchOverviewStatusAction.get, (state) => {
+      state.status = null;
+    })
+    .addCase(setFlyoutConfig, (state, action) => {
+      state.flyoutConfig = action.payload;
+    })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
-      state.status = action.payload;
+      state.status = {
+        ...action.payload,
+        allConfigs: { ...action.payload.upConfigs, ...action.payload.downConfigs },
+      };
+    })
+    .addCase(enableMonitorAlertAction.success, (state, action) => {
+      const attrs = action.payload.attributes;
+      if (!('errors' in attrs)) {
+        const isStatusAlertEnabled = isStatusEnabled(attrs[ConfigKey.ALERT_CONFIG]);
+        state.data.monitors = state.data.monitors.map((monitor) => {
+          if (
+            monitor.id === action.payload.id ||
+            attrs[ConfigKey.MONITOR_QUERY_ID] === monitor.id
+          ) {
+            return {
+              ...monitor,
+              isStatusAlertEnabled,
+            };
+          }
+          return monitor;
+        });
+      }
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.statusError = action.payload;
