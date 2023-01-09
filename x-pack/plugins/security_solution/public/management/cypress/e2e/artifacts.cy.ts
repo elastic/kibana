@@ -13,7 +13,7 @@ import {
 import { BASE_ENDPOINT_ROUTE } from '../../../../common/endpoint/constants';
 import { login, loginWithRole, ROLE } from '../tasks/login';
 
-import { type FormAction, getArtifactsListTestsData } from './mocks/artifacts_page';
+import { type FormAction, getArtifactsListTestsData } from '../fixtures/artifacts_page';
 import { runEndpointLoaderScript } from '../tasks/run_endpoint_loader';
 
 const removeAllArtifacts = () => {
@@ -61,14 +61,19 @@ const loadEndpointDataForEventFiltersIfNeeded = () => {
 };
 
 const runAction = (action: FormAction) => {
+  let element;
+  if (action.customSelector) {
+    element = cy.get(action.customSelector);
+  } else {
+    element = cy.getBySel(action.selector || '');
+  }
+
   if (action.type === 'click') {
-    cy.getBySel(action.selector).click();
+    element.click();
   } else if (action.type === 'input') {
-    cy.getBySel(action.selector).type(action.value || '');
+    element.type(action.value || '');
   } else if (action.type === 'clear') {
-    cy.getBySel(action.selector).clear();
-  } else if (action.type === 'customClick') {
-    cy.get(action.selector).click();
+    element.clear();
   } else if (action.type === 'removeItem') {
     cy.get(`[data-test-subj="${action.selector}"] > span > button`).click();
   }

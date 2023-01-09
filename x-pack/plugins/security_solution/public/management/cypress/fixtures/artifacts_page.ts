@@ -6,7 +6,7 @@
  */
 
 import type { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
-import type { TranslatedExceptionListItem } from '../../../../../server/endpoint/schemas';
+import type { TranslatedExceptionListItem } from '../../../../server/endpoint/schemas';
 
 export interface ArtifactResponseType {
   _index: string;
@@ -21,7 +21,8 @@ export interface ArtifactBodyType {
 
 export interface FormAction {
   type: string;
-  selector: string;
+  selector?: string;
+  customSelector?: string;
   value?: string;
 }
 
@@ -145,16 +146,16 @@ export const getArtifactsListTestsData = () => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
-          type: 'customClick',
-          selector: 'button[title="agent.type"]',
+          type: 'click',
+          customSelector: 'button[title="agent.type"]',
         },
         {
           type: 'click',
           selector: 'valuesAutocompleteMatch',
         },
         {
-          type: 'customClick',
-          selector: 'button[title="endpoint"]',
+          type: 'click',
+          customSelector: 'button[title="endpoint"]',
         },
       ],
       checkResults: [
@@ -189,8 +190,8 @@ export const getArtifactsListTestsData = () => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
-          type: 'customClick',
-          selector: 'button[title="agent.name"]',
+          type: 'clcik',
+          customSelector: 'button[title="agent.name"]',
         },
         {
           type: 'input',
