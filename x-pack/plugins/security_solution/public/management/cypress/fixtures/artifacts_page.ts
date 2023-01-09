@@ -190,7 +190,7 @@ export const getArtifactsListTestsData = () => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
-          type: 'clcik',
+          type: 'click',
           customSelector: 'button[title="agent.name"]',
         },
         {
@@ -296,9 +296,9 @@ export const getArtifactsListTestsData = () => [
           selector: 'blocklist-form-file.path',
         },
         {
-          type: 'removeItem',
-          selector:
-            'blocklist-form-values-input-A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+          type: 'click',
+          customSelector:
+            '[data-test-subj="blocklist-form-values-input-A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476"] > span > button',
         },
         {
           type: 'input',

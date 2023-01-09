@@ -74,8 +74,6 @@ const runAction = (action: FormAction) => {
     element.type(action.value || '');
   } else if (action.type === 'clear') {
     element.clear();
-  } else if (action.type === 'removeItem') {
-    cy.get(`[data-test-subj="${action.selector}"] > span > button`).click();
   }
 };
 
