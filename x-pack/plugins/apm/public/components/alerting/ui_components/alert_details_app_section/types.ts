@@ -6,6 +6,7 @@
  */
 
 import { Rule } from '@kbn/alerting-plugin/common';
+import { SERVICE_ENVIRONMENT } from '@kbn/apm-plugin/common/es_fields/apm';
 import { TopAlert } from '@kbn/observability-plugin/public/pages/alerts';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 
@@ -18,6 +19,6 @@ export interface AlertDetailsAppSectionProps {
     windowSize: number;
     windowUnit: TIME_UNITS;
   }>;
-  alert: TopAlert<{ [SERVICE_NAME]: string; [TRANSACTION_TYPE]: string }>;
+  alert: TopAlert<{ [SERVICE_NAME]: string; [TRANSACTION_TYPE]: string; [SERVICE_ENVIRONMENT]: string; }>;
   timeZone: string;
 }

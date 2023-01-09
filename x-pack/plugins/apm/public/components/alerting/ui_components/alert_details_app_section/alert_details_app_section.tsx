@@ -55,6 +55,7 @@ import {
   AlertThresholdRect,
   AlertThresholdAnnotation,
 } from './latency_chart_components';
+import { SERVICE_ENVIRONMENT } from '@kbn/apm-plugin/common/es_fields/apm';
 
 export function AlertDetailsAppSection({
   rule,
@@ -62,7 +63,7 @@ export function AlertDetailsAppSection({
   timeZone,
 }: AlertDetailsAppSectionProps) {
   const params = rule.params;
-  const environment = String(params.environment) || ENVIRONMENT_ALL.value;
+  const environment = alert.fields[SERVICE_ENVIRONMENT];
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
 
   // duration is us, convert it to MS
