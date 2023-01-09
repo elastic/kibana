@@ -6,11 +6,13 @@
  */
 
 import { pagePathGetters, pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
+import type { PosturePolicyTemplate } from '../../../common/types';
 import { useCisKubernetesIntegration } from '../api/use_cis_kubernetes_integration';
 import { useKibana } from '../hooks/use_kibana';
 
-export const useCISIntegrationLink = (): string | undefined => {
+export const useCspIntegrationLink = (
+  policyTemplate: PosturePolicyTemplate
+): string | undefined => {
   const { http } = useKibana().services;
   const cisIntegration = useCisKubernetesIntegration();
 
@@ -18,7 +20,7 @@ export const useCISIntegrationLink = (): string | undefined => {
 
   const path = pagePathGetters
     .add_integration_to_policy({
-      integration: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+      integration: policyTemplate,
       pkgkey: pkgKeyFromPackageInfo({
         name: cisIntegration.data.item.name,
         version: cisIntegration.data.item.version,
