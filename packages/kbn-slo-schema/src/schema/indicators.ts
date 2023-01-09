@@ -9,15 +9,15 @@
 import * as t from 'io-ts';
 import { allOrAnyString, dateRangeSchema } from './common';
 
-const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transaction_duration');
+const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transactionDuration');
 const apmTransactionDurationIndicatorSchema = t.type({
   type: apmTransactionDurationIndicatorTypeSchema,
   params: t.intersection([
     t.type({
       environment: allOrAnyString,
       service: allOrAnyString,
-      transaction_type: allOrAnyString,
-      transaction_name: allOrAnyString,
+      transactionType: allOrAnyString,
+      transactionName: allOrAnyString,
       'threshold.us': t.number,
     }),
     t.partial({
@@ -26,18 +26,18 @@ const apmTransactionDurationIndicatorSchema = t.type({
   ]),
 });
 
-const apmTransactionErrorRateIndicatorTypeSchema = t.literal('sli.apm.transaction_error_rate');
+const apmTransactionErrorRateIndicatorTypeSchema = t.literal('sli.apm.transactionErrorRate');
 const apmTransactionErrorRateIndicatorSchema = t.type({
   type: apmTransactionErrorRateIndicatorTypeSchema,
   params: t.intersection([
     t.type({
       environment: allOrAnyString,
       service: allOrAnyString,
-      transaction_type: allOrAnyString,
-      transaction_name: allOrAnyString,
+      transactionType: allOrAnyString,
+      transactionName: allOrAnyString,
     }),
     t.partial({
-      good_status_codes: t.array(
+      goodStatusCodes: t.array(
         t.union([t.literal('2xx'), t.literal('3xx'), t.literal('4xx'), t.literal('5xx')])
       ),
       index: t.string,
@@ -57,7 +57,7 @@ const kqlCustomIndicatorSchema = t.type({
 });
 
 const indicatorDataSchema = t.type({
-  date_range: dateRangeSchema,
+  dateRange: dateRangeSchema,
   good: t.number,
   total: t.number,
 });
@@ -69,7 +69,7 @@ const indicatorTypesSchema = t.union([
 ]);
 
 // Validate that a string is a comma separated list of indicator types,
-// e.g. sli.kql.custom,sli.apm.transaction_duration
+// e.g. sli.kql.custom,sli.apm.transactionDuration
 // Transform to an array of indicator type
 const indicatorTypesArraySchema = new t.Type<string[], string, unknown>(
   'indicatorTypesArray',

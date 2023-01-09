@@ -28,13 +28,13 @@ import { sevenDaysRolling } from './time_window';
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
 ): Indicator => ({
-  type: 'sli.apm.transaction_error_rate',
+  type: 'sli.apm.transactionErrorRate',
   params: {
     environment: 'irrelevant',
     service: 'irrelevant',
-    transaction_name: 'irrelevant',
-    transaction_type: 'irrelevant',
-    good_status_codes: ['2xx', '3xx', '4xx'],
+    transactionName: 'irrelevant',
+    transactionType: 'irrelevant',
+    goodStatusCodes: ['2xx', '3xx', '4xx'],
     ...params,
   },
 });
@@ -42,12 +42,12 @@ export const createAPMTransactionErrorRateIndicator = (
 export const createAPMTransactionDurationIndicator = (
   params: Partial<APMTransactionDurationIndicator['params']> = {}
 ): Indicator => ({
-  type: 'sli.apm.transaction_duration',
+  type: 'sli.apm.transactionDuration',
   params: {
     environment: 'irrelevant',
     service: 'irrelevant',
-    transaction_name: 'irrelevant',
-    transaction_type: 'irrelevant',
+    transactionName: 'irrelevant',
+    transactionType: 'irrelevant',
     'threshold.us': 500000,
     ...params,
   },
@@ -66,18 +66,18 @@ export const createKQLCustomIndicator = (
   },
 });
 
-const defaultSLO: Omit<SLO, 'id' | 'revision' | 'created_at' | 'updated_at'> = {
+const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt'> = {
   name: 'irrelevant',
   description: 'irrelevant',
-  time_window: sevenDaysRolling(),
-  budgeting_method: 'occurrences',
+  timeWindow: sevenDaysRolling(),
+  budgetingMethod: 'occurrences',
   objective: {
     target: 0.999,
   },
   indicator: createAPMTransactionDurationIndicator(),
   settings: {
-    timestamp_field: '@timestamp',
-    sync_delay: new Duration(1, DurationUnit.Minute),
+    timestampField: '@timestamp',
+    syncDelay: new Duration(1, DurationUnit.Minute),
     frequency: new Duration(1, DurationUnit.Minute),
   },
 };
@@ -102,17 +102,17 @@ export const createSLO = (params: Partial<SLO> = {}): SLO => {
     ...defaultSLO,
     id: uuid.v1(),
     revision: 1,
-    created_at: now,
-    updated_at: now,
+    createdAt: now,
+    updatedAt: now,
     ...params,
   });
 };
 
 export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
   return createSLO({
-    time_window: {
+    timeWindow: {
       duration: sevenDays(),
-      calendar: { start_time: new Date('2022-10-01T00:00:00.000Z') },
+      calendar: { startTime: new Date('2022-10-01T00:00:00.000Z') },
     },
     ...params,
   });

@@ -26,8 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
 
-  // Failing: See https://github.com/elastic/kibana/issues/147687
-  describe.skip('discover sidebar', function describeIndexTests() {
+  describe('discover sidebar', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
@@ -46,6 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
+      await PageObjects.discover.cleanSidebarLocalStorage();
     });
 
     describe('field filtering', function () {
@@ -541,6 +541,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('discoverNoResultsError'); // still has error
 
         // check that the sidebar is rendered event after a refresh
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
         allFields = await PageObjects.discover.getAllFieldNames();
         expect(allFields.includes('_invalid-runtimefield')).to.be(true);
 

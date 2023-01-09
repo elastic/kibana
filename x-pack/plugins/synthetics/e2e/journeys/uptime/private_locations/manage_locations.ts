@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { journey, step, expect, before } from '@elastic/synthetics';
+import { journey, step, expect } from '@elastic/synthetics';
 import { byTestId, TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
+import { recordVideo } from '../../../helpers/record_video';
 import { monitorManagementPageProvider } from '../../../page_objects/uptime/monitor_management';
 
 journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
+  recordVideo(page);
+
   const uptime = monitorManagementPageProvider({ page, kibanaUrl });
 
-  before(async () => {
-    await uptime.waitForLoadingToFinish();
-  });
+  recordVideo(page);
 
   step('Go to monitor-management', async () => {
     await uptime.navigateToMonitorManagement();
@@ -75,6 +76,7 @@ journey('ManagePrivateLocation', async ({ page, params: { kibanaUrl } }) => {
   const addAgentPolicy = async (name: string) => {
     await page.click('[placeholder="Choose a name"]');
     await page.fill('[placeholder="Choose a name"]', name);
+    await page.click('text=Collect system logs and metrics');
     await page.click('div[role="dialog"] button:has-text("Create agent policy")');
   };
 });

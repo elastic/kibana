@@ -12,8 +12,8 @@ import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
 
-const occurrencesBudgetingMethodSchema = t.literal<string>('occurrences');
-const timeslicesBudgetingMethodSchema = t.literal<string>('timeslices');
+const occurrencesBudgetingMethodSchema = t.literal('occurrences');
+const timeslicesBudgetingMethodSchema = t.literal('timeslices');
 
 const budgetingMethodSchema = t.union([
   occurrencesBudgetingMethodSchema,
@@ -22,12 +22,12 @@ const budgetingMethodSchema = t.union([
 
 const objectiveSchema = t.intersection([
   t.type({ target: t.number }),
-  t.partial({ timeslice_target: t.number, timeslice_window: durationType }),
+  t.partial({ timesliceTarget: t.number, timesliceWindow: durationType }),
 ]);
 
 const settingsSchema = t.type({
-  timestamp_field: t.string,
-  sync_delay: durationType,
+  timestampField: t.string,
+  syncDelay: durationType,
   frequency: durationType,
 });
 
@@ -38,13 +38,13 @@ const sloSchema = t.type({
   name: t.string,
   description: t.string,
   indicator: indicatorSchema,
-  time_window: timeWindowSchema,
-  budgeting_method: budgetingMethodSchema,
+  timeWindow: timeWindowSchema,
+  budgetingMethod: budgetingMethodSchema,
   objective: objectiveSchema,
   settings: settingsSchema,
   revision: t.number,
-  created_at: dateType,
-  updated_at: dateType,
+  createdAt: dateType,
+  updatedAt: dateType,
 });
 
 const sloWithSummarySchema = t.intersection([sloSchema, t.type({ summary: summarySchema })]);
