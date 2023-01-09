@@ -64,7 +64,7 @@ export function getEarlyRecoveredAlerts(
       return a.flappingHistory.length - b.flappingHistory.length;
     });
 
-    earlyRecoveredAlerts = recoveredAlerts.splice(maxAlerts);
+    earlyRecoveredAlerts = recoveredAlerts.slice(maxAlerts);
     logger.warn(
       `Recovered alerts have exceeded the max alert limit of ${maxAlerts} : dropping ${
         earlyRecoveredAlerts.length
