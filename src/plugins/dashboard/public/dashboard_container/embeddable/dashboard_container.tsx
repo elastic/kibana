@@ -45,6 +45,11 @@ import {
   addOrUpdateEmbeddable,
 } from './api';
 import {
+  DashboardReduxState,
+  DashboardContainerOutput,
+  DashboardRenderPerformanceStats,
+} from '../types';
+import {
   DashboardPanelState,
   DashboardContainerInput,
   DashboardContainerByValueInput,
@@ -64,19 +69,11 @@ import { createPanelState } from '../component/panel';
 import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
 import { DashboardCreationOptions } from './dashboard_container_factory';
-import { DashboardContainerOutput, DashboardReduxState } from '../types';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { DashboardSavedObjectService } from '../../services/dashboard_saved_object/types';
 import { dashboardContainerInputIsByValue } from '../../../common/dashboard_container/type_guards';
-
-export interface DashboardLoadedInfo {
-  timeToData: number;
-  timeToDone: number;
-  numOfPanels: number;
-  status: string;
-}
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -103,6 +100,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private subscriptions: Subscription = new Subscription();
 
   private initialized$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private initializeStartTime: number;
+  private savedObjectLoadTime?: number;
+
   private initialSavedDashboardId?: string;
 
   private reduxEmbeddableTools?: ReduxEmbeddableTools<
@@ -157,6 +157,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       ? undefined
       : this.input.savedObjectId;
     this.creationOptions = creationOptions;
+
+    this.initializeStartTime = performance.now();
     this.initializeDashboard(readyToInitializeChildren$, creationOptions);
   }
 
@@ -180,10 +182,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     if (dashboardContainerInputIsByValue(this.input)) {
       return this.input;
     }
+
+    // if this dashboard is loaded by reference, unwrap it and track the saved object load time.
+    const savedObjectLoadStartTime = performance.now();
     const unwrapResult = await this.dashboardSavedObjectService.loadDashboardStateFromSavedObject({
       id: this.input.savedObjectId,
     });
     this.updateInput({ savedObjectId: undefined });
+    this.savedObjectLoadTime = performance.now() - savedObjectLoadStartTime;
     if (
       !this.creationOptions?.validateLoadedSavedObject ||
       this.creationOptions.validateLoadedSavedObject(unwrapResult)
@@ -351,15 +357,22 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     });
   }
 
-  private onDataLoaded(data: DashboardLoadedInfo) {
+  public reportPerformanceMetrics(stats: DashboardRenderPerformanceStats) {
     if (this.analyticsService) {
+      const panelCount = Object.keys(
+        this.getReduxEmbeddableTools().getState().explicitInput.panels
+      ).length;
       reportPerformanceMetricEvent(this.analyticsService, {
         eventName: DASHBOARD_LOADED_EVENT,
-        duration: data.timeToDone,
+        duration: stats.panelsRenderDoneTime - stats.panelsRenderStartTime,
         key1: 'time_to_data',
-        value1: data.timeToData,
+        value1: (stats.lastTimeToData || stats.panelsRenderDoneTime) - stats.panelsRenderStartTime,
         key2: 'num_of_panels',
-        value2: data.numOfPanels,
+        value2: panelCount,
+        key3: 'total_load_time',
+        value3: stats.panelsRenderDoneTime - this.initializeStartTime,
+        key4: 'saved_object_load_time',
+        value4: this.savedObjectLoadTime,
       });
     }
   }
@@ -408,7 +421,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: this.chrome }}>
           <KibanaThemeProvider theme$={this.theme$}>
             <DashboardReduxWrapper>
-              <DashboardViewport onDataLoaded={this.onDataLoaded.bind(this)} />
+              <DashboardViewport />
             </DashboardReduxWrapper>
           </KibanaThemeProvider>
         </ExitFullScreenButtonKibanaProvider>
