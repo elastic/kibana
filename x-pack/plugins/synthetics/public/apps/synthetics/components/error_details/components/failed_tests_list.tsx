@@ -49,7 +49,7 @@ export const FailedTestsList = ({
           <EuiLink
             href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${item.monitor.check_group}`}
           >
-            {formatTestRunAt(item.state!.started_at, format)}
+            {formatTestRunAt(value, format)}
           </EuiLink>
         );
       },
