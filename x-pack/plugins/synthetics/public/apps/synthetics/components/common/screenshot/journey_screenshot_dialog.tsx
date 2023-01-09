@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useContext, useState, useCallback, KeyboardEvent } from 'react';
+import React, {
+  MouseEvent,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  KeyboardEvent,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiModal,
@@ -58,6 +65,14 @@ export const JourneyScreenshotDialog = ({
   const imgSrc = stepNumber === initialStepNumber ? initialImgSrc ?? url : url;
 
   const stepCountLabel = formatScreenshotStepsCount(stepNumber, maxSteps ?? stepNumber);
+
+  useEffect(() => {
+    if (isOpen) {
+      setStepNumber(initialStepNumber);
+    }
+    // do not include initialStepNumber
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, setStepNumber]);
 
   const onKeyDown = useCallback(
     (evt: KeyboardEvent<HTMLElement>) => {
