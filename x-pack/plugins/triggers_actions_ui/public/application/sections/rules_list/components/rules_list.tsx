@@ -77,7 +77,6 @@ import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experime
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListDocLink } from './rules_list_doc_link';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { RulesListColumns } from './rules_list_column_selector';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
@@ -126,7 +125,6 @@ export interface RulesListProps {
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: string[];
-  columns?: RulesListColumns[];
 }
 
 export const percentileFields = {
@@ -159,7 +157,6 @@ export const RulesList = ({
   refresh,
   rulesListKey,
   visibleColumns,
-  columns,
 }: RulesListProps) => {
   const history = useHistory();
   const {
@@ -917,7 +914,6 @@ export const RulesList = ({
               rulesListKey={rulesListKey}
               config={config}
               visibleColumns={visibleColumns}
-              columns={columns}
             />
             {manageLicenseModalOpts && (
               <ManageLicenseModal

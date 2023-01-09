@@ -144,7 +144,6 @@ export interface RulesListTableProps {
   ) => React.ReactNode;
   renderRuleError?: (rule: RuleTableItem) => React.ReactNode;
   visibleColumns?: string[];
-  columns?: RulesListColumns[];
 }
 
 interface ConvertRulesToTableItemsOpts {
@@ -210,7 +209,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
     renderSelectAllDropdown,
     renderRuleError = EMPTY_RENDER,
     visibleColumns,
-    columns,
   } = props;
 
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
@@ -796,34 +794,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     ruleOutcomeColumnField,
   ]);
 
-  const columnsOverrideMap = useMemo(() => {
-    if (!columns) {
-      return {};
-    }
-    return columns.reduce<Record<string, RulesListColumns>>((result, column) => {
-      if (column.id) {
-        result[column.id] = column;
-      }
-      return result;
-    }, {});
-  }, [columns]);
-
-  const allRuleColumns = useMemo(() => {
-    const defaultColumns = getRulesTableColumns();
-
-    const columnsWithOverride = defaultColumns.map((column) => {
-      if (column.id && columnsOverrideMap[column.id]) {
-        return columnsOverrideMap[column.id];
-      }
-      return column;
-    });
-
-    const newColumns = columns?.filter((column) => {
-      return column.id && !(originalRulesListVisibleColumns as string[]).includes(column.id);
-    });
-
-    return [...columnsWithOverride, ...(newColumns || [])];
-  }, [getRulesTableColumns, columnsOverrideMap, columns]);
+  const allRuleColumns = useMemo(() => getRulesTableColumns(), [getRulesTableColumns]);
 
   const [rulesListColumns, ColumnSelector] = useRulesListColumnSelector({
     allRuleColumns,
