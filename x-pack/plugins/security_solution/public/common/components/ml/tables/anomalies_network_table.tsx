@@ -22,7 +22,7 @@ import { BasicTable } from './basic_table';
 import { getCriteriaFromNetworkType } from '../criteria/get_criteria_from_network_type';
 import { Panel } from '../../panel';
 import { useQueryToggle } from '../../../containers/query_toggle';
-import { useInstalledSecurityJobsIds } from '../hooks/use_installed_security_jobs';
+import { useInstalledSecurityJobsNamesById } from '../hooks/use_installed_security_jobs';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import type { State } from '../../../store';
 import { JobIdFilter } from './job_id_filter';
@@ -60,7 +60,8 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const { jobIds, loading: loadingJobs } = useInstalledSecurityJobsIds();
+  const { jobNameById, loading: loadingJobs } = useInstalledSecurityJobsNamesById();
+  const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
 
   const getAnomaliesUserTableFilterQuerySelector = useMemo(
     () => networkSelectors.networkAnomaliesJobIdFilterSelector(),
@@ -113,7 +114,7 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
     aggregationInterval: selectedInterval,
   });
 
-  const networks = convertAnomaliesToNetwork(tableData, ip);
+  const networks = convertAnomaliesToNetwork(tableData, jobNameById, ip);
   const columns = getAnomaliesNetworkTableColumnsCurated(type, startDate, endDate, flowTarget);
   const pagination = {
     initialPageIndex: 0,
@@ -148,6 +149,7 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
                   onSelect={onSelectJobId}
                   selectedJobIds={selectedJobIds}
                   jobIds={jobIds}
+                  jobNameById={jobNameById}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

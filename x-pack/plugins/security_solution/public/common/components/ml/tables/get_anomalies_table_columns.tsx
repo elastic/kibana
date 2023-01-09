@@ -39,7 +39,7 @@ export const getAnomaliesDefaultTableColumns = (
         score={anomalyBy.anomaly}
         startDate={startDate}
         endDate={endDate}
-        linkName={jobId}
+        linkName={anomalyBy.jobName ?? jobId}
       />
     ),
   },

@@ -47,7 +47,7 @@ export const useNotableAnomaliesSearch = ({
   data: AnomaliesCount[];
   refetch: inputsModel.Refetch;
 } => {
-  const [data, setData] = useState<AnomaliesCount[]>(formatResultData([], []));
+  const [data, setData] = useState<AnomaliesCount[]>([]);
 
   const {
     loading: jobsLoading,
