@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   useEuiTheme,
@@ -22,15 +21,15 @@ import {
   THUMBNAIL_SCREENSHOT_SIZE,
 } from './screenshot_size';
 
-export const thumbnailStyle = css`
-  padding: 0;
-  margin: auto;
-  object-fit: contain;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
+export const thumbnailStyle = {
+  padding: 0,
+  margin: 'auto',
+  objectFit: 'contain' as const,
+  overflow: 'hidden',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
 
 export const EmptyThumbnail = ({
   isLoading = false,
@@ -55,35 +54,32 @@ export const EmptyThumbnail = ({
       role="img"
       aria-label={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : noDataMessage}
       title={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : noDataMessage}
-      css={css`
-        ${thumbnailStyle};
-        width: ${width};
-        height: ${height};
-        background: ${useEuiBackgroundColor('subdued')};
-        border: ${euiTheme.border.thin};
-        ${borderRadius ? `border-radius: ${borderRadius}` : ``};
-      `}
+      style={{
+        ...thumbnailStyle,
+        width,
+        height,
+        background: useEuiBackgroundColor('subdued'),
+        border: euiTheme.border.thin,
+        ...(borderRadius ? { borderRadius } : {}),
+      }}
     >
       {isLoading ? (
         <EuiLoadingContent
           data-test-subj="stepScreenshotPlaceholderLoading"
-          css={css`
-            width: 100%;
-            transform: scale(
-              1,
-              ${animateLoading ? '100' : '0'}
-            ); // To create a skeleton loading effect when animateLoading is true
-          `}
+          style={{
+            width: '100%',
+            transform: `scale(1, ${animateLoading ? '100' : '0'})`, // To create a skeleton loading effect when animateLoading is true
+          }}
           lines={1}
         />
       ) : (
         <div
-          css={css({
+          style={{
             border: 'none',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-          })}
+          }}
         >
           <EuiIcon
             data-test-subj="stepScreenshotNotAvailable"

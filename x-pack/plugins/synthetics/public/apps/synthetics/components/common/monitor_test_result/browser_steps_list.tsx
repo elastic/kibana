@@ -7,19 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { CSSProperties } from 'react';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButtonIcon,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiText, useEuiTheme } from '@elastic/eui';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
 import { JourneyStep } from '../../../../../../common/runtime_types';
-import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
 import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
 import { ScreenshotImageSize, THUMBNAIL_SCREENSHOT_SIZE } from '../screenshot/screenshot_size';
+import { StepDetailsLinkIcon } from '../links/step_details_link';
 
 import { StatusBadge, parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';
 import { StepDurationText } from './step_duration_text';
@@ -47,8 +41,6 @@ export const BrowserStepsList = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
-
-  const { basePath } = useSyntheticsSettingsContext();
 
   const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
     ...(showStepNumber
@@ -127,13 +119,9 @@ export const BrowserStepsList = ({
       name: '',
       mobileOptions: { show: false },
       render: (_val: string, item) => (
-        <EuiButtonIcon
-          aria-label={VIEW_DETAILS}
-          title={VIEW_DETAILS}
-          size="s"
-          href={`${basePath}/app/synthetics/journey/${item.monitor.check_group}/step/${item.synthetics?.step?.index}`}
-          target="_self"
-          iconType="apmTrace"
+        <StepDetailsLinkIcon
+          checkGroup={item.monitor.check_group}
+          stepIndex={item.synthetics?.step?.index}
         />
       ),
     },
@@ -202,8 +190,4 @@ const STEP_NAME = i18n.translate('xpack.synthetics.monitor.stepName.label', {
 
 const STEP_DURATION = i18n.translate('xpack.synthetics.monitor.step.duration.label', {
   defaultMessage: 'Duration',
-});
-
-const VIEW_DETAILS = i18n.translate('xpack.synthetics.monitor.step.viewDetails', {
-  defaultMessage: 'View Details',
 });

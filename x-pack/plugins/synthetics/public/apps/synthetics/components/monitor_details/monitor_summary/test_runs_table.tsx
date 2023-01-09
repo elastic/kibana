@@ -6,8 +6,8 @@
  */
 
 import React, { MouseEvent, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { useHistory, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
@@ -24,7 +24,7 @@ import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
 import { MONITOR_HISTORY_ROUTE, MONITOR_TYPES } from '../../../../../../common/constants';
-import { TestDetailsLink } from '../../common/links/test_details_link';
+import { getTestRunDetailLink, TestDetailsLink } from '../../common/links/test_details_link';
 import { ConfigKey, DataStream, Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useGetUrlParams } from '../../../hooks';
@@ -34,6 +34,7 @@ import { selectPingsError } from '../../../state';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
 import { JourneyLastScreenshot } from '../../common/screenshot/journey_last_screenshot';
 import { useSyntheticsRefreshContext } from '../../../contexts';
@@ -78,6 +79,7 @@ export const TestRunsTable = ({
 
   const pingsError = useSelector(selectPingsError);
   const { monitor } = useSelectedMonitor();
+  const selectedLocation = useSelectedLocation();
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
 
@@ -163,7 +165,13 @@ export const TestRunsTable = ({
           targetElem.tagName !== 'path' &&
           !targetElem.parentElement?.classList.contains('euiLink')
         ) {
-          history.push(`/monitor/${monitorId}/test-run/${item.monitor.check_group}`);
+          history.push(
+            getTestRunDetailLink({
+              monitorId,
+              checkGroup: item.monitor.check_group,
+              locationId: selectedLocation?.id,
+            })
+          );
         }
       },
     };

@@ -6,7 +6,6 @@
  */
 
 import React, { MouseEvent, useContext, useState, useCallback, KeyboardEvent } from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiModal,
@@ -91,13 +90,13 @@ export const JourneyScreenshotDialog = ({
           evt?.stopPropagation?.();
           onClose();
         }}
-        css={css({
+        css={{
           outline: 0,
           maxWidth: 'calc(90vw)',
           maxHeight: 'calc(90vh)',
           borderRadius: 0,
           padding: 0,
-        })}
+        }}
         onKeyDown={onKeyDown}
       >
         <EuiModalBody>
@@ -112,14 +111,14 @@ export const JourneyScreenshotDialog = ({
         </EuiModalBody>
 
         <EuiModalFooter
-          css={css`
-            outline: 0;
-            background-color: ${euiTheme.colors.lightShade};
-            display: inline-block;
-            width: 100%;
-            text-decoration: none;
-            padding: 0;
-          `}
+          css={{
+            outline: 0,
+            backgroundColor: euiTheme.colors.lightShade,
+            display: 'inline-block',
+            width: '100%',
+            textDecoration: 'none',
+            padding: 0,
+          }}
           onClick={(evt) => {
             // we don't want this to be captured by row click which leads to step list page
             evt.stopPropagation();
@@ -169,14 +168,14 @@ export const JourneyScreenshotDialog = ({
           </EuiFlexGroup>
           <EuiText
             color={euiTheme.colors.text}
-            css={css({
+            css={{
               outline: 0,
               padding: euiTheme.size.m,
               paddingTop: 0,
               textAlign: 'center',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-            })}
+            }}
             className="eui-textNoWrap"
             size="s"
           >

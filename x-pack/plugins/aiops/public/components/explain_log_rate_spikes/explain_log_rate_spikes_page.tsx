@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
+import { useCss } from '../../hooks/use_css';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
@@ -40,9 +41,6 @@ import { restorableDefaults, type AiOpsPageUrlState } from './explain_log_rate_s
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
 import type { GroupTableItem } from '../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
-
-// TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
-import './explain_log_rate_spikes_page.scss';
 
 function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: GroupTableItem) {
   if (changePoint) {
@@ -68,6 +66,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   dataView,
   savedSearch,
 }) => {
+  const { aiopsPageHeader, dataViewTitleHeader } = useCss();
   const { data: dataService } = useAiopsAppContext();
 
   const {
@@ -189,9 +188,9 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
-          <EuiPageContentHeader className="aiopsPageHeader">
+          <EuiPageContentHeader css={aiopsPageHeader}>
             <EuiPageContentHeaderSection>
-              <div className="dataViewTitleHeader">
+              <div css={dataViewTitleHeader}>
                 <EuiTitle size={'s'}>
                   <h2>{dataView.getName()}</h2>
                 </EuiTitle>

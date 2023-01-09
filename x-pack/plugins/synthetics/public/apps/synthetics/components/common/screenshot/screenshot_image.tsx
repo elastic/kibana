@@ -6,7 +6,6 @@
  */
 
 import React, { useState, MouseEventHandler } from 'react';
-import { css } from '@emotion/css';
 import { useEuiTheme, EuiThemeComputed } from '@elastic/eui';
 
 import { EmptyThumbnail } from './empty_thumbnail';
@@ -49,17 +48,18 @@ export const ScreenshotImage: React.FC<ScreenshotImageProps & { imgSrc?: string 
   return imgSrc ? (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <img
-      css={css`
-        outline: 0;
-        object-fit: contain;
-        width: ${width};
-        height: ${height};
-        cursor: pointer;
-        border: ${euiTheme.border.thin};
-        ${borderColor ? `border-color: ${borderColor}` : ``};
-        ${borderRadius ? `border-radius: ${borderRadius}` : ``};
-        ${!hasBorder ? `border-width: 0` : ``};
-      `}
+      css={{
+        outline: 0,
+        objectFit: 'contain',
+        width,
+        height,
+        cursor: 'pointer',
+        border: euiTheme.border.thin,
+        ...(borderColor ? { borderColor } : {}),
+        ...(borderRadius ? { borderRadius } : {}),
+        ...(!hasBorder ? { borderRadius } : {}),
+        ...(borderColor ? { borderColor } : {}),
+      }}
       src={imgSrc}
       alt={label}
       data-test-subj="stepScreenshotThumbnail"
