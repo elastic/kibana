@@ -15,9 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import { ENABLE_SQL, getEditPath } from '../../common';
+import { ENABLE_SQL } from '../../common';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
 import {
@@ -33,11 +31,11 @@ import {
   getIndexPatternsIds,
   getResolvedDateRange,
   refreshIndexPatternsList,
-  extractReferencesFromState,
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
 import { LensByReferenceInput } from '../embeddable';
+import { getShareURL } from './share_action';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
@@ -581,49 +579,19 @@ export const LensTopNavMenu = ({
               title: title || unsavedTitle,
             };
 
-            const references = extractReferencesFromState({
-              activeDatasources: Object.keys(datasourceStates).reduce(
-                (acc, datasourceId) => ({
-                  ...acc,
-                  [datasourceId]: datasourceMap[datasourceId],
-                }),
-                {}
-              ),
-              datasourceStates,
-              visualizationState: visualization.state,
-              activeVisualization: visualization.activeId
-                ? visualizationMap[visualization.activeId]
-                : undefined,
-            }) as Array<SavedObjectReference & SerializableRecord>;
-
-            const serializableVisualization = visualization as LensAppState['visualization'] &
-              SerializableRecord;
-
-            const serializableDatasourceStates =
-              datasourceStates as LensAppState['datasourceStates'] & SerializableRecord;
-
-            const shareableUrl = await shortUrlService?.({
-              filters,
-              query,
-              resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
-              visualization: serializableVisualization,
-              datasourceStates: serializableDatasourceStates,
-              activeDatasourceId,
-              searchSessionId: data.search.session.getSessionId(),
-              references,
-            });
-
-            const savedObjectURL = new URL(
-              `${application.getUrlForApp('lens', { absolute: true })}${
-                currentDoc?.savedObjectId
-                  ? getEditPath(
-                      currentDoc?.savedObjectId,
-                      data.query.timefilter.timefilter.getTime(),
-                      data.query.filterManager.getGlobalFilters(),
-                      data.query.timefilter.timefilter.getRefreshInterval()
-                    )
-                  : ''
-              }`
+            const { shareableUrl, savedObjectURL } = await getShareURL(
+              shortUrlService,
+              { application, data },
+              {
+                filters,
+                query,
+                activeDatasourceId,
+                datasourceStates,
+                datasourceMap,
+                visualizationMap,
+                visualization,
+                currentDoc,
+              }
             );
 
             share.toggleShareContextMenu({
@@ -777,17 +745,16 @@ export const LensTopNavMenu = ({
     title,
     share,
     unsavedTitle,
-    datasourceStates,
-    visualization,
-    visualizationMap,
+    data,
     filters,
     query,
-    data.query,
-    data.search.session,
     activeDatasourceId,
-    currentDoc?.savedObjectId,
-    isCurrentStateDirty,
+    datasourceStates,
     datasourceMap,
+    visualizationMap,
+    visualization,
+    currentDoc,
+    isCurrentStateDirty,
     onAppLeave,
     runSave,
     attributeService,
