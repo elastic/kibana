@@ -40,13 +40,13 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../lib/kibana', () => {
+jest.mock('../../common/lib/kibana', () => {
   return {
     useKibana: jest.fn(),
   };
 });
 
-jest.mock('../../store/actions', () => {
+jest.mock('../../common/store/actions', () => {
   return {
     inputsActions: {
       setInspectionParameter: jest.fn(),
