@@ -5,36 +5,42 @@
  * 2.0.
  */
 import '../_index.scss';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
-import { isEqual } from 'lodash';
+import { isEqual, throttle } from 'lodash';
+import { EuiResizeObserver } from '@elastic/eui';
 import { encode } from '@kbn/rison';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import {
+  Provider as UrlStateContextProvider,
+  parseUrlState,
+  isRisonSerializationRequired,
+  type Accessor,
+  type Dictionary,
+  type SetUrlState,
+} from '@kbn/ml-url-state';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
 } from './components/index_data_visualizer_view';
-import {
-  Accessor,
-  Provider as UrlStateContextProvider,
-  Dictionary,
-  parseUrlState,
-  SetUrlState,
-  getNestedProperty,
-  isRisonSerializationRequired,
-} from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
+import { DV_STORAGE_KEYS } from './types/storage';
 
-export interface DataVisualizerUrlStateContextProviderProps {
+const localStorage = new Storage(window.localStorage);
+
+export interface DataVisualizerStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
   getAdditionalLinks?: GetAdditionalLinks;
 }
@@ -70,9 +76,10 @@ export const getLocatorParams = (params: {
   return locatorParams;
 };
 
-export const DataVisualizerUrlStateContextProvider: FC<
-  DataVisualizerUrlStateContextProviderProps
-> = ({ IndexDataVisualizerComponent, getAdditionalLinks }) => {
+export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
+  IndexDataVisualizerComponent,
+  getAdditionalLinks,
+}) => {
   const { services } = useDataVisualizerKibana();
   const {
     data: { dataViews, search },
@@ -240,15 +247,36 @@ export const DataVisualizerUrlStateContextProvider: FC<
     [history, urlSearchString]
   );
 
+  const [panelWidth, setPanelWidth] = useState(1600);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const resizeHandler = useCallback(
+    throttle((e: { width: number; height: number }) => {
+      // When window or table is resized,
+      // update the page body width
+      setPanelWidth(e.width);
+    }, 500),
+    []
+  );
+  const compact = useMemo(() => panelWidth <= 1024, [panelWidth]);
+
   return (
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
       {currentDataView ? (
-        <IndexDataVisualizerComponent
-          currentDataView={currentDataView}
-          currentSavedSearch={currentSavedSearch}
-          currentSessionId={currentSessionId}
-          getAdditionalLinks={getAdditionalLinks}
-        />
+        // Needs ResizeObserver to measure window width - side bar navigation
+        <EuiResizeObserver onResize={resizeHandler}>
+          {(resizeRef) => (
+            <div ref={resizeRef}>
+              <IndexDataVisualizerComponent
+                currentDataView={currentDataView}
+                currentSavedSearch={currentSavedSearch}
+                currentSessionId={currentSessionId}
+                getAdditionalLinks={getAdditionalLinks}
+                compact={compact}
+              />
+            </div>
+          )}
+        </EuiResizeObserver>
       ) : (
         <div />
       )}
@@ -293,10 +321,12 @@ export const IndexDataVisualizer: FC<{
   return (
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
       <KibanaContextProvider services={{ ...services }}>
-        <DataVisualizerUrlStateContextProvider
-          IndexDataVisualizerComponent={IndexDataVisualizerView}
-          getAdditionalLinks={getAdditionalLinks}
-        />
+        <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
+          <DataVisualizerStateContextProvider
+            IndexDataVisualizerComponent={IndexDataVisualizerView}
+            getAdditionalLinks={getAdditionalLinks}
+          />
+        </StorageContextProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );

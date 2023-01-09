@@ -4,6 +4,7 @@
   "kibanaVersion": "kibana",
   "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "telemetry"],
   "requiredPlugins": [
+    "actions",
     "alerting",
     "cases",
     "embeddable",
