@@ -49,15 +49,32 @@ export default function (providerContext: FtrProviderContext) {
       if (!server.enabled) {
         return;
       }
-      const { body: agentPolicyResponse } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'Test policy',
-          namespace: 'default',
-        });
+      const [{ body: agentPolicyResponse }, { body: managedAgentPolicyResponse }] =
+        await Promise.all([
+          supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'xxxx').send({
+            name: 'Test policy',
+            namespace: 'default',
+          }),
+          supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'xxxx').send({
+            name: 'Test hosted agent policy',
+            namespace: 'default',
+            is_managed: true,
+          }),
+        ]);
 
       agentPolicyId = agentPolicyResponse.item.id;
+
+      // if one already exists, re-use that
+      const managedExists = managedAgentPolicyResponse.statusCode === 409;
+      if (managedExists) {
+        const errorRegex = /^agent policy \'(?<id>[\w,\-]+)\' already exists/i;
+        const result = errorRegex.exec(managedAgentPolicyResponse.message);
+        if (result?.groups?.id) {
+          managedAgentPolicyId = result.groups.id;
+        }
+      } else {
+        managedAgentPolicyId = managedAgentPolicyResponse.item.id;
+      }
 
       inputOnlyBasePackagePolicy = {
         name: 'input-only-test-1',
@@ -87,136 +104,121 @@ export default function (providerContext: FtrProviderContext) {
         package: { name: 'input_package', title: 'Input only package', version: '1.0.0' },
       };
 
-      const { body: managedAgentPolicyResponse } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'Test hosted agent policy',
-          namespace: 'default',
-          is_managed: true,
-        });
-
-      // if one already exists, re-use that
-      const managedExists = managedAgentPolicyResponse.statusCode === 409;
-      if (managedExists) {
-        const errorRegex = /^agent policy \'(?<id>[\w,\-]+)\' already exists/i;
-        const result = errorRegex.exec(managedAgentPolicyResponse.message);
-        if (result?.groups?.id) {
-          managedAgentPolicyId = result.groups.id;
-        }
-      } else {
-        managedAgentPolicyId = managedAgentPolicyResponse.item.id;
-      }
-
-      const { body: packagePolicyResponse } = await supertest
-        .post(`/api/fleet/package_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'filetest-1',
-          description: '',
-          namespace: 'default',
-          policy_id: agentPolicyId,
-          enabled: true,
-          inputs: [],
-          package: {
-            name: 'filetest',
-            title: 'For File Tests',
-            version: '0.1.0',
-          },
-        });
-      packagePolicyId = packagePolicyResponse.item.id;
-
-      const { body: packagePolicyResponse2 } = await supertest
-        .post(`/api/fleet/package_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'filetest-2',
-          description: '',
-          namespace: 'default',
-          policy_id: agentPolicyId,
-          enabled: true,
-          inputs: [],
-          package: {
-            name: 'filetest',
-            title: 'For File Tests',
-            version: '0.1.0',
-          },
-        });
-      packagePolicyId2 = packagePolicyResponse2.item.id;
-
-      const { body: packagePolicyResponse3 } = await supertest
-        .post(`/api/fleet/package_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'update-package-policy-with_required_variables-1',
-          description: '',
-          namespace: 'default',
-          policy_id: agentPolicyId,
-          inputs: {
-            'with_required_variables-test_input': {
-              streams: {
-                'with_required_variables.log': {
-                  vars: { test_var_required: 'I am required' },
+      const [
+        { body: packagePolicyResponse },
+        { body: packagePolicyResponse2 },
+        { body: packagePolicyResponse3 },
+        { body: endpointPackagePolicyResponse },
+        { body: inputOnlyPolicyResponse },
+      ] = await Promise.all([
+        supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          }),
+        supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-2',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          }),
+        supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'update-package-policy-with_required_variables-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
                 },
               },
             },
-          },
-          package: {
-            name: 'with_required_variables',
-            version: '0.1.0',
-          },
-        });
-      packagePolicyId3 = packagePolicyResponse3.item.id;
-
-      const { body: endpointPackagePolicyResponse } = await supertest
-        .post(`/api/fleet/package_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'endpoint-1',
-          description: '',
-          namespace: 'default',
-          policy_id: agentPolicyId,
-          enabled: true,
-          inputs: [
-            {
-              enabled: true,
-              streams: [],
-              type: 'endpoint',
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
             },
-          ],
-          force: true,
-          package: {
-            name: 'endpoint',
-            title: 'Elastic Defend',
-            version: '8.6.1',
-          },
-        });
+          }),
+        supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'endpoint-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [
+              {
+                enabled: true,
+                streams: [],
+                type: 'endpoint',
+              },
+            ],
+            force: true,
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Defend',
+              version: '8.6.1',
+            },
+          }),
+        supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(inputOnlyBasePackagePolicy),
+      ]);
+      packagePolicyId = packagePolicyResponse.item.id;
+      packagePolicyId2 = packagePolicyResponse2.item.id;
+      packagePolicyId3 = packagePolicyResponse3.item.id;
       endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
-
-      const { body: inputOnlyPolicyResponse } = await supertest
-        .post(`/api/fleet/package_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send(inputOnlyBasePackagePolicy);
       inputOnlyPackagePolicyId = inputOnlyPolicyResponse.item.id;
     });
 
     after(async function () {
-      await supertest
-        .post(`/api/fleet/agent_policies/delete`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ agentPolicyId });
-
-      // uninstall endpoint package
-      await supertest
-        .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ force: true })
-        .expect(200);
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-      await kibanaServer.savedObjects.cleanStandardList();
+      await Promise.all([
+        supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId }),
+        supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId: managedAgentPolicyId }),
+        // uninstall endpoint package
+        supertest
+          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200),
+        esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server'),
+        kibanaServer.savedObjects.cleanStandardList(),
+      ]);
     });
 
     it('should work with valid values on "regular" policies', async function () {
