@@ -287,7 +287,7 @@ describe('Log threshold executor', () => {
               },
               aggregations: {
                 groups: {
-                  aggs: {
+                  aggregations: {
                     additionalContext: {
                       top_hits: {
                         _source: {
