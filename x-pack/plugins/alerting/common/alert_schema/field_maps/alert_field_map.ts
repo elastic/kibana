@@ -21,7 +21,6 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
-  ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -85,11 +84,6 @@ export const alertFieldMap = {
   },
   [ALERT_DURATION]: {
     type: 'long',
-    array: false,
-    required: false,
-  },
-  [ALERT_SEVERITY]: {
-    type: 'keyword',
     array: false,
     required: false,
   },

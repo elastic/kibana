@@ -246,9 +246,6 @@ describe('mappingFromFieldMap', () => {
                     },
                   },
                 },
-                severity: {
-                  type: 'keyword',
-                },
                 start: {
                   type: 'date',
                 },

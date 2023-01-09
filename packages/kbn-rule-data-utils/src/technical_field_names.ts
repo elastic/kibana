@@ -23,7 +23,6 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
-  ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -50,6 +49,7 @@ const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as 
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
 const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
 const ALERT_RISK_SCORE = `${ALERT_NAMESPACE}.risk_score` as const;
+const ALERT_SEVERITY = `${ALERT_NAMESPACE}.severity` as const;
 const ALERT_SYSTEM_STATUS = `${ALERT_NAMESPACE}.system_status` as const;
 const ALERT_WORKFLOW_REASON = `${ALERT_NAMESPACE}.workflow_reason` as const;
 const ALERT_WORKFLOW_USER = `${ALERT_NAMESPACE}.workflow_user` as const;
