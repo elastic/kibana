@@ -114,7 +114,6 @@ export function initRoutes(
       try {
         if (request.body.enabled) {
           await taskManager.bulkEnable([SESSION_INDEX_CLEANUP_TASK_NAME]);
-          await taskManager.runSoon(SESSION_INDEX_CLEANUP_TASK_NAME);
         } else {
           await taskManager.bulkDisable([SESSION_INDEX_CLEANUP_TASK_NAME]);
         }
@@ -128,6 +127,17 @@ export function initRoutes(
       }
 
       logger.info(`Successfully toggled session cleanup task (enabled: ${request.body.enabled}).`);
+
+      if (request.body.enabled) {
+        try {
+          await taskManager.runSoon(SESSION_INDEX_CLEANUP_TASK_NAME);
+          logger.info('Successfully triggered session cleanup task.');
+        } catch (err) {
+          // Running can fail since Task Manager could have already picked up the task, so swallow error as it's not
+          // critical for the test anyway.
+          logger.error(`Could not run the session cleanup task: ${err.message || err}`);
+        }
+      }
 
       return response.ok();
     }
