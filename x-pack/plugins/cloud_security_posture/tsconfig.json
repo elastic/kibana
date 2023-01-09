@@ -46,7 +46,6 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/ecs",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/cloud-security-posture-plugin",
   ],
   "exclude": [
     "target/**/*",
