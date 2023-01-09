@@ -22,6 +22,7 @@ interface Options {
   versionQualifier?: string;
   dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
+  dockerTag: string | null;
   dockerTagQualifier: string | null;
   dockerPush: boolean;
 }
@@ -42,6 +43,7 @@ export class Config {
     versionQualifier,
     dockerContextUseLocalArtifact,
     dockerCrossCompile,
+    dockerTag,
     dockerTagQualifier,
     dockerPush,
   }: Options) {
@@ -60,6 +62,7 @@ export class Config {
       }),
       dockerContextUseLocalArtifact,
       dockerCrossCompile,
+      dockerTag,
       dockerTagQualifier,
       dockerPush,
       isRelease
@@ -74,6 +77,7 @@ export class Config {
     private readonly versionInfo: VersionInfo,
     private readonly dockerContextUseLocalArtifact: boolean | null,
     private readonly dockerCrossCompile: boolean,
+    private readonly dockerTag: string | null,
     private readonly dockerTagQualifier: string | null,
     private readonly dockerPush: boolean,
     public readonly isRelease: boolean
@@ -91,6 +95,13 @@ export class Config {
    */
   getNodeVersion() {
     return this.nodeVersion;
+  }
+
+  /**
+   * Get the docker tag qualifier
+   */
+  getDockerTag() {
+    return this.dockerTag;
   }
 
   /**
