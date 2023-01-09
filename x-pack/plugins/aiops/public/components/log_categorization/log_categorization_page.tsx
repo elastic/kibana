@@ -25,15 +25,16 @@ import {
   EuiLoadingContent,
 } from '@elastic/eui';
 
+import { useUrlState } from '@kbn/ml-url-state';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DatePickerWrapper } from '../date_picker_wrapper';
+import { useCss } from '../../hooks/use_css';
 import { useData } from '../../hooks/use_data';
 import { SearchPanel } from '../search_panel';
 import type {
   SearchQueryLanguage,
   SavedSearchSavedObject,
 } from '../../application/utils/search_utils';
-import { useUrlState } from '../../hooks/use_url_state';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { useCategorizeRequest } from './use_categorize_request';
@@ -53,6 +54,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
   dataView,
   savedSearch,
 }) => {
+  const { aiopsPageHeader, dataViewTitleHeader } = useCss();
   const {
     notifications: { toasts },
   } = useAiopsAppContext();
@@ -220,9 +222,9 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
     <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
-          <EuiPageContentHeader className="aiopsPageHeader">
+          <EuiPageContentHeader css={aiopsPageHeader}>
             <EuiPageContentHeaderSection>
-              <div className="dataViewTitleHeader">
+              <div css={dataViewTitleHeader}>
                 <EuiTitle size="s">
                   <h2>{dataView.getName()}</h2>
                 </EuiTitle>

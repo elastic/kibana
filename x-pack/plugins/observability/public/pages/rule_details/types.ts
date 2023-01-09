@@ -19,7 +19,7 @@ export interface PageHeaderProps {
 }
 
 export interface FetchRuleProps {
-  ruleId: string;
+  ruleId?: string;
   http: HttpSetup;
 }
 

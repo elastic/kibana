@@ -15,10 +15,8 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import {
-  comparePolicies,
-  getTestProjectSyntheticsPolicy,
-} from '../uptime/rest/sample_data/test_policy';
+import { comparePolicies } from './sample_data/test_policy';
+import { getTestProjectSyntheticsPolicy } from './sample_data/test_project_monitor_policy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddProjectMonitors', function () {
@@ -74,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.10.3')
+        .post('/api/fleet/epm/packages/synthetics/0.11.4')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -140,6 +138,11 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             'filter_journeys.match': 'check if title is present',
             'filter_journeys.tags': [],
             form_monitor_type: 'multistep',
@@ -152,11 +155,8 @@ export default function ({ getService }: FtrProviderContext) {
                   lon: 0,
                 },
                 id: 'localhost',
-                isInvalid: false,
                 isServiceManaged: true,
                 label: 'Local Synthetics Service',
-                status: 'experimental',
-                url: 'mockDevUrl',
               },
             ],
             name: 'check if title is present',
@@ -230,8 +230,8 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               id: httpProjectMonitors.monitors[0].id,
-              details: `Multiple urls are not supported for http project monitors in ${kibanaVersion}. Please set only 1 url per monitor. You monitor was not created or updated.`,
-              reason: 'Unsupported Heartbeat option',
+              details: `\`http\` project monitors must have exactly one value for field \`urls\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+              reason: 'Invalid Heartbeat configuration',
             },
             {
               id: httpProjectMonitors.monitors[0].id,
@@ -273,6 +273,11 @@ export default function ({ getService }: FtrProviderContext) {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
             enabled: false,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'http',
             journey_id: journeyId,
             locations: [
@@ -282,11 +287,8 @@ export default function ({ getService }: FtrProviderContext) {
                   lon: 0,
                 },
                 id: 'localhost',
-                isInvalid: false,
                 isServiceManaged: true,
                 label: 'Local Synthetics Service',
-                status: 'experimental',
-                url: 'mockDevUrl',
               },
             ],
             max_redirects: '0',
@@ -348,8 +350,8 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               id: tcpProjectMonitors.monitors[2].id,
-              details: `Multiple hosts are not supported for tcp project monitors in ${kibanaVersion}. Please set only 1 host per monitor. You monitor was not created or updated.`,
-              reason: 'Unsupported Heartbeat option',
+              details: `\`tcp\` project monitors must have exactly one value for field \`hosts\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+              reason: 'Invalid Heartbeat configuration',
             },
             {
               id: tcpProjectMonitors.monitors[2].id,
@@ -381,6 +383,11 @@ export default function ({ getService }: FtrProviderContext) {
             'check.receive': '',
             'check.send': '',
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'tcp',
             journey_id: journeyId,
             locations: [
@@ -390,11 +397,8 @@ export default function ({ getService }: FtrProviderContext) {
                   lon: 0,
                 },
                 id: 'localhost',
-                isInvalid: false,
                 isServiceManaged: true,
                 label: 'Local Synthetics Service',
-                status: 'experimental',
-                url: 'mockDevUrl',
               },
             ],
             name: monitor.name,
@@ -452,8 +456,8 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               id: icmpProjectMonitors.monitors[2].id,
-              details: `Multiple hosts are not supported for icmp project monitors in ${kibanaVersion}. Please set only 1 host per monitor. You monitor was not created or updated.`,
-              reason: 'Unsupported Heartbeat option',
+              details: `\`icmp\` project monitors must have exactly one value for field \`hosts\` in version \`${kibanaVersion}\`. Your monitor was not created or updated.`,
+              reason: 'Invalid Heartbeat configuration',
             },
             {
               id: icmpProjectMonitors.monitors[2].id,
@@ -480,6 +484,11 @@ export default function ({ getService }: FtrProviderContext) {
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             enabled: true,
+            alert: {
+              status: {
+                enabled: true,
+              },
+            },
             form_monitor_type: 'icmp',
             journey_id: journeyId,
             locations: [
@@ -489,21 +498,15 @@ export default function ({ getService }: FtrProviderContext) {
                   lon: 0,
                 },
                 id: 'localhost',
-                isInvalid: false,
                 isServiceManaged: true,
                 label: 'Local Synthetics Service',
-                status: 'experimental',
-                url: 'mockDevUrl',
               },
               {
-                agentPolicyId: testPolicyId,
-                concurrentMonitors: 1,
                 geo: {
                   lat: '',
                   lon: '',
                 },
                 id: testPolicyId,
-                isInvalid: false,
                 isServiceManaged: false,
                 label: 'Test private location 0',
               },
@@ -1039,6 +1042,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationName: 'Test private location 0',
           })
         );
       } finally {
@@ -1161,6 +1165,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationName: 'Test private location 0',
           })
         );
 
@@ -1241,6 +1246,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationName: 'Test private location 0',
           })
         );
 
@@ -1277,6 +1283,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: id2,
             configId: configId2,
             projectId: project,
+            locationName: 'Test private location 0',
           })
         );
       } finally {
@@ -1317,22 +1324,16 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'localhost',
               label: 'Local Synthetics Service',
               geo: { lat: 0, lon: 0 },
-              url: 'mockDevUrl',
               isServiceManaged: true,
-              status: 'experimental',
-              isInvalid: false,
             },
             {
               label: 'Test private location 0',
               isServiceManaged: false,
-              isInvalid: false,
-              agentPolicyId: testPolicyId,
               id: testPolicyId,
               geo: {
                 lat: '',
                 lon: '',
               },
-              concurrentMonitors: 1,
             },
           ]);
         });

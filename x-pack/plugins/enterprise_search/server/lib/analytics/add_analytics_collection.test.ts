@@ -55,7 +55,7 @@ describe('add analytics collection lib function', () => {
       )
     ).resolves.toEqual({
       event_retention_day_length: 180,
-      events_datastream: 'elastic_analytics-events-example',
+      events_datastream: 'logs-elastic_analytics.events-example',
       id: 'example',
       name: 'example',
     });
@@ -63,7 +63,7 @@ describe('add analytics collection lib function', () => {
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
         event_retention_day_length: 180,
-        events_datastream: 'elastic_analytics-events-example',
+        events_datastream: 'logs-elastic_analytics.events-example',
         name: 'example',
       },
       id: 'example',
@@ -73,9 +73,9 @@ describe('add analytics collection lib function', () => {
     expect(mockDataViewsService.createAndSave).toHaveBeenCalledWith(
       {
         allowNoIndex: true,
-        namespaces: ['elastic_analytics-events-example'],
+        name: 'elastic_analytics.events-example',
+        title: 'logs-elastic_analytics.events-example',
         timeFieldName: '@timestamp',
-        title: 'elastic_analytics.events-example',
       },
       true
     );
@@ -115,7 +115,7 @@ describe('add analytics collection lib function', () => {
       )
     ).resolves.toEqual({
       event_retention_day_length: 180,
-      events_datastream: 'elastic_analytics-events-example',
+      events_datastream: 'logs-elastic_analytics.events-example',
       id: 'example',
       name: 'example',
     });
@@ -123,7 +123,7 @@ describe('add analytics collection lib function', () => {
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
         event_retention_day_length: 180,
-        events_datastream: 'elastic_analytics-events-example',
+        events_datastream: 'logs-elastic_analytics.events-example',
         name: 'example',
       },
       id: 'example',

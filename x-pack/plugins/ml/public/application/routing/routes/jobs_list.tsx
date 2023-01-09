@@ -61,7 +61,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
 
   useEffect(() => {
     const refreshInterval =
-      refreshValue === 0 && refreshPause === true
+      refreshValue === 0 || refreshPause === true
         ? { pause: false, value: DEFAULT_REFRESH_INTERVAL_MS }
         : { pause: refreshPause, value: refreshValue };
     timefilter.setRefreshInterval(refreshInterval);

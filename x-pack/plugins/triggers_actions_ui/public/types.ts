@@ -15,6 +15,8 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IconType, EuiFlyoutSize, RecursivePartial } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
+import { HttpSetup } from '@kbn/core/public';
+import { KueryNode } from '@kbn/es-query';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
@@ -169,22 +171,27 @@ export enum ActionConnectorMode {
   ActionForm = 'actionForm',
 }
 
-export interface BulkDeleteResponse {
-  errors: BulkOperationError[];
-  total: number;
-}
-
-export interface BulkEnableResponse {
+export interface BulkOperationResponse {
   rules: Rule[];
   errors: BulkOperationError[];
   total: number;
 }
 
-export interface BulkDisableResponse {
-  rules: Rule[];
-  errors: BulkOperationError[];
-  total: number;
+interface BulkOperationAttributesByIds {
+  ids: string[];
+  filter?: never;
 }
+interface BulkOperationAttributesByFilter {
+  ids?: never;
+  filter: KueryNode | null;
+}
+export type BulkOperationAttributesWithoutHttp =
+  | BulkOperationAttributesByIds
+  | BulkOperationAttributesByFilter;
+
+export type BulkOperationAttributes = BulkOperationAttributesWithoutHttp & {
+  http: HttpSetup;
+};
 
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
@@ -198,6 +205,7 @@ export interface ActionParamsProps<TParams> {
   isDisabled?: boolean;
   showEmailSubjectAndMessage?: boolean;
   executionMode?: ActionConnectorMode;
+  onBlur?: (field?: string) => void;
 }
 
 export interface Pagination {
@@ -364,6 +372,9 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   requiresAppContext: boolean;
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
+  alertDetailsAppSection?:
+    | React.FunctionComponent<any>
+    | React.LazyExoticComponent<ComponentType<any>>;
 }
 
 export interface IErrorObject {

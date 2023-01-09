@@ -27,22 +27,20 @@ import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
+import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
+import { useCss } from '../../hooks/use_css';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
-import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/use_url_state';
 import { useData } from '../../hooks/use_data';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 import { SearchPanel } from '../search_panel';
 
-import { restorableDefaults } from './explain_log_rate_spikes_app_state';
+import { restorableDefaults, type AiOpsPageUrlState } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
-import type { GroupTableItem } from '../spike_analysis_table/spike_analysis_table_groups';
+import type { GroupTableItem } from '../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
-
-// TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
-import './explain_log_rate_spikes_page.scss';
 
 function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: GroupTableItem) {
   if (changePoint) {
@@ -68,6 +66,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   dataView,
   savedSearch,
 }) => {
+  const { aiopsPageHeader, dataViewTitleHeader } = useCss();
   const { data: dataService } = useAiopsAppContext();
 
   const {
@@ -79,7 +78,10 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     setSelectedGroup,
   } = useSpikeAnalysisTableRowContext();
 
-  const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
+  const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
+    'AIOPS_INDEX_VIEWER',
+    restorableDefaults
+  );
   const [globalState, setGlobalState] = useUrlState('_g');
 
   const [currentSavedSearch, setCurrentSavedSearch] = useState(savedSearch);
@@ -97,7 +99,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
     }) => {
-      // When the user loads saved search and then clear or modify the query
+      // When the user loads a saved search and then clears or modifies the query
       // we should remove the saved search and replace it with the index pattern id
       if (currentSavedSearch !== null) {
         setCurrentSavedSearch(null);
@@ -186,9 +188,9 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
     <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
-          <EuiPageContentHeader className="aiopsPageHeader">
+          <EuiPageContentHeader css={aiopsPageHeader}>
             <EuiPageContentHeaderSection>
-              <div className="dataViewTitleHeader">
+              <div css={dataViewTitleHeader}>
                 <EuiTitle size={'s'}>
                   <h2>{dataView.getName()}</h2>
                 </EuiTitle>

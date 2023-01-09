@@ -17,7 +17,11 @@ import type {
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import {
+  setMapsAreEqual,
+  SavedObjectsErrorHelpers,
+  setsAreEqual,
+} from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import {
@@ -31,12 +35,8 @@ import { AuditAction, type ISavedObjectsSecurityExtension } from '@kbn/core-save
 import {
   authMap,
   enforceError,
-  typeMapsAreEqual,
-  setsAreEqual,
-  setupCheckAuthorized,
-  setupCheckUnauthorized,
-  setupEnforceFailure,
-  setupEnforceSuccess,
+  setupPerformAuthFullyAuthorized,
+  setupPerformAuthEnforceFailure,
   setupRedactPassthrough,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
@@ -487,7 +487,7 @@ describe('collectMultiNamespaceReferences', () => {
     });
 
     afterEach(() => {
-      mockSecurityExt.checkAuthorization.mockReset();
+      mockSecurityExt.performAuthorization.mockReset();
       mockSecurityExt.enforceAuthorization.mockReset();
       mockSecurityExt.redactNamespaces.mockReset();
       mockSecurityExt.addAuditEvent.mockReset();
@@ -495,25 +495,21 @@ describe('collectMultiNamespaceReferences', () => {
 
     describe(`errors`, () => {
       test(`propagates decorated error when not authorized`, async () => {
-        setupCheckUnauthorized(mockSecurityExt);
         // Unlike other functions, it doesn't validate the level of authorization first, so we need to
         // carry on and mock the enforce function as well to create an unauthorized condition
-        setupEnforceFailure(mockSecurityExt);
+        setupPerformAuthEnforceFailure(mockSecurityExt);
 
         await expect(collectMultiNamespaceReferences(params)).rejects.toThrow(enforceError);
-        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
       });
 
       test(`adds audit event per object when not successful`, async () => {
-        setupCheckUnauthorized(mockSecurityExt);
         // Unlike other functions, it doesn't validate the level of authorization first, so we need to
         // carry on and mock the enforce function as well to create an unauthorized condition
-        setupEnforceFailure(mockSecurityExt);
+        setupPerformAuthEnforceFailure(mockSecurityExt);
 
         await expect(collectMultiNamespaceReferences(params)).rejects.toThrow(enforceError);
-        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
 
         expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
         objects.forEach((obj) => {
@@ -528,23 +524,19 @@ describe('collectMultiNamespaceReferences', () => {
 
     describe('checks privileges', () => {
       beforeEach(() => {
-        setupCheckUnauthorized(mockSecurityExt);
-        setupEnforceFailure(mockSecurityExt);
+        setupPerformAuthEnforceFailure(mockSecurityExt);
       });
       test(`in the default state`, async () => {
         await expect(collectMultiNamespaceReferences(params)).rejects.toThrow(enforceError);
 
-        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
         const expectedSpaces = new Set(['default', ...SPACES, ...obj1LegacySpaces]);
-        const { spaces: actualSpaces } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
+        const expectedEnforceMap = new Map([[objects[0].type, new Set(['default'])]]);
+
+        const { spaces: actualSpaces, enforceMap: actualEnforceMap } =
+          mockSecurityExt.performAuthorization.mock.calls[0][0];
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-
-        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-        const expectedTypesAndSpaces = new Map([[objects[0].type, new Set(['default'])]]);
-        const { typesAndSpaces: actualTypesAndSpaces } =
-          mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-        expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
+        expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       });
 
       test(`in a non-default state`, async () => {
@@ -553,17 +545,13 @@ describe('collectMultiNamespaceReferences', () => {
           collectMultiNamespaceReferences({ ...params, options: { namespace } })
         ).rejects.toThrow(enforceError);
 
-        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
         const expectedSpaces = new Set([namespace, ...SPACES, ...obj1LegacySpaces]);
-        const { spaces: actualSpaces } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
+        const expectedEnforceMap = new Map([[objects[0].type, new Set([namespace])]]);
+        const { spaces: actualSpaces, enforceMap: actualEnforceMap } =
+          mockSecurityExt.performAuthorization.mock.calls[0][0];
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-
-        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-        const expectedTypesAndSpaces = new Map([[objects[0].type, new Set([namespace])]]);
-        const { typesAndSpaces: actualTypesAndSpaces } =
-          mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-        expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
+        expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
       });
 
       test(`with purpose 'collectMultiNamespaceReferences'`, async () => {
@@ -571,19 +559,17 @@ describe('collectMultiNamespaceReferences', () => {
           purpose: 'collectMultiNamespaceReferences',
         };
 
-        setupCheckUnauthorized(mockSecurityExt);
-        setupEnforceFailure(mockSecurityExt);
+        setupPerformAuthEnforceFailure(mockSecurityExt);
 
         await expect(collectMultiNamespaceReferences({ ...params, options })).rejects.toThrow(
           enforceError
         );
-        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-        expect(mockSecurityExt.checkAuthorization).toBeCalledWith(
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.performAuthorization).toBeCalledWith(
           expect.objectContaining({
             actions: new Set(['bulk_get']),
           })
         );
-        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
       });
 
       test(`with purpose 'updateObjectsSpaces'`, async () => {
@@ -591,45 +577,40 @@ describe('collectMultiNamespaceReferences', () => {
           purpose: 'updateObjectsSpaces',
         };
 
-        setupCheckUnauthorized(mockSecurityExt);
-        setupEnforceFailure(mockSecurityExt);
+        setupPerformAuthEnforceFailure(mockSecurityExt);
 
         await expect(collectMultiNamespaceReferences({ ...params, options })).rejects.toThrow(
           enforceError
         );
-        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-        expect(mockSecurityExt.checkAuthorization).toBeCalledWith(
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.performAuthorization).toBeCalledWith(
           expect.objectContaining({
             actions: new Set(['share_to_space']),
           })
         );
-        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('success', () => {
       beforeEach(async () => {
-        setupCheckAuthorized(mockSecurityExt);
-        setupEnforceSuccess(mockSecurityExt);
+        setupPerformAuthFullyAuthorized(mockSecurityExt);
         setupRedactPassthrough(mockSecurityExt);
         await collectMultiNamespaceReferences(params);
       });
       test(`calls redactNamespaces with type, spaces, and authorization map`, async () => {
-        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
         const expectedSpaces = new Set(['default', ...SPACES, ...obj1LegacySpaces]);
-        const { spaces: actualSpaces } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
+        const { spaces: actualSpaces } = mockSecurityExt.performAuthorization.mock.calls[0][0];
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
 
         const resultObjects = [obj1, obj2, obj3];
 
         // enforce is called once for all objects/spaces, then once per object
-        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(
-          1 + resultObjects.length
-        );
+        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(resultObjects.length);
         const expectedTypesAndSpaces = new Map([[objects[0].type, new Set(['default'])]]);
         const { typesAndSpaces: actualTypesAndSpaces } =
           mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-        expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
+        expect(setMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
 
         // Redact is called once per object, but an additional time for object 1 because it has legacy URL aliases in another set of spaces
         expect(mockSecurityExt.redactNamespaces).toBeCalledTimes(resultObjects.length + 1);
@@ -653,14 +634,9 @@ describe('collectMultiNamespaceReferences', () => {
       });
 
       test(`adds audit event per object when successful`, async () => {
-        expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
 
         const resultObjects = [obj1, obj2, obj3];
-
-        // enforce is called once for all objects/spaces, then once per object
-        expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(
-          1 + resultObjects.length
-        );
 
         expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(resultObjects.length);
         resultObjects.forEach((obj) => {

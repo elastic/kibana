@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { InjectedMetadataStart } from '@kbn/core-injected-metadata-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -14,7 +13,7 @@ import type { ExecutionContextStart } from '@kbn/core-execution-context-browser'
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { FatalErrorsStart } from '@kbn/core-fatal-errors-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
@@ -53,13 +52,14 @@ export interface CoreStart {
   /** {@link OverlayStart} */
   overlays: OverlayStart;
   /** {@link IUiSettingsClient} */
+  /** @Deprecated Use {@link CoreStart.settings} instead */
   uiSettings: IUiSettingsClient;
+  /** {@link SettingsStart} */
+  settings: SettingsStart;
   /** {@link FatalErrorsStart} */
   fatalErrors: FatalErrorsStart;
   /** {@link DeprecationsServiceStart} */
   deprecations: DeprecationsServiceStart;
   /** {@link ThemeServiceStart} */
   theme: ThemeServiceStart;
-  /** {@link InjectedMetadataStart} */
-  injectedMetadata: InjectedMetadataStart;
 }
