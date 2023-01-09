@@ -15,7 +15,8 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { estypes } from '@elastic/elasticsearch';
 import { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
-import { kibanaPackageJson } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { wrapErrorIfNeeded } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
 import { FtrService } from '../../../functional/ftr_provider_context';
 import { EndpointRuleAlertGenerator } from './endpoint_rule_alert_generator';
