@@ -14,13 +14,13 @@ import globby from 'globby';
 import { ESLint } from 'eslint';
 
 import micromatch from 'micromatch';
-import { REPO_ROOT } from '@kbn/utils';
-import { discoverBazelPackages, BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
 import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
 import { sortPackageJson } from '@kbn/sort-package-json';
 
 import { validateElasticTeam } from '../lib/validate_elastic_team';
-import { TEMPLATE_DIR, ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
+import { ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
 import type { GenerateCommand } from '../generate_command';
 import { ask } from '../lib/ask';
 
@@ -180,20 +180,11 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
       ? [packageJson.devDependencies, packageJson.dependencies]
       : [packageJson.dependencies, packageJson.devDependencies];
 
-    addDeps[pkgId] = `link:bazel-bin/${normalizedRepoRelativeDir}`;
+    addDeps[pkgId] = `link:${normalizedRepoRelativeDir}`;
     delete removeDeps[pkgId];
 
     await Fsp.writeFile(packageJsonPath, sortPackageJson(JSON.stringify(packageJson)));
     log.info('Updated package.json file');
-
-    await render.toFile(
-      Path.resolve(TEMPLATE_DIR, 'packages_BUILD.bazel.ejs'),
-      Path.resolve(REPO_ROOT, 'packages/BUILD.bazel'),
-      {
-        packages: await discoverBazelPackages(REPO_ROOT),
-      }
-    );
-    log.info('Updated packages/BUILD.bazel');
 
     log.success(`Generated ${pkgId}! Please bootstrap to make sure it works.`);
   },
