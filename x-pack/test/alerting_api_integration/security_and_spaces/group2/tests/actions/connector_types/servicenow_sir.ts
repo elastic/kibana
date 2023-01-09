@@ -11,9 +11,9 @@ import { asyncForEach } from '@kbn/std';
 import getPort from 'get-port';
 import http from 'http';
 
-import { getHttpProxyServer } from '../../../../../../common/lib/get_proxy_server';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
-import { getServiceNowServer } from '../../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { getHttpProxyServer } from '../../../../../common/lib/get_proxy_server';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getServiceNowServer } from '../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function serviceNowSIRTest({ getService }: FtrProviderContext) {

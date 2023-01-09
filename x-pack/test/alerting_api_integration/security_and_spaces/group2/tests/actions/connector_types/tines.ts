@@ -7,14 +7,14 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   TinesSimulator,
   tinesStory1,
   tinesStory2,
   tinesAgentWebhook,
   tinesWebhookSuccessResponse,
-} from '../../../../../../common/fixtures/plugins/actions_simulators/server/tines_simulation';
+} from '../../../../../common/fixtures/plugins/actions_simulators/server/tines_simulation';
 
 const connectorTypeId = '.tines';
 const name = 'A tines action';

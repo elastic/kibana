@@ -5,34 +5,32 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function emailTest({ getService }: FtrProviderContext) {
+export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('create email action', () => {
-    it('should return 403 when creating an email action', async () => {
+  describe('pagerduty action', () => {
+    it('should return 403 when creating a pagerduty action', async () => {
       await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'An email action',
-          actionTypeId: '.email',
+          name: 'A pagerduty action',
+          actionTypeId: '.pagerduty',
           config: {
-            service: '__json',
-            from: 'bob@example.com',
+            apiUrl: 'http://localhost',
           },
           secrets: {
-            user: 'bob',
-            password: 'supersecret',
+            routingKey: 'pager-duty-routing-key',
           },
         })
         .expect(403, {
           statusCode: 403,
           error: 'Forbidden',
           message:
-            'Action type .email is disabled because your basic license does not support it. Please upgrade your license.',
+            'Action type .pagerduty is disabled because your basic license does not support it. Please upgrade your license.',
         });
     });
   });

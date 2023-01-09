@@ -8,35 +8,37 @@
 import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
-import { getHttpProxyServer } from '../../../../../../common/lib/get_proxy_server';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { getHttpProxyServer } from '../../../../../common/lib/get_proxy_server';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+} from '../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
-export default function jiraTest({ getService }: FtrProviderContext) {
+export default function resilientTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
 
-  const mockJira = {
+  const mockResilient = {
     config: {
-      apiUrl: 'www.jiraisinkibanaactions.com',
-      projectKey: 'CK',
+      apiUrl: 'www.resilientisinkibanaactions.com',
+      orgId: '201',
     },
     secrets: {
-      apiToken: 'elastic',
-      email: 'elastic@elastic.co',
+      apiKeyId: 'key',
+      apiKeySecret: 'secret',
     },
     params: {
       subAction: 'pushToService',
       subActionParams: {
         incident: {
-          summary: 'a title',
+          name: 'a title',
           description: 'a description',
+          incidentTypes: [1001],
+          severityCode: 6,
           externalId: null,
         },
         comments: [
@@ -49,27 +51,28 @@ export default function jiraTest({ getService }: FtrProviderContext) {
     },
   };
 
-  let jiraSimulatorURL: string = '<could not determine kibana url>';
+  let resilientSimulatorURL: string = '<could not determine kibana url>';
 
-  describe('Jira', () => {
+  describe('IBM Resilient', () => {
     before(() => {
-      jiraSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA)
+      resilientSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT)
       );
     });
-    describe('Jira - Action Creation', () => {
-      it('should return 200 when creating a jira action successfully', async () => {
+
+    describe('IBM Resilient - Action Creation', () => {
+      it('should return 200 when creating a ibm resilient action successfully', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A jira action',
-            connector_type_id: '.jira',
+            name: 'An IBM Resilient action',
+            connector_type_id: '.resilient',
             config: {
-              ...mockJira.config,
-              apiUrl: jiraSimulatorURL,
+              ...mockResilient.config,
+              apiUrl: resilientSimulatorURL,
             },
-            secrets: mockJira.secrets,
+            secrets: mockResilient.secrets,
           })
           .expect(200);
 
@@ -77,12 +80,12 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           id: createdAction.id,
           is_preconfigured: false,
           is_deprecated: false,
-          name: 'A jira action',
-          connector_type_id: '.jira',
+          name: 'An IBM Resilient action',
+          connector_type_id: '.resilient',
           is_missing_secrets: false,
           config: {
-            apiUrl: jiraSimulatorURL,
-            projectKey: mockJira.config.projectKey,
+            apiUrl: resilientSimulatorURL,
+            orgId: mockResilient.config.orgId,
           },
         });
 
@@ -94,24 +97,24 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           id: fetchedAction.id,
           is_preconfigured: false,
           is_deprecated: false,
-          name: 'A jira action',
-          connector_type_id: '.jira',
+          name: 'An IBM Resilient action',
+          connector_type_id: '.resilient',
           is_missing_secrets: false,
           config: {
-            apiUrl: jiraSimulatorURL,
-            projectKey: mockJira.config.projectKey,
+            apiUrl: resilientSimulatorURL,
+            orgId: mockResilient.config.orgId,
           },
         });
       });
 
-      it('should respond with a 400 Bad Request when creating a jira action with no apiUrl', async () => {
+      it('should respond with a 400 Bad Request when creating a ibm resilient action with no apiUrl', async () => {
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A jira action',
-            connector_type_id: '.jira',
-            config: { projectKey: 'CK' },
+            name: 'An IBM Resilient',
+            connector_type_id: '.resilient',
+            config: { orgId: '201' },
           })
           .expect(400)
           .then((resp: any) => {
@@ -124,14 +127,14 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a jira action with no projectKey', async () => {
+      it('should respond with a 400 Bad Request when creating a ibm resilient action with no orgId', async () => {
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A jira action',
-            connector_type_id: '.jira',
-            config: { apiUrl: jiraSimulatorURL },
+            name: 'An IBM Resilient',
+            connector_type_id: '.resilient',
+            config: { apiUrl: resilientSimulatorURL },
           })
           .expect(400)
           .then((resp: any) => {
@@ -139,23 +142,23 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: [projectKey]: expected value of type [string] but got [undefined]',
+                'error validating action type config: [orgId]: expected value of type [string] but got [undefined]',
             });
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a jira action with a not present in allowedHosts apiUrl', async () => {
+      it('should respond with a 400 Bad Request when creating a ibm resilient action with a not present in allowedHosts apiUrl', async () => {
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A jira action',
-            connector_type_id: '.jira',
+            name: 'An IBM Resilient',
+            connector_type_id: '.resilient',
             config: {
-              apiUrl: 'http://jira.mynonexistent.com',
-              projectKey: mockJira.config.projectKey,
+              apiUrl: 'http://resilient.mynonexistent.com',
+              orgId: mockResilient.config.orgId,
             },
-            secrets: mockJira.secrets,
+            secrets: mockResilient.secrets,
           })
           .expect(400)
           .then((resp: any) => {
@@ -163,21 +166,21 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://jira.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating action type config: error configuring connector action: target url "http://resilient.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a jira action without secrets', async () => {
+      it('should respond with a 400 Bad Request when creating a ibm resilient action without secrets', async () => {
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A jira action',
-            connector_type_id: '.jira',
+            name: 'An IBM Resilient',
+            connector_type_id: '.resilient',
             config: {
-              apiUrl: jiraSimulatorURL,
-              projectKey: mockJira.config.projectKey,
+              apiUrl: resilientSimulatorURL,
+              orgId: mockResilient.config.orgId,
             },
           })
           .expect(400)
@@ -186,29 +189,28 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: [email]: expected value of type [string] but got [undefined]',
+                'error validating action type secrets: [apiKeyId]: expected value of type [string] but got [undefined]',
             });
           });
       });
     });
 
-    describe('Jira - Executor', () => {
+    describe('IBM Resilient - Executor', () => {
       let simulatedActionId: string;
       let proxyServer: httpProxy | undefined;
       let proxyHaveBeenCalled = false;
-
       before(async () => {
         const { body } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A jira simulator',
-            connector_type_id: '.jira',
+            name: 'A ibm resilient simulator',
+            connector_type_id: '.resilient',
             config: {
-              apiUrl: jiraSimulatorURL,
-              projectKey: mockJira.config.projectKey,
+              apiUrl: resilientSimulatorURL,
+              orgId: mockResilient.config.orgId,
             },
-            secrets: mockJira.secrets,
+            secrets: mockResilient.secrets,
           });
         simulatedActionId = body.id;
 
@@ -249,7 +251,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
@@ -267,7 +269,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.summary]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.name]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
@@ -278,7 +280,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
-                ...mockJira.params,
+                ...mockResilient.params,
                 subActionParams: {
                   incident: {
                     description: 'success',
@@ -293,7 +295,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.summary]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.name]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
@@ -304,12 +306,11 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
-                ...mockJira.params,
+                ...mockResilient.params,
                 subActionParams: {
                   incident: {
-                    ...mockJira.params.subActionParams.incident,
-                    description: 'success',
-                    summary: 'success',
+                    ...mockResilient.params.subActionParams.incident,
+                    name: 'success',
                   },
                   comments: [{ comment: 'comment' }],
                 },
@@ -321,7 +322,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
@@ -332,11 +333,11 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
-                ...mockJira.params,
+                ...mockResilient.params,
                 subActionParams: {
                   incident: {
-                    ...mockJira.params.subActionParams.incident,
-                    summary: 'success',
+                    ...mockResilient.params.subActionParams.incident,
+                    name: 'success',
                   },
                   comments: [{ commentId: 'success' }],
                 },
@@ -348,35 +349,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
-              });
-            });
-        });
-
-        it('should handle failing with a simulated success when labels containing a space', async () => {
-          await supertest
-            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...mockJira.params,
-                subActionParams: {
-                  incident: {
-                    ...mockJira.params.subActionParams.incident,
-                    issueType: '10006',
-                    labels: ['label with spaces'],
-                  },
-                  comments: [],
-                },
-              },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                connector_id: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.labels]: types that failed validation:\n - [subActionParams.incident.labels.0.0]: The label label with spaces cannot contain spaces\n - [subActionParams.incident.labels.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
               });
             });
         });
@@ -389,13 +362,10 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
-                ...mockJira.params,
+                ...mockResilient.params,
                 subActionParams: {
-                  incident: {
-                    ...mockJira.params.subActionParams.incident,
-                    issueType: '10006',
-                  },
-                  comments: [],
+                  ...mockResilient.params.subActionParams,
+                  comments: null,
                 },
               },
             })
@@ -407,9 +377,9 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             connector_id: simulatedActionId,
             data: {
               id: '123',
-              title: 'CK-1',
-              pushedDate: '2020-04-27T14:17:45.490Z',
-              url: `${jiraSimulatorURL}/browse/CK-1`,
+              title: '123',
+              pushedDate: '2020-05-13T17:44:34.472Z',
+              url: `${resilientSimulatorURL}/#incidents/123`,
             },
           });
         });

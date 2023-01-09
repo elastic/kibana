@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function serverLogTest({ getService }: FtrProviderContext) {
+export default function indexTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('server-log action', () => {
-    it('should return 200 when creating a server-log action', async () => {
+  describe('index action', () => {
+    it('should return 200 when creating an index action', async () => {
+      // create action with no config
       await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'A server.log action',
-          actionTypeId: '.server-log',
+          name: 'An index action',
+          actionTypeId: '.index',
+          config: {
+            index: 'foo',
+          },
+          secrets: {},
         })
         .expect(200);
     });
