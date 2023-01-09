@@ -14,3 +14,6 @@ export * from './filterable_embeddable';
 export * from './filterable_embeddable_factory';
 export * from './hello_world_container';
 export * from './hello_world_container_component';
+export * from './time_range_container';
+export * from './time_range_embeddable_factory';
+export * from './time_range_embeddable';

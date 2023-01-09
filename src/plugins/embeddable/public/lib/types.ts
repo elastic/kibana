@@ -24,7 +24,7 @@ export interface PropertySpec {
 export { ViewMode } from '../../common/types';
 export type { Adapters };
 
-export interface TimePickerRange {
+export interface CommonlyUsedRange {
   from: string;
   to: string;
   display: string;

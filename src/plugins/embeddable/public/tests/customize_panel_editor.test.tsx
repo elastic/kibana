@@ -21,7 +21,7 @@ import {
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 import { coreMock } from '@kbn/core/public/mocks';
 import { testPlugin } from './test_plugin';
-import { CustomizePanelModal } from '../lib/panel/panel_header/panel_actions/customize_title/customize_panel_modal';
+import { CustomizePanelEditor } from '../lib/panel/panel_header/panel_actions/customize_panel/customize_panel_editor';
 import { EmbeddableStart } from '../plugin';
 import { createEmbeddablePanelMock } from '../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -76,79 +76,98 @@ beforeEach(async () => {
 
 test('Value is initialized with the embeddables title', async () => {
   const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={() => {}} cancel={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
   );
 
-  const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
-  expect(inputField.props().value).toBe(embeddable.getOutput().title);
-  expect(inputField.props().value).toBe(embeddable.getOutput().defaultTitle);
+  const titleField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
+  const descriptionField = findTestSubject(component, 'customEmbeddablePanelDescriptionInput').find(
+    'textarea'
+  );
+  expect(titleField.props().value).toBe(embeddable.getOutput().title);
+  expect(titleField.props().value).toBe(embeddable.getOutput().defaultTitle);
+  expect(descriptionField.props().value).toBe(embeddable.getOutput().description);
+  expect(descriptionField.props().value).toBe(embeddable.getOutput().defaultDescription);
 });
 
-test('Calls updateTitle with a new title', async () => {
-  const updateTitle = jest.fn();
+test('Calls updateInput with a new title', async () => {
+  const updateInput = jest.spyOn(embeddable, 'updateInput');
   const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
   const event = { target: { value: 'new title' } };
   inputField.simulate('change', event);
 
-  findTestSubject(component, 'saveNewTitleButton').simulate('click');
+  findTestSubject(component, 'saveCustomizePanelButton').simulate('click');
 
-  expect(updateTitle).toBeCalledWith('new title', undefined);
+  expect(updateInput).toBeCalledWith({
+    description: undefined,
+    hidePanelTitles: undefined,
+    title: 'new title',
+  });
 });
 
 test('Input value shows custom title if one given', async () => {
   embeddable.updateInput({ title: 'new title' });
-
-  const updateTitle = jest.fn();
   const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
   expect(inputField.props().value).toBe('new title');
-  findTestSubject(component, 'saveNewTitleButton').simulate('click');
+  findTestSubject(component, 'saveCustomizePanelButton').simulate('click');
   expect(inputField.props().value).toBe('new title');
 });
 
-test('Reset updates the input value with the default title when the embeddable has a title override', async () => {
-  const updateTitle = jest.fn();
-
-  embeddable.updateInput({ title: 'my custom title' });
+test('Reset updates the input values with the default properties when the embeddable has overridden the properties', async () => {
+  embeddable.updateInput({ title: 'my custom title', description: 'my custom description' });
   const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
   );
 
-  const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
+  const titleField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
   const event = { target: { value: 'another custom title' } };
-  inputField.simulate('change', event);
+  titleField.simulate('change', event);
 
   findTestSubject(component, 'resetCustomEmbeddablePanelTitle').simulate('click');
-  const inputAfter = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
-  expect(inputAfter.props().value).toBe(embeddable.getOutput().defaultTitle);
+  const titleAfter = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
+  expect(titleAfter.props().value).toBe(embeddable.getOutput().defaultTitle);
+
+  findTestSubject(component, 'resetCustomEmbeddablePanelDescription').simulate('click');
+  const descriptionAfter = findTestSubject(component, 'customEmbeddablePanelDescriptionInput').find(
+    'textarea'
+  );
+  expect(descriptionAfter.props().value).toBe(embeddable.getOutput().defaultDescription);
 });
 
-test('Reset updates the input with the default title when the embeddable has no title override', async () => {
-  const updateTitle = jest.fn();
+test('Reset updates the input with the default properties when the embeddable has no property overrides', async () => {
   const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
   );
 
-  const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
-  const event = { target: { value: 'new title' } };
-  inputField.simulate('change', event);
+  const titleField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
+  const titleEvent = { target: { value: 'new title' } };
+  titleField.simulate('change', titleEvent);
+
+  const descriptionField = findTestSubject(component, 'customEmbeddablePanelDescriptionInput').find(
+    'textarea'
+  );
+  const descriptionEvent = { target: { value: 'new description' } };
+  titleField.simulate('change', descriptionEvent);
 
   findTestSubject(component, 'resetCustomEmbeddablePanelTitle').simulate('click');
+  findTestSubject(component, 'resetCustomEmbeddablePanelDescription').simulate('click');
+
   await component.update();
-  expect(inputField.props().value).toBe(embeddable.getOutput().defaultTitle);
+  expect(titleField.props().value).toBe(embeddable.getOutput().defaultTitle);
+  expect(descriptionField.props().value).toBe(embeddable.getOutput().defaultDescription);
 });
 
-test('Reset calls updateTitle with undefined', async () => {
-  const updateTitle = jest.fn();
+test('Reset title calls updateInput with undefined', async () => {
+  const updateInput = jest.spyOn(embeddable, 'updateInput');
   const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -156,23 +175,36 @@ test('Reset calls updateTitle with undefined', async () => {
   inputField.simulate('change', event);
 
   findTestSubject(component, 'resetCustomEmbeddablePanelTitle').simulate('click');
-  findTestSubject(component, 'saveNewTitleButton').simulate('click');
+  findTestSubject(component, 'saveCustomizePanelButton').simulate('click');
 
-  expect(updateTitle).toBeCalledWith(undefined, undefined);
+  expect(updateInput).toBeCalledWith({
+    description: undefined,
+    hidePanelTitles: undefined,
+    title: undefined,
+  });
 });
 
-test('Can set title to an empty string', async () => {
-  const updateTitle = jest.fn();
+test('Can set title and description to an empty string', async () => {
+  const updateInput = jest.spyOn(embeddable, 'updateInput');
   const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+    <CustomizePanelEditor embeddable={embeddable} onClose={() => {}} />
   );
+
+  for (const subject of [
+    'customEmbeddablePanelTitleInput',
+    'customEmbeddablePanelDescriptionInput',
+  ]) {
+    const inputField = findTestSubject(component, subject);
+    const event = { target: { value: '' } };
+    inputField.simulate('change', event);
+  }
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput');
   const event = { target: { value: '' } };
   inputField.simulate('change', event);
 
-  findTestSubject(component, 'saveNewTitleButton').simulate('click');
+  findTestSubject(component, 'saveCustomizePanelButton').simulate('click');
   const inputFieldAfter = findTestSubject(component, 'customEmbeddablePanelTitleInput');
   expect(inputFieldAfter.props().value).toBe('');
-  expect(updateTitle).toBeCalledWith('', undefined);
+  expect(updateInput).toBeCalledWith({ description: '', hidePanelTitles: undefined, title: '' });
 });

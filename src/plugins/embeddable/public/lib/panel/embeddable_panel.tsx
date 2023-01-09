@@ -17,9 +17,7 @@ import classNames from 'classnames';
 import React, { ReactNode } from 'react';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { TimeRange } from '@kbn/es-query';
-import { CoreStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { isPromise } from '@kbn/std';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
@@ -48,9 +46,8 @@ import { CustomizePanelAction } from './panel_header/panel_actions/customize_pan
 import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
 import { EditPanelAction } from '../actions';
-import { CustomizePanelEditor } from './panel_header/panel_actions/customize_panel/customize_panel_editor';
 import { EmbeddableStart } from '../../plugin';
-import { EmbeddableStateTransfer, isSelfStyledEmbeddable, TimePickerRange } from '..';
+import { EmbeddableStateTransfer, isSelfStyledEmbeddable, CommonlyUsedRange } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -87,7 +84,7 @@ interface Props {
   getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories?: EmbeddableStart['getEmbeddableFactories'];
   dateFormat?: string;
-  commonlyUsedRanges: TimePickerRange[];
+  commonlyUsedRanges?: CommonlyUsedRange[];
   overlays?: CoreStart['overlays'];
   notifications?: CoreStart['notifications'];
   application?: CoreStart['application'];
@@ -376,7 +373,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   private getUniversalActions = (): PanelUniversalActions => {
-    const { dateFormat, commonlyUsedRanges } = this.props;
     let actions = {};
     if (this.props.inspector) {
       actions = {
@@ -393,41 +389,16 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     ) {
       return actions;
     }
-    const createGetUserData = (overlays: OverlayStart, theme: ThemeServiceStart) =>
-      async function getUserData(context: { embeddable: IEmbeddable }) {
-        return new Promise<{
-          title: string | undefined;
-          description: string | undefined;
-          hideTitle?: boolean;
-          timeRange?: TimeRange;
-        }>((resolve) => {
-          const flyoutInstance = overlays.openFlyout(
-            toMountPoint(
-              <CustomizePanelEditor
-                embeddable={context.embeddable}
-                dateFormat={dateFormat}
-                commonlyUsedRanges={commonlyUsedRanges}
-                updatePanelSettings={({ title, description, hideTitle, timeRange }) => {
-                  flyoutInstance.close();
-                  resolve({ title, description, hideTitle, timeRange });
-                }}
-                cancel={() => flyoutInstance.close()}
-              />,
-              { theme$: theme.theme$ }
-            ),
-            {
-              'data-test-subj': 'customizePanel',
-            }
-          );
-        });
-      };
 
     // Universal actions are exposed on the context menu for every embeddable, they bypass the trigger
     // registry.
     return {
       ...actions,
       customizePanel: new CustomizePanelAction(
-        createGetUserData(this.props.overlays, this.props.theme)
+        this.props.overlays,
+        this.props.theme,
+        this.props.commonlyUsedRanges,
+        this.props.dateFormat
       ),
       addPanel: new AddPanelAction(
         this.props.getEmbeddableFactory,

@@ -11,5 +11,5 @@
   "ui": true,
   "requiredPlugins": ["embeddable", "uiActions"],
   "optionalPlugins": ["licensing"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "data"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact"]
 }

@@ -28,18 +28,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { TimeRangeInput } from './customize_panel_action';
-import {
-  IContainer,
-  ContainerInput,
-  IEmbeddable,
-  Embeddable,
-  EmbeddableOutput,
-  TimePickerRange,
-} from '../../../..';
+import { doesInheritTimeRange } from './does_inherit_time_range';
+import { IEmbeddable, Embeddable, EmbeddableOutput, CommonlyUsedRange } from '../../../..';
 
 type PanelSettings = {
   title?: string;
-  hideTitle?: boolean;
+  hidePanelTitles?: boolean;
   description?: string;
   timeRange?: TimeRange;
 };
@@ -47,9 +41,8 @@ type PanelSettings = {
 interface CustomizePanelProps {
   embeddable: IEmbeddable;
   dateFormat?: string;
-  commonlyUsedRanges: TimePickerRange[];
-  updatePanelSettings: (panelSettings: PanelSettings) => void;
-  cancel: () => void;
+  commonlyUsedRanges?: CommonlyUsedRange[];
+  onClose: () => void;
 }
 
 const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
@@ -89,24 +82,8 @@ function hasTimeRange(
   return (embeddable as Embeddable<TimeRangeInput>).getInput().timeRange !== undefined;
 }
 
-function doesInheritTimeRange(embeddable: IEmbeddable) {
-  if (!embeddable.parent) {
-    return false;
-  }
-
-  const parent = embeddable.parent as IContainer<{}, ContainerInput<TimeRangeInput>>;
-
-  // if it's a dashboard emptys screen, there will be no embeddable
-  if (!parent.getInput().panels[embeddable.id]) {
-    return false;
-  }
-  // If there is no explicit input defined on the parent then this embeddable inherits the
-  // time range from whatever the time range of the parent is.
-  return parent.getInput().panels[embeddable.id].explicitInput.timeRange === undefined;
-}
-
 export const CustomizePanelEditor = (props: CustomizePanelProps) => {
-  const { cancel, updatePanelSettings, embeddable } = props;
+  const { onClose, embeddable } = props;
   const timeRangeCompatible = isTimeRangeCompatible(embeddable);
   const [hideTitle, setHideTitle] = useState(embeddable.getInput().hidePanelTitles);
   const [description, setDescription] = useState(
@@ -116,7 +93,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
     embeddable.getInput().title ?? embeddable.getOutput().defaultTitle
   );
   const [inheritTimeRange, setInheritTimeRange] = useState(
-    timeRangeCompatible ? doesInheritTimeRange(embeddable) : false
+    timeRangeCompatible ? doesInheritTimeRange(embeddable as Embeddable<TimeRangeInput>) : false
   );
   const [timeRange, setTimeRange] = useState(
     timeRangeCompatible
@@ -124,19 +101,32 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
       : undefined
   );
 
+  const commonlyUsedRangesForDatePicker = props.commonlyUsedRanges
+    ? props.commonlyUsedRanges!.map(
+        ({ from, to, display }: { from: string; to: string; display: string }) => {
+          return {
+            start: from,
+            end: to,
+            label: display,
+          };
+        }
+      )
+    : undefined;
+
   const save = () => {
     const newTitle = title === embeddable.getOutput().defaultTitle ? undefined : title;
     const newDescription =
       description === embeddable.getOutput().defaultDescription ? undefined : description;
     const newPanelSettings: PanelSettings = {
       title: newTitle,
-      hideTitle,
+      hidePanelTitles: hideTitle,
       description: newDescription,
     };
     if (Boolean(timeRangeCompatible)) {
       newPanelSettings.timeRange = !inheritTimeRange ? timeRange : undefined;
     }
-    updatePanelSettings(newPanelSettings);
+    embeddable.updateInput(newPanelSettings);
+    onClose();
   };
 
   return (
@@ -221,8 +211,8 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
             labelAppend={
               <EuiButtonEmpty
                 size="xs"
-                data-test-subj="resetCustomEmbeddablePanelTitle"
-                onClick={() => setDescription(embeddable.getOutput().defaultDescription ?? '')}
+                data-test-subj="resetCustomEmbeddablePanelDescription"
+                onClick={() => setDescription(embeddable.getOutput().defaultDescription)}
                 disabled={hideTitle}
                 aria-label={i18n.translate(
                   'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
@@ -285,15 +275,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
                     onTimeChange={({ start, end }) => setTimeRange({ from: start, to: end })}
                     showUpdateButton={false}
                     dateFormat={props.dateFormat}
-                    commonlyUsedRanges={props.commonlyUsedRanges.map(
-                      ({ from, to, display }: { from: string; to: string; display: string }) => {
-                        return {
-                          start: from,
-                          end: to,
-                          label: display,
-                        };
-                      }
-                    )}
+                    commonlyUsedRanges={commonlyUsedRangesForDatePicker}
                     data-test-subj="customizePanelTimeRangeDatePicker"
                   />
                 </EuiFormRow>
@@ -305,7 +287,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={cancel}>
+            <EuiButtonEmpty onClick={onClose}>
               <FormattedMessage
                 id="embeddableApi.customizePanel.flyout.cancelButtonTitle"
                 defaultMessage="Cancel"
@@ -313,7 +295,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton data-test-subj="saveNewTitleButton" onClick={save} fill>
+            <EuiButton data-test-subj="saveCustomizePanelButton" onClick={save} fill>
               <FormattedMessage
                 id="embeddableApi.customizePanel.flyout.saveButtonTitle"
                 defaultMessage="Save"
