@@ -15,7 +15,7 @@ export const IconWithCount = React.memo<{
   <span style={{ width: 'fit-content'}}>
       <EuiFlexGroup alignItems="center" gutterSize="none"  style={{ width: 'fit-content'}}>
         <EuiFlexItem grow={false}>
-          <EuiIcon style={{marginRight: '4px'}} size="s" type={icon} />
+          <EuiIcon style={{marginRight: '4px'}} size="s" type={icon} data-test-subj="comment-count-icon" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
