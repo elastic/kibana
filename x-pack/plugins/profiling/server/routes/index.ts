@@ -28,6 +28,8 @@ import {
   registerTraceEventsTopNThreadsSearchRoute,
 } from './topn';
 
+import { registerSetupRoute } from './setup';
+
 export interface RouteRegisterParameters {
   router: IRouter<ProfilingRequestHandlerContext>;
   logger: Logger;
@@ -53,4 +55,7 @@ export function registerRoutes(params: RouteRegisterParameters) {
   registerTraceEventsTopNHostsSearchRoute(params);
   registerTraceEventsTopNStackTracesSearchRoute(params);
   registerTraceEventsTopNThreadsSearchRoute(params);
+  // Setup of Profiling resources, automates the configuration of Universal Profiling
+  // and will show instructions on how to add data
+  registerSetupRoute(params);
 }
