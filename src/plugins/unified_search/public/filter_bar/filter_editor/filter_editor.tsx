@@ -75,10 +75,6 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.filterEditor.updateButtonLabel', {
       defaultMessage: 'Update filter',
     }),
-  getDisableToggleModeTooltip: () =>
-    i18n.translate('unifiedSearch.filter.filterEditor.disableToggleModeTooltip', {
-      defaultMessage: '"Edit as Query DSL" operation is not supported for combined filters',
-    }),
   getSelectDataViewToolTip: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.chooseDataViewFirstToolTip', {
       defaultMessage: 'You need to select a data view first',
