@@ -68,12 +68,12 @@ const CaseTooltipComponent = React.memo<Props>(
               </EuiText>
               <EuiText style={{ ...commonTextStyles, WebkitLineClamp: 2 }}>{description}</EuiText>
 
-              <EuiSpacer size="xs" />
+              <EuiSpacer size="s" />
 
               <EuiText style={{ borderTop: `1px solid ${borderColor}` }}>
-                <EuiSpacer size="xs" />
+                <EuiSpacer size="s" />
                 {status === CaseStatuses.closed ? i18n.CLOSED : i18n.OPENED}{' '}
-                <FormattedRelative value={createdAt} />
+                <FormattedRelative value={createdAt} />{' '}
                 {createdBy.username || createdBy.fullName ? (
                   <>
                     {i18n.BY}{' '}
