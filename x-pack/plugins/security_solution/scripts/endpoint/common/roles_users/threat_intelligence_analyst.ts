@@ -8,7 +8,7 @@
 import type { Role } from '@kbn/security-plugin/common';
 import { getNoResponseActionsRole } from './without_response_actions_role';
 
-export const getThreadIntelligenceAnalyst: () => Omit<Role, 'name'> = () => {
+export const getThreatIntelligenceAnalyst: () => Omit<Role, 'name'> = () => {
   const noResponseActionsRole = getNoResponseActionsRole();
   return {
     ...noResponseActionsRole,

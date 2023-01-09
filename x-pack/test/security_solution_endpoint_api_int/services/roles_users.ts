@@ -10,7 +10,7 @@ import type { Role } from '@kbn/security-plugin/common';
 import { getT1Analyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/t1_analyst';
 import { getT2Analyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/t2_analyst';
 import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/hunter';
-import { getThreadIntelligenceAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/thread_intelligence_analyst';
+import { getThreatIntelligenceAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/threat_intelligence_analyst';
 import { getSocManager } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/soc_manager';
 import { getPlatformEngineer } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/platform_engineer';
 import { getEndpointOperationsAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/endpoint_operations_analyst';
@@ -22,7 +22,7 @@ export enum ROLE {
   t1_analyst = 't1Analyst',
   t2_analyst = 't2Analyst',
   analyst_hunter = 'hunter',
-  thread_intelligence_analyst = 'threadIntelligenceAnalyst',
+  threat_intelligence_analyst = 'threatIntelligenceAnalyst',
   detections_engineer = 'detectionsEngineer',
   soc_manager = 'socManager',
   platform_engineer = 'platformEngineer',
@@ -34,7 +34,7 @@ const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
   t1Analyst: getT1Analyst(),
   t2Analyst: getT2Analyst(),
   hunter: getHunter(),
-  threadIntelligenceAnalyst: getThreadIntelligenceAnalyst(),
+  threadIntelligenceAnalyst: getThreatIntelligenceAnalyst(),
   socManager: getSocManager(),
   platformEngineer: getPlatformEngineer(),
   endpointOperationsAnalyst: getEndpointOperationsAnalyst(),

@@ -19,6 +19,8 @@ export const getT2Analyst: () => Omit<Role, 'name'> = () => {
           ...noResponseActionsRole.kibana[0].feature,
           siem: [
             'minimal_all',
+            'policy_management_read',
+            'endpoint_list_read',
             'actions_log_management_read',
             'trusted_applications_read',
             'event_filters_read',
