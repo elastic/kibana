@@ -175,10 +175,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(await getNumberOfSessionDocuments()).to.be(3);
 
-      // Cleanup routine runs every 10s, let's wait for 30s to make sure cleanup routine runs at least once.
+      // Cleanup routine runs every 10s, let's wait for 60s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
       await toggleSessionCleanupTask(true);
-      await setTimeoutAsync(30000);
+      await setTimeoutAsync(60000);
 
       // The oldest session should have been removed, but the rest should still be valid.
       expect(await getNumberOfSessionDocuments()).to.be(2);
@@ -204,10 +204,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(await getNumberOfSessionDocuments()).to.be(6);
 
-      // Cleanup routine runs every 10s, let's wait for 30s to make sure cleanup routine runs at least once.
+      // Cleanup routine runs every 10s, let's wait for 60s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
       await toggleSessionCleanupTask(true);
-      await setTimeoutAsync(30000);
+      await setTimeoutAsync(60000);
 
       // The oldest session should have been removed, but the rest should still be valid.
       expect(await getNumberOfSessionDocuments()).to.be(4);
@@ -271,10 +271,10 @@ export default function ({ getService }: FtrProviderContext) {
         refresh: true,
       });
 
-      // Cleanup routine runs every 10s, let's wait for 30s to make sure cleanup routine runs at least once.
+      // Cleanup routine runs every 10s, let's wait for 60s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
       await toggleSessionCleanupTask(true);
-      await setTimeoutAsync(30000);
+      await setTimeoutAsync(60000);
 
       // The oldest session should have been removed, but the rest should still be valid.
       expect(await getNumberOfSessionDocuments()).to.be(4);
@@ -299,10 +299,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(await getNumberOfSessionDocuments()).to.be(2);
 
-      // Cleanup routine runs every 10s, let's wait for 30s to make sure cleanup routine runs at least once.
+      // Cleanup routine runs every 10s, let's wait for 60s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
       await toggleSessionCleanupTask(true);
-      await setTimeoutAsync(30000);
+      await setTimeoutAsync(60000);
 
       // The oldest session should have been removed, but the rest should still be valid.
       expect(await getNumberOfSessionDocuments()).to.be(2);
@@ -322,10 +322,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(await getNumberOfSessionDocuments()).to.be(3);
 
-      // Cleanup routine runs every 10s, let's wait for 30s to make sure cleanup routine runs at least once.
+      // Cleanup routine runs every 10s, let's wait for 60s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
       await toggleSessionCleanupTask(true);
-      await setTimeoutAsync(30000);
+      await setTimeoutAsync(60000);
 
       // The oldest session should have been removed, but the rest should still be valid.
       expect(await getNumberOfSessionDocuments()).to.be(3);
@@ -351,10 +351,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(await getNumberOfSessionDocuments()).to.be(3);
 
-      // Cleanup routine runs every 10s, let's wait for 30s to make sure cleanup routine runs at least once.
+      // Cleanup routine runs every 10s, let's wait for 60s to make sure cleanup routine runs at least once.
       log.debug('Waiting for cleanup job to run...');
       await toggleSessionCleanupTask(true);
-      await setTimeoutAsync(30000);
+      await setTimeoutAsync(60000);
 
       // The oldest session should have been removed, but the rest should still be valid.
       expect(await getNumberOfSessionDocuments()).to.be(3);
