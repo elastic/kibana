@@ -35,6 +35,7 @@ const config = new Config(
   false,
   false,
   '',
+  '',
   false,
   true
 );
