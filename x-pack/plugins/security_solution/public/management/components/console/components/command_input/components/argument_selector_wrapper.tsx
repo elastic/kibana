@@ -7,9 +7,14 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithCommandArgumentState } from '../../../hooks/state_selectors/use_with_command_argument_state';
 import type { CommandArgDefinition, CommandArgumentValueSelectorProps } from '../../../types';
+
+const ArgumentSelectorWrapperContainer = styled.span`
+  user-select: none;
+`;
 
 // Type to ensure that `SelectorComponent` is defined
 type ArgDefinitionWithRequiredSelector = Omit<CommandArgDefinition, 'SelectorComponent'> &
@@ -45,7 +50,7 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
 
     // FIXME:PT wrapper component needs to have bounds on width and overflow so that it does not disrupt the Input UI
     return (
-      <span className="eui-displayInlineBlock">
+      <ArgumentSelectorWrapperContainer className="eui-displayInlineBlock">
         <EuiFlexGroup responsive={false} gutterSize="none">
           <EuiFlexItem grow={false}>{`--${argName}=`}</EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -56,7 +61,7 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </span>
+      </ArgumentSelectorWrapperContainer>
     );
   }
 );

@@ -7,6 +7,12 @@
 
 import { useConsoleStore } from '../../components/console_state/console_state';
 
+/**
+ * Retrieves the command name from the text the user entered. Will only return a value if a space
+ * has been entered, which is the trigger to being able to actually parse out the command name
+ */
 export const useWithInputCommandEntered = (): string => {
-  return useConsoleStore().state.input.enteredCommand?.commandDefinition.name ?? '';
+  const parsedInput = useConsoleStore().state.input.parsedInput;
+
+  return parsedInput.input.trimStart().indexOf(' ') !== -1 ? parsedInput.name : '';
 };
