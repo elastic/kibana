@@ -2845,6 +2845,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/code-editor@link:packages/shared-ux/code-editor":
+  version "0.0.0"
+  uid ""
+
 "@kbn/coloring@link:packages/kbn-coloring":
   version "0.0.0"
   uid ""
@@ -4134,6 +4138,10 @@
   uid ""
 
 "@kbn/shared-ux-utility@link:packages/kbn-shared-ux-utility":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux/code-editor@link:packages/shared-ux/code-editor":
   version "0.0.0"
   uid ""
 
