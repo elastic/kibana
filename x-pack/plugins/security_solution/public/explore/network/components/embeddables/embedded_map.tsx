@@ -139,7 +139,6 @@ export const EmbeddedMapComponent = ({
 
     const fetchData = async () => {
       try {
-        throw new Error('oh no');
         const apiResponse = await Promise.all(
           availableDataViews.map(async ({ title }) =>
             isFieldInIndexPattern(title, getRequiredMapsFields(title))
