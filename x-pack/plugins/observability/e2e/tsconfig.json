@@ -9,5 +9,6 @@
   "kbn_references": [
     "@kbn/apm-plugin",
     "@kbn/test",
+    "@kbn/es-archiver",
   ]
 }
