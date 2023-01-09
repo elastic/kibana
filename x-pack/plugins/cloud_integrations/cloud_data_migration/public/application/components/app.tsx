@@ -26,6 +26,8 @@ import {
 import { CoreStart, CoreTheme } from '@kbn/core/public';
 
 import { Observable } from 'rxjs';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { getServices } from '@kbn/home-plugin/public/application/kibana_services';
 import { getAppStyles } from '../../app.styles';
 import { BreadcrumbService } from '../services/breadcrumbs';
 
@@ -44,6 +46,7 @@ export const CloudDataMigrationApp = ({ http, breadcrumbService }: CloudDataMigr
     wrapText: true,
   };
   const styles = getAppStyles(euiTheme);
+  const { trackUiMetric } = getServices();
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('home');
@@ -132,7 +135,15 @@ export const CloudDataMigrationApp = ({ http, breadcrumbService }: CloudDataMigr
           <EuiSpacer size="l" />
 
           <div>
-            <EuiButton fill={true} target="_blank" href="https://ela.st/cloud-migration">
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiButton
+              fill={true}
+              target="_blank"
+              href="https://ela.st/cloud-migration"
+              onClick={() => {
+                trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud__stack_management_link');
+              }}
+            >
               <FormattedMessage
                 id="xpack.cloudDataMigration.readInstructionsButtonLabel"
                 defaultMessage="Help me move"

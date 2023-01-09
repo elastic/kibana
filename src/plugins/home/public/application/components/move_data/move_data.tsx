@@ -72,14 +72,22 @@ export const MoveData: FC<Props> = ({ addBasePath, isCloudEnabled, trackUiMetric
               color="primary"
               href={addBasePath(migrateDataUrl)}
               onClick={(event: MouseEvent) => {
-                trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud');
+                trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud__home_self_managed_link');
                 createAppNavigationHandler(migrateDataUrl)(event);
               }}
             >
               {buttonLabel}
             </EuiButton>
           ) : (
-            <EuiButton fill={true} target="_blank" href={migrateDataUrl}>
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiButton
+              fill={true}
+              target="_blank"
+              href={migrateDataUrl}
+              onClick={() => {
+                trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud__home_cloud_enabled_link');
+              }}
+            >
               {buttonLabel}
             </EuiButton>
           )}
