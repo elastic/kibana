@@ -170,6 +170,11 @@ export class TaskRunner<
   ) {
     const client = this.context.internalSavedObjectsRepository;
     try {
+      // Future engineer -> Here we are just checking if we need to wait for
+      // the update of the attribute `running` in the rule's saved object
+      // and we are swallowing the error because we still want to move forward
+      // with the update of our rule since we are putting back the running attribute
+      // back to false
       await this.ruleRunning.waitFor();
       // eslint-disable-next-line no-empty
     } catch {}
