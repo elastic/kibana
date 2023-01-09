@@ -169,6 +169,11 @@ export const getUpdatedActionsParams = ({
           ...resOfAction,
           id: actionReference[actionRef].id,
           actionTypeId,
+          frequency: {
+            summary: true,
+            notifyWhen: transformToNotifyWhen(ruleThrottle) ?? 'onThrottleInterval',
+            throttle: transformToAlertThrottle(ruleThrottle),
+          },
         },
       ];
     }, []),
