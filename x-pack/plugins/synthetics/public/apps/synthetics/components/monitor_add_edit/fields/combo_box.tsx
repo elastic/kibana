@@ -8,13 +8,13 @@
 import React, { useState, useCallback } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-export interface Props {
+export interface ComboBoxProps {
   onChange: (value: string[]) => void;
   onBlur?: () => void;
   selectedOptions: string[];
 }
 
-export const ComboBox = ({ onChange, onBlur, selectedOptions, ...props }: Props) => {
+export const ComboBox = ({ onChange, onBlur, selectedOptions, ...props }: ComboBoxProps) => {
   const [formattedSelectedOptions, setSelectedOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >(selectedOptions.map((option) => ({ label: option, key: option })));
