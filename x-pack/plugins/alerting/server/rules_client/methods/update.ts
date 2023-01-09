@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
@@ -144,10 +144,14 @@ async function updateAlert<Params extends RuleTypeParams>(
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
   // TODO https://github.com/elastic/kibana/issues/148414
-  // If any action-level frequencies get pushed into a SIEM rule, sync up their frequencies
-  if (attributes.consumer === AlertConsumers.SIEM && data.actions[0]?.frequency) {
-    const firstFrequency = data.actions[0].frequency;
-    data.actions = data.actions.map((a) => ({ ...a, frequency: firstFrequency }));
+  // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
+  const firstFrequency = data.actions[0]?.frequency;
+  if (attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
+    data.actions = data.actions.map((action) => omit(action, 'frequency'));
+    if (!attributes.notifyWhen) {
+      attributes.notifyWhen = firstFrequency.notifyWhen;
+      attributes.throttle = firstFrequency.throttle;
+    }
   }
 
   // Validate

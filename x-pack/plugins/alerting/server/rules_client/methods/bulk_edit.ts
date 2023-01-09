@@ -7,7 +7,7 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
@@ -565,13 +565,14 @@ async function getUpdatedAttributesFromOperations(
         }
 
         // TODO https://github.com/elastic/kibana/issues/148414
-        // If any action-level frequencies get pushed into a SIEM rule, sync up their frequencies
+        // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
         const firstFrequency = operation.value[0]?.frequency;
         if (rule.attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
-          ruleActions.actions = ruleActions.actions.map((action) => ({
-            ...action,
-            frequency: firstFrequency,
-          }));
+          ruleActions.actions = ruleActions.actions.map((action) => omit(action, 'frequency'));
+          if (!attributes.notifyWhen) {
+            attributes.notifyWhen = firstFrequency.notifyWhen;
+            attributes.throttle = firstFrequency.throttle;
+          }
         }
 
         break;

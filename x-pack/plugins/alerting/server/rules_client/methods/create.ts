@@ -6,6 +6,7 @@
  */
 import Semver from 'semver';
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { parseDuration } from '../../../common/parse_duration';
@@ -88,10 +89,14 @@ export async function create<Params extends RuleTypeParams = never>(
   }
 
   // TODO https://github.com/elastic/kibana/issues/148414
-  // If any action-level frequencies get pushed into a SIEM rule, sync up their frequencies
-  if (data.consumer === AlertConsumers.SIEM && data.actions[0]?.frequency) {
-    const firstFrequency = data.actions[0].frequency;
-    data.actions = data.actions.map((a) => ({ ...a, frequency: firstFrequency }));
+  // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
+  const firstFrequency = data.actions[0]?.frequency;
+  if (data.consumer === AlertConsumers.SIEM && firstFrequency) {
+    data.actions = data.actions.map((action) => omit(action, 'frequency'));
+    if (!data.notifyWhen) {
+      data.notifyWhen = firstFrequency.notifyWhen;
+      data.throttle = firstFrequency.throttle;
+    }
   }
 
   await validateActions(context, ruleType, data);
