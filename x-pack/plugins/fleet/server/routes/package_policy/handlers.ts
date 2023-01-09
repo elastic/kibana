@@ -15,7 +15,12 @@ import { groupBy, keyBy } from 'lodash';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
 
-import { agentPolicyService, appContextService, packagePolicyService } from '../../services';
+import {
+  agentPolicyService,
+  appContextService,
+  checkAllowedPackages,
+  packagePolicyService,
+} from '../../services';
 import type {
   GetPackagePoliciesRequestSchema,
   GetOnePackagePolicyRequestSchema,
@@ -45,44 +50,6 @@ import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/servi
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-const getAllowedPackageNamesMessage = (allowedPackageNames: string[]): string => {
-  return `Allowed package.name's: ${allowedPackageNames.join(', ')}`;
-};
-
-/**
- * Validates that Package Policy data only includes `package.name`'s that are in the list of
- * `allowedPackageNames`. If an error is encountered, then a message is return, otherwise, undefined.
- *
- * @param data
- * @param allowedPackageNames
- */
-const validatePackagePolicyDataIsScopedToAllowedPackageNames = (
-  data: PackagePolicy[],
-  allowedPackageNames: string[] | undefined
-): string | undefined => {
-  if (!data.length || typeof allowedPackageNames === 'undefined') {
-    return;
-  }
-
-  if (!allowedPackageNames.length) {
-    return 'Authorization denied due to lack of integration package privileges';
-  }
-
-  // Because List type of APIs have an un-bounded `perPage` query param, we only validate the
-  // data up to the first package.name that we find is not authorized.
-  for (const packagePolicy of data) {
-    if (!packagePolicy.package) {
-      return `Authorization denied. ${getAllowedPackageNamesMessage(allowedPackageNames)}`;
-    }
-
-    if (!allowedPackageNames.includes(packagePolicy.package.name)) {
-      return `Authorization denied to [package.name=${
-        packagePolicy.package.name
-      }]. ${getAllowedPackageNamesMessage(allowedPackageNames)}`;
-    }
-  }
-};
-
 export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagePoliciesRequestSchema.query>
@@ -98,18 +65,7 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
       request.query
     );
 
-    // specific to package-level RBAC
-    const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
-      items,
-      limitedToPackages
-    );
-    if (validationResult) {
-      return response.forbidden({
-        body: {
-          message: validationResult,
-        },
-      });
-    }
+    checkAllowedPackages(items, limitedToPackages, 'package.name');
 
     if (request.query.withAgentCount) {
       await populatePackagePolicyAssignedAgentsCount(esClient, items);
@@ -146,17 +102,7 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
 
     const body: BulkGetPackagePoliciesResponse = { items: items ?? [] };
 
-    const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
-      body.items,
-      limitedToPackages
-    );
-    if (validationResult) {
-      return response.forbidden({
-        body: {
-          message: validationResult,
-        },
-      });
-    }
+    checkAllowedPackages(body.items, limitedToPackages, 'package.name');
 
     return response.ok({
       body,
@@ -186,17 +132,7 @@ export const getOnePackagePolicyHandler: FleetRequestHandler<
     const packagePolicy = await packagePolicyService.get(soClient, packagePolicyId);
 
     if (packagePolicy) {
-      const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
-        [packagePolicy],
-        limitedToPackages
-      );
-      if (validationResult) {
-        return response.forbidden({
-          body: {
-            message: validationResult,
-          },
-        });
-      }
+      checkAllowedPackages([packagePolicy], limitedToPackages, 'package.name');
 
       return response.ok({
         body: {
