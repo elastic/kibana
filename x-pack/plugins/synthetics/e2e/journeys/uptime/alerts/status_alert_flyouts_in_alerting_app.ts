@@ -8,9 +8,12 @@
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { assertText, byTestId, waitForLoadingToFinish } from '@kbn/observability-plugin/e2e/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { loginPageProvider } from '../../../page_objects/login';
 
 journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
+  recordVideo(page);
+
   const login = loginPageProvider({ page });
   before(async () => {
     await waitForLoadingToFinish({ page });
@@ -59,8 +62,10 @@ journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
     await assertText({ page, text: 'browser' });
     await assertText({ page, text: 'http' });
 
-    const suggestionItem = await page.$(byTestId('autoCompleteSuggestionText'));
-    expect(await suggestionItem?.textContent()).toBe('"browser" ');
+    await retry.tryForTime(30 * 1000, async () => {
+      const suggestionItem = await page.$(byTestId('autoCompleteSuggestionText'));
+      expect(await suggestionItem?.textContent()).toBe('"browser" ');
+    });
 
     await page.click(byTestId('euiFlyoutCloseButton'));
     await page.click(byTestId('confirmModalConfirmButton'));

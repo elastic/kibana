@@ -707,7 +707,7 @@ export const RulesList = ({
 
     return selectedIds.length
       ? filterRulesById(rulesState.data, selectedIds).every((selectedRule) =>
-          hasAllPrivilege(selectedRule, ruleTypesState.data.get(selectedRule.ruleTypeId))
+          hasAllPrivilege(selectedRule.consumer, ruleTypesState.data.get(selectedRule.ruleTypeId))
         )
       : false;
   }, [selectedIds, rulesState.data, ruleTypesState.data, isAllSelected]);
