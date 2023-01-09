@@ -3371,7 +3371,7 @@
             "section": "def-server.BulkOperationError",
             "text": "BulkOperationError"
           },
-          "[]; rules: (",
+          "[]; total: number; rules: (",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -3381,7 +3381,7 @@
           },
           "<never> | ",
           "RuleWithLegacyId",
-          "<never>)[]; total: number; taskIdsFailedToBeDeleted: string[]; }>; bulkEdit: <Params extends ",
+          "<never>)[]; taskIdsFailedToBeDeleted: string[]; }>; bulkEdit: <Params extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
