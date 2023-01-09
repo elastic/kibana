@@ -28,7 +28,15 @@ export const getUploadCommand = ({
     RenderComponent: (props) => {
       window.console.log(`upload command rendering...`);
       window.console.log(props);
-      return <div>{'rendered!'}</div>;
+
+      return (
+        <div>
+          <div>{`ExecuteFileAction DEV MOCK`}</div>
+          <div>
+            <strong>{`File Selected: ${props.command.args.args.file[0].name}`}</strong>
+          </div>
+        </div>
+      );
     },
     meta: {
       endpointId: endpointAgentId,
