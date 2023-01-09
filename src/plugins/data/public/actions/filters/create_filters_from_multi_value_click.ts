@@ -37,6 +37,13 @@ export const createFiltersFromMultiValueClickAction = async ({
     )
   ).filter(Boolean) as unknown as Filter[];
   if (filters.length === 0) return;
+  // no need for combined filter in case of one filter
+  if (filters.length === 1) {
+    if (filters[0] && negate) {
+      return toggleFilterNegated(filters[0]);
+    }
+    return filters[0];
+  }
   const filtersHaveAlias = filters.every((f) => f.meta.alias);
   let alias = '';
   if (filtersHaveAlias) {
