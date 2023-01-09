@@ -55,6 +55,7 @@ export const useNetworkKpiNetworkEvents = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
+  const canceled = useRef(false);
   const [loading, setLoading] = useState(false);
   const [networkKpiNetworkEventsRequest, setNetworkKpiNetworkEventsRequest] =
     useState<NetworkKpiNetworkEventsRequestOptions | null>(null);
@@ -79,6 +80,7 @@ export const useNetworkKpiNetworkEvents = ({
       }
 
       const asyncSearch = async () => {
+        console.log('1', canceled.current);
         abortCtrl.current = new AbortController();
         setLoading(true);
 
@@ -92,33 +94,46 @@ export const useNetworkKpiNetworkEvents = ({
           )
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
-                setLoading(false);
-                setNetworkKpiNetworkEventsResponse((prevResponse) => ({
-                  ...prevResponse,
-                  networkEvents: response.networkEvents,
-                  inspect: getInspectResponse(response, prevResponse.inspect),
-                  refetch: refetch.current,
-                }));
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_NETWORK_KPI_NETWORK_EVENTS);
-                searchSubscription$.current.unsubscribe();
+              console.log('2', {
+                canceled: canceled.current,
+                complete: isCompleteResponse(response),
+                error: isErrorResponse(response),
+              });
+              if (!canceled.current) {
+                if (isCompleteResponse(response)) {
+                  setLoading(false);
+                  setNetworkKpiNetworkEventsResponse((prevResponse) => ({
+                    ...prevResponse,
+                    networkEvents: response.networkEvents,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
+                    refetch: refetch.current,
+                  }));
+                  searchSubscription$.current.unsubscribe();
+                } else if (isErrorResponse(response)) {
+                  setLoading(false);
+                  addWarning(i18n.ERROR_NETWORK_KPI_NETWORK_EVENTS);
+                  searchSubscription$.current.unsubscribe();
+                }
               }
             },
             error: (msg) => {
-              setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_NETWORK_KPI_NETWORK_EVENTS,
-              });
+              console.log('3 err', { msg, canceled: canceled.current });
+
+              if (!canceled.current) {
+                setLoading(false);
+                addError(msg, {
+                  title: i18n.FAIL_NETWORK_KPI_NETWORK_EVENTS,
+                });
+              }
               searchSubscription$.current.unsubscribe();
             },
           });
       };
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
-      asyncSearch();
+      if (!canceled.current) {
+        asyncSearch();
+      }
       refetch.current = asyncSearch;
     },
     [data.search, addError, addWarning, skip]
@@ -147,6 +162,8 @@ export const useNetworkKpiNetworkEvents = ({
   useEffect(() => {
     networkKpiNetworkEventsSearch(networkKpiNetworkEventsRequest);
     return () => {
+      canceled.current = true;
+      console.log('unmounted!!!', canceled.current);
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };

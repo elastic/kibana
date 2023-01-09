@@ -55,6 +55,7 @@ export const useNetworkKpiDns = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
+  const canceled = useRef(false);
   const [loading, setLoading] = useState(false);
   const [networkKpiDnsRequest, setNetworkKpiDnsRequest] =
     useState<NetworkKpiDnsRequestOptions | null>(null);
@@ -114,7 +115,9 @@ export const useNetworkKpiDns = ({
       };
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
-      asyncSearch();
+      if (!canceled.current) {
+        asyncSearch();
+      }
       refetch.current = asyncSearch;
     },
     [data.search, addError, addWarning, skip]
@@ -143,6 +146,7 @@ export const useNetworkKpiDns = ({
   useEffect(() => {
     networkKpiDnsSearch(networkKpiDnsRequest);
     return () => {
+      canceled.current = true;
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
