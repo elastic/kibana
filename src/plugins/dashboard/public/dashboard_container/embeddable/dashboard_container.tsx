@@ -100,7 +100,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private subscriptions: Subscription = new Subscription();
 
   private initialized$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  private dashboardCreationStartTime: number;
+  private dashboardCreationStartTime?: number;
   private savedObjectLoadTime?: number;
 
   private initialSavedDashboardId?: string;
@@ -123,7 +123,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   constructor(
     initialInput: DashboardContainerInput,
-    dashboardCreationStartTime: number,
+    dashboardCreationStartTime?: number,
     parent?: Container,
     creationOptions?: DashboardCreationOptions
   ) {
@@ -359,7 +359,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public reportPerformanceMetrics(stats: DashboardRenderPerformanceStats) {
-    if (this.analyticsService) {
+    if (this.analyticsService && this.dashboardCreationStartTime) {
       const panelCount = Object.keys(
         this.getReduxEmbeddableTools().getState().explicitInput.panels
       ).length;
