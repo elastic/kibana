@@ -12,7 +12,7 @@ import { TestProviders } from '../../../../../common/mock';
 import React from 'react';
 import { NetworkKpiDns } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useRefetchByRestartingSession } from '../../../../../common/components/page/use_refetch_by_session';
+import { useRefetchByRestartingSession } from '../../../../containers/use_refetch_by_session';
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 
 jest.mock('../../../../../common/containers/query_toggle');
@@ -25,7 +25,7 @@ jest.mock('../../../../hosts/components/kpi_hosts/common', () => ({
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
-jest.mock('../../../../../common/components/page/use_refetch_by_session', () => ({
+jest.mock('../../../../containers/use_refetch_by_session', () => ({
   useRefetchByRestartingSession: jest.fn(),
 }));
 
