@@ -93,7 +93,7 @@ describe('experimental_datastream_features', () => {
     esClient.cluster.getComponentTemplate.mockClear();
     esClient.cluster.putComponentTemplate.mockClear();
 
-    esClient.cluster.getComponentTemplate.mockResolvedValueOnce({
+    esClient.cluster.getComponentTemplate.mockResolvedValue({
       component_templates: [
         {
           name: 'metrics-test.test@package',
@@ -192,6 +192,58 @@ describe('experimental_datastream_features', () => {
             }),
           }),
         })
+      );
+    });
+
+    it('should throw for tdsb option without dimension fields', async () => {
+      esClient.cluster.getComponentTemplate.mockResolvedValue({
+        component_templates: [
+          {
+            name: 'metrics-test.test@package',
+            component_template: {
+              template: {
+                settings: {},
+                mappings: {
+                  _source: {
+                    mode: 'stored',
+                  },
+                  properties: {
+                    test: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      });
+
+      const packagePolicy = getNewTestPackagePolicy({
+        isSyntheticSourceEnabled: false,
+        isTSDBEnabled: true,
+      });
+
+      esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+        index_templates: [
+          {
+            name: 'metrics-test.test',
+            index_template: {
+              template: {
+                settings: {},
+                mappings: {},
+              },
+              composed_of: [],
+              index_patterns: '',
+            },
+          },
+        ],
+      });
+
+      expect(() =>
+        handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy })
+      ).rejects.toThrowError(
+        /Unable to enable Time-series indexing, at least one dimension fields need to be defined./
       );
     });
   });

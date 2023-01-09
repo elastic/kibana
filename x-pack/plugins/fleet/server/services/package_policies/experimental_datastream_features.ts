@@ -112,7 +112,11 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       // Temporarily generating routing_path here until fixed in elasticsearch https://github.com/elastic/elasticsearch/issues/91592
       const routingPath = builRoutingPath(mappingsProperties);
 
-      if (routingPath.length === 0) continue;
+      if (routingPath.length === 0) {
+        throw new Error(
+          'Unable to enable Time-series indexing, at least one dimension fields need to be defined.'
+        );
+      }
 
       const indexTemplateRes = await esClient.indices.getIndexTemplate({
         name: featureMapEntry.data_stream,
