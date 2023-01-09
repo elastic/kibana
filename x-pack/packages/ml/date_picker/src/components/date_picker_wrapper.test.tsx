@@ -117,7 +117,7 @@ const MockedEuiSuperDatePicker = EuiSuperDatePicker as jest.MockedFunction<
   typeof EuiSuperDatePicker
 >;
 
-describe('<MlDatePickerWrapper />', () => {
+describe('<DatePickerWrapper />', () => {
   beforeEach(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
     MockedEuiSuperDatePicker.mockClear();

@@ -265,7 +265,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = ({
   });
 
   return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? (
-    <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlDatePickerWrapper">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false} css={datePickerWidth}>
         <EuiSuperDatePicker
           isLoading={isLoading}
