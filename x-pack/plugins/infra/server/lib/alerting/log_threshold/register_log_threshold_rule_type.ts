@@ -18,6 +18,12 @@ import { getAlertDetailsPageEnabledForApp } from '../common/utils';
 import {
   alertDetailUrlActionVariableDescription,
   groupByKeysActionVariableDescription,
+  cloudActionVariableDescription,
+  containerActionVariableDescription,
+  hostActionVariableDescription,
+  labelsActionVariableDescription,
+  orchestratorActionVariableDescription,
+  tagsActionVariableDescription
 } from '../common/messages';
 
 const timestampActionVariableDescription = i18n.translate(
@@ -142,6 +148,12 @@ export async function registerLogThresholdRuleType(
           name: 'viewInAppUrl',
           description: viewInAppUrlActionVariableDescription,
         },
+        { name: 'cloud', description: cloudActionVariableDescription },
+        { name: 'host', description: hostActionVariableDescription },
+        { name: 'container', description: containerActionVariableDescription },
+        { name: 'orchestrator', description: orchestratorActionVariableDescription },
+        { name: 'labels', description: labelsActionVariableDescription },
+        { name: 'tags', description: tagsActionVariableDescription },
       ],
     },
     producer: 'logs',
