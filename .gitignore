@@ -113,3 +113,4 @@ fleet-server.yml
 /packages/kbn-package-map/package-map.json
 /packages/kbn-synthetic-package-map/
 **/.synthetics/
+**/.journeys/
