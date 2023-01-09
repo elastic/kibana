@@ -181,7 +181,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.diskQueueEncryptionDescription"
-                  defaultMessage="Enable encryption of data at rest."
+                  defaultMessage="Enable encryption of data written to the disk queue."
                 />
               </EuiText>
             </EuiFlexItem>
