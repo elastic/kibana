@@ -122,10 +122,6 @@ export interface LensAppLocatorParams extends SerializableRecord {
 
 export type LensAppLocator = LocatorPublic<LensAppLocatorParams>;
 
-export interface LensAppLocatorDependencies {
-  useHash?: boolean;
-}
-
 /**
  * Location state of scoped history (history instance of Kibana Platform application service)
  */
@@ -143,6 +139,18 @@ function getStateFromParams(params: LensAppLocatorParams): MainHistoryLocationSt
   if (params.savedObjectId) {
     return {};
   }
+
+  // return no state for malformed state?
+  if (
+    !(
+      params.activeDatasourceId &&
+      params.datasourceStates &&
+      params.visualization &&
+      params.references
+    )
+  ) {
+    return {};
+  }
   return {
     activeDatasourceId: params.activeDatasourceId!,
     visualization: params.visualization!,
@@ -156,7 +164,7 @@ function getStateFromParams(params: LensAppLocatorParams): MainHistoryLocationSt
 export class LensAppLocatorDefinition implements LocatorDefinition<LensAppLocatorParams> {
   public readonly id = LENS_APP_LOCATOR;
 
-  constructor(protected readonly deps: LensAppLocatorDependencies) {}
+  constructor() {}
 
   public readonly getLocation = async (params: LensAppLocatorParams) => {
     const { filters, query, savedObjectId, resolvedDateRange, searchSessionId } = params;
@@ -176,7 +184,7 @@ export class LensAppLocatorDefinition implements LocatorDefinition<LensAppLocato
       queryState.filters = appState.filters;
     }
 
-    const savedObjectPath = savedObjectId ? `edit/${encodeURIComponent(savedObjectId)}` : '';
+    const savedObjectPath = savedObjectId ? `/edit/${encodeURIComponent(savedObjectId)}` : '';
     const basepath = `${window.location.origin}${window.location.pathname}`;
     const url = new URL(basepath);
     url.hash = savedObjectPath;
@@ -188,7 +196,7 @@ export class LensAppLocatorDefinition implements LocatorDefinition<LensAppLocato
 
     return {
       app: 'lens',
-      path: url.href.replace(basepath, '#/'),
+      path: url.href.replace(basepath, ''),
       state: { type: LENS_SHARE_STATE_ACTION, payload: appState },
     };
   };

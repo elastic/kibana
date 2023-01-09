@@ -77,7 +77,7 @@ export class ShareMenuManager {
     anonymousAccess,
     snapshotShareWarning,
     onClose,
-    panelTitle,
+    objectTypeTitle,
     disabledShareUrl,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
@@ -110,7 +110,7 @@ export class ShareMenuManager {
               allowShortUrl={allowShortUrl}
               objectId={objectId}
               objectType={objectType}
-              panelTitle={panelTitle}
+              objectTypeTitle={objectTypeTitle}
               shareMenuItems={menuItems}
               sharingData={sharingData}
               shareableUrl={shareableUrl}
