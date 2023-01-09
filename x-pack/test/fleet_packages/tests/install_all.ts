@@ -62,6 +62,8 @@ export default function (providerContext: FtrProviderContext) {
       } = await supertest.get('/api/fleet/epm/packages?prerelease=true').expect(200);
       const allResults = [];
       for (const pkg of packages) {
+        // skip deprecated failing package https://github.com/elastic/integrations/issues/4947
+        if (pkg.name === 'zscaler') continue;
         const res = await installPackage(pkg.name, pkg.version);
         allResults.push(res);
         if (res.success) {
