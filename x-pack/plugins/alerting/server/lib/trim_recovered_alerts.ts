@@ -28,8 +28,7 @@ export interface TrimRecoveredOpts {
 export function trimRecoveredAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  RecoveryActionGroupIds extends string,
-  ActionGroupIds extends string
+  RecoveryActionGroupIds extends string
 >(
   logger: Logger,
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {},
