@@ -20,7 +20,6 @@
     "@kbn/monaco",
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/ambient-ui-types",
-    "@kbn/shared-ux-code-editor-mocks",
+    "@kbn/code-editor-mocks",
   ]
 }
