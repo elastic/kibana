@@ -243,7 +243,7 @@ describe('experimental_datastream_features', () => {
       expect(() =>
         handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy })
       ).rejects.toThrowError(
-        /Unable to enable Time-series indexing, at least one dimension fields need to be defined./
+        /Unable to enable time-series indexing, at least one dimension field needs to be defined./
       );
     });
   });

@@ -114,7 +114,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
       if (routingPath.length === 0) {
         throw new Error(
-          'Unable to enable Time-series indexing, at least one dimension fields need to be defined.'
+          'Unable to enable time-series indexing, at least one dimension field needs to be defined.'
         );
       }
 
