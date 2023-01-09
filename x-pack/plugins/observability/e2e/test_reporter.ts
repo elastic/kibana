@@ -135,7 +135,7 @@ export class TestReporter implements Reporter {
     );
 
     successfulJourneys.forEach(([journeyName, steps]) => {
-      // fs.unlinkSync('.journeys/videos/' + journeyName + '.webm');
+      fs.unlinkSync('.journeys/videos/' + journeyName + '.webm');
     });
 
     const { failed, succeeded, skipped } = this.metrics;
