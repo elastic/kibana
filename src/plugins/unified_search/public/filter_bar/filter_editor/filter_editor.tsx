@@ -25,14 +25,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  type Filter,
   BooleanRelation,
   buildCombinedFilter,
   buildCustomFilter,
   buildEmptyFilter,
-  cleanFilter,
-  Filter,
+  filterToQueryDsl,
   getFilterParams,
-  isCombinedFilter,
 } from '@kbn/es-query';
 import { merge } from 'lodash';
 import React, { Component } from 'react';
@@ -159,13 +158,11 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   }
 
   private parseFilterToQueryDsl(filter: Filter) {
-    return JSON.stringify(cleanFilter(filter), null, 2);
+    const dsl = filterToQueryDsl(filter, this.props.indexPatterns);
+    return JSON.stringify(dsl, null, 2);
   }
 
   public render() {
-    const { localFilter } = this.state;
-    const shouldDisableToggle = isCombinedFilter(localFilter);
-
     return (
       <div>
         <EuiPopoverTitle paddingSize="s">
@@ -180,30 +177,23 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             </EuiFlexGroup>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             <EuiFlexItem grow={false}>
-              <EuiToolTip
-                position="top"
-                content={shouldDisableToggle ? strings.getDisableToggleModeTooltip() : null}
-                display="block"
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj="editQueryDSL"
+                onClick={this.toggleCustomEditor}
               >
-                <EuiButtonEmpty
-                  size="xs"
-                  data-test-subj="editQueryDSL"
-                  disabled={shouldDisableToggle}
-                  onClick={this.toggleCustomEditor}
-                >
-                  {this.state.isCustomEditorOpen ? (
-                    <FormattedMessage
-                      id="unifiedSearch.filter.filterEditor.editFilterValuesButtonLabel"
-                      defaultMessage="Edit filter values"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="unifiedSearch.filter.filterEditor.editQueryDslButtonLabel"
-                      defaultMessage="Edit as Query DSL"
-                    />
-                  )}
-                </EuiButtonEmpty>
-              </EuiToolTip>
+                {this.state.isCustomEditorOpen ? (
+                  <FormattedMessage
+                    id="unifiedSearch.filter.filterEditor.editFilterValuesButtonLabel"
+                    defaultMessage="Edit filter values"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="unifiedSearch.filter.filterEditor.editQueryDslButtonLabel"
+                    defaultMessage="Edit as Query DSL"
+                  />
+                )}
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
