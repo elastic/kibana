@@ -139,6 +139,7 @@ export const EmbeddedMapComponent = ({
 
     const fetchData = async () => {
       try {
+        throw new Error('oh no');
         const apiResponse = await Promise.all(
           availableDataViews.map(async ({ title }) =>
             isFieldInIndexPattern(title, getRequiredMapsFields(title))
@@ -152,7 +153,7 @@ export const EmbeddedMapComponent = ({
       } catch (e) {
         if (!canceled) {
           setMapDataViews([]);
-          addError(e, i18n.ERROR_CREATING_EMBEDDABLE);
+          addError(e, { title: i18n.ERROR_CREATING_EMBEDDABLE });
           setIsError(true);
         }
       }
@@ -192,7 +193,7 @@ export const EmbeddedMapComponent = ({
         }
       } catch (e) {
         if (isSubscribed) {
-          addError(e, i18n.ERROR_CREATING_EMBEDDABLE);
+          addError(e, { title: i18n.ERROR_CREATING_EMBEDDABLE });
           setIsError(true);
         }
       }
