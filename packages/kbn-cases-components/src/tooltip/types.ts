@@ -8,7 +8,7 @@
 
 import { CaseStatuses } from '../status/types';
 
-export type CaseTooltipProps = {
+export interface CaseTooltipProps {
   title: string;
   description: string;
   status: CaseStatuses;
@@ -17,4 +17,4 @@ export type CaseTooltipProps = {
   createdBy: { username?: string; fullName?: string };
   dataTestSubj?: string;
   className?: string;
-};
+}
