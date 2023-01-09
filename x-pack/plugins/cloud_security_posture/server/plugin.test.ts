@@ -89,7 +89,6 @@ describe('Cloud Security Posture Plugin', () => {
           {
             type: 'csp_rule',
             attributes: {
-              enabled: false,
               metadata: {
                 rego_rule_id: 'cis_1_1_1',
                 benchmark: { id: 'cis_k8s' },
