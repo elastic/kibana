@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -140,7 +141,7 @@ export const ActionNotifyWhen = ({
       setNotifyWhenValue(frequency.notifyWhen);
     } else {
       // If 'notifyWhen' is not set, derive value from existence of throttle value
-      setNotifyWhenValue(frequency.throttle ? 'onThrottleInterval' : 'onActiveAlert');
+      setNotifyWhenValue(frequency.throttle ? RuleNotifyWhen.THROTTLE : RuleNotifyWhen.ACTIVE);
     }
   }, [frequency]);
 
