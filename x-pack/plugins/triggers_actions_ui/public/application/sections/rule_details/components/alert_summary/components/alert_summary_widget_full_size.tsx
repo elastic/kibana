@@ -23,7 +23,7 @@ import {
   RECOVERED_COLOR,
   TOOLTIP_DATE_FORMAT,
 } from './constants';
-import { Alert } from '../../../../../hooks/use_load_alert_summary';
+import { Alert } from '../types';
 
 export interface AlertsSummaryWidgetFullSizeProps {
   activeAlertCount: number;

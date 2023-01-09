@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { AlertSummaryTimeRange } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_load_alert_summary';
+import moment from 'moment';
 import React from 'react';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { AlertSummaryTimeRange } from '@kbn/triggers-actions-ui-plugin/public';
+import { getAbsoluteTime } from '../../../utils/date';
 
-export const getAlertSummaryWidgetTimeRange = (): AlertSummaryTimeRange => {
+export const getDefaultAlertSummaryTimeRange = (): AlertSummaryTimeRange => {
   const { to, from } = getAbsoluteTimeRange({
     from: 'now-30d',
     to: 'now',
@@ -27,4 +30,38 @@ export const getAlertSummaryWidgetTimeRange = (): AlertSummaryTimeRange => {
       />
     ),
   };
+};
+
+export const getAlertSummaryTimeRange = (timeRange: TimeRange): AlertSummaryTimeRange => {
+  const { to, from } = getAbsoluteTimeRange(timeRange);
+
+  return {
+    utcFrom: from,
+    utcTo: to,
+    fixedInterval: getFixedInterval(timeRange),
+  };
+};
+
+const getFixedInterval = ({ to, from }: TimeRange) => {
+  const start = getAbsoluteTime(from);
+  const end = getAbsoluteTime(to, { roundUp: true });
+
+  if (start && end) {
+    const durationS = Math.floor(moment.duration(end - start).asSeconds());
+    return getCalendarInterval(durationS);
+  }
+
+  return '1m';
+};
+
+const getCalendarInterval = (durationS: number) => {
+  if (durationS > 31 * 24 * 60 * 60) {
+    return '30d';
+  } else if (durationS > 25 * 60 * 60) {
+    return '1d';
+  } else if (durationS > 60 * 60) {
+    return '1h';
+  } else {
+    return '1m';
+  }
 };

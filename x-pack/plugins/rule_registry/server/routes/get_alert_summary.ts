@@ -57,10 +57,8 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
           throw Boom.badRequest('gte and/or lte are not following the UTC format');
         }
 
-        if (fixedInterval && fixedInterval?.match(/^\d{1,2}['m','h','d','w']$/) == null) {
-          throw Boom.badRequest(
-            'fixed_interval is not following the expected format 1m, 1h, 1d, 1w'
-          );
+        if (fixedInterval && fixedInterval?.match(/^\d{1,2}['m','h','d']$/) == null) {
+          throw Boom.badRequest('fixed_interval is not following the expected format 1m, 1h, 1d');
         }
 
         const aggs = await alertsClient.getAlertSummary({
