@@ -33590,7 +33590,6 @@
     "xpack.synthetics.monitor.step.screenshot.notAvailable": "步骤屏幕截图不可用。",
     "xpack.synthetics.monitor.step.screenshot.unAvailable": "图像不可用",
     "xpack.synthetics.monitor.step.thumbnail.alt": "此过程步骤的缩略图屏幕截图较大版本。",
-    "xpack.synthetics.monitor.step.viewDetails": "查看详情",
     "xpack.synthetics.monitor.stepName.label": "步骤名称",
     "xpack.synthetics.monitorCharts.durationChart.wrapper.label": "显示监测的 ping 持续时间（按位置分组）的图表。",
     "xpack.synthetics.monitorCharts.monitorDuration.titleLabel": "监测持续时间",
