@@ -130,6 +130,7 @@ export const ActionNotifyWhen = ({
   onNotifyWhenChange,
   onThrottleChange,
 }: RuleNotifyWhenProps) => {
+  const [ruleThrottle, setRuleThrottle] = useState<number>(throttle || 1);
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] =
     useState<RuleNotifyWhenType>(DEFAULT_NOTIFY_WHEN_VALUE);
@@ -153,11 +154,11 @@ export const ActionNotifyWhen = ({
       setNotifyWhenValue(newValue);
       setTimeout(
         () =>
-          onThrottleChange(newValue === 'onThrottleInterval' ? throttle ?? 1 : null, throttleUnit),
+          onThrottleChange(newValue === 'onThrottleInterval' ? ruleThrottle : null, throttleUnit),
         100
       );
     },
-    [onNotifyWhenChange, setNotifyWhenValue, onThrottleChange, throttle, throttleUnit]
+    [onNotifyWhenChange, setNotifyWhenValue, onThrottleChange, ruleThrottle, throttleUnit]
   );
 
   const labelForRuleRenotify = [
@@ -193,7 +194,7 @@ export const ActionNotifyWhen = ({
                   <EuiFlexItem grow={2}>
                     <EuiFieldNumber
                       min={1}
-                      value={throttle ?? 1}
+                      value={ruleThrottle}
                       name="throttle"
                       data-test-subj="throttleInput"
                       prepend={i18n.translate(
@@ -209,6 +210,7 @@ export const ActionNotifyWhen = ({
                           map((value) => parseInt(value, 10)),
                           filter((value) => !isNaN(value)),
                           map((value) => {
+                            setRuleThrottle(value);
                             onThrottleChange(value, throttleUnit);
                           })
                         );

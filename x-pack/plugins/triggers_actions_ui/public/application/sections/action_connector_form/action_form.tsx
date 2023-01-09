@@ -65,7 +65,6 @@ export interface ActionAccordionFormProps {
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
   hideActionHeader?: boolean;
   hideNotifyWhen?: boolean;
-  minimumThrottleInterval?: [number | undefined, string];
 }
 
 interface ActiveActionConnectorState {
@@ -92,7 +91,6 @@ export const ActionForm = ({
   isActionGroupDisabledForActionType,
   hideActionHeader,
   hideNotifyWhen,
-  minimumThrottleInterval,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -398,7 +396,6 @@ export const ActionForm = ({
                 setActiveActionItem(undefined);
               }}
               hideNotifyWhen={hideNotifyWhen}
-              minimumThrottleInterval={minimumThrottleInterval}
             />
           );
         })}

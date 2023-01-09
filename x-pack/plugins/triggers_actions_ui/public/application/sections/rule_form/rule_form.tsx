@@ -672,7 +672,6 @@ export const RuleForm = ({
             setActionParamsProperty={setActionParamsProperty}
             actionTypeRegistry={actionTypeRegistry}
             setActionFrequencyProperty={setActionFrequencyProperty}
-            minimumThrottleInterval={[ruleInterval, ruleIntervalUnit]}
           />
         </>
       ) : null}

@@ -31,7 +31,6 @@ import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
-  parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
 import { betaBadgeProps } from './beta_badge_props';
 import {
@@ -66,7 +65,6 @@ export type ActionTypeFormProps = {
   recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
   hideNotifyWhen?: boolean;
-  minimumThrottleInterval?: [number | undefined, string];
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -104,7 +102,6 @@ export const ActionTypeForm = ({
   isActionGroupDisabledForActionType,
   recoveryActionGroup,
   hideNotifyWhen = false,
-  minimumThrottleInterval,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -126,10 +123,6 @@ export const ActionTypeForm = ({
   const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
     actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
   );
-  const [minimumActionThrottle = -1, minimumActionThrottleUnit] = minimumThrottleInterval ?? [
-    -1,
-    's',
-  ];
 
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
@@ -144,40 +137,6 @@ export const ActionTypeForm = ({
 
     return defaultParams;
   };
-
-  const getBoundThrottle = useCallback(
-    (throttle: number | null, throttleUnit: string) => {
-      try {
-        const throttleUnitDuration = parseDuration(`1${throttleUnit}`);
-        const minThrottleUnitDuration = parseDuration(`1${minimumActionThrottleUnit}`);
-        const boundedThrottle =
-          throttleUnitDuration > minThrottleUnitDuration || !throttle
-            ? throttle
-            : Math.max(throttle, minimumActionThrottle);
-        const boundedThrottleUnit =
-          throttleUnitDuration >= minThrottleUnitDuration
-            ? throttleUnit
-            : minimumActionThrottleUnit;
-        return [boundedThrottle, boundedThrottleUnit] as [number | null, string];
-      } catch (e) {
-        return [throttle, throttleUnit] as [number | null, string];
-      }
-    },
-    [minimumActionThrottle, minimumActionThrottleUnit]
-  );
-
-  useEffect(() => {
-    const [boundThrottle, boundThrottleUnit] = getBoundThrottle(actionThrottle, actionThrottleUnit);
-    if (boundThrottle !== actionThrottle) setActionThrottle(boundThrottle);
-    if (boundThrottleUnit !== actionThrottleUnit) setActionThrottleUnit(boundThrottleUnit);
-  }, [
-    getBoundThrottle,
-    actionThrottle,
-    actionThrottleUnit,
-    setActionThrottle,
-    setActionThrottleUnit,
-    minimumThrottleInterval,
-  ]);
 
   useEffect(() => {
     (async () => {
@@ -219,6 +178,13 @@ export const ActionTypeForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem]);
 
+  // useEffect(() => {
+  //   if (!actionItem.frequency) {
+  //     setActionFrequency(DEFAULT_FREQUENCY, index);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [actionItem.frequency]);
+
   const canSave = hasSaveActionsCapability(capabilities);
 
   const actionGroupDisplay = (
@@ -256,16 +222,15 @@ export const ActionTypeForm = ({
       )}
       onThrottleChange={useCallback(
         (throttle: number | null, throttleUnit: string) => {
-          const [boundedThrottle, boundedThrottleUnit] = getBoundThrottle(throttle, throttleUnit);
-          setActionThrottle(boundedThrottle);
-          setActionThrottleUnit(boundedThrottleUnit);
+          setActionThrottle(throttle);
+          setActionThrottleUnit(throttleUnit);
           setActionFrequencyProperty(
             'throttle',
-            boundedThrottle ? `${boundedThrottle}${boundedThrottleUnit}` : null,
+            throttle ? `${throttle}${throttleUnit}` : null,
             index
           );
         },
-        [setActionFrequencyProperty, index, getBoundThrottle]
+        [setActionFrequencyProperty, index]
       )}
     />
   );
@@ -289,6 +254,7 @@ export const ActionTypeForm = ({
     <>
       {showSelectActionGroup && (
         <>
+          <EuiSpacer size="xs" />
           <EuiSuperSelect
             prepend={
               <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}>
@@ -313,7 +279,6 @@ export const ActionTypeForm = ({
               setActionGroup(group);
             }}
           />
-          {!hideNotifyWhen && <EuiSpacer size="xs" />}
         </>
       )}
       {!hideNotifyWhen && actionNotifyWhen}
