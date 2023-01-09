@@ -206,10 +206,6 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agent_policies/delete`)
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId }),
-        supertest
-          .post(`/api/fleet/agent_policies/delete`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ agentPolicyId: managedAgentPolicyId }),
         // uninstall endpoint package
         supertest
           .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
