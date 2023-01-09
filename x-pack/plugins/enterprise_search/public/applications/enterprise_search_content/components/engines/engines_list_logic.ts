@@ -36,11 +36,6 @@ interface EngineListValues {
 }
 
 export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListActions>>({
-  connect: {
-    actions: [FetchEnginesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
-    values: [FetchEnginesAPILogic, ['data', 'status']],
-  },
-  path: ['enterprise_search', 'content', 'engine_list_logic'],
   actions: {
     fetchEngines: ({ meta, searchQuery }) => ({
       meta,
@@ -49,6 +44,16 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
 
     onPaginate: (pageNumber) => ({ pageNumber }),
   },
+  connect: {
+    actions: [FetchEnginesAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    values: [FetchEnginesAPILogic, ['data', 'status']],
+  },
+  listeners: ({ actions }) => ({
+    fetchEngines: async (input) => {
+      actions.makeRequest(input);
+    },
+  }),
+  path: ['enterprise_search', 'content', 'engine_list_logic'],
   reducers: ({}) => ({
     parameters: [
       { meta: DEFAULT_META },
@@ -64,14 +69,8 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
       },
     ],
   }),
-
   selectors: ({ selectors }) => ({
     results: [() => [selectors.data], (data) => data?.results ?? []],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
-  }),
-  listeners: ({ actions }) => ({
-    fetchEngines: async (input) => {
-      actions.makeRequest(input);
-    },
   }),
 });
