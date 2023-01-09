@@ -133,7 +133,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
         return;
       }
       const data = getRequestsAndResponses(adapters?.requests?.getRequests());
-
       setVisualizationData({
         requests: data.requests,
         responses: data.responses,

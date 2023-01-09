@@ -18,21 +18,17 @@ import { INSPECT } from '../inspect/translations';
 export type ActionTypes = 'addToExistingCase' | 'addToNewCase' | 'openInLens';
 
 export const useActions = ({
-  withActions,
   attributes,
-  timeRange,
-  inspectActionProps,
   extraActions,
+  inspectActionProps,
+  timeRange,
+  withActions,
 }: {
-  withActions?: boolean;
-
   attributes: LensAttributes | null;
-
-  timeRange: { from: string; to: string };
-
-  inspectActionProps?: { onInspectActionClicked: () => void; isDisabled: boolean };
-
   extraActions?: Action[];
+  inspectActionProps?: { onInspectActionClicked: () => void; isDisabled: boolean };
+  timeRange: { from: string; to: string };
+  withActions?: boolean;
 }) => {
   const { lens } = useKibana().services;
   const { navigateToPrefilledEditor } = lens;
