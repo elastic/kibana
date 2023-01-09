@@ -49,3 +49,12 @@ export const EMPTY_EXECUTION_KPI_RESULT = {
 };
 
 export type IExecutionKPIResult = typeof EMPTY_EXECUTION_KPI_RESULT;
+
+export const executionLogSortableColumns = [
+  'timestamp',
+  'execution_duration',
+  'total_search_duration',
+  'schedule_delay',
+] as const;
+
+export type ExecutionLogSortFields = typeof executionLogSortableColumns[number];

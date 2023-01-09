@@ -10,7 +10,7 @@ import { IExecutionKPIResult } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
 import { getFilter } from '../rule_api';
 
-export interface LoadGlobalExecutionKPIAggregationsProps {
+export interface LoadGlobalConnectorExecutionKPIAggregationsProps {
   outcomeFilter?: string[];
   message?: string;
   dateStart: string;
@@ -25,7 +25,7 @@ export const loadGlobalConnectorExecutionKPIAggregations = ({
   dateStart,
   dateEnd,
   namespaces,
-}: LoadGlobalExecutionKPIAggregationsProps & { http: HttpSetup }) => {
+}: LoadGlobalConnectorExecutionKPIAggregationsProps & { http: HttpSetup }) => {
   const filter = getFilter({ outcomeFilter, message });
 
   return http.get<IExecutionKPIResult>(

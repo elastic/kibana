@@ -50,7 +50,7 @@ describe('rule_event_log_list_kpi', () => {
       <ConnectorEventLogListKPI
         dateStart="now-24h"
         dateEnd="now"
-        loadGlobalExecutionKPIAggregations={loadGlobalExecutionKPIAggregationsMock}
+        loadGlobalConnectorExecutionKPIAggregations={loadGlobalExecutionKPIAggregationsMock}
       />
     );
 
@@ -113,7 +113,7 @@ describe('rule_event_log_list_kpi', () => {
         dateEnd="now"
         message="test"
         outcomeFilter={['status: 123', 'test:456']}
-        loadGlobalExecutionKPIAggregations={loadGlobalExecutionKPIAggregationsMock}
+        loadGlobalConnectorExecutionKPIAggregations={loadGlobalExecutionKPIAggregationsMock}
       />
     );
 

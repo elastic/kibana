@@ -13,8 +13,6 @@ import {
   IExecutionLog,
   ExecutionLogSortFields,
   IExecutionLogResult,
-} from '@kbn/alerting-plugin/common';
-import {
   AsApiContract,
   INTERNAL_BASE_ACTION_API_PATH,
   RewriteRequestCase,
@@ -43,8 +41,7 @@ export type SortField = Record<
   }
 >;
 
-export interface LoadExecutionLogAggregationsProps {
-  id: string;
+export interface LoadGlobalConnectorExecutionLogAggregationsProps {
   dateStart: string;
   dateEnd?: string;
   outcomeFilter?: string[];
@@ -52,12 +49,8 @@ export interface LoadExecutionLogAggregationsProps {
   perPage?: number;
   page?: number;
   sort?: SortField[];
+  namespaces?: Array<string | undefined>;
 }
-
-export type LoadGlobalExecutionLogAggregationsProps = Omit<
-  LoadExecutionLogAggregationsProps,
-  'id'
-> & { namespaces?: Array<string | undefined> };
 
 export const loadGlobalConnectorExecutionLogAggregations = async ({
   http,
@@ -69,7 +62,7 @@ export const loadGlobalConnectorExecutionLogAggregations = async ({
   page = 0,
   sort = [],
   namespaces,
-}: LoadGlobalExecutionLogAggregationsProps & { http: HttpSetup }) => {
+}: LoadGlobalConnectorExecutionLogAggregationsProps & { http: HttpSetup }) => {
   const sortField: any[] = sort;
   const filter = getFilter({ outcomeFilter, message });
 

@@ -46,7 +46,7 @@ export type ConnectorEventLogListKPIProps = {
   message?: string;
   refreshToken?: number;
   namespaces?: Array<string | undefined>;
-} & Pick<ConnectorApis, 'loadGlobalExecutionKPIAggregations'>;
+} & Pick<ConnectorApis, 'loadGlobalConnectorExecutionKPIAggregations'>;
 
 export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) => {
   const {
@@ -56,7 +56,7 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
     message,
     refreshToken,
     namespaces,
-    loadGlobalExecutionKPIAggregations,
+    loadGlobalConnectorExecutionKPIAggregations,
   } = props;
   const {
     notifications: { toasts },
@@ -69,8 +69,8 @@ export const ConnectorEventLogListKPI = (props: ConnectorEventLogListKPIProps) =
   const [kpi, setKpi] = useState<IExecutionKPIResult>();
 
   const loadKPIFn = useMemo(() => {
-    return loadGlobalExecutionKPIAggregations;
-  }, [loadGlobalExecutionKPIAggregations]);
+    return loadGlobalConnectorExecutionKPIAggregations;
+  }, [loadGlobalConnectorExecutionKPIAggregations]);
 
   const loadKPIs = async () => {
     setIsLoading(true);

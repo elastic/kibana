@@ -29,7 +29,7 @@ import {
   CONNECTOR_LOCKED_COLUMNS,
 } from '../../../constants';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { LoadExecutionLogAggregationsProps } from '../../../lib/action_connector_api';
+import { LoadGlobalConnectorExecutionLogAggregationsProps } from '../../../lib/action_connector_api';
 import {
   ComponentOpts as ConnectorApis,
   withActionOperations,
@@ -97,7 +97,7 @@ export type ConnectorEventLogListCommonProps = {
   initialPageSize?: number;
   hasConnectorNames?: boolean;
   hasAllSpaceSwitch?: boolean;
-} & Pick<ConnectorApis, 'loadGlobalExecutionLogAggregations'>;
+} & Pick<ConnectorApis, 'loadGlobalConnectorExecutionLogAggregations'>;
 
 export type ConnectorEventLogListTableProps<T extends ConnectorEventLogListOptions = 'default'> =
   T extends 'default'
@@ -112,7 +112,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   const {
     localStorageKey = CONNECTOR_EVENT_LOG_LIST_STORAGE_KEY,
     refreshToken,
-    loadGlobalExecutionLogAggregations,
+    loadGlobalConnectorExecutionLogAggregations,
     initialPageSize = 10,
     hasConnectorNames = false,
     hasAllSpaceSwitch = false,
@@ -189,13 +189,13 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   }, [sortingColumns]);
 
   const loadEventLogs = async () => {
-    if (!loadGlobalExecutionLogAggregations) {
+    if (!loadGlobalConnectorExecutionLogAggregations) {
       return;
     }
     setIsLoading(true);
     try {
-      const result = await loadGlobalExecutionLogAggregations({
-        sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
+      const result = await loadGlobalConnectorExecutionLogAggregations({
+        sort: formattedSort as LoadGlobalConnectorExecutionLogAggregationsProps['sort'],
         outcomeFilter: filter,
         message: searchText,
         dateStart: getParsedDate(dateStart),
@@ -345,7 +345,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         displayAsText: i18n.translate(
           'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.id',
           {
-            defaultMessage: 'Id',
+            defaultMessage: 'Execution Id',
           }
         ),
         isSortable: getIsColumnSortable('id'),

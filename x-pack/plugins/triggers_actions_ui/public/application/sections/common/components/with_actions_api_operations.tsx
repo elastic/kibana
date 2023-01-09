@@ -11,20 +11,20 @@ import { IExecutionLogResult, IExecutionKPIResult } from '@kbn/actions-plugin/co
 import { ActionType } from '../../../../types';
 import {
   loadActionTypes,
-  LoadGlobalExecutionLogAggregationsProps,
+  LoadGlobalConnectorExecutionLogAggregationsProps,
   loadGlobalConnectorExecutionLogAggregations,
-  LoadGlobalExecutionKPIAggregationsProps,
+  LoadGlobalConnectorExecutionKPIAggregationsProps,
   loadGlobalConnectorExecutionKPIAggregations,
 } from '../../../lib/action_connector_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
   loadActionTypes: () => Promise<ActionType[]>;
-  loadGlobalExecutionLogAggregations: (
-    props: LoadGlobalExecutionLogAggregationsProps
+  loadGlobalConnectorExecutionLogAggregations: (
+    props: LoadGlobalConnectorExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
-  loadGlobalExecutionKPIAggregations: (
-    props: LoadGlobalExecutionKPIAggregationsProps
+  loadGlobalConnectorExecutionKPIAggregations: (
+    props: LoadGlobalConnectorExecutionKPIAggregationsProps
   ) => Promise<IExecutionKPIResult>;
 }
 
@@ -39,16 +39,16 @@ export function withActionOperations<T>(
       <WrappedComponent
         {...(props as T)}
         loadActionTypes={async () => loadActionTypes({ http })}
-        loadGlobalExecutionLogAggregations={async (
-          loadProps: LoadGlobalExecutionLogAggregationsProps
+        loadGlobalConnectorExecutionLogAggregations={async (
+          loadProps: LoadGlobalConnectorExecutionLogAggregationsProps
         ) =>
           loadGlobalConnectorExecutionLogAggregations({
             ...loadProps,
             http,
           })
         }
-        loadGlobalExecutionKPIAggregations={async (
-          loadGlobalExecutionKPIAggregationsProps: LoadGlobalExecutionKPIAggregationsProps
+        loadGlobalConnectorExecutionKPIAggregations={async (
+          loadGlobalExecutionKPIAggregationsProps: LoadGlobalConnectorExecutionKPIAggregationsProps
         ) =>
           loadGlobalConnectorExecutionKPIAggregations({
             ...loadGlobalExecutionKPIAggregationsProps,
