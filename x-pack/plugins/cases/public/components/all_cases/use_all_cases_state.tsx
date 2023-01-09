@@ -23,7 +23,6 @@ import type {
   QueryParams,
   PartialQueryParams,
   ParsedUrlQueryParams,
-  UrlQueryParams,
 } from '../../../common/ui/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
@@ -42,7 +41,7 @@ const getQueryParams = (
   queryParams: PartialQueryParams,
   urlParams: PartialQueryParams,
   localStorageQueryParams?: LocalStorageQueryParams
-): [QueryParams, UrlQueryParams] => {
+): QueryParams => {
   const result = { ...DEFAULT_QUERY_PARAMS };
 
   result.perPage =
@@ -65,7 +64,7 @@ const getQueryParams = (
 
   result.page = params.page ?? urlParams.page ?? DEFAULT_QUERY_PARAMS.page;
 
-  return [result, { ...result, page: result.page.toString(), perPage: result.perPage.toString() }];
+  return result;
 };
 
 const getFilterOptions = (
@@ -75,12 +74,12 @@ const getFilterOptions = (
   localStorageFilterOptions?: PartialFilterOptions
 ): FilterOptions => {
   const severity =
-    params.severity ??
+    params?.severity ??
     urlParams?.severity ??
     localStorageFilterOptions?.severity ??
     DEFAULT_FILTER_OPTIONS.severity;
   const status =
-    params.status ??
+    params?.status ??
     urlParams?.status ??
     localStorageFilterOptions?.status ??
     DEFAULT_FILTER_OPTIONS.status;
@@ -101,14 +100,12 @@ export function useAllCasesState(
   const location = useLocation();
   const history = useHistory();
   const isFirstRenderRef = useRef(true);
-  const isFirstHistoryUpdateRef = useRef(true);
 
   const [queryParams, setQueryParams] = useState<QueryParams>({ ...DEFAULT_QUERY_PARAMS });
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     ...DEFAULT_FILTER_OPTIONS,
     ...initialFilterOptions,
   });
-  const [stateUrlParams, setStateUrlParams] = useState<Partial<UrlQueryParams & FilterOptions>>({});
 
   const [localStorageQueryParams, setLocalStorageQueryParams] =
     useLocalStorage<LocalStorageQueryParams>(getQueryParamsLocalStorageKey(appId));
@@ -125,7 +122,7 @@ export function useAllCasesState(
 
       const parsedUrlParams: ParsedUrlQueryParams = parse(location.search);
       const urlParams: PartialQueryParams = parseUrlQueryParams(parsedUrlParams);
-      const [newQueryParams, newUrlQueryParams]: [QueryParams, UrlQueryParams] = getQueryParams(
+      const newQueryParams: QueryParams = getQueryParams(
         params,
         queryParams,
         urlParams,
@@ -136,23 +133,10 @@ export function useAllCasesState(
         sortField: newQueryParams.sortField,
         sortOrder: newQueryParams.sortOrder,
       };
-
-      setStateUrlParams((prevUrlParams) => ({
-        ...prevUrlParams,
-        ...newUrlQueryParams,
-      }));
-
       setLocalStorageQueryParams(newLocalStorageQueryParams);
       setQueryParams(newQueryParams);
     },
-    [
-      isModalView,
-      location.search,
-      queryParams,
-      localStorageQueryParams,
-      setStateUrlParams,
-      setLocalStorageQueryParams,
-    ]
+    [isModalView, location.search, queryParams, localStorageQueryParams, setLocalStorageQueryParams]
   );
 
   const persistAndUpdateFilterOptions = useCallback(
@@ -178,12 +162,6 @@ export function useAllCasesState(
         ...localStorageFilterOptions,
         ...newPersistedFilterOptions,
       };
-
-      setStateUrlParams((prevUrlParams) => ({
-        ...prevUrlParams,
-        ...newPersistedFilterOptions,
-      }));
-
       setLocalStorageFilterOptions(newLocalStorageFilterOptions);
       setFilterOptions(newFilterOptions);
     },
@@ -193,35 +171,33 @@ export function useAllCasesState(
       localStorageFilterOptions,
       location.search,
       setLocalStorageFilterOptions,
-      setStateUrlParams,
     ]
   );
 
   useEffect(() => {
     if (isFirstRenderRef.current) {
-      persistAndUpdateQueryParams(isModalView ? DEFAULT_QUERY_PARAMS : {});
-      persistAndUpdateFilterOptions(
-        isModalView
-          ? {
-              ...DEFAULT_FILTER_OPTIONS,
-              ...initialFilterOptions,
-            }
-          : {}
-      );
+      persistAndUpdateQueryParams(isModalView ? queryParams : {});
+      persistAndUpdateFilterOptions(isModalView ? filterOptions : initialFilterOptions);
 
       isFirstRenderRef.current = false;
     }
   }, [
-    history,
+    filterOptions,
     initialFilterOptions,
     isModalView,
-    location,
     persistAndUpdateFilterOptions,
     persistAndUpdateQueryParams,
+    queryParams,
   ]);
 
-  useEffect(() => {
+  if (!isModalView) {
     const parsedUrlParams = parse(location.search);
+    const stateUrlParams = {
+      ...parsedUrlParams,
+      ...queryParams,
+      severity: filterOptions.severity,
+      status: filterOptions.status,
+    };
 
     if (!isEqual(parsedUrlParams, stateUrlParams)) {
       try {
@@ -230,17 +206,12 @@ export function useAllCasesState(
           search: stringify({ ...parsedUrlParams, ...stateUrlParams }),
         };
 
-        if (isFirstHistoryUpdateRef.current) {
-          history.replace(newHistory);
-          isFirstHistoryUpdateRef.current = false;
-        } else {
-          history.push(newHistory);
-        }
+        history.replace(newHistory);
       } catch {
         // silently fail
       }
     }
-  }, [history, location, stateUrlParams]);
+  }
 
   return {
     queryParams,

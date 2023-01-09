@@ -18,6 +18,7 @@ import {
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
 import { stringify } from 'query-string';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
+import { CaseStatuses } from '../../../common';
 
 const LOCAL_STORAGE_QUERY_PARAMS_DEFAULTS = {
   perPage: DEFAULT_QUERY_PARAMS.perPage,
@@ -92,17 +93,20 @@ describe('useAllCasesQueryParams', () => {
     });
   });
 
-  it('calls history.replace with default values on first run', () => {
-    renderHook(() => useAllCasesState(), {
+  it('takes into account input filter options', () => {
+    const existingLocalStorageValues = { owner: ['foobar'], status: CaseStatuses.open };
+
+    const { result } = renderHook(() => useAllCasesState(false, existingLocalStorageValues), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(useHistory().replace).toHaveBeenCalledWith({
-      search: stringify(URL_DEFAULTS),
+    expect(result.current.filterOptions).toStrictEqual({
+      ...DEFAULT_FILTER_OPTIONS,
+      ...existingLocalStorageValues,
     });
   });
 
-  it('calls history.replace on first run and history.push onwards', () => {
+  it('calls history.replace on every run', () => {
     const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
@@ -115,7 +119,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(useHistory().replace).toHaveBeenCalled();
-    expect(useHistory().push).toHaveBeenCalledTimes(1);
+    expect(useHistory().push).toHaveBeenCalledTimes(0);
   });
 
   it('takes into account existing localStorage query params on first run', () => {
@@ -164,7 +168,7 @@ describe('useAllCasesQueryParams', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(useHistory().push).toHaveBeenCalledWith({
+    expect(useHistory().replace).toHaveBeenCalledWith({
       search: stringify(expectedUrl),
     });
   });
@@ -179,7 +183,7 @@ describe('useAllCasesQueryParams', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(useHistory().push).toHaveBeenCalledWith({
+    expect(useHistory().replace).toHaveBeenCalledWith({
       search: stringify(expectedUrl),
     });
   });
@@ -196,7 +200,7 @@ describe('useAllCasesQueryParams', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(useHistory().push).toHaveBeenCalledWith({
+    expect(useHistory().replace).toHaveBeenCalledWith({
       search: stringify(expectedUrl),
     });
   });
