@@ -59,6 +59,7 @@ const findTestUtils = (
         name: 'abc',
         tags: ['foo'],
         rule_type_id: 'test.noop',
+        running: false,
         consumer: 'alertsFixture',
         schedule: { interval: '1m' },
         enabled: true,

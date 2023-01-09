@@ -51,6 +51,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         id: createdAlert.id,
         tags: ['bar'],
         rule_type_id: 'test.noop',
+        running: false,
         consumer: 'alertsFixture',
         created_by: null,
         enabled: true,
