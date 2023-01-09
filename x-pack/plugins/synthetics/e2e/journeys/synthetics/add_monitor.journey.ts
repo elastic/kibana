@@ -6,8 +6,9 @@
  */
 import uuid from 'uuid';
 import { journey, step, expect, Page } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { FormMonitorType } from '../../../common/runtime_types';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 const customLocation = process.env.SYNTHETICS_TEST_LOCATION;
 
@@ -146,6 +147,8 @@ const createMonitorJourney = ({
   journey(
     `SyntheticsAddMonitor - ${monitorName}`,
     async ({ page, params }: { page: Page; params: any }) => {
+      recordVideo(page);
+
       const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
       step('Go to monitor management', async () => {
@@ -181,7 +184,7 @@ const createMonitorJourney = ({
       });
 
       step(`edit ${monitorName}`, async () => {
-        await syntheticsApp.navigateToEditMonitor();
+        await syntheticsApp.navigateToEditMonitor(monitorName);
         await syntheticsApp.findByText(monitorListDetails.location);
         const hasFailure = await syntheticsApp.findEditMonitorConfiguration(
           monitorEditDetails,
@@ -212,7 +215,7 @@ const createMonitorJourney = ({
 Object.values(configuration).forEach((config) => {
   createMonitorJourney({
     monitorType: config.monitorType,
-    monitorName: `${config.monitorConfig.name} monitor`,
+    monitorName: config.monitorConfig.name,
     monitorConfig: config.monitorConfig,
     monitorListDetails: config.monitorListDetails,
     monitorEditDetails: config.monitorEditDetails as Array<[string, string]>,

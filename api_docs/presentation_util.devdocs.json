@@ -661,6 +661,23 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.getContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "getContextProvider",
+        "description": [],
+        "signature": [
+          "() => React.FC<{}>"
+        ],
+        "path": "src/plugins/presentation_util/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.LazyDashboardPicker",
         "type": "Function",
         "tags": [],
@@ -3180,9 +3197,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">) => any"
