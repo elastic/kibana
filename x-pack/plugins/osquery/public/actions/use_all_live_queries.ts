@@ -14,16 +14,21 @@ import type { ActionEdges, ActionsStrategyResponse, Direction } from '../../comm
 import type { ESTermQuery, ESExistsQuery, ESMatchPhraseQuery } from '../../common/typed_json';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { Direction } from '../../common/search_strategy';
 
-interface UseAllLiveQueries {
+export interface UseAllLiveQueriesConfig {
   activePage: number;
-  direction: Direction;
+  direction?: Direction;
   limit: number;
   sortField: string;
   skip?: boolean;
+  alertId?: string;
   actionId?: string;
   alertId?: string;
 }
+
+// Make sure we keep this and ACTIONS_QUERY_KEY in osquery_flyout.tsx in sync.
+const ACTIONS_QUERY_KEY = 'actions';
 
 const getFilterQuery = (
   alertId?: string,
@@ -50,20 +55,23 @@ const getFilterQuery = (
 
 export const useAllLiveQueries = ({
   activePage,
-  direction,
+  direction = Direction.desc,
   limit,
   sortField,
   skip = false,
   actionId,
   alertId,
-}: UseAllLiveQueries) => {
+}: UseAllLiveQueriesConfig) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   const filterQuery = getFilterQuery(alertId, actionId);
 
   return useQuery(
-    ['actions', { activePage, direction, limit, sortField, actionId, alertId }],
+    [
+      ACTIONS_QUERY_KEY,
+      { activePage, direction, limit, sortField, actionId, alertId },
+    ],
     () =>
       http.get<{ data: Omit<ActionsStrategyResponse, 'edges'> & { items: ActionEdges } }>(
         '/api/osquery/live_queries',

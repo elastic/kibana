@@ -22,3 +22,9 @@ export function getRoundedTimeRangeBounds(state: TimeSliderReduxState): [number,
     roundUpToNextStepSizeFactor(timeRangeBounds[TO_INDEX], stepSize),
   ];
 }
+
+export function getIsAnchored(state: TimeSliderReduxState): boolean {
+  return typeof state.explicitInput.isAnchored === 'boolean'
+    ? state.explicitInput.isAnchored
+    : false;
+}

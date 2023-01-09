@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { ActionEdges } from '../../../common/search_strategy';
 import type { AlertEcsData } from '../../common/contexts';
 
 export interface OsqueryActionResultsProps {
   agentIds?: string[];
   ruleName?: string[];
+  actionItems?: ActionEdges;
+
   alertId?: string;
   ecsData: AlertEcsData | null;
   actionId?: string;
