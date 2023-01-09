@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { encode } from '@kbn/rison';
 import { getNewRule } from '../../objects/rule';
 import {
   CONTROL_FRAMES,
@@ -59,6 +60,10 @@ describe('Detections : Page Filters', () => {
     cleanKibana();
     login();
     createCustomRuleEnabled(getNewRule(), 'custom_rule_filters');
+  });
+
+  beforeEach(() => {
+    login();
     visit(ALERTS_URL);
     waitForAlerts();
     waitForPageFilters();
@@ -84,7 +89,7 @@ describe('Detections : Page Filters', () => {
     cy.url().then((url) => {
       const currURL = new URL(url);
 
-      currURL.searchParams.set('pageFilters', formatPageFilterSearchParam(NEW_FILTERS));
+      currURL.searchParams.set('pageFilters', encode(formatPageFilterSearchParam(NEW_FILTERS)));
       cy.visit(currURL.toString());
       waitForAlerts();
       assertFilterControlsWithFilterObject(NEW_FILTERS);
@@ -105,7 +110,7 @@ describe('Detections : Page Filters', () => {
     cy.url().then((url) => {
       const currURL = new URL(url);
 
-      currURL.searchParams.set('pageFilters', pageFilterUrlString);
+      currURL.searchParams.set('pageFilters', encode(pageFilterUrlString));
       cy.visit(currURL.toString());
 
       waitForAlerts();
