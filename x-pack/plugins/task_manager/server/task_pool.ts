@@ -20,6 +20,7 @@ import { TaskManagerStat } from './task_events';
 interface Opts {
   maxWorkers$: Observable<number>;
   logger: Logger;
+  maxQueuedTasks: number;
 }
 
 export enum TaskPoolRunResult {
@@ -39,8 +40,10 @@ const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana servic
  * Runs tasks in batches, taking costs into account.
  */
 export class TaskPool {
+  private maxQueuedTasks: number;
   private maxWorkers: number = 0;
-  private tasksInPool = new Map<string, TaskRunner>();
+  private tasksInQueue: TaskRunner[] = [];
+  private tasksRunning: TaskRunner[] = [];
   private logger: Logger;
   private load$ = new Subject<TaskManagerStat>();
 
@@ -54,6 +57,7 @@ export class TaskPool {
    */
   constructor(opts: Opts) {
     this.logger = opts.logger;
+    this.maxQueuedTasks = opts.maxQueuedTasks;
     opts.maxWorkers$.subscribe((maxWorkers) => {
       this.logger.debug(`Task pool now using ${maxWorkers} as the max worker value`);
       this.maxWorkers = maxWorkers;
@@ -68,7 +72,7 @@ export class TaskPool {
    * Gets how many workers are currently in use.
    */
   public get occupiedWorkers() {
-    return this.tasksInPool.size;
+    return this.tasksRunning.length;
   }
 
   /**
@@ -76,6 +80,17 @@ export class TaskPool {
    */
   public get workerLoad() {
     return this.maxWorkers ? Math.round((this.occupiedWorkers * 100) / this.maxWorkers) : 100;
+  }
+
+  /**
+   * Gets # of tasks to fill available workers and queue.
+   */
+  public get numOfTasksToClaim() {
+    // cancel expired task whenever a call is made to check for capacity
+    // this ensures that we don't end up with a queue of hung tasks causing both
+    // the poller and the pool from hanging due to lack of capacity
+    this.cancelExpiredTasks();
+    return this.maxQueuedTasks - this.tasksInQueue.length + this.availableWorkers;
   }
 
   /**
@@ -93,9 +108,49 @@ export class TaskPool {
    * Gets how many workers are currently in use by type.
    */
   public getOccupiedWorkersByType(type: string) {
-    return [...this.tasksInPool.values()].reduce(
+    return this.tasksRunning.reduce(
       (count, runningTask) => (runningTask.definition.type === type ? ++count : count),
       0
+    );
+  }
+
+  /**
+   * For each available worker, take a task from the queue and occupy a worker.
+   */
+  private fillAvailableWorkersFromQueue() {
+    // Move tasks from tasksInQueue to tasksRunning synchronously
+    const tasksToRun =
+      this.availableWorkers > 0 ? this.tasksInQueue.splice(0, this.availableWorkers) : [];
+    tasksToRun.forEach((taskRunner) => this.tasksRunning.push(taskRunner));
+
+    // Mark them as running and start running them asynchronously
+    (async () => {
+      await Promise.all(
+        tasksToRun.map(async (taskRunner) => {
+          try {
+            const hasTaskBeenMarkAsRunning = await taskRunner.markTaskAsRunning();
+            if (hasTaskBeenMarkAsRunning) {
+              this.handleMarkAsRunning(taskRunner);
+            } else {
+              this.handleFailureOfMarkAsRunning(taskRunner, {
+                name: 'TaskPoolVersionConflictError',
+                message: VERSION_CONFLICT_MESSAGE,
+              });
+            }
+          } catch (e) {
+            this.handleFailureOfMarkAsRunning(taskRunner, e);
+          }
+        })
+      );
+    })();
+  }
+
+  /**
+   * Resets the tasksInQueue object based on when a task is scheduled to run
+   */
+  private resortQueue() {
+    this.tasksInQueue = this.tasksInQueue.sort(
+      (a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime()
     );
   }
 
@@ -108,46 +163,32 @@ export class TaskPool {
    * @returns {Promise<boolean>}
    */
   public run = async (tasks: TaskRunner[]): Promise<TaskPoolRunResult> => {
-    const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
-    if (tasksToRun.length) {
-      await Promise.all(
-        tasksToRun
-          .filter(
-            (taskRunner) =>
-              !Array.from(this.tasksInPool.keys()).some((executionId: string) =>
-                taskRunner.isSameTask(executionId)
-              )
-          )
-          .map(async (taskRunner) => {
-            // We use taskRunner.taskExecutionId instead of taskRunner.id as key for the task pool map because
-            // task cancellation is a non-blocking procedure. We calculate the expiration and immediately remove
-            // the task from the task pool. There is a race condition that can occur when a recurring tasks's schedule
-            // matches its timeout value. A new instance of the task can be claimed and added to the task pool before
-            // the cancel function (meant for the previous instance of the task) is actually called. This means the wrong
-            // task instance is cancelled. We introduce the taskExecutionId to differentiate between these overlapping instances and
-            // ensure that the correct task instance is cancelled.
-            this.tasksInPool.set(taskRunner.taskExecutionId, taskRunner);
-            return taskRunner
-              .markTaskAsRunning()
-              .then((hasTaskBeenMarkAsRunning: boolean) =>
-                hasTaskBeenMarkAsRunning
-                  ? this.handleMarkAsRunning(taskRunner)
-                  : this.handleFailureOfMarkAsRunning(taskRunner, {
-                      name: 'TaskPoolVersionConflictError',
-                      message: VERSION_CONFLICT_MESSAGE,
-                    })
-              )
-              .catch((err) => this.handleFailureOfMarkAsRunning(taskRunner, err));
-          })
-      );
+    if (tasks.length) {
+      tasks
+        // Tasks in queue will keep showing up until they run, let's filter them out if the task is the same
+        .filter(
+          (taskRunner) =>
+            !this.tasksRunning.some(({ taskExecutionId }) =>
+              taskRunner.isSameTask(taskExecutionId)
+            ) &&
+            !this.tasksInQueue.some(({ taskExecutionId }) => taskRunner.isSameTask(taskExecutionId))
+        )
+        .map((taskRunner) => {
+          // We use taskRunner.taskExecutionId instead of taskRunner.id as key for the task pool map because
+          // task cancellation is a non-blocking procedure. We calculate the expiration and immediately remove
+          // the task from the task pool. There is a race condition that can occur when a recurring tasks's schedule
+          // matches its timeout value. A new instance of the task can be claimed and added to the task pool before
+          // the cancel function (meant for the previous instance of the task) is actually called. This means the wrong
+          // task instance is cancelled. We introduce the taskExecutionId to differentiate between these overlapping instances and
+          // ensure that the correct task instance is cancelled.
+          this.tasksInQueue.push(taskRunner);
+          return taskRunner;
+        });
+      this.resortQueue();
+      this.fillAvailableWorkersFromQueue();
     }
 
-    if (leftOverTasks.length) {
-      if (this.availableWorkers) {
-        return this.run(leftOverTasks);
-      }
-      return TaskPoolRunResult.RanOutOfCapacity;
-    } else if (!this.availableWorkers) {
+    if (!this.availableWorkers) {
       return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
@@ -155,7 +196,7 @@ export class TaskPool {
 
   public cancelRunningTasks() {
     this.logger.debug('Cancelling running tasks.');
-    for (const task of this.tasksInPool.values()) {
+    for (const task of this.tasksRunning) {
       this.cancelTask(task);
     }
   }
@@ -177,17 +218,21 @@ export class TaskPool {
         }
       })
       .then(() => {
-        this.tasksInPool.delete(taskRunner.taskExecutionId);
+        const index = this.tasksRunning.indexOf(taskRunner);
+        this.tasksRunning.splice(index, 1);
+        this.fillAvailableWorkersFromQueue();
       });
   }
 
   private handleFailureOfMarkAsRunning(task: TaskRunner, err: Error) {
-    this.tasksInPool.delete(task.taskExecutionId);
+    const index = this.tasksRunning.indexOf(task);
+    this.tasksRunning.splice(index, 1);
     this.logger.error(`Failed to mark Task ${task.toString()} as running: ${err.message}`);
+    this.fillAvailableWorkersFromQueue();
   }
 
   private cancelExpiredTasks() {
-    for (const taskRunner of this.tasksInPool.values()) {
+    for (const taskRunner of this.tasksRunning) {
       if (taskRunner.isExpired) {
         this.logger.warn(
           `Cancelling task ${taskRunner.toString()} as it expired at ${taskRunner.expiration.toISOString()}${
@@ -210,17 +255,14 @@ export class TaskPool {
   private async cancelTask(task: TaskRunner) {
     try {
       this.logger.debug(`Cancelling task ${task.toString()}.`);
-      this.tasksInPool.delete(task.taskExecutionId);
+      const index = this.tasksRunning.indexOf(task);
+      this.tasksRunning.splice(index, 1);
       await task.cancel();
+      this.fillAvailableWorkersFromQueue();
     } catch (err) {
       this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);
     }
   }
-}
-
-function partitionListByCount<T>(list: T[], count: number): [T[], T[]] {
-  const listInCount = list.splice(0, count);
-  return [listInCount, list];
 }
 
 function durationAsString(duration: Duration): string {

@@ -73,6 +73,7 @@ export interface TaskRunner {
   isEphemeral?: boolean;
   toString: () => string;
   isSameTask: (executionId: string) => boolean;
+  scheduledAt: Date;
 }
 
 export enum TaskRunningStage {
@@ -249,6 +250,13 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public get startedAt() {
     return this.instance.task.startedAt;
+  }
+
+  /**
+   * Gets when the task was scheduled to run
+   */
+  public get scheduledAt() {
+    return this.instance.task.scheduledAt;
   }
 
   /**

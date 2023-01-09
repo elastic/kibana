@@ -10,6 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
+export const DEFUALT_MAX_QUEUED_TASKS = 0;
 export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
@@ -78,6 +79,8 @@ export const configSchema = schema.object(
       // disable the task manager rather than trying to specify it with 0 workers
       min: 1,
     }),
+    /* The maximum number of tasks that this Kibana instance will queue for running  */
+    max_queued_tasks: schema.number({ defaultValue: DEFUALT_MAX_QUEUED_TASKS }),
     /* The threshold percenatge for workers experiencing version conflicts for shifting the polling interval. */
     version_conflict_threshold: schema.number({
       defaultValue: DEFAULT_VERSION_CONFLICT_THRESHOLD,

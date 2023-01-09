@@ -130,6 +130,7 @@ export class TaskPollingLifecycle {
     this.pool = new TaskPool({
       logger,
       maxWorkers$: maxWorkersConfiguration$,
+      maxQueuedTasks: config.max_queued_tasks,
     });
     this.pool.load.subscribe(emitEvent);
 
@@ -140,6 +141,8 @@ export class TaskPollingLifecycle {
       definitions,
       unusedTypes,
       logger: this.logger,
+      maxQueuedTasks: config.max_queued_tasks,
+      maxWorkers$: maxWorkersConfiguration$,
       getCapacity: (taskType?: string) =>
         taskType && this.definitions.get(taskType)?.maxConcurrency
           ? Math.max(
@@ -150,7 +153,7 @@ export class TaskPollingLifecycle {
               ),
               0
             )
-          : this.pool.availableWorkers,
+          : this.pool.numOfTasksToClaim,
     });
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);

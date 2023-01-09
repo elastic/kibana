@@ -49,6 +49,8 @@ export interface TaskClaimingOpts {
   maxAttempts: number;
   excludedTaskTypes: string[];
   getCapacity: (taskType?: string) => number;
+  maxQueuedTasks: number;
+  maxWorkers$: Observable<number>;
 }
 
 export interface OwnershipClaimingOpts {
@@ -103,6 +105,8 @@ export class TaskClaiming {
   private events$: Subject<TaskClaim>;
   private taskStore: TaskStore;
   private getCapacity: (taskType?: string) => number;
+  private readonly maxQueuedTasks: number;
+  private maxWorkers: number = 0;
   private logger: Logger;
   private readonly taskClaimingBatchesByType: TaskClaimingBatches;
   private readonly taskMaxAttempts: Record<string, number>;
@@ -125,8 +129,13 @@ export class TaskClaiming {
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
     this.unusedTypes = opts.unusedTypes;
+    this.maxQueuedTasks = opts.maxQueuedTasks;
 
     this.events$ = new Subject<TaskClaim>();
+
+    opts.maxWorkers$.subscribe((maxWorkers) => {
+      this.maxWorkers = maxWorkers;
+    });
   }
 
   private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
@@ -247,7 +256,10 @@ export class TaskClaiming {
         taskTypes,
       });
 
-    const docs = tasksUpdated > 0 ? await this.sweepForClaimedTasks(taskTypes, size) : [];
+    // Size here needs to be max queue size + max workers, since max workers can change (increase / decrease)
+    // at any time, let's wrap it in a Max.max..
+    const maxSize = Math.max(size, this.maxWorkers + this.maxQueuedTasks);
+    const docs = tasksUpdated > 0 ? await this.sweepForClaimedTasks(taskTypes, maxSize) : [];
 
     this.emitEvents(docs.map((doc) => asTaskClaimEvent(doc.id, asOk(doc))));
 
