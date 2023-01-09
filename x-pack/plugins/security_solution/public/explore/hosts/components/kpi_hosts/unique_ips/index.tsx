@@ -20,7 +20,7 @@ import * as i18n from './translations';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
-import { useRefetchByRestartingSession } from '../../../../../common/components/page/use_refetch_by_session';
+import { useRefetchByRestartingSession } from '../../../../containers/use_refetch_by_session';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {

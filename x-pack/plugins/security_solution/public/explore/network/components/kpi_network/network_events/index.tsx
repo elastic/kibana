@@ -16,7 +16,7 @@ import { kpiNetworkEventsLensAttributes } from '../../../../../common/components
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
-import { useRefetchByRestartingSession } from '../../../../../common/components/page/use_refetch_by_session';
+import { useRefetchByRestartingSession } from '../../../../containers/use_refetch_by_session';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 const euiVisColorPalette = euiPaletteColorBlind();
