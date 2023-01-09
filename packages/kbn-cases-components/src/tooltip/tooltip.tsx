@@ -60,12 +60,16 @@ const CaseTooltipComponent = React.memo<Props>(
                 <Status status={status} />
                 <IconWithCount count={totalComments} icon={'editorComment'} />
               </EuiFlexGroup>
+
               <EuiSpacer size="xs" />
+
               <EuiText style={{ ...commonTextStyles, WebkitLineClamp: 1 }}>
                 <strong>{title}</strong>
               </EuiText>
               <EuiText style={{ ...commonTextStyles, WebkitLineClamp: 2 }}>{description}</EuiText>
+
               <EuiSpacer size="xs" />
+
               <EuiText style={{ borderTop: `1px solid ${borderColor}` }}>
                 <EuiSpacer size="xs" />
                 {status === CaseStatuses.closed ? i18n.CLOSED : i18n.OPENED}{' '}
