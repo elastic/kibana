@@ -4975,6 +4975,49 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-server.ArtifactsClientInterface.bulkCreateArtifacts",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkCreateArtifacts",
+            "description": [],
+            "signature": [
+              "(optionsList: ",
+              "ArtifactsClientCreateOptions",
+              "[]) => Promise<{ artifacts?: ",
+              {
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.Artifact",
+                "text": "Artifact"
+              },
+              "[] | undefined; errors?: Error[] | undefined; }>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.ArtifactsClientInterface.bulkCreateArtifacts.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "optionsList",
+                "description": [],
+                "signature": [
+                  "ArtifactsClientCreateOptions",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-server.ArtifactsClientInterface.deleteArtifact",
             "type": "Function",
             "tags": [],
@@ -14990,6 +15033,37 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.AssetsGroupedByServiceByType",
+        "type": "Type",
+        "tags": [],
+        "label": "AssetsGroupedByServiceByType",
+        "description": [],
+        "signature": [
+          "Record<\"kibana\", ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.KibanaAssetTypeToParts",
+            "text": "KibanaAssetTypeToParts"
+          },
+          "> & Record<\"elasticsearch\", ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.ElasticsearchAssetTypeToParts",
+            "text": "ElasticsearchAssetTypeToParts"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.BulkGetAgentPoliciesResponse",
         "type": "Type",
         "tags": [],
@@ -17721,9 +17795,11 @@
         "type": "Object",
         "tags": [],
         "label": "ENDPOINT_PRIVILEGES",
-        "description": [],
+        "description": [
+          "\ndefines endpoint package privileges\nthe key is the name of the packagePrivilege (ie. 'readSecuritySolution')\nthe value object is for mapping kibana privileges and capabilities\nsee x-pack/plugins/fleet/server/services/security/security.ts for example of how object values are used"
+        ],
         "signature": [
-          "readonly [\"writeEndpointList\", \"readEndpointList\", \"writeTrustedApplications\", \"readTrustedApplications\", \"writeHostIsolationExceptions\", \"readHostIsolationExceptions\", \"writeBlocklist\", \"readBlocklist\", \"writeEventFilters\", \"readEventFilters\", \"writePolicyManagement\", \"readPolicyManagement\", \"writeActionsLogManagement\", \"readActionsLogManagement\", \"writeHostIsolation\", \"writeProcessOperations\", \"writeFileOperations\"]"
+          "{ [x: string]: PrivilegeMapObject; }"
         ],
         "path": "x-pack/plugins/fleet/common/constants/authz.ts",
         "deprecated": false,
