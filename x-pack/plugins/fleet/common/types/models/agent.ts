@@ -59,6 +59,7 @@ export interface NewAgentAction {
   id?: string;
   expiration?: string;
   start_time?: string;
+  minimum_execution_duration?: number;
   rollout_duration_seconds?: number;
   source_uri?: string;
   total?: number;

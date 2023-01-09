@@ -45,6 +45,7 @@ export async function createAgentAction(
     data: newAgentAction.data,
     type: newAgentAction.type,
     start_time: newAgentAction.start_time,
+    minimum_execution_duration: newAgentAction.minimum_execution_duration,
     rollout_duration_seconds: newAgentAction.rollout_duration_seconds,
     total: newAgentAction.total,
   };
