@@ -11,18 +11,22 @@ import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public'
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { IMAGE_EMBEDDABLE_TYPE, ImageEmbeddableFactoryDefinition } from './image_embeddable';
+import { imageClickTrigger } from './actions';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
   files: FilesSetup;
   security?: SecurityPluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface StartDependencies {
   embeddable: EmbeddableStart;
   files: FilesStart;
   security?: SecurityPluginStart;
+  uiActions: UiActionsStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -51,9 +55,12 @@ export class ImageEmbeddablePlugin
             const security = start().plugins.security;
             return security ? await security.authc.getCurrentUser() : undefined;
           },
+          uiActions: start().plugins.uiActions,
         }),
       })
     );
+
+    plugins.uiActions.registerTrigger(imageClickTrigger);
     return {};
   }
 

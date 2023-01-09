@@ -20,6 +20,7 @@
     "@kbn/i18n",
     "@kbn/core-http-browser",
     "@kbn/shared-ux-file-image",
+    "@kbn/ui-actions-plugin"
   ],
   "exclude": [
     "target/**/*",

@@ -19,10 +19,12 @@ import {
   FileImageMetadata,
   imageEmbeddableFileKind,
   ThemeServiceStart,
+  UiActionsStart,
 } from '../imports';
 import { ImageEmbeddable, IMAGE_EMBEDDABLE_TYPE } from './image_embeddable';
 import { ImageConfig } from '../types';
 import { createValidateUrl } from '../utils/validate_url';
+import { ImageClickContext } from '../actions';
 
 export interface ImageEmbeddableFactoryDeps {
   start: () => {
@@ -32,6 +34,7 @@ export interface ImageEmbeddableFactoryDeps {
     externalUrl: IExternalUrl;
     theme: ThemeServiceStart;
     getUser: () => Promise<AuthenticatedUser | undefined>;
+    uiActions: UiActionsStart;
   };
 }
 
@@ -55,6 +58,16 @@ export class ImageEmbeddableFactoryDefinition
       {
         getImageDownloadHref: this.getImageDownloadHref,
         validateUrl: createValidateUrl(this.deps.start().externalUrl),
+        actions: {
+          executeTriggerActions: (triggerId: string, context: ImageClickContext) =>
+            this.deps.start().uiActions.executeTriggerActions(triggerId, context),
+          hasTriggerActions: (triggerId: string, context: ImageClickContext) =>
+            this.deps
+              .start()
+              .uiActions.getTriggerCompatibleActions(triggerId, context)
+              .catch(() => [])
+              .then((actions) => actions.length > 0),
+        },
       },
       initialInput,
       parent
