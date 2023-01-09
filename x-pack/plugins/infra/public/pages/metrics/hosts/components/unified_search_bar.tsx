@@ -11,7 +11,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGrid } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
@@ -73,7 +73,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   };
 
   return (
-    <>
+    <EuiFlexGrid gutterSize="s">
       <SearchBar
         appName={'Infra Hosts'}
         placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
@@ -93,7 +93,6 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
         onFiltersUpdated={onFilterChange}
         displayStyle="inPage"
       />
-      <EuiSpacer />
       <ControlsContent
         timeRange={unifiedSearchDateRange}
         dataViewId={dataView.id ?? ''}
@@ -101,6 +100,6 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
         filters={unifiedSearchFilters}
         onFilterChange={onPanelFiltersChange}
       />
-    </>
+    </EuiFlexGrid>
   );
 };
