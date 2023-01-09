@@ -184,7 +184,7 @@ describe('experimental_datastream_features', () => {
           body: expect.objectContaining({
             template: expect.objectContaining({
               settings: expect.objectContaining({
-                index: { mode: 'time_series', routing_path: ['test_dimension'] },
+                index: { mode: 'time_series' },
               }),
             }),
           }),
@@ -288,7 +288,7 @@ describe('experimental_datastream_features', () => {
             body: expect.objectContaining({
               template: expect.objectContaining({
                 settings: expect.objectContaining({
-                  index: { mode: 'time_series', routing_path: ['test_dimension'] },
+                  index: { mode: 'time_series' },
                 }),
               }),
             }),
