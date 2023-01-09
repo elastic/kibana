@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -20,6 +20,9 @@ import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import { DatePickerWrapper } from './date_picker_wrapper';
 
 jest.mock('@elastic/eui', () => {
+  const EuiButtonMock = jest.fn(() => {
+    return null;
+  });
   const EuiSuperDatePickerMock = jest.fn(() => {
     return null;
   });
@@ -30,6 +33,9 @@ jest.mock('@elastic/eui', () => {
     return <>{children}</>;
   });
   return {
+    useEuiBreakpoint: jest.fn(() => 'mediaQuery @media only screen and (max-width: 1199px)'),
+    useIsWithinMaxBreakpoint: jest.fn(() => false),
+    EuiButton: EuiButtonMock,
     EuiSuperDatePicker: EuiSuperDatePickerMock,
     EuiFlexGroup: EuiFlexGroupMock,
     EuiFlexItem: EuiFlexItemMock,
@@ -58,12 +64,18 @@ jest.mock('../hooks/use_timefilter', () => ({
   }),
 }));
 
-jest.mock('../hooks/use_date_picker_context');
+jest.mock('../hooks/use_date_picker_context', () => ({
+  useDatePickerContext: jest.fn(),
+}));
 
 const mockContextFactory = (addWarning: jest.Mock<void, []>) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { of } = require('rxjs');
-  return {
+  const mockedUiSettingsKeys = {} as typeof UI_SETTINGS;
+  const mockedToMountPoint = jest.fn();
+  const mockedWrapWithTheme = jest.fn();
+
+  return () => ({
     notifications: {
       toasts: { addWarning },
     },
@@ -106,12 +118,8 @@ const mockContextFactory = (addWarning: jest.Mock<void, []>) => {
     uiSettingsKeys: mockedUiSettingsKeys,
     toMountPoint: mockedToMountPoint,
     wrapWithTheme: mockedWrapWithTheme,
-  };
+  });
 };
-
-const mockedUiSettingsKeys = {} as typeof UI_SETTINGS;
-const mockedToMountPoint = jest.fn();
-const mockedWrapWithTheme = jest.fn();
 
 const MockedEuiSuperDatePicker = EuiSuperDatePicker as jest.MockedFunction<
   typeof EuiSuperDatePicker
@@ -127,16 +135,16 @@ describe('<DatePickerWrapper />', () => {
     jest.useRealTimers();
   });
 
-  test('Minimal initialization.', () => {
+  test('Minimal initialization.', async () => {
     const refreshListener = jest.fn();
     const refreshSubscription = mlTimefilterRefresh$.subscribe(refreshListener);
 
     const displayWarningSpy = jest.fn(() => {});
 
-    (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory(displayWarningSpy));
+    (useDatePickerContext as jest.Mock).mockImplementation(mockContextFactory(displayWarningSpy));
 
-    const wrapper = mount(<DatePickerWrapper />);
-    expect(wrapper.find(DatePickerWrapper)).toHaveLength(1);
+    render(<DatePickerWrapper />);
+
     expect(refreshListener).toBeCalledTimes(0);
 
     refreshSubscription.unsubscribe();
@@ -148,7 +156,7 @@ describe('<DatePickerWrapper />', () => {
 
     const displayWarningSpy = jest.fn(() => {});
 
-    (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory(displayWarningSpy));
+    (useDatePickerContext as jest.Mock).mockImplementation(mockContextFactory(displayWarningSpy));
 
     // act
     render(<DatePickerWrapper />);
@@ -167,7 +175,7 @@ describe('<DatePickerWrapper />', () => {
 
     const displayWarningSpy = jest.fn(() => {});
 
-    (useDatePickerContext as jest.Mock).mockReturnValueOnce(mockContextFactory(displayWarningSpy));
+    (useDatePickerContext as jest.Mock).mockImplementation(mockContextFactory(displayWarningSpy));
 
     // act
     render(<DatePickerWrapper />);
