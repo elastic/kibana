@@ -14,12 +14,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useUrlState } from '@kbn/ml-url-state';
+import { isDefined } from '@kbn/ml-is-defined';
 
 import { LinkCardProps } from '../../../common/components/link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { LinkCard } from '../../../common/components/link_card';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
-import { isDefined } from '../../../common/util/is_defined';
 
 interface Props {
   dataView: DataView;
