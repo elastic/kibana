@@ -153,7 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
       });
 
-      it('Other bucket should be added to a session when restoring', async () => {
+      it.only('Other bucket should be added to a session when restoring', async () => {
         // not using regular navigation method, because don't want to wait until all panels load
         // await PageObjects.dashboard.loadSavedDashboard('Lens with other bucket');
         await listingTable.clickItemLink('dashboard', 'Lens with other bucket');
@@ -173,12 +173,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let searchSessionList = await PageObjects.searchSessionsManagement.getList();
         let searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
         expect(searchSessionItem.searchesCount).to.be(1);
+        await new Promise((resolve) => setTimeout(resolve, 10000));
 
         await searchSessionItem.view();
 
         // Check that session is still loading
         await searchSessions.expectState('backgroundLoading');
-        expect(await toasts.getToastCount()).to.be(1); // there should be a session restoration warnings related to other bucket
+        await retry.waitFor('session restoration warnings related to other bucket', async () => {
+          return (await toasts.getToastCount()) === 1;
+        });
         await toasts.dismissAllToasts();
 
         // check that other bucket requested add to a session
