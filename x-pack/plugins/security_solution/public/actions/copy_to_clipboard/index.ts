@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { EmbeddableCopyToClipboardAction as CopyToClipboardAction } from './embeddable_copy_to_clipboard_action';
+export { LensCopyToClipboardAction } from './lens/copy_to_clipboard';
+export { createCopyToClipboardAction as createDefaultCopyToClipboardAction } from './default/copy_to_clipboard';

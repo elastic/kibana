@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { KibanaServices } from '../../common/lib/kibana';
+import { KibanaServices } from '../../../common/lib/kibana';
 import { createCopyToClipboardAction } from './copy_to_clipboard';
 import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
-jest.mock('../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 const mockSuccessToast = jest.fn();
 KibanaServices.get().notifications.toasts.addSuccess = mockSuccessToast;
 

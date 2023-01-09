@@ -7,20 +7,20 @@
 
 import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { TimelineId } from '../../../common/types';
+import { TimelineId } from '../../../../common/types';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
-} from '../../common/mock';
-import { createStore } from '../../common/store';
-import { createTimelineFilterInAction } from './timeline_filter_in';
+} from '../../../common/mock';
+import { createStore } from '../../../common/store';
 import { Subject } from 'rxjs';
-import { KibanaServices } from '../../common/lib/kibana';
-import { APP_UI_ID } from '../../../common/constants';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../common/constants';
+import { createTimelineFilterOutAction } from './filter_out';
 
-jest.mock('../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 
 const currentAppId$ = new Subject<string | undefined>();
 KibanaServices.get().application.currentAppId$ = currentAppId$.asObservable();
@@ -42,8 +42,8 @@ const mockState = {
 const { storage } = createSecuritySolutionStorageMock();
 const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-describe('createTimelineFilterInAction', () => {
-  const filterInAction = createTimelineFilterInAction({ store: mockStore, order: 1 });
+describe('createTimelineFilterOutAction', () => {
+  const filterOutAction = createTimelineFilterOutAction({ store: mockStore, order: 1 });
   const context = {
     field: { name: 'user.name', value: 'the value', type: 'text' },
   } as CellActionExecutionContext;
@@ -54,27 +54,27 @@ describe('createTimelineFilterInAction', () => {
   });
 
   it('should return display name', () => {
-    expect(filterInAction.getDisplayName(context)).toEqual('Filter In');
+    expect(filterOutAction.getDisplayName(context)).toEqual('Filter Out');
   });
 
   it('should return icon type', () => {
-    expect(filterInAction.getIconType(context)).toEqual('plusInCircle');
+    expect(filterOutAction.getIconType(context)).toEqual('minusInCircle');
   });
 
   describe('isCompatible', () => {
     it('should return true if everything is okay', async () => {
-      expect(await filterInAction.isCompatible(context)).toEqual(true);
+      expect(await filterOutAction.isCompatible(context)).toEqual(true);
     });
 
     it('should return false if not in Security', async () => {
       currentAppId$.next('not security');
-      expect(await filterInAction.isCompatible(context)).toEqual(false);
+      expect(await filterOutAction.isCompatible(context)).toEqual(false);
     });
   });
 
   describe('execute', () => {
     it('should execute normally', async () => {
-      await filterInAction.execute(context);
+      await filterOutAction.execute(context);
       expect(
         mockState.timeline.timelineById[TimelineId.active].filterManager?.addFilters
       ).toHaveBeenCalled();

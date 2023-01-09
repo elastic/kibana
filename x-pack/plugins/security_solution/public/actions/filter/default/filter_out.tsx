@@ -8,8 +8,8 @@
 import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { createFilter } from './helpers';
-import { KibanaServices } from '../../common/lib/kibana';
+import { createFilter } from '../helpers';
+import { KibanaServices } from '../../../common/lib/kibana';
 
 export const FILTER_OUT = i18n.translate('xpack.securitySolution.actions.filterOut', {
   defaultMessage: 'Filter Out',

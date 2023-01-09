@@ -8,15 +8,15 @@
 import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
-import type { SecurityAppStore } from '../../common/store/types';
-import { EmbeddableAddToTimelineAction } from './embeddable_add_to_timeline_action';
-import { KibanaServices } from '../../common/lib/kibana';
-import { APP_UI_ID } from '../../../common/constants';
+import type { SecurityAppStore } from '../../../common/store/types';
+import { LensEmbeddableAddToTimelineAction } from './add_to_timeline';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../common/constants';
 import { Subject } from 'rxjs';
-import { TimelineId } from '../../../common/types';
-import { addProvider, showTimeline } from '../../timelines/store/timeline/actions';
+import { TimelineId } from '../../../../common/types';
+import { addProvider, showTimeline } from '../../../timelines/store/timeline/actions';
 
-jest.mock('../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
 KibanaServices.get().application.currentAppId$ = currentAppId$.asObservable();
 const mockWarningToast = jest.fn();
@@ -49,7 +49,7 @@ const eventId = 'event_1';
 const data: CellValueContext['data'] = [{ columnMeta, value, eventId }];
 
 describe('EmbeddableAddToTimelineAction', () => {
-  const addToTimelineAction = new EmbeddableAddToTimelineAction(store);
+  const addToTimelineAction = new LensEmbeddableAddToTimelineAction(store);
 
   beforeEach(() => {
     currentAppId$.next(APP_UI_ID);

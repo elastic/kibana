@@ -8,8 +8,8 @@
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import copy from 'copy-to-clipboard';
 import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public/cell_actions/components/cell_actions';
-import { COPY_TO_CLIPBOARD, COPY_TO_CLIPBOARD_ICON, COPY_TO_CLIPBOARD_SUCCESS } from './constants';
-import { KibanaServices } from '../../common/lib/kibana';
+import { COPY_TO_CLIPBOARD, COPY_TO_CLIPBOARD_ICON, COPY_TO_CLIPBOARD_SUCCESS } from '../constants';
+import { KibanaServices } from '../../../common/lib/kibana';
 
 const ID = 'security_copyToClipboard';
 

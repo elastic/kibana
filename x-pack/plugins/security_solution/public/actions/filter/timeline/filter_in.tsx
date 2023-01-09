@@ -8,12 +8,12 @@
 import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { createFilter } from './helpers';
-import type { SecurityAppStore } from '../../common/store';
-import { timelineSelectors } from '../../timelines/store/timeline';
-import { isInSecurityApp } from '../utils';
-import { KibanaServices } from '../../common/lib/kibana';
-import { TimelineId } from '../../../common/types';
+import { createFilter } from '../helpers';
+import type { SecurityAppStore } from '../../../common/store';
+import { timelineSelectors } from '../../../timelines/store/timeline';
+import { isInSecurityApp } from '../../utils';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { TimelineId } from '../../../../common/types';
 
 export const FILTER_IN = i18n.translate('xpack.securitySolution.actions.filterIn', {
   defaultMessage: 'Filter In',
@@ -21,7 +21,7 @@ export const FILTER_IN = i18n.translate('xpack.securitySolution.actions.filterIn
 const ID = 'security_timeline_filterIn';
 const ICON = 'plusInCircle';
 
-export const createTimelineFilterInAction = ({
+export const createFilterInAction = ({
   store,
   order,
 }: {

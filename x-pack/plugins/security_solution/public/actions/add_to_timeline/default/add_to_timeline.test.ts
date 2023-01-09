@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { SecurityAppStore } from '../../common/store/types';
-import { KibanaServices } from '../../common/lib/kibana';
-import { APP_UI_ID } from '../../../common/constants';
+import type { SecurityAppStore } from '../../../common/store/types';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../common/constants';
 import { Subject } from 'rxjs';
-import { TimelineId } from '../../../common/types';
-import { addProvider } from '../../timelines/store/timeline/actions';
+import { TimelineId } from '../../../../common/types';
+import { addProvider } from '../../../timelines/store/timeline/actions';
 import { createAddToTimelineAction } from './add_to_timeline';
 import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { GEO_FIELD_TYPE } from '../../timelines/components/timeline/body/renderers/constants';
+import { GEO_FIELD_TYPE } from '../../../timelines/components/timeline/body/renderers/constants';
 
-jest.mock('../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
 KibanaServices.get().application.currentAppId$ = currentAppId$.asObservable();
 const mockWarningToast = jest.fn();

@@ -8,12 +8,12 @@
 import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
-import { EmbeddableCopyToClipboardAction } from './embeddable_copy_to_clipboard_action';
-import { KibanaServices } from '../../common/lib/kibana';
-import { APP_UI_ID } from '../../../common/constants';
+import { LensCopyToClipboardAction } from './copy_to_clipboard';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../common/constants';
 import { Subject } from 'rxjs';
 
-jest.mock('../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
 KibanaServices.get().application.currentAppId$ = currentAppId$.asObservable();
 const mockSuccessToast = jest.fn();
@@ -42,7 +42,7 @@ const columnMeta = {
 const data: CellValueContext['data'] = [{ columnMeta, value: 'the value' }];
 
 describe('EmbeddableCopyToClipboardAction', () => {
-  const copyToClipboardAction = new EmbeddableCopyToClipboardAction();
+  const copyToClipboardAction = new LensCopyToClipboardAction();
 
   beforeEach(() => {
     currentAppId$.next(APP_UI_ID);

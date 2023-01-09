@@ -14,7 +14,7 @@ import { StatefulTopN } from '../../common/components/top_n';
 import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { APP_ID } from '../../../common/constants';
 import { getScopeFromPath, useSourcererDataView } from '../../common/containers/sourcerer';
-import type { ShowTopNActionContext } from './show_top_n';
+import type { ShowTopNActionContext } from './default/show_top_n';
 
 export const TopNAction = ({
   onClose,

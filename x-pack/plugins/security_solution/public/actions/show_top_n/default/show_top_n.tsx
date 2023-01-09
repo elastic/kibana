@@ -16,12 +16,12 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 
-import { KibanaContextProvider } from '../../common/lib/kibana';
-import { APP_NAME, DEFAULT_DARK_MODE } from '../../../common/constants';
-import type { SecurityAppStore } from '../../common/store';
-import { isInSecurityApp } from '../utils';
-import { TopNAction } from './show_top_n_component';
-import type { StartServices } from '../../types';
+import { KibanaContextProvider } from '../../../common/lib/kibana';
+import { APP_NAME, DEFAULT_DARK_MODE } from '../../../../common/constants';
+import type { SecurityAppStore } from '../../../common/store';
+import { isInSecurityApp } from '../../utils';
+import { TopNAction } from '../show_top_n_component';
+import type { StartServices } from '../../../types';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.actions.showTopTooltip', {

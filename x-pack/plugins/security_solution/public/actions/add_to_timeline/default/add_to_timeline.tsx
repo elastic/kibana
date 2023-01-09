@@ -7,19 +7,19 @@
 
 import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import { addProvider } from '../../timelines/store/timeline/actions';
-import { TimelineId } from '../../../common/types';
-import { KibanaServices } from '../../common/lib/kibana';
-import type { SecurityAppStore } from '../../common/store';
-import { isInSecurityApp } from '../utils';
+import { addProvider } from '../../../timelines/store/timeline/actions';
+import { TimelineId } from '../../../../common/types';
+import { KibanaServices } from '../../../common/lib/kibana';
+import type { SecurityAppStore } from '../../../common/store';
+import { isInSecurityApp } from '../../utils';
 import {
   ADD_TO_TIMELINE,
   ADD_TO_TIMELINE_FAILED_TEXT,
   ADD_TO_TIMELINE_FAILED_TITLE,
   ADD_TO_TIMELINE_ICON,
   ADD_TO_TIMELINE_SUCCESS_TITLE,
-} from './constants';
-import { createDataProviders } from './data_provider';
+} from '../constants';
+import { createDataProviders } from '../data_provider';
 
 export const ACTION_ID = 'security_addToTimeline';
 

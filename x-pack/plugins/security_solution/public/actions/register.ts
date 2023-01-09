@@ -10,52 +10,54 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type * as H from 'history';
 import type { SecurityAppStore } from '../common/store/types';
 import type { StartPlugins, StartServices } from '../types';
-import { EmbeddableCopyToClipboardAction } from './copy_to_clipboard/embeddable_copy_to_clipboard_action';
-import { createFilterInAction } from './filter/filter_in';
-import { createFilterOutAction } from './filter/filter_out';
-import { createAddToTimelineAction, EmbeddableAddToTimelineAction } from './add_to_timeline';
-import { createShowTopNAction } from './show_top_n/show_top_n';
+import { LensCopyToClipboardAction, createDefaultCopyToClipboardAction } from './copy_to_clipboard';
+import {
+  createDefaultFilterInAction,
+  createDefaultFilterOutAction,
+  createTimelineFilterInAction,
+  createTimelineFilterOutAction,
+} from './filter';
+import { LensAddToTimelineAction, createDefaultAddToTimelineAction } from './add_to_timeline';
+import { createDefaultShowTopNAction } from './show_top_n';
 import {
   CELL_ACTIONS_DEFAULT_TRIGGER,
   CELL_ACTIONS_TIMELINE_TRIGGER,
 } from '../../common/constants';
-import { createCopyToClipboardAction } from './copy_to_clipboard/copy_to_clipboard';
-import { createTimelineFilterInAction, createTimelineFilterOutAction } from './filter';
 
-export const registerActions = (
+export const registerUIActions = (
   plugins: StartPlugins,
   store: SecurityAppStore,
   history: H.History,
   services: StartServices
 ) => {
-  registerEmbeddableActions(plugins.uiActions, store);
-  registerUiActions(plugins.uiActions, store, history, services);
-  registerTimelineUiActions(plugins.uiActions, store, history, services);
+  registerLensActions(plugins.uiActions, store);
+  registerDefaultActions(plugins.uiActions, store, history, services);
+  registerTimelineActions(plugins.uiActions, store, history, services);
 };
 
-const registerEmbeddableActions = (uiActions: UiActionsStart, store: SecurityAppStore) => {
-  const addToTimelineAction = new EmbeddableAddToTimelineAction(store);
+const registerLensActions = (uiActions: UiActionsStart, store: SecurityAppStore) => {
+  const addToTimelineAction = new LensAddToTimelineAction(store);
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, addToTimelineAction);
 
-  const copyToClipboardAction = new EmbeddableCopyToClipboardAction();
+  const copyToClipboardAction = new LensCopyToClipboardAction();
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
 };
 
-const registerUiActions = (
+const registerDefaultActions = (
   uiActions: UiActionsStart,
   store: SecurityAppStore,
   history: H.History,
   services: StartServices
 ) => {
-  const filterInAction = createFilterInAction({
+  const filterInAction = createDefaultFilterInAction({
     order: 1,
   });
-  const filterOutAction = createFilterOutAction({
+  const filterOutAction = createDefaultFilterOutAction({
     order: 2,
   });
-  const addToTimeline = createAddToTimelineAction({ store, order: 3 });
-  const showTopNAction = createShowTopNAction({ store, history, services, order: 4 });
-  const copyAction = createCopyToClipboardAction({ order: 5 });
+  const addToTimeline = createDefaultAddToTimelineAction({ store, order: 3 });
+  const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 4 });
+  const copyAction = createDefaultCopyToClipboardAction({ order: 5 });
 
   uiActions.registerTrigger({
     id: CELL_ACTIONS_DEFAULT_TRIGGER,
@@ -68,7 +70,7 @@ const registerUiActions = (
   uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, addToTimeline);
 };
 
-const registerTimelineUiActions = (
+const registerTimelineActions = (
   uiActions: UiActionsStart,
   store: SecurityAppStore,
   history: H.History,
@@ -82,9 +84,9 @@ const registerTimelineUiActions = (
     store,
     order: 2,
   });
-  const addToTimeline = createAddToTimelineAction({ store, order: 3 });
-  const showTopNAction = createShowTopNAction({ store, history, services, order: 4 });
-  const copyAction = createCopyToClipboardAction({ order: 5 });
+  const addToTimeline = createDefaultAddToTimelineAction({ store, order: 3 });
+  const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 4 });
+  const copyAction = createDefaultCopyToClipboardAction({ order: 5 });
 
   uiActions.registerTrigger({
     id: CELL_ACTIONS_TIMELINE_TRIGGER,

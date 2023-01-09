@@ -6,15 +6,15 @@
  */
 
 import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { KibanaServices } from '../../common/lib/kibana';
-import { createFilterInAction } from './filter_in';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { createFilterOutAction } from './filter_out';
 
-jest.mock('../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 
 const mockFilterManager = KibanaServices.get().data.query.filterManager;
 
-describe('createFilterInAction', () => {
-  const filterInAction = createFilterInAction({ order: 1 });
+describe('createFilterOutAction', () => {
+  const filterInAction = createFilterOutAction({ order: 1 });
   const context = {
     field: { name: 'user.name', value: 'the value', type: 'text' },
   } as CellActionExecutionContext;
@@ -24,11 +24,11 @@ describe('createFilterInAction', () => {
   });
 
   it('should return display name', () => {
-    expect(filterInAction.getDisplayName(context)).toEqual('Filter In');
+    expect(filterInAction.getDisplayName(context)).toEqual('Filter Out');
   });
 
   it('should return icon type', () => {
-    expect(filterInAction.getIconType(context)).toEqual('plusInCircle');
+    expect(filterInAction.getIconType(context)).toEqual('minusInCircle');
   });
 
   describe('isCompatible', () => {

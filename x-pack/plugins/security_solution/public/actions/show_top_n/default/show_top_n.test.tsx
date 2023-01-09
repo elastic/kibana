@@ -7,22 +7,22 @@
 
 import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Subject } from 'rxjs';
-import { APP_UI_ID } from '../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
-} from '../../common/mock';
-import { mockHistory } from '../../common/mock/router';
-import { createStore } from '../../common/store';
+} from '../../../common/mock';
+import { mockHistory } from '../../../common/mock/router';
+import { createStore } from '../../../common/store';
 import { createShowTopNAction } from './show_top_n';
 import React from 'react';
-import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
-jest.mock('../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 
-jest.mock('./show_top_n_component', () => ({
+jest.mock('../show_top_n_component', () => ({
   TopNAction: () => <span>{'TEST COMPONENT'}</span>,
 }));
 

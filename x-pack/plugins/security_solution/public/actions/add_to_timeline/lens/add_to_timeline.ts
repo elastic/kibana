@@ -8,19 +8,19 @@
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { KibanaServices } from '../../common/lib/kibana';
-import type { SecurityAppStore } from '../../common/store/types';
-import { addProvider, showTimeline } from '../../timelines/store/timeline/actions';
-import type { DataProvider } from '../../../common/types';
-import { TimelineId } from '../../../common/types';
-import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../utils';
+import { KibanaServices } from '../../../common/lib/kibana';
+import type { SecurityAppStore } from '../../../common/store/types';
+import { addProvider, showTimeline } from '../../../timelines/store/timeline/actions';
+import type { DataProvider } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types';
+import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../../utils';
 import {
   ADD_TO_TIMELINE,
   ADD_TO_TIMELINE_FAILED_TEXT,
   ADD_TO_TIMELINE_FAILED_TITLE,
   ADD_TO_TIMELINE_ICON,
-} from './constants';
-import { createDataProviders } from './data_provider';
+} from '../constants';
+import { createDataProviders } from '../data_provider';
 
 export const ACTION_ID = 'embeddable_addToTimeline';
 
@@ -38,7 +38,7 @@ function isDataColumnsFilterable(data?: CellValueContext['data']): boolean {
   );
 }
 
-export class EmbeddableAddToTimelineAction implements Action<CellValueContext> {
+export class LensAddToTimelineAction implements Action<CellValueContext> {
   public readonly type = ACTION_ID;
   public readonly id = ACTION_ID;
   public order = 1;

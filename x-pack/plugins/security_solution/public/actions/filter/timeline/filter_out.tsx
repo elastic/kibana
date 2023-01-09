@@ -8,12 +8,12 @@
 import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { createFilter } from './helpers';
-import { KibanaServices } from '../../common/lib/kibana';
-import { isInSecurityApp } from '../utils';
-import type { SecurityAppStore } from '../../common/store';
-import { timelineSelectors } from '../../timelines/store/timeline';
-import { TimelineId } from '../../../common/types';
+import { createFilter } from '../helpers';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { isInSecurityApp } from '../../utils';
+import type { SecurityAppStore } from '../../../common/store';
+import { timelineSelectors } from '../../../timelines/store/timeline';
+import { TimelineId } from '../../../../common/types';
 
 export const FILTER_OUT = i18n.translate('xpack.securitySolution.actions.filterOut', {
   defaultMessage: 'Filter Out',
@@ -21,7 +21,7 @@ export const FILTER_OUT = i18n.translate('xpack.securitySolution.actions.filterO
 const ID = 'security_timeline_filterOut';
 const ICON = 'minusInCircle';
 
-export const createTimelineFilterOutAction = ({
+export const createFilterOutAction = ({
   store,
   order,
 }: {
