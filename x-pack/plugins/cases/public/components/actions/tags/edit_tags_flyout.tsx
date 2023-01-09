@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -34,7 +34,7 @@ interface Props {
   onSaveTags: (args: ItemsSelectionState) => void;
 }
 
-const fullHeight = css`
+const FlyoutBody = styled(EuiFlyoutBody)`
   ${euiFullHeight()}
 
   .euiFlyoutBody__overflowContent {
@@ -72,7 +72,7 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
           <p>{headerSubtitle}</p>
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody css={fullHeight}>
+      <FlyoutBody>
         {isLoading ? (
           <EuiLoadingSpinner />
         ) : (
@@ -83,7 +83,7 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
             onChangeTags={setTagsSelection}
           />
         )}
-      </EuiFlyoutBody>
+      </FlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
