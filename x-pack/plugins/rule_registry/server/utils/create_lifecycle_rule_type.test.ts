@@ -84,7 +84,6 @@ function createRule(shouldWriteAlerts: boolean = true) {
     alertLimit: {
       getValue: () => 1000,
       setLimitReached: () => {},
-      getEarlyRecoveredAlerts: () => [],
     },
     done: () => ({ getRecoveredAlerts: () => [] }),
   };

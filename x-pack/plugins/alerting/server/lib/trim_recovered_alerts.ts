@@ -20,9 +20,8 @@ interface TrimmedRecoveredAlertsResult<
 }
 
 export interface TrimRecoveredOpts {
-  index: number | string;
+  key: string;
   flappingHistory: boolean[];
-  trackedEvents?: boolean;
 }
 
 export function trimRecoveredAlerts<
@@ -37,7 +36,7 @@ export function trimRecoveredAlerts<
 ): TrimmedRecoveredAlertsResult<State, Context, RecoveryActionGroupIds> {
   const alerts = map(recoveredAlerts, (value, key) => {
     return {
-      index: key,
+      key,
       flappingHistory: value.getFlappingHistory() || [],
     };
   });
@@ -45,8 +44,8 @@ export function trimRecoveredAlerts<
   // Dropping the "early recovered" alerts for now.
   // In #143445 we will want to recover these alerts and set flapping to false
   earlyRecoveredAlerts.forEach((alert) => {
-    delete recoveredAlerts[alert.index];
-    delete currentRecoveredAlerts[alert.index];
+    delete recoveredAlerts[alert.key];
+    delete currentRecoveredAlerts[alert.key];
   });
   return {
     trimmedAlertsRecovered: recoveredAlerts,

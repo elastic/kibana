@@ -312,7 +312,6 @@ describe('getPublicAlertFactory', () => {
     expect(alertFactory.alertLimit.getValue).toBeDefined();
     expect(alertFactory.alertLimit.setLimitReached).toBeDefined();
     expect(alertFactory.alertLimit.checkLimitUsage).toBeDefined();
-    expect(alertFactory.alertLimit.getEarlyRecoveredAlerts).toBeDefined();
     expect(alertFactory.hasReachedAlertLimit).toBeDefined();
     expect(alertFactory.done).toBeDefined();
 
@@ -322,7 +321,6 @@ describe('getPublicAlertFactory', () => {
     expect(publicAlertFactory.done).toBeDefined();
     expect(publicAlertFactory.alertLimit.getValue).toBeDefined();
     expect(publicAlertFactory.alertLimit.setLimitReached).toBeDefined();
-    expect(publicAlertFactory.alertLimit.getEarlyRecoveredAlerts).toBeDefined();
 
     // @ts-expect-error
     expect(publicAlertFactory.alertLimit.checkLimitUsage).not.toBeDefined();

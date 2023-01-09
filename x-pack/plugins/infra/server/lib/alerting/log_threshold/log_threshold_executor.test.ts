@@ -414,7 +414,6 @@ describe('Log threshold executor', () => {
         const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
           getValue: jest.fn().mockReturnValue(10),
           setLimitReached: jest.fn(),
-          getEarlyRecoveredAlerts: jest.fn(),
         };
 
         const ruleParams = {
@@ -451,7 +450,6 @@ describe('Log threshold executor', () => {
         const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
           getValue: jest.fn().mockReturnValue(1),
           setLimitReached: jest.fn(),
-          getEarlyRecoveredAlerts: jest.fn(),
         };
 
         const ruleParams = {
@@ -477,7 +475,6 @@ describe('Log threshold executor', () => {
         const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
           getValue: jest.fn().mockReturnValue(10),
           setLimitReached: jest.fn(),
-          getEarlyRecoveredAlerts: jest.fn(),
         };
 
         const ruleParams = {
@@ -503,7 +500,6 @@ describe('Log threshold executor', () => {
         const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
           getValue: jest.fn().mockReturnValue(0),
           setLimitReached: jest.fn(),
-          getEarlyRecoveredAlerts: jest.fn(),
         };
 
         const ruleParams = {
@@ -531,7 +527,6 @@ describe('Log threshold executor', () => {
         const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
           getValue: jest.fn().mockReturnValue(2),
           setLimitReached: jest.fn(),
-          getEarlyRecoveredAlerts: jest.fn(),
         };
 
         const ruleParams = {
@@ -628,7 +623,6 @@ describe('Log threshold executor', () => {
         const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
           getValue: jest.fn().mockReturnValue(1),
           setLimitReached: jest.fn(),
-          getEarlyRecoveredAlerts: jest.fn(),
         };
 
         const ruleParams = {
@@ -681,7 +675,6 @@ describe('Log threshold executor', () => {
         const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
           getValue: jest.fn().mockReturnValue(10),
           setLimitReached: jest.fn(),
-          getEarlyRecoveredAlerts: jest.fn(),
         };
 
         const ruleParams = {
