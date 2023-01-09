@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useEffect, useMemo } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
@@ -24,14 +24,15 @@ export const useRefetchByRestartingSession = ({
   inputId,
   queryId,
 }: UseRefetchByRestartingSessionProps): {
-  searchSessionId: string;
+  searchSessionId: string | null;
   refetchByRestartingSession: Refetch;
 } => {
   const dispatch = useDispatch();
   const { data } = useKibana().services;
 
   const session = useRef(data.search.session);
-  const searchSessionId = useMemo(() => session.current.start(), [session]);
+  const [searchSessionId, setSearchSessionId] = useState<string | null>(null);
+
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
   const { selectedInspectIndex } = useDeepEqualSelector((state) =>
@@ -57,10 +58,12 @@ export const useRefetchByRestartingSession = ({
   }, [dispatch, queryId, selectedInspectIndex]);
 
   useEffect(() => {
+    setSearchSessionId(session.current.start());
+    const currentSession = session.current;
     return () => {
-      data.search.session.clear();
+      currentSession.clear();
     };
-  });
+  }, []);
 
   return { searchSessionId, refetchByRestartingSession };
 };
