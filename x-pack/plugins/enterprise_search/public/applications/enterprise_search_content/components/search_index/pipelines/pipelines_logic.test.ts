@@ -151,7 +151,7 @@ describe('PipelinesLogic', () => {
         PipelinesLogic.actions.fetchCustomPipeline = jest.fn();
         PipelinesLogic.actions.fetchIndexApiSuccess(connectorIndex);
         PipelinesLogic.actions.createCustomPipelineSuccess({ created: ['a', 'b'] });
-        expect(flashSuccessToast).toHaveBeenCalledWith('uccessfully created');
+        expect(flashSuccessToast).toHaveBeenCalledWith('Custom pipeline created');
         expect(PipelinesLogic.actions.setPipelineState).toHaveBeenCalledWith({
           ...PipelinesLogic.values.pipelineState,
           name: 'a',
