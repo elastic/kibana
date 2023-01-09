@@ -19,7 +19,6 @@ import {
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
 import { useServiceAgentFetcher } from '../../../../context/apm_service/use_service_agent_fetcher';
 import { useServiceTransactionTypesFetcher } from '../../../../context/apm_service/use_service_transaction_types_fetcher';
@@ -55,7 +54,7 @@ import {
   AlertThresholdRect,
   AlertThresholdAnnotation,
 } from './latency_chart_components';
-import { SERVICE_ENVIRONMENT } from '@kbn/apm-plugin/common/es_fields/apm';
+import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 
 export function AlertDetailsAppSection({
   rule,
