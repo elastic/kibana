@@ -6,11 +6,10 @@
  */
 import '../_index.scss';
 import { pick } from 'lodash';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
-import { isEqual, throttle } from 'lodash';
-import { EuiResizeObserver } from '@elastic/eui';
+import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -45,6 +44,8 @@ import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from '.
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
 import { DV_STORAGE_KEYS } from './types/storage';
+
+const XXL_BREAKPOINT = 1400;
 
 const localStorage = new Storage(window.localStorage);
 
@@ -255,36 +256,15 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
     [history, urlSearchString]
   );
 
-  const [panelWidth, setPanelWidth] = useState(1600);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const resizeHandler = useCallback(
-    throttle((e: { width: number; height: number }) => {
-      // When window or table is resized,
-      // update the page body width
-      setPanelWidth(e.width);
-    }, 500),
-    []
-  );
-  const compact = useMemo(() => panelWidth <= 1024, [panelWidth]);
-
   return (
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
       {currentDataView ? (
-        // Needs ResizeObserver to measure window width - side bar navigation
-        <EuiResizeObserver onResize={resizeHandler}>
-          {(resizeRef) => (
-            <div ref={resizeRef}>
-              <IndexDataVisualizerComponent
-                currentDataView={currentDataView}
-                currentSavedSearch={currentSavedSearch}
-                currentSessionId={currentSessionId}
-                getAdditionalLinks={getAdditionalLinks}
-                compact={compact}
-              />
-            </div>
-          )}
-        </EuiResizeObserver>
+        <IndexDataVisualizerComponent
+          currentDataView={currentDataView}
+          currentSavedSearch={currentSavedSearch}
+          currentSessionId={currentSessionId}
+          getAdditionalLinks={getAdditionalLinks}
+        />
       ) : (
         <div />
       )}
@@ -333,7 +313,14 @@ export const IndexDataVisualizer: FC<{
   };
 
   return (
-    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+    <KibanaThemeProvider
+      theme$={coreStart.theme.theme$}
+      modify={{
+        breakpoint: {
+          xxl: XXL_BREAKPOINT,
+        },
+      }}
+    >
       <KibanaContextProvider services={{ ...services }}>
         <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
           <DatePickerContextProvider deps={datePickerDeps}>

@@ -48,14 +48,7 @@ function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: Grou
   }
 }
 
-/**
- * ExplainLogRateSpikes props require a data view.
- */
-interface ExplainLogRateSpikesPageProps {
-  compact?: boolean;
-}
-
-export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ compact }) => {
+export const ExplainLogRateSpikesPage: FC = () => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
@@ -176,7 +169,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({ co
 
   return (
     <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
-      <PageHeader compact={compact} />
+      <PageHeader />
       <EuiHorizontalRule />
       <EuiPageContentBody>
         <EuiFlexGroup gutterSize="m" direction="column">

@@ -8,6 +8,7 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
 import {
+  useIsWithinMaxBreakpoint,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -34,11 +35,7 @@ import {
   type AiOpsStorageMapped,
 } from '../../types/storage';
 
-interface PageHeaderProps {
-  compact?: boolean;
-}
-
-export const PageHeader: FC<PageHeaderProps> = ({ compact }) => {
+export const PageHeader: FC = () => {
   const { aiopsPageHeader, dataViewTitleHeader } = useCss();
 
   const [, setGlobalState] = useUrlState('_g');
@@ -70,15 +67,12 @@ export const PageHeader: FC<PageHeaderProps> = ({ compact }) => {
     [dataView.timeFieldName]
   );
 
+  const isWithinLBreakpoint = useIsWithinMaxBreakpoint('l');
+
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
-        <EuiPageContentHeader
-          css={[
-            aiopsPageHeader,
-            compact ? { flexDirection: 'column', alignItems: 'flex-start' } : {},
-          ]}
-        >
+        <EuiPageContentHeader css={aiopsPageHeader}>
           <EuiPageContentHeaderSection>
             <div css={dataViewTitleHeader}>
               <EuiTitle size="s">
@@ -87,7 +81,7 @@ export const PageHeader: FC<PageHeaderProps> = ({ compact }) => {
             </div>
           </EuiPageContentHeaderSection>
 
-          {compact ? <EuiSpacer size="m" /> : null}
+          {isWithinLBreakpoint ? <EuiSpacer size="m" /> : null}
           <EuiFlexGroup
             alignItems="center"
             justifyContent="flexEnd"
@@ -111,7 +105,6 @@ export const PageHeader: FC<PageHeaderProps> = ({ compact }) => {
               <DatePickerWrapper
                 isAutoRefreshOnly={!hasValidTimeField}
                 showRefresh={!hasValidTimeField}
-                compact={compact}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

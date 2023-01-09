@@ -38,13 +38,9 @@ import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
 import { InformationText } from './information_text';
 
-export interface LogCategorizationPageProps {
-  compact?: boolean;
-}
-
 const BAR_TARGET = 20;
 
-export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ compact }) => {
+export const LogCategorizationPage: FC = () => {
   const {
     notifications: { toasts },
   } = useAiopsAppContext();
@@ -211,7 +207,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ compact 
 
   return (
     <EuiPageBody data-test-subj="aiopsLogCategorizationPage" paddingSize="none" panelled={false}>
-      <PageHeader compact={compact} />
+      <PageHeader />
       <EuiSpacer />
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>

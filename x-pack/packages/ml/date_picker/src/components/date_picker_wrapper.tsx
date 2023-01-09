@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 
 import {
+  useEuiBreakpoint,
+  useIsWithinMaxBreakpoint,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,7 +32,7 @@ import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5000;
-const DATE_PICKER_MAX_WIDTH = 540;
+const DATE_PICKER_MAX_WIDTH = '540px';
 
 interface TimePickerQuickRange {
   from: string;
@@ -68,14 +71,12 @@ interface DatePickerWrapperProps {
   isAutoRefreshOnly?: boolean;
   isLoading?: boolean;
   showRefresh?: boolean;
-  compact?: boolean;
 }
 
 export const DatePickerWrapper: FC<DatePickerWrapperProps> = ({
   isAutoRefreshOnly,
   isLoading = false,
   showRefresh,
-  compact = false,
 }) => {
   const {
     data,
@@ -86,6 +87,8 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = ({
     wrapWithTheme,
     toMountPoint,
   } = useDatePickerContext();
+
+  const isWithinLBreakpoint = useIsWithinMaxBreakpoint('l');
 
   const { timefilter, history } = data.query.timefilter;
 
@@ -255,18 +258,15 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = ({
     setRefreshInterval({ pause, value });
   }
 
+  const datePickerWidth = css({
+    [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
+      maxWidth: DATE_PICKER_MAX_WIDTH,
+    },
+  });
+
   return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? (
     <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="mlDatePickerWrapper">
-      <EuiFlexItem
-        grow={false}
-        css={
-          compact
-            ? {
-                maxWidth: DATE_PICKER_MAX_WIDTH,
-              }
-            : null
-        }
-      >
+      <EuiFlexItem grow={false} css={datePickerWidth}>
         <EuiSuperDatePicker
           isLoading={isLoading}
           start={time.from}
@@ -280,7 +280,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = ({
           recentlyUsedRanges={recentlyUsedRanges}
           dateFormat={dateFormat}
           commonlyUsedRanges={commonlyUsedRanges}
-          updateButtonProps={{ iconOnly: compact }}
+          updateButtonProps={{ iconOnly: isWithinLBreakpoint }}
         />
       </EuiFlexItem>
 
