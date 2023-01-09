@@ -46,12 +46,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async findFieldByName(name: string) {
-    const fieldSearch = await this.testSubjects.find('fieldFilterSearchInput');
+    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
     await fieldSearch.type(name);
   }
 
   public async clearFieldSearchInput() {
-    const fieldSearch = await this.testSubjects.find('fieldFilterSearchInput');
+    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
     await fieldSearch.clearValue();
   }
 

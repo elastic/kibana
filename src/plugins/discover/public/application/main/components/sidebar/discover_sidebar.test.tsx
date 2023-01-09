@@ -17,7 +17,6 @@ import {
   DiscoverSidebarProps,
 } from './discover_sidebar';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { getDefaultFieldFilter } from './lib/field_filter';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -100,8 +99,6 @@ function getCompProps(): DiscoverSidebarProps {
     onRemoveField: jest.fn(),
     selectedDataView: dataView,
     trackUiMetric: jest.fn(),
-    fieldFilter: getDefaultFieldFilter(),
-    setFieldFilter: jest.fn(),
     onFieldEdited: jest.fn(),
     editField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
@@ -112,6 +109,7 @@ function getCompProps(): DiscoverSidebarProps {
     useNewFieldsApi: true,
     showFieldList: true,
     isAffectedByGlobalFilter: false,
+    isProcessing: false,
   };
 }
 

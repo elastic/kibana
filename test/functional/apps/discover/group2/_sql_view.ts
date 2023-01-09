@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(true);
-        expect(await testSubjects.exists('fieldFilterSearchInput')).to.be(true);
+        expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
         expect(await testSubjects.exists('toggleFieldFilterButton')).to.be(true);
         expect(await testSubjects.exists('fieldTypesHelpButton')).to.be(true);
         await testSubjects.click('field-@message-showDetails');
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.discover.selectTextBaseLang('SQL');
 
-        expect(await testSubjects.exists('fieldFilterSearchInput')).to.be(true);
+        expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
         expect(await testSubjects.exists('unifiedTextLangEditor')).to.be(true);
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
 

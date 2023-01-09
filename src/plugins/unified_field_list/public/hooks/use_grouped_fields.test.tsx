@@ -199,68 +199,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
   });
 
-  it('should work correctly when filtered', async () => {
-    const props: GroupedFieldsParams<DataViewField> = {
-      dataViewId: dataView.id!,
-      allFields: allFieldsIncludingUnmapped,
-      services: mockedServices,
-    };
-    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
-      initialProps: props,
-    });
-
-    await waitForNextUpdate();
-
-    const fieldListGroupedProps = result.current.fieldListGroupedProps;
-    let fieldGroups = fieldListGroupedProps.fieldGroups;
-    const scrollToTopResetCounter1 = fieldListGroupedProps.scrollToTopResetCounter;
-
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) =>
-          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
-            fieldGroups![key as FieldsGroupNames]?.fieldCount
-          }`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0-0',
-      'SelectedFields-0-0',
-      'PopularFields-0-0',
-      'AvailableFields-25-25',
-      'UnmappedFields-28-28',
-      'EmptyFields-0-0',
-      'MetaFields-3-3',
-    ]);
-
-    rerender({
-      ...props,
-      onFilterField: (field: DataViewField) => field.name.startsWith('@'),
-    });
-
-    fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
-
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) =>
-          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
-            fieldGroups![key as FieldsGroupNames]?.fieldCount
-          }`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0-0',
-      'SelectedFields-0-0',
-      'PopularFields-0-0',
-      'AvailableFields-2-25',
-      'UnmappedFields-2-28',
-      'EmptyFields-0-0',
-      'MetaFields-0-3',
-    ]);
-
-    expect(result.current.fieldListGroupedProps.scrollToTopResetCounter).not.toBe(
-      scrollToTopResetCounter1
-    );
-  });
-
   it('should not change the scroll position if fields list is extended', async () => {
     const props: GroupedFieldsParams<DataViewField> = {
       dataViewId: dataView.id!,
