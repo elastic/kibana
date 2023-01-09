@@ -380,7 +380,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
       configureEndpointIntegrationPolicy: `${SECURITY_SOLUTION_DOCS}configure-endpoint-integration-policy.html`,
       exceptions: {
-        value_lists: `${SECURITY_SOLUTION_DOCS}detections-ui-exceptions.html`,
+        value_lists: `${SECURITY_SOLUTION_DOCS}value-lists-exceptions.html`,
       },
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
     },
