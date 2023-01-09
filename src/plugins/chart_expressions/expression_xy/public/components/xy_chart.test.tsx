@@ -1105,6 +1105,127 @@ describe('XYChart component', () => {
     expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBin')).toEqual(true);
   });
 
+  test('should not have tooltip actions for the detailed tooltip', () => {
+    const { args, data } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          detailedTooltip: true,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              isHistogram: true,
+              seriesType: 'bar',
+              isStacked: true,
+              isHorizontal: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: 'b',
+              xScaleType: 'time',
+              splitAccessors: ['b'],
+              accessors: ['d'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+        }}
+      />
+    );
+
+    const tooltip = wrapper.find(Tooltip);
+    const actions = tooltip.prop('actions');
+    expect(actions).toBeUndefined();
+  });
+
+  test('should not have tooltip actions for no split accessor', () => {
+    const { args, data } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              isHistogram: true,
+              seriesType: 'bar',
+              isStacked: true,
+              isHorizontal: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: 'b',
+              xScaleType: 'time',
+              splitAccessors: undefined,
+              accessors: ['d'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+        }}
+      />
+    );
+
+    const tooltip = wrapper.find(Tooltip);
+    const actions = tooltip.prop('actions');
+    expect(actions).toBeUndefined();
+  });
+
+  test('should have tooltip actions for split accessor and default tooltip', () => {
+    const { args, data } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              isHistogram: true,
+              seriesType: 'bar',
+              isStacked: true,
+              isHorizontal: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: 'b',
+              xScaleType: 'time',
+              splitAccessors: ['d'],
+              accessors: ['d'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+        }}
+      />
+    );
+
+    const tooltip = wrapper.find(Tooltip);
+    const actions = tooltip.prop('actions');
+    // [{"disabled": [Function disabled], "label": [Function label], "onSelect": [Function filterSelectedTooltipValues]}]
+    expect(actions?.length).toBe(1);
+    expect(actions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          onSelect: expect.any(Function),
+          disabled: expect.any(Function),
+        }),
+      ])
+    );
+  });
+
   test('onElementClick returns correct context data', () => {
     const geometry: GeometryValue = { x: 5, y: 1, accessor: 'y1', mark: null, datum: {} };
     const series = {
