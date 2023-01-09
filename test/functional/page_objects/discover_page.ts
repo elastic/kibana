@@ -463,6 +463,10 @@ export class DiscoverPageObject extends FtrService {
     ).getAttribute('innerText');
   }
 
+  public async cleanSidebarLocalStorage(): Promise<void> {
+    await this.browser.setLocalStorageItem('discover.unifiedFieldList.initiallyOpenSections', '{}');
+  }
+
   public async waitUntilSidebarHasLoaded() {
     await this.retry.waitFor('sidebar is loaded', async () => {
       return (await this.getSidebarAriaDescription()).length > 0;
@@ -785,7 +789,10 @@ export class DiscoverPageObject extends FtrService {
     return button.getAttribute('title');
   }
 
-  public async getCurrentDataViewId() {
+  /**
+   * Validates if data view references in the URL are equal.
+   */
+  public async validateDataViewReffsEquality() {
     const currentUrl = await this.browser.getCurrentUrl();
     const matches = currentUrl.matchAll(/index:[^,]*/g);
     const indexes = [];
@@ -798,14 +805,25 @@ export class DiscoverPageObject extends FtrService {
     if (first) {
       const allEqual = indexes.every((val) => val === first);
       if (allEqual) {
-        return first;
+        return { valid: true, result: first };
       } else {
-        throw new Error(
-          'Discover URL state contains different index references. They should be all the same.'
-        );
+        return {
+          valid: false,
+          message:
+            'Discover URL state contains different index references. They should be all the same.',
+        };
       }
     }
-    throw new Error("Discover URL state doesn't contain an index reference.");
+    return { valid: false, message: "Discover URL state doesn't contain an index reference." };
+  }
+
+  public async getCurrentDataViewId() {
+    const validationResult = await this.validateDataViewReffsEquality();
+    if (validationResult.valid) {
+      return validationResult.result!;
+    } else {
+      throw new Error(validationResult.message);
+    }
   }
 
   public async addRuntimeField(name: string, script: string) {

@@ -6,24 +6,24 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, useEuiBackgroundColor, EuiIcon, EuiLoadingContent } from '@elastic/eui';
+import styled from 'styled-components';
 
 export const THUMBNAIL_WIDTH = 96;
 export const THUMBNAIL_HEIGHT = 64;
 
-export const thumbnailStyle = `
-  padding: 0;
-  margin: auto;
-  width: ${THUMBNAIL_WIDTH}px;
-  height: ${THUMBNAIL_HEIGHT}px;
-  object-fit: contain;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
+export const thumbnailStyle = {
+  padding: 0,
+  margin: 'auto',
+  width: THUMBNAIL_WIDTH,
+  height: THUMBNAIL_HEIGHT,
+  objectFit: 'contain' as const,
+  overflow: 'hidden',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
 
 export const EmptyThumbnail = ({
   isLoading = false,
@@ -42,23 +42,16 @@ export const EmptyThumbnail = ({
       role="img"
       aria-label={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : SCREENSHOT_NOT_AVAILABLE}
       title={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : SCREENSHOT_NOT_AVAILABLE}
-      css={css`
-        ${thumbnailStyle};
-        width: ${width}px;
-        height: ${height}px;
-        background: ${useEuiBackgroundColor('subdued')};
-        border: ${euiTheme.border.thin};
-      `}
+      style={{
+        ...thumbnailStyle,
+        width,
+        height,
+        background: useEuiBackgroundColor('subdued'),
+        border: euiTheme.border.thin,
+      }}
     >
       {isLoading ? (
-        <EuiLoadingContent
-          data-test-subj="stepScreenshotPlaceholderLoading"
-          css={css`
-            width: 100%;
-            height: 100%;
-            transform: scale(1, 100); // To create a skeleton loading effect
-          `}
-        />
+        <LoadingContentWrapper data-test-subj="stepScreenshotPlaceholderLoading" />
       ) : (
         <EuiIcon
           data-test-subj="stepScreenshotNotAvailable"
@@ -69,6 +62,12 @@ export const EmptyThumbnail = ({
     </div>
   );
 };
+
+const LoadingContentWrapper = styled(EuiLoadingContent)`
+  width: 100%;
+  height: 100%;
+  transform: scale(1, 100); // To create a skeleton loading effect
+`;
 
 export const SCREENSHOT_LOADING_ARIA_LABEL = i18n.translate(
   'xpack.synthetics.monitor.step.screenshot.ariaLabel',
