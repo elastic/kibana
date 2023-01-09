@@ -226,8 +226,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('sort alphabetically - descending', async () => {
         await dashboardControls.optionsListPopoverSetSort({ by: '_key', direction: 'desc' });
-        await dashboardControls.optionsListWaitForLoading(controlId);
-
         const sortedSuggestions = Object.keys(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS)
           .sort()
           .reverse()
@@ -243,8 +241,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('sort alphabetically - ascending', async () => {
         await dashboardControls.optionsListPopoverSetSort({ by: '_key', direction: 'asc' });
-        await dashboardControls.optionsListWaitForLoading(controlId);
-
         const sortedSuggestions = Object.keys(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS)
           .sort()
           .reduce((result, key) => {
@@ -259,7 +255,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('sort by document count - descending', async () => {
         await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
-        await dashboardControls.optionsListWaitForLoading(controlId);
         await dashboardControls.ensureAvailableOptionsEqual(
           controlId,
           {
@@ -272,7 +267,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('sort by document count - ascending', async () => {
         await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'asc' });
-        await dashboardControls.optionsListWaitForLoading(controlId);
         const sortedSuggestions = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS)
           .sort(([, docCountA], [, docCountB]) => {
             return docCountB - docCountA;
@@ -293,7 +287,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('returning to default value should remove unsaved changes', async () => {
         await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
-        await dashboardControls.optionsListWaitForLoading(controlId);
         await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
       });
 
@@ -310,7 +303,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('Applies query settings to controls', async () => {
         it('Applies dashboard query to options list control', async () => {
           await queryBar.setQuery('animal.keyword : "dog" ');
-          await queryBar.submitQuery();
+          await queryBar.submitQuery(); // quicker than clicking the submit button, but hides the time picker
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
 
@@ -326,11 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             invalidSelections: [],
           });
           await queryBar.setQuery('');
-          await queryBar.submitQuery();
-
-          // using the query hides the time range. Clicking anywhere else shows it again.
-          await dashboardControls.optionsListOpenPopover(controlId);
-          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+          await queryBar.clickQuerySubmitButton(); // ensures that the time picker is visible for the next test
         });
 
         it('Applies dashboard time range to options list control', async () => {

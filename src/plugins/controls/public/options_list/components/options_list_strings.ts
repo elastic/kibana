@@ -59,6 +59,10 @@ export const OptionsListStrings = {
           '{key}, which appears in {documentCount} {documentCount, plural, one {document} other {documents}}.',
         values: { key, documentCount },
       }),
+    getLoadingMessage: () =>
+      i18n.translate('controls.optionsList.popover.loading', {
+        defaultMessage: 'Loading options',
+      }),
     getEmptyMessage: () =>
       i18n.translate('controls.optionsList.popover.empty', {
         defaultMessage: 'No options found',

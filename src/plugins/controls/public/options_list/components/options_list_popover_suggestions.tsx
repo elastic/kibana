@@ -8,7 +8,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { EuiSelectable } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSelectable, EuiSpacer } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
@@ -110,6 +110,13 @@ export const OptionsListPopoverSuggestions = ({
   return (
     <EuiSelectable
       isLoading={isLoading}
+      loadingMessage={
+        <span data-test-subj="optionsList-control-popover-loading">
+          <EuiLoadingSpinner size="m" />
+          <EuiSpacer size="xs" />
+          {OptionsListStrings.popover.getLoadingMessage()}
+        </span>
+      }
       options={suggestionsTest}
       listProps={{ onFocusBadge: false }}
       aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(fieldName)}

@@ -66,7 +66,7 @@ export const OptionsListPopover = ({
       )}
       <div
         data-test-subj={`optionsList-control-available-options`}
-        data-option-count={Object.keys(availableOptions ?? {}).length}
+        data-option-count={isLoading ? 0 : Object.keys(availableOptions ?? {}).length}
       >
         <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected} isLoading={isLoading} />
         {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
