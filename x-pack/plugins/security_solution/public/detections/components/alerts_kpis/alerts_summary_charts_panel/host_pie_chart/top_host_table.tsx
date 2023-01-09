@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiPanel, EuiInMemoryTable, EuiProgress, EuiSpacer } from '@elastic/eui';
 import {
-  Chart,
-  Settings,
-  Axis,
-  BarSeries,
-  Position,
-  ScaleType,
-  PartialTheme,
-} from '@elastic/charts'; 
+  EuiFlexItem,
+  EuiPanel,
+  EuiInMemoryTable,
+  EuiProgress,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
+import type { PartialTheme } from '@elastic/charts';
+import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -24,7 +24,6 @@ import { InspectButtonContainer } from '../../../../../common/components/inspect
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getHostTableColumns } from '../columns';
 import * as i18n from '../translations';
-import { useTheme } from '../../../../../common/components/charts/common';
 
 const TABLE_HEIGHT = 200;
 
@@ -41,6 +40,7 @@ export const TopHostTable: React.FC<ChartsPanelProps> = ({
     @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.xl}) {
       ${() => `height: ${TABLE_HEIGHT}px;`}
     }
+    height: ${TABLE_HEIGHT}px;
   `;
 
   const sorting: { sort: { field: keyof HostData; direction: SortOrder } } = {
@@ -50,35 +50,18 @@ export const TopHostTable: React.FC<ChartsPanelProps> = ({
     },
   };
 
-  const baseTheme = useTheme();
+  const { euiTheme } = useEuiTheme();
+
   const theme: PartialTheme = {
-    barSeriesStyle: {
-      displayValue: {
-        fontSize: 15,
-        fill: { textBorder: 50, color: 'white', borderColor: 'black' },
-        // alignment: {
-        //   horizontal: onselect(
-        //     'Horizontal alignment',
-        //     {
-        //       Default: undefined,
-        //       Left: 'left',
-        //       Center: 'center',
-        //       Right: 'right',
-        //     },
-        //     undefined,
-        //   ),
-        //   vertical: onselect(
-        //     'Vertical alignment',
-        //     {
-        //       Default: undefined,
-        //       Top: 'top',
-        //       Middle: 'middle',
-        //       Bottom: 'bottom',
-        //     },
-        //     undefined,
-        //   ),
-        // },
+    axes: {
+      // axisLine: { visible: false },
+      tickLabel: {
+        alignment: { horizontal: 'left' },
+        fontSize: 12,
+        fontFamily: euiTheme.font.family,
+        fill: euiTheme.colors.text,
       },
+      tickLine: { size: 1 },
     },
   };
   return (
@@ -95,12 +78,18 @@ export const TopHostTable: React.FC<ChartsPanelProps> = ({
           />
           {option === 1 && (
             <Wrapper data-test-subj="alert-detections-table" className="eui-yScroll">
-              <EuiInMemoryTable columns={columns} items={items} loading={isLoading} sorting={sorting} tableLayout="auto" />
+              <EuiInMemoryTable
+                columns={columns}
+                items={items}
+                loading={isLoading}
+                sorting={sorting}
+              />
             </Wrapper>
           )}
-          {option === 2 &&
-            (<Wrapper data-test-subj="alert-detections-table" className="eui-yScroll"> {
-              items.map((item) => (
+          {option === 2 && (
+            <Wrapper data-test-subj="alert-detections-table" className="eui-yScroll">
+              {' '}
+              {items.map((item) => (
                 <>
                   <EuiProgress
                     valueText={true}
@@ -121,23 +110,22 @@ export const TopHostTable: React.FC<ChartsPanelProps> = ({
                     }
                   />
                   <EuiSpacer size="s" />
-                  </>
+                </>
               ))}
-              </Wrapper>
-            )
-          }
+            </Wrapper>
+          )}
           {option === 3 && (
             <Wrapper data-test-subj="alert-host-table" className="eui-yScroll">
               <Chart>
-                <Settings showLegend={false} rotation={90} baseTheme={baseTheme} theme={theme} />
+                <Settings showLegend={false} rotation={90} theme={theme} />
                 <Axis id="x left" position={Position.Left} />
                 <BarSeries
                   id="Count"
                   xScaleType={ScaleType.Ordinal}
-                  // yScaleType={ScaleType.Linear}
                   xAccessor="x"
                   yAccessors={['y']}
                   data={items}
+                  color={euiTheme.colors.accentText}
                 />
               </Chart>
             </Wrapper>

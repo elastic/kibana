@@ -111,7 +111,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   return (
     <>
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem/>
+        <EuiFlexItem />
         <EuiFlexItem>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>

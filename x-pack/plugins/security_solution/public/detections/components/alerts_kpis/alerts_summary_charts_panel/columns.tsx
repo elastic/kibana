@@ -16,7 +16,8 @@ import {
   DraggableWrapper,
 } from '../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
-import { IS_OPERATOR, DataProvider} from '../../../../timelines/components/timeline/data_providers/data_provider';
+import type { DataProvider } from '../../../../timelines/components/timeline/data_providers/data_provider';
+import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import * as i18n from './translations';
@@ -83,8 +84,6 @@ export const getDetectionsTableColumns = (): Array<EuiBasicTableColumn<Detection
     name: i18n.DETECTIONS_TYPE_COLUMN_TITLE,
     'data-test-subj': 'detectionsTable-type',
     render: (type: string) => {
-      console.log(type);
-      console.log(type === 'Detection')
       const dataProvider = {
         and: [],
         enabled: true,
@@ -96,15 +95,14 @@ export const getDetectionsTableColumns = (): Array<EuiBasicTableColumn<Detection
           field: 'event.type',
           value: 'denied',
           operator: IS_OPERATOR,
-          displayValue: type === 'Detection' ? 'Detection' : 'Prevention'
+          displayValue: type === 'Detection' ? 'Detection' : 'Prevention',
         },
       };
 
       return (
-      
-      <EuiHealth color={EVENT_TYPE_COLOUR[type as AlertType]}>
-        <EuiText grow={false} size="xs">
-          {/* <DefaultDraggable
+        <EuiHealth color={EVENT_TYPE_COLOUR[type as AlertType]}>
+          <EuiText grow={false} size="xs">
+            {/* <DefaultDraggable
             isDraggable={false}
             field={"event.type"}
             hideTopN={true}
@@ -113,24 +111,25 @@ export const getDetectionsTableColumns = (): Array<EuiBasicTableColumn<Detection
             queryValue={type == 'Detection' ? "denied" : "denied"}
             tooltipContent={null}
           /> */}
-          <DraggableWrapper
-            dataProvider={dataProvider as DataProvider}
-            isAggregatable={true}
-            fieldType={'keyword'}
-            render={(_, __, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider as DataProvider} />
-                </DragEffects>
-              ) : (
-                <Content field={"event.type"} value = {type} />
-              )
-            }
-            hideTopN
-          />
-        </EuiText>
-      </EuiHealth>
-    )}
+            <DraggableWrapper
+              dataProvider={dataProvider as DataProvider}
+              isAggregatable={true}
+              fieldType={'keyword'}
+              render={(_, __, snapshot) =>
+                snapshot.isDragging ? (
+                  <DragEffects>
+                    <Provider dataProvider={dataProvider as DataProvider} />
+                  </DragEffects>
+                ) : (
+                  <Content field={'event.type'} value={type} />
+                )
+              }
+              hideTopN
+            />
+          </EuiText>
+        </EuiHealth>
+      );
+    },
   },
   {
     field: 'value',
@@ -151,38 +150,39 @@ export const getHostTableColumns = (): Array<EuiBasicTableColumn<HostData>> => [
     name: ALERTS_HEADERS_RULE,
     'data-test-subj': 'hostTable-host',
     render: ({ key, value, percentage }: { key: string; value: number; percentage: number }) => (
-      <EuiProgress
-        max={100}
-        color={`vis9`}
-        size="s"
-        valueText={true}
-        value={percentage}
-        label={
-          <DefaultDraggable
-            isDraggable={false}
-            field={'host.name'}
-            hideTopN={true}
-            id={`alert-host-table-${key}`}
-            value={key}
-            queryValue={key}
-            tooltipContent={null}
-          />
-        }
-      />
+      <span style={{ width: 400 }}>
+        <EuiProgress
+          max={100}
+          color={`vis9`}
+          size="s"
+          valueText={true}
+          value={percentage}
+          label={
+            <DefaultDraggable
+              isDraggable={false}
+              field={'host.name'}
+              hideTopN={true}
+              id={`alert-host-table-${key}`}
+              value={key}
+              queryValue={key}
+              tooltipContent={null}
+            />
+          }
+        />
+      </span>
     ),
-    height: '100%',
   },
   {
     field: 'value',
     name: i18n.COUNT_COULMN_TITLE,
     dataType: 'number',
     'data-test-subj': 'hostTable-count',
-    sortable: true,
+    // sortable: true,
     render: (count: number) => (
       <EuiText grow={false} size="xs">
         <FormattedCount count={count} />
       </EuiText>
     ),
-    width: '20%',
+    width: '17%',
   },
 ];

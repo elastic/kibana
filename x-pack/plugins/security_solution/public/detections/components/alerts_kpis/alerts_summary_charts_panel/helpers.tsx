@@ -67,8 +67,8 @@ export const parseDetectionsData = (
       });
 };
 export const EVENT_TYPE_COLOUR = {
-  Detection: '#54B399',
-  Prevention: '#D36086',
+  Detection: '#D36086',
+  Prevention: '#54B399',
 };
 const getAggregateDetections = (
   ruleName: string,
@@ -115,7 +115,7 @@ export const parseHostData = (
         return {
           key: host.key,
           value: host.doc_count,
-          percentage: Math.round(host.doc_count / total * 100),
+          percentage: Math.round((host.doc_count / total) * 100),
           label: host.key,
           color: getPieChartColor(hostsBuckets.length, i),
           x: host.key,
