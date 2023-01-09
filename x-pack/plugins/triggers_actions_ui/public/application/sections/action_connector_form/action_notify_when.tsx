@@ -152,6 +152,8 @@ export const ActionNotifyWhen = ({
     (newValue: RuleNotifyWhenType) => {
       onNotifyWhenChange(newValue);
       setNotifyWhenValue(newValue);
+      // Calling onNotifyWhenChange and onThrottleChange at the same time interferes with the React state lifecycle
+      // so wait for onNotifyWhenChange to process before calling onThrottleChange
       setTimeout(
         () =>
           onThrottleChange(newValue === 'onThrottleInterval' ? ruleThrottle : null, throttleUnit),
