@@ -156,13 +156,20 @@ export const ControlGeneralViewSelector = ({
   return (
     <EuiAccordion
       id={selector.name}
+      data-test-subj="cloud-defend-selector"
       paddingSize="m"
       buttonContent={selector.name}
       css={styles.accordion}
       extraAction={
         <EuiPopover
           id={selector.name}
-          button={<EuiButtonIcon iconType="boxesHorizontal" onClick={onTogglePopover} />}
+          button={
+            <EuiButtonIcon
+              iconType="boxesHorizontal"
+              onClick={onTogglePopover}
+              aria-label="Selector options"
+            />
+          }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           panelPaddingSize="none"
@@ -208,7 +215,7 @@ export const ControlGeneralViewSelector = ({
             const restrictedValues = ControlSelectorConditionUIOptionsMap[prop]?.values;
 
             return (
-              <EuiFormRow label={label} fullWidth={true}>
+              <EuiFormRow label={label} fullWidth={true} key={prop}>
                 <EuiFlexGroup alignItems="center">
                   <EuiComboBox
                     aria-label={label}
@@ -236,6 +243,7 @@ export const ControlGeneralViewSelector = ({
                       iconType="trash"
                       color="danger"
                       onClick={() => onRemoveCondition(prop)}
+                      aria-label="Remove condition"
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

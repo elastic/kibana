@@ -10,8 +10,8 @@ import '@kbn/kibana-react-plugin/public/code_editor/code_editor.test.helpers';
 import { TestProvider } from '../../test/test_provider';
 import { getCloudDefendNewPolicyMock } from './mocks';
 import { ConfigYamlView } from '.';
-import './__mocks__/worker';
-import './__mocks__/resizeobserver';
+import '../../test/__mocks__/worker';
+import '../../test/__mocks__/resizeobserver';
 
 // @ts-ignore-next
 window.Worker = Worker;
@@ -54,7 +54,7 @@ describe('<CloudDefendCreatePolicyExtension />', () => {
     expect(input).toBeEnabled();
   });
 
-  it('renders a yaml editor', () => {
+  it('renders a yaml editor when the user switches to yaml view', () => {
     const { getByTestId } = render(<WrappedComponent />);
     const el = getByTestId('monacoEditorTextarea') as HTMLTextAreaElement;
     expect(el).toBeInTheDocument();

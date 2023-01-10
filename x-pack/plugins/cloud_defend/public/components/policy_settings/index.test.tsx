@@ -6,33 +6,14 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import '@kbn/kibana-react-plugin/public/code_editor/code_editor.test.helpers';
+import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { getCloudDefendNewPolicyMock } from '../../test/mocks';
 import { PolicySettings } from '.';
-import '../../test/__mocks__/worker';
-import '../../test/__mocks__/resizeobserver';
+import { getInputFromPolicy } from '../../common/utils';
+import { INPUT_CONTROL } from '../../../common/constants';
 
-// @ts-ignore-next
-window.Worker = Worker;
-
-describe('<CloudDefendCreatePolicyExtension />', () => {
-  beforeAll(() => {
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: jest.fn().mockImplementation((query) => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: jest.fn(), // Deprecated
-        removeListener: jest.fn(), // Deprecated
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn(),
-      })),
-    });
-  });
-
+describe('<PolicySettings />', () => {
   const onChange = jest.fn();
 
   const WrappedComponent = ({ policy = getCloudDefendNewPolicyMock() }) => {
@@ -49,14 +30,19 @@ describe('<CloudDefendCreatePolicyExtension />', () => {
 
   it('renders a checkbox to toggle BPF/LSM control mechanism', () => {
     const { getByTestId } = render(<WrappedComponent />);
-    const input = getByTestId('cloud-defend-control-toggle') as HTMLInputElement;
+    const input = getByTestId('cloud-defend-controltoggle');
     expect(input).toBeInTheDocument();
     expect(input).toBeEnabled();
   });
 
-  it('renders a yaml editor', () => {
+  it('User can disable control features', async () => {
     const { getByTestId } = render(<WrappedComponent />);
-    const el = getByTestId('monacoEditorTextarea') as HTMLTextAreaElement;
-    expect(el).toBeInTheDocument();
+
+    userEvent.click(getByTestId('cloud-defend-controltoggle'));
+
+    const policy = onChange.mock.calls[0][0].updatedPolicy;
+    const controlInput = getInputFromPolicy(policy, INPUT_CONTROL);
+
+    expect(controlInput?.enabled).toBeFalsy();
   });
 });

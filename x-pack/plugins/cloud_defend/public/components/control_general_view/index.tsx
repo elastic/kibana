@@ -164,7 +164,7 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
   );
 
   return (
-    <EuiFlexGroup gutterSize="m" direction="column">
+    <EuiFlexGroup gutterSize="m" direction="column" data-test-subj="cloud-defend-generalview">
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h4>{i18n.selectors}</h4>
@@ -176,7 +176,7 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
 
       {selectors.map((selector, i) => {
         return (
-          <EuiFlexItem>
+          <EuiFlexItem key={i}>
             <ControlGeneralViewSelector
               key={i}
               selector={selector}
@@ -188,7 +188,13 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
           </EuiFlexItem>
         );
       })}
-      <EuiButton fullWidth color="primary" iconType="plusInCircle" onClick={onAddSelector}>
+      <EuiButton
+        fullWidth
+        color="primary"
+        iconType="plusInCircle"
+        onClick={onAddSelector}
+        data-test-subj="cloud-defend-btnaddselector"
+      >
         {i18n.addSelector}
       </EuiButton>
 
@@ -231,7 +237,6 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <ControlGeneralViewResponse
-                            key={i}
                             index={i}
                             response={response}
                             responses={responses}
@@ -249,7 +254,13 @@ export const ControlGeneralView = ({ policy, onChange }: SettingsDeps) => {
             })}
           </EuiDroppable>
         </EuiDragDropContext>
-        <EuiButton fullWidth color="primary" iconType="plusInCircle" onClick={onAddResponse}>
+        <EuiButton
+          fullWidth
+          color="primary"
+          iconType="plusInCircle"
+          onClick={onAddResponse}
+          data-test-subj="cloud-defend-btnaddresponse"
+        >
           {i18n.addResponse}
         </EuiButton>
         <EuiSpacer size="m" />

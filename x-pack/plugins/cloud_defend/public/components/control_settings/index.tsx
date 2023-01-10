@@ -46,10 +46,16 @@ export const ControlSettings = ({ policy, onChange }: ControlSettingsDeps) => {
             id={VIEW_MODE_GENERAL}
             onClick={onViewModeGeneral}
             isSelected={isGeneralViewSelected}
+            data-test-subj="cloud-defend-btngeneralview"
           >
             {i18n.viewModeGeneral}
           </EuiTab>
-          <EuiTab id={VIEW_MODE_YAML} onClick={onViewModeYaml} isSelected={isYamlViewSelected}>
+          <EuiTab
+            id={VIEW_MODE_YAML}
+            onClick={onViewModeYaml}
+            isSelected={isYamlViewSelected}
+            data-test-subj="cloud-defend-btnyamlview"
+          >
             {i18n.viewModeYaml}
           </EuiTab>
         </EuiTabs>

@@ -131,7 +131,7 @@ export const ControlGeneralViewResponse = ({
   }, [alertSelected, blockSelected, onChange, onToggleAlert, response]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup data-test-subj="cloud-defend-response">
       <EuiFlexItem>
         <EuiForm component="form" fullWidth>
           <EuiFormRow label={i18n.matchSelectors} fullWidth>
@@ -193,7 +193,13 @@ export const ControlGeneralViewResponse = ({
 
         <EuiPopover
           css={styles.options}
-          button={<EuiButtonIcon iconType="boxesHorizontal" onClick={onTogglePopover} />}
+          button={
+            <EuiButtonIcon
+              iconType="boxesHorizontal"
+              onClick={onTogglePopover}
+              aria-label="Response options"
+            />
+          }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           panelPaddingSize="none"

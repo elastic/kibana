@@ -31,7 +31,7 @@ export const PolicySettings = ({ policy, onChange }: SettingsDeps) => {
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiSwitch
-          data-test-subj="cloud-defend-control-toggle"
+          data-test-subj="cloud-defend-controltoggle"
           label={i18n.enableControl}
           checked={controlEnabled}
           onChange={onToggleEnabled}
@@ -41,7 +41,13 @@ export const PolicySettings = ({ policy, onChange }: SettingsDeps) => {
           {i18n.enableControlHelp}
         </EuiText>
       </EuiFlexItem>
-      {controlEnabled && <ControlSettings policy={policy} onChange={onChange} />}
+      {controlEnabled && (
+        <ControlSettings
+          data-test-subj="cloud-defend-controlsettings"
+          policy={policy}
+          onChange={onChange}
+        />
+      )}
     </EuiFlexGroup>
   );
 };
