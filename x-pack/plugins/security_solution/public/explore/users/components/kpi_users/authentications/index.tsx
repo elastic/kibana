@@ -79,7 +79,7 @@ const UsersKpiAuthenticationsComponent: React.FC<UsersKpiProps> = ({
     endDate: to,
     indexNames,
     startDate: from,
-    skip: querySkip,
+    skip: querySkip || isChartEmbeddablesEnabled,
   });
 
   const { session, refetchByRestartingSession } = useRefetchByRestartingSession({
