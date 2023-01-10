@@ -9,6 +9,17 @@ import http from 'http';
 import expect from '@kbn/expect';
 
 import { CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsSec,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -34,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const actionsRemover = new ActionsRemover(supertest);
 
-  describe.only('get_connectors', () => {
+  describe('get_connectors', () => {
     let serviceNowSimulatorURL: string = '';
     let serviceNowServer: http.Server;
 
@@ -53,68 +64,11 @@ export default ({ getService }: FtrProviderContext): void => {
       serviceNowServer.close();
     });
 
-    it('retrieves a single connector using the create case user action', async () => {
-      const { postedCase, connector } = await createCaseWithConnector({
-        supertest,
-        serviceNowSimulatorURL,
-        actionsRemover,
-      });
-
-      const theCase = await pushCase({
-        supertest,
-        caseId: postedCase.id,
-        connectorId: connector.id,
-      });
-
-      const connectors = await getConnectors({ caseId: theCase.id, supertest });
-      expect(connectors.length).to.be(1);
-      expect(connectors[0].fields).to.eql({
-        category: 'software',
-        impact: '2',
-        severity: '2',
-        subcategory: 'os',
-        urgency: '2',
-      });
-
-      expect(connectors[0].needsToBePushed).to.be(false);
-      expect(connectors[0].name).to.be('ServiceNow Connector');
-      expect(connectors[0].id).to.be(connector.id);
-    });
-
-    it('retrieves a single connector using the connector user action', async () => {
+    it('does not return a case that does not have a connector', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
 
-      const jiraConnector = await createConnector({
-        supertest,
-        req: {
-          ...getJiraConnector(),
-        },
-      });
-
-      actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
-
-      await updateCase({
-        supertest,
-        params: {
-          cases: [
-            {
-              id: postedCase.id,
-              version: postedCase.version,
-              connector: {
-                id: jiraConnector.id,
-                name: 'Jira',
-                type: ConnectorTypes.jira,
-                fields: { issueType: 'Task', priority: null, parent: null },
-              },
-            },
-          ],
-        },
-      });
-
       const connectors = await getConnectors({ caseId: postedCase.id, supertest });
-
-      expect(connectors.length).to.be(1);
-      expect(connectors[0].id).to.be(jiraConnector.id);
+      expect(connectors.length).to.be(0);
     });
 
     it('retrieves multiple connectors', async () => {
@@ -144,8 +98,8 @@ export default ({ getService }: FtrProviderContext): void => {
         params: {
           cases: [
             {
-              id: postedCase.id,
-              version: postedCase.version,
+              id: theCase.id,
+              version: theCase.version,
               connector: {
                 id: jiraConnector.id,
                 name: 'Jira',
@@ -163,7 +117,71 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(connectors[1].id).to.be(jiraConnector.id);
     });
 
-    describe('fields', () => {
+    describe('retrieving fields', () => {
+      it('retrieves a single connector using the create case user action', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        const theCase = await pushCase({
+          supertest,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+        });
+
+        const connectors = await getConnectors({ caseId: theCase.id, supertest });
+        expect(connectors.length).to.be(1);
+        expect(connectors[0].fields).to.eql({
+          category: 'software',
+          impact: '2',
+          severity: '2',
+          subcategory: 'os',
+          urgency: '2',
+        });
+
+        expect(connectors[0].needsToBePushed).to.be(false);
+        expect(connectors[0].name).to.be('ServiceNow Connector');
+        expect(connectors[0].id).to.be(connector.id);
+      });
+
+      it('retrieves a single connector using the connector user action', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        const jiraConnector = await createConnector({
+          supertest,
+          req: {
+            ...getJiraConnector(),
+          },
+        });
+
+        actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
+
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                connector: {
+                  id: jiraConnector.id,
+                  name: 'Jira',
+                  type: ConnectorTypes.jira,
+                  fields: { issueType: 'Task', priority: null, parent: null },
+                },
+              },
+            ],
+          },
+        });
+
+        const connectors = await getConnectors({ caseId: postedCase.id, supertest });
+
+        expect(connectors.length).to.be(1);
+        expect(connectors[0].id).to.be(jiraConnector.id);
+      });
+
       it('returns the fields of the connector update after a case was created with a connector', async () => {
         const { postedCase, connector: serviceNowConnector } = await createCaseWithConnector({
           supertest,
@@ -277,7 +295,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actionsRemover,
         });
 
-        await pushCase({
+        const pushedCase = await pushCase({
           supertest,
           caseId: postedCase.id,
           connectorId: connector.id,
@@ -288,8 +306,8 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             cases: [
               {
-                id: postedCase.id,
-                version: postedCase.version,
+                id: pushedCase.id,
+                version: pushedCase.version,
                 severity: CaseSeverity.CRITICAL,
               },
             ],
@@ -310,7 +328,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actionsRemover,
         });
 
-        await pushCase({
+        const pushedCase = await pushCase({
           supertest,
           caseId: postedCase.id,
           connectorId: serviceNowConnector.id,
@@ -330,8 +348,8 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             cases: [
               {
-                id: postedCase.id,
-                version: postedCase.version,
+                id: pushedCase.id,
+                version: pushedCase.version,
                 connector: {
                   id: jiraConnector.id,
                   name: 'Jira',
@@ -366,7 +384,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           actionsRemover.add('default', serviceNowConnector.id, 'action', 'actions');
 
-          await updateCase({
+          const updatedCasesServiceNow = await updateCase({
             supertest,
             params: {
               cases: [
@@ -392,7 +410,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const pushedCase = await pushCase({
             supertest,
-            caseId: postedCase.id,
+            caseId: updatedCasesServiceNow[0].id,
             connectorId: serviceNowConnector.id,
           });
 
@@ -495,11 +513,70 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(connectors.length).to.be(1);
           expect(connectors[0].id).to.be(serviceNowConnector.id);
-          expect(connectors[0].needsToBePushed).to.be(false);
+          expect(connectors[0].needsToBePushed).to.be(true);
         });
       });
     });
 
-    describe('rbac', () => {});
+    describe('rbac', () => {
+      const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+      it('should retrieve the connectors for a case', async () => {
+        const { postedCase, connector: serviceNowConnector } = await createCaseWithConnector({
+          supertest: supertestWithoutAuth,
+          serviceNowSimulatorURL,
+          actionsRemover,
+          auth: { user: superUser, space: 'space1' },
+          createCaseReq: getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+        });
+
+        for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
+          const connectors = await getConnectors({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            auth: { user, space: 'space1' },
+          });
+
+          expect(connectors.length).to.eql(1);
+          expect(connectors[0].id).to.eql(serviceNowConnector.id);
+        }
+      });
+
+      it('should not get connectors for a case when the user does not have access to the owner', async () => {
+        const { postedCase } = await createCaseWithConnector({
+          supertest: supertestWithoutAuth,
+          serviceNowSimulatorURL,
+          actionsRemover,
+          auth: { user: superUser, space: 'space1' },
+          createCaseReq: getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+        });
+
+        for (const user of [noKibanaPrivileges, obsOnly, obsOnlyRead]) {
+          await getConnectors({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            expectedHttpCode: 403,
+            auth: { user, space: 'space1' },
+          });
+        }
+      });
+
+      it('should not get a case in a space the user does not have permissions to', async () => {
+        const { postedCase } = await createCaseWithConnector({
+          supertest: supertestWithoutAuth,
+          serviceNowSimulatorURL,
+          actionsRemover,
+          auth: { user: superUser, space: 'space2' },
+          createCaseReq: getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+        });
+
+        await getConnectors({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          expectedHttpCode: 403,
+          auth: { user: secOnly, space: 'space2' },
+        });
+      });
+    });
   });
 };
