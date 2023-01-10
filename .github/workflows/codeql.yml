@@ -9,6 +9,9 @@ on:
   schedule:
     - cron: '27 21 * * 0' # At 21:27 every Sunday
 
+env:
+  ACTIONS_STEP_DEBUG: true
+
 jobs:
   analyze:
     name: Analyze
@@ -36,6 +39,7 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
+        debug: true
 
     - name: yarn kbn bootstrap
       run: |
