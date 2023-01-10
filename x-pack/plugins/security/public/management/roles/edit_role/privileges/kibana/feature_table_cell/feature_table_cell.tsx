@@ -48,7 +48,12 @@ export const FeatureTableCell = ({ feature }: Props) => {
       </EuiFlexItem>
       {feature.description && (
         <EuiFlexItem>
-          <EuiText color="subdued" size="xs" data-test-subj="featurePrivilegeDescriptionText">
+          <EuiText
+            color="subdued"
+            size="xs"
+            data-test-subj="featurePrivilegeDescriptionText"
+            aria-describedby={`${feature.name} description text`}
+          >
             {feature.description}
           </EuiText>
         </EuiFlexItem>

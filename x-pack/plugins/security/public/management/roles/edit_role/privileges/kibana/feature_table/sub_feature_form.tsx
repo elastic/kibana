@@ -75,7 +75,12 @@ export const SubFeatureForm = (props: Props) => {
           </EuiFlexItem>
           {props.subFeature.description && (
             <EuiFlexItem>
-              <EuiText color={'subdued'} size={'xs'} data-test-subj="subFeatureDescription">
+              <EuiText
+                color={'subdued'}
+                size={'xs'}
+                data-test-subj="subFeatureDescription"
+                aria-describedby={`${props.subFeature.name} description text`}
+              >
                 {props.subFeature.description}
               </EuiText>
             </EuiFlexItem>
