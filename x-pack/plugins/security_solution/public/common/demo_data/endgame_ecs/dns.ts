@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Ecs } from '../../../../common/ecs';
+import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
 
 export const demoEndgameDnsRequest: Ecs = {
   _id: 'S8jPcG0BOpWiDweSou3g',

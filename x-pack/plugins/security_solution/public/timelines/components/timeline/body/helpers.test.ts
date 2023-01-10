@@ -12,7 +12,7 @@ import {
   getPinTooltip,
   stringifyEvent,
 } from './helpers';
-import type { Ecs } from '../../../../../common/ecs';
+import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineType } from '../../../../../common/types/timeline';
 
 describe('helpers', () => {

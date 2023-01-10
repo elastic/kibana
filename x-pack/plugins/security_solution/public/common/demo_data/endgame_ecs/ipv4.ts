@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Ecs } from '../../../../common/ecs';
+import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
 
 export const demoEndgameIpv4ConnectionAcceptEvent: Ecs = {
   _id: 'LsjPcG0BOpWiDweSCNfu',

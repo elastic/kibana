@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type { Ecs } from '../../../../common/ecs';
+import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
 
 export const isEventBuildingBlockType = (event: Ecs): boolean =>
   !isEmpty(event.kibana?.alert?.building_block_type);

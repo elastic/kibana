@@ -1106,9 +1106,6 @@ export const demoTimelineData: TimelineItem[] = [
               field: ['source.ip'],
               type: ['ip'],
             },
-            feed: {
-              name: ['feed_name'],
-            },
           },
         ],
       },

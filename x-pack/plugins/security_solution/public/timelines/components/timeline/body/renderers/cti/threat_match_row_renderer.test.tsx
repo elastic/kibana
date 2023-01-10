@@ -24,7 +24,7 @@ describe('threatMatchRowRenderer', () => {
     it('is false for an empty event', () => {
       const emptyEvent = {
         _id: 'my_id',
-        '@timestamp': ['2020-11-17T14:48:08.922Z'],
+        '@timestamp': '2020-11-17T14:48:08.922Z',
       };
       expect(threatMatchRowRenderer.isInstance(emptyEvent)).toBe(false);
     });

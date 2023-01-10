@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Ecs } from '../../../../common/ecs';
+import type { Scs as Ecs } from '@kbn/securitysolution-ecs';
 
 export const demoEndgameTerminationEvent: Ecs = {
   _id: '2MjPcG0BOpWiDweSoutC',

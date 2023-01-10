@@ -7,37 +7,79 @@
  */
 
 import type { Ecs } from '@kbn/ecs';
+import { AgentEcs } from '@kbn/securitysolution-ecs/src/agent';
 import type { AuditdEcs } from './auditd';
+import type { CloudEcs } from './cloud';
+import type { CodeSignature, FileEcs } from './file';
 import type { DestinationEcs } from './destination';
-import type { DnsEcs } from './dns';
 import type { DllEcs } from './dll';
+import type { DnsEcs } from './dns';
 import type { EndgameEcs } from './endgame';
+import { EventCategory, EventCode } from './event';
 import type { EventEcs } from './event';
-import type { FileEcs } from './file';
 import type { GeoEcs } from './geo';
-import type { HostEcs } from './host';
+import type { HostEcs, OsEcs } from './host';
+import type { HttpEcs } from './http';
+import type { MemoryProtection } from './memory_protection';
 import type { NetworkEcs } from './network';
+import type { ProcessEcs } from './process';
+import type { Ransomware } from './ransomware';
 import type { RegistryEcs } from './registry';
 import type { RuleEcs } from './rule';
 import type { SignalEcs, SignalEcsAAD } from './signal';
 import type { SourceEcs } from './source';
 import type { SuricataEcs } from './suricata';
+import type { SystemEcs } from './system';
+import type { Target } from './target_type';
+import type { ThreatEcs, ThreatIndicatorEcs } from './threat';
 import type { TlsEcs } from './tls';
-import type { ZeekEcs } from './zeek';
-import type { HttpEcs } from './http';
 import type { UrlEcs } from './url';
 import type { UserEcs } from './user';
 import type { WinlogEcs } from './winlog';
-import type { ProcessEcs } from './process';
-import type { SystemEcs } from './system';
-import type { ThreatEcs } from './threat';
-import type { Ransomware } from './ransomware';
-import type { MemoryProtection } from './memory_protection';
-import type { Target } from './target_type';
+import type { ZeekEcs } from './zeek';
+export * from './ecs_fields';
+
+export { EventCategory, EventCode };
+
+export type {
+  AuditdEcs,
+  CloudEcs,
+  CodeSignature,
+  DestinationEcs,
+  DllEcs,
+  DnsEcs,
+  EndgameEcs,
+  EventEcs,
+  FileEcs,
+  GeoEcs,
+  HostEcs,
+  HttpEcs,
+  MemoryProtection,
+  NetworkEcs,
+  OsEcs,
+  ProcessEcs,
+  Ransomware,
+  RegistryEcs,
+  RuleEcs,
+  SignalEcs,
+  SourceEcs,
+  SuricataEcs,
+  SystemEcs,
+  Target,
+  ThreatEcs,
+  ThreatIndicatorEcs,
+  TlsEcs,
+  UrlEcs,
+  UserEcs,
+  WinlogEcs,
+  ZeekEcs,
+};
 
 type OverrideTypes =
+  | 'agent'
   | 'destination'
   | 'dns'
+  | 'ecs'
   | 'event'
   | 'file'
   | 'host'
@@ -49,6 +91,7 @@ type OverrideTypes =
   | 'rule'
   | 'source'
   | 'threat'
+  | '@timestamp'
   | 'tls'
   | 'url'
   | 'user';
@@ -57,6 +100,7 @@ type OverrideTypes =
 export interface Scs extends Omit<Ecs, OverrideTypes> {
   // Ecs Overrides
   // overrides Ecs to support multiple values for security entities
+  agent?: AgentEcs;
   destination?: DestinationEcs;
   dns?: DnsEcs;
   event?: EventEcs;
@@ -74,7 +118,11 @@ export interface Scs extends Omit<Ecs, OverrideTypes> {
   url?: UrlEcs;
   user?: UserEcs;
 
-  // security specific Ecs
+  // Overrides Not Required in Security solution
+  ['@timestamp']?: Ecs['@timestamp'];
+  ecs?: Ecs['ecs'];
+
+  // Security Specific Ecs
   // exists only in security solution Ecs definition
   _id: string;
   _index?: string;
