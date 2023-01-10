@@ -94,7 +94,7 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { loadRuleTypes, updateAPIKey, loadRuleTags } = jest.requireMock('../../../lib/rule_api');
+const { loadRuleTypes, bulkUpdateAPIKey, loadRuleTags } = jest.requireMock('../../../lib/rule_api');
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
@@ -111,10 +111,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/134922
-// FLAKY: https://github.com/elastic/kibana/issues/134923
-// FLAKY: https://github.com/elastic/kibana/issues/134924
-
 const AllTheProviders = ({ children }: { children: any }) => (
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -125,7 +121,7 @@ const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
 
-describe.skip('Update Api Key', () => {
+describe('Update Api Key', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
 
@@ -143,19 +139,20 @@ describe.skip('Update Api Key', () => {
       addSuccess,
       addError,
     } as unknown as IToasts;
+    loadRuleTags.mockResolvedValue({});
+    loadRuleAggregationsWithKueryFilter.mockResolvedValue({});
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
   });
 
   it('Updates the Api Key successfully', async () => {
-    updateAPIKey.mockResolvedValueOnce(204);
-    render(
-      <IntlProvider locale="en">
-        <RulesList />
-      </IntlProvider>
-    );
+    bulkUpdateAPIKey.mockResolvedValueOnce({ errors: [], total: 1, rules: [], skipped: [] });
+    renderWithProviders(<RulesList />);
+
     expect(await screen.findByText('test rule ok')).toBeInTheDocument();
 
     fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
@@ -174,22 +171,15 @@ describe.skip('Update Api Key', () => {
 
     fireEvent.click(screen.getByText('Update API key'));
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('Update'));
-    });
-    expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
-    expect(loadRulesWithKueryFilter).toHaveBeenCalledTimes(3);
+    fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+    await waitFor(() => expect(addSuccess).toHaveBeenCalledWith('Updated API key for 1 rule.'));
+    expect(bulkUpdateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ ids: ['2'] }));
     expect(screen.queryByText("You can't recover the old API key")).not.toBeInTheDocument();
-    expect(addSuccess).toHaveBeenCalledWith('API key has been updated');
   });
 
   it('Update API key fails', async () => {
-    updateAPIKey.mockRejectedValueOnce(500);
-    render(
-      <IntlProvider locale="en">
-        <RulesList />
-      </IntlProvider>
-    );
+    bulkUpdateAPIKey.mockRejectedValueOnce(500);
+    renderWithProviders(<RulesList />);
 
     expect(await screen.findByText('test rule ok')).toBeInTheDocument();
 
@@ -202,8 +192,7 @@ describe.skip('Update Api Key', () => {
     await act(async () => {
       fireEvent.click(screen.getByText('Update'));
     });
-    expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
-    expect(loadRulesWithKueryFilter).toHaveBeenCalledTimes(3);
+    expect(bulkUpdateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ ids: ['2'] }));
     expect(
       screen.queryByText('You will not be able to recover the old API key')
     ).not.toBeInTheDocument();

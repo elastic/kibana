@@ -93,7 +93,7 @@ export const UpdateApiKeyModalConfirmation = ({
         setIsLoadingState(true);
         try {
           const response = await apiUpdateApiKeyCall({
-            ids: idsToUpdate,
+            ids: computedIdsToUpdate,
             filter: idsToUpdateFilter,
             http,
           });
