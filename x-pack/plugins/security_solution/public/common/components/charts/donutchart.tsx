@@ -45,7 +45,6 @@ export interface DonutChartProps {
   data: DonutChartData[] | null | undefined;
   fillColor: FillColor;
   height?: number;
-  isChartEmbeddablesEnabled?: boolean;
   label: React.ReactElement | string;
   legendItems?: LegendItem[] | null | undefined;
   onElementClick?: ElementClickListener;
@@ -134,7 +133,6 @@ export const DonutChart = ({
   data,
   fillColor,
   height = 90,
-  isChartEmbeddablesEnabled,
   label,
   legendItems,
   onElementClick,
@@ -148,7 +146,7 @@ export const DonutChart = ({
       dataExists={data != null && data.length > 0}
       label={label}
       title={title}
-      isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
+      isChartEmbeddablesEnabled={false}
     >
       <>
         {data == null || totalCount == null || totalCount === 0 ? (
