@@ -18,7 +18,7 @@ import { createStore } from '../../../common/store';
 import { Subject } from 'rxjs';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../common/constants';
-import { createTimelineFilterOutAction } from './filter_out';
+import { createFilterOutAction } from './filter_out';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -42,8 +42,8 @@ const mockState = {
 const { storage } = createSecuritySolutionStorageMock();
 const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-describe('createTimelineFilterOutAction', () => {
-  const filterOutAction = createTimelineFilterOutAction({ store: mockStore, order: 1 });
+describe('Timeline createFilterOutAction', () => {
+  const filterOutAction = createFilterOutAction({ store: mockStore, order: 1 });
   const context = {
     field: { name: 'user.name', value: 'the value', type: 'text' },
   } as CellActionExecutionContext;

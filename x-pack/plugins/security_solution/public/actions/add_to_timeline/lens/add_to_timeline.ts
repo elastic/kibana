@@ -7,7 +7,7 @@
 
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { SecurityAppStore } from '../../../common/store/types';
 import { addProvider, showTimeline } from '../../../timelines/store/timeline/actions';
@@ -38,67 +38,58 @@ function isDataColumnsFilterable(data?: CellValueContext['data']): boolean {
   );
 }
 
-export class LensAddToTimelineAction implements Action<CellValueContext> {
-  public readonly type = ACTION_ID;
-  public readonly id = ACTION_ID;
-  public order = 1;
+export const createAddToTimelineAction = ({
+  store,
+  order,
+}: {
+  store: SecurityAppStore;
+  order?: number;
+}) => {
+  const {
+    application: applicationService,
+    notifications: { toasts: toastsService },
+  } = KibanaServices.get();
+  let currentAppId: string | undefined;
+  applicationService.currentAppId$.subscribe((appId) => {
+    currentAppId = appId;
+  });
 
-  private icon = ADD_TO_TIMELINE_ICON;
-  private toastsService;
-  private store;
-  private currentAppId: string | undefined;
-
-  constructor(store: SecurityAppStore) {
-    this.store = store;
-    const { application, notifications } = KibanaServices.get();
-    this.toastsService = notifications.toasts;
-
-    application.currentAppId$.subscribe((currentAppId) => {
-      this.currentAppId = currentAppId;
-    });
-  }
-
-  public getDisplayName() {
-    return ADD_TO_TIMELINE;
-  }
-
-  public getIconType() {
-    return this.icon;
-  }
-
-  public async isCompatible({ embeddable, data }: CellValueContext) {
-    return (
+  return createAction<CellValueContext>({
+    id: ACTION_ID,
+    type: ACTION_ID,
+    order,
+    getIconType: () => ADD_TO_TIMELINE_ICON,
+    getDisplayName: () => ADD_TO_TIMELINE,
+    isCompatible: async ({ embeddable, data }) =>
       !isErrorEmbeddable(embeddable) &&
       isLensEmbeddable(embeddable) &&
       isFilterableEmbeddable(embeddable) &&
       isDataColumnsFilterable(data) &&
-      isInSecurityApp(this.currentAppId)
-    );
-  }
+      isInSecurityApp(currentAppId),
+    execute: async ({ data }) => {
+      const dataProviders = data.reduce<DataProvider[]>((acc, { columnMeta, value, eventId }) => {
+        const dataProvider = createDataProviders({
+          contextId: TimelineId.active,
+          fieldType: columnMeta?.type,
+          values: value,
+          field: columnMeta?.field,
+          eventId,
+        });
+        if (dataProvider) {
+          acc.push(...dataProvider);
+        }
+        return acc;
+      }, []);
 
-  public async execute({ data }: CellValueContext) {
-    const dataProviders = data.reduce<DataProvider[]>((acc, { columnMeta, value, eventId }) => {
-      const dataProvider = createDataProviders({
-        contextId: TimelineId.active,
-        fieldType: columnMeta?.type,
-        values: value,
-        field: columnMeta?.field,
-        eventId,
-      });
-      if (dataProvider) {
-        acc.push(...dataProvider);
+      if (dataProviders.length > 0) {
+        store.dispatch(addProvider({ id: TimelineId.active, providers: dataProviders }));
+        store.dispatch(showTimeline({ id: TimelineId.active, show: true }));
+      } else {
+        toastsService.addWarning({
+          title: ADD_TO_TIMELINE_FAILED_TITLE,
+          text: ADD_TO_TIMELINE_FAILED_TEXT,
+        });
       }
-      return acc;
-    }, []);
-
-    if (dataProviders.length > 0) {
-      this.store.dispatch(addProvider({ id: TimelineId.active, providers: dataProviders }));
-      this.store.dispatch(showTimeline({ id: TimelineId.active, show: true }));
-    } else {
-      this.toastsService.addWarning({
-        title: ADD_TO_TIMELINE_FAILED_TITLE,
-        text: ADD_TO_TIMELINE_FAILED_TEXT,
-      });
-    }
-  }
-}
+    },
+  });
+};

@@ -16,7 +16,7 @@ KibanaServices.get().notifications.toasts.addSuccess = mockSuccessToast;
 const mockCopy = jest.fn((text: string) => true);
 jest.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
 
-describe('createCopyToClipboardAction', () => {
+describe('Default createCopyToClipboardAction', () => {
   const copyToClipboardAction = createCopyToClipboardAction({ order: 1 });
   const context = {
     field: { name: 'user.name', value: 'the value', type: 'text' },

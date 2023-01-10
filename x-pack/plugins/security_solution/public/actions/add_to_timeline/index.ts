@@ -6,4 +6,4 @@
  */
 
 export { createAddToTimelineAction as createDefaultAddToTimelineAction } from './default/add_to_timeline';
-export { LensAddToTimelineAction } from './lens/add_to_timeline';
+export { createAddToTimelineAction as createLensAddToTimelineAction } from './lens/add_to_timeline';

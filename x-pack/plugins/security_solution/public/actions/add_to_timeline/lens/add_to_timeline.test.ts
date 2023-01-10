@@ -9,12 +9,13 @@ import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embedd
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
 import type { SecurityAppStore } from '../../../common/store/types';
-import { LensEmbeddableAddToTimelineAction } from './add_to_timeline';
+import { createAddToTimelineAction } from './add_to_timeline';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../common/constants';
 import { Subject } from 'rxjs';
 import { TimelineId } from '../../../../common/types';
 import { addProvider, showTimeline } from '../../../timelines/store/timeline/actions';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 jest.mock('../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
@@ -48,8 +49,13 @@ const value = 'the value';
 const eventId = 'event_1';
 const data: CellValueContext['data'] = [{ columnMeta, value, eventId }];
 
-describe('EmbeddableAddToTimelineAction', () => {
-  const addToTimelineAction = new LensEmbeddableAddToTimelineAction(store);
+const context = {
+  data,
+  embeddable: lensEmbeddable,
+} as unknown as ActionExecutionContext<CellValueContext>;
+
+describe('Lens createAddToTimelineAction', () => {
+  const addToTimelineAction = createAddToTimelineAction({ store, order: 1 });
 
   beforeEach(() => {
     currentAppId$.next(APP_UI_ID);
@@ -57,19 +63,19 @@ describe('EmbeddableAddToTimelineAction', () => {
   });
 
   it('should return display name', () => {
-    expect(addToTimelineAction.getDisplayName()).toEqual('Add to timeline');
+    expect(addToTimelineAction.getDisplayName(context)).toEqual('Add to timeline');
   });
 
   it('should return icon type', () => {
-    expect(addToTimelineAction.getIconType()).toEqual('timeline');
+    expect(addToTimelineAction.getIconType(context)).toEqual('timeline');
   });
 
   describe('isCompatible', () => {
     it('should return false if error embeddable', async () => {
       expect(
         await addToTimelineAction.isCompatible({
+          ...context,
           embeddable: new ErrorEmbeddable('some error', {} as EmbeddableInput),
-          data,
         })
       ).toEqual(false);
     });
@@ -77,8 +83,8 @@ describe('EmbeddableAddToTimelineAction', () => {
     it('should return false if not lens embeddable', async () => {
       expect(
         await addToTimelineAction.isCompatible({
+          ...context,
           embeddable: new MockEmbeddable('not_lens') as unknown as IEmbeddable,
-          data,
         })
       ).toEqual(false);
     });
@@ -86,7 +92,7 @@ describe('EmbeddableAddToTimelineAction', () => {
     it('should return false if data is empty', async () => {
       expect(
         await addToTimelineAction.isCompatible({
-          embeddable: lensEmbeddable,
+          ...context,
           data: [],
         })
       ).toEqual(false);
@@ -95,7 +101,7 @@ describe('EmbeddableAddToTimelineAction', () => {
     it('should return false if data do not have column meta', async () => {
       expect(
         await addToTimelineAction.isCompatible({
-          embeddable: lensEmbeddable,
+          ...context,
           data: [{}],
         })
       ).toEqual(false);
@@ -105,7 +111,7 @@ describe('EmbeddableAddToTimelineAction', () => {
       const { field, ...testColumnMeta } = columnMeta;
       expect(
         await addToTimelineAction.isCompatible({
-          embeddable: lensEmbeddable,
+          ...context,
           data: [{ columnMeta: testColumnMeta }],
         })
       ).toEqual(false);
@@ -115,7 +121,7 @@ describe('EmbeddableAddToTimelineAction', () => {
       const testColumnMeta = { ...columnMeta, field: 'signal.reason' };
       expect(
         await addToTimelineAction.isCompatible({
-          embeddable: lensEmbeddable,
+          ...context,
           data: [{ columnMeta: testColumnMeta }],
         })
       ).toEqual(false);
@@ -125,7 +131,7 @@ describe('EmbeddableAddToTimelineAction', () => {
       let testColumnMeta = { ...columnMeta, source: '' };
       expect(
         await addToTimelineAction.isCompatible({
-          embeddable: lensEmbeddable,
+          ...context,
           data: [{ columnMeta: testColumnMeta }],
         })
       ).toEqual(false);
@@ -133,7 +139,7 @@ describe('EmbeddableAddToTimelineAction', () => {
       testColumnMeta = { ...columnMeta, sourceParams: { indexPatternId: '' } };
       expect(
         await addToTimelineAction.isCompatible({
-          embeddable: lensEmbeddable,
+          ...context,
           data: [{ columnMeta: testColumnMeta }],
         })
       ).toEqual(false);
@@ -141,30 +147,17 @@ describe('EmbeddableAddToTimelineAction', () => {
 
     it('should return false if not in Security', async () => {
       currentAppId$.next('not security');
-      expect(
-        await addToTimelineAction.isCompatible({
-          embeddable: lensEmbeddable,
-          data,
-        })
-      ).toEqual(false);
+      expect(await addToTimelineAction.isCompatible(context)).toEqual(false);
     });
 
     it('should return true if everything is okay', async () => {
-      expect(
-        await addToTimelineAction.isCompatible({
-          embeddable: lensEmbeddable,
-          data,
-        })
-      ).toEqual(true);
+      expect(await addToTimelineAction.isCompatible(context)).toEqual(true);
     });
   });
 
   describe('execute', () => {
     it('should execute normally', async () => {
-      await addToTimelineAction.execute({
-        embeddable: lensEmbeddable,
-        data,
-      });
+      await addToTimelineAction.execute(context);
       expect(mockDispatch).toHaveBeenCalledTimes(2);
       expect(mockDispatch).toHaveBeenCalledWith({
         type: addProvider.type,
@@ -199,7 +192,7 @@ describe('EmbeddableAddToTimelineAction', () => {
 
     it('should show warning if no provider added', async () => {
       await addToTimelineAction.execute({
-        embeddable: lensEmbeddable,
+        ...context,
         data: [],
       });
       expect(mockDispatch).not.toHaveBeenCalled();
@@ -208,7 +201,7 @@ describe('EmbeddableAddToTimelineAction', () => {
 
     it('should show warning if no value in the data', async () => {
       await addToTimelineAction.execute({
-        embeddable: lensEmbeddable,
+        ...context,
         data: [{ columnMeta }],
       });
       expect(mockDispatch).not.toHaveBeenCalled();
@@ -217,7 +210,7 @@ describe('EmbeddableAddToTimelineAction', () => {
 
     it('should show warning if no field in the data column meta', async () => {
       await addToTimelineAction.execute({
-        embeddable: lensEmbeddable,
+        ...context,
         data: [{ columnMeta: { ...columnMeta, field: undefined }, value }],
       });
       expect(mockDispatch).not.toHaveBeenCalled();

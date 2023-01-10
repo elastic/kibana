@@ -13,7 +13,7 @@ jest.mock('../../../common/lib/kibana');
 
 const mockFilterManager = KibanaServices.get().data.query.filterManager;
 
-describe('createFilterOutAction', () => {
+describe('Default createFilterOutAction', () => {
   const filterInAction = createFilterOutAction({ order: 1 });
   const context = {
     field: { name: 'user.name', value: 'the value', type: 'text' },

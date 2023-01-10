@@ -10,14 +10,17 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type * as H from 'history';
 import type { SecurityAppStore } from '../common/store/types';
 import type { StartPlugins, StartServices } from '../types';
-import { LensCopyToClipboardAction, createDefaultCopyToClipboardAction } from './copy_to_clipboard';
+import {
+  createLensCopyToClipboardAction,
+  createDefaultCopyToClipboardAction,
+} from './copy_to_clipboard';
 import {
   createDefaultFilterInAction,
   createDefaultFilterOutAction,
   createTimelineFilterInAction,
   createTimelineFilterOutAction,
 } from './filter';
-import { LensAddToTimelineAction, createDefaultAddToTimelineAction } from './add_to_timeline';
+import { createLensAddToTimelineAction, createDefaultAddToTimelineAction } from './add_to_timeline';
 import { createDefaultShowTopNAction } from './show_top_n';
 import {
   CELL_ACTIONS_DEFAULT_TRIGGER,
@@ -36,10 +39,10 @@ export const registerUIActions = (
 };
 
 const registerLensActions = (uiActions: UiActionsStart, store: SecurityAppStore) => {
-  const addToTimelineAction = new LensAddToTimelineAction(store);
+  const addToTimelineAction = createLensAddToTimelineAction({ store, order: 1 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, addToTimelineAction);
 
-  const copyToClipboardAction = new LensCopyToClipboardAction();
+  const copyToClipboardAction = createLensCopyToClipboardAction({ order: 2 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
 };
 

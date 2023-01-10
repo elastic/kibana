@@ -15,7 +15,7 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
 import { createStore } from '../../../common/store';
-import { createTimelineFilterInAction } from './filter_in';
+import { createFilterInAction } from './filter_in';
 import { Subject } from 'rxjs';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../common/constants';
@@ -42,8 +42,8 @@ const mockState = {
 const { storage } = createSecuritySolutionStorageMock();
 const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-describe('createTimelineFilterInAction', () => {
-  const filterInAction = createTimelineFilterInAction({ store: mockStore, order: 1 });
+describe('Timeline createFilterInAction', () => {
+  const filterInAction = createFilterInAction({ store: mockStore, order: 1 });
   const context = {
     field: { name: 'user.name', value: 'the value', type: 'text' },
   } as CellActionExecutionContext;

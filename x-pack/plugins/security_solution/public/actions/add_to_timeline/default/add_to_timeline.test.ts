@@ -32,7 +32,7 @@ const context = {
   field: { name: 'user.name', value, type: 'text' },
 } as CellActionExecutionContext;
 
-describe('createAddToTimelineAction', () => {
+describe('Default createAddToTimelineAction', () => {
   const addToTimelineAction = createAddToTimelineAction({ store, order: 1 });
 
   beforeEach(() => {

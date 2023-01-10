@@ -7,7 +7,7 @@
 
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 import copy from 'copy-to-clipboard';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../../utils';
@@ -23,52 +23,43 @@ function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   );
 }
 
-export class LensCopyToClipboardAction implements Action<CellValueContext> {
-  public readonly type = ACTION_ID;
-  public readonly id = ACTION_ID;
-  public order = 2;
+export const createCopyToClipboardAction = ({ order }: { order?: number }) => {
+  const { application: applicationService } = KibanaServices.get();
+  let currentAppId: string | undefined;
+  applicationService.currentAppId$.subscribe((appId) => {
+    currentAppId = appId;
+  });
 
-  private toastsService;
-  private currentAppId: string | undefined;
-
-  constructor() {
-    const { application, notifications } = KibanaServices.get();
-    this.toastsService = notifications.toasts;
-
-    application.currentAppId$.subscribe((currentAppId) => {
-      this.currentAppId = currentAppId;
-    });
-  }
-
-  public getDisplayName() {
-    return COPY_TO_CLIPBOARD;
-  }
-
-  public getIconType() {
-    return COPY_TO_CLIPBOARD_ICON;
-  }
-
-  public async isCompatible({ embeddable, data }: CellValueContext) {
-    return (
+  return createAction<CellValueContext>({
+    id: ACTION_ID,
+    type: ACTION_ID,
+    order,
+    getIconType: () => COPY_TO_CLIPBOARD_ICON,
+    getDisplayName: () => COPY_TO_CLIPBOARD,
+    isCompatible: async ({ embeddable, data }) =>
       !isErrorEmbeddable(embeddable) &&
       isLensEmbeddable(embeddable) &&
       isDataColumnsValid(data) &&
-      isInSecurityApp(this.currentAppId)
-    );
-  }
+      isInSecurityApp(currentAppId),
+    execute: async ({ data }) => {
+      const {
+        notifications: { toasts: toastsService },
+      } = KibanaServices.get();
 
-  public async execute({ data }: CellValueContext) {
-    const text = data
-      .map(({ columnMeta, value }) => `${columnMeta?.field}${value != null ? `: "${value}"` : ''}`)
-      .join(' | ');
+      const text = data
+        .map(
+          ({ columnMeta, value }) => `${columnMeta?.field}${value != null ? `: "${value}"` : ''}`
+        )
+        .join(' | ');
 
-    const isSuccess = copy(text, { debug: true });
+      const isSuccess = copy(text, { debug: true });
 
-    if (isSuccess) {
-      this.toastsService.addSuccess({
-        title: COPY_TO_CLIPBOARD_SUCCESS,
-        toastLifeTimeMs: 800,
-      });
-    }
-  }
-}
+      if (isSuccess) {
+        toastsService.addSuccess({
+          title: COPY_TO_CLIPBOARD_SUCCESS,
+          toastLifeTimeMs: 800,
+        });
+      }
+    },
+  });
+};
