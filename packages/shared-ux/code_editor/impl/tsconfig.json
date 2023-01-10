@@ -1,6 +1,5 @@
 {
   "extends": "../../../../tsconfig.base.json",
-  "parserOptions": "extraFileExtensions",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -15,7 +14,6 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "**/*.mdx",
   ],
   "exclude": [
     "target/**/*"
