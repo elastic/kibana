@@ -104,7 +104,9 @@ const SummaryCell: React.FC<{
     <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
       {rowRenderer && rowRender ? (
         <EventRenderedFlexItem className="eui-xScroll">
-          <div className="eui-displayInlineBlock">{rowRender}</div>
+          <div className="eui-displayInlineBlock" style={{ width: 'fit-content' }}>
+            {rowRender}
+          </div>
         </EventRenderedFlexItem>
       ) : (
         values && <EuiFlexItem data-test-subj="plain-text-reason">{values}</EuiFlexItem>

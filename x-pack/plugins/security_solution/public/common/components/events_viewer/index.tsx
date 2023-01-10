@@ -231,9 +231,14 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope,
     editorActionsRef,
-    upsertColumn: (column, index) =>
-      dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
-    removeColumn: (columnId) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
+    upsertColumn: useCallback(
+      (column, index) => dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
+      [dispatch, tableId]
+    ),
+    removeColumn: useCallback(
+      (columnId) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
+      [dispatch, tableId]
+    ),
   });
 
   const columnHeaders = isEmpty(columns) ? defaultHeaders : columns;
