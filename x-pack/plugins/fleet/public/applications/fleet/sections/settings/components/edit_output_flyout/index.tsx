@@ -39,6 +39,7 @@ import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placeholder';
 import { useOutputForm } from './use_output_form';
 import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
+import { AdvancedOptionsSection } from './advanced_options_section';
 
 export interface EditOutputFlyoutProps {
   output?: Output;
@@ -402,6 +403,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               }
             />
           </EuiFormRow>
+          <EuiSpacer size="l" />
+          <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
