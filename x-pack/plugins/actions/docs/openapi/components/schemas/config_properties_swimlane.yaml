@@ -1,0 +1,95 @@
+title: Create connector request properties for a Swimlane connector
+required:
+  - apiUrl
+  - appId
+  - connectorType
+description: Defines properties for connectors when type is `.swimlane`.
+type: object
+properties:
+  apiUrl:
+    description: The Swimlane instance URL.
+    type: string
+  appId:
+    description: The Swimlane application ID.
+    type: string
+  connectorType:
+    description: The type of connector. Valid values are `all`, `alerts`, and `cases`.
+    type: string
+    enum:
+      - all
+      - alerts
+      - cases
+  mappings:
+    description: The field mapping.
+    type: object
+    properties:
+      alertIdConfig:
+        description: Mapping for the alert ID.
+        type: object
+        required:
+          - fieldType
+          - id
+          - key
+          - name
+        properties:
+          $ref: 'mapping_properties_swimlane.yaml'
+      caseIdConfig:
+        description: Mapping for the case ID.
+        type: object
+        required:
+          - fieldType
+          - id
+          - key
+          - name
+        properties:
+          $ref: 'mapping_properties_swimlane.yaml'
+      caseNameConfig:
+        description: Mapping for the case name.
+        type: object
+        required:
+          - fieldType
+          - id
+          - key
+          - name
+        properties:
+          $ref: 'mapping_properties_swimlane.yaml'
+      commentsConfig:
+        description: Mapping for the case comments.
+        type: object
+        required:
+          - fieldType
+          - id
+          - key
+          - name
+        properties:
+          $ref: 'mapping_properties_swimlane.yaml'
+      descriptionConfig:
+        description: Mapping for the case description.
+        type: object
+        required:
+          - fieldType
+          - id
+          - key
+          - name
+        properties:
+          $ref: 'mapping_properties_swimlane.yaml'
+      ruleNameConfig:
+        description: Mapping for the name of the alert's rule.
+        type: object
+        required:
+          - fieldType
+          - id
+          - key
+          - name
+        properties:
+          $ref: 'mapping_properties_swimlane.yaml'
+      severityConfig:
+        description: Mapping for the severity.
+        type: object
+        required:
+          - fieldType
+          - id
+          - key
+          - name
+        properties:
+          $ref: 'mapping_properties_swimlane.yaml'

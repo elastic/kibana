@@ -1,0 +1,14 @@
+title: Connector response properties
+oneOf:
+  - $ref: 'connector_response_properties_cases_webhook.yaml'
+  - $ref: 'connector_response_properties_index.yaml'  
+  - $ref: 'connector_response_properties_jira.yaml'
+  - $ref: 'connector_response_properties_opsgenie.yaml'
+  - $ref: 'connector_response_properties_resilient.yaml'
+  - $ref: 'connector_response_properties_serverlog.yaml'
+  - $ref: 'connector_response_properties_servicenow.yaml'
+  - $ref: 'connector_response_properties_servicenow_itom.yaml'
+  - $ref: 'connector_response_properties_servicenow_sir.yaml'
+  - $ref: 'connector_response_properties_swimlane.yaml'
+discriminator:
+  propertyName: connector_type_id
