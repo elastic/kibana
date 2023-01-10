@@ -7,6 +7,7 @@
  */
 
 import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 
 import {
   NoDataViewsPromptServices,
@@ -32,12 +33,7 @@ export interface Services {
 export type KibanaNoDataPageServices = Services & NoDataCardServices & NoDataViewsPromptServices;
 
 export interface KibanaDependencies {
-  dataViews: {
-    hasData: {
-      hasESData: () => Promise<boolean>;
-      hasUserDataView: () => Promise<boolean>;
-    };
-  };
+  dataViews: DataViewsContract;
 }
 /**
  * An interface containing a collection of Kibana plugins and services required to
