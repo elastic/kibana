@@ -155,21 +155,21 @@ describe('Update Api Key', () => {
 
     expect(await screen.findByText('test rule ok')).toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
+    fireEvent.click((await screen.findAllByTestId('selectActionButton'))[1]);
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Update API key'));
+    fireEvent.click(await screen.findByText('Update API key'));
     expect(screen.getByText('You will not be able to recover the old API key')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Cancel'));
+    fireEvent.click(await screen.findByText('Cancel'));
     expect(
       screen.queryByText('You will not be able to recover the old API key')
     ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
+    fireEvent.click((await screen.findAllByTestId('selectActionButton'))[1]);
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Update API key'));
+    fireEvent.click(await screen.findByText('Update API key'));
 
     fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
     await waitFor(() => expect(addSuccess).toHaveBeenCalledWith('Updated API key for 1 rule.'));
@@ -183,20 +183,20 @@ describe('Update Api Key', () => {
 
     expect(await screen.findByText('test rule ok')).toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
+    fireEvent.click((await screen.findAllByTestId('selectActionButton'))[1]);
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Update API key'));
+    fireEvent.click(await screen.findByText('Update API key'));
     expect(screen.getByText('You will not be able to recover the old API key')).toBeInTheDocument();
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('Update'));
-    });
+    fireEvent.click(await screen.findByText('Update'));
+    await waitFor(() =>
+      expect(addError).toHaveBeenCalledWith(500, { title: 'Failed to update the API key' })
+    );
     expect(bulkUpdateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ ids: ['2'] }));
     expect(
       screen.queryByText('You will not be able to recover the old API key')
     ).not.toBeInTheDocument();
-    expect(addError).toHaveBeenCalledWith(500, { title: 'Failed to update the API key' });
   });
 });
 
