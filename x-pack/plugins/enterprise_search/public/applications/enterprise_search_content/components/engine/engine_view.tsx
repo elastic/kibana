@@ -10,12 +10,18 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiNotificationBadge, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiNotificationBadge,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../common/types/api';
 
+import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ENGINE_TAB_PATH, EngineViewTabs } from '../../routes';
@@ -56,6 +62,7 @@ export const EngineView: React.FC = () => {
     {
       content: <div />,
       id: EngineViewTabs.OVERVIEW,
+      isSelected: tabId === EngineViewTabs.OVERVIEW || undefined,
       name: i18n.translate('xpack.enterpriseSearch.engines.engineView.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
@@ -66,6 +73,7 @@ export const EngineView: React.FC = () => {
       ),
       content: <div />,
       id: EngineViewTabs.INDICES,
+      isSelected: tabId === EngineViewTabs.INDICES || undefined,
       name: i18n.translate('xpack.enterpriseSearch.engines.engineView.indicesTabLabel', {
         defaultMessage: 'Indices',
       }),
@@ -73,6 +81,7 @@ export const EngineView: React.FC = () => {
     {
       content: <div />,
       id: EngineViewTabs.DOCUMENTS,
+      isSelected: tabId === EngineViewTabs.DOCUMENTS || undefined,
       name: i18n.translate('xpack.enterpriseSearch.engines.engineView.documentsTabLabel', {
         defaultMessage: 'Documents',
       }),
@@ -80,6 +89,7 @@ export const EngineView: React.FC = () => {
     {
       content: <div />,
       id: EngineViewTabs.SCHEMA,
+      isSelected: tabId === EngineViewTabs.SCHEMA || undefined,
       name: i18n.translate('xpack.enterpriseSearch.engines.engineView.schemaTabLabel', {
         defaultMessage: 'Schema',
       }),
@@ -87,6 +97,7 @@ export const EngineView: React.FC = () => {
     {
       content: <div />,
       id: EngineViewTabs.PREVIEW,
+      isSelected: tabId === EngineViewTabs.PREVIEW || undefined,
       name: i18n.translate('xpack.enterpriseSearch.engines.engineView.previewTabLabel', {
         defaultMessage: 'Preview',
       }),
@@ -94,12 +105,12 @@ export const EngineView: React.FC = () => {
     {
       content: <div />,
       id: EngineViewTabs.API,
+      isSelected: tabId === EngineViewTabs.API || undefined,
       name: i18n.translate('xpack.enterpriseSearch.engines.engineView.apiTabLabel', {
         defaultMessage: 'API',
       }),
     },
   ];
-  const selectedTab = tabs.find((tab) => tab.id === tabId);
   const onTabClick = (tab: EuiTabbedContentTab) => {
     KibanaLogic.values.navigateToUrl(
       generateEncodedPath(ENGINE_TAB_PATH, {
@@ -116,12 +127,20 @@ export const EngineView: React.FC = () => {
       isLoading={isLoadingEngine}
       pageHeader={{
         pageTitle: engineName,
-        rightSideItems: [],
+        rightSideItems: [
+          <EuiButtonEmpty
+            href={docLinks.appSearchElasticsearchIndexedEngines} // TODO: replace with real docLinks when it's created
+            target="_blank"
+            iconType="documents"
+          >
+            Engine Docs
+          </EuiButtonEmpty>,
+        ],
       }}
       engineName={engineName}
     >
       <>
-        <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+        <EuiTabbedContent tabs={tabs} onTabClick={onTabClick} />
       </>
     </EnterpriseSearchEnginesPageTemplate>
   );
