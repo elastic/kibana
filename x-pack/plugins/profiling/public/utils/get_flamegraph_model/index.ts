@@ -6,7 +6,7 @@
  */
 import { ColumnarViewModel } from '@elastic/charts';
 import d3 from 'd3';
-import { compact, sum, uniqueId } from 'lodash';
+import { compact, sum, uniqueId, range } from 'lodash';
 import { createColumnarViewModel } from '../../../common/columnar_view_model';
 import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
 import { FRAME_TYPE_COLOR_MAP, rgbToRGBA } from '../../../common/frame_type_colors';
@@ -88,13 +88,16 @@ export function getFlamegraphModel({
       return nodeColor;
     }
 
-    legendItems = [-1, -0.5, 0, 0.5, 1].map((value) => {
-      const color = getColor(value);
-      return {
-        color,
-        label: `${asPercentage(value * 100)}`,
-      };
-    });
+    legendItems = range(1, -1, -0.2)
+      .concat(-1)
+      .map((value) => {
+        const rounded = Math.round(value * 100) / 100;
+        const color = getColor(rounded);
+        return {
+          color,
+          label: `${asPercentage(rounded)}`,
+        };
+      });
 
     comparisonFlamegraph.ID.forEach((nodeID, index) => {
       comparisonNodesById[nodeID] = {

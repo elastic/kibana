@@ -6,6 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { Legend, LegendItem } from '../legend';
 
@@ -18,21 +19,47 @@ export function FlameGraphLegend({
 }) {
   if (asScale) {
     return (
-      <EuiFlexGroup direction="row">
+      <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiText size="s">&lt;+{asPercentage(1)}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem style={{ width: legendItems.length * 20 }}>
-              <EuiFlexGroup direction="row" gutterSize="none">
-                {legendItems.map(({ color }) => {
-                  return <EuiFlexItem style={{ backgroundColor: color }} />;
-                })}
+              <EuiFlexGroup direction="row">
+                <EuiFlexItem>
+                  <EuiText textAlign="center" size="s">
+                    {i18n.translate('xpack.profiling.flameGraphLegend.improvement', {
+                      defaultMessage: 'Improvement',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText textAlign="center" size="s">
+                    {i18n.translate('xpack.profiling.flameGraphLegend.regression', {
+                      defaultMessage: 'Regression',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">&gt;{asPercentage(-1)}</EuiText>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="row">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup direction="row" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">+{asPercentage(1)}</EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem style={{ width: legendItems.length * 20 }}>
+                      <EuiFlexGroup direction="row" gutterSize="none">
+                        {legendItems.map(({ color }) => {
+                          return <EuiFlexItem style={{ backgroundColor: color }} />;
+                        })}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">{asPercentage(-1)}</EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
