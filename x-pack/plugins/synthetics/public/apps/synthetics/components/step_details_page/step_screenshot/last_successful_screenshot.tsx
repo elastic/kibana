@@ -14,14 +14,20 @@ import { JourneyStep } from '../../../../../../common/runtime_types';
 import { EmptyImage } from '../../common/screenshot/empty_image';
 import { JourneyStepScreenshotContainer } from '../../common/screenshot/journey_step_screenshot_container';
 
-export const LastSuccessfulScreenshot = ({ step }: { step: JourneyStep }) => {
-  const { stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
+export const LastSuccessfulScreenshot = ({
+  step,
+  stepIndex: stepInd,
+}: {
+  step: JourneyStep;
+  stepIndex?: number;
+}) => {
+  const { stepIndex } = useParams<{ checkGroupId: string; stepIndex?: string }>();
 
   const { data, loading } = useFetcher(() => {
     return fetchLastSuccessfulCheck({
       timestamp: step['@timestamp'],
       monitorId: step.monitor.id,
-      stepIndex: Number(stepIndex),
+      stepIndex: Number(stepIndex ?? stepInd),
       location: step.observer?.geo?.name,
     });
   }, [step._id, step['@timestamp']]);
