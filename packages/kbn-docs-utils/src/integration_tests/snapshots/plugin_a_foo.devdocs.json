@@ -13,7 +13,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/plugin_a/public/foo/index.ts",
+        "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/foo/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -34,7 +34,7 @@
         "signature": [
           "() => \"foo\""
         ],
-        "path": "packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/plugin_a/public/foo/index.ts",
+        "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/foo/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -68,7 +68,7 @@
         "signature": [
           "\"COMMON VAR!\""
         ],
-        "path": "packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/plugin_a/common/foo/index.ts",
+        "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/common/foo/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
