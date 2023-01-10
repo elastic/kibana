@@ -231,12 +231,11 @@ export const RulesList = ({
   // Fetch action types
   const { actionTypes } = useLoadActionTypesQuery();
 
-  const [rulesTypesFilter, hasDefaultRuleTypesFiltersOn] = useMemo(() => {
-    if (isEmpty(filters.types)) {
-      return [authorizedRuleTypes.map((art) => art.id), true];
-    }
-    return [filters.types, false];
-  }, [filters.types, authorizedRuleTypes]);
+  const rulesTypesFilter = isEmpty(filters.types)
+    ? authorizedRuleTypes.map((art) => art.id)
+    : filters.types;
+  const hasDefaultRuleTypesFiltersOn = isEmpty(filters.types);
+
   const computedFilter = useMemo(() => {
     return {
       ...filters,
