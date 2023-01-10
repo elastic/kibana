@@ -14,10 +14,11 @@ import type {
   DatatableColumnType,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
@@ -157,6 +158,29 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             );
           }
 
+          let startTime = Date.now();
+          const logInspectorRequest = () => {
+            if (!inspectorAdapters.requests) {
+              inspectorAdapters.requests = new RequestAdapter();
+            }
+
+            const request = inspectorAdapters.requests.start(
+              i18n.translate('data.search.dataRequest.title', {
+                defaultMessage: 'Data',
+              }),
+              {
+                description: i18n.translate('data.search.es_search.dataRequest.description', {
+                  defaultMessage:
+                    'This request queries Elasticsearch to fetch the data for the visualization.',
+                }),
+              },
+              startTime
+            );
+            startTime = Date.now();
+
+            return request;
+          };
+
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,
             IKibanaSearchResponse<ESQLSearchReponse>
@@ -174,6 +198,27 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               }
 
               return throwError(() => error);
+            }),
+            tap({
+              next({ rawResponse }) {
+                logInspectorRequest()
+                  .stats({
+                    hits: {
+                      label: i18n.translate('data.search.es_search.hitsLabel', {
+                        defaultMessage: 'Hits',
+                      }),
+                      value: `${rawResponse.values.length}`,
+                      description: i18n.translate('data.search.es_search.hitsDescription', {
+                        defaultMessage: 'The number of documents returned by the query.',
+                      }),
+                    },
+                  })
+                  .json(params)
+                  .ok({ json: rawResponse });
+              },
+              error(error) {
+                logInspectorRequest().error({ json: error });
+              },
             })
           );
         }),

@@ -11,7 +11,8 @@ import React from 'react';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 
-import { useUrlState } from '../../../util/url_state';
+import { useUrlState } from '@kbn/ml-url-state';
+
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 
@@ -34,7 +35,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../util/url_state', () => {
+jest.mock('@kbn/ml-url-state', () => {
   return {
     useUrlState: jest.fn(() => {
       return [{ refreshInterval: { value: 0, pause: true } }, jest.fn()];

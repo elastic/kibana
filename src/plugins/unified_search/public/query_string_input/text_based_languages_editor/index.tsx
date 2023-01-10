@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
+import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
-import { SQLLang, monaco, ESQL_LANG_ID, ESQL_THEME_ID } from '@kbn/monaco';
+import {
+  SQLLang,
+  monaco,
+  ESQL_LANG_ID,
+  ESQL_THEME_ID,
+  ESQLLang,
+  ESQLCustomAutocompleteCallbacks,
+} from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
 import {
@@ -43,12 +50,13 @@ import {
   parseErrors,
   getInlineEditorText,
   getDocumentationSections,
+  MonacoError,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 
 import './overwrite.scss';
-import { IUnifiedSearchPluginServices } from '../../types';
+import type { IUnifiedSearchPluginServices } from '../../types';
 
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
@@ -106,13 +114,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isWordWrapped, setIsWordWrapped] = useState(true);
-  const [editorErrors, setEditorErrors] = useState<
-    Array<{ startLineNumber: number; message: string }>
-  >([]);
+  const [editorErrors, setEditorErrors] = useState<MonacoError[]>([]);
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { uiSettings } = kibana.services;
+  const { uiSettings, dataViews } = kibana.services;
 
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
@@ -245,6 +251,19 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [errors]
   );
 
+  const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoError) => {
+    if (!editor1.current) {
+      return;
+    }
+
+    editor1.current.focus();
+    editor1.current.setPosition({
+      lineNumber: startLineNumber,
+      column: startColumn,
+    });
+    editor1.current.revealLine(startLineNumber);
+  }, []);
+
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
     const model = editorModel;
@@ -319,6 +338,42 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     getDocumentation();
   }, [language]);
 
+  const getSourceIdentifiers: ESQLCustomAutocompleteCallbacks['getSourceIdentifiers'] =
+    useCallback(() => {
+      return dataViews.getTitles();
+    }, [dataViews]);
+
+  const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] =
+    useMemo(() => {
+      let source: string;
+      let cachedSuggestions: string[] = [];
+
+      return async (ctx) => {
+        let data: string[] = [];
+        const sourceKey = ctx.userDefinedVariables.sourceIdentifiers.join(',');
+        if (sourceKey === source) {
+          return cachedSuggestions;
+        }
+        for (const s of ctx.userDefinedVariables.sourceIdentifiers) {
+          if (s) {
+            try {
+              const [dataView] = await dataViews.find(s, 1);
+              if (dataView) {
+                data = [...data, ...dataView.fields.map((f) => f.name)];
+              }
+            } catch (e) {
+              // nothing to be here
+            }
+          }
+        }
+
+        cachedSuggestions = data;
+        source = sourceKey;
+
+        return cachedSuggestions;
+      };
+    }, [dataViews]);
+
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
     accessibilitySupport: 'off',
@@ -341,11 +396,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     overviewRulerLanes: 0,
     hideCursorInOverviewRuler: true,
     scrollbar: {
-      vertical: 'hidden',
       horizontal: 'hidden',
+      vertical: 'auto',
     },
     overviewRulerBorder: false,
-    readOnly: isDisabled,
+    readOnly: isDisabled || Boolean(codeOneLiner),
   };
 
   if (isCompactFocused) {
@@ -464,7 +519,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <EuiFlexGroup gutterSize="none" responsive={false} css={{ margin: 0 }} ref={containerRef}>
+      <EuiFlexGroup
+        gutterSize="none"
+        responsive={false}
+        css={{ margin: '0 0 1px 0' }}
+        ref={containerRef}
+      >
         <EuiResizeObserver onResize={onResize}>
           {(resizeRef) => (
             <EuiOutsideClickDetector
@@ -503,6 +563,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       value={codeOneLiner || code}
                       options={codeEditorOptions}
                       width="100%"
+                      suggestionProvider={
+                        language === 'esql'
+                          ? ESQLLang.getSuggestionProvider?.({
+                              getSourceIdentifiers,
+                              getFieldsIdentifiers,
+                            })
+                          : undefined
+                      }
                       onChange={onQueryUpdate}
                       editorDidMount={(editor) => {
                         editor1.current = editor;
@@ -520,6 +588,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         lines={lines}
                         containerCSS={styles.bottomContainer}
                         errors={editorErrors}
+                        onErrorClick={onErrorClick}
+                        refreshErrors={onTextLangQuerySubmit}
                       />
                     )}
                   </div>
@@ -596,7 +666,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         )}
       </EuiFlexGroup>
       {isCodeEditorExpanded && (
-        <EditorFooter lines={lines} containerCSS={styles.bottomContainer} errors={editorErrors} />
+        <EditorFooter
+          lines={lines}
+          containerCSS={styles.bottomContainer}
+          errors={editorErrors}
+          onErrorClick={onErrorClick}
+          refreshErrors={onTextLangQuerySubmit}
+        />
       )}
       {isCodeEditorExpanded && (
         <ResizableButton

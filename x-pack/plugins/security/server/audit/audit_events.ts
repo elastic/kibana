@@ -67,6 +67,9 @@ type EcsRequest = Required<EcsHttp>['request'];
  * Audit request schema using ECS format
  */
 export interface AuditRequest extends EcsRequest {
+  /**
+   * HTTP request headers
+   */
   headers?: {
     'x-forwarded-for'?: string;
   };
@@ -76,6 +79,9 @@ export interface AuditRequest extends EcsRequest {
  * Audit http schema using ECS format
  */
 export interface AuditHttp extends EcsHttp {
+  /**
+   * HTTP request details
+   */
   request?: AuditRequest;
 }
 
@@ -88,8 +94,19 @@ export interface AuditHttp extends EcsHttp {
  * @public
  */
 export interface AuditEvent extends LogMeta {
+  /**
+   * Log message
+   */
   message: string;
+
+  /**
+   * Kibana specific fields
+   */
   kibana?: AuditKibana;
+
+  /**
+   * Fields describing an HTTP request
+   */
   http?: AuditHttp;
 }
 
