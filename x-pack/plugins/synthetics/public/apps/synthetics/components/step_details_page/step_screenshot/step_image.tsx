@@ -58,7 +58,7 @@ export const StepImage = ({
             asThumbnail={false}
           />
         ) : (
-          <LastSuccessfulScreenshot step={ping} />
+          <LastSuccessfulScreenshot step={ping} stepIndex={step?.synthetics?.step?.index} />
         )}
 
         <EuiSpacer size="l" />
