@@ -199,22 +199,22 @@ export default function ({ getService }: FtrProviderContext) {
                   group: 'host-01',
                   groupByKeys: {
                     host: {
-                      name: 'host-01'
-                    }
+                      name: 'host-01',
+                    },
                   },
                   isRatio: false,
                   matchingDocuments: 1,
                   reason: '1 log entry in the last 5 mins for host-01. Alert when ≥ 1.',
                   host: {
-                    name: 'host-01'
-                  }
+                    name: 'host-01',
+                  },
                 },
               },
             ],
             {
               host: {
-                name: 'host-01'
-              }
+                name: 'host-01',
+              },
             },
           ]);
           expect(alertLimit.setLimitReached.calledOnceWith(true)).to.be(true);
