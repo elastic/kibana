@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiFlexItem,
   EuiButtonIcon,
@@ -20,6 +20,10 @@ import { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import { popoverDragAndDropCss } from './add_filter_popover.styles';
+import {
+  withCloseFilterEditorConfirmModal,
+  WithCloseFilterEditorConfirmModalProps,
+} from '../filter_bar/filter_editor';
 
 export const strings = {
   getAddFilterButtonLabel: () =>
@@ -28,7 +32,7 @@ export const strings = {
     }),
 };
 
-interface AddFilterPopoverProps {
+interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
   indexPatterns?: Array<DataView | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
@@ -37,16 +41,19 @@ interface AddFilterPopoverProps {
   buttonProps?: Partial<EuiButtonIconProps>;
 }
 
-export const AddFilterPopover = React.memo(function AddFilterPopover({
+const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   indexPatterns,
   filters,
   timeRangeForSuggestionsOverride,
   onFiltersUpdated,
   buttonProps,
   isDisabled,
+  onCloseFilterPopover,
+  onLocalFilterUpdate,
+  onLocalFilterCreate,
 }: AddFilterPopoverProps) {
   const euiTheme = useEuiTheme();
-  const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
+  const [showAddFilterPopover, setShowAddFilterPopover] = useState(false);
 
   const button = (
     <EuiToolTip delay="long" content={strings.getAddFilterButtonLabel()}>
@@ -55,7 +62,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
         iconType="plusInCircleFilled"
         aria-label={strings.getAddFilterButtonLabel()}
         data-test-subj="addFilter"
-        onClick={() => setIsAddFilterPopoverOpen((isOpen) => !isOpen)}
+        onClick={() => setShowAddFilterPopover((isOpen) => !isOpen)}
         size="m"
         disabled={isDisabled}
         {...buttonProps}
@@ -64,13 +71,17 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
     </EuiToolTip>
   );
 
+  const closePopover = useCallback(() => {
+    onCloseFilterPopover([() => setShowAddFilterPopover(false)]);
+  }, [onCloseFilterPopover]);
+
   return (
     <EuiFlexItem grow={false}>
       <EuiPopover
         id="addFilterPopover"
         button={button}
-        isOpen={isAddFilterPopoverOpen}
-        closePopover={() => setIsAddFilterPopoverOpen(false)}
+        isOpen={showAddFilterPopover}
+        closePopover={closePopover}
         anchorPosition="downLeft"
         panelPaddingSize="none"
         panelProps={{
@@ -86,9 +97,16 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
           filters={filters}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           onFiltersUpdated={onFiltersUpdated}
-          closePopover={() => setIsAddFilterPopoverOpen(false)}
+          onLocalFilterUpdate={onLocalFilterUpdate}
+          onLocalFilterCreate={onLocalFilterCreate}
+          closePopoverOnAdd={() => {
+            setShowAddFilterPopover(false);
+          }}
+          closePopoverOnCancel={closePopover}
         />
       </EuiPopover>
     </EuiFlexItem>
   );
 });
+
+export const AddFilterPopover = withCloseFilterEditorConfirmModal(AddFilterPopoverComponent);
