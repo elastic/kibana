@@ -14,7 +14,7 @@ import normalize from 'normalize-path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { PROJECTS } from '@kbn/ts-projects';
+import { TS_PROJECTS } from '@kbn/ts-projects';
 
 export const ROOT_REFS_CONFIG_PATH = Path.resolve(REPO_ROOT, 'tsconfig.refs.json');
 export const REF_CONFIG_PATHS = [ROOT_REFS_CONFIG_PATH];
@@ -51,8 +51,8 @@ export async function updateRootRefsConfig(log: ToolingLog) {
     );
   }
 
-  const refs = PROJECTS.flatMap((p) => {
-    if (p.disableTypeCheck) {
+  const refs = TS_PROJECTS.flatMap((p) => {
+    if (p.isTypeCheckDisabled()) {
       return [];
     }
 
