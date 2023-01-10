@@ -12,13 +12,9 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Agent } from '../../types';
 
-import { AGENTS_INDEX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENTS_INDEX } from '../../constants';
 
 import { appContextService } from '../app_context';
-
-import { agentPolicyService } from '../agent_policy';
-
-import { SO_SEARCH_LIMIT } from '../../../common/constants';
 
 import { ActionRunner, MAX_RETRY_COUNT } from './action_runner';
 
@@ -50,26 +46,6 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected getActionType() {
     return 'UPDATE_TAGS';
   }
-
-  async processAgentsInBatches(): Promise<{ actionId: string }> {
-    const { updated, took } = await updateTagsBatch(
-      this.soClient,
-      this.esClient,
-      [],
-      {},
-      {
-        tagsToAdd: this.actionParams?.tagsToAdd,
-        tagsToRemove: this.actionParams?.tagsToRemove,
-        actionId: this.actionParams.actionId,
-        total: this.actionParams.total,
-        kuery: this.actionParams.kuery,
-        retryCount: this.retryParams.retryCount,
-      }
-    );
-
-    appContextService.getLogger().info(`processed ${updated} agents, took ${took}ms`);
-    return { actionId: this.actionParams.actionId! };
-  }
 }
 
 export async function updateTagsBatch(
@@ -98,32 +74,24 @@ export async function updateTagsBatch(
   const agentIds = filteredAgents.map((agent) => agent.id);
 
   let query: estypes.QueryDslQueryContainer | undefined;
-  if (options.kuery !== undefined) {
-    const hostedPolicies = await agentPolicyService.list(soClient, {
-      kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
-      perPage: SO_SEARCH_LIMIT,
-    });
-    const hostedIds = hostedPolicies.items.map((item) => item.id);
 
-    const extraFilters = [];
-    if (options.tagsToAdd.length === 1 && options.tagsToRemove.length === 0) {
-      extraFilters.push(`NOT (tags:${options.tagsToAdd[0]})`);
-    } else if (options.tagsToRemove.length === 1 && options.tagsToAdd.length === 0) {
-      extraFilters.push(`tags:${options.tagsToRemove[0]}`);
-    }
-    const DEFAULT_STATUS_FILTER =
-      'status:online or (status:error or status:degraded) or (status:updating or status:unenrolling or status:enrolling) or status:offline';
-    // removing default staus filters, as it is a runtime field and doesn't work with updateByQuery
-    // this is a quick fix for bulk update tags with default filters
-    const kuery = options.kuery === DEFAULT_STATUS_FILTER ? '' : options.kuery;
-    query = getElasticsearchQuery(kuery, false, false, hostedIds, extraFilters);
-  } else {
-    query = {
-      terms: {
-        _id: agentIds,
-      },
-    };
+  const extraFilters = [];
+  if (options.tagsToAdd.length === 1 && options.tagsToRemove.length === 0) {
+    extraFilters.push(`NOT (tags:${options.tagsToAdd[0]})`);
+  } else if (options.tagsToRemove.length === 1 && options.tagsToAdd.length === 0) {
+    extraFilters.push(`tags:${options.tagsToRemove[0]}`);
   }
+
+  query = getElasticsearchQuery(options.kuery ?? '', false, false, [], extraFilters);
+  if (!query?.bool) {
+    if (!query) query = {};
+    query.bool = {};
+  }
+  query.bool.must = {
+    terms: {
+      _id: agentIds,
+    },
+  };
 
   let res;
   try {
@@ -220,5 +188,6 @@ export async function updateTagsBatch(
     throw new Error(`version conflict of ${res.version_conflicts} agents`);
   }
 
+  // console.log(res)
   return { actionId, updated: res.updated, took: res.took };
 }
