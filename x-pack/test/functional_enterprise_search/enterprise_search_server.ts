@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import { spawn, ChildProcess } from 'child_process';
 
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { ToolingLog } from '@kbn/tooling-log';
 import * as Rx from 'rxjs';
 import { filter, take, map, tap } from 'rxjs/operators';
+import { getLatestVersion } from './artifact_manager';
 
 let enterpriseSearchProcess: ChildProcess | undefined;
 
 const DOCKER_START_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-const dockerImage = `docker.elastic.co/enterprise-search/enterprise-search:8.6.0-SNAPSHOT`;
+const dockerImage = `docker.elastic.co/enterprise-search/enterprise-search`;
 
 function firstWithTimeout(source$: Rx.Observable<any>, errorMsg: string, ms = 30 * 1000) {
   return Rx.race(
@@ -47,8 +47,6 @@ function childProcessToLogLine(childProcess: ChildProcess, log: ToolingLog) {
 export async function setupEnterpriseSearch(logger: ToolingLog): Promise<void> {
   return new Promise(async (res, rej) => {
     try {
-      // TODO get latest automatcially
-
       const dockerArgs: string[] = [
         `run`,
         `--name=enterprise-search-ftr`,
@@ -70,25 +68,9 @@ export async function setupEnterpriseSearch(logger: ToolingLog): Promise<void> {
         `ent_search.listen_port=3002`,
         `-e`,
         `ent_search.external_url='http://localhost:3002'`,
-        `docker.elastic.co/enterprise-search/enterprise-search:8.6.0-SNAPSHOT`,
+        `docker.elastic.co/enterprise-search/enterprise-search:${await getLatestVersion()}`,
       ];
 
-      // TODO move config
-      // const dockerArgs: string[] = [
-      //   `run`,
-      //   `-p`,
-      //   `3002:3002`,
-      //   `-v`,
-      //   `${resolve(
-      //     __dirname,
-      //     '../../../../ent-search/config/config.local.yml'
-      //   )}:/usr/share/enterprise-search/config/enterprise-search.yml`,
-      //   // `--add-host=host.docker.internal:host-gateway`,
-      //   `--rm`,
-      //   `--name`,
-      //   `enterprise-search-ftr`,
-      //   dockerImage,
-      // ];
       logger.info('starting enterpriseSearch');
       logger.info('docker ' + dockerArgs.join(' '));
 
@@ -111,7 +93,6 @@ export async function setupEnterpriseSearch(logger: ToolingLog): Promise<void> {
         throw err;
       }
 
-      console.log('efe - settimeout');
       // TODO check if that makes sense ?
       // or replace with a better solution, timeout + wait for
       setTimeout(res, 15000);
@@ -121,16 +102,16 @@ export async function setupEnterpriseSearch(logger: ToolingLog): Promise<void> {
   });
 }
 
-export function cleanupEnterpriseSearch() {
+export function cleanupEnterpriseSearch(log: ToolingLog) {
   if (enterpriseSearchProcess) {
-    console.log('cleaning up enterprise search process');
+    log.info('Cleaning up enterprise search process');
     spawn('docker', ['stop', 'enterprise-search-ftr'], { stdio: 'inherit' });
     if (!enterpriseSearchProcess.kill(9)) {
-      console.log("Couldn't clean enterprise search process");
+      log.info("Couldn't clean enterprise search process");
     }
 
     enterpriseSearchProcess.on('close', () => {
-      console.log('enterprise search closed ');
+      log.info('Enterprise search closed ');
     });
   }
 }

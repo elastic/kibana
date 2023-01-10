@@ -16,15 +16,12 @@ export async function withEnterpriseSearch(
   runner: (runnerEnv: Record<string, string>) => Promise<void>
 ) {
   const log = context.getService('log');
-  log.info('efe- setup');
   await setupEnterpriseSearch(log);
 
   try {
     await runner({});
-    log.info('efe runned done');
   } finally {
-    log.info('efe finally block');
-    cleanupEnterpriseSearch();
+    cleanupEnterpriseSearch(log);
   }
 }
 

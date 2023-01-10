@@ -6,9 +6,9 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test';
-import { resolve } from 'path';
-import { FtrConfigProviderContext, defineDockerServersConfig } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { runEnterpriseSearchTests } from './runner';
+// import { getLatestVersion } from './artifact_manager';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -16,49 +16,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
   const baseConfig = await readConfigFile(require.resolve('./cypress.config'));
 
-  // TODO get latest automatcially
-  const dockerImage = `docker.elastic.co/enterprise-search/enterprise-search:8.6.0-SNAPSHOT`;
-
-  // TODO move config
-  const dockerArgs: string[] = [
-    `run`,
-    `-p`,
-    `9220:9220`,
-    `-v`,
-    `${resolve(
-      __dirname,
-      '../../../../ent-search/config/config.local.yml'
-    )}:/usr/share/enterprise-search/config/enterprise-search.yml`,
-    `--add-host`,
-    `host.docker.internal:host-gateway`,
-    `--rm`,
-    `--name`,
-    `enterprise-search-ftr`,
-    dockerImage,
-  ];
-
   return {
     ...kibanaCommonTestsConfig.getAll(),
     // default to the xpack functional config
     ...baseConfig.getAll(),
 
-    // testFiles: [resolve(__dirname, './apps/enterprise_search/with_host_configured')],
-
     junit: {
       reportName: 'X-Pack Enterprise Search Functional Tests with Host Configured',
     },
-    // dockerServers: defineDockerServersConfig({
-    //   registry: {
-    //     enabled: true,
-    //     image: dockerImage,
-    //     portInContainer: 3002,
-    //     port: 3002,
-    //     args: dockerArgs,
-    //     waitForLogLine: 'Jetty successfully started and is ready to handle requests!',
-    //     waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
-    //   },
-    // }),
-
     kbnTestServer: {
       ...baseConfig.get('kbnTestServer'),
       serverArgs: [
@@ -67,7 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ],
     },
     testRunner: (context: GenericFtrProviderContext<{}, {}>) => {
-      return runEnterpriseSearchTests(context, 'run');
+      return runEnterpriseSearchTests(context, 'open');
     },
   };
 }
