@@ -9,6 +9,9 @@
 import type { CoreSetup, Plugin, PluginInitializerContext, Logger } from '@kbn/core/server';
 import { PLUGIN_ID } from '../common';
 import { ContentCore } from './core';
+import { wrapError } from './error_wrapper';
+import { initRpcRoutes, FunctionHandler, initRpcHandlers } from './rpc';
+import type { Context as RpcContext } from './rpc';
 
 export class ContentManagementPlugin implements Plugin {
   private readonly logger: Logger;
@@ -22,7 +25,11 @@ export class ContentManagementPlugin implements Plugin {
   public setup(core: CoreSetup): void {
     this.logger.info(`>>>> [${PLUGIN_ID}] setup...`);
 
-    // Here we will pass the core http client and other Kibana deps
+    const fnHandler = new FunctionHandler<RpcContext>();
+    initRpcHandlers(fnHandler);
+    const router = core.http.createRouter();
+    initRpcRoutes(router, { logger: this.logger, wrapError, fnHandler, context: {} });
+
     this.contentCore.setup();
   }
 

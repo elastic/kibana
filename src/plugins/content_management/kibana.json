@@ -2,7 +2,7 @@
   "id": "contentManagement",
   "version": "kibana",
   "server": true,
-  "ui": false,
+  "ui": true,
   "requiredPlugins": [],
   "requiredBundles": [],
   "optionalPlugins": [],

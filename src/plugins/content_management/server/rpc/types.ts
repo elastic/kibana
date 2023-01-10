@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { PLUGIN_ID, API_ENDPOINT } from './constants';
-
-export { Payload, Calls } from './rpc';
-
-export type { NamedFnDef, FN, AsyncFN } from './rpc';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface Context {}

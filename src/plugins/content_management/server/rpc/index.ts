@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { PLUGIN_ID, API_ENDPOINT } from './constants';
-
-export { Payload, Calls } from './rpc';
-
-export type { NamedFnDef, FN, AsyncFN } from './rpc';
+export { FunctionHandler } from './function_handler';
+export { initRpcRoutes } from './routes';
+export { initRpcHandlers } from './handlers';
+export type { Context } from './types';

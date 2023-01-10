@@ -5,9 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import * as t from 'io-ts';
 
-export { PLUGIN_ID, API_ENDPOINT } from './constants';
+export const Payload = t.tuple([t.string, t.unknown]);
 
-export { Payload, Calls } from './rpc';
+export const Calls = {
+  get: () => ({
+    i: t.string,
+    o: t.number,
+  }),
+};
 
-export type { NamedFnDef, FN, AsyncFN } from './rpc';
+export interface FN<I, O> {
+  i: t.Type<I>;
+  o: t.Type<O>;
+}
+
+export type NamedFnDef<I, O> = () => FN<I, O>;
+
+export type AsyncFN<I, O> = (i: I) => Promise<O>;

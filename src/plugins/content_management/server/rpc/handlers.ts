@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { PLUGIN_ID, API_ENDPOINT } from './constants';
+import { Calls } from '../../common';
+import { FunctionHandler } from './function_handler';
+import { Context } from './types';
 
-export { Payload, Calls } from './rpc';
-
-export type { NamedFnDef, FN, AsyncFN } from './rpc';
+export function initRpcHandlers(fnHandler: FunctionHandler<Context>) {
+  fnHandler.load((register) => {
+    // Get single content
+    register(Calls.get)(async (ctx, msg) => {
+      return parseFloat(msg);
+    });
+  });
+}
