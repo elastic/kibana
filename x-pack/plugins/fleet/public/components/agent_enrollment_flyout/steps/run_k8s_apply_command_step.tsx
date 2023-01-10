@@ -62,11 +62,11 @@ export const KubernetesManifestApplyStep = ({
             max-width: 1100px;
           `}
         >
-          <CommandCode>kubectl apply -f elastic-agent-managed-kubernetes.yaml</CommandCode>
+          <CommandCode>kubectl apply -f elastic-agent-managed-kubernetes.yml</CommandCode>
         </EuiCodeBlock>
         <EuiSpacer size="s" />
         {fullCopyButton && (
-          <EuiCopy textToCopy="kubectl apply -f elastic-agent-managed-kubernetes.yaml">
+          <EuiCopy textToCopy="kubectl apply -f elastic-agent-managed-kubernetes.yml">
             {(copy) => (
               <EuiButton
                 color="primary"
