@@ -144,7 +144,7 @@ export const FieldLabels: Record<string, string> = {
   'kibana.alert.rule.name': i18n.translate('xpack.observability.expView.alerts.name', {
     defaultMessage: 'Alert name',
   }),
-  'kibana.alert.status': i18n.translate('xpack.observability.expView.alerts.name', {
+  'kibana.alert.status': i18n.translate('xpack.observability.expView.alerts.status', {
     defaultMessage: 'Alert status',
   }),
 
