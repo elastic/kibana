@@ -21,6 +21,41 @@
     "functions": [
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.createLiteralValueFromUndefinedRT",
+        "type": "Function",
+        "tags": [],
+        "label": "createLiteralValueFromUndefinedRT",
+        "description": [],
+        "signature": [
+          "<LiteralValue extends string | number | boolean>(literalValue: LiteralValue) => ",
+          "Type",
+          "<LiteralValue, undefined, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/literal_value_from_undefined_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.createLiteralValueFromUndefinedRT.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "literalValue",
+            "description": [],
+            "signature": [
+              "LiteralValue"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/literal_value_from_undefined_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.deepExactRt",
         "type": "Function",
         "tags": [],
