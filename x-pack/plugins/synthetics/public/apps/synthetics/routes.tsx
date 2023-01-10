@@ -19,7 +19,6 @@ import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plug
 import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
 import { getSettingsRouteConfig } from './components/settings/route_config';
 import { TestRunDetails } from './components/test_run_details/test_run_details';
-import { ErrorDetailsPage } from './components/error_details/error_details_page';
 import { StepTitle } from './components/step_details_page/step_title';
 import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
@@ -43,7 +42,6 @@ import {
   MONITOR_ERRORS_ROUTE,
   MONITOR_HISTORY_ROUTE,
   MONITOR_ROUTE,
-  ERROR_DETAILS_ROUTE,
   STEP_DETAIL_ROUTE,
   OVERVIEW_ROUTE,
   TEST_RUN_DETAILS_ROUTE,
@@ -59,6 +57,7 @@ import { MonitorSummary } from './components/monitor_details/monitor_summary/mon
 import { MonitorHistory } from './components/monitor_details/monitor_history/monitor_history';
 import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
 import { StepDetailPage } from './components/step_details_page/step_detail_page';
+import { getErrorDetailsRouteConfig } from './components/error_details/route_config';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -85,6 +84,7 @@ const getRoutes = (
 ): RouteProps[] => {
   return [
     ...getSettingsRouteConfig(history, syntheticsPath, baseTitle),
+    getErrorDetailsRouteConfig(history, syntheticsPath, baseTitle),
     getTestRunDetailsRoute(history, syntheticsPath, baseTitle),
     {
       title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
@@ -285,23 +285,6 @@ const getRoutes = (
             text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
           },
         ],
-      },
-    },
-    {
-      title: i18n.translate('xpack.synthetics.errorDetailsRoute.title', {
-        defaultMessage: 'Error details | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: ERROR_DETAILS_ROUTE,
-      component: ErrorDetailsPage,
-      dataTestSubj: 'syntheticsMonitorEditPage',
-      pageHeader: {
-        pageTitle: (
-          <FormattedMessage
-            id="xpack.synthetics.editMonitor.errorDetailsRoute.title"
-            defaultMessage="Error details"
-          />
-        ),
       },
     },
     {

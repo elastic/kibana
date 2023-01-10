@@ -129,6 +129,11 @@ export const mockState: SyntheticsAppState = {
     error: null,
     success: null,
   },
+  elasticsearch: {
+    results: {},
+    loading: {},
+    error: {},
+  },
 };
 
 function getBrowserJourneyMockSlice() {

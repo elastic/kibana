@@ -37,8 +37,12 @@ export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
     ) ?? false;
 
   const stepEnds: JourneyStep[] = (journeyData?.steps ?? []).filter(isStepEnd);
-
+  const failedStep = journeyData?.steps.find((step) => step.synthetics?.step?.status === 'failed');
   const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
+
+  const currentStep = stepIndex
+    ? journeyData?.steps.find((step) => step.synthetics?.step?.index === Number(stepIndex))
+    : undefined;
 
   return {
     data: journeyData as SyntheticsJourneyApiResponse,
@@ -46,8 +50,7 @@ export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
     isFailed,
     stepEnds,
     stepLabels,
-    currentStep: stepIndex
-      ? journeyData?.steps.find((step) => step.synthetics?.step?.index === Number(stepIndex))
-      : undefined,
+    currentStep,
+    failedStep,
   };
 };
