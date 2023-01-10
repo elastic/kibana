@@ -900,7 +900,7 @@ describe('Lens App', () => {
   });
 
   describe('share button', () => {
-    function getButton(inst: ReactWrapper): TopNavMenuData {
+    function getShareButton(inst: ReactWrapper): TopNavMenuData {
       return (
         inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
       ).find((button) => button.testId === 'lnsApp_shareButton')!;
@@ -908,7 +908,7 @@ describe('Lens App', () => {
 
     it('should be disabled when no data is available', async () => {
       const { instance } = await mountWith({ preloadedState: { isSaveable: true } });
-      expect(getButton(instance).disableButton).toEqual(true);
+      expect(getShareButton(instance).disableButton).toEqual(true);
     });
 
     it('should not disable share when not saveable', async () => {
@@ -919,7 +919,7 @@ describe('Lens App', () => {
         },
       });
 
-      expect(getButton(instance).disableButton).toEqual(false);
+      expect(getShareButton(instance).disableButton).toEqual(false);
     });
 
     it('should still be enabled even if the user is missing save permissions', async () => {
@@ -939,7 +939,7 @@ describe('Lens App', () => {
           activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
         },
       });
-      expect(getButton(instance).disableButton).toEqual(false);
+      expect(getShareButton(instance).disableButton).toEqual(false);
     });
 
     it('should still be enabled even if the user is missing shortUrl permissions', async () => {
@@ -959,10 +959,10 @@ describe('Lens App', () => {
           activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
         },
       });
-      expect(getButton(instance).disableButton).toEqual(false);
+      expect(getShareButton(instance).disableButton).toEqual(false);
     });
 
-    it('should be disabled if the user is missing both save and shortUrl permissions', async () => {
+    it('should be disabled if the user is missing shortUrl permissions and visualization is not saveable', async () => {
       const services = makeDefaultServicesForApp();
       services.application = {
         ...services.application,
@@ -975,11 +975,11 @@ describe('Lens App', () => {
       const { instance } = await mountWith({
         services,
         preloadedState: {
-          isSaveable: true,
+          isSaveable: false,
           activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
         },
       });
-      expect(getButton(instance).disableButton).toEqual(true);
+      expect(getShareButton(instance).disableButton).toEqual(true);
     });
   });
 
