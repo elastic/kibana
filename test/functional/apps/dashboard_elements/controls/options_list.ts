@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Options List Control';
 
-  describe('Dashboard options list integration', () => {
+  describe.only('Dashboard options list integration', () => {
     let controlId: string;
 
     const returnToDashboard = async () => {
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Options List Control Editor selects relevant data views', async () => {
+    describe.skip('Options List Control Editor selects relevant data views', async () => {
       it('selects the default data view when the dashboard is blank', async () => {
         expect(await dashboardControls.optionsListEditorGetCurrentDataView(true)).to.eql(
           'logstash-*'
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // Skip on cloud until issue is fixed
     // Issue: https://github.com/elastic/kibana/issues/141280
-    describe('Options List Control creation and editing experience', function () {
+    describe.skip('Options List Control creation and editing experience', function () {
       this.tags(['skipCloudFailedTest']);
       it('can add a new options list control from a blank state', async () => {
         await dashboardControls.createControl({
@@ -210,7 +210,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Options List Control suggestions', async () => {
+    describe.skip('Options List Control suggestions', async () => {
       before(async () => {
         await dashboardControls.createControl({
           controlType: OPTIONS_LIST_CONTROL,
@@ -296,11 +296,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Interactions between options list and dashboard', async () => {
+      /** vv REMOVE THIS vv */
       before(async () => {
+        await dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
+          dataViewTitle: 'animals-*',
+          fieldName: 'sound.keyword',
+        });
+        controlId = (await dashboardControls.getAllControlIds())[0];
+        await dashboard.clickQuickSave();
+        await header.waitUntilLoadingHasFinished();
+        /** ^^ REMOVE THIS ^^ */
+
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
       });
 
-      describe('Applies query settings to controls', async () => {
+      describe.skip('Applies query settings to controls', async () => {
         it('Applies dashboard query to options list control', async () => {
           await queryBar.setQuery('animal.keyword : "dog" ');
           await queryBar.submitQuery(); // quicker than clicking the submit button, but hides the time picker

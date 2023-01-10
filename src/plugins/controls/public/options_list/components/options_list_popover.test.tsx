@@ -136,11 +136,15 @@ describe('Options list popover', () => {
     expect(validSelection.find('.euiSelectableListItem__text').text()).toEqual(
       'bark - Checked option.'
     );
-    expect(validSelection.find('.euiSelectableListItem__append').text().trim()).toEqual('75');
+    expect(
+      validSelection.find('div[data-test-subj="optionsList-document-count-badge"]').text().trim()
+    ).toEqual('75');
     const title = findTestSubject(popover, 'optionList__ignoredSelectionLabel').text();
     expect(title).toEqual('Ignored selection');
     const invalidSelection = findTestSubject(popover, 'optionsList-control-ignored-selection-woof');
-    expect(invalidSelection.text()).toEqual('woof');
+    expect(invalidSelection.find('.euiSelectableListItem__text').text()).toEqual(
+      'woof - Checked option.'
+    );
     expect(invalidSelection.hasClass('optionsList__selectionInvalid')).toBe(true);
   });
 

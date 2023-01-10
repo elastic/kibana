@@ -364,7 +364,7 @@ export class DashboardPageControls extends FtrService {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
     await this.testSubjects.click(`optionsList-control-${controlId}`);
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`optionsList-control-available-options`);
+      await this.testSubjects.existOrFail(`optionsList-control-popover`);
     });
   }
 
@@ -384,13 +384,14 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListPopoverGetAvailableOptionsCount() {
     this.log.debug(`getting available options count from options list`);
+    await this.optionsListPopoverWaitForLoading();
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
     return +(await availableOptions.getAttribute('data-option-count'));
   }
 
   public async optionsListPopoverGetAvailableOptions() {
     this.log.debug(`getting available options from options list`);
-    await this.testSubjects.waitForDeleted('optionsList-control-popover-loading');
+    await this.optionsListPopoverWaitForLoading();
     const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
     const optionsCount = await this.optionsListPopoverGetAvailableOptionsCount();
 
@@ -463,10 +464,9 @@ export class DashboardPageControls extends FtrService {
   public async optionsListPopoverSelectOption(availableOption: string) {
     this.log.debug(`selecting ${availableOption} from options list`);
     if (!(await this.testSubjects.exists(`optionsList-control-selection-${availableOption}`))) {
+      await this.optionsListPopoverClearSearch();
       await this.optionsListPopoverSearchForOption(availableOption);
-      await this.retry.try(async () => {
-        await this.testSubjects.existOrFail(`optionsList-control-selection-${availableOption}`);
-      });
+      await this.optionsListPopoverWaitForLoading();
     }
     await this.testSubjects.click(`optionsList-control-selection-${availableOption}`);
   }
@@ -493,6 +493,12 @@ export class DashboardPageControls extends FtrService {
   public async optionsListWaitForLoading(controlId: string) {
     this.log.debug(`wait for ${controlId} to load`);
     await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
+  }
+
+  public async optionsListPopoverWaitForLoading() {
+    this.log.debug(`wait for the suggestions in the popover to load`);
+    await this.optionsListPopoverAssertOpen();
+    await this.testSubjects.waitForDeleted('optionsList-control-popover-loading');
   }
 
   /* -----------------------------------------------------------
