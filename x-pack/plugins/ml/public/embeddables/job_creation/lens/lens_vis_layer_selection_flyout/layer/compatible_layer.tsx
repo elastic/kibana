@@ -14,9 +14,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import {
   redirectToADJobWizards,
   QuickLensJobCreator,
-} from '../../../../application/jobs/new_job/job_from_lens';
-import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
-import { JOB_TYPE } from '../../../../../common/constants/new_job';
+} from '../../../../../application/jobs/new_job/job_from_lens';
+import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { useMlFromLensKibanaContext } from '../../context';
 import { JobDetails, CreateADJobParams } from '../../../common/job_details';
 

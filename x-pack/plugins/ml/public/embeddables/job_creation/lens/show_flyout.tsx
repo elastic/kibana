@@ -8,10 +8,11 @@
 import React from 'react';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';
+import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 import {
   toMountPoint,
@@ -19,14 +20,15 @@ import {
   KibanaContextProvider,
 } from '@kbn/kibana-react-plugin/public';
 
-import { getMlGlobalServices } from '../../application/app';
-import { GeoJobFlyout } from './flyout';
+import { getMlGlobalServices } from '../../../application/app';
+import { LensLayerSelectionFlyout } from './lens_vis_layer_selection_flyout';
 
-export async function showMapVisToADJobFlyout(
-  embeddable: MapEmbeddable,
+export async function showLensVisToADJobFlyout(
+  embeddable: Embeddable,
   coreStart: CoreStart,
   share: SharePluginStart,
-  data: DataPublicPluginStart
+  data: DataPublicPluginStart,
+  lens: LensPublicStart
 ): Promise<void> {
   const {
     http,
@@ -50,10 +52,11 @@ export async function showMapVisToADJobFlyout(
                 ...coreStart,
                 share,
                 data,
+                lens,
                 mlServices: getMlGlobalServices(http),
               }}
             >
-              <GeoJobFlyout
+              <LensLayerSelectionFlyout
                 embeddable={embeddable}
                 onClose={() => {
                   onFlyoutClose();
@@ -65,7 +68,7 @@ export async function showMapVisToADJobFlyout(
           )
         ),
         {
-          'data-test-subj': 'mlGeoJobFlyout',
+          'data-test-subj': 'mlFlyoutLensLayerSelector',
           ownFocus: true,
           closeButtonAriaLabel: 'jobSelectorFlyout',
           onClose: onFlyoutClose,

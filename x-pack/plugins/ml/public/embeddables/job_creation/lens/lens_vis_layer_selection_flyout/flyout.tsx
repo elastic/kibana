@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import React, { FC, useState, useEffect } from 'react';
+import type { Embeddable } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyoutFooter,
@@ -15,27 +15,34 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiFlyoutBody,
+  EuiTitle,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { Layer } from './map_vis_layer_selection_flyout/layer';
-import { LayerResult, VisualizationExtractor } from '../../application/jobs/new_job/job_from_map';
+
+import { Layer } from './layer';
+import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
+import { VisualizationExtractor } from '../../../../application/jobs/new_job/job_from_lens';
+import { useMlFromLensKibanaContext } from '../context';
 
 interface Props {
-  embeddable: MapEmbeddable;
+  embeddable: Embeddable;
   onClose: () => void;
 }
 
-export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
+export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { data, lens },
+  } = useMlFromLensKibanaContext();
+
   const [layerResults, setLayerResults] = useState<LayerResult[]>([]);
 
   useEffect(() => {
     const visExtractor = new VisualizationExtractor();
     visExtractor
-      .getResultLayersFromEmbeddable(embeddable)
+      .getResultLayersFromEmbeddable(embeddable, lens)
       .then(setLayerResults)
       .catch((error) => {
         // eslint-disable-next-line no-console
@@ -43,7 +50,7 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
         onClose();
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [embeddable]);
+  }, [data, lens, embeddable]);
 
   return (
     <>
@@ -51,7 +58,7 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.ml.embeddables.geoJobFlyout.title"
+              id="xpack.ml.embeddables.lensLayerFlyout.title"
               defaultMessage="Create anomaly detection job"
             />
           </h3>
@@ -59,15 +66,15 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
         <EuiSpacer size="m" />
         <EuiText size="s">
           <FormattedMessage
-            id="xpack.ml.embeddables.geoJobFlyout.secondTitle"
-            defaultMessage="Create an anomaly detection lat_long job from map visualization {title}."
+            id="xpack.ml.embeddables.lensLayerFlyout.secondTitle"
+            defaultMessage="Select a compatible layer from the visualization {title} to create an anomaly detection job."
             values={{ title: embeddable.getTitle() }}
           />
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={{ backgroundColor: euiTheme.colors.lightestShade }}>
         {layerResults.map((layer, i) => (
-          <Layer key={`${layer.layerId}`} layer={layer} layerIndex={i} embeddable={embeddable} />
+          <Layer layer={layer} layerIndex={i} key={layer.id} embeddable={embeddable} />
         ))}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -75,7 +82,7 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.ml.embeddables.geoJobFlyout.closeButton"
+                id="xpack.ml.embeddables.lensLayerFlyout.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>

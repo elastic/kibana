@@ -25,7 +25,7 @@ import {
   type LayerResult,
   QuickGeoJobCreator,
   redirectToGeoJobWizard,
-} from '../../../../application/jobs/new_job/job_from_map';
+} from '../../../../../application/jobs/new_job/job_from_map';
 import { useMlFromLensKibanaContext } from '../../../lens/context';
 import { JobDetails, CreateADJobParams } from '../../../common/job_details';
 
