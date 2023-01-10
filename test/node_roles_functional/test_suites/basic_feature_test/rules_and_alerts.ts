@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginFunctionalProviderContext } from '../../services';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // const supertest = getService('supertest');
