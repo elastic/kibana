@@ -52,13 +52,14 @@ export const MetricItem = ({
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const locationName = useLocationName({ locationId: monitor.location?.id });
-  const status = useStatusByLocationOverview(monitor.id, locationName);
+  const status = useStatusByLocationOverview(monitor.configId, locationName);
   const theme = useTheme();
 
   return (
     <div data-test-subj={`${monitor.name}-metric-item`} style={{ height: '160px' }}>
       {loaded ? (
         <EuiPanel
+          data-test-subj={`${monitor.name}-metric-item-${locationName}-${status}`}
           paddingSize="none"
           onMouseOver={() => {
             if (!isMouseOver) {
