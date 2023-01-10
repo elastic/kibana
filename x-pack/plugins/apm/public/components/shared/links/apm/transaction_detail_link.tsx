@@ -5,16 +5,23 @@
  * 2.0.
  */
 
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { identity, pickBy } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { EuiLink } from '@elastic/eui';
-import { pickBy, identity } from 'lodash';
-import { getLegacyApmHref, APMLinkExtendProps } from './apm_link';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
-import { APMQueryParams } from '../url_helpers';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getComparisonEnabled } from '../../time_comparison/get_comparison_enabled';
+import { APMQueryParams } from '../url_helpers';
+import { APMLinkExtendProps, getLegacyApmHref } from './apm_link';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
@@ -32,6 +39,8 @@ const persistedFilters: Array<keyof APMQueryParams> = [
   'transactionResult',
   'serviceVersion',
 ];
+
+const txGroupsDroppedBucketName = 'other';
 
 export function TransactionDetailLink({
   serviceName,
@@ -68,5 +77,32 @@ export function TransactionDetailLink({
     search: location.search,
   });
 
-  return <EuiLink href={href} {...rest} />;
+  return (
+    <>
+      {transactionName === txGroupsDroppedBucketName ? (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.transactionDetail.tooltip.message',
+            {
+              defaultMessage:
+                "The transaction group limit has been reached. Please see the APM Server docs for 'aggregation.transaction.max_groups' to increase this",
+            }
+          )}
+        >
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexItem grow={1}>
+              {i18n.translate('xpack.apm.transactionDetail.other.label', {
+                defaultMessage: 'other',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiIcon size="s" color="subdued" type="alert" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiToolTip>
+      ) : (
+        <EuiLink href={href} {...rest} />
+      )}
+    </>
+  );
 }
