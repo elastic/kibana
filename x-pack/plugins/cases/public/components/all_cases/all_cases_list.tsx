@@ -142,13 +142,18 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
-        if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.closed) {
+        if (
+          newFilterOptions.status &&
+          newFilterOptions.status === CaseStatuses.closed &&
+          queryParams.sortField === SortFieldCase.createdAt
+        ) {
           setQueryParams({ sortField: SortFieldCase.closedAt });
         } else if (
           newFilterOptions.status &&
           [CaseStatuses.open, CaseStatuses['in-progress'], StatusAll].includes(
             newFilterOptions.status
-          )
+          ) &&
+          queryParams.sortField === SortFieldCase.closedAt
         ) {
           setQueryParams({ sortField: SortFieldCase.createdAt });
         }
@@ -176,7 +181,15 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             : {}),
         });
       },
-      [deselectCases, setFilterOptions, hasOwner, availableSolutions, owner, setQueryParams]
+      [
+        queryParams.sortField,
+        deselectCases,
+        setFilterOptions,
+        hasOwner,
+        availableSolutions,
+        owner,
+        setQueryParams,
+      ]
     );
 
     const { columns } = useCasesColumns({
