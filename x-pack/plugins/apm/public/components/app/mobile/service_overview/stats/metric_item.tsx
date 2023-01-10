@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Chart, Settings, Metric, MetricDatum } from '@elastic/charts';
-import { DARK_THEME } from '@elastic/charts';
+import { Chart, Metric, MetricDatum } from '@elastic/charts';
 import { EuiLoadingContent, EuiPanel } from '@elastic/eui';
 
 export function MetricItem({
@@ -34,7 +33,6 @@ export function MetricItem({
         </EuiPanel>
       ) : (
         <Chart>
-          <Settings baseTheme={DARK_THEME} />
           <Metric id={`metric_${id}`} data={[data]} />
         </Chart>
       )}

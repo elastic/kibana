@@ -23,7 +23,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 
-type Timeseries = Array<{ x: number; y: number | null }>;
+type Timeseries = Array<{ x: number; y: number }>;
 export interface MobileStats {
   sessions: { value?: number; timeseries: Timeseries };
   requests: { value?: number | null; timeseries: Timeseries };
@@ -114,7 +114,7 @@ export async function getMobileStats({
       timeseries:
         response.aggregations?.timeseries?.buckets.map((bucket) => ({
           x: bucket.key,
-          y: bucket.sessions.value,
+          y: bucket.sessions.value ?? 0,
         })) ?? [],
     },
     requests: {
@@ -122,7 +122,7 @@ export async function getMobileStats({
       timeseries:
         response.aggregations?.timeseries?.buckets.map((bucket) => ({
           x: bucket.key,
-          y: bucket.requests.doc_count,
+          y: bucket.requests.doc_count ?? 0,
         })) ?? [],
     },
     maxLoadTime: {
@@ -130,7 +130,7 @@ export async function getMobileStats({
       timeseries:
         response.aggregations?.timeseries?.buckets.map((bucket) => ({
           x: bucket.key,
-          y: bucket.maxLoadTime?.value,
+          y: bucket.maxLoadTime?.value ?? 0,
         })) ?? [],
     },
     crashCount: {
@@ -139,7 +139,7 @@ export async function getMobileStats({
       timeseries:
         response.aggregations?.timeseries?.buckets.map((bucket) => ({
           x: bucket.key,
-          y: bucket.crashCount.doc_count,
+          y: bucket.crashCount.doc_count ?? 0,
         })) ?? [],
     },
   };

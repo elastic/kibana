@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function callApi({
+  async function getMobileStats({
     environment = ENVIRONMENT_ALL.value,
     kuery = '',
     serviceName,
@@ -91,7 +91,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let response: MobileStats;
 
       before(async () => {
-        response = await callApi({ serviceName: 'synth-android', environment: 'production' });
+        response = await getMobileStats({
+          serviceName: 'synth-android',
+          environment: 'production',
+        });
       });
 
       it('returns same sessions', () => {

@@ -76,10 +76,8 @@ export function MobileStats({
       icon: getIcon('bug'),
       value: data?.crashCount?.value ?? NaN,
       valueFormatter: (value: number) => valueFormatter(value, 'cpm'),
-      ...(data?.maxLoadTime?.timeseries && {
-        trend: data?.maxLoadTime.timeseries,
-        trendShape: MetricTrendShape.Area,
-      }),
+      trend: data?.maxLoadTime?.timeseries,
+      trendShape: MetricTrendShape.Area,
     },
     {
       color: euiTheme.eui.euiColorLightestShade,
@@ -89,10 +87,8 @@ export function MobileStats({
       icon: getIcon('visGauge'),
       value: data?.maxLoadTime?.value ?? NaN,
       valueFormatter: (value: number) => valueFormatter(value, 's'),
-      ...(data?.maxLoadTime?.timeseries && {
-        trend: data?.maxLoadTime.timeseries,
-        trendShape: MetricTrendShape.Area,
-      }),
+      trend: data?.maxLoadTime.timeseries,
+      trendShape: MetricTrendShape.Area,
     },
     {
       color: euiTheme.eui.euiColorLightestShade,
@@ -102,10 +98,8 @@ export function MobileStats({
       icon: getIcon('timeslider'),
       value: data?.sessions?.value ?? NaN,
       valueFormatter: (value: number) => valueFormatter(value),
-      ...(data?.sessions.timeseries && {
-        trend: data?.sessions.timeseries,
-        trendShape: MetricTrendShape.Area,
-      }),
+      trend: data?.sessions.timeseries,
+      trendShape: MetricTrendShape.Area,
     },
     {
       color: euiTheme.eui.euiColorLightestShade,
@@ -115,10 +109,8 @@ export function MobileStats({
       icon: getIcon('kubernetesPod'),
       value: data?.requests?.value ?? NaN,
       valueFormatter: (value: number) => valueFormatter(value),
-      ...(data?.requests.timeseries && {
-        trend: data?.requests.timeseries,
-        trendShape: MetricTrendShape.Area,
-      }),
+      trend: data?.requests.timeseries,
+      trendShape: MetricTrendShape.Area,
     },
   ];
 
