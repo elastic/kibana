@@ -43,30 +43,28 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         '_other',
       ];
 
-      return range
-        .ratePerMinute(60)
-        .generator((timestamp, timestampIndex) => {
-          return logger.perf(
-            'generate_events_for_timestamp ' + new Date(timestamp).toISOString(),
-            () => {
-              const events = instances.flatMap((instance) =>
-                transactionGroupRange.flatMap((groupId, groupIndex) => {
-                  const duration = Math.round(
-                    (timestampIndex % MAX_BUCKETS) * BUCKET_SIZE + MIN_DURATION
-                  );
+      return range.ratePerMinute(60).generator((timestamp, timestampIndex) => {
+        return logger.perf(
+          'generate_events_for_timestamp ' + new Date(timestamp).toISOString(),
+          () => {
+            const events = instances.flatMap((instance) =>
+              transactionGroupRange.flatMap((groupId, groupIndex) => {
+                const duration = Math.round(
+                  (timestampIndex % MAX_BUCKETS) * BUCKET_SIZE + MIN_DURATION
+                );
 
-                  return instance
-                    .transaction(groupId, TRANSACTION_TYPES[groupIndex % TRANSACTION_TYPES.length])
-                    .timestamp(timestamp)
-                    .duration(duration)
-                    .outcome('success' as const);
-                })
-              );
+                return instance
+                  .transaction(groupId, TRANSACTION_TYPES[groupIndex % TRANSACTION_TYPES.length])
+                  .timestamp(timestamp)
+                  .duration(duration)
+                  .outcome('success' as const);
+              })
+            );
 
-              return events;
-            }
-          );
-        });
+            return events;
+          }
+        );
+      });
     },
   };
 };
