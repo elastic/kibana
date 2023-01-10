@@ -69,7 +69,7 @@ describe('FullTimeRangeSelector', () => {
 
     const { getByText } = render(
       <IntlProvider locale="en">
-        <DatePickerContextProvider deps={mockDependencies}>
+        <DatePickerContextProvider {...mockDependencies}>
           <FullTimeRangeSelector {...props} />
         </DatePickerContextProvider>
       </IntlProvider>
