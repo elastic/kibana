@@ -8,7 +8,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '../../../common/types';
-import { convertEsError } from './errors';
+import { convertEsError, createNoMatchingIndicesError } from './errors';
 import { DataViewMissingIndices } from '../../../common/lib';
 
 /**
@@ -72,8 +72,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     fields = ['*'],
   } = params;
   try {
-    // console.log('*** ABOUT TO CALL CLUSTER');
-    const a = await callCluster.fieldCaps(
+    const caps = await callCluster.fieldCaps(
       {
         index: indices,
         fields,
@@ -83,15 +82,15 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
       },
       { meta: true }
     );
-    if (a.body.indices.length === 0) {
+    if (caps.body.indices.length === 0) {
       const pattern = Array.isArray(indices) ? indices.join(',') : indices;
       throw new DataViewMissingIndices(pattern);
     }
-    // console.log('*** CALLED CLUSTER', a);
-    return a;
+    return caps;
   } catch (error) {
-    // console.log('*** CALLED CLUSTER ERROR', error);
-    // console.log('*** meta', error.meta.meta.request.params);
+    if (error instanceof DataViewMissingIndices) {
+      throw createNoMatchingIndicesError(indices);
+    }
     throw convertEsError(indices, error);
   }
 }
