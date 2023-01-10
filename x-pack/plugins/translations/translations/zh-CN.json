@@ -16538,7 +16538,6 @@
     "xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder": "搜索基础设施数据……（例如 host.name:host-1）",
     "xpack.infra.hostsPage.experimentalBadgeDescription": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将尽最大努力来修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
     "xpack.infra.hostsPage.experimentalBadgeLabel": "技术预览",
-    "xpack.infra.hostsPage.giveFeedbackLink": "反馈",
     "xpack.infra.hostsTable.averageMemoryTotalColumnHeader": "内存合计（平均值）",
     "xpack.infra.hostsTable.averageMemoryUsageColumnHeader": "内存使用率（平均值）",
     "xpack.infra.hostsTable.averageRxColumnHeader": "RX（平均值）",
