@@ -12,13 +12,12 @@ import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_
 import {
   UseField,
   ValidationError,
-  ValidationFunc
+  ValidationFunc,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
 import { ActionConnectorFieldsProps, PasswordField } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import * as i18n from './translations';
-
 
 const { urlField } = fieldValidators;
 
@@ -34,17 +33,17 @@ const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dat
 
 const torqWebhookEndpoint =
   (message: string) =>
-    (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-      const [{ value }] = args as Array<{ value: string }>;
-      const error: ValidationError<ERROR_CODE> = {
-        code: 'ERR_FIELD_FORMAT',
-        formatType: 'URL',
-        message,
-      };
-      if (!isUrl(value)) return error;
-      const hostname = new URL(value).hostname;
-      return hostname === 'hooks.torq.io' ? undefined : error;
+  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    const [{ value }] = args as Array<{ value: string }>;
+    const error: ValidationError<ERROR_CODE> = {
+      code: 'ERR_FIELD_FORMAT',
+      formatType: 'URL',
+      message,
     };
+    if (!isUrl(value)) return error;
+    const hostname = new URL(value).hostname;
+    return hostname === 'hooks.torq.io' ? undefined : error;
+  };
 
 const TorqActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,

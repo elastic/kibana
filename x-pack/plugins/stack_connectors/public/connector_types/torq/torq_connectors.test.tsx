@@ -12,7 +12,7 @@ import React from 'react';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import TorqActionConnectorFields from './torq_connectors';
 
-const EMPTY_FUNC = () => { };
+const EMPTY_FUNC = () => {};
 
 describe('TorqActionConnectorFields renders', () => {
   test('all connector fields are rendered', async () => {
