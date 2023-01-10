@@ -147,6 +147,7 @@ export type {
   KibanaAssetReference,
   KibanaSavedObjectType,
   EsAssetReference,
+  AssetsGroupedByServiceByType,
   KibanaAssetTypeToParts,
   KibanaAssetParts,
   KibanaAssetType,
