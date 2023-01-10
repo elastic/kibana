@@ -14,6 +14,7 @@ import type {
   IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
+  RegistryElasticsearch,
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
@@ -62,20 +63,26 @@ export function getTemplate({
   composedOfTemplates,
   templatePriority,
   hidden,
+  registryElasticsearch,
+  mappings,
 }: {
   templateIndexPattern: string;
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
+  mappings: IndexTemplateMappings;
   hidden?: boolean;
+  registryElasticsearch?: RegistryElasticsearch | undefined;
 }): IndexTemplate {
-  const template = getBaseTemplate(
+  const template = getBaseTemplate({
     templateIndexPattern,
     packageName,
     composedOfTemplates,
     templatePriority,
-    hidden
-  );
+    registryElasticsearch,
+    hidden,
+    mappings,
+  });
   if (template.template.settings.index.final_pipeline) {
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
@@ -470,21 +477,40 @@ const flattenFieldsToNameAndType = (
   return newFields;
 };
 
-function getBaseTemplate(
-  templateIndexPattern: string,
-  packageName: string,
-  composedOfTemplates: string[],
-  templatePriority: number,
-  hidden?: boolean
-): IndexTemplate {
+function getBaseTemplate({
+  templateIndexPattern,
+  packageName,
+  composedOfTemplates,
+  templatePriority,
+  hidden,
+  registryElasticsearch,
+  mappings,
+}: {
+  templateIndexPattern: string;
+  packageName: string;
+  composedOfTemplates: string[];
+  templatePriority: number;
+  hidden?: boolean;
+  registryElasticsearch: RegistryElasticsearch | undefined;
+  mappings: IndexTemplateMappings;
+}): IndexTemplate {
   const _meta = getESAssetMetadata({ packageName });
+
+  const isIndexModeTimeSeries = registryElasticsearch?.index_mode === 'time_series';
+
+  let settingsIndex = {};
+  if (isIndexModeTimeSeries) {
+    settingsIndex = {
+      mode: 'time_series',
+    };
+  }
 
   return {
     priority: templatePriority,
     index_patterns: [templateIndexPattern],
     template: {
       settings: {
-        index: {},
+        index: settingsIndex,
       },
       mappings: {
         _meta,
