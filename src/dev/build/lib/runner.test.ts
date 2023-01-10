@@ -49,7 +49,6 @@ const setup = async () => {
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerPush: false,
-    dockerTag: '',
     dockerTagQualifier: '',
   });
 
