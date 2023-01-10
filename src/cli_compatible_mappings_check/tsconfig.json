@@ -7,11 +7,10 @@
   "kbn_references": [
     { "path": "../cli/tsconfig.json" },
     "@kbn/repo-info",
-    "@elastic/elasticsearch",
-    "@kbn/core-root-server-internal",
-    "@kbn/core-logging-server-mocks",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-plugins-server-internal",
   ],
   "exclude": ["target/**/*"]
 }
