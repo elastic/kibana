@@ -32,7 +32,7 @@ export const StepScreenshotDetails = ({
         <EuiFlexItem css={{ alignItems: 'flex-start' }}>
           <JourneyStepScreenshotContainer
             key={stepIndex}
-            checkGroup={checkGroupId}
+            checkGroup={step?.monitor.check_group ?? checkGroupId}
             initialStepNo={stepIndex}
             stepStatus={step?.synthetics.payload?.status}
             allStepsLoaded={true}

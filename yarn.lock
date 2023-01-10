@@ -2813,10 +2813,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/bazel-packages@link:packages/kbn-bazel-packages":
-  version "0.0.0"
-  uid ""
-
 "@kbn/bazel-runner@link:packages/kbn-bazel-runner":
   version "0.0.0"
   uid ""
@@ -2861,11 +2857,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-content-editor@link:bazel-bin/packages/content-management/content_editor":
+"@kbn/content-management-content-editor@link:packages/content-management/content_editor":
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-table-list@link:bazel-bin/packages/content-management/table_list":
+"@kbn/content-management-table-list@link:packages/content-management/table_list":
   version "0.0.0"
   uid ""
 
@@ -2985,10 +2981,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-config-server-mocks@link:packages/core/config/core-config-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-deprecations-browser-internal@link:packages/core/deprecations/core-deprecations-browser-internal":
   version "0.0.0"
   uid ""
@@ -3046,10 +3038,6 @@
   uid ""
 
 "@kbn/core-elasticsearch-client-server-mocks@link:packages/core/elasticsearch/core-elasticsearch-client-server-mocks":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-elasticsearch-client-server@link:packages/core/elasticsearch/core-elasticsearch-client-server":
   version "0.0.0"
   uid ""
 
@@ -3721,6 +3709,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/import-locator@link:packages/kbn-import-locator":
+  version "0.0.0"
+  uid ""
+
 "@kbn/import-resolver@link:packages/kbn-import-resolver":
   version "0.0.0"
   uid ""
@@ -3741,11 +3733,23 @@
   version "0.0.0"
   uid ""
 
+"@kbn/json-ast@link:packages/kbn-json-ast":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kibana-manifest-schema@link:packages/kbn-kibana-manifest-schema":
   version "0.0.0"
   uid ""
 
 "@kbn/language-documentation-popover@link:packages/kbn-language-documentation-popover":
+  version "0.0.0"
+  uid ""
+
+"@kbn/lint-packages-cli@link:packages/kbn-lint-packages-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/lint-ts-projects-cli@link:packages/kbn-lint-ts-projects-cli":
   version "0.0.0"
   uid ""
 
@@ -3813,10 +3817,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/package-map@link:packages/kbn-package-map":
-  version "0.0.0"
-  uid ""
-
 "@kbn/peggy-loader@link:packages/kbn-peggy-loader":
   version "0.0.0"
   uid ""
@@ -3826,6 +3826,10 @@
   uid ""
 
 "@kbn/performance-testing-dataset-extractor@link:packages/kbn-performance-testing-dataset-extractor":
+  version "0.0.0"
+  uid ""
+
+"@kbn/picomatcher@link:packages/kbn-picomatcher":
   version "0.0.0"
   uid ""
 
@@ -3845,7 +3849,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/repo-file-maps@link:packages/kbn-repo-file-maps":
+  version "0.0.0"
+  uid ""
+
 "@kbn/repo-info@link:packages/kbn-repo-info":
+  version "0.0.0"
+  uid ""
+
+"@kbn/repo-linter@link:packages/kbn-repo-linter":
+  version "0.0.0"
+  uid ""
+
+"@kbn/repo-packages@link:packages/kbn-repo-packages":
   version "0.0.0"
   uid ""
 
@@ -3938,6 +3954,10 @@
   uid ""
 
 "@kbn/server-route-repository@link:packages/kbn-server-route-repository":
+  version "0.0.0"
+  uid ""
+
+"@kbn/set-map@link:packages/kbn-set-map":
   version "0.0.0"
   uid ""
 
@@ -4121,15 +4141,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-services@link:packages/kbn-shared-ux-services":
+"@kbn/shared-ux-router-types@link:packages/shared-ux/router/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-router@link:packages/shared-ux/router/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-storybook-config@link:packages/shared-ux/storybook/config":
   version "0.0.0"
   uid ""
 
 "@kbn/shared-ux-storybook-mock@link:packages/shared-ux/storybook/mock":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-storybook@link:packages/kbn-shared-ux-storybook":
   version "0.0.0"
   uid ""
 
@@ -4190,14 +4214,6 @@
   uid ""
 
 "@kbn/tooling-log@link:packages/kbn-tooling-log":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ts-project-linter-cli@link:packages/kbn-ts-project-linter-cli":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ts-project-linter@link:packages/kbn-ts-project-linter":
   version "0.0.0"
   uid ""
 
@@ -7430,6 +7446,11 @@
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/@types/pegjs/-/pegjs-0.10.1.tgz#9a2f3961dc62430fdb21061eb0ddbd890f9e3b94"
   integrity sha512-ra8IchO9odGQmYKbm+94K58UyKCEKdZh9y0vxhG4pIpOJOBlC1C+ZtBVr6jLs+/oJ4pl+1p/4t3JtBA8J10Vvw==
+
+"@types/picomatch@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@types/picomatch/-/picomatch-2.3.0.tgz#75db5e75a713c5a83d5b76780c3da84a82806003"
+  integrity sha512-O397rnSS9iQI4OirieAtsDqvCj4+3eY1J+EPdNTKuHuRWIfUoGyzX294o8C4KJYaLqgSrd2o60c5EqCU8Zv02g==
 
 "@types/pidusage@^2.0.2":
   version "2.0.2"
