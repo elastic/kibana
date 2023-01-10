@@ -18,14 +18,11 @@ import { getDiscoverStateContainer } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
-import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
-  SEARCH_FIELDS_FROM_SOURCE,
   SEARCH_ON_PAGE_LOAD_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
-import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
@@ -45,7 +42,6 @@ export function useDiscoverState({
 }) {
   const { uiSettings, data, filterManager, dataViews, toastNotifications, trackUiMetric } =
     services;
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const { timefilter } = data.query.timefilter;
 
   const dataView = savedSearch.searchSource.getField('index')!;
@@ -78,7 +74,7 @@ export function useDiscoverState({
   /**
    * Search session logic
    */
-  const searchSessionManager = useSearchSession({ services, history, stateContainer, savedSearch });
+  const searchSessionManager = stateContainer.searchSessionManager;
 
   const initialFetchStatus: FetchStatus = useMemo(() => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
@@ -121,15 +117,7 @@ export function useDiscoverState({
   /**
    * Data fetching logic
    */
-  const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
-    initialFetchStatus,
-    searchSessionManager,
-    savedSearch,
-    searchSource,
-    services,
-    stateContainer,
-    useNewFieldsApi,
-  });
+  const { data$, refetch$, reset, inspectorAdapters } = stateContainer.dataState;
   /**
    * State changes (data view, columns), when a text base query result is returned
    */
@@ -155,6 +143,14 @@ export function useDiscoverState({
 
     return () => stopSync();
   }, [stateContainer, filterManager, data, dataView]);
+
+  /**
+   * Data store subscribing to trigger fetching
+   */
+  useEffect(() => {
+    const stopSync = stateContainer.dataState.subscribe();
+    return () => stopSync();
+  }, [stateContainer]);
 
   /**
    * Track state changes that should trigger a fetch
