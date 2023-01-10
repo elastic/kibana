@@ -31,7 +31,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       ];
 
       const instances = serviceRange.flatMap((serviceName) => {
-                const services = ENVIRONMENTS.map((env) => apm.service(serviceName, env, 'go'));
+        const services = ENVIRONMENTS.map((env) => apm.service(serviceName, env, 'go'));
 
         return lodashRange(0, 2).flatMap((serviceNodeId) =>
           services.map((service) => service.instance(`${serviceName}-${serviceNodeId}`))
