@@ -918,7 +918,7 @@ export default function ({ getService }: FtrProviderContext) {
               dev: {
                 aggType: 'sum',
                 bucketKey: {
-                  groupBy0: 'dev'
+                  groupBy0: 'dev',
                 },
                 comparator: '>=',
                 context: {
@@ -934,12 +934,10 @@ export default function ({ getService }: FtrProviderContext) {
                 metric: 'value',
                 shouldFire: true,
                 shouldWarn: false,
-                threshold: [
-                  1
-                ],
+                threshold: [1],
                 timeSize: 5,
                 timeUnit: 'm',
-                timestamp: '2021-01-01T01:00:00.000Z'
+                timestamp: '2021-01-01T01:00:00.000Z',
               },
               prod: {
                 timeSize: 5,
