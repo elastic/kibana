@@ -13,6 +13,7 @@ import { IHttpFetchError } from '@kbn/core-http-browser';
 import { TestNowResponse } from '../../../../../common/types';
 import {
   clearTestNowMonitorAction,
+  hideTestNowFlyoutAction,
   manualTestMonitorAction,
   manualTestRunUpdateAction,
   toggleTestNowFlyoutAction,
@@ -144,6 +145,17 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
         ...state[action.payload],
         isTestNowFlyoutOpen: !state[action.payload].isTestNowFlyoutOpen,
       };
+    })
+    .addCase(hideTestNowFlyoutAction, (state: WritableDraft<ManualTestRunsState>) => {
+      state = Object.values(state).reduce((acc, curr) => {
+        acc[curr.configId] = {
+          ...curr,
+          isTestNowFlyoutOpen: false,
+        };
+
+        return acc;
+      }, state);
+      return state;
     })
     .addCase(
       String(clearTestNowMonitorAction),

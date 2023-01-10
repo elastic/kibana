@@ -11,6 +11,7 @@ import { TestNowResponse } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
 
 export const toggleTestNowFlyoutAction = createAction<string>('TOGGLE TEST NOW FLYOUT ACTION');
+export const hideTestNowFlyoutAction = createAction('HIDE ALL TEST NOW FLYOUT ACTION');
 
 export const manualTestMonitorAction = createAsyncAction<string, TestNowResponse | undefined>(
   'TEST_NOW_MONITOR_ACTION'

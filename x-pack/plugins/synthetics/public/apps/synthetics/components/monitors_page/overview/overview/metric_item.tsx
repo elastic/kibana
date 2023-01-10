@@ -19,6 +19,7 @@ import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
 import { OverviewGridItemLoader } from './overview_grid_item_loader';
 import {
+  hideTestNowFlyoutAction,
   manualTestRunInProgressSelector,
   toggleTestNowFlyoutAction,
 } from '../../../../state/manual_test_runs';
@@ -92,6 +93,8 @@ export const MetricItem = ({
               onElementClick={() => {
                 if (testInProgress) {
                   dispatch(toggleTestNowFlyoutAction(monitor.configId));
+                } else {
+                  dispatch(hideTestNowFlyoutAction());
                 }
                 if (!testInProgress && locationName) {
                   onClick({

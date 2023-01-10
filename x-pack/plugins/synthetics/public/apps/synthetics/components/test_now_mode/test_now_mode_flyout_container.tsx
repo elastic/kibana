@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
+import { useTestFlyoutOpen } from './hooks/use_test_flyout_open';
 import { TestNowModeFlyout } from './test_now_mode_flyout';
 import { ManualTestRunMode } from './manual_test_run_mode/manual_test_run_mode';
 import { useSyntheticsRefreshContext } from '../../contexts';
@@ -29,9 +30,7 @@ export function TestNowModeFlyoutContainer() {
   const testNowRuns = useSelector(testNowRunsSelector);
   const { refreshApp } = useSyntheticsRefreshContext();
 
-  const flyoutOpenTestRun = Object.values(testNowRuns).find((value) => {
-    return value.isTestNowFlyoutOpen;
-  });
+  const flyoutOpenTestRun = useTestFlyoutOpen();
 
   const onDone = useCallback(
     (testRunId) => {
@@ -65,7 +64,9 @@ export function TestNowModeFlyoutContainer() {
           ? { id: flyoutOpenTestRun.testRunId, monitor: flyoutOpenTestRun.monitor }
           : undefined
       }
-      inProgress={flyoutOpenTestRun.status === 'in-progress'}
+      inProgress={
+        flyoutOpenTestRun.status === 'in-progress' || flyoutOpenTestRun.status === 'loading'
+      }
       onClose={() => handleFlyoutClose(flyoutOpenTestRun.testRunId)}
       onDone={onDone}
       isPushing={flyoutOpenTestRun.status === 'loading'}
@@ -78,7 +79,11 @@ export function TestNowModeFlyoutContainer() {
       {Object.values(testNowRuns)
         .filter((val) => val.testRunId)
         .map((manualTestRun) => (
-          <ManualTestRunMode manualTestRun={manualTestRun} onDone={onDone} />
+          <ManualTestRunMode
+            key={manualTestRun.testRunId}
+            manualTestRun={manualTestRun}
+            onDone={onDone}
+          />
         ))}
       {flyout}
     </>

@@ -173,6 +173,7 @@ export function ActionsPopover({
       disabled: testInProgress,
       onClick: () => {
         dispatch(manualTestMonitorAction.get(monitor.configId));
+        dispatch(setFlyoutConfig(null));
         setIsPopoverOpen(false);
       },
     },

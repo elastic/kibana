@@ -68,7 +68,6 @@ export function PingListTable({ loading, error, pings, onChange }: Props) {
     },
     {
       align: 'right',
-      dataType: 'number',
       field: 'monitor.ip',
       name: i18n.translate('xpack.synthetics.pingList.ipAddressColumnLabel', {
         defaultMessage: 'IP',

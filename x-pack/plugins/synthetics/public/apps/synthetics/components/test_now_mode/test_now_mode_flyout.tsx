@@ -75,7 +75,7 @@ export function TestNowModeFlyout({
               onDone={onDone}
             />
           ) : (
-            <LoadingState />
+            !isPushing && <LoadingState />
           )}
         </EuiErrorBoundary>
       </EuiFlyoutBody>
