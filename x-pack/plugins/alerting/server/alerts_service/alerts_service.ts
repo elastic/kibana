@@ -23,11 +23,13 @@ import {
   IIndexPatternString,
 } from './types';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { IRuleTypeAlerts } from '../types';
 import {
   createResourceInstallationHelper,
   ResourceInstallationHelper,
 } from './create_resource_installation_helper';
+import { AlertsClient } from './alerts_client';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
@@ -67,6 +69,8 @@ interface IAlertsService {
   register(opts: IRuleTypeAlerts, timeoutMs?: number): void;
 
   isInitialized(): boolean;
+
+  createAlertsClient(ruleType: UntypedNormalizedRuleType, maxAlerts: number): AlertsClient | null;
 }
 
 export class AlertsService implements IAlertsService {
@@ -85,7 +89,7 @@ export class AlertsService implements IAlertsService {
     return this.initialized;
   }
 
-  public async isContextInitialized(context: string) {
+  public async isContextInitialized(context: string): Promise<boolean> {
     return (await this.resourceInitializationHelper.getInitializedContexts().get(context)) ?? false;
   }
 
@@ -138,6 +142,22 @@ export class AlertsService implements IAlertsService {
     this.options.logger.info(`Registering resources for context "${context}".`);
     this.registeredContexts.set(context, fieldMap);
     this.resourceInitializationHelper.add({ context, fieldMap }, timeoutMs);
+  }
+
+  public createAlertsClient(
+    ruleType: UntypedNormalizedRuleType,
+    maxAlerts: number
+  ): AlertsClient | null {
+    if (!ruleType.alerts) {
+      return null;
+    }
+    return new AlertsClient({
+      logger: this.options.logger,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      resourceInstallationPromise: this.isContextInitialized(ruleType.alerts?.context),
+      ruleType,
+      maxAlerts,
+    });
   }
 
   private async initializeContext({ context, fieldMap }: IRuleTypeAlerts, timeoutMs?: number) {

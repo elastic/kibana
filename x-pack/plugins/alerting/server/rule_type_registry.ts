@@ -43,7 +43,7 @@ export interface ConstructorOptions {
   licensing: LicensingPluginSetup;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   inMemoryMetrics: InMemoryMetrics;
-  alertsService?: AlertsService;
+  alertsService: AlertsService | null;
 }
 
 export interface RegistryRuleType
@@ -141,7 +141,7 @@ export class RuleTypeRegistry {
   private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   private readonly licensing: LicensingPluginSetup;
   private readonly inMemoryMetrics: InMemoryMetrics;
-  private readonly alertsService?: AlertsService;
+  private readonly alertsService: AlertsService | null;
 
   constructor({
     logger,

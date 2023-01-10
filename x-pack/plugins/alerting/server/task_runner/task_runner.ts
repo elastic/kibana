@@ -72,6 +72,7 @@ import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
 import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
+import { AlertsClient } from '../alerts_service/alerts_client';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -110,6 +111,7 @@ export class TaskRunner<
   private alerts: Record<string, Alert<State, Context>>;
   private timer: TaskRunnerTimer;
   private alertingEventLogger: AlertingEventLogger;
+  private alertsClient: AlertsClient | null;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
@@ -117,6 +119,7 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
+  private useLegacyApi: boolean;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -156,6 +159,14 @@ export class TaskRunner<
       loggerId
     );
     this.ruleResult = new RuleResultService();
+    this.alertsClient = context.alertsService ? context.alertsService.createAlertsClient(
+      ruleType as UntypedNormalizedRuleType,
+      this.maxAlerts
+    ) : null;
+
+    // If this rule type has not registered an alert configuration or the AlertsClient is null
+    // default to legacy API
+    this.useLegacyApi = !this.ruleType.alerts || !this.alertsClient;
   }
 
   private async updateRuleSavedObjectPostRun(
@@ -261,6 +272,7 @@ export class TaskRunner<
         alertRecoveredInstances: alertRecoveredRawInstances = {},
         alertTypeState: ruleTypeState = {},
         previousStartedAt,
+        previousExecutionUuid,
       },
     } = this.taskInstance;
 
@@ -294,11 +306,23 @@ export class TaskRunner<
 
     const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts, originalRecoveredAlerts } =
       await this.timer.runWithTimer(TaskRunnerTimerSpan.RuleTypeRun, async () => {
-        for (const id in alertRawInstances) {
-          if (alertRawInstances.hasOwnProperty(id)) {
-            this.alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
+        if (previousExecutionUuid && !this.useLegacyApi) {
+          // This rule type has registered an alert configuration with the framework so we should use
+          // the FAAD API to query for alerts from previous execution
+          this.alertsClient!.loadExistingAlerts({
+            ruleId,
+            previousRuleExecutionUuid: previousExecutionUuid,
+          });
+
+        } else {
+          // Use legacy method of de-serializing alerts from the task document
+          for (const id in alertRawInstances) {
+            if (alertRawInstances.hasOwnProperty(id)) {
+              this.alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
+            }
           }
         }
+
 
         const recoveredAlerts: Record<string, Alert<State, Context>> = {};
         for (const id in alertRecoveredRawInstances) {
@@ -750,6 +774,7 @@ export class TaskRunner<
       return {
         ...omit(runStateWithMetrics, ['metrics']),
         previousStartedAt: startedAt,
+        previousExecutionUuid: this.executionId,
       };
     };
 

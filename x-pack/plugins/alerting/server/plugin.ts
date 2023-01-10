@@ -180,7 +180,7 @@ export class AlertingPlugin {
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
   private inMemoryMetrics: InMemoryMetrics;
-  private alertsService?: AlertsService;
+  private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -191,6 +191,7 @@ export class AlertingPlugin {
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.alertsService = null;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
     this.pluginStop$ = new ReplaySubject(1);
   }
@@ -462,6 +463,7 @@ export class AlertingPlugin {
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       executionContext: core.executionContext,
       ruleTypeRegistry: this.ruleTypeRegistry!,
+      alertsService: this.alertsService,
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,

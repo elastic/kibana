@@ -21,6 +21,7 @@ export const ruleStateSchema = t.partial({
   // tracks the recovered alerts for flapping purposes
   alertRecoveredInstances: t.record(t.string, rawAlertInstance),
   previousStartedAt: t.union([t.null, DateFromString]),
+  previousExecutionUuid: t.string,
   summaryActions: throttledActionSchema,
 });
 
