@@ -574,9 +574,7 @@ export function XYChart({
       if (layer.splitAccessors?.length !== 1) return;
 
       const splitAccessor = getAccessorByDimension(layer.splitAccessors[0], table.columns);
-      const filterValues = tooltipSelectedValues
-        .map((v) => v.datum?.[splitAccessor])
-        .filter((item) => item);
+      const filterValues = tooltipSelectedValues.map((v) => v.datum?.[splitAccessor]);
       const finalValues = filterValues.map((v) => {
         const splitPointRowIndex = formattedDatatables[layer.layerId].table.rows.findIndex(
           (row) => {
@@ -787,15 +785,7 @@ export function XYChart({
     position: uiState ? 'absolute' : 'relative',
   });
   // enable the tooltip actions only if there is at least one splitAccessor to the dataLayer
-  // and not a filters split as it is blocked by #144601
   const hasTooltipActions = dataLayers.some((dataLayer) => dataLayer.splitAccessors);
-  let hasFiltersBreakDown = false;
-  dataLayers.forEach((dataLayer) => {
-    if (dataLayer.splitAccessors) {
-      const columns = dataLayer.table.columns;
-      hasFiltersBreakDown = columns.some((c) => c.meta?.sourceParams?.type === 'filters');
-    }
-  });
 
   return (
     <div css={chartContainerStyle}>
@@ -833,7 +823,7 @@ export function XYChart({
                 : undefined
             }
             actions={
-              !args.detailedTooltip && hasTooltipActions && !hasFiltersBreakDown
+              !args.detailedTooltip && hasTooltipActions
                 ? [
                     {
                       disabled: (selected) => selected.length < 1,
