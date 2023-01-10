@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MultiRowInput } from '../../../sections/settings/components/multi_row_input';
 
-import { useLink, useFlyoutContext } from '../../../hooks';
+import { useLink } from '../../../hooks';
 
 import type { QuickStartCreateForm } from '../hooks';
 import { FleetServerHostSelect } from '../components';
@@ -50,9 +50,9 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
   error,
   inputs,
   submit,
+  onClose,
 }) => {
   const { getHref } = useLink();
-  const flyoutContext = useFlyoutContext();
 
   if (status === 'success') {
     return (
@@ -73,11 +73,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
             values={{
               hostUrl: <EuiCode>{selectedFleetServerHost?.host_urls[0]}</EuiCode>,
               fleetSettingsLink: (
-                <EuiButtonEmpty
-                  href={getHref('settings')}
-                  onClick={() => flyoutContext.closeFleetServerFlyout()}
-                  flush="left"
-                >
+                <EuiButtonEmpty href={getHref('settings')} onClick={onClose} flush="left">
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                     defaultMessage="Fleet Settings"
