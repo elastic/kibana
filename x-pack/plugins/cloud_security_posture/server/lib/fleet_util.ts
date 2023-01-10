@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { map, uniq } from 'lodash';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import * as t from 'io-ts';
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
   AgentService,
@@ -26,6 +27,7 @@ import {
 } from '../../common/schemas/benchmark';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
+const fleetError = t.type({ statusCode: t.number });
 
 const isPolicyTemplate = (input: any): input is PosturePolicyTemplate =>
   SUPPORTED_POLICY_TEMPLATES.includes(input);
@@ -43,17 +45,26 @@ export type AgentStatusByAgentPolicyMap = Record<string, GetAgentStatusResponse[
 
 export const getAgentStatusesByAgentPolicies = async (
   agentService: AgentService,
-  agentPolicies: AgentPolicy[] | undefined
+  agentPolicies: AgentPolicy[] | undefined,
+  logger: Logger
 ): Promise<AgentStatusByAgentPolicyMap> => {
   if (!agentPolicies?.length) return {};
 
   const internalAgentService = agentService.asInternalUser;
   const result: AgentStatusByAgentPolicyMap = {};
 
-  for (const agentPolicy of agentPolicies) {
-    result[agentPolicy.id] = await internalAgentService.getAgentStatusForAgentPolicy(
-      agentPolicy.id
-    );
+  try {
+    for (const agentPolicy of agentPolicies) {
+      result[agentPolicy.id] = await internalAgentService.getAgentStatusForAgentPolicy(
+        agentPolicy.id
+      );
+    }
+  } catch (error) {
+    if (fleetError.is(error) && error.statusCode === 404) {
+      logger.debug('failed to get agent status for agent policy');
+    } else {
+      throw error;
+    }
   }
 
   return result;

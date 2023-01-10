@@ -42,7 +42,6 @@ async function setup() {
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerPush: false,
-    dockerTag: '',
     dockerTagQualifier: '',
   });
 

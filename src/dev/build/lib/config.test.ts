@@ -32,7 +32,6 @@ const setup = async ({ targetAllPlatforms = true }: { targetAllPlatforms?: boole
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerPush: false,
-    dockerTag: '',
     dockerTagQualifier: '',
   });
 };
