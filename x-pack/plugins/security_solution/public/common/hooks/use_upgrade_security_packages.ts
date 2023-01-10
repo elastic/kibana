@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
+import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { KibanaServices, useKibana } from '../lib/kibana';
 import { useUserPrivileges } from '../components/user_privileges';
 
@@ -23,14 +24,35 @@ const sendUpgradeSecurityPackages = async (
   http: HttpStart,
   options: HttpFetchOptions = {},
   prebuiltRulesPackageVersion?: string
-): Promise<BulkInstallPackagesResponse> => {
-  // TODO: If `prebuiltRulesPackageVersion` is provided, try to install that version
-  return http.post<BulkInstallPackagesResponse>(epmRouteService.getBulkInstallPath(), {
-    ...options,
-    body: JSON.stringify({
-      packages: ['endpoint', 'security_detection_engine'],
-    }),
-  });
+): Promise<Array<PromiseSettledResult<BulkInstallPackagesResponse | InstallPackageResponse>>> => {
+  const packages = ['endpoint', 'security_detection_engine'];
+  const requests: Array<Promise<InstallPackageResponse | BulkInstallPackagesResponse>> = [];
+
+  // If `prebuiltRulesPackageVersion` is provided, try to install that version
+  // Must be done as two separate requests as bulk API doesn't support versions
+  if (prebuiltRulesPackageVersion != null) {
+    packages.splice(packages.indexOf('security_detection_engine'), 1);
+    requests.push(
+      http.post<InstallPackageResponse>(
+        epmRouteService.getInstallPath('security_detection_engine', prebuiltRulesPackageVersion),
+        {
+          ...options,
+        }
+      )
+    );
+  }
+
+  // Note: if `prerelease:true` option is provided, endpoint package will also be installed as prerelease
+  requests.push(
+    http.post<BulkInstallPackagesResponse>(epmRouteService.getBulkInstallPath(), {
+      ...options,
+      body: JSON.stringify({
+        packages,
+      }),
+    })
+  );
+
+  return Promise.allSettled(requests);
 };
 
 export const useUpgradeSecurityPackages = () => {
@@ -53,6 +75,7 @@ export const useUpgradeSecurityPackages = () => {
           // Make sure fleet is initialized first
           await context.services.fleet?.isInitialized();
 
+          // Always install the latest package if in dev env or snapshot build
           const isPrerelease =
             KibanaServices.getKibanaVersion().includes('-SNAPSHOT') ||
             KibanaServices.getKibanaBranch() === 'main';
