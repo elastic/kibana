@@ -7,6 +7,7 @@
 import { ColumnarViewModel } from '@elastic/charts';
 import d3 from 'd3';
 import { compact, sum, uniqueId, range } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { createColumnarViewModel } from '../../../common/columnar_view_model';
 import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
 import { FRAME_TYPE_COLOR_MAP, rgbToRGBA } from '../../../common/frame_type_colors';
@@ -95,7 +96,12 @@ export function getFlamegraphModel({
         const color = getColor(rounded);
         return {
           color,
-          label: `${asPercentage(rounded)}`,
+          label:
+            rounded === 0
+              ? i18n.translate('xpack.profiling.flamegraphModel.noChange', {
+                  defaultMessage: 'No change',
+                })
+              : '',
         };
       });
 

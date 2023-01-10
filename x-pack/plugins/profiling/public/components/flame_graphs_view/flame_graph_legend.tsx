@@ -49,8 +49,28 @@ export function FlameGraphLegend({
                     </EuiFlexItem>
                     <EuiFlexItem style={{ width: legendItems.length * 20 }}>
                       <EuiFlexGroup direction="row" gutterSize="none">
-                        {legendItems.map(({ color }) => {
-                          return <EuiFlexItem style={{ backgroundColor: color }} />;
+                        {legendItems.map(({ color, label }) => {
+                          return (
+                            <EuiFlexItem
+                              style={{ backgroundColor: color, justifyContent: 'center' }}
+                            >
+                              {label ? (
+                                <EuiText
+                                  size="xs"
+                                  style={{
+                                    verticalAlign: 'center',
+                                    whiteSpace: 'nowrap',
+                                    paddingLeft: 8,
+                                    paddingRight: 8,
+                                  }}
+                                >
+                                  {label}
+                                </EuiText>
+                              ) : (
+                                ''
+                              )}
+                            </EuiFlexItem>
+                          );
                         })}
                       </EuiFlexGroup>
                     </EuiFlexItem>
