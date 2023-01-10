@@ -16,6 +16,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import { RuleNotifyWhen } from '../../types';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
@@ -167,6 +168,7 @@ describe('create()', () => {
               params: {
                 foo: true,
               },
+              frequency: { summary: false, notifyWhen: RuleNotifyWhen.CHANGE, throttle: null },
             },
           ],
         },
@@ -444,7 +446,7 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -662,7 +664,7 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -753,7 +755,7 @@ describe('create()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -840,7 +842,7 @@ describe('create()', () => {
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -945,7 +947,7 @@ describe('create()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -1028,7 +1030,7 @@ describe('create()', () => {
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -1089,7 +1091,7 @@ describe('create()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: { bar: true },
         running: false,
         schedule: { interval: '1m' },
@@ -1123,7 +1125,7 @@ describe('create()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -1160,7 +1162,7 @@ describe('create()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "id": "1",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -1290,7 +1292,7 @@ describe('create()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
         running: false,
         schedule: { interval: '1m' },
@@ -1461,7 +1463,7 @@ describe('create()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         name: 'abc',
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'action_0' },
         running: false,
         schedule: { interval: '1m' },
@@ -1841,7 +1843,7 @@ describe('create()', () => {
       muteAll: false,
       snoozeSchedule: [],
       mutedInstanceIds: [],
-      notifyWhen: 'onActiveAlert',
+      notifyWhen: null,
       actions: [
         {
           group: 'default',
@@ -1895,7 +1897,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],
         mutedInstanceIds: [],
@@ -1941,7 +1943,7 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
-        "notifyWhen": "onActiveAlert",
+        "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
@@ -2024,7 +2026,7 @@ describe('create()', () => {
           interval: '1m',
         },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         params: {
           bar: true,
           risk_score: 42,
@@ -2420,7 +2422,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],
         mutedInstanceIds: [],
@@ -2524,7 +2526,7 @@ describe('create()', () => {
         },
         schedule: { interval: '1m' },
         throttle: null,
-        notifyWhen: 'onActiveAlert',
+        notifyWhen: null,
         muteAll: false,
         snoozeSchedule: [],
         mutedInstanceIds: [],
@@ -2743,7 +2745,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default, default"`
+      `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, default"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2773,7 +2775,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data: data2 })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default"`
+      `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
