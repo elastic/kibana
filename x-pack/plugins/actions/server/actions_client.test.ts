@@ -44,6 +44,8 @@ import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { getOAuthJwtAccessToken } from './lib/get_oauth_jwt_access_token';
 import { getOAuthClientCredentialsAccessToken } from './lib/get_oauth_client_credentials_access_token';
 import { OAuthParams } from './routes/get_oauth_access_token';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../common';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -96,6 +98,7 @@ const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const mockTaskManager = taskManagerMock.createSetup();
 const configurationUtilities = actionsConfigMock.create();
+const eventLogClient = eventLogClientMock.create();
 const getEventLogClient = jest.fn();
 
 let actionsClient: ActionsClient;
@@ -146,6 +149,7 @@ beforeEach(() => {
   (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
     `Bearer clienttokentokentoken`
   );
+  getEventLogClient.mockResolvedValue(eventLogClient);
 });
 
 describe('create()', () => {
@@ -2579,5 +2583,121 @@ describe('isPreconfigured()', () => {
     });
 
     expect(actionsClient.isPreconfigured(uuid.v4())).toEqual(false);
+  });
+});
+
+describe('getGlobalExecutionLogWithAuth()', () => {
+  const opts: GetGlobalExecutionLogParams = {
+    dateStart: '2023-01-09T08:55:56-08:00',
+    dateEnd: '2023-01-10T08:55:56-08:00',
+    page: 1,
+    perPage: 50,
+    sort: [{ timestamp: { order: 'desc' } }],
+  };
+  const results = {
+    aggregations: {
+      excludeExecuteStart: {
+        doc_count: 5,
+        executionUuid: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [],
+        },
+        executionUuidCardinality: { doc_count: 5, executionUuidCardinality: { value: 5 } },
+      },
+    },
+  };
+  describe('authorization', () => {
+    test('ensures user is authorised to access logs', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
+
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+      await actionsClient.getGlobalExecutionLogWithAuth(opts);
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get_execution_log');
+    });
+
+    test('throws when user is not authorised to access logs', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+      authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access logs`));
+
+      await expect(actionsClient.getGlobalExecutionLogWithAuth(opts)).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to access logs]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get_execution_log');
+    });
+  });
+
+  test('calls the eventLogClient with the appropriate parameters', async () => {
+    eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
+
+    await expect(actionsClient.getGlobalExecutionLogWithAuth(opts)).resolves.toMatchInlineSnapshot(`
+      Object {
+        "data": Array [],
+        "total": 5,
+      }
+    `);
+    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
+  });
+});
+
+describe('getGlobalExecutionKpiWithAuth()', () => {
+  const opts: GetGlobalExecutionKPIParams = {
+    dateStart: '2023-01-09T08:55:56-08:00',
+    dateEnd: '2023-01-10T08:55:56-08:00',
+  };
+  const results = {
+    aggregations: {
+      excludeExecuteStart: {
+        doc_count: 5,
+        executionUuid: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [],
+        },
+      },
+    },
+  };
+  describe('authorization', () => {
+    test('ensures user is authorised to access kpi', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
+
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+      await actionsClient.getGlobalExecutionKpiWithAuth(opts);
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get_execution_kpi');
+    });
+
+    test('throws when user is not authorised to access kpi', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+      authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access kpi`));
+
+      await expect(actionsClient.getGlobalExecutionKpiWithAuth(opts)).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to access kpi]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get_execution_kpi');
+    });
+  });
+
+  test('calls the eventLogClient with the appropriate parameters', async () => {
+    eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
+
+    await expect(actionsClient.getGlobalExecutionKpiWithAuth(opts)).resolves.toMatchInlineSnapshot(`
+      Object {
+        "failure": 0,
+        "success": 0,
+        "unknown": 0,
+        "warning": 0,
+      }
+    `);
+    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
   });
 });
