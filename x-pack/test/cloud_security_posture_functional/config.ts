@@ -8,7 +8,7 @@
 import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
-import { getPreConfiguredFleetPackages, getPreConfiguredAgentPolicies } from './helpers';
+import { getCloudSecurityFleetConfig } from './helpers';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
@@ -26,8 +26,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        ...getPreConfiguredFleetPackages(),
-        ...getPreConfiguredAgentPolicies(),
+        ...getCloudSecurityFleetConfig(),
       ],
     },
   };
