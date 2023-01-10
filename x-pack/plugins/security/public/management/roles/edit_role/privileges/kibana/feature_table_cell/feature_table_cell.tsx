@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import './feature_table_cell.scss';
+
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
 
@@ -38,7 +40,9 @@ export const FeatureTableCell = ({ feature }: Props) => {
     <EuiFlexGroup direction="column" gutterSize="none" component="span">
       <EuiFlexItem data-test-subj={`featureTableCell`} component="span">
         <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem grow={false}>{feature.name}</EuiFlexItem>
+          <EuiFlexItem className="featurePrivilegeName" grow={false}>
+            {feature.name}
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>{tooltipElement}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
