@@ -62,8 +62,10 @@ journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
     await assertText({ page, text: 'browser' });
     await assertText({ page, text: 'http' });
 
-    const suggestionItem = await page.$(byTestId('autoCompleteSuggestionText'));
-    expect(await suggestionItem?.textContent()).toBe('"browser" ');
+    await retry.tryForTime(30 * 1000, async () => {
+      const suggestionItem = await page.$(byTestId('autoCompleteSuggestionText'));
+      expect(await suggestionItem?.textContent()).toBe('"browser" ');
+    });
 
     await page.click(byTestId('euiFlyoutCloseButton'));
     await page.click(byTestId('confirmModalConfirmButton'));
