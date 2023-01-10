@@ -8,12 +8,12 @@
 import { Logger, CoreStart } from '@kbn/core/server';
 import {
   FleetStartContract,
-  PackagePolicyCreateCallback,
-  PackagePolicyPostCreateCallback,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server';
 import { get } from 'lodash';
-import { PackagePolicyDeleteCallback } from '@kbn/fleet-plugin/server/types';
 import { APMPlugin, APMRouteHandlerResources } from '../..';
 import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { decoratePackagePolicyWithAgentConfigAndSourceMap } from './merge_package_policy_with_apm';
@@ -81,7 +81,7 @@ function onPackagePolicyDelete({
   fleetPluginStart: FleetStartContract;
   coreStart: CoreStart;
   logger: Logger;
-}): PackagePolicyDeleteCallback {
+}): PostPackagePolicyDeleteCallback {
   return async (packagePolicies) => {
     // console.log(`packagePolicyDelete:`, packagePolicies);
     const promises = packagePolicies.map(async (packagePolicy) => {
@@ -128,7 +128,7 @@ function onPackagePolicyPostCreate({
   fleet: FleetStartContract;
   coreStart: CoreStart;
   logger: Logger;
-}): PackagePolicyPostCreateCallback {
+}): PostPackagePolicyPostCreateCallback {
   return async (packagePolicy) => {
     if (packagePolicy.package?.name !== 'apm') {
       return packagePolicy;
@@ -156,7 +156,7 @@ function onPackagePolicyCreateOrUpdate({
 }: {
   fleetPluginStart: FleetStartContract;
   config: NonNullable<APMPlugin['currentConfig']>;
-}): PutPackagePolicyUpdateCallback & PackagePolicyCreateCallback {
+}): PutPackagePolicyUpdateCallback & PostPackagePolicyCreateCallback {
   return async (packagePolicy, context, request) => {
     if (packagePolicy.package?.name !== 'apm') {
       return packagePolicy;
