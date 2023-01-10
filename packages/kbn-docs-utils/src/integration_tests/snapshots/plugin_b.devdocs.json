@@ -29,7 +29,7 @@
           },
           "<any>"
         ],
-        "path": "packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/plugin_b/public/index.ts",
+        "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_b/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,7 +50,7 @@
               },
               "<any>"
             ],
-            "path": "packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/plugin_b/public/index.ts",
+            "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_b/public/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

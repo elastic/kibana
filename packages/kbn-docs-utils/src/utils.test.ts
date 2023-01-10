@@ -9,6 +9,7 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import Path from 'path';
 import { Project } from 'ts-morph';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { findPlugins } from './find_plugins';
 import { getPluginApi } from './get_plugin_api';
 import { getKibanaPlatformPlugin } from './integration_tests/kibana_platform_plugin_mock';
@@ -26,7 +27,7 @@ it('getFileName', () => {
 
 it('test getPluginForPath', () => {
   const plugins = findPlugins();
-  const path = Path.resolve(__dirname, '../../../../src/plugins/embeddable/public/service/file.ts');
+  const path = Path.resolve(REPO_ROOT, 'src/plugins/embeddable/public/service/file.ts');
   expect(getPluginForPath(path, plugins)).toBeDefined();
 });
 
@@ -53,8 +54,8 @@ it('test getServiceForPath', () => {
 
   expect(
     getServiceForPath(
-      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/plugin_a/public/foo/index',
-      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/plugin_a'
+      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/foo/index',
+      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a'
     )
   ).toBe('foo');
 });
