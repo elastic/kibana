@@ -6,12 +6,19 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import { SecurityPageName } from '../../../../common/constants';
 import type { Request } from './types';
 
 export const VISUALIZATION_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
 
-export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
-  hostName
+const pageFilterFieldMap: Record<string, string> = {
+  [SecurityPageName.hosts]: 'host',
+  [SecurityPageName.users]: 'user',
+};
+
+export const getDetailsPageFilter = (pageName: string, detailName?: string): Filter[] => {
+  const field = pageFilterFieldMap[pageName];
+  return field && detailName
     ? [
         {
           meta: {
@@ -19,19 +26,20 @@ export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
             negate: false,
             disabled: false,
             type: 'phrase',
-            key: 'host.name',
+            key: `${field}.name`,
             params: {
-              query: hostName,
+              query: detailName,
             },
           },
           query: {
             match_phrase: {
-              'host.name': hostName,
+              [`${field}.name`]: detailName,
             },
           },
         },
       ]
     : [];
+};
 
 export const hostNameExistsFilter: Filter[] = [
   {

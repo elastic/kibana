@@ -16,6 +16,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useSeverityChartData } from './severity_donut/use_severity_chart_data';
 import { SeverityLevelChart } from './severity_donut/severity_level_chart';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const DETECTIONS_ALERTS_CHARTS_ID = 'detections-alerts-charts';
 
@@ -54,6 +55,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
 }: Props) => {
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_CHARTS_ID}-${uuid.v4()}`, []);
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
 
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_ALERTS_CHARTS_ID);
   const [querySkip, setQuerySkip] = useState(!toggleStatus);
@@ -69,12 +71,16 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const { items: severityData, isLoading: isSeverityLoading } = useSeverityChartData({
+  const {
+    items: severityData,
+    isLoading: isSeverityLoading,
+    timerange,
+  } = useSeverityChartData({
     filters,
     query,
     signalIndexName,
     runtimeMappings,
-    skip: querySkip,
+    skip: querySkip || isChartEmbeddablesEnabled,
     uniqueQueryId,
   });
 
@@ -99,10 +105,12 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
         <EuiFlexGroup data-test-subj="alerts-charts-container">
           <PlaceHolder title={i18n.DETECTIONS_TITLE} />
           <SeverityLevelChart
-            data={severityData}
-            isLoading={isSeverityLoading}
-            uniqueQueryId={uniqueQueryId}
             addFilter={addFilter}
+            data={severityData}
+            filters={filters}
+            isLoading={isSeverityLoading}
+            timerange={timerange}
+            uniqueQueryId={uniqueQueryId}
           />
           <PlaceHolder title={i18n.ALERT_BY_HOST_TITLE} />
         </EuiFlexGroup>

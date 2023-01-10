@@ -23,7 +23,7 @@ jest.mock('../../../../containers/sourcerer', () => ({
 jest.mock('../../../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {
-      detailName: 'mockHost',
+      detailName: '192.168.1.1',
       pageName: 'network',
       tabName: 'events',
     },

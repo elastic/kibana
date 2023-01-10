@@ -6,6 +6,7 @@
  */
 
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Filter } from '@kbn/es-query';
 import type { ESQuery } from '../../../../../common/typed_json';
 
 interface StatusBySeverity {
@@ -78,9 +79,10 @@ export type ParsedAlertsData = Partial<
 export type AlertsByStatus = 'open' | 'acknowledged' | 'closed';
 
 export interface AlertDonutEmbeddableProps {
-  status: AlertsByStatus;
-  timerange: { from: string; to: string };
+  filters?: Filter[];
   label: string;
+  status?: AlertsByStatus;
+  timerange: { from: string; to: string };
 }
 
 export interface VisualizationAlertsByStatusData {

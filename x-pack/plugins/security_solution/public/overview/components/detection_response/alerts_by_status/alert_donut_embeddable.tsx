@@ -23,6 +23,7 @@ import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
 const ChartSize = '135px';
 
 const AlertDonutEmbeddableComponent: React.FC<AlertDonutEmbeddableProps> = ({
+  filters,
   status,
   timerange,
   label,
@@ -55,7 +56,7 @@ const AlertDonutEmbeddableComponent: React.FC<AlertDonutEmbeddableProps> = ({
     [dispatch, queryId, refetchByRestartingSession, searchSessionId]
   );
 
-  const extraOptions = useMemo(() => ({ status }), [status]);
+  const extraOptions = useMemo(() => ({ status, filters }), [status, filters]);
 
   useEffect(() => {
     dispatch(

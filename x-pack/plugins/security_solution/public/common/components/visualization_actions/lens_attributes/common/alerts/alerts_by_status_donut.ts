@@ -38,25 +38,30 @@ export const getAlertsByStatusAttributes: GetLensAttributes = (
         language: 'kuery',
       },
       filters: [
-        {
-          meta: {
-            disabled: false,
-            negate: false,
-            alias: null,
-            index: 'a1aaa83b-5026-444e-9465-50e0afade01c',
-            key: stackByField,
-            field: stackByField,
-            params: {
-              query: extraOptions?.status,
-            },
-            type: 'phrase',
-          },
-          query: {
-            match_phrase: {
-              [stackByField]: extraOptions?.status,
-            },
-          },
-        },
+        ...(extraOptions?.status && stackByField
+          ? [
+              {
+                meta: {
+                  disabled: false,
+                  negate: false,
+                  alias: null,
+                  index: 'a1aaa83b-5026-444e-9465-50e0afade01c',
+                  key: stackByField,
+                  field: stackByField,
+                  params: {
+                    query: extraOptions?.status,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    [stackByField]: extraOptions?.status,
+                  },
+                },
+              },
+            ]
+          : []),
+        ...(extraOptions?.filters ? extraOptions.filters : []),
       ],
       datasourceStates: {
         formBased: {
