@@ -40,6 +40,14 @@ const getInputCharacters = (input: string): InputCharacter[] => {
   });
 };
 
+const toReactJsxFragment = (prefix: string, item: InputCharacter, index: number) => {
+  return (
+    <React.Fragment key={`${prefix}.${index}.${item.value ?? '$'}`}>
+      {item.renderValue}
+    </React.Fragment>
+  );
+};
+
 /**
  * Class that manages the command entered and how that is displayed to the left and right of the cursor
  */
@@ -101,6 +109,10 @@ export class EnteredInput {
           }
         }
       }
+
+      // Remove all empty characters (created as a result of inserting any Argument Selector components
+      this.leftOfCursorContent = this.leftOfCursorContent.filter(({ value }) => value.length > 0);
+      this.rightOfCursorContent = this.rightOfCursorContent.filter(({ value }) => value.length > 0);
     }
   }
 
@@ -129,23 +141,11 @@ export class EnteredInput {
   }
 
   getLeftOfCursorRenderingContent(): ReactNode {
-    return (
-      <>
-        {this.leftOfCursorContent.map((item, index) => {
-          return <React.Fragment key={`left.${index}`}>{item.renderValue}</React.Fragment>;
-        })}
-      </>
-    );
+    return <>{this.leftOfCursorContent.map(toReactJsxFragment.bind(null, 'left'))}</>;
   }
 
   getRightOfCursorRenderingContent(): ReactNode {
-    return (
-      <>
-        {this.rightOfCursorContent.map((item, index) => {
-          return <React.Fragment key={`right.${index}`}>{item.renderValue}</React.Fragment>;
-        })}
-      </>
-    );
+    return <>{this.rightOfCursorContent.map(toReactJsxFragment.bind(null, 'right'))}</>;
   }
 
   moveCursorTo(direction: 'left' | 'right' | 'end' | 'home') {
