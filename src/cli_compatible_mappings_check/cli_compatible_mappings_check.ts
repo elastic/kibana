@@ -15,7 +15,6 @@ import fs from 'fs';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
-import { functionTypeParam } from '@babel/types';
 import { extractMappingsFromPlugins } from './extract_mappings_from_plugins';
 
 const MY_INDEX = '.kibana';
