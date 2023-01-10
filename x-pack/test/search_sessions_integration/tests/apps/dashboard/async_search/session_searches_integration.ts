@@ -153,7 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
       });
 
-      it.only('Other bucket should be added to a session when restoring', async () => {
+      it('Other bucket should be added to a session when restoring', async () => {
         // not using regular navigation method, because don't want to wait until all panels load
         // await PageObjects.dashboard.loadSavedDashboard('Lens with other bucket');
         await listingTable.clickItemLink('dashboard', 'Lens with other bucket');
