@@ -63,7 +63,6 @@ describe(`useRefetchByRestartingSession`, () => {
     },
     {
       session: MutableRefObject<ISessionService>;
-      searchSessionId: string | undefined;
       refetchByRestartingSession: Refetch;
     }
   >;
@@ -95,10 +94,6 @@ describe(`useRefetchByRestartingSession`, () => {
         wrapper,
       }
     );
-  });
-
-  it('should retrieve exisisting search session', () => {
-    expect(res.result.current.searchSessionId).toBeUndefined();
   });
 
   it('should start a session when clicking refetchByRestartingSession', () => {

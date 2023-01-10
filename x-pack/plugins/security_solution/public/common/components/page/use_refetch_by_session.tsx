@@ -28,7 +28,6 @@ export const useRefetchByRestartingSession = ({
   skip,
 }: UseRefetchByRestartingSessionProps): {
   session: MutableRefObject<ISessionService>;
-  searchSessionId: string | undefined;
   refetchByRestartingSession: Refetch;
 } => {
   const dispatch = useDispatch();
@@ -38,11 +37,10 @@ export const useRefetchByRestartingSession = ({
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const { selectedInspectIndex, searchSessionId: existingSearchSessionId } = useDeepEqualSelector(
-    (state) =>
-      inputId === InputsModelId.global
-        ? getGlobalQuery(state, queryId)
-        : getTimelineQuery(state, queryId)
+  const { selectedInspectIndex } = useDeepEqualSelector((state) =>
+    inputId === InputsModelId.global
+      ? getGlobalQuery(state, queryId)
+      : getTimelineQuery(state, queryId)
   );
 
   const refetchByRestartingSession = useCallback(() => {
@@ -63,7 +61,6 @@ export const useRefetchByRestartingSession = ({
 
   return {
     session,
-    searchSessionId: existingSearchSessionId,
     refetchByRestartingSession,
   };
 };
