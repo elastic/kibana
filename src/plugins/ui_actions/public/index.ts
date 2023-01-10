@@ -17,7 +17,7 @@ export type { UiActionsSetup, UiActionsStart } from './plugin';
 export type { UiActionsServiceParams } from './service';
 export { UiActionsService } from './service';
 export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
-export { createAction, IncompatibleActionError } from './actions';
+export { ActionInternal, createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
 export type {
   Presentable as UiActionsPresentable,
@@ -39,3 +39,8 @@ export {
   ACTION_VISUALIZE_LENS_FIELD,
 } from './types';
 export type { ActionExecutionContext, ActionExecutionMeta, ActionMenuItemProps } from './actions';
+export {
+  CellActions,
+  CellActionsMode,
+  CellActionsContextProvider,
+} from './cell_actions/components';

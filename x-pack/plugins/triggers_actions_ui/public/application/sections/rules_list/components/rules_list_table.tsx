@@ -165,7 +165,7 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
       actionsCount: rule.actions.length,
       ruleType: ruleTypeIndex.get(rule.ruleTypeId)?.name ?? rule.ruleTypeId,
       isEditable:
-        hasAllPrivilege(rule, ruleTypeIndex.get(rule.ruleTypeId)) &&
+        hasAllPrivilege(rule.consumer, ruleTypeIndex.get(rule.ruleTypeId)) &&
         (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
       enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
       showIntervalWarning: parseDuration(rule.schedule.interval) < minimumDuration,
@@ -282,7 +282,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
   );
 
   const renderRuleStatusDropdown = useCallback(
-    (ruleEnabled: boolean | undefined, rule: RuleTableItem) => {
+    (rule: RuleTableItem) => {
       return (
         <RuleStatusDropdown
           hideSnoozeOption
@@ -699,7 +699,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '10%',
         'data-test-subj': 'rulesTableCell-status',
         render: (_enabled: boolean | undefined, rule: RuleTableItem) => {
-          return renderRuleStatusDropdown(rule.enabled, rule);
+          return renderRuleStatusDropdown(rule);
         },
       },
       {

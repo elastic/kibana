@@ -6,12 +6,24 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
+import { enableDefaultAlertingEffect, updateDefaultAlertingEffect } from './alert_rules/effects';
+import { executeEsQueryEffect } from './elasticsearch';
+import {
+  fetchAlertConnectorsEffect,
+  fetchDynamicSettingsEffect,
+  setDynamicSettingsEffect,
+} from './settings/effects';
+import { syncGlobalParamsEffect } from './settings';
 import { fetchAgentPoliciesEffect } from './private_locations';
 import { fetchNetworkEventsEffect } from './network_events/effects';
 import { fetchSyntheticsMonitorEffect } from './monitor_details';
 import { fetchIndexStatusEffect } from './index_status';
 import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
-import { fetchMonitorListEffect, upsertMonitorEffect } from './monitor_list';
+import {
+  enableMonitorAlertEffect,
+  fetchMonitorListEffect,
+  upsertMonitorEffect,
+} from './monitor_list';
 import { fetchMonitorOverviewEffect, fetchOverviewStatusEffect } from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
 import { browserJourneyEffects } from './browser_journey';
@@ -31,5 +43,14 @@ export const rootEffect = function* root(): Generator {
     fork(fetchNetworkEventsEffect),
     fork(fetchPingStatusesEffect),
     fork(fetchAgentPoliciesEffect),
+    fork(fetchDynamicSettingsEffect),
+    fork(setDynamicSettingsEffect),
+    fork(fetchAgentPoliciesEffect),
+    fork(fetchAlertConnectorsEffect),
+    fork(syncGlobalParamsEffect),
+    fork(enableDefaultAlertingEffect),
+    fork(enableMonitorAlertEffect),
+    fork(updateDefaultAlertingEffect),
+    fork(executeEsQueryEffect),
   ]);
 };

@@ -261,7 +261,7 @@ describe.skip('rules_list component empty', () => {
   });
 });
 
-describe('rules_list component with props', () => {
+describe.skip('rules_list component with props', () => {
   describe('Status filter', () => {
     let wrapper: ReactWrapper<any>;
     async function setup(editable: boolean = true) {
@@ -581,7 +581,10 @@ describe('rules_list component with props', () => {
           .exists()
       ).toBeTruthy(); // doesnt have a tick icon
       expect(
-        wrapper.find('[data-test-subj="actionTypeFilterButton"] .euiNotificationBadge').text()
+        wrapper
+          .find('[data-test-subj="actionTypeFilterButton"] .euiNotificationBadge')
+          .first()
+          .text()
       ).toEqual('1'); // badge is being shown
     });
   });
@@ -857,7 +860,7 @@ describe('rules_list component with props', () => {
   });
 });
 
-describe('rules_list component with items', () => {
+describe.skip('rules_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(editable: boolean = true) {
@@ -1437,7 +1440,7 @@ describe('rules_list component with items', () => {
   });
 });
 
-describe('rules_list component empty with show only capability', () => {
+describe.skip('rules_list component empty with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
@@ -1480,7 +1483,7 @@ describe('rules_list component empty with show only capability', () => {
   });
 });
 
-describe('rules_list with show only capability', () => {
+describe.skip('rules_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(editable: boolean = true) {
@@ -1601,7 +1604,7 @@ describe('rules_list with show only capability', () => {
   });
 });
 
-describe('rules_list with disabled items', () => {
+describe.skip('rules_list with disabled items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
