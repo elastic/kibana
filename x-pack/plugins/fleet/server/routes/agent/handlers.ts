@@ -182,7 +182,7 @@ export const getAgentsHandler: RequestHandler<
       kuery: request.query.kuery,
       sortField: request.query.sortField,
       sortOrder: request.query.sortOrder,
-      getTotalInactive: true,
+      getTotalInactive: request.query.showInactive,
     });
 
     const body: GetAgentsResponse = {
