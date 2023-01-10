@@ -193,6 +193,7 @@ describe('filters_builder', () => {
         if (
           typeof secondFilter !== 'number' &&
           typeof secondFilter !== 'string' &&
+          typeof secondFilter !== 'boolean' &&
           isCombinedFilter(secondFilter)
         ) {
           groupOfFilters = secondFilter;
