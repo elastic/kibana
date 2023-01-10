@@ -58,7 +58,7 @@ const getMockedDatePickeDependencies = () => {
 
 const Wrapper: FC = ({ children }) => (
   <I18nProvider>
-    <DatePickerContextProvider deps={getMockedDatePickeDependencies()}>
+    <DatePickerContextProvider {...getMockedDatePickeDependencies()}>
       {children}
     </DatePickerContextProvider>
   </I18nProvider>

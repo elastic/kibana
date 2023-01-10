@@ -124,7 +124,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
             }}
           >
             <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
-              <DatePickerContextProvider deps={datePickerDeps}>
+              <DatePickerContextProvider {...datePickerDeps}>
                 <MlRouter pageDeps={pageDeps} />
               </DatePickerContextProvider>
             </StorageContextProvider>

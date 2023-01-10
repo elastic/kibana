@@ -138,7 +138,7 @@ describe('TimeSeriesExplorerUrlStateManager', () => {
     render(
       <MlContext.Provider value={kibanaContextValueMock}>
         <I18nProvider>
-          <DatePickerContextProvider deps={getMockedDatePickeDependencies()}>
+          <DatePickerContextProvider {...getMockedDatePickeDependencies()}>
             <TimeSeriesExplorerUrlStateManager {...props} />
           </DatePickerContextProvider>
         </I18nProvider>
