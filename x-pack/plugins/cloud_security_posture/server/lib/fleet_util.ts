@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { map, uniq } from 'lodash';
+import * as t from 'io-ts';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
@@ -58,8 +59,9 @@ export const getAgentStatusesByAgentPolicies = async (
       );
     }
   } catch (error) {
-    if (error.statusCode === 404) {
-      logger.debug('Index .fleet-agents does not exist yet, skipping point in time.');
+    const httpError = t.type({ statusCode: t.number });
+    if (httpError.is(error) && error.statusCode === 404) {
+      logger.debug('failed to get agent status for agent policy');
     } else {
       throw error;
     }
