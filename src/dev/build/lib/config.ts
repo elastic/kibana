@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { dirname, resolve, relative } from 'path';
+import { resolve, relative } from 'path';
 import os from 'os';
 
-import loadJsonFile from 'load-json-file';
-import { discoverBazelPackages, type BazelPackage } from '@kbn/bazel-packages';
-import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages, type Package } from '@kbn/repo-packages';
+import { REPO_ROOT, kibanaPackageJson, KibanaPackageJson } from '@kbn/repo-info';
 
 import { getVersionInfo, VersionInfo } from './version_info';
 import { PlatformName, PlatformArchitecture, ALL_PLATFORMS } from './platform';
@@ -26,15 +25,6 @@ interface Options {
   dockerPush: boolean;
 }
 
-interface Package {
-  version: string;
-  engines: { node: string };
-  workspaces: {
-    packages: string[];
-  };
-  [key: string]: unknown;
-}
-
 export class Config {
   static async create({
     isRelease,
@@ -45,18 +35,20 @@ export class Config {
     dockerTagQualifier,
     dockerPush,
   }: Options) {
-    const pkgPath = resolve(__dirname, '../../../../package.json');
-    const pkg: Package = loadJsonFile.sync(pkgPath);
+    const nodeVersion = kibanaPackageJson.engines?.node;
+    if (!nodeVersion) {
+      throw new Error('missing node version in package.json');
+    }
 
     return new Config(
       targetAllPlatforms,
-      pkg,
-      pkg.engines.node,
-      dirname(pkgPath),
+      kibanaPackageJson,
+      nodeVersion,
+      REPO_ROOT,
       await getVersionInfo({
         isRelease,
         versionQualifier,
-        pkg,
+        pkg: kibanaPackageJson,
       }),
       dockerContextUseLocalArtifact,
       dockerCrossCompile,
@@ -68,7 +60,7 @@ export class Config {
 
   constructor(
     private readonly targetAllPlatforms: boolean,
-    private readonly pkg: Package,
+    private readonly pkg: KibanaPackageJson,
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
@@ -211,12 +203,10 @@ export class Config {
     return resolve(this.repoRoot, 'target', ...subPaths);
   }
 
-  private _prodPackages: BazelPackage[] | undefined;
+  private _prodPackages: Package[] | undefined;
   async getProductionPackages() {
     if (!this._prodPackages) {
-      this._prodPackages = (await discoverBazelPackages(REPO_ROOT)).filter(
-        (pkg) => !pkg.isDevOnly()
-      );
+      this._prodPackages = getPackages(REPO_ROOT).filter((pkg) => !pkg.isDevOnly);
     }
 
     return this._prodPackages;
