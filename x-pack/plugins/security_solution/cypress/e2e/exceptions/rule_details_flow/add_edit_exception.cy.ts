@@ -257,7 +257,7 @@ describe('Add/edit exception from rule details', () => {
           customQuery: 'agent.name:*',
           dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
           runsEvery: {
-            interval: '1',
+            interval: '10',
             timeType: 'Seconds',
             type: 's',
           },
