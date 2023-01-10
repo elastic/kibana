@@ -26,7 +26,7 @@ import {
 } from './monitor_list';
 import { fetchMonitorOverviewEffect, fetchOverviewStatusEffect } from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
-import { browserJourneyEffects } from './browser_journey';
+import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journey';
 import { fetchPingStatusesEffect } from './ping_status';
 
 export const rootEffect = function* root(): Generator {
@@ -52,5 +52,6 @@ export const rootEffect = function* root(): Generator {
     fork(enableMonitorAlertEffect),
     fork(updateDefaultAlertingEffect),
     fork(executeEsQueryEffect),
+    fork(fetchJourneyStepsEffect),
   ]);
 };
