@@ -71,6 +71,7 @@ import {
   RULE_STATUS,
   RULE_TIMESTAMP_OVERRIDE,
   RULES_CREATION_FORM,
+  RULES_CREATION_PREVIEW_BUTTON,
   RULES_CREATION_PREVIEW_REFRESH_BUTTON,
   RUNS_EVERY_INTERVAL,
   RUNS_EVERY_TIME_TYPE,
@@ -450,6 +451,7 @@ export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
+  cy.get(RULES_CREATION_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
   cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).should('not.be.disabled').click({ force: true });
   cy.get(PREVIEW_HISTOGRAM)
     .invoke('text')
