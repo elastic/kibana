@@ -39,7 +39,6 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerPush: false,
-    dockerTag: '',
     dockerTagQualifier: '',
   });
 
