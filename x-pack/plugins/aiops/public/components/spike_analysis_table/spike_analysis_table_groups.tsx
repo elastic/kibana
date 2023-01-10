@@ -84,14 +84,13 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     useSpikeAnalysisTableRowContext();
 
   const pushExpandedTableItem = (
-    expandedTableItems: FieldValuePair[],
+    expandedTableItems: ChangePoint[],
     items: FieldValuePair[],
-    appendString?: string
+    unique = false
   ) => {
     for (const groupItem of items) {
       const { fieldName, fieldValue } = groupItem;
-
-      expandedTableItems.push({
+      const itemToPush = {
         ...(changePoints.find(
           (changePoint) =>
             (changePoint.fieldName === fieldName ||
@@ -100,8 +99,11 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
               changePoint.fieldValue === `${fieldValue}.keyword`)
         ) ?? {}),
         fieldName: `${fieldName}`,
-        fieldValue: `${fieldValue} ${appendString ? appendString : ''}`,
-      });
+        fieldValue: `${fieldValue}`,
+        unique,
+      } as ChangePoint;
+
+      expandedTableItems.push(itemToPush);
     }
     return expandedTableItems;
   };
@@ -112,9 +114,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
       const { group, repeatedValues } = item;
-      const expandedTableItems: FieldValuePair[] = [];
+      const expandedTableItems: ChangePoint[] = [];
 
-      pushExpandedTableItem(expandedTableItems, group, '*');
+      pushExpandedTableItem(expandedTableItems, group, true);
       pushExpandedTableItem(expandedTableItems, repeatedValues);
 
       itemIdToExpandedRowMapValues[item.id] = (
@@ -122,6 +124,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           changePoints={expandedTableItems as ChangePoint[]}
           loading={loading}
           dataViewId={dataViewId}
+          isExpandedRow
         />
       );
     }
