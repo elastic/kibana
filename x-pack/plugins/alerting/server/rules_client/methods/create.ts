@@ -138,6 +138,7 @@ export async function create<Params extends RuleTypeParams = never>(
     throttle,
     executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
     monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
+    running: false,
   };
 
   const mappedParams = getMappedParams(updatedParams);
