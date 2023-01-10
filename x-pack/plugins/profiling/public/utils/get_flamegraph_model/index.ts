@@ -12,7 +12,6 @@ import { createColumnarViewModel } from '../../../common/columnar_view_model';
 import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
 import { FRAME_TYPE_COLOR_MAP, rgbToRGBA } from '../../../common/frame_type_colors';
 import { describeFrameType, FrameType } from '../../../common/profiling';
-import { asPercentage } from '../formatters/as_percentage';
 import { getInterpolationValue } from './get_interpolation_value';
 
 const nullColumnarViewModel = {
