@@ -772,7 +772,7 @@ describe('EPM template', () => {
     expect(mappings).toEqual(expectedMapping);
   });
 
-  it('tests processing metric_type field with long fiekd ', () => {
+  it('tests processing metric_type field with long field ', () => {
     const literalYml = `
     - name: total
       type: long
