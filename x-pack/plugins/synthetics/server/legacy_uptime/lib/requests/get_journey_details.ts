@@ -40,7 +40,10 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
     size: 1,
   };
 
-  const { body: thisJourney } = await uptimeEsClient.search({ body: baseParams });
+  const { body: thisJourney } = await uptimeEsClient.search(
+    { body: baseParams },
+    'getJourneyDetails'
+  );
 
   if (thisJourney.hits.hits.length > 0) {
     const { _id, _source } = thisJourney.hits.hits[0];
