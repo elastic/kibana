@@ -260,7 +260,6 @@ export class SearchSource {
 
   getActiveIndexFilter() {
     const { filter: originalFilters, query } = this.getFields();
-
     let filters: Filter[] = [];
     if (originalFilters) {
       filters = this.getFilters(originalFilters);
@@ -279,7 +278,7 @@ export class SearchSource {
             return acc.concat(this.parseActiveIndexPatternFromQueryString(currStr));
           }, []) ?? [];
 
-    const activeIndexPattern: string[] = filters?.reduce((acc, f) => {
+    const activeIndexPattern = filters?.reduce((acc, f) => {
       if (isPhraseFilter(f)) {
         if (f.meta.key === '_index' && f.meta.disabled === false) {
           if (f.meta.negate === false) {
@@ -287,6 +286,8 @@ export class SearchSource {
           } else {
             return difference(acc, [f.meta.params?.query]);
           }
+        } else {
+          return acc;
         }
       } else {
         return acc;

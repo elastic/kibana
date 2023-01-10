@@ -8,7 +8,7 @@
 
 import type { PhrasesFilter } from './phrases_filter';
 import { isPhraseFilter } from './phrase_filter';
-import { isRangeFilter } from './range_filter';
+import { isMetaRangeFilter } from './range_filter';
 import { Filter, FILTERS } from './types';
 
 /**
@@ -23,7 +23,7 @@ export function getFilterParams(filter: Filter): Filter['meta']['params'] {
     case FILTERS.PHRASES:
       return (filter as PhrasesFilter).meta.params;
     case FILTERS.RANGE:
-      if (isRangeFilter(filter) && filter.meta.params) {
+      if (isMetaRangeFilter(filter) && filter.meta.params) {
         const { gte, gt, lte, lt } = filter.meta.params;
         return {
           from: gte ?? gt,

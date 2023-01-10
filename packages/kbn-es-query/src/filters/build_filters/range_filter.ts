@@ -137,7 +137,6 @@ export const buildRangeFilter = (
   indexPattern?: DataViewBase,
   formattedValue?: string
 ): RangeFilter | ScriptedRangeFilter | MatchAllRangeFilter => {
-  debugger;
   params = mapValues(params, (value: any) => (field.type === 'number' ? parseFloat(value) : value));
 
   if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');

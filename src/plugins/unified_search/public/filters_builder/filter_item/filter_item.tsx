@@ -144,12 +144,15 @@ export function FilterItem({
 
   const onHandleParamsUpdate = useCallback(
     (value: Filter['meta']['params']) => {
-      console.log({value, params});
       const paramsValues = Array.isArray(params) ? params : [];
-      const filterParams = [...paramsValues, value];
       dispatch({
         type: 'updateFilter',
-        payload: { dest: { path, index }, field, operator, params: filterParams },
+        payload: {
+          dest: { path, index },
+          field,
+          operator,
+          params: [...paramsValues, value] as Filter['meta']['params'],
+        },
       });
     },
     [dispatch, path, index, field, operator, params]

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-// import { identity, pickBy } from 'lodash';
+import { identity, pickBy } from 'lodash';
 
-import type { Filter, FilterMeta, RangeFilter } from '..';
-import { isRangeFilter, isMetaRangeFilter } from '../build_filters/range_filter';
+import type { Filter, FilterMeta, RangeFilter, RangeFilterParams } from '..';
+import { isMetaRangeFilter } from '../build_filters';
 
 type FilterOperator = Pick<FilterMeta, 'type' | 'negate'>;
 
@@ -19,7 +19,6 @@ export const updateFilter = (
   operator?: FilterOperator,
   params?: Filter['meta']['params']
 ): Filter => {
-  console.log({ filter, isRange: isRangeFilter(filter) });
   if (!field || !operator) {
     return updateField(filter, field);
   }
@@ -27,7 +26,7 @@ export const updateFilter = (
   if (operator.type === 'exists') {
     return updateWithExistsOperator(filter, operator);
   }
-  if (operator.type === 'range') {
+  if (operator.type === 'range' && isMetaRangeFilter(filter)) {
     return updateWithRangeOperator(filter, operator, params, field);
   }
   if (Array.isArray(params)) {
@@ -89,16 +88,16 @@ function updateWithIsOperator(
 }
 
 function updateWithRangeOperator(
-  filter: Filter,
+  filter: RangeFilter,
   operator: FilterOperator,
-  rawParams: Filter['meta']['params'],
+  rawParams: Filter['meta']['params'] | undefined,
   field: string
-) {
-  console.log('update with range', filter);
-  if (typeof filter.meta.params === 'object' && isMetaRangeFilter(filter)) {
+): Filter {
+  if (filter.meta.params !== undefined && Array.isArray(rawParams)) {
+    const rangeParams: RangeFilterParams = filter.meta.params;
     const params = {
-      ...filter.meta.params,
-      // ...pickBy(rawParams, identity),
+      ...rangeParams,
+      ...pickBy(rawParams, identity),
     };
 
     params.gte = params.from;
@@ -117,7 +116,7 @@ function updateWithRangeOperator(
           [field]: params,
         },
       },
-    };
+    } as Filter;
 
     return updatedFilter;
   } else {

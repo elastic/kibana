@@ -184,8 +184,6 @@ export const updateFilters = (
   operator?: Operator,
   params?: Filter['meta']['params']
 ) => {
-  console.log({filters, dest, field, operator, params});
-  debugger;
   const newFilters = [...filters];
   const updatedFilter = updateFilter(
     getFilterByPath(newFilters, dest.path),

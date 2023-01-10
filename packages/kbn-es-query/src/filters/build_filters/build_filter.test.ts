@@ -64,7 +64,7 @@ describe('buildFilter', () => {
   });
 
   it('should build range filters', () => {
-    const params = { from: 'foo', to: 'qux', id: '' };
+    const params = { from: 'foo', to: 'qux' };
     const alias = 'bar';
     const state = FilterStateStore.APP_STATE;
     const filter = buildFilter(
