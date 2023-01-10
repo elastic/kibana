@@ -42,7 +42,6 @@ export const AnnotationsSwitch: FC = () => {
           checked={annotationsEnabled}
           onChange={toggleAnnotations}
           data-test-subj="mlJobWizardSwitchAnnotations"
-          showLabel={false}
           label={i18n.translate(
             'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.enableModelPlotAnnotations.title',
             {
