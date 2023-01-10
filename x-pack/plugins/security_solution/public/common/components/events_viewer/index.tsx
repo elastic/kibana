@@ -483,7 +483,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     tableId,
     data: nonDeletedEvents,
     totalItems: totalCountMinusDeleted,
-    refetch,
     indexNames: selectedPatterns,
     hasAlertsCrud: hasCrudPermissions,
     showCheckboxes,
