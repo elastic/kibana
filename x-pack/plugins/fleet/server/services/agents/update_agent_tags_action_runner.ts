@@ -8,7 +8,6 @@
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import uuid from 'uuid';
 import { uniq } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Agent } from '../../types';
 
@@ -21,7 +20,6 @@ import { ActionRunner, MAX_RETRY_COUNT } from './action_runner';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 import { filterHostedPolicies } from './filter_hosted_agents';
 import { bulkCreateAgentActionResults, createAgentAction } from './actions';
-import { getElasticsearchQuery } from './crud';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -73,30 +71,14 @@ export async function updateTagsBatch(
   );
   const agentIds = filteredAgents.map((agent) => agent.id);
 
-  let query: estypes.QueryDslQueryContainer | undefined;
-
-  const extraFilters = [];
-  if (options.tagsToAdd.length === 1 && options.tagsToRemove.length === 0) {
-    extraFilters.push(`NOT (tags:${options.tagsToAdd[0]})`);
-  } else if (options.tagsToRemove.length === 1 && options.tagsToAdd.length === 0) {
-    extraFilters.push(`tags:${options.tagsToRemove[0]}`);
-  }
-
-  query = getElasticsearchQuery(options.kuery ?? '', false, false, [], extraFilters);
-  if (!query?.bool) {
-    if (!query) query = {};
-    query.bool = {};
-  }
-  query.bool.must = {
-    terms: {
-      _id: agentIds,
-    },
-  };
-
   let res;
   try {
     res = await esClient.updateByQuery({
-      query,
+      query: {
+        terms: {
+          _id: agentIds,
+        },
+      },
       index: AGENTS_INDEX,
       refresh: true,
       wait_for_completion: true,
@@ -188,6 +170,5 @@ export async function updateTagsBatch(
     throw new Error(`version conflict of ${res.version_conflicts} agents`);
   }
 
-  // console.log(res)
   return { actionId, updated: res.updated, took: res.took };
 }

@@ -12,7 +12,7 @@ import type { Agent } from '../../types';
 
 import { createClientMock } from './action.mock';
 import { updateAgentTags } from './update_agent_tags';
-import { updateTagsBatch } from './update_agent_tags_action_runner';
+import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
 jest.mock('../app_context', () => {
   return {
@@ -76,6 +76,7 @@ describe('update_agent_tags', () => {
     esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 1 } as any);
 
     mockRunAsync.mockClear();
+    (UpdateAgentTagsActionRunner as jest.Mock).mockClear();
   });
 
   it('should remove duplicate tags', async () => {
@@ -86,25 +87,7 @@ describe('update_agent_tags', () => {
         conflicts: 'proceed',
         index: '.fleet-agents',
         query: {
-          bool: {
-            must_not: {
-              bool: {
-                should: [
-                  {
-                    bool: { should: [{ match: { status: 'inactive' } }], minimum_should_match: 1 },
-                  },
-                  {
-                    bool: {
-                      should: [{ match: { status: 'unenrolled' } }],
-                      minimum_should_match: 1,
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-            must: { terms: { _id: ['agent1'] } },
-          },
+          terms: { _id: ['agent1'] },
         },
         script: expect.objectContaining({
           lang: 'painless',
@@ -269,6 +252,17 @@ describe('update_agent_tags', () => {
     await updateAgentTags(soClient, esClient, { kuery: '', batchSize: 2 }, ['newName'], []);
 
     expect(mockRunAsync).toHaveBeenCalled();
+    expect(UpdateAgentTagsActionRunner).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        batchSize: 2,
+        kuery: '(NOT (tags:newName))',
+        tagsToAdd: ['newName'],
+        tagsToRemove: [],
+      }),
+      expect.anything()
+    );
   });
 
   it('should add tags filter if only one tag to add', async () => {
@@ -286,58 +280,45 @@ describe('update_agent_tags', () => {
 
     const updateByQuery = esClient.updateByQuery.mock.calls[0][0] as any;
     expect(updateByQuery.query).toEqual({
-      bool: {
-        filter: [
-          {
-            bool: {
-              must_not: {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        should: [{ match: { status: 'inactive' } }],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [{ match: { status: 'unenrolled' } }],
-                        minimum_should_match: 1,
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            },
-          },
-          {
-            bool: {
-              must_not: { bool: { should: [{ match: { tags: 'new' } }], minimum_should_match: 1 } },
-            },
-          },
-        ],
-        must: { terms: { _id: ['agent1', 'agent2'] } },
-      },
+      terms: { _id: ['agent1', 'agent2'] },
     });
   });
 
   it('should add tags filter if only one tag to remove', async () => {
-    await updateTagsBatch(
-      soClient,
-      esClient,
-      [],
-      {},
-      {
+    await updateAgentTags(soClient, esClient, { kuery: '' }, [], ['remove']);
+
+    expect(UpdateAgentTagsActionRunner).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        batchSize: 10000,
+        kuery: '(tags:remove)',
         tagsToAdd: [],
         tagsToRemove: ['remove'],
-        kuery: '',
-      }
+      }),
+      expect.anything()
+    );
+  });
+
+  it('should add tags filter to existing kuery if only one tag to remove', async () => {
+    await updateAgentTags(
+      soClient,
+      esClient,
+      { kuery: 'status:healthy OR status:offline' },
+      [],
+      ['remove']
     );
 
-    const updateByQuery = esClient.updateByQuery.mock.calls[0][0] as any;
-    expect(JSON.stringify(updateByQuery.query)).toContain(
-      '{"bool":{"should":[{"match":{"tags":"remove"}}],"minimum_should_match":1}}'
+    expect(UpdateAgentTagsActionRunner).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        batchSize: 10000,
+        kuery: '(status:healthy OR status:offline) AND (tags:remove)',
+        tagsToAdd: [],
+        tagsToRemove: ['remove'],
+      }),
+      expect.anything()
     );
   });
 

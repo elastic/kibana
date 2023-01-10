@@ -39,12 +39,23 @@ export async function updateAgentTags(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+
+    const filters = [];
+    if (options.kuery !== '') {
+      filters.push(options.kuery);
+    }
+    if (tagsToAdd.length === 1 && tagsToRemove.length === 0) {
+      filters.push(`NOT (tags:${tagsToAdd[0]})`);
+    } else if (tagsToRemove.length === 1 && tagsToAdd.length === 0) {
+      filters.push(`tags:${tagsToRemove[0]}`);
+    }
+
     return await new UpdateAgentTagsActionRunner(
       esClient,
       soClient,
       {
         ...options,
-        kuery: options.kuery,
+        kuery: filters.map((filter) => `(${filter})`).join(' AND '),
         tagsToAdd,
         tagsToRemove,
         batchSize,

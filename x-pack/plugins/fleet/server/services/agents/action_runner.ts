@@ -79,7 +79,9 @@ export abstract class ActionRunner {
     appContextService
       .getLogger()
       .info(
-        `Running action asynchronously, actionId: ${this.actionParams.actionId}, total agents: ${this.actionParams.total}`
+        `Running action asynchronously, actionId: ${this.actionParams.actionId}${
+          this.actionParams.total ? ', total agents:' + this.actionParams.total : ''
+        }`
       );
 
     if (!this.bulkActionsResolver) {
