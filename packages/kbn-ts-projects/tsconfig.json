@@ -15,7 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/repo-info",
-    "@kbn/bazel-packages",
-    "@kbn/package-map",
+    "@kbn/repo-packages",
+    "@kbn/picomatcher",
   ]
 }
