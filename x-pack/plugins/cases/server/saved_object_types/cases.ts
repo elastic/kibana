@@ -145,7 +145,7 @@ export const createCaseSavedObjectType = (
         },
       },
       status: {
-        type: 'short',
+        type: 'keyword',
       },
       tags: {
         type: 'keyword',
