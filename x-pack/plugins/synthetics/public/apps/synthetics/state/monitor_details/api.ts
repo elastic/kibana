@@ -48,7 +48,7 @@ export const fetchMonitorRecentPings = async ({
     SYNTHETICS_API_URLS.PINGS,
     {
       monitorId,
-      from: from ?? moment().subtract(5, 'days').toISOString(),
+      from: from ?? moment().subtract(30, 'days').toISOString(),
       to: to ?? new Date().toISOString(),
       locations,
       sort,
