@@ -96,6 +96,7 @@ function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions<{
         },
       },
     ],
+    running: false,
     ...overwrites,
   };
 }
@@ -377,6 +378,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -446,6 +448,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -663,6 +666,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -968,6 +972,7 @@ describe('create()', () => {
             },
           },
         ],
+        running: false,
       },
       references: [
         {
@@ -1027,6 +1032,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1085,6 +1091,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true },
+        running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
@@ -1230,6 +1237,7 @@ describe('create()', () => {
             },
           },
         ],
+        running: false,
       },
       references: [
         {
@@ -1284,6 +1292,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
+        running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
@@ -1326,6 +1335,7 @@ describe('create()', () => {
           "bar": true,
           "parameterThatIsSavedObjectId": "9",
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1398,6 +1408,7 @@ describe('create()', () => {
             },
           },
         ],
+        running: false,
       },
       references: [
         {
@@ -1452,6 +1463,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true, parameterThatIsSavedObjectRef: 'action_0' },
+        running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
         throttle: null,
@@ -1494,6 +1506,7 @@ describe('create()', () => {
           "bar": true,
           "parameterThatIsSavedObjectId": "8",
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1569,6 +1582,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1623,6 +1637,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1660,6 +1675,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1701,6 +1717,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1755,6 +1772,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1792,6 +1810,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1833,6 +1852,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -1887,6 +1907,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -1924,6 +1945,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1973,6 +1995,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '123',
@@ -2058,6 +2081,7 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: 'v8.0.0',
         },
+        running: false,
       },
       {
         references: [
@@ -2098,6 +2122,7 @@ describe('create()', () => {
           "risk_score": 42,
           "severity": "low",
         },
+        "running": false,
         "schedule": Object {
           "interval": "10s",
         },
@@ -2407,6 +2432,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -2442,6 +2468,7 @@ describe('create()', () => {
             },
           },
         ],
+        running: false,
       },
       references: [
         {
@@ -2509,6 +2536,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        running: false,
       },
       {
         id: 'mock-saved-object-id',
@@ -2612,6 +2640,7 @@ describe('create()', () => {
           },
         },
       ],
+      running: false,
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
