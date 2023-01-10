@@ -35,63 +35,70 @@ import type { Ransomware } from './ransomware';
 import type { MemoryProtection } from './memory_protection';
 import type { Target } from './target_type';
 
+type OverwriteTypes =
+  | 'destination'
+  | 'dns'
+  | 'event'
+  | 'file'
+  | 'host'
+  | 'http'
+  | 'message'
+  | 'network'
+  | 'process'
+  | 'registry'
+  | 'rule'
+  | 'source'
+  | 'threat'
+  | 'tls'
+  | 'url'
+  | 'user';
+
 // Security Common Schema
-export interface Scs
-  extends Omit<
-    Ecs,
-    | 'destination'
-    | 'dns'
-    | 'event'
-    | 'file'
-    | 'host'
-    | 'http'
-    | 'message'
-    | 'network'
-    | 'process'
-    | 'registry'
-  > {
-  _id: string;
-  _index?: string;
+export interface Scs extends Omit<Ecs, OverwriteTypes> {
+  // Exists in Ecs
   // overwrites to support multiple values for security entities
   destination?: DestinationEcs;
   dns?: DnsEcs;
-  message?: string[];
   event?: EventEcs;
+  file?: FileEcs;
   host?: HostEcs;
+  http?: HttpEcs;
+  message?: string[];
   network?: NetworkEcs;
+  process?: ProcessEcs;
   registry?: RegistryEcs;
   rule?: RuleEcs;
-  file?: FileEcs;
-  http?: HttpEcs;
-  process?: ProcessEcs;
+  source?: SourceEcs;
+  threat?: ThreatEcs;
+  tls?: TlsEcs;
+  url?: UrlEcs;
+  user?: UserEcs;
 
   // security specific Ecs
+  // exists only in security solution
+  _id: string;
+  _index?: string;
   auditd?: AuditdEcs;
   endgame?: EndgameEcs;
   geo?: GeoEcs;
   kibana?: {
     alert: SignalEcsAAD;
   };
-  signal?: SignalEcs;
-  source?: SourceEcs;
-  suricata?: SuricataEcs;
-  tls?: TlsEcs;
-  zeek?: ZeekEcs;
-  url?: UrlEcs;
-  timestamp?: string;
-  user?: UserEcs;
-  winlog?: WinlogEcs;
-  system?: SystemEcs;
-  threat?: ThreatEcs;
-  // This should be temporary
-  eql?: { parentId: string; sequenceNumber: string };
-  Ransomware?: Ransomware;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Memory_protection?: MemoryProtection;
-  Target?: Target;
-  dll?: DllEcs;
-  'kibana.alert.workflow_status'?: 'open' | 'acknowledged' | 'in-progress' | 'closed';
   // I believe these parameters are all snake cased to correspond with how they are sent "over the wire" as request / response
   // Not representative of the parsed types that are camel cased.
   'kibana.alert.rule.parameters'?: { index: string[]; data_view_id?: string };
+  'kibana.alert.workflow_status'?: 'open' | 'acknowledged' | 'in-progress' | 'closed';
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  Memory_protection?: MemoryProtection;
+  Ransomware?: Ransomware;
+  Target?: Target;
+  dll?: DllEcs;
+  // This should be temporary
+  eql?: { parentId: string; sequenceNumber: string };
+  signal?: SignalEcs;
+  suricata?: SuricataEcs;
+  system?: SystemEcs;
+  timestamp?: string;
+  winlog?: WinlogEcs;
+  zeek?: ZeekEcs;
 }
