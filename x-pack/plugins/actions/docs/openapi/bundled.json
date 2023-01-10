@@ -188,6 +188,86 @@
           }
         ]
       },
+      "put": {
+        "summary": "Updates the attributes for a connector.",
+        "operationId": "updateConnector",
+        "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/connector_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_cases_webhook"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_index"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_jira"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_opsgenie"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_resilient"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_serverlog"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_servicenow"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_servicenow_itom"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_swimlane"
+                  }
+                ],
+                "additionalProperties": true
+              },
+              "examples": {
+                "updateIndexConnectorRequest": {
+                  "$ref": "#/components/examples/update_index_connector_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connector_response_properties"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
       "servers": [
         {
           "url": "https://localhost:5601"
@@ -1803,6 +1883,184 @@
           "propertyName": "connector_type_id"
         }
       },
+      "update_connector_request_cases_webhook": {
+        "title": "Update Webhook - Case Managment connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_cases_webhook"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector.",
+            "example": "my-connector"
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_cases_webhook"
+          }
+        }
+      },
+      "update_connector_request_index": {
+        "title": "Update index connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_index"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          }
+        }
+      },
+      "update_connector_request_jira": {
+        "title": "Update Jira connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_jira"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_jira"
+          }
+        }
+      },
+      "update_connector_request_opsgenie": {
+        "title": "Update Opsgenie connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_opsgenie"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_opsgenie"
+          }
+        }
+      },
+      "update_connector_request_resilient": {
+        "title": "Update IBM Resilient connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_resilient"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_resilient"
+          }
+        }
+      },
+      "update_connector_request_serverlog": {
+        "title": "Update server log connector request",
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          }
+        }
+      },
+      "update_connector_request_servicenow": {
+        "title": "Update ServiceNow ITSM connector or ServiceNow SecOps request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_servicenow"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_servicenow"
+          }
+        }
+      },
+      "update_connector_request_servicenow_itom": {
+        "title": "Create ServiceNow ITOM connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_servicenow_itom"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_servicenow"
+          }
+        }
+      },
+      "update_connector_request_swimlane": {
+        "title": "Update Swimlane connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_swimlane"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector.",
+            "example": "my-connector"
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_swimlane"
+          }
+        }
+      },
       "connector_types": {
         "type": "string",
         "description": "The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.",
@@ -1875,6 +2133,15 @@
           "is_preconfigured": false,
           "is_deprecated": false,
           "is_missing_secrets": false
+        }
+      },
+      "update_index_connector_request": {
+        "summary": "Update an index connector.",
+        "value": {
+          "name": "updated-connector",
+          "config": {
+            "index": "updated-index"
+          }
         }
       },
       "get_connectors_response": {
