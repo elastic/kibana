@@ -1,18 +1,10 @@
 {
   "extends": "../../../../../../tsconfig.base.json",
-  "include": [
-    "**/*"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*"],
+  "exclude": ["target/**/*"],
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "cypress",
-      "node",
-      "cypress-react-selector"
-    ],
+    "types": ["cypress", "node", "cypress-react-selector"]
   },
   "kbn_references": [
     // this cypress project uses code from the parent ts project
@@ -22,8 +14,6 @@
       "path": "../../../tsconfig.json",
       "force": true
     },
-    "@kbn/security-plugin",
-    "@kbn/securitysolution-list-constants",
-    "@kbn/fleet-plugin"
+    "@kbn/security-plugin"
   ]
 }
