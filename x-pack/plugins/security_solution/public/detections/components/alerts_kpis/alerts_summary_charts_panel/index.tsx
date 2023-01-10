@@ -69,7 +69,11 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const { items: severityData, isLoading: isSeverityLoading } = useSeverityChartData({
+  const {
+    items: severityData,
+    isLoading: isSeverityLoading,
+    timerange,
+  } = useSeverityChartData({
     filters,
     query,
     signalIndexName,
@@ -99,10 +103,12 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
         <EuiFlexGroup data-test-subj="alerts-charts-container">
           <PlaceHolder title={i18n.DETECTIONS_TITLE} />
           <SeverityLevelChart
-            data={severityData}
-            isLoading={isSeverityLoading}
-            uniqueQueryId={uniqueQueryId}
             addFilter={addFilter}
+            data={severityData}
+            filters={filters}
+            isLoading={isSeverityLoading}
+            timerange={timerange}
+            uniqueQueryId={uniqueQueryId}
           />
           <PlaceHolder title={i18n.ALERT_BY_HOST_TITLE} />
         </EuiFlexGroup>

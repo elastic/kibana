@@ -21,6 +21,10 @@ describe('Severity level chart', () => {
     data: [],
     isLoading: false,
     uniqueQueryId: 'test-query-id',
+    timerange: {
+      from: '2023-01-10T00:00:00.000Z',
+      to: '2023-01-10T23:59:59.999Z',
+    },
   };
 
   afterEach(() => {

@@ -72,6 +72,7 @@ export interface UseSeverityChartProps {
 export type UseAlertsBySeverity = (props: UseSeverityChartProps) => {
   items: ParsedSeverityData;
   isLoading: boolean;
+  timerange: { from: string; to: string };
   updatedAt: number;
 };
 
@@ -87,7 +88,7 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<null | ParsedSeverityData>(null);
-
+  const timerange = useMemo(() => ({ to, from }), [to, from]);
   const additionalFilters = useMemo(() => {
     try {
       return [
@@ -159,5 +160,5 @@ export const useSeverityChartData: UseAlertsBySeverity = ({
     uniqueQueryId,
   });
 
-  return { items, isLoading, updatedAt };
+  return { items, isLoading, updatedAt, timerange };
 };
