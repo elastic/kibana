@@ -129,11 +129,15 @@ describe('pickSavedTimeline', () => {
       expect(result.createdBy).toEqual(userInfo.email);
       expect(result.updatedBy).toEqual(userInfo.email);
     });
-    
+
     test('Creating a timeline with user full name', () => {
       const savedTimeline = getMockSavedTimeline();
       const timelineId = null;
-      const userInfo = { username: 'elastic', email: 'some@email.com', full_name: 'Some Full Name' } as AuthenticatedUser;
+      const userInfo = {
+        username: 'elastic',
+        email: 'some@email.com',
+        full_name: 'Some Full Name',
+      } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
       expect(result.createdBy).toEqual(userInfo.full_name);
@@ -163,7 +167,11 @@ describe('pickSavedTimeline', () => {
     test('Updating a timeline with user full name', () => {
       const savedTimeline = getMockSavedTimeline();
       const timelineId = savedTimeline.savedObjectId ?? null;
-      const userInfo = { username: 'elastic', email: 'some@email.com', full_name: 'Some Full Name' } as AuthenticatedUser;
+      const userInfo = {
+        username: 'elastic',
+        email: 'some@email.com',
+        full_name: 'Some Full Name',
+      } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
       expect(result.createdBy).toEqual(savedTimeline.createdBy);
