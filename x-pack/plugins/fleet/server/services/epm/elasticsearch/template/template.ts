@@ -18,7 +18,6 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
-import { builRoutingPath } from '../../../package_policies';
 import {
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
@@ -499,17 +498,10 @@ function getBaseTemplate({
 
   const isIndexModeTimeSeries = registryElasticsearch?.index_mode === 'time_series';
 
-  const mappingsProperties = mappings?.properties ?? {};
-
-  // All mapped fields of type keyword and time_series_dimension enabled will be included in the generated routing path
-  // Temporarily generating routing_path here until fixed in elasticsearch https://github.com/elastic/elasticsearch/issues/91592
-  const routingPath = builRoutingPath(mappingsProperties);
-
   let settingsIndex = {};
-  if (isIndexModeTimeSeries && routingPath.length > 0) {
+  if (isIndexModeTimeSeries) {
     settingsIndex = {
       mode: 'time_series',
-      routing_path: routingPath,
     };
   }
 
