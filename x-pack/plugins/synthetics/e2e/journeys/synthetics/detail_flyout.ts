@@ -6,9 +6,12 @@
  */
 
 import { expect, journey, step } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey('TestMonitorDetailFlyout', async ({ page, params }) => {
+  recordVideo(page);
+
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const monitorName = 'test-flyout-http-monitor';
 
