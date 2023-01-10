@@ -27,6 +27,7 @@ import {
 } from '../../common/schemas/benchmark';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
+const fleetError = t.type({ statusCode: t.number });
 
 const isPolicyTemplate = (input: any): input is PosturePolicyTemplate =>
   SUPPORTED_POLICY_TEMPLATES.includes(input);
@@ -59,8 +60,7 @@ export const getAgentStatusesByAgentPolicies = async (
       );
     }
   } catch (error) {
-    const httpError = t.type({ statusCode: t.number });
-    if (httpError.is(error) && error.statusCode === 404) {
+    if (fleetError.is(error) && error.statusCode === 404) {
       logger.debug('failed to get agent status for agent policy');
     } else {
       throw error;
