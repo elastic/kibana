@@ -19,6 +19,7 @@ import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/u
 import { stringify } from 'query-string';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
 import { CaseStatuses } from '../../../common';
+import { SortFieldCase } from '../../containers/types';
 
 const LOCAL_STORAGE_QUERY_PARAMS_DEFAULTS = {
   perPage: DEFAULT_QUERY_PARAMS.perPage,
@@ -57,7 +58,7 @@ const LOCALSTORAGE_FILTER_OPTIONS_KEY = getFilterOptionsLocalStorageKey(APP_ID);
 
 describe('useAllCasesQueryParams', () => {
   beforeEach(() => {
-    global.localStorage.clear();
+    localStorage.clear();
   });
 
   afterEach(() => {
@@ -74,23 +75,21 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('updates localstorage with default values on first run', () => {
-    expect(global.localStorage.getItem(LOCALSTORAGE_QUERY_PARAMS_KEY)).toStrictEqual(null);
-    expect(global.localStorage.getItem(LOCALSTORAGE_FILTER_OPTIONS_KEY)).toStrictEqual(null);
+    expect(localStorage.getItem(LOCALSTORAGE_QUERY_PARAMS_KEY)).toStrictEqual(null);
+    expect(localStorage.getItem(LOCALSTORAGE_FILTER_OPTIONS_KEY)).toStrictEqual(null);
 
     renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(
-      JSON.parse(global.localStorage.getItem(LOCALSTORAGE_QUERY_PARAMS_KEY) ?? '{}')
-    ).toMatchObject({
+    expect(JSON.parse(localStorage.getItem(LOCALSTORAGE_QUERY_PARAMS_KEY) ?? '{}')).toMatchObject({
       ...LOCAL_STORAGE_QUERY_PARAMS_DEFAULTS,
     });
-    expect(
-      JSON.parse(global.localStorage.getItem(LOCALSTORAGE_FILTER_OPTIONS_KEY) ?? '{}')
-    ).toMatchObject({
-      ...LOCAL_STORAGE_FILTER_OPTIONS_DEFAULTS,
-    });
+    expect(JSON.parse(localStorage.getItem(LOCALSTORAGE_FILTER_OPTIONS_KEY) ?? '{}')).toMatchObject(
+      {
+        ...LOCAL_STORAGE_FILTER_OPTIONS_DEFAULTS,
+      }
+    );
   });
 
   it('takes into account input filter options', () => {
@@ -123,12 +122,13 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('takes into account existing localStorage query params on first run', () => {
-    const existingLocalStorageValues = { perPage: DEFAULT_TABLE_LIMIT + 10, sortOrder: 'asc' };
+    const existingLocalStorageValues = {
+      perPage: DEFAULT_TABLE_LIMIT + 10,
+      sortOrder: 'asc',
+      sortField: SortFieldCase.severity,
+    };
 
-    global.localStorage.setItem(
-      LOCALSTORAGE_QUERY_PARAMS_KEY,
-      JSON.stringify(existingLocalStorageValues)
-    );
+    localStorage.setItem(LOCALSTORAGE_QUERY_PARAMS_KEY, JSON.stringify(existingLocalStorageValues));
 
     const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -143,7 +143,7 @@ describe('useAllCasesQueryParams', () => {
   it('takes into account existing localStorage filter options values on first run', () => {
     const existingLocalStorageValues = { severity: 'critical', status: 'open' };
 
-    global.localStorage.setItem(
+    localStorage.setItem(
       LOCALSTORAGE_FILTER_OPTIONS_KEY,
       JSON.stringify(existingLocalStorageValues)
     );
@@ -212,7 +212,7 @@ describe('useAllCasesQueryParams', () => {
 
     mockLocation.search = stringify(nonDefaultUrlParams);
 
-    global.localStorage.setItem(
+    localStorage.setItem(
       LOCALSTORAGE_QUERY_PARAMS_KEY,
       JSON.stringify({ perPage: DEFAULT_TABLE_LIMIT + 10 })
     );
@@ -235,7 +235,7 @@ describe('useAllCasesQueryParams', () => {
 
     mockLocation.search = stringify(nonDefaultUrlParams);
 
-    global.localStorage.setItem(
+    localStorage.setItem(
       LOCALSTORAGE_FILTER_OPTIONS_KEY,
       JSON.stringify({ severity: 'low', status: 'closed' })
     );
