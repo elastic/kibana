@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import TorqParamsFields from './torq_params';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
+import React from 'react';
+import TorqParamsFields from './torq_params';
 
 const kibanaReactPath = '../../../../../../../src/plugins/kibana_react/public';
 
@@ -32,7 +32,7 @@ describe('TorqParamsFields renders', () => {
       <TorqParamsFields
         actionParams={actionParams}
         errors={{ body: [] }}
-        editAction={() => {}}
+        editAction={() => { }}
         index={0}
         messageVariables={[
           {

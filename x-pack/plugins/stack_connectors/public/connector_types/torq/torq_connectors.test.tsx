@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import TorqActionConnectorFields from './torq_connectors';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../../lib/test_utils';
+import React from 'react';
+import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
+import TorqActionConnectorFields from './torq_connectors';
 
-const EMPTY_FUNC = () => {};
+const EMPTY_FUNC = () => { };
 
 describe('TorqActionConnectorFields renders', () => {
   test('all connector fields are rendered', async () => {

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const torqDefaultBody = '{{.}}';
+export const torqDefaultBody = "{{.}}";
