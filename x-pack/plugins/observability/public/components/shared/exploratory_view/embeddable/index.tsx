@@ -87,7 +87,7 @@ export function getExploratoryViewEmbeddable(
       <EuiErrorBoundary>
         <EuiThemeProvider darkMode={isDarkMode}>
           <KibanaContextProvider services={services}>
-            <Wrapper customHeight={props.customHeight}>
+            <Wrapper customHeight={props.customHeight} data-test-subj={props.dataTestSubj}>
               <ExploratoryViewEmbeddable
                 {...embedProps}
                 dataViewState={dataViews}

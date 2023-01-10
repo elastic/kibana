@@ -25,11 +25,17 @@ export const MonitorStatus = ({
   const badge = loading ? (
     <EuiLoadingSpinner size="s" />
   ) : !status ? (
-    <EuiBadge color="default">{PENDING_LABEL}</EuiBadge>
+    <EuiBadge color="default" data-test-subj="monitorLatestStatusPending">
+      {PENDING_LABEL}
+    </EuiBadge>
   ) : status === 'up' ? (
-    <EuiBadge color="success">{isBrowserType ? SUCCESS_LABEL : UP_LABEL}</EuiBadge>
+    <EuiBadge color="success" data-test-subj="monitorLatestStatusUp">
+      {isBrowserType ? SUCCESS_LABEL : UP_LABEL}
+    </EuiBadge>
   ) : (
-    <EuiBadge color="danger">{isBrowserType ? FAILED_LABEL : DOWN_LABEL}</EuiBadge>
+    <EuiBadge color="danger" data-test-subj="monitorLatestStatusDown">
+      {isBrowserType ? FAILED_LABEL : DOWN_LABEL}
+    </EuiBadge>
   );
 
   return (

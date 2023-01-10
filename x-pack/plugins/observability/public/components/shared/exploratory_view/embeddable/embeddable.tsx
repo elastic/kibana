@@ -57,6 +57,7 @@ export interface ExploratoryEmbeddableProps {
   noLabel?: boolean;
   fontSize?: number;
   lineHeight?: number;
+  dataTestSubj?: string;
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {

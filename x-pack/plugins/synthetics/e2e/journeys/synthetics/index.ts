@@ -19,3 +19,4 @@ export * from './global_parameters.journey';
 export * from './detail_flyout';
 export * from './alert_rules/default_status_alert.journey';
 export * from './data_retention.journey';
+export * from './monitor_details_page/monitor_summary.journey';
