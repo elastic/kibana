@@ -201,20 +201,20 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     after(async function () {
-      await Promise.all([
-        supertest
-          .post(`/api/fleet/agent_policies/delete`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ agentPolicyId }),
-        // uninstall endpoint package
-        supertest
-          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ force: true })
-          .expect(200),
-        esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server'),
-        kibanaServer.savedObjects.cleanStandardList(),
-      ]);
+      await supertest
+        .post(`/api/fleet/agent_policies/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ agentPolicyId });
+      // uninstall endpoint package
+      await supertest
+        .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should work with valid values on "regular" policies', async function () {
