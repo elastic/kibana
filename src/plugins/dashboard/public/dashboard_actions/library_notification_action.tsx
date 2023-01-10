@@ -15,7 +15,6 @@ import {
   isReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { pluginServices } from '../services/plugin_services';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
@@ -50,15 +49,13 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
   public readonly MenuItem = ({ context }: { context: LibraryNotificationActionContext }) => {
     const { embeddable } = context;
     return (
-      <KibanaThemeProvider theme$={this.theme$}>
-        <LibraryNotificationPopover
-          unlinkAction={this.unlinkAction}
-          displayName={this.displayName}
-          context={context}
-          icon={this.getIconType({ embeddable })}
-          id={this.id}
-        />
-      </KibanaThemeProvider>
+      <LibraryNotificationPopover
+        unlinkAction={this.unlinkAction}
+        displayName={this.displayName}
+        context={context}
+        icon={this.getIconType({ embeddable })}
+        id={this.id}
+      />
     );
   };
 
