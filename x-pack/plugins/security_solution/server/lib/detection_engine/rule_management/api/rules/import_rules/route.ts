@@ -38,6 +38,7 @@ import { importRules as importRulesHelper } from '../../../logic/import/import_r
 import { getReferencedExceptionLists } from '../../../logic/import/gather_referenced_exceptions';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
 import type { HapiReadableStream } from '../../../logic/import/hapi_readable_stream';
+import { importRuleActionConnectors } from '../../../logic/import/import_rule_action_connectors';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -81,6 +82,8 @@ export const importRulesRoute = (
         const actionSOClient = ctx.core.savedObjects.getClient({
           includedHiddenTypes: ['action'],
         });
+        const actionsImporter = ctx.core.savedObjects.getImporter(actionSOClient);
+
         const savedObjectsClient = ctx.core.savedObjects.client;
         const exceptionsClient = ctx.lists?.getExceptionListClient();
 
@@ -104,7 +107,7 @@ export const importRulesRoute = (
 
         // parse file to separate out exceptions from rules
         const readAllStream = createRulesAndExceptionsStreamFromNdJson(objectLimit);
-        const [{ exceptions, rules }] = await createPromiseFromStreams<
+        const [{ exceptions, rules, actionConnectors }] = await createPromiseFromStreams<
           RuleExceptionsPromiseFromStreams[]
         >([request.body.file as HapiReadableStream, ...readAllStream]);
 
@@ -118,6 +121,18 @@ export const importRulesRoute = (
           exceptionsClient,
           overwrite: request.query.overwrite_exceptions,
           maxExceptionsImportSize: objectLimit,
+        });
+
+        // import actions-connectors
+        const {
+          successCount: actionConnectorSuccessCount,
+          success: actionConnectorSuccess,
+          warnings: actionConnectorWarnings,
+          errors: actionConnectorErrors,
+        } = await importRuleActionConnectors({
+          actionConnectors,
+          actionsClient,
+          actionsImporter,
         });
 
         // report on duplicate rules
@@ -179,6 +194,10 @@ export const importRulesRoute = (
           exceptions_errors: exceptionsErrors,
           exceptions_success: exceptionsSuccess,
           exceptions_success_count: exceptionsSuccessCount,
+          // action_connectors_errors: actionConnectorErrors,
+          //  action_connectors_warnings: actionConnectorWarnings,
+          action_connectors_success: actionConnectorSuccess,
+          action_connectors_success_count: actionConnectorSuccessCount,
         };
 
         const [validated, errors] = validate(importRules, ImportRulesResponse);

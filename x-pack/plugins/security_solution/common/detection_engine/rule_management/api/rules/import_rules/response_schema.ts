@@ -19,5 +19,9 @@ export const ImportRulesResponse = t.exact(
     success: t.boolean,
     success_count: PositiveInteger,
     errors: t.array(errorSchema),
+    //   action_connectors_errors: t.array(errorSchema),
+    // action_connectors_warnings: t.array(),
+    action_connectors_success: t.boolean,
+    action_connectors_success_count: PositiveInteger,
   })
 );

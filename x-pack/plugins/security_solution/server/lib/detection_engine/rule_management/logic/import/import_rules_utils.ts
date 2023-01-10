@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   ImportExceptionsListSchema,
   ImportExceptionListItemSchema,
@@ -31,6 +31,7 @@ export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
   rules: PromiseFromStreams[];
   exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
+  actionConnectors: SavedObject[];
 }
 
 /**
