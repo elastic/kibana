@@ -51,6 +51,7 @@
     "@kbn/rison",
     "@kbn/config-schema",
     "@kbn/storybook",
+    "@kbn/unified-histogram",
   ],
   "exclude": [
     "target/**/*",
