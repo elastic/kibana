@@ -12,18 +12,14 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { FetchStatus } from '../../types';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { useUrlTracking } from './use_url_tracking';
 import { getDiscoverStateContainer } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
-import {
-  MODIFY_COLUMNS_ON_SWITCH,
-  SEARCH_ON_PAGE_LOAD_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../common';
-import { FetchStatus } from '../../types';
+import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -42,7 +38,6 @@ export function useDiscoverState({
 }) {
   const { uiSettings, data, filterManager, dataViews, toastNotifications, trackUiMetric } =
     services;
-  const { timefilter } = data.query.timefilter;
 
   const dataView = savedSearch.searchSource.getField('index')!;
 
@@ -76,17 +71,6 @@ export function useDiscoverState({
    */
   const searchSessionManager = stateContainer.searchSessionManager;
 
-  const initialFetchStatus: FetchStatus = useMemo(() => {
-    // A saved search is created on every page load, so we check the ID to see if we're loading a
-    // previously saved search or if it is just transient
-    const shouldSearchOnPageLoad =
-      uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearch.id !== undefined ||
-      timefilter.getRefreshInterval().pause === false ||
-      searchSessionManager.hasSearchSessionIdInURL();
-    return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
-  }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
-
   /**
    * Adhoc data views functionality
    */
@@ -117,7 +101,8 @@ export function useDiscoverState({
   /**
    * Data fetching logic
    */
-  const { data$, refetch$, reset, inspectorAdapters } = stateContainer.dataState;
+  const { data$, refetch$, reset, inspectorAdapters, initialFetchStatus } =
+    stateContainer.dataState;
   /**
    * State changes (data view, columns), when a text base query result is returned
    */
@@ -300,7 +285,7 @@ export function useDiscoverState({
    * Trigger data fetching on dataView or savedSearch changes
    */
   useEffect(() => {
-    if (dataView) {
+    if (dataView && initialFetchStatus === FetchStatus.LOADING) {
       refetch$.next(undefined);
     }
   }, [initialFetchStatus, refetch$, dataView, savedSearch.id]);

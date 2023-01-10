@@ -12,6 +12,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
+import { InspectorAdapters } from '../hooks/use_inspector';
 import { DataTableRecord } from '../../../types';
 import { AppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
@@ -28,22 +29,21 @@ export interface SavedSearchData {
   main$: DataMain$;
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
-  charts$: DataCharts$;
   availableFields$: AvailableFields$;
 }
 
 export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
-export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
+
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
 export interface UseSavedSearch {
   refetch$: DataRefetch$;
   data$: SavedSearchData;
   reset: () => void;
-  inspectorAdapters: { requests: RequestAdapter };
+  inspectorAdapters: InspectorAdapters;
 }
 
 export enum RecordRawType {
@@ -75,8 +75,6 @@ export interface DataDocumentsMsg extends DataMsg {
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
-  fetchStatus: FetchStatus;
-  error?: Error;
   result?: number;
 }
 
@@ -139,7 +137,6 @@ export function getDataStateContainer({
     main$: new BehaviorSubject<DataMainMsg>(initialState),
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
-    charts$: new BehaviorSubject<DataChartsMessage>(initialState),
     availableFields$: new BehaviorSubject<DataAvailableFieldsMsg>(initialState),
   };
 
