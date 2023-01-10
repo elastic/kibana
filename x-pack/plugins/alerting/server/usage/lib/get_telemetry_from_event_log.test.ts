@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   getExecutionsPerDayCount,
@@ -13,287 +14,344 @@ import {
   parsePercentileAggs,
   parseExecutionCountAggregationResults,
   getExecutionTimeoutsPerDayCount,
-  parseNumericMappings,
-  buildEventLogAggsFromMapping,
+  GetExecutionCountsAggregationBucket,
 } from './get_telemetry_from_event_log';
-import mappings from '@kbn/event-log-plugin/generated/mappings.json';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 
+interface GetAggResultsOpts {
+  key?: string;
+  doc_count?: number;
+  avg_event_duration: number;
+  avg_kibana_task_schedule_delay: number;
+  avg_number_of_searches: number;
+  avg_total_indexing_duration_ms: number;
+  avg_es_search_duration_ms: number;
+  avg_total_search_duration_ms: number;
+  avg_execution_gap_duration_s: number;
+  avg_rule_type_run_duration_ms: number;
+  avg_process_alerts_duration_ms: number;
+  avg_trigger_actions_duration_ms: number;
+  avg_process_rule_duration_ms: number;
+  avg_claim_to_start_duration_ms: number;
+  avg_prepare_rule_duration_ms: number;
+  avg_total_run_duration_ms: number;
+  avg_total_enrichment_duration_ms: number;
+  percentile_number_of_triggered_actions: {
+    p50: number;
+    p90: number;
+    p99: number;
+  };
+  percentile_number_of_generated_actions: {
+    p50: number;
+    p90: number;
+    p99: number;
+  };
+  percentile_alert_counts_active: {
+    p50: number;
+    p90: number;
+    p99: number;
+  };
+  percentile_alert_counts_new: {
+    p50: number;
+    p90: number;
+    p99: number;
+  };
+  percentile_alert_counts_recovered: {
+    p50: number;
+    p90: number;
+    p99: number;
+  };
+  execution_failures: {
+    doc_count: number;
+    by_reason: {
+      doc_count_error_upper_bound: number;
+      sum_other_doc_count: number;
+      buckets: Array<{ key: string; doc_count: number }>;
+    };
+  };
+}
+const getAggResult = (params: GetAggResultsOpts): GetExecutionCountsAggregationBucket => {
+  return {
+    ...Object.keys(params).reduce((acc, key) => {
+      if (key.startsWith('percentile')) {
+        return {
+          ...acc,
+          [key]: {
+            values: {
+              '50.0': get(params, `${key}.p50`),
+              '90.0': get(params, `${key}.p90`),
+              '99.0': get(params, `${key}.p99`),
+            },
+          },
+        };
+      } else if (key.startsWith('avg')) {
+        return {
+          ...acc,
+          [key]: {
+            value: get(params, key),
+          },
+        };
+      } else {
+        return {
+          ...acc,
+          [key]: get(params, key),
+        };
+      }
+    }, {}),
+  } as GetExecutionCountsAggregationBucket;
+};
+
+const indexThresholdAggResult = getAggResult({
+  key: '.index-threshold',
+  doc_count: 78,
+  avg_event_duration: 100576923.07692307,
+  avg_kibana_task_schedule_delay: 1541564.2432,
+  avg_number_of_searches: 1.2,
+  avg_total_indexing_duration_ms: 33.2468545465,
+  avg_es_search_duration_ms: 40.76056338028169,
+  avg_total_search_duration_ms: 43.74647887323944,
+  avg_execution_gap_duration_s: 3.4564534,
+  avg_rule_type_run_duration_ms: 6.454324687,
+  avg_process_alerts_duration_ms: 11.48654234,
+  avg_trigger_actions_duration_ms: 5.15646487,
+  avg_process_rule_duration_ms: 14.8743546857,
+  avg_claim_to_start_duration_ms: 55.5645324168,
+  avg_prepare_rule_duration_ms: 6.567687,
+  avg_total_run_duration_ms: 101.46745347,
+  avg_total_enrichment_duration_ms: 47.5757,
+  percentile_number_of_triggered_actions: {
+    p50: 1,
+    p90: 1,
+    p99: 1,
+  },
+  percentile_number_of_generated_actions: {
+    p50: 1,
+    p90: 1,
+    p99: 1,
+  },
+  percentile_alert_counts_active: {
+    p50: 1,
+    p90: 1,
+    p99: 1,
+  },
+  percentile_alert_counts_new: {
+    p50: 1,
+    p90: 1,
+    p99: 1,
+  },
+  percentile_alert_counts_recovered: {
+    p50: 0,
+    p90: 0,
+    p99: 0,
+  },
+  execution_failures: {
+    doc_count: 7,
+    by_reason: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: 'execute',
+          doc_count: 4,
+        },
+        {
+          key: 'decrypt',
+          doc_count: 3,
+        },
+      ],
+    },
+  },
+});
+const documentTestAggResult = getAggResult({
+  key: 'document.test.',
+  doc_count: 42,
+  avg_event_duration: 770071428.5714285,
+  avg_kibana_task_schedule_delay: 4542467.24547,
+  avg_number_of_searches: 0,
+  avg_total_indexing_duration_ms: 11.456767,
+  avg_es_search_duration_ms: 0,
+  avg_total_search_duration_ms: 0,
+  avg_execution_gap_duration_s: 1.5767537,
+  avg_rule_type_run_duration_ms: 4.4657357,
+  avg_process_alerts_duration_ms: 3.243575,
+  avg_trigger_actions_duration_ms: 8.1357657,
+  avg_process_rule_duration_ms: 19.527435745,
+  avg_claim_to_start_duration_ms: 1.437537,
+  avg_prepare_rule_duration_ms: 9.57357,
+  avg_total_run_duration_ms: 77.5275347687,
+  avg_total_enrichment_duration_ms: 0,
+  percentile_number_of_triggered_actions: {
+    p50: 5,
+    p90: 5,
+    p99: 5,
+  },
+  percentile_number_of_generated_actions: {
+    p50: 5,
+    p90: 5,
+    p99: 5,
+  },
+  percentile_alert_counts_active: {
+    p50: 5,
+    p90: 5,
+    p99: 5,
+  },
+  percentile_alert_counts_new: {
+    p50: 0,
+    p90: 0,
+    p99: 0,
+  },
+  percentile_alert_counts_recovered: {
+    p50: 1,
+    p90: 1,
+    p99: 1,
+  },
+  execution_failures: {
+    doc_count: 2,
+    by_reason: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: 'decrypt',
+          doc_count: 2,
+        },
+      ],
+    },
+  },
+});
+const logsAlertDocumentCountAggResult = getAggResult({
+  key: 'logs.alert.document.count',
+  doc_count: 28,
+  avg_event_duration: 88321428.57142857,
+  avg_kibana_task_schedule_delay: 3015054.24547,
+  avg_number_of_searches: 1.1,
+  avg_total_indexing_duration_ms: 88.245354,
+  avg_es_search_duration_ms: 26.962962962962962,
+  avg_total_search_duration_ms: 31.296296296296298,
+  avg_execution_gap_duration_s: 10.43457,
+  avg_rule_type_run_duration_ms: 7.237357,
+  avg_process_alerts_duration_ms: 33.35745237,
+  avg_trigger_actions_duration_ms: 9.53737,
+  avg_process_rule_duration_ms: 8.53737,
+  avg_claim_to_start_duration_ms: 15.53737,
+  avg_prepare_rule_duration_ms: 9.327357,
+  avg_total_run_duration_ms: 89.53735,
+  avg_total_enrichment_duration_ms: 72.575237,
+  percentile_number_of_triggered_actions: {
+    p50: 0,
+    p90: 0,
+    p99: 0,
+  },
+  percentile_number_of_generated_actions: {
+    p50: 0,
+    p90: 0,
+    p99: 0,
+  },
+  percentile_alert_counts_active: {
+    p50: 1,
+    p90: 1,
+    p99: 5,
+  },
+  percentile_alert_counts_new: {
+    p50: 1,
+    p90: 1,
+    p99: 5,
+  },
+  percentile_alert_counts_recovered: {
+    p50: 0,
+    p90: 0,
+    p99: 0,
+  },
+  execution_failures: {
+    doc_count: 1,
+    by_reason: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: 'decrypt',
+          doc_count: 1,
+        },
+      ],
+    },
+  },
+});
+
+const aggResult = getAggResult({
+  avg_event_duration: 288250000.07692307,
+  avg_kibana_task_schedule_delay: 1541564.2432,
+  avg_number_of_searches: 1.2,
+  avg_total_indexing_duration_ms: 28.630434782608695,
+  avg_es_search_duration_ms: 26.246376811594203,
+  avg_total_search_duration_ms: 43.74647887323944,
+  avg_execution_gap_duration_s: 3.4564534,
+  avg_rule_type_run_duration_ms: 6.454324687,
+  avg_process_alerts_duration_ms: 11.48654234,
+  avg_trigger_actions_duration_ms: 5.15646487,
+  avg_process_rule_duration_ms: 14.8743546857,
+  avg_claim_to_start_duration_ms: 55.5645324168,
+  avg_prepare_rule_duration_ms: 6.567687,
+  avg_total_run_duration_ms: 101.46745347,
+  avg_total_enrichment_duration_ms: 47.5757,
+  percentile_number_of_triggered_actions: {
+    p50: 0,
+    p90: 5,
+    p99: 5,
+  },
+  percentile_number_of_generated_actions: {
+    p50: 0,
+    p90: 5,
+    p99: 5,
+  },
+  percentile_alert_counts_active: {
+    p50: 1,
+    p90: 5,
+    p99: 5,
+  },
+  percentile_alert_counts_new: {
+    p50: 0,
+    p90: 1,
+    p99: 1,
+  },
+  percentile_alert_counts_recovered: {
+    p50: 0,
+    p90: 0,
+    p99: 0,
+  },
+  execution_failures: {
+    doc_count: 10,
+    by_reason: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: 'decrypt',
+          doc_count: 6,
+        },
+        {
+          key: 'execute',
+          doc_count: 4,
+        },
+      ],
+    },
+  },
+});
+
 describe('event log telemetry', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
-  describe('parseNumericMappings', () => {
-    test('should correctly extract numeric fields from mapping', () => {
-      expect(parseNumericMappings(mappings)).toEqual([
-        'event.duration',
-        'event.risk_score',
-        'event.risk_score_norm',
-        'event.sequence',
-        'event.severity',
-        'kibana.task.schedule_delay',
-        'kibana.alert.rule.execution.status_order',
-        'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
-        'kibana.alert.rule.execution.metrics.number_of_generated_actions',
-        'kibana.alert.rule.execution.metrics.alert_counts.active',
-        'kibana.alert.rule.execution.metrics.alert_counts.new',
-        'kibana.alert.rule.execution.metrics.alert_counts.recovered',
-        'kibana.alert.rule.execution.metrics.number_of_searches',
-        'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
-        'kibana.alert.rule.execution.metrics.es_search_duration_ms',
-        'kibana.alert.rule.execution.metrics.total_search_duration_ms',
-        'kibana.alert.rule.execution.metrics.execution_gap_duration_s',
-        'kibana.alert.rule.execution.metrics.rule_type_run_duration_ms',
-        'kibana.alert.rule.execution.metrics.process_alerts_duration_ms',
-        'kibana.alert.rule.execution.metrics.trigger_actions_duration_ms',
-        'kibana.alert.rule.execution.metrics.process_rule_duration_ms',
-        'kibana.alert.rule.execution.metrics.claim_to_start_duration_ms',
-        'kibana.alert.rule.execution.metrics.prepare_rule_duration_ms',
-        'kibana.alert.rule.execution.metrics.total_run_duration_ms',
-        'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
-      ]);
-    });
-
-    test('should correctly build aggregation from mapping', () => {
-      expect(buildEventLogAggsFromMapping()).toEqual({
-        avg_event_duration: {
-          avg: {
-            field: 'event.duration',
-          },
-        },
-        avg_kibana_task_schedule_delay: {
-          avg: {
-            field: 'kibana.task.schedule_delay',
-          },
-        },
-        avg_number_of_triggered_actions: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
-          },
-        },
-        percentile_number_of_generated_actions: {
-          percentiles: {
-            field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
-            percents: [50, 90, 99],
-          },
-        },
-        percentile_alert_counts_active: {
-          percentiles: {
-            field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
-            percents: [50, 90, 99],
-          },
-        },
-        avg_alert_counts_new: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
-          },
-        },
-        avg_alert_counts_recovered: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
-          },
-        },
-        avg_number_of_searches: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.number_of_searches',
-          },
-        },
-        avg_total_indexing_duration_ms: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
-          },
-        },
-        avg_es_search_duration_ms: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.es_search_duration_ms',
-          },
-        },
-        avg_total_search_duration_ms: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
-          },
-        },
-        avg_execution_gap_duration_s: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.execution_gap_duration_s',
-          },
-        },
-        avg_rule_type_run_duration_ms: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.rule_type_run_duration_ms',
-          },
-        },
-        avg_process_alerts_duration_ms: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.process_alerts_duration_ms',
-          },
-        },
-        avg_trigger_actions_duration_ms: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.trigger_actions_duration_ms',
-          },
-        },
-        avg_process_rule_duration_ms: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.process_rule_duration_ms',
-          },
-        },
-        avg_claim_to_start_duration_ms: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.claim_to_start_duration_ms',
-          },
-        },
-        avg_prepare_rule_duration_ms: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.prepare_rule_duration_ms',
-          },
-        },
-        avg_total_run_duration_ms: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.total_run_duration_ms',
-          },
-        },
-        avg_total_enrichment_duration_ms: {
-          avg: {
-            field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
-          },
-        },
-      });
-    });
+    jest.clearAllMocks();
   });
 
   describe('parseRuleTypeBucket', () => {
     test('should correctly parse rule type bucket results', () => {
       expect(
         parseRuleTypeBucket([
-          {
-            key: '.index-threshold',
-            doc_count: 78,
-            avg_es_search_duration: {
-              value: 40.76056338028169,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 1,
-                '90.0': 1,
-                '99.0': 1,
-              },
-            },
-            execution_failures: {
-              doc_count: 7,
-              by_reason: {
-                doc_count_error_upper_bound: 0,
-                sum_other_doc_count: 0,
-                buckets: [
-                  {
-                    key: 'execute',
-                    doc_count: 4,
-                  },
-                  {
-                    key: 'decrypt',
-                    doc_count: 3,
-                  },
-                ],
-              },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 0,
-                '90.0': 0,
-                '99.0': 0,
-              },
-            },
-            avg_execution_time: {
-              value: 100576923.07692307,
-            },
-            avg_total_search_duration: {
-              value: 43.74647887323944,
-            },
-          },
-          {
-            key: 'document.test.',
-            doc_count: 42,
-            avg_es_search_duration: {
-              value: 0,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 5,
-                '90.0': 5,
-                '99.0': 5,
-              },
-            },
-            execution_failures: {
-              doc_count: 2,
-              by_reason: {
-                doc_count_error_upper_bound: 0,
-                sum_other_doc_count: 0,
-                buckets: [
-                  {
-                    key: 'decrypt',
-                    doc_count: 2,
-                  },
-                ],
-              },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 5,
-                '90.0': 5,
-                '99.0': 5,
-              },
-            },
-            avg_execution_time: {
-              value: 770071428.5714285,
-            },
-            avg_total_search_duration: {
-              value: 0,
-            },
-          },
-          {
-            key: 'logs.alert.document.count',
-            doc_count: 28,
-            avg_es_search_duration: {
-              value: 26.962962962962962,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 0,
-                '90.0': 0,
-                '99.0': 0,
-              },
-            },
-            execution_failures: {
-              doc_count: 1,
-              by_reason: {
-                doc_count_error_upper_bound: 0,
-                sum_other_doc_count: 0,
-                buckets: [
-                  {
-                    key: 'decrypt',
-                    doc_count: 1,
-                  },
-                ],
-              },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 0,
-                '90.0': 0,
-                '99.0': 0,
-              },
-            },
-            avg_execution_time: {
-              value: 88321428.57142857,
-            },
-            avg_total_search_duration: {
-              value: 31.296296296296298,
-            },
-          },
+          indexThresholdAggResult,
+          documentTestAggResult,
+          logsAlertDocumentCountAggResult,
         ])
       ).toEqual({
         countRuleExecutionsByType: {
@@ -302,63 +360,195 @@ describe('event log telemetry', () => {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 28,
         },
-        avgExecutionTimeByType: {
-          '__index-threshold': 101,
-          document__test__: 770,
+        avg_event_duration_by_type_per_day: {
+          '__index-threshold': 100576923,
+          document__test__: 770071429,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 88321429,
+        },
+        avg_kibana_task_schedule_delay_by_type_per_day: {
+          '__index-threshold': 1541564,
+          document__test__: 4542467,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 3015054,
+        },
+        percentile_number_of_triggered_actions_by_type_per_day: {
+          p50: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+          p90: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+          p99: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+        },
+        percentile_number_of_generated_actions_by_type_per_day: {
+          p50: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+          p90: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+          p99: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+        },
+        percentile_alert_counts_active_by_type_per_day: {
+          p50: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 1,
+          },
+          p90: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 1,
+          },
+          p99: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 5,
+          },
+        },
+        percentile_alert_counts_new_by_type_per_day: {
+          p50: {
+            '__index-threshold': 1,
+            document__test__: 0,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 1,
+          },
+          p90: {
+            '__index-threshold': 1,
+            document__test__: 0,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 1,
+          },
+          p99: {
+            '__index-threshold': 1,
+            document__test__: 0,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 5,
+          },
+        },
+        percentile_alert_counts_recovered_by_type_per_day: {
+          p50: {
+            '__index-threshold': 0,
+            document__test__: 1,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+          p90: {
+            '__index-threshold': 0,
+            document__test__: 1,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+          p99: {
+            '__index-threshold': 0,
+            document__test__: 1,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+        },
+        avg_number_of_searches_by_type_per_day: {
+          '__index-threshold': 1,
+          document__test__: 0,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 1,
+        },
+        avg_total_indexing_duration_ms_by_type_per_day: {
+          '__index-threshold': 33,
+          document__test__: 11,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 88,
         },
-        avgEsSearchDurationByType: {
+        avg_es_search_duration_ms_by_type_per_day: {
           '__index-threshold': 41,
           document__test__: 0,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 27,
         },
-        avgTotalSearchDurationByType: {
+        avg_total_search_duration_ms_by_type_per_day: {
           '__index-threshold': 44,
           document__test__: 0,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 31,
         },
-        generatedActionsPercentilesByType: {
-          p50: {
-            '__index-threshold': 0,
-            document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            logs__alert__document__count: 0,
-          },
-          p90: {
-            '__index-threshold': 0,
-            document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            logs__alert__document__count: 0,
-          },
-          p99: {
-            '__index-threshold': 0,
-            document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            logs__alert__document__count: 0,
-          },
+        avg_execution_gap_duration_s_by_type_per_day: {
+          '__index-threshold': 3,
+          document__test__: 2,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 10,
         },
-        alertsPercentilesByType: {
-          p50: {
-            '__index-threshold': 1,
-            document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            logs__alert__document__count: 0,
-          },
-          p90: {
-            '__index-threshold': 1,
-            document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            logs__alert__document__count: 0,
-          },
-          p99: {
-            '__index-threshold': 1,
-            document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            logs__alert__document__count: 0,
-          },
+        avg_rule_type_run_duration_ms_by_type_per_day: {
+          '__index-threshold': 6,
+          document__test__: 4,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 7,
+        },
+        avg_process_alerts_duration_ms_by_type_per_day: {
+          '__index-threshold': 11,
+          document__test__: 3,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 33,
+        },
+        avg_trigger_actions_duration_ms_by_type_per_day: {
+          '__index-threshold': 5,
+          document__test__: 8,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 10,
+        },
+        avg_process_rule_duration_ms_by_type_per_day: {
+          '__index-threshold': 15,
+          document__test__: 20,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 9,
+        },
+        avg_claim_to_start_duration_ms_by_type_per_day: {
+          '__index-threshold': 56,
+          document__test__: 1,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 16,
+        },
+        avg_prepare_rule_duration_ms_by_type_per_day: {
+          '__index-threshold': 7,
+          document__test__: 10,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 9,
+        },
+        avg_total_run_duration_ms_by_type_per_day: {
+          '__index-threshold': 101,
+          document__test__: 78,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 90,
+        },
+        avg_total_enrichment_duration_ms_by_type_per_day: {
+          '__index-threshold': 48,
+          document__test__: 0,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 73,
         },
       });
     });
@@ -367,78 +557,16 @@ describe('event log telemetry', () => {
       expect(
         parseRuleTypeBucket([
           {
-            key: '.index-threshold',
-            doc_count: 78,
-            percentile_alerts: {
-              values: {
-                '50.0': 1,
-                '90.0': 1,
-                '99.0': 1,
-              },
-            },
-            execution_failures: {
-              doc_count: 7,
-              by_reason: {
-                doc_count_error_upper_bound: 0,
-                sum_other_doc_count: 0,
-                buckets: [
-                  // @ts-expect-error
-                  {
-                    key: 'execute',
-                  },
-                  {
-                    key: 'decrypt',
-                    doc_count: 3,
-                  },
-                ],
-              },
-            },
+            ...indexThresholdAggResult,
             // @ts-expect-error
-            percentile_scheduled_actions: {},
-            avg_execution_time: {
-              value: 100576923.07692307,
-            },
-            avg_total_search_duration: {
-              value: 43.74647887323944,
-            },
+            percentile_number_of_generated_actions: {},
           },
           {
-            key: 'document.test.',
-            avg_es_search_duration: {
-              value: 0,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 5,
-                '90.0': 5,
-                '99.0': 5,
-              },
-            },
-            execution_failures: {
-              doc_count: 2,
-              by_reason: {
-                doc_count_error_upper_bound: 0,
-                sum_other_doc_count: 0,
-                buckets: [
-                  {
-                    key: 'decrypt',
-                    doc_count: 2,
-                  },
-                ],
-              },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 5,
-                '90.0': 5,
-                '99.0': 5,
-              },
-            },
+            ...documentTestAggResult,
             // @ts-expect-error
-            avg_execution_time: {},
-            avg_total_search_duration: {
-              value: 0,
-            },
+            doc_count: undefined,
+            // @ts-expect-error
+            avg_event_duration: {},
           },
           // @ts-expect-error
           {
@@ -452,48 +580,132 @@ describe('event log telemetry', () => {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 0,
         },
-        avgExecutionTimeByType: {
-          '__index-threshold': 101,
+        avg_event_duration_by_type_per_day: {
+          '__index-threshold': 100576923,
           document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          logs__alert__document__count: 0,
         },
-        avgEsSearchDurationByType: {
-          '__index-threshold': 0,
+        avg_kibana_task_schedule_delay_by_type_per_day: {
+          '__index-threshold': 1541564,
+          document__test__: 4542467,
+        },
+        percentile_number_of_triggered_actions_by_type_per_day: {
+          p50: {
+            '__index-threshold': 1,
+            document__test__: 5,
+          },
+          p90: {
+            '__index-threshold': 1,
+            document__test__: 5,
+          },
+          p99: {
+            '__index-threshold': 1,
+            document__test__: 5,
+          },
+        },
+        percentile_number_of_generated_actions_by_type_per_day: {
+          p50: {
+            document__test__: 5,
+          },
+          p90: {
+            document__test__: 5,
+          },
+          p99: {
+            document__test__: 5,
+          },
+        },
+        percentile_alert_counts_active_by_type_per_day: {
+          p50: {
+            '__index-threshold': 1,
+            document__test__: 5,
+          },
+          p90: {
+            '__index-threshold': 1,
+            document__test__: 5,
+          },
+          p99: {
+            '__index-threshold': 1,
+            document__test__: 5,
+          },
+        },
+        percentile_alert_counts_new_by_type_per_day: {
+          p50: {
+            '__index-threshold': 1,
+            document__test__: 0,
+          },
+          p90: {
+            '__index-threshold': 1,
+            document__test__: 0,
+          },
+          p99: {
+            '__index-threshold': 1,
+            document__test__: 0,
+          },
+        },
+        percentile_alert_counts_recovered_by_type_per_day: {
+          p50: {
+            '__index-threshold': 0,
+            document__test__: 1,
+          },
+          p90: {
+            '__index-threshold': 0,
+            document__test__: 1,
+          },
+          p99: {
+            '__index-threshold': 0,
+            document__test__: 1,
+          },
+        },
+        avg_number_of_searches_by_type_per_day: {
+          '__index-threshold': 1,
           document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          logs__alert__document__count: 0,
         },
-        avgTotalSearchDurationByType: {
+        avg_total_indexing_duration_ms_by_type_per_day: {
+          '__index-threshold': 33,
+          document__test__: 11,
+        },
+        avg_es_search_duration_ms_by_type_per_day: {
+          '__index-threshold': 41,
+          document__test__: 0,
+        },
+        avg_total_search_duration_ms_by_type_per_day: {
           '__index-threshold': 44,
           document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          logs__alert__document__count: 0,
         },
-        generatedActionsPercentilesByType: {
-          p50: {
-            document__test__: 5,
-          },
-          p90: {
-            document__test__: 5,
-          },
-          p99: {
-            document__test__: 5,
-          },
+        avg_execution_gap_duration_s_by_type_per_day: {
+          '__index-threshold': 3,
+          document__test__: 2,
         },
-        alertsPercentilesByType: {
-          p50: {
-            '__index-threshold': 1,
-            document__test__: 5,
-          },
-          p90: {
-            '__index-threshold': 1,
-            document__test__: 5,
-          },
-          p99: {
-            '__index-threshold': 1,
-            document__test__: 5,
-          },
+        avg_rule_type_run_duration_ms_by_type_per_day: {
+          '__index-threshold': 6,
+          document__test__: 4,
+        },
+        avg_process_alerts_duration_ms_by_type_per_day: {
+          '__index-threshold': 11,
+          document__test__: 3,
+        },
+        avg_trigger_actions_duration_ms_by_type_per_day: {
+          '__index-threshold': 5,
+          document__test__: 8,
+        },
+        avg_process_rule_duration_ms_by_type_per_day: {
+          '__index-threshold': 15,
+          document__test__: 20,
+        },
+        avg_claim_to_start_duration_ms_by_type_per_day: {
+          '__index-threshold': 56,
+          document__test__: 1,
+        },
+        avg_prepare_rule_duration_ms_by_type_per_day: {
+          '__index-threshold': 7,
+          document__test__: 10,
+        },
+        avg_total_run_duration_ms_by_type_per_day: {
+          '__index-threshold': 101,
+          document__test__: 78,
+        },
+        avg_total_enrichment_duration_ms_by_type_per_day: {
+          '__index-threshold': 48,
+          document__test__: 0,
         },
       });
     });
@@ -501,19 +713,46 @@ describe('event log telemetry', () => {
     test('should handle empty input', () => {
       expect(parseRuleTypeBucket([])).toEqual({
         countRuleExecutionsByType: {},
-        avgExecutionTimeByType: {},
-        avgEsSearchDurationByType: {},
-        avgTotalSearchDurationByType: {},
-        generatedActionsPercentilesByType: {
+        avg_event_duration_by_type_per_day: {},
+        avg_kibana_task_schedule_delay_by_type_per_day: {},
+        percentile_number_of_triggered_actions_by_type_per_day: {
           p50: {},
           p90: {},
           p99: {},
         },
-        alertsPercentilesByType: {
+        percentile_number_of_generated_actions_by_type_per_day: {
           p50: {},
           p90: {},
           p99: {},
         },
+        percentile_alert_counts_active_by_type_per_day: {
+          p50: {},
+          p90: {},
+          p99: {},
+        },
+        percentile_alert_counts_new_by_type_per_day: {
+          p50: {},
+          p90: {},
+          p99: {},
+        },
+        percentile_alert_counts_recovered_by_type_per_day: {
+          p50: {},
+          p90: {},
+          p99: {},
+        },
+        avg_number_of_searches_by_type_per_day: {},
+        avg_total_indexing_duration_ms_by_type_per_day: {},
+        avg_es_search_duration_ms_by_type_per_day: {},
+        avg_total_search_duration_ms_by_type_per_day: {},
+        avg_execution_gap_duration_s_by_type_per_day: {},
+        avg_rule_type_run_duration_ms_by_type_per_day: {},
+        avg_process_alerts_duration_ms_by_type_per_day: {},
+        avg_trigger_actions_duration_ms_by_type_per_day: {},
+        avg_process_rule_duration_ms_by_type_per_day: {},
+        avg_claim_to_start_duration_ms_by_type_per_day: {},
+        avg_prepare_rule_duration_ms_by_type_per_day: {},
+        avg_total_run_duration_ms_by_type_per_day: {},
+        avg_total_enrichment_duration_ms_by_type_per_day: {},
       });
     });
 
@@ -521,19 +760,46 @@ describe('event log telemetry', () => {
       // @ts-expect-error
       expect(parseRuleTypeBucket(undefined)).toEqual({
         countRuleExecutionsByType: {},
-        avgExecutionTimeByType: {},
-        avgEsSearchDurationByType: {},
-        avgTotalSearchDurationByType: {},
-        generatedActionsPercentilesByType: {
+        avg_event_duration_by_type_per_day: {},
+        avg_kibana_task_schedule_delay_by_type_per_day: {},
+        percentile_number_of_triggered_actions_by_type_per_day: {
           p50: {},
           p90: {},
           p99: {},
         },
-        alertsPercentilesByType: {
+        percentile_number_of_generated_actions_by_type_per_day: {
           p50: {},
           p90: {},
           p99: {},
         },
+        percentile_alert_counts_active_by_type_per_day: {
+          p50: {},
+          p90: {},
+          p99: {},
+        },
+        percentile_alert_counts_new_by_type_per_day: {
+          p50: {},
+          p90: {},
+          p99: {},
+        },
+        percentile_alert_counts_recovered_by_type_per_day: {
+          p50: {},
+          p90: {},
+          p99: {},
+        },
+        avg_number_of_searches_by_type_per_day: {},
+        avg_total_indexing_duration_ms_by_type_per_day: {},
+        avg_es_search_duration_ms_by_type_per_day: {},
+        avg_total_search_duration_ms_by_type_per_day: {},
+        avg_execution_gap_duration_s_by_type_per_day: {},
+        avg_rule_type_run_duration_ms_by_type_per_day: {},
+        avg_process_alerts_duration_ms_by_type_per_day: {},
+        avg_trigger_actions_duration_ms_by_type_per_day: {},
+        avg_process_rule_duration_ms_by_type_per_day: {},
+        avg_claim_to_start_duration_ms_by_type_per_day: {},
+        avg_prepare_rule_duration_ms_by_type_per_day: {},
+        avg_total_run_duration_ms_by_type_per_day: {},
+        avg_total_enrichment_duration_ms_by_type_per_day: {},
       });
     });
   });
@@ -611,130 +877,9 @@ describe('event log telemetry', () => {
     test('should format execution failures by rule type', () => {
       expect(
         parseExecutionFailureByRuleType([
-          {
-            key: '.index-threshold',
-            doc_count: 78,
-            avg_es_search_duration: {
-              value: 40.76056338028169,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 1,
-                '95.0': 1,
-                '99.0': 1,
-              },
-            },
-            execution_failures: {
-              doc_count: 7,
-              by_reason: {
-                doc_count_error_upper_bound: 0,
-                sum_other_doc_count: 0,
-                buckets: [
-                  {
-                    key: 'execute',
-                    doc_count: 4,
-                  },
-                  {
-                    key: 'decrypt',
-                    doc_count: 3,
-                  },
-                ],
-              },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 0,
-                '95.0': 0,
-                '99.0': 0,
-              },
-            },
-            avg_execution_time: {
-              value: 100576923.07692307,
-            },
-            avg_total_search_duration: {
-              value: 43.74647887323944,
-            },
-          },
-          {
-            key: 'document.test.',
-            doc_count: 42,
-            avg_es_search_duration: {
-              value: 0,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 5,
-                '95.0': 5,
-                '99.0': 5,
-              },
-            },
-            execution_failures: {
-              doc_count: 2,
-              by_reason: {
-                doc_count_error_upper_bound: 0,
-                sum_other_doc_count: 0,
-                buckets: [
-                  {
-                    key: 'decrypt',
-                    doc_count: 2,
-                  },
-                ],
-              },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 5,
-                '95.0': 5,
-                '99.0': 5,
-              },
-            },
-            avg_execution_time: {
-              value: 770071428.5714285,
-            },
-            avg_total_search_duration: {
-              value: 0,
-            },
-          },
-          {
-            key: 'logs.alert.document.count',
-            doc_count: 28,
-            avg_es_search_duration: {
-              value: 26.962962962962962,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 0,
-                '95.0': 0,
-                '99.0': 0,
-              },
-            },
-            execution_failures: {
-              doc_count: 1,
-              by_reason: {
-                doc_count_error_upper_bound: 0,
-                sum_other_doc_count: 0,
-                buckets: [
-                  {
-                    key: 'decrypt',
-                    doc_count: 1,
-                  },
-                ],
-              },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 0,
-                '95.0': 0,
-                '99.0': 0,
-              },
-            },
-            avg_execution_time: {
-              value: 88321428.57142857,
-            },
-            avg_total_search_duration: {
-              value: 31.296296296296298,
-            },
-          },
+          indexThresholdAggResult,
+          documentTestAggResult,
+          logsAlertDocumentCountAggResult,
         ])
       ).toEqual({
         countFailedExecutionsByReasonByType: {
@@ -755,18 +900,7 @@ describe('event log telemetry', () => {
       expect(
         parseExecutionFailureByRuleType([
           {
-            key: '.index-threshold',
-            doc_count: 78,
-            avg_es_search_duration: {
-              value: 40.76056338028169,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 1,
-                '95.0': 1,
-                '99.0': 1,
-              },
-            },
+            ...indexThresholdAggResult,
             execution_failures: {
               doc_count: 9,
               by_reason: {
@@ -775,100 +909,9 @@ describe('event log telemetry', () => {
                 buckets: [],
               },
             },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 0,
-                '95.0': 0,
-                '99.0': 0,
-              },
-            },
-            avg_execution_time: {
-              value: 100576923.07692307,
-            },
-            avg_total_search_duration: {
-              value: 43.74647887323944,
-            },
           },
-          {
-            key: 'document.test.',
-            doc_count: 42,
-            avg_es_search_duration: {
-              value: 0,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 5,
-                '95.0': 5,
-                '99.0': 5,
-              },
-            },
-            execution_failures: {
-              doc_count: 2,
-              by_reason: {
-                doc_count_error_upper_bound: 0,
-                sum_other_doc_count: 0,
-                buckets: [
-                  {
-                    key: 'decrypt',
-                    doc_count: 2,
-                  },
-                ],
-              },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 5,
-                '95.0': 5,
-                '99.0': 5,
-              },
-            },
-            avg_execution_time: {
-              value: 770071428.5714285,
-            },
-            avg_total_search_duration: {
-              value: 0,
-            },
-          },
-          {
-            key: 'logs.alert.document.count',
-            doc_count: 28,
-            avg_es_search_duration: {
-              value: 26.962962962962962,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 0,
-                '95.0': 0,
-                '99.0': 0,
-              },
-            },
-            execution_failures: {
-              doc_count: 1,
-              by_reason: {
-                doc_count_error_upper_bound: 0,
-                sum_other_doc_count: 0,
-                buckets: [
-                  {
-                    key: 'decrypt',
-                    doc_count: 1,
-                  },
-                ],
-              },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 0,
-                '95.0': 0,
-                '99.0': 0,
-              },
-            },
-            avg_execution_time: {
-              value: 88321428.57142857,
-            },
-            avg_total_search_duration: {
-              value: 31.296296296296298,
-            },
-          },
+          documentTestAggResult,
+          logsAlertDocumentCountAggResult,
         ])
       ).toEqual({
         countFailedExecutionsByReasonByType: {
@@ -885,18 +928,7 @@ describe('event log telemetry', () => {
       expect(
         parseExecutionFailureByRuleType([
           {
-            key: '.index-threshold',
-            doc_count: 78,
-            avg_es_search_duration: {
-              value: 40.76056338028169,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 1,
-                '95.0': 1,
-                '99.0': 1,
-              },
-            },
+            ...indexThresholdAggResult,
             execution_failures: {
               doc_count: 0,
               by_reason: {
@@ -904,34 +936,10 @@ describe('event log telemetry', () => {
                 sum_other_doc_count: 0,
                 buckets: [],
               },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 0,
-                '95.0': 0,
-                '99.0': 0,
-              },
-            },
-            avg_execution_time: {
-              value: 100576923.07692307,
-            },
-            avg_total_search_duration: {
-              value: 43.74647887323944,
             },
           },
           {
-            key: 'document.test.',
-            doc_count: 42,
-            avg_es_search_duration: {
-              value: 0,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 5,
-                '95.0': 5,
-                '99.0': 5,
-              },
-            },
+            ...documentTestAggResult,
             execution_failures: {
               doc_count: 0,
               by_reason: {
@@ -939,34 +947,10 @@ describe('event log telemetry', () => {
                 sum_other_doc_count: 0,
                 buckets: [],
               },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 5,
-                '95.0': 5,
-                '99.0': 5,
-              },
-            },
-            avg_execution_time: {
-              value: 770071428.5714285,
-            },
-            avg_total_search_duration: {
-              value: 0,
             },
           },
           {
-            key: 'logs.alert.document.count',
-            doc_count: 28,
-            avg_es_search_duration: {
-              value: 26.962962962962962,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 0,
-                '95.0': 0,
-                '99.0': 0,
-              },
-            },
+            ...logsAlertDocumentCountAggResult,
             execution_failures: {
               doc_count: 0,
               by_reason: {
@@ -974,19 +958,6 @@ describe('event log telemetry', () => {
                 sum_other_doc_count: 0,
                 buckets: [],
               },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 0,
-                '95.0': 0,
-                '99.0': 0,
-              },
-            },
-            avg_execution_time: {
-              value: 88321428.57142857,
-            },
-            avg_total_search_duration: {
-              value: 31.296296296296298,
             },
           },
         ])
@@ -996,89 +967,20 @@ describe('event log telemetry', () => {
     test('should handle results with no execution failures', () => {
       expect(
         parseExecutionFailureByRuleType([
-          // @ts-expect-error
           {
-            key: '.index-threshold',
-            doc_count: 78,
-            avg_es_search_duration: {
-              value: 40.76056338028169,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 1,
-                '95.0': 1,
-                '99.0': 1,
-              },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 0,
-                '95.0': 0,
-                '99.0': 0,
-              },
-            },
-            avg_execution_time: {
-              value: 100576923.07692307,
-            },
-            avg_total_search_duration: {
-              value: 43.74647887323944,
-            },
+            ...indexThresholdAggResult,
+            // @ts-expect-error
+            execution_failures: undefined,
           },
-          // @ts-expect-error
           {
-            key: 'document.test.',
-            doc_count: 42,
-            avg_es_search_duration: {
-              value: 0,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 5,
-                '95.0': 5,
-                '99.0': 5,
-              },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 5,
-                '95.0': 5,
-                '99.0': 5,
-              },
-            },
-            avg_execution_time: {
-              value: 770071428.5714285,
-            },
-            avg_total_search_duration: {
-              value: 0,
-            },
+            ...documentTestAggResult,
+            // @ts-expect-error
+            execution_failures: undefined,
           },
-          // @ts-expect-error
           {
-            key: 'logs.alert.document.count',
-            doc_count: 28,
-            avg_es_search_duration: {
-              value: 26.962962962962962,
-            },
-            percentile_alerts: {
-              values: {
-                '50.0': 0,
-                '95.0': 0,
-                '99.0': 0,
-              },
-            },
-            percentile_scheduled_actions: {
-              values: {
-                '50.0': 0,
-                '95.0': 0,
-                '99.0': 0,
-              },
-            },
-            avg_execution_time: {
-              value: 88321428.57142857,
-            },
-            avg_total_search_duration: {
-              value: 31.296296296296298,
-            },
+            ...logsAlertDocumentCountAggResult,
+            // @ts-expect-error
+            execution_failures: undefined,
           },
         ])
       ).toEqual({ countFailedExecutionsByReasonByType: {} });
@@ -1101,66 +1003,55 @@ describe('event log telemetry', () => {
   describe('parseExecutionCountAggregationResults', () => {
     test('should correctly format aggregation results', () => {
       expect(
-        parseExecutionCountAggregationResults({
-          avg_es_search_duration: {
-            value: 26.246376811594203,
-          },
-          percentile_alerts: {
-            values: {
-              '50.0': 1,
-              '90.0': 5,
-              '99.0': 5,
-            },
-          },
-          execution_failures: {
-            doc_count: 10,
-            by_reason: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
-              buckets: [
-                {
-                  key: 'decrypt',
-                  doc_count: 6,
-                },
-                {
-                  key: 'execute',
-                  doc_count: 4,
-                },
-              ],
-            },
-          },
-          percentile_scheduled_actions: {
-            values: {
-              '50.0': 0,
-              '90.0': 5,
-              '99.0': 5,
-            },
-          },
-          avg_execution_time: {
-            value: 288250000,
-          },
-          avg_total_search_duration: {
-            value: 28.630434782608695,
-          },
-        })
+        parseExecutionCountAggregationResults(
+          // @ts-expect-error
+          aggResult
+        )
       ).toEqual({
         countTotalFailedExecutions: 10,
         countFailedExecutionsByReason: {
           decrypt: 6,
           execute: 4,
         },
-        avgExecutionTime: 288,
-        avgEsSearchDuration: 26,
-        avgTotalSearchDuration: 29,
-        generatedActionsPercentiles: {
+        avg_event_duration_per_day: 288250000,
+        avg_kibana_task_schedule_delay_per_day: 1541564,
+        avg_number_of_searches_per_day: 1,
+        avg_total_indexing_duration_ms_per_day: 29,
+        avg_es_search_duration_ms_per_day: 26,
+        avg_total_search_duration_ms_per_day: 44,
+        avg_execution_gap_duration_s_per_day: 3,
+        avg_rule_type_run_duration_ms_per_day: 6,
+        avg_process_alerts_duration_ms_per_day: 11,
+        avg_trigger_actions_duration_ms_per_day: 5,
+        avg_process_rule_duration_ms_per_day: 15,
+        avg_claim_to_start_duration_ms_per_day: 56,
+        avg_prepare_rule_duration_ms_per_day: 7,
+        avg_total_run_duration_ms_per_day: 101,
+        avg_total_enrichment_duration_ms_per_day: 48,
+        percentile_number_of_triggered_actions_per_day: {
           p50: 0,
           p90: 5,
           p99: 5,
         },
-        alertsPercentiles: {
+        percentile_number_of_generated_actions_per_day: {
+          p50: 0,
+          p90: 5,
+          p99: 5,
+        },
+        percentile_alert_counts_active_per_day: {
           p50: 1,
           p90: 5,
           p99: 5,
+        },
+        percentile_alert_counts_new_per_day: {
+          p50: 0,
+          p90: 1,
+          p99: 1,
+        },
+        percentile_alert_counts_recovered_per_day: {
+          p50: 0,
+          p90: 0,
+          p99: 0,
         },
       });
     });
@@ -1168,15 +1059,9 @@ describe('event log telemetry', () => {
     test('should handle missing values', () => {
       expect(
         parseExecutionCountAggregationResults({
+          ...aggResult,
           // @ts-expect-error
-          avg_es_search_duration: {},
-          percentile_alerts: {
-            values: {
-              '50.0': 1,
-              '70.0': 5,
-              '99.0': 5,
-            },
-          },
+          avg_es_search_duration_ms: {},
           execution_failures: {
             by_reason: {
               doc_count_error_upper_bound: 0,
@@ -1194,10 +1079,7 @@ describe('event log telemetry', () => {
             },
           },
           // @ts-expect-error
-          percentile_scheduled_actions: {},
-          avg_total_search_duration: {
-            value: 28.630434782608695,
-          },
+          percentile_number_of_generated_actions: {},
         })
       ).toEqual({
         countTotalFailedExecutions: 0,
@@ -1205,13 +1087,41 @@ describe('event log telemetry', () => {
           decrypt: 0,
           execute: 4,
         },
-        avgExecutionTime: 0,
-        avgEsSearchDuration: 0,
-        avgTotalSearchDuration: 29,
-        generatedActionsPercentiles: {},
-        alertsPercentiles: {
-          p50: 1,
+        avg_event_duration_per_day: 288250000,
+        avg_kibana_task_schedule_delay_per_day: 1541564,
+        avg_number_of_searches_per_day: 1,
+        avg_total_indexing_duration_ms_per_day: 29,
+        avg_es_search_duration_ms_per_day: 0,
+        avg_total_search_duration_ms_per_day: 44,
+        avg_execution_gap_duration_s_per_day: 3,
+        avg_rule_type_run_duration_ms_per_day: 6,
+        avg_process_alerts_duration_ms_per_day: 11,
+        avg_trigger_actions_duration_ms_per_day: 5,
+        avg_process_rule_duration_ms_per_day: 15,
+        avg_claim_to_start_duration_ms_per_day: 56,
+        avg_prepare_rule_duration_ms_per_day: 7,
+        avg_total_run_duration_ms_per_day: 101,
+        avg_total_enrichment_duration_ms_per_day: 48,
+        percentile_number_of_triggered_actions_per_day: {
+          p50: 0,
+          p90: 5,
           p99: 5,
+        },
+        percentile_number_of_generated_actions_per_day: {},
+        percentile_alert_counts_active_per_day: {
+          p50: 1,
+          p90: 5,
+          p99: 5,
+        },
+        percentile_alert_counts_new_per_day: {
+          p50: 0,
+          p90: 1,
+          p99: 1,
+        },
+        percentile_alert_counts_recovered_per_day: {
+          p50: 0,
+          p90: 0,
+          p99: 0,
         },
       });
     });
@@ -1221,11 +1131,6 @@ describe('event log telemetry', () => {
       expect(parseExecutionCountAggregationResults({})).toEqual({
         countTotalFailedExecutions: 0,
         countFailedExecutionsByReason: {},
-        avgExecutionTime: 0,
-        avgEsSearchDuration: 0,
-        avgTotalSearchDuration: 0,
-        generatedActionsPercentiles: {},
-        alertsPercentiles: {},
       });
     });
 
@@ -1234,11 +1139,6 @@ describe('event log telemetry', () => {
       expect(parseExecutionCountAggregationResults(undefined)).toEqual({
         countTotalFailedExecutions: 0,
         countFailedExecutionsByReason: {},
-        avgExecutionTime: 0,
-        avgEsSearchDuration: 0,
-        avgTotalSearchDuration: 0,
-        generatedActionsPercentiles: {},
-        alertsPercentiles: {},
       });
     });
   });
@@ -1267,171 +1167,10 @@ describe('event log telemetry', () => {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [
-              {
-                key: '.index-threshold',
-                doc_count: 78,
-                avg_es_search_duration: {
-                  value: 40.76056338028169,
-                },
-                percentile_alerts: {
-                  values: {
-                    '50.0': 1,
-                    '90.0': 1,
-                    '99.0': 1,
-                  },
-                },
-                execution_failures: {
-                  doc_count: 7,
-                  by_reason: {
-                    doc_count_error_upper_bound: 0,
-                    sum_other_doc_count: 0,
-                    buckets: [
-                      {
-                        key: 'execute',
-                        doc_count: 4,
-                      },
-                      {
-                        key: 'decrypt',
-                        doc_count: 3,
-                      },
-                    ],
-                  },
-                },
-                percentile_scheduled_actions: {
-                  values: {
-                    '50.0': 0,
-                    '90.0': 0,
-                    '99.0': 0,
-                  },
-                },
-                avg_execution_time: {
-                  value: 100576923.07692307,
-                },
-                avg_total_search_duration: {
-                  value: 43.74647887323944,
-                },
-              },
-              {
-                key: 'document.test.',
-                doc_count: 42,
-                avg_es_search_duration: {
-                  value: 0,
-                },
-                percentile_alerts: {
-                  values: {
-                    '50.0': 5,
-                    '90.0': 5,
-                    '99.0': 5,
-                  },
-                },
-                execution_failures: {
-                  doc_count: 2,
-                  by_reason: {
-                    doc_count_error_upper_bound: 0,
-                    sum_other_doc_count: 0,
-                    buckets: [
-                      {
-                        key: 'decrypt',
-                        doc_count: 2,
-                      },
-                    ],
-                  },
-                },
-                percentile_scheduled_actions: {
-                  values: {
-                    '50.0': 5,
-                    '90.0': 5,
-                    '99.0': 5,
-                  },
-                },
-                avg_execution_time: {
-                  value: 770071428.5714285,
-                },
-                avg_total_search_duration: {
-                  value: 0,
-                },
-              },
-              {
-                key: 'logs.alert.document.count',
-                doc_count: 28,
-                avg_es_search_duration: {
-                  value: 26.962962962962962,
-                },
-                percentile_alerts: {
-                  values: {
-                    '50.0': 0,
-                    '90.0': 0,
-                    '99.0': 0,
-                  },
-                },
-                execution_failures: {
-                  doc_count: 1,
-                  by_reason: {
-                    doc_count_error_upper_bound: 0,
-                    sum_other_doc_count: 0,
-                    buckets: [
-                      {
-                        key: 'decrypt',
-                        doc_count: 1,
-                      },
-                    ],
-                  },
-                },
-                percentile_scheduled_actions: {
-                  values: {
-                    '50.0': 0,
-                    '90.0': 0,
-                    '99.0': 0,
-                  },
-                },
-                avg_execution_time: {
-                  value: 88321428.57142857,
-                },
-                avg_total_search_duration: {
-                  value: 31.296296296296298,
-                },
-              },
+              indexThresholdAggResult,
+              documentTestAggResult,
+              logsAlertDocumentCountAggResult,
             ],
-          },
-          avg_es_search_duration: {
-            value: 26.246376811594203,
-          },
-          percentile_alerts: {
-            values: {
-              '50.0': 1,
-              '90.0': 5,
-              '99.0': 5,
-            },
-          },
-          execution_failures: {
-            doc_count: 10,
-            by_reason: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
-              buckets: [
-                {
-                  key: 'decrypt',
-                  doc_count: 6,
-                },
-                {
-                  key: 'execute',
-                  doc_count: 4,
-                },
-              ],
-            },
-          },
-          percentile_scheduled_actions: {
-            values: {
-              '50.0': 0,
-              '90.0': 5,
-              '99.0': 5,
-            },
-          },
-          avg_execution_time: {
-            value: 288250000,
-          },
-          avg_total_search_duration: {
-            value: 28.630434782608695,
           },
           by_execution_status: {
             doc_count_error_upper_bound: 0,
@@ -1441,6 +1180,7 @@ describe('event log telemetry', () => {
               { key: 'failure', doc_count: 22 },
             ],
           },
+          ...aggResult,
         },
       });
 
@@ -1453,17 +1193,246 @@ describe('event log telemetry', () => {
       expect(esClient.search).toHaveBeenCalledTimes(1);
 
       expect(telemetry).toStrictEqual({
-        countTotalRuleExecutions: 148,
         countRuleExecutionsByType: {
           '__index-threshold': 78,
           document__test__: 42,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 28,
         },
+        avg_event_duration_by_type_per_day: {
+          '__index-threshold': 100576923,
+          document__test__: 770071429,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 88321429,
+        },
+        avg_kibana_task_schedule_delay_by_type_per_day: {
+          '__index-threshold': 1541564,
+          document__test__: 4542467,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 3015054,
+        },
+        percentile_number_of_triggered_actions_by_type_per_day: {
+          p50: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+          p90: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+          p99: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+        },
+        percentile_number_of_generated_actions_by_type_per_day: {
+          p50: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+          p90: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+          p99: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+        },
+        percentile_alert_counts_active_by_type_per_day: {
+          p50: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 1,
+          },
+          p90: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 1,
+          },
+          p99: {
+            '__index-threshold': 1,
+            document__test__: 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 5,
+          },
+        },
+        percentile_alert_counts_new_by_type_per_day: {
+          p50: {
+            '__index-threshold': 1,
+            document__test__: 0,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 1,
+          },
+          p90: {
+            '__index-threshold': 1,
+            document__test__: 0,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 1,
+          },
+          p99: {
+            '__index-threshold': 1,
+            document__test__: 0,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 5,
+          },
+        },
+        percentile_alert_counts_recovered_by_type_per_day: {
+          p50: {
+            '__index-threshold': 0,
+            document__test__: 1,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+          p90: {
+            '__index-threshold': 0,
+            document__test__: 1,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+          p99: {
+            '__index-threshold': 0,
+            document__test__: 1,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            logs__alert__document__count: 0,
+          },
+        },
+        avg_number_of_searches_by_type_per_day: {
+          '__index-threshold': 1,
+          document__test__: 0,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 1,
+        },
+        avg_total_indexing_duration_ms_by_type_per_day: {
+          '__index-threshold': 33,
+          document__test__: 11,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 88,
+        },
+        avg_es_search_duration_ms_by_type_per_day: {
+          '__index-threshold': 41,
+          document__test__: 0,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 27,
+        },
+        avg_total_search_duration_ms_by_type_per_day: {
+          '__index-threshold': 44,
+          document__test__: 0,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 31,
+        },
+        avg_execution_gap_duration_s_by_type_per_day: {
+          '__index-threshold': 3,
+          document__test__: 2,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 10,
+        },
+        avg_rule_type_run_duration_ms_by_type_per_day: {
+          '__index-threshold': 6,
+          document__test__: 4,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 7,
+        },
+        avg_process_alerts_duration_ms_by_type_per_day: {
+          '__index-threshold': 11,
+          document__test__: 3,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 33,
+        },
+        avg_trigger_actions_duration_ms_by_type_per_day: {
+          '__index-threshold': 5,
+          document__test__: 8,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 10,
+        },
+        avg_process_rule_duration_ms_by_type_per_day: {
+          '__index-threshold': 15,
+          document__test__: 20,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 9,
+        },
+        avg_claim_to_start_duration_ms_by_type_per_day: {
+          '__index-threshold': 56,
+          document__test__: 1,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 16,
+        },
+        avg_prepare_rule_duration_ms_by_type_per_day: {
+          '__index-threshold': 7,
+          document__test__: 10,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 9,
+        },
+        avg_total_run_duration_ms_by_type_per_day: {
+          '__index-threshold': 101,
+          document__test__: 78,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 90,
+        },
+        avg_total_enrichment_duration_ms_by_type_per_day: {
+          '__index-threshold': 48,
+          document__test__: 0,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 73,
+        },
         countTotalFailedExecutions: 10,
         countFailedExecutionsByReason: {
           decrypt: 6,
           execute: 4,
+        },
+        avg_event_duration_per_day: 288250000,
+        avg_kibana_task_schedule_delay_per_day: 1541564,
+        avg_number_of_searches_per_day: 1,
+        avg_total_indexing_duration_ms_per_day: 29,
+        avg_es_search_duration_ms_per_day: 26,
+        avg_total_search_duration_ms_per_day: 44,
+        avg_execution_gap_duration_s_per_day: 3,
+        avg_rule_type_run_duration_ms_per_day: 6,
+        avg_process_alerts_duration_ms_per_day: 11,
+        avg_trigger_actions_duration_ms_per_day: 5,
+        avg_process_rule_duration_ms_per_day: 15,
+        avg_claim_to_start_duration_ms_per_day: 56,
+        avg_prepare_rule_duration_ms_per_day: 7,
+        avg_total_run_duration_ms_per_day: 101,
+        avg_total_enrichment_duration_ms_per_day: 48,
+        percentile_number_of_triggered_actions_per_day: {
+          p50: 0,
+          p90: 5,
+          p99: 5,
+        },
+        percentile_number_of_generated_actions_per_day: {
+          p50: 0,
+          p90: 5,
+          p99: 5,
+        },
+        percentile_alert_counts_active_per_day: {
+          p50: 1,
+          p90: 5,
+          p99: 5,
+        },
+        percentile_alert_counts_new_per_day: {
+          p50: 0,
+          p90: 1,
+          p99: 1,
+        },
+        percentile_alert_counts_recovered_per_day: {
+          p50: 0,
+          p90: 0,
+          p99: 0,
         },
         countFailedExecutionsByReasonByType: {
           decrypt: {
@@ -1476,77 +1445,7 @@ describe('event log telemetry', () => {
             '__index-threshold': 4,
           },
         },
-        avgExecutionTime: 288,
-        avgEsSearchDuration: 26,
-        avgTotalSearchDuration: 29,
-        avgExecutionTimeByType: {
-          '__index-threshold': 101,
-          document__test__: 770,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          logs__alert__document__count: 88,
-        },
-        avgEsSearchDurationByType: {
-          '__index-threshold': 41,
-          document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          logs__alert__document__count: 27,
-        },
-        avgTotalSearchDurationByType: {
-          '__index-threshold': 44,
-          document__test__: 0,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          logs__alert__document__count: 31,
-        },
-        generatedActionsPercentiles: {
-          p50: 0,
-          p90: 5,
-          p99: 5,
-        },
-        alertsPercentiles: {
-          p50: 1,
-          p90: 5,
-          p99: 5,
-        },
-        generatedActionsPercentilesByType: {
-          p50: {
-            '__index-threshold': 0,
-            document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            logs__alert__document__count: 0,
-          },
-          p90: {
-            '__index-threshold': 0,
-            document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            logs__alert__document__count: 0,
-          },
-          p99: {
-            '__index-threshold': 0,
-            document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            logs__alert__document__count: 0,
-          },
-        },
-        alertsPercentilesByType: {
-          p50: {
-            '__index-threshold': 1,
-            document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            logs__alert__document__count: 0,
-          },
-          p90: {
-            '__index-threshold': 1,
-            document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            logs__alert__document__count: 0,
-          },
-          p99: {
-            '__index-threshold': 1,
-            document__test__: 5,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            logs__alert__document__count: 0,
-          },
-        },
+        countTotalRuleExecutions: 148,
         countRulesByExecutionStatus: {
           failure: 22,
           success: 21,
@@ -1575,21 +1474,51 @@ describe('event log telemetry', () => {
       expect(telemetry).toStrictEqual({
         hasErrors: true,
         errorMessage: 'oh no',
-        countTotalRuleExecutions: 0,
         countRuleExecutionsByType: {},
+        avg_event_duration_by_type_per_day: {},
+        avg_kibana_task_schedule_delay_by_type_per_day: {},
+        percentile_number_of_triggered_actions_by_type_per_day: { p50: {}, p90: {}, p99: {} },
+        percentile_number_of_generated_actions_by_type_per_day: { p50: {}, p90: {}, p99: {} },
+        percentile_alert_counts_active_by_type_per_day: { p50: {}, p90: {}, p99: {} },
+        percentile_alert_counts_new_by_type_per_day: { p50: {}, p90: {}, p99: {} },
+        percentile_alert_counts_recovered_by_type_per_day: { p50: {}, p90: {}, p99: {} },
+        avg_number_of_searches_by_type_per_day: {},
+        avg_total_indexing_duration_ms_by_type_per_day: {},
+        avg_es_search_duration_ms_by_type_per_day: {},
+        avg_total_search_duration_ms_by_type_per_day: {},
+        avg_execution_gap_duration_s_by_type_per_day: {},
+        avg_rule_type_run_duration_ms_by_type_per_day: {},
+        avg_process_alerts_duration_ms_by_type_per_day: {},
+        avg_trigger_actions_duration_ms_by_type_per_day: {},
+        avg_process_rule_duration_ms_by_type_per_day: {},
+        avg_claim_to_start_duration_ms_by_type_per_day: {},
+        avg_prepare_rule_duration_ms_by_type_per_day: {},
+        avg_total_run_duration_ms_by_type_per_day: {},
+        avg_total_enrichment_duration_ms_by_type_per_day: {},
         countTotalFailedExecutions: 0,
         countFailedExecutionsByReason: {},
+        avg_event_duration_per_day: 0,
+        avg_kibana_task_schedule_delay_per_day: 0,
+        avg_number_of_searches_per_day: 0,
+        avg_total_indexing_duration_ms_per_day: 0,
+        avg_es_search_duration_ms_per_day: 0,
+        avg_total_search_duration_ms_per_day: 0,
+        avg_execution_gap_duration_s_per_day: 0,
+        avg_rule_type_run_duration_ms_per_day: 0,
+        avg_process_alerts_duration_ms_per_day: 0,
+        avg_trigger_actions_duration_ms_per_day: 0,
+        avg_process_rule_duration_ms_per_day: 0,
+        avg_claim_to_start_duration_ms_per_day: 0,
+        avg_prepare_rule_duration_ms_per_day: 0,
+        avg_total_run_duration_ms_per_day: 0,
+        avg_total_enrichment_duration_ms_per_day: 0,
+        percentile_number_of_triggered_actions_per_day: { p50: 0, p90: 0, p99: 0 },
+        percentile_number_of_generated_actions_per_day: { p50: 0, p90: 0, p99: 0 },
+        percentile_alert_counts_active_per_day: { p50: 0, p90: 0, p99: 0 },
+        percentile_alert_counts_new_per_day: { p50: 0, p90: 0, p99: 0 },
+        percentile_alert_counts_recovered_per_day: { p50: 0, p90: 0, p99: 0 },
         countFailedExecutionsByReasonByType: {},
-        avgExecutionTime: 0,
-        avgExecutionTimeByType: {},
-        avgEsSearchDuration: 0,
-        avgEsSearchDurationByType: {},
-        avgTotalSearchDuration: 0,
-        avgTotalSearchDurationByType: {},
-        generatedActionsPercentiles: {},
-        generatedActionsPercentilesByType: {},
-        alertsPercentiles: {},
-        alertsPercentilesByType: {},
+        countTotalRuleExecutions: 0,
         countRulesByExecutionStatus: {},
       });
     });

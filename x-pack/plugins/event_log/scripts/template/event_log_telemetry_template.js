@@ -9,6 +9,7 @@
 
 const EventLogTelemetryFileTemplate = `
 
+import { cloneDeep } from 'lodash';
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import type {
   AggregationsPercentilesAggregateBase,
@@ -36,7 +37,11 @@ export interface PercentileValueByTypeSchema {
 
 export const EmptyEventLogUsage = %%DEFAULT_VALS%%;
 
+export const getEmptyEventLogUsage = () => cloneDeep(EmptyEventLogUsage);
+
 export const EmptyEventLogUsageByType = %%DEFAULT_VALS_BY_TYPE%%;
+
+export const getEmptyEventLogUsageByType = () => cloneDeep(EmptyEventLogUsageByType);
 
 const byPercentileSchema: MakeSchemaFrom<PercentileValueSchema> = {
   p50: { type: 'long' },

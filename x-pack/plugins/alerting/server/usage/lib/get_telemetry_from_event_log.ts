@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, flatMap } from 'lodash';
+import { get, flatMap, merge, omit } from 'lodash';
 import type {
   AggregationsKeyedPercentiles,
   AggregationsSingleBucketAggregateBase,
@@ -26,9 +26,9 @@ import {
   EventLogUsageAggregationType,
   EventLogUsage,
   EventLogUsageSchema,
-  EmptyEventLogUsage,
   EventLogUsageByTypeSchema,
-  EmptyEventLogUsageByType,
+  getEmptyEventLogUsageByType,
+  getEmptyEventLogUsage,
 } from '../generated/event_log_telemetry_types';
 
 const percentileFieldNameMapping: Record<string, string> = {
@@ -70,7 +70,7 @@ interface GetExecutionTimeoutsPerDayCountResults {
 interface GetExecutionCountsExecutionFailures extends AggregationsSingleBucketAggregateBase {
   by_reason: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
 }
-interface GetExecutionCountsAggregationBucket
+export interface GetExecutionCountsAggregationBucket
   extends AggregationsStringTermsBucketKeys,
     EventLogUsageAggregationType {
   execution_failures: GetExecutionCountsExecutionFailures;
@@ -174,8 +174,8 @@ export async function getExecutionsPerDayCount({
       countFailedExecutionsByReason: {},
       countFailedExecutionsByReasonByType: {},
       countRulesByExecutionStatus: {},
-      ...EmptyEventLogUsage,
-      ...EmptyEventLogUsageByType,
+      ...getEmptyEventLogUsage(),
+      ...getEmptyEventLogUsageByType(),
     };
   }
 }
@@ -301,7 +301,7 @@ export function parseRuleTypeBucket(
 ): RuleTypeBucketResults {
   let summary: RuleTypeBucketResults = {
     countRuleExecutionsByType: {},
-    ...EmptyEventLogUsageByType,
+    ...getEmptyEventLogUsageByType(),
   };
   for (const bucket of buckets ?? []) {
     const ruleType: string = replaceDotSymbols(bucket?.key) ?? '';
@@ -328,16 +328,24 @@ export function parseRuleTypeBucket(
         [ruleType]: numExecutions,
       },
       ...Object.keys(metrics).reduce((acc, key) => {
-        return {
-          ...acc,
-          ...get(summary, `${key}`),
-          [key]: {
-            [ruleType]: key.startsWith('percentile')
-              ? parsePercentileAggs(get(metrics, `${key}`), ruleType)
-              : Math.round(get(metrics, `${key}`)),
-          },
-        };
-      }, {}),
+        if (key.startsWith('percentile')) {
+          return {
+            ...acc,
+            [key]: merge(
+              get(summary, `${key}`),
+              parsePercentileAggs(get(metrics, `${key}`), ruleType)
+            ),
+          };
+        } else {
+          return {
+            ...acc,
+            [key]: {
+              ...get(summary, `${key}`),
+              [ruleType]: Math.round(get(metrics, `${key}`)),
+            },
+          };
+        }
+      }, omit(summary, 'countRuleExecutionsByType')),
     } as RuleTypeBucketResults;
   }
 
@@ -490,7 +498,7 @@ export function parsePercentileAggs(
 export function parseExecutionCountAggregationResults(results: IAggResult): ParsedAggResults {
   const executionFailuresByReasonBuckets =
     (results?.execution_failures?.by_reason?.buckets as AggregationsStringTermsBucketKeys[]) ?? [];
-  const metrics = Object.keys(results).reduce((acc, key) => {
+  const metrics = Object.keys(results ?? []).reduce((acc, key) => {
     if (key.startsWith('avg_')) {
       return {
         ...acc,
@@ -518,12 +526,17 @@ export function parseExecutionCountAggregationResults(results: IAggResult): Pars
       {}
     ),
     ...Object.keys(metrics).reduce((acc, key) => {
-      return {
-        ...acc,
-        [key]: key.startsWith('percentile')
-          ? parsePercentileAggs(get(metrics, `${key}`))
-          : Math.round(get(metrics, `${key}`)),
-      };
+      if (key.startsWith('percentile')) {
+        return {
+          ...acc,
+          [key]: parsePercentileAggs(get(metrics, `${key}`)),
+        };
+      } else {
+        return {
+          ...acc,
+          [key]: Math.round(get(metrics, `${key}`)),
+        };
+      }
     }, {}),
   } as ParsedAggResults;
 }

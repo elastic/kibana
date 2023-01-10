@@ -24,7 +24,10 @@ const excludeList = [
 
 const aggTypeMapping = {
   'kibana.alert.rule.execution.metrics.number_of_generated_actions': 'percentile',
+  'kibana.alert.rule.execution.metrics.number_of_triggered_actions': 'percentile',
   'kibana.alert.rule.execution.metrics.alert_counts.active': 'percentile',
+  'kibana.alert.rule.execution.metrics.alert_counts.new': 'percentile',
+  'kibana.alert.rule.execution.metrics.alert_counts.recovered': 'percentile',
 };
 
 module.exports = {
@@ -71,10 +74,8 @@ function generateSchemaLines(lineWriters, prop, mappings, fullFieldName = '') {
 
   if (mappings.type) {
     if (NumberTypes.has(mappings.type)) {
-      console.log(`number type ${fullFieldName}`);
       if (!excludeList.includes(fullFieldName)) {
         const fieldName = getNormalizedFieldName(fullFieldName);
-        console.log(`fieldName ${fieldName}`);
         const aggType = aggTypeMapping[fullFieldName];
         switch (aggType) {
           case 'percentile':

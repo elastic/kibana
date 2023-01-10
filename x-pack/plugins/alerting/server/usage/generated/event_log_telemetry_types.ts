@@ -9,6 +9,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 
+import { cloneDeep } from 'lodash';
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import type {
   AggregationsPercentilesAggregateBase,
@@ -19,11 +20,11 @@ import { byTypeSchema } from '../by_type_schema';
 export interface EventLogUsageSchema {
   avg_event_duration_per_day: AvgValueSchema;
   avg_kibana_task_schedule_delay_per_day: AvgValueSchema;
-  avg_number_of_triggered_actions_per_day: AvgValueSchema;
+  percentile_number_of_triggered_actions_per_day: PercentileValueSchema;
   percentile_number_of_generated_actions_per_day: PercentileValueSchema;
   percentile_alert_counts_active_per_day: PercentileValueSchema;
-  avg_alert_counts_new_per_day: AvgValueSchema;
-  avg_alert_counts_recovered_per_day: AvgValueSchema;
+  percentile_alert_counts_new_per_day: PercentileValueSchema;
+  percentile_alert_counts_recovered_per_day: PercentileValueSchema;
   avg_number_of_searches_per_day: AvgValueSchema;
   avg_total_indexing_duration_ms_per_day: AvgValueSchema;
   avg_es_search_duration_ms_per_day: AvgValueSchema;
@@ -41,11 +42,11 @@ export interface EventLogUsageSchema {
 export interface EventLogUsageByTypeSchema {
   avg_event_duration_by_type_per_day: AvgValueByTypeSchema;
   avg_kibana_task_schedule_delay_by_type_per_day: AvgValueByTypeSchema;
-  avg_number_of_triggered_actions_by_type_per_day: AvgValueByTypeSchema;
+  percentile_number_of_triggered_actions_by_type_per_day: PercentileValueByTypeSchema;
   percentile_number_of_generated_actions_by_type_per_day: PercentileValueByTypeSchema;
   percentile_alert_counts_active_by_type_per_day: PercentileValueByTypeSchema;
-  avg_alert_counts_new_by_type_per_day: AvgValueByTypeSchema;
-  avg_alert_counts_recovered_by_type_per_day: AvgValueByTypeSchema;
+  percentile_alert_counts_new_by_type_per_day: PercentileValueByTypeSchema;
+  percentile_alert_counts_recovered_by_type_per_day: PercentileValueByTypeSchema;
   avg_number_of_searches_by_type_per_day: AvgValueByTypeSchema;
   avg_total_indexing_duration_ms_by_type_per_day: AvgValueByTypeSchema;
   avg_es_search_duration_ms_by_type_per_day: AvgValueByTypeSchema;
@@ -79,7 +80,11 @@ export interface PercentileValueByTypeSchema {
 export const EmptyEventLogUsage = {
   avg_event_duration_per_day: 0,
   avg_kibana_task_schedule_delay_per_day: 0,
-  avg_number_of_triggered_actions_per_day: 0,
+  percentile_number_of_triggered_actions_per_day: {
+    p50: 0,
+    p90: 0,
+    p99: 0,
+  },
   percentile_number_of_generated_actions_per_day: {
     p50: 0,
     p90: 0,
@@ -90,8 +95,16 @@ export const EmptyEventLogUsage = {
     p90: 0,
     p99: 0,
   },
-  avg_alert_counts_new_per_day: 0,
-  avg_alert_counts_recovered_per_day: 0,
+  percentile_alert_counts_new_per_day: {
+    p50: 0,
+    p90: 0,
+    p99: 0,
+  },
+  percentile_alert_counts_recovered_per_day: {
+    p50: 0,
+    p90: 0,
+    p99: 0,
+  },
   avg_number_of_searches_per_day: 0,
   avg_total_indexing_duration_ms_per_day: 0,
   avg_es_search_duration_ms_per_day: 0,
@@ -107,10 +120,16 @@ export const EmptyEventLogUsage = {
   avg_total_enrichment_duration_ms_per_day: 0,
 };
 
+export const getEmptyEventLogUsage = () => cloneDeep(EmptyEventLogUsage);
+
 export const EmptyEventLogUsageByType = {
   avg_event_duration_by_type_per_day: {},
   avg_kibana_task_schedule_delay_by_type_per_day: {},
-  avg_number_of_triggered_actions_by_type_per_day: {},
+  percentile_number_of_triggered_actions_by_type_per_day: {
+    p50: {},
+    p90: {},
+    p99: {},
+  },
   percentile_number_of_generated_actions_by_type_per_day: {
     p50: {},
     p90: {},
@@ -121,8 +140,16 @@ export const EmptyEventLogUsageByType = {
     p90: {},
     p99: {},
   },
-  avg_alert_counts_new_by_type_per_day: {},
-  avg_alert_counts_recovered_by_type_per_day: {},
+  percentile_alert_counts_new_by_type_per_day: {
+    p50: {},
+    p90: {},
+    p99: {},
+  },
+  percentile_alert_counts_recovered_by_type_per_day: {
+    p50: {},
+    p90: {},
+    p99: {},
+  },
   avg_number_of_searches_by_type_per_day: {},
   avg_total_indexing_duration_ms_by_type_per_day: {},
   avg_es_search_duration_ms_by_type_per_day: {},
@@ -137,6 +164,8 @@ export const EmptyEventLogUsageByType = {
   avg_total_run_duration_ms_by_type_per_day: {},
   avg_total_enrichment_duration_ms_by_type_per_day: {},
 };
+
+export const getEmptyEventLogUsageByType = () => cloneDeep(EmptyEventLogUsageByType);
 
 const byPercentileSchema: MakeSchemaFrom<PercentileValueSchema> = {
   p50: { type: 'long' },
@@ -155,16 +184,16 @@ export const EventLogUsageMapping: MakeSchemaFrom<EventLogUsage> = {
   avg_event_duration_by_type_per_day: byTypeSchema,
   avg_kibana_task_schedule_delay_per_day: { type: 'long' },
   avg_kibana_task_schedule_delay_by_type_per_day: byTypeSchema,
-  avg_number_of_triggered_actions_per_day: { type: 'long' },
-  avg_number_of_triggered_actions_by_type_per_day: byTypeSchema,
+  percentile_number_of_triggered_actions_per_day: byPercentileSchema,
+  percentile_number_of_triggered_actions_by_type_per_day: byPercentileSchemaByType,
   percentile_number_of_generated_actions_per_day: byPercentileSchema,
   percentile_number_of_generated_actions_by_type_per_day: byPercentileSchemaByType,
   percentile_alert_counts_active_per_day: byPercentileSchema,
   percentile_alert_counts_active_by_type_per_day: byPercentileSchemaByType,
-  avg_alert_counts_new_per_day: { type: 'long' },
-  avg_alert_counts_new_by_type_per_day: byTypeSchema,
-  avg_alert_counts_recovered_per_day: { type: 'long' },
-  avg_alert_counts_recovered_by_type_per_day: byTypeSchema,
+  percentile_alert_counts_new_per_day: byPercentileSchema,
+  percentile_alert_counts_new_by_type_per_day: byPercentileSchemaByType,
+  percentile_alert_counts_recovered_per_day: byPercentileSchema,
+  percentile_alert_counts_recovered_by_type_per_day: byPercentileSchemaByType,
   avg_number_of_searches_per_day: { type: 'long' },
   avg_number_of_searches_by_type_per_day: byTypeSchema,
   avg_total_indexing_duration_ms_per_day: { type: 'long' },
@@ -204,9 +233,10 @@ export const EventLogUsageAggregations = {
       field: 'kibana.task.schedule_delay',
     },
   },
-  avg_number_of_triggered_actions: {
-    avg: {
+  percentile_number_of_triggered_actions: {
+    percentiles: {
       field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+      percents: [50, 90, 99],
     },
   },
   percentile_number_of_generated_actions: {
@@ -221,14 +251,16 @@ export const EventLogUsageAggregations = {
       percents: [50, 90, 99],
     },
   },
-  avg_alert_counts_new: {
-    avg: {
+  percentile_alert_counts_new: {
+    percentiles: {
       field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
+      percents: [50, 90, 99],
     },
   },
-  avg_alert_counts_recovered: {
-    avg: {
+  percentile_alert_counts_recovered: {
+    percentiles: {
       field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+      percents: [50, 90, 99],
     },
   },
   avg_number_of_searches: {
@@ -301,11 +333,11 @@ export const EventLogUsageAggregations = {
 export interface EventLogUsageAggregationType {
   avg_event_duration: AggregationsSingleMetricAggregateBase;
   avg_kibana_task_schedule_delay: AggregationsSingleMetricAggregateBase;
-  avg_number_of_triggered_actions: AggregationsSingleMetricAggregateBase;
+  percentile_number_of_triggered_actions: AggregationsPercentilesAggregateBase;
   percentile_number_of_generated_actions: AggregationsPercentilesAggregateBase;
   percentile_alert_counts_active: AggregationsPercentilesAggregateBase;
-  avg_alert_counts_new: AggregationsSingleMetricAggregateBase;
-  avg_alert_counts_recovered: AggregationsSingleMetricAggregateBase;
+  percentile_alert_counts_new: AggregationsPercentilesAggregateBase;
+  percentile_alert_counts_recovered: AggregationsPercentilesAggregateBase;
   avg_number_of_searches: AggregationsSingleMetricAggregateBase;
   avg_total_indexing_duration_ms: AggregationsSingleMetricAggregateBase;
   avg_es_search_duration_ms: AggregationsSingleMetricAggregateBase;
