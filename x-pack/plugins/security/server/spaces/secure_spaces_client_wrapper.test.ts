@@ -735,7 +735,7 @@ describe('SecureSpacesClientWrapper', () => {
       securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>,
       aliases: Array<{ targetSpace: string; targetType: string }>
     ) {
-      expect(securityExtension.performAuthorization).toHaveBeenCalledTimes(1);
+      expect(securityExtension.authorize).toHaveBeenCalledTimes(1);
 
       const targetTypes = aliases.map((alias) => alias.targetType);
       const targetSpaces = aliases.map((alias) => alias.targetSpace);
@@ -754,7 +754,7 @@ describe('SecureSpacesClientWrapper', () => {
         types: actualTypes,
         enforceMap: actualEnforceMap,
         options: actualOptions,
-      } = securityExtension.performAuthorization.mock.calls[0][0];
+      } = securityExtension.authorize.mock.calls[0][0];
 
       expect(setsAreEqual(expectedActions, actualActions)).toBeTruthy();
       expect(setsAreEqual(expectedSpaces, actualSpaces)).toBeTruthy();
@@ -784,7 +784,7 @@ describe('SecureSpacesClientWrapper', () => {
         const { wrapper, baseClient, forbiddenError, securityExtension } = setup({
           securityEnabled,
         });
-        securityExtension!.performAuthorization.mockImplementation(() => {
+        securityExtension!.authorize.mockImplementation(() => {
           throw new Error('Oh no!');
         });
         const aliases = [alias1, alias2];
@@ -799,7 +799,7 @@ describe('SecureSpacesClientWrapper', () => {
 
       it('updates the legacy URL aliases when authorized', async () => {
         const { wrapper, baseClient, securityExtension } = setup({ securityEnabled });
-        securityExtension!.performAuthorization.mockResolvedValue({
+        securityExtension!.authorize.mockResolvedValue({
           // These values don't actually matter, the call to enforceAuthorization matters
           status: 'fully_authorized',
           typeMap: new Map(),

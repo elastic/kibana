@@ -72,7 +72,7 @@ export type {
 } from './src/extensions/encryption';
 export type {
   CheckAuthorizationParams,
-  PerformAuthorizationParams,
+  AuthorizeParams as PerformAuthorizationParams,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
@@ -80,7 +80,17 @@ export type {
   AddAuditEventParams,
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
+  BaseAuthorizeOptions,
+  CollectMultiNamespaceReferencesOptions,
   AuthorizeCreateObject,
+  AuthorizeUpdateObject,
+  AuditOptions,
+  UpdateSpacesAuditOptions,
+  AuditHelperParams,
+  UpdateSpacesAuditHelperParams,
+  AuthorizeCreateParams,
+  AuthorizeUpdateParams,
+  AuthorizeAndRedactMultiNamespaceReferencesParams,
 } from './src/extensions/security';
 export { AuditAction, SecurityAction } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';

@@ -74,6 +74,7 @@ import {
   type AuthorizationTypeMap,
   SecurityAction,
   AuthorizeCreateObject,
+  AuthorizeUpdateObject,
 } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_NAMESPACE_STRING,
@@ -353,26 +354,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       existingOriginId = preflightResult?.existingDocument?._source?.originId;
     }
 
-    // const spacesToEnforce = new Set(initialNamespaces).add(namespaceString); // Always check/enforce authZ for the active space
-    // const existingNamespaces = preflightResult?.existingDocument?._source?.namespaces || [];
-    // const spacesToAuthorize = new Set(existingNamespaces);
-    // spacesToAuthorize.delete(ALL_NAMESPACES_STRING); // Don't accidentally check for global privileges when the object exists in '*'
-    // const authorizationResult = await this._securityExtension?.performAuthorization({
-    //   // If a user tries to create an object with `initialNamespaces: ['*']`, they need to have 'create' privileges for the Global Resource
-    //   // (e.g., All privileges for All Spaces).
-    //   // Inversely, if a user tries to overwrite an object that already exists in '*', they don't need to 'create' privileges for the Global
-    //   // Resource, so in that case we have to filter out that string from spacesToAuthorize (because `allowGlobalResource: true` is used
-    //   // below.)
-    //   actions: new Set([SecurityAction.CREATE]),
-    //   types: new Set([type]),
-    //   spaces: new Set([...spacesToEnforce, ...spacesToAuthorize]), // existing namespaces are included so we can later redact if necessary
-    //   enforceMap: new Map([[type, spacesToEnforce]]),
-    //   options: { allowGlobalResource: true },
-    //   auditOptions: { objects: [{ type, id }] },
-    // });
-
     const authorizationResult = await this._securityExtension?.authorizeCreate({
-      action: SecurityAction.CREATE,
       namespaceString,
       objects: [
         {
@@ -584,9 +566,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     });
 
     const authorizationResult = await this._securityExtension?.authorizeCreate({
-      action: SecurityAction.BULK_CREATE,
       namespaceString,
       objects: authObjects,
+      options: { forceBulkAction: true },
     });
 
     let bulkRequestIndexCounter = 0;
@@ -790,7 +772,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       typesAndSpaces.set(value.type, new Set([namespaceString])); // Always enforce authZ for the active space
     }
 
-    await this._securityExtension?.performAuthorization({
+    await this._securityExtension?.authorize({
       actions: new Set([SecurityAction.CHECK_CONFLICTS]),
       types: new Set(typesAndSpaces.keys()),
       spaces: new Set([namespaceString]), // Always check authZ for the active space
@@ -869,7 +851,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
     const typesAndSpaces = new Map<string, Set<string>>([[type, new Set([namespaceString])]]); // Always enforce authZ for the active space
 
-    await this._securityExtension?.performAuthorization({
+    await this._securityExtension?.authorize({
       actions: new Set([SecurityAction.DELETE]),
       types: new Set([type]),
       spaces: new Set([namespaceString]), // Always check authZ for the active space
@@ -1161,7 +1143,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       }
     }
 
-    await this._securityExtension?.performAuthorization({
+    await this._securityExtension?.authorize({
       actions: new Set([SecurityAction.BULK_DELETE]),
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
@@ -1459,7 +1441,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     let typeToNamespacesMap: Map<string, string[]> | undefined;
     let preAuthorizationResult: CheckAuthorizationResult<'find'> | undefined;
     if (!disableExtensions && this._securityExtension) {
-      preAuthorizationResult = await this._securityExtension.performAuthorization({
+      preAuthorizationResult = await this._securityExtension.authorize({
         actions: new Set([SecurityAction.FIND]),
         types: new Set(types),
         spaces: spacesToPreauthorize,
@@ -1574,7 +1556,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       spacesToAuthorize.size > spacesToPreauthorize.size
         ? // If there are any namespaces in the object results that were not already checked during pre-authorization, we need *another*
           // authorization check so we can correctly redact the object namespaces below.
-          await this._securityExtension?.performAuthorization({
+          await this._securityExtension?.authorize({
             actions: new Set([SecurityAction.FIND]),
             types: new Set(types),
             spaces: spacesToAuthorize,
@@ -1745,11 +1727,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     const auditObjects = new Array<{ type: string; id: string }>();
     for (const { type, id, error: bulkError } of result.saved_objects) {
-      if (!!bulkError) continue; // Only log success events for objects that were actually found (and are being returned to the user)
-      auditObjects.concat({ type, id });
+      // Only log success events for objects that were actually found (and are being returned to the user)
+      if (!bulkError) {
+        auditObjects.push({ type, id });
+      }
     }
 
-    const authorizationResult = await this._securityExtension?.performAuthorization({
+    const authorizationResult = await this._securityExtension?.authorize({
       actions: new Set([SecurityAction.BULK_GET]),
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
@@ -1838,7 +1822,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const spacesToEnforce = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
     const existingNamespaces = body?._source?.namespaces || [];
 
-    const authorizationResult = await this._securityExtension?.performAuthorization({
+    const authorizationResult = await this._securityExtension?.authorize({
       actions: new Set([SecurityAction.GET]),
       types: new Set([type]),
       spaces: new Set([...spacesToEnforce, ...existingNamespaces]), // existing namespaces are included so we can later redact if necessary
@@ -1937,15 +1921,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       });
     }
 
-    const spacesToEnforce = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
     const existingNamespaces = preflightResult?.savedObjectNamespaces || [];
 
-    const authorizationResult = await this._securityExtension?.performAuthorization({
-      actions: new Set([SecurityAction.UPDATE]),
-      types: new Set([type]),
-      spaces: new Set([...spacesToEnforce, ...existingNamespaces]), // existing namespaces are included so we can later redact if necessary
-      enforceMap: new Map([[type, spacesToEnforce]]),
-      auditOptions: { objects: [{ type, id }] },
+    const authorizationResult = await this._securityExtension?.authorizeUpdate({
+      namespaceString,
+      objects: [{ type, id, existingNamespaces }],
     });
 
     if (
@@ -2198,36 +2179,54 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
 
-    const typesAndSpaces = new Map<string, Set<string>>();
-    const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
-    for (const { value } of validObjects) {
-      const { type, objectNamespace, esRequestIndex: index } = value;
-      const objectNamespaceString = getNamespaceString(objectNamespace);
+    // const typesAndSpaces = new Map<string, Set<string>>();
+    // const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
+    // for (const { value } of validObjects) {
+    //   const { type, objectNamespace, esRequestIndex: index } = value;
+    //   const objectNamespaceString = getNamespaceString(objectNamespace);
+    //   const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
+
+    //   const spacesToEnforce = typesAndSpaces.get(type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
+    //   spacesToEnforce.add(objectNamespaceString);
+    //   typesAndSpaces.set(type, spacesToEnforce);
+    //   spacesToAuthorize.add(objectNamespaceString);
+    //   // @ts-expect-error MultiGetHit._source is optional
+    //   for (const space of preflightResult?._source?.namespaces ?? []) {
+    //     spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
+    //   }
+    // }
+
+    // const authorizationResult = await this._securityExtension?.performAuthorization({
+    //   actions: new Set([SecurityAction.BULK_UPDATE]),
+    //   types: new Set(typesAndSpaces.keys()),
+    //   spaces: spacesToAuthorize,
+    //   enforceMap: typesAndSpaces,
+    //   auditOptions: {
+    //     objects: validObjects.map((element) => {
+    //       return {
+    //         type: element.value.type,
+    //         id: element.value.id,
+    //       };
+    //     }),
+    //   },
+    // });
+
+    const authObjects: AuthorizeUpdateObject[] = validObjects.map((element) => {
+      const { type, id, objectNamespace, esRequestIndex: index } = element.value;
       const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
+      return {
+        type,
+        id,
+        objectNamespace,
+        // @ts-expect-error MultiGetHit._source is optional
+        existingNamespaces: preflightResult?._source?.namespaces,
+      };
+    });
 
-      const spacesToEnforce = typesAndSpaces.get(type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
-      spacesToEnforce.add(objectNamespaceString);
-      typesAndSpaces.set(type, spacesToEnforce);
-      spacesToAuthorize.add(objectNamespaceString);
-      // @ts-expect-error MultiGetHit._source is optional
-      for (const space of preflightResult?._source?.namespaces ?? []) {
-        spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
-      }
-    }
-
-    const authorizationResult = await this._securityExtension?.performAuthorization({
-      actions: new Set([SecurityAction.BULK_UPDATE]),
-      types: new Set(typesAndSpaces.keys()),
-      spaces: spacesToAuthorize,
-      enforceMap: typesAndSpaces,
-      auditOptions: {
-        objects: validObjects.map((element) => {
-          return {
-            type: element.value.type,
-            id: element.value.id,
-          };
-        }),
-      },
+    const authorizationResult = await this._securityExtension?.authorizeUpdate({
+      namespaceString,
+      objects: authObjects,
+      options: { forceBulkAction: true },
     });
 
     let bulkUpdateRequestIndexCounter = 0;
@@ -2387,7 +2386,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     // TODO: Improve authorization and auditing (https://github.com/elastic/kibana/issues/135259)
 
     const spaces = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
-    await this._securityExtension?.performAuthorization({
+    await this._securityExtension?.authorize({
       actions: new Set([SecurityAction.REMOVE_REFERENCES]),
       types: new Set([type]),
       spaces,
@@ -2666,7 +2665,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     if (!disableExtensions && this._securityExtension) {
       const spaces = new Set(namespaces);
-      const preAuthorizationResult = await this._securityExtension?.performAuthorization({
+      const preAuthorizationResult = await this._securityExtension?.authorize({
         actions: new Set([SecurityAction.OPEN_POINT_IN_TIME]),
         types: new Set(types),
         spaces,

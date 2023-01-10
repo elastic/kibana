@@ -12,6 +12,9 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { Payload } from 'elastic-apm-node';
 import {
   AuthorizationTypeEntry,
+  AuthorizeAndRedactMultiNamespaceReferencesParams,
+  AuthorizeCreateParams,
+  AuthorizeUpdateParams,
   CheckAuthorizationResult,
   ISavedObjectsSecurityExtension,
   PerformAuthorizationParams,
@@ -236,10 +239,10 @@ export const enforceError = SavedObjectsErrorHelpers.decorateForbiddenError(
   'User lacks privileges'
 );
 
-export const setupPerformAuthFullyAuthorized = (
+export const setupAuthorizeFullyAuthorized = (
   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
 ) => {
-  mockSecurityExt.performAuthorization.mockImplementation(
+  mockSecurityExt.authorize.mockImplementation(
     (params: PerformAuthorizationParams<string>): Promise<CheckAuthorizationResult<string>> => {
       // const { auditCallback } = params;
       // auditCallback?.(undefined);
@@ -253,15 +256,7 @@ export const setupAuthorizeCreate = (
   status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
 ) => {
   mockSecurityExt.authorizeCreate.mockImplementation(
-    (params: {
-      namespaceString: string;
-      objects: Array<{
-        type: string;
-        id: string;
-        initialNamespaces: string[] | undefined;
-        existingNamespaces: string[] | undefined;
-      }>;
-    }): Promise<CheckAuthorizationResult<string>> => {
+    (params: AuthorizeCreateParams): Promise<CheckAuthorizationResult<string>> => {
       if (status === 'unauthorized') throw enforceError;
       // const { auditCallback } = params;
       // auditCallback?.(undefined);
@@ -270,10 +265,24 @@ export const setupAuthorizeCreate = (
   );
 };
 
-export const setupPerformAuthPartiallyAuthorized = (
+export const setupAuthorizeUpdate = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
+) => {
+  mockSecurityExt.authorizeUpdate.mockImplementation(
+    (params: AuthorizeUpdateParams): Promise<CheckAuthorizationResult<string>> => {
+      if (status === 'unauthorized') throw enforceError;
+      // const { auditCallback } = params;
+      // auditCallback?.(undefined);
+      return Promise.resolve({ status, typeMap: authMap });
+    }
+  );
+};
+
+export const setupAuthorizePartiallyAuthorized = (
   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
 ) => {
-  mockSecurityExt.performAuthorization.mockImplementation(
+  mockSecurityExt.authorize.mockImplementation(
     (params: PerformAuthorizationParams<string>): Promise<CheckAuthorizationResult<string>> => {
       // const { auditCallback } = params;
       // auditCallback?.(undefined);
@@ -282,10 +291,10 @@ export const setupPerformAuthPartiallyAuthorized = (
   );
 };
 
-export const setupPerformAuthUnauthorized = (
+export const setupAuthorizeUnauthorized = (
   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
 ) => {
-  mockSecurityExt.performAuthorization.mockImplementation(
+  mockSecurityExt.authorize.mockImplementation(
     (params: PerformAuthorizationParams<string>): Promise<CheckAuthorizationResult<string>> => {
       // const { auditCallback } = params;
       // auditCallback?.(undefined);
@@ -294,14 +303,32 @@ export const setupPerformAuthUnauthorized = (
   );
 };
 
-export const setupPerformAuthEnforceFailure = (
+export const setupAuthorizeEnforceFailure = (
   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
 ) => {
-  mockSecurityExt.performAuthorization.mockImplementation(
-    (params: PerformAuthorizationParams<string>) => {
-      // const { auditCallback } = params;
-      // auditCallback?.(enforceError);
+  mockSecurityExt.authorize.mockImplementation((params: PerformAuthorizationParams<string>) => {
+    // const { auditCallback } = params;
+    // auditCallback?.(enforceError);
+    throw enforceError;
+  });
+};
+
+export const setupAuthorizeAndRedactMultiNamespaceReferenecesEnforceFailure = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mockImplementation(
+    (params: AuthorizeAndRedactMultiNamespaceReferencesParams) => {
       throw enforceError;
+    }
+  );
+};
+
+export const setupAuthorizeAndRedactMultiNamespaceReferenecesSuccess = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mockImplementation(
+    (params: AuthorizeAndRedactMultiNamespaceReferencesParams) => {
+      return Promise.resolve(params.objects);
     }
   );
 };

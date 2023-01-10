@@ -324,7 +324,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
 
       let error: Error | undefined;
       try {
-        await this.securityExtension.performAuthorization({
+        await this.securityExtension.authorize({
           actions: new Set([SecurityAction.BULK_UPDATE]),
           types: new Set(typesAndSpaces.keys()),
           spaces: uniqueSpaces,

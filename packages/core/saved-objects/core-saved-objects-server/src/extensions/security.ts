@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 import { EcsEventOutcome } from '@kbn/ecs';
 
@@ -35,6 +36,73 @@ export enum SecurityAction {
 }
 
 /**
+ * The BaseAuthorizeOptions interface contains basic options
+ * for authorize methods of the ISavedObjectsSecurityExtension.
+ */
+export interface BaseAuthorizeOptions {
+  /**
+   * Whether or not to force the use of the bulk action for the authorization.
+   * By default this will be based on the number of objects passed to the
+   * authorize method.
+   */
+  forceBulkAction: boolean;
+}
+
+/**
+ * The CollectMultiNamespaceReferencesOptions interface contains options
+ * specific for authorizing CollectMultiNamespaceReferences actions.
+ */
+export interface CollectMultiNamespaceReferencesOptions {
+  purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';
+}
+
+/**
+ * The AuditHelperParams interface contains parameters to log audit events
+ * within the ISavedObjectsSecurityExtension.
+ */
+export interface AuditHelperParams {
+  /**
+   * The audit action to log.
+   */
+  action: AuditAction;
+  /**
+   * The objects applicable to the action.
+   */
+  objects?: Array<{ type: string; id: string }>;
+  /**
+   * Whether or not to use success as the non-failure outcome. Default is 'unknown'.
+   */
+  useSuccessOutcome?: boolean;
+
+  addToSpaces?: string[];
+  deleteFromSpaces?: string[];
+  /**
+   * Error information produced by the action.
+   */
+  error?: Error;
+}
+
+/**
+ * The UpdateSpacesAuditHelperParams interface contains parameters to log
+ * audit events for the UPDATE_OBJECTS_SPACES audit action within the
+ * ISavedObjectsSecurityExtension.
+ */
+export interface UpdateSpacesAuditHelperParams extends AuditHelperParams {
+  /**
+   * The audit action to log is always UPDATE_OBJECTS_SPACES.
+   */
+  action: AuditAction.UPDATE_OBJECTS_SPACES;
+  /**
+   * Spaces to which the the object(s) are being added.
+   */
+  addToSpaces?: string[];
+  /**
+   * Spaces from which the the object(s) are being removed.
+   */
+  deleteFromSpaces?: string[];
+}
+
+/**
  * The AuditOptions interface contains optional settings for audit
  * logging within the ISavedObjectsSecurityExtension.
  */
@@ -45,17 +113,20 @@ export interface AuditOptions {
    */
   objects?: Array<{ type: string; id: string }>;
   /**
-   * Whether or not to bypass audit logging on authz success
+   * Whether or not to bypass audit logging on authz success. Default false.
    */
   bypassOnSuccess?: boolean;
   /**
-   * Whether or not to bypass audit logging on authz failure
+   * Whether or not to bypass audit logging on authz failure. Default false.
    */
   bypassOnFailure?: boolean;
   /**
-   * If authz success should be logged as 'success' (default is 'unknown')
+   * If authz success should be logged as 'success'. Default false.
    */
   useSuccessOutcome?: boolean;
+}
+
+export interface UpdateSpacesAuditOptions extends AuditOptions {
   /**
    * An array of spaces which to add the objects (used in Update Object Spaces)
    */
@@ -67,10 +138,10 @@ export interface AuditOptions {
 }
 
 /**
- * The PerformAuthorizationParams interface contains settings for checking
+ * The AuthorizeParams interface contains settings for checking
  * & enforcing authorization via the ISavedObjectsSecurityExtension.
  */
-export interface PerformAuthorizationParams<A extends string> {
+export interface AuthorizeParams<A extends string> {
   /**
    * A set of actions to check.
    */
@@ -98,7 +169,7 @@ export interface PerformAuthorizationParams<A extends string> {
   /**
    * auditOptions - options for audit logging
    */
-  auditOptions?: AuditOptions;
+  auditOptions?: AuditOptions | UpdateSpacesAuditOptions;
 }
 
 /**
@@ -188,7 +259,7 @@ export interface EnforceAuthorizationParams<A extends string> {
   /**
    * auditOptions - options for audit logging
    */
-  auditOptions?: AuditOptions;
+  auditOptions?: AuditOptions | UpdateSpacesAuditOptions;
 }
 
 /**
@@ -265,8 +336,32 @@ export interface RedactNamespacesParams<T, A extends string> {
 export interface AuthorizeCreateObject {
   type: string;
   id: string;
-  initialNamespaces: string[] | undefined;
-  existingNamespaces: string[] | undefined;
+  initialNamespaces?: string[];
+  existingNamespaces?: string[];
+}
+
+export interface AuthorizeUpdateObject {
+  type: string;
+  id: string;
+  objectNamespace?: string;
+  existingNamespaces?: string[];
+}
+
+export interface AuthorizeCreateParams {
+  namespaceString: string;
+  objects: AuthorizeCreateObject[];
+  options?: BaseAuthorizeOptions;
+}
+
+export interface AuthorizeUpdateParams {
+  namespaceString: string;
+  objects: AuthorizeUpdateObject[];
+  options?: BaseAuthorizeOptions;
+}
+export interface AuthorizeAndRedactMultiNamespaceReferencesParams {
+  namespaceString: string;
+  objects: SavedObjectReferenceWithContext[];
+  options: CollectMultiNamespaceReferencesOptions;
 }
 
 /**
@@ -289,21 +384,28 @@ export interface ISavedObjectsSecurityExtension {
   /**
    * Performs authorization for create actions
    * @param params - actions, types & spaces map, audit callback, options (enforce bypassed if enforce map is undefined)
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns CheckAuthorizationResult or undefined - the resulting authorization level and authorization map, undefined
+   * if the authorization action does not require an authorization check. (ToDo: remove this possibility for actions that are not applicable?)
    */
-  authorizeCreate: (params: {
-    action: SecurityAction.CREATE | SecurityAction.BULK_CREATE;
-    namespaceString: string;
-    objects: AuthorizeCreateObject[];
-  }) => Promise<CheckAuthorizationResult<string> | undefined>;
+  authorizeCreate: (
+    params: AuthorizeCreateParams
+  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+
+  authorizeUpdate: (
+    params: AuthorizeUpdateParams
+  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+
+  authorizeAndRedactMultiNamespaceReferences: (
+    params: AuthorizeAndRedactMultiNamespaceReferencesParams
+  ) => Promise<SavedObjectReferenceWithContext[]>;
 
   /**
    * Performs authorization (check & enforce) of actions on specified types in specified spaces.
    * @param params - actions, types & spaces map, audit callback, options (enforce bypassed if enforce map is undefined)
    * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
    */
-  performAuthorization: <T extends string>(
-    params: PerformAuthorizationParams<T>
+  authorize: <T extends string>(
+    params: AuthorizeParams<T>
   ) => Promise<CheckAuthorizationResult<T> | undefined>;
 
   /**
@@ -311,7 +413,7 @@ export interface ISavedObjectsSecurityExtension {
    * Throws error if authorization map does not cover specified parameters.
    * @param params - map of types/spaces, action to check, and authz map (from CheckAuthorizationResult)
    */
-  enforceAuthorization: <T extends string>(params: EnforceAuthorizationParams<T>) => void;
+  // enforceAuthorization: <T extends string>(params: EnforceAuthorizationParams<T>) => void;
 
   /**
    * Adds an audit event for the specified action with relevant information

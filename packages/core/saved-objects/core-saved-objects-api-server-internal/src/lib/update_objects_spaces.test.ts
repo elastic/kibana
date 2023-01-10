@@ -34,8 +34,8 @@ import {
 import {
   checkAuthError,
   enforceError,
-  setupPerformAuthFullyAuthorized,
-  setupPerformAuthEnforceFailure,
+  setupAuthorizeFullyAuthorized,
+  setupAuthorizeEnforceFailure,
   setupRedactPassthrough,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
@@ -655,7 +655,7 @@ describe('#updateObjectsSpaces', () => {
     let params: UpdateObjectsSpacesParams;
 
     afterEach(() => {
-      mockSecurityExt.performAuthorization.mockClear();
+      mockSecurityExt.authorize.mockClear();
       mockSecurityExt.redactNamespaces.mockClear();
     });
 
@@ -671,7 +671,7 @@ describe('#updateObjectsSpaces', () => {
       });
 
       test(`propagates error from es client bulk get`, async () => {
-        setupPerformAuthFullyAuthorized(mockSecurityExt);
+        setupAuthorizeFullyAuthorized(mockSecurityExt);
         setupRedactPassthrough(mockSecurityExt);
 
         const error = SavedObjectsErrorHelpers.createBadRequestError('OOPS!');
@@ -686,38 +686,21 @@ describe('#updateObjectsSpaces', () => {
       });
 
       test(`propagates decorated error when performAuthorization rejects promise`, async () => {
-        mockSecurityExt.performAuthorization.mockRejectedValueOnce(checkAuthError);
+        mockSecurityExt.authorize.mockRejectedValueOnce(checkAuthError);
 
         await expect(updateObjectsSpaces(params)).rejects.toThrow(checkAuthError);
-        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
       });
 
       test(`propagates decorated error when unauthorized`, async () => {
-        setupPerformAuthEnforceFailure(mockSecurityExt);
+        setupAuthorizeEnforceFailure(mockSecurityExt);
 
         await expect(updateObjectsSpaces(params)).rejects.toThrow(enforceError);
-        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
       });
 
-      // ToDo: can no longer validate audit logs at this level
-      // test(`adds audit event when not unauthorized`, async () => {
-      //   setupPerformAuthEnforceFailure(mockSecurityExt);
-
-      //   await expect(updateObjectsSpaces(params)).rejects.toThrow(enforceError);
-      //   expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
-
-      //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-      //     action: AuditAction.UPDATE_OBJECTS_SPACES,
-      //     addToSpaces: params.spacesToAdd,
-      //     deleteFromSpaces: undefined,
-      //     savedObject: { type: params.objects[0].type, id: params.objects[0].id },
-      //     error: enforceError,
-      //   });
-      // });
-
       test(`returns error from es client bulk operation`, async () => {
-        setupPerformAuthFullyAuthorized(mockSecurityExt);
+        setupAuthorizeFullyAuthorized(mockSecurityExt);
         setupRedactPassthrough(mockSecurityExt);
 
         mockGetBulkOperationError.mockReset();
@@ -760,7 +743,7 @@ describe('#updateObjectsSpaces', () => {
           { found: true, namespaces: [EXISTING_SPACE] } // result for obj4 -- will be updated to remove EXISTING_SPACE and add otherSpace
         );
         mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
-        setupPerformAuthFullyAuthorized(mockSecurityExt);
+        setupAuthorizeFullyAuthorized(mockSecurityExt);
         setupRedactPassthrough(mockSecurityExt);
       });
 
@@ -768,7 +751,7 @@ describe('#updateObjectsSpaces', () => {
         await updateObjectsSpaces(params);
 
         expect(client.bulk).toHaveBeenCalledTimes(1);
-        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
         const expectedActions = new Set([SecurityAction.UPDATE_OBJECTS_SPACES]);
         const expectedSpaces = new Set([defaultSpace, otherSpace, EXISTING_SPACE]);
         const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
@@ -784,7 +767,7 @@ describe('#updateObjectsSpaces', () => {
           types: actualTypes,
           enforceMap: actualEnforceMap,
           options: actualOptions,
-        } = mockSecurityExt.performAuthorization.mock.calls[0][0];
+        } = mockSecurityExt.authorize.mock.calls[0][0];
 
         expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
@@ -792,23 +775,6 @@ describe('#updateObjectsSpaces', () => {
         expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
         expect(actualOptions).toEqual(expect.objectContaining({ allowGlobalResource: true }));
       });
-
-      // ToDo: can no longer validate audit logs at this level
-      // test(`adds audit event per object when successful`, async () => {
-      //   await updateObjectsSpaces(params);
-
-      //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-      //   objects.forEach((obj) => {
-      //     expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-      //       action: AuditAction.UPDATE_OBJECTS_SPACES,
-      //       savedObject: { type: obj.type, id: obj.id },
-      //       outcome: 'unknown',
-      //       addToSpaces: spacesToAdd,
-      //       deleteFromSpaces: spacesToRemove,
-      //       error: undefined,
-      //     });
-      //   });
-      // });
     });
 
     describe('all spaces', () => {
@@ -830,7 +796,7 @@ describe('#updateObjectsSpaces', () => {
           { found: true, namespaces: [EXISTING_SPACE] } // result for obj4 -- will be updated to remove EXISTING_SPACE and add otherSpace
         );
         mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
-        setupPerformAuthFullyAuthorized(mockSecurityExt);
+        setupAuthorizeFullyAuthorized(mockSecurityExt);
         setupRedactPassthrough(mockSecurityExt);
       };
 
@@ -841,7 +807,7 @@ describe('#updateObjectsSpaces', () => {
         await updateObjectsSpaces(params);
 
         expect(client.bulk).toHaveBeenCalledTimes(1);
-        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
         const expectedActions = new Set([SecurityAction.UPDATE_OBJECTS_SPACES]);
         const expectedSpaces = new Set(['*', defaultSpace, otherSpace, EXISTING_SPACE]);
         const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
@@ -857,7 +823,7 @@ describe('#updateObjectsSpaces', () => {
           types: actualTypes,
           enforceMap: actualEnforceMap,
           options: actualOptions,
-        } = mockSecurityExt.performAuthorization.mock.calls[0][0];
+        } = mockSecurityExt.authorize.mock.calls[0][0];
 
         expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
@@ -873,7 +839,7 @@ describe('#updateObjectsSpaces', () => {
         await updateObjectsSpaces(params);
 
         expect(client.bulk).toHaveBeenCalledTimes(1);
-        expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
+        expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
         const expectedActions = new Set([SecurityAction.UPDATE_OBJECTS_SPACES]);
         const expectedSpaces = new Set(['*', defaultSpace, otherSpace, EXISTING_SPACE]);
         const expectedTypes = new Set([SHAREABLE_OBJ_TYPE]);
@@ -889,7 +855,7 @@ describe('#updateObjectsSpaces', () => {
           types: actualTypes,
           enforceMap: actualEnforceMap,
           options: actualOptions,
-        } = mockSecurityExt.performAuthorization.mock.calls[0][0];
+        } = mockSecurityExt.authorize.mock.calls[0][0];
 
         expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
         expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();

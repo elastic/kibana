@@ -324,7 +324,7 @@ async function authorizeAuditAndRedact<T>(
     return resolvedObjects;
   }
 
-  const { typeMap } = (await securityExtension?.performAuthorization({
+  const { typeMap } = (await securityExtension?.authorize({
     actions: new Set([SecurityAction.INTERNAL_BULK_RESOLVE]),
     types: new Set(typesAndSpaces.keys()),
     spaces: spacesToAuthorize,
