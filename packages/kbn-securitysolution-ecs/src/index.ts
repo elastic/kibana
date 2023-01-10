@@ -35,7 +35,7 @@ import type { Ransomware } from './ransomware';
 import type { MemoryProtection } from './memory_protection';
 import type { Target } from './target_type';
 
-type OverwriteTypes =
+type OverrideTypes =
   | 'destination'
   | 'dns'
   | 'event'
@@ -54,7 +54,7 @@ type OverwriteTypes =
   | 'user';
 
 // Security Common Schema
-export interface Scs extends Omit<Ecs, OverwriteTypes> {
+export interface Scs extends Omit<Ecs, OverrideTypes> {
   // Ecs Overrides
   // overrides Ecs to support multiple values for security entities
   destination?: DestinationEcs;
