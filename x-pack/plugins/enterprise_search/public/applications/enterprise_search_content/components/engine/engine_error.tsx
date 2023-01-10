@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { ApiError } from '../../../../../common/types/api';
 
@@ -22,6 +24,9 @@ export const EngineError: React.FC<{ apiStatus: ApiError }> = ({ apiStatus }) =>
       <>
         <SendEnterpriseSearchTelemetry action="error" metric="not_found" />
         <NotFoundPrompt
+          backToContent={i18n.translate('xpack.enterpriseSearch.engines.engine.notFound.action1', {
+            defaultMessage: 'Back to Engines',
+          })}
           backToLink={ENGINES_PATH}
           productSupportUrl={ENTERPRISE_SEARCH_CONTENT_PLUGIN.SUPPORT_URL}
         />
