@@ -338,6 +338,7 @@ export const CasesBulkGetResponseRt = rt.type({
   cases: CasesResponseRt,
   errors: rt.array(
     rt.type({
+      error: rt.string,
       message: rt.string,
       status: rt.union([rt.undefined, rt.number]),
       caseId: rt.string,

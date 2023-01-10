@@ -146,6 +146,7 @@ const constructErrors = (
 
   for (const soError of soBulkGetErrors) {
     errors.push({
+      error: soError.error.error,
       message: soError.error.message,
       status: soError.error.statusCode,
       caseId: soError.id,
@@ -154,7 +155,8 @@ const constructErrors = (
 
   for (const theCase of unauthorizedCases) {
     errors.push({
-      message: 'Unauthorized',
+      error: 'Forbidden',
+      message: `Unauthorized to access case with owner: "${theCase.attributes.owner}"`,
       status: 403,
       caseId: theCase.id,
     });

@@ -1168,7 +1168,7 @@ describe('authorization', () => {
     });
 
     describe('hasAllRequested: true', () => {
-      it('returns correct entities when the registered features (owners) are a and b', async () => {
+      it('categorizes the registered owners a and b as authorized and the unregistered owner c as unauthorized', async () => {
         auth = await Authorization.create({
           request,
           spaces: spacesStart,
@@ -1298,7 +1298,7 @@ describe('authorization', () => {
         });
       });
 
-      it('returns entities correctly when the kibana privileges are a and b', async () => {
+      it('categorizes the registered owners a and b as authorized and the unregistered owner c as unauthorized', async () => {
         const res = await auth.getAndEnsureAuthorizedEntities({
           savedObjects: [
             { id: '1', attributes: { owner: 'a' }, type: 'test', references: [] },

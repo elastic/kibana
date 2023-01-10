@@ -60,5 +60,14 @@ describe('bulkGet', () => {
         'Failed to bulk get cases: test: Error: Field: not-valid is not supported'
       );
     });
+
+    it('throws for nested fields', async () => {
+      const ids = ['test'];
+
+      // @ts-expect-error
+      await expect(bulkGet({ ids, fields: ['created_by.username'] }, clientArgs)).rejects.toThrow(
+        'Failed to bulk get cases: test: Error: Field: created_by.username is not supported'
+      );
+    });
   });
 });
