@@ -73,7 +73,6 @@ export const useControlPanels = (
 /**
  * Utils
  */
-
 const getVisibleControlPanels = (dataView: DataView) => {
   return availableControlPanelFields.filter(
     (panelKey) => dataView.fields.getByName(panelKey) !== undefined
