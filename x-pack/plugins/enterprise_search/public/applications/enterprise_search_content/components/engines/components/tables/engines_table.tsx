@@ -10,19 +10,20 @@ import React from 'react';
 import { CriteriaWithPagination, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedNumber } from '@kbn/i18n-react';
+
+import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
 
 import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
 
-import { convertMetaToPagination, EngineListDetails, Meta } from '../../types';
+import { convertMetaToPagination, Meta } from '../../types';
 
 // add health status
 interface EnginesListTableProps {
-  enginesList: EngineListDetails[];
+  enginesList: EnterpriseSearchEngine[];
   loading: boolean;
   meta: Meta;
   isLoading?: boolean;
-  onChange: (criteria: CriteriaWithPagination<EngineListDetails>) => void;
+  onChange: (criteria: CriteriaWithPagination<EnterpriseSearchEngine>) => void;
 }
 export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   enginesList,
@@ -30,7 +31,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
   isLoading,
   onChange,
 }) => {
-  const columns: Array<EuiBasicTableColumn<EngineListDetails>> = [
+  const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngine>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.name', {
@@ -43,14 +44,6 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
         enlarge: true,
         width: '100%',
       },
-    },
-    {
-      field: 'document_count',
-      name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.documents', {
-        defaultMessage: 'Documents',
-      }),
-      dataType: 'number',
-      render: (number: number) => <FormattedNumber value={number} />,
     },
     {
       field: 'last_updated',
