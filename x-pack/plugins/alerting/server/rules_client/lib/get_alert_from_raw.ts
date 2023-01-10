@@ -16,7 +16,11 @@ import {
   RuleWithLegacyId,
   PartialRuleWithLegacyId,
 } from '../../types';
-import { ruleExecutionStatusFromRaw, convertMonitoringFromRawAndVerify } from '../../lib';
+import {
+  ruleExecutionStatusFromRaw,
+  convertMonitoringFromRawAndVerify,
+  buildViewInAppRelativeUrl,
+} from '../../lib';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
 import {
@@ -151,6 +155,15 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
         }
       : {}),
   };
+
+  // Need the `rule` object to build a URL
+  if (!excludeFromPublicApi) {
+    (rule as PartialRule<Params>).viewInAppRelativeUrl = buildViewInAppRelativeUrl({
+      spaceId: context.spaceId,
+      opts: { rule: rule as Rule<Params> },
+      getViewInAppUrl: ruleType.getViewInAppUrl,
+    });
+  }
 
   return includeLegacyId
     ? ({ ...rule, legacyId } as PartialRuleWithLegacyId<Params>)

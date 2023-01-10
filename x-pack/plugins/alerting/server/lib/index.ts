@@ -41,3 +41,10 @@ export * from './snooze';
 export { setFlapping } from './set_flapping';
 export { determineAlertsToReturn } from './determine_alerts_to_return';
 export { updateFlappingHistory, isFlapping } from './flapping_utils';
+export { buildViewInAppUrl, buildViewInAppRelativeUrl } from './build_view_in_app_url';
+export type {
+  GetViewInAppUrlFnOpts,
+  GetViewInAppUrlFn,
+  BuildViewInAppUrlOpts,
+  BuildViewInAppRelativeUrlOpts,
+} from './build_view_in_app_url';

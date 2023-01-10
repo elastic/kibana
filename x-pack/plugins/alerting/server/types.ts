@@ -49,6 +49,7 @@ import {
   RuleLastRun,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
+import { GetViewInAppUrlFn } from './lib';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -202,6 +203,7 @@ export interface RuleType<
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
   getSummarizedAlerts?: GetSummarizedAlertsFn;
+  getViewInAppUrl?: GetViewInAppUrlFn<Params>;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

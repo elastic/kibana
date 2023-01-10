@@ -9,7 +9,7 @@ import { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './alert_api';
-import { Rule, RuleNavigation } from '../common';
+import { Rule } from '../common';
 
 export interface PluginSetupContract {
   /**
@@ -46,7 +46,7 @@ export interface PluginSetupContract {
   registerDefaultNavigation: (applicationId: string, handler: AlertNavigationHandler) => void;
 }
 export interface PluginStartContract {
-  getNavigation: (ruleId: Rule['id']) => Promise<RuleNavigation | undefined>;
+  getNavigation: (ruleId: Rule['id']) => Promise<string | undefined>;
 }
 
 export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
@@ -89,8 +89,11 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
 
         if (this.alertNavigationRegistry!.has(rule.consumer, ruleType)) {
           const navigationHandler = this.alertNavigationRegistry!.get(rule.consumer, ruleType);
-          const state = navigationHandler(rule);
-          return typeof state === 'string' ? { path: state } : { state };
+          return navigationHandler(rule);
+        }
+
+        if (rule.viewInAppRelativeUrl) {
+          return rule.viewInAppRelativeUrl;
         }
       },
     };

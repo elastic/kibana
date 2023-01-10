@@ -16,6 +16,7 @@ import { chunk } from 'lodash';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { parseDuration, RawRule, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { buildViewInAppUrl } from '../lib';
 import { injectActionParams } from './inject_action_params';
 import { ExecutionHandlerOptions, RuleTaskInstance } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -223,6 +224,13 @@ export class ExecutionHandler<
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
                 ruleUrl: this.buildRuleUrl(spaceId),
+                viewInAppUrl: buildViewInAppUrl({
+                  kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+                  spaceId,
+                  getViewInAppUrl: this.ruleType.getViewInAppUrl,
+                  opts: { rule: this.rule },
+                  logger: this.logger,
+                }),
               }),
             }),
           };
@@ -269,6 +277,13 @@ export class ExecutionHandler<
                 actionParams: action.params,
                 ruleUrl: this.buildRuleUrl(spaceId),
                 flapping: executableAlert.getFlapping(),
+                viewInAppUrl: buildViewInAppUrl({
+                  kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+                  spaceId,
+                  getViewInAppUrl: this.ruleType.getViewInAppUrl,
+                  opts: { rule: this.rule },
+                  logger: this.logger,
+                }),
               }),
             }),
           };

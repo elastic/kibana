@@ -33,6 +33,7 @@ interface TransformActionParamsOptions {
   context: AlertInstanceContext;
   ruleUrl?: string;
   flapping: boolean;
+  viewInAppUrl?: string;
 }
 
 interface SummarizedAlertsWithAll {
@@ -73,6 +74,7 @@ export function transformActionParams({
   alertParams,
   ruleUrl,
   flapping,
+  viewInAppUrl,
 }: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
@@ -98,6 +100,7 @@ export function transformActionParams({
       spaceId,
       tags,
       url: ruleUrl,
+      viewInAppUrl,
     },
     alert: {
       id: alertInstanceId,
@@ -125,6 +128,7 @@ export function transformSummaryActionParams({
   actionParams,
   ruleUrl,
   kibanaBaseUrl,
+  viewInAppUrl,
 }: {
   alerts: SummarizedAlertsWithAll;
   rule: SanitizedRule<RuleTypeParams>;
@@ -136,6 +140,7 @@ export function transformSummaryActionParams({
   actionParams: RuleActionParams;
   kibanaBaseUrl?: string;
   ruleUrl?: string;
+  viewInAppUrl?: string;
 }): RuleActionParams {
   const variables = {
     kibanaBaseUrl,
@@ -148,6 +153,7 @@ export function transformSummaryActionParams({
       url: ruleUrl,
       tags: rule.tags,
       spaceId,
+      viewInAppUrl,
     },
     alerts,
   };
