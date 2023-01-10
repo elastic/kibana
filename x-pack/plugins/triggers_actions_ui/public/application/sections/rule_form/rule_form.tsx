@@ -197,7 +197,7 @@ export const RuleForm = ({
           },
           []
         )
-        .filter((item) => item.ruleType && hasAllPrivilege(rule, item.ruleType))
+        .filter((item) => item.ruleType && hasAllPrivilege(rule.consumer, item.ruleType))
         .filter((item) =>
           rule.consumer === ALERTS_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
@@ -225,7 +225,7 @@ export const RuleForm = ({
     setSolutions(
       new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
     );
-  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule, ruleTypeRegistry]);
+  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule.consumer, ruleTypeRegistry]);
 
   useEffect(() => {
     if (loadRuleTypesError) {
