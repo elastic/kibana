@@ -13,7 +13,6 @@ import {
   waitFor,
   waitForElementToBeRemoved,
   cleanup,
-  act,
 } from '@testing-library/react';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
