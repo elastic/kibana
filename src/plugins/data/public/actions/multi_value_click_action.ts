@@ -8,7 +8,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { Action, createAction } from '@kbn/ui-actions-plugin/public';
+import { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { FilterManager } from '../query';
 import { createFiltersFromMultiValueClickAction } from './filters/create_filters_from_multi_value_click';
 
@@ -30,10 +30,10 @@ export interface MultiValueClickContext {
   };
 }
 
-export function createMultiValueClickAction(
+export function createMultiValueClickActionDefinition(
   getStartServices: () => { filterManager: FilterManager }
-): Action {
-  return createAction({
+): UiActionsActionDefinition<MultiValueClickContext> {
+  return {
     type: ACTION_MULTI_VALUE_CLICK,
     id: ACTION_MULTI_VALUE_CLICK,
     shouldAutoExecute: async () => true,
@@ -45,5 +45,5 @@ export function createMultiValueClickAction(
       const filter = (await createFiltersFromMultiValueClickAction(context.data)) as Filter;
       getStartServices().filterManager.addFilters(filter);
     },
-  });
+  };
 }
