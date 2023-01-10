@@ -23,6 +23,7 @@ import { getSeverityTableColumns } from '../columns';
 import { getSeverityColor } from '../helpers';
 import { AlertDonutEmbeddable } from '../../../../../overview/components/detection_response/alerts_by_status/alert_donut_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { AlertBySeverityTableEmbeddable } from '../../../../../overview/components/detection_response/alerts_by_status/alert_by_severity_table_embeddable';
 
 const DONUT_HEIGHT = 150;
 
@@ -88,22 +89,31 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
       <InspectButtonContainer>
         <EuiPanel>
           <HeaderSection
+            hideSubtitle
             id={uniqueQueryId}
             inspectTitle={i18n.SEVERITY_LEVELS_TITLE}
             outerDirection="row"
+            showInspectButton={!isChartEmbeddablesEnabled}
             title={i18n.SEVERITY_LEVELS_TITLE}
             titleSize="xs"
-            hideSubtitle
           />
-          <EuiFlexGroup data-test-subj="severty-chart" gutterSize="l">
+          <EuiFlexGroup data-test-subj="severty-chart" gutterSize="none">
             <EuiFlexItem>
-              <EuiInMemoryTable
-                data-test-subj="severity-level-alerts-table"
-                columns={columns}
-                items={items}
-                loading={isLoading}
-                sorting={sorting}
-              />
+              {isChartEmbeddablesEnabled ? (
+                <AlertBySeverityTableEmbeddable
+                  timerange={timerange}
+                  label={i18n.SEVERITY_TOTAL_ALERTS}
+                  filters={filters}
+                />
+              ) : (
+                <EuiInMemoryTable
+                  data-test-subj="severity-level-alerts-table"
+                  columns={columns}
+                  items={items}
+                  loading={isLoading}
+                  sorting={sorting}
+                />
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {isChartEmbeddablesEnabled ? (
