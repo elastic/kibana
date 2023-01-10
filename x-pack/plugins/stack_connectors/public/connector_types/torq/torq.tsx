@@ -10,9 +10,10 @@ import {
   GenericValidationResult
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { lazy } from 'react';
-import { torqDefaultBody } from '../lib/default_params';
 import { TorqActionParams, TorqConfig, TorqSecrets } from '../types';
 import * as i18n from './translations';
+
+const torqDefaultBody = "{{.}}";
 
 function replaceReferencesWithNumbers(body: string) {
   return body.replace(/\{\{[.\w]+\}\}/gm, '42');
