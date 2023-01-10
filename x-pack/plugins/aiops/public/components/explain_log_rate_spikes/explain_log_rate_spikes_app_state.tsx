@@ -113,7 +113,7 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
           <SpikeAnalysisTableRowStateProvider>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-              <DatePickerContextProvider deps={datePickerDeps}>
+              <DatePickerContextProvider {...datePickerDeps}>
                 <ExplainLogRateSpikesPage />
               </DatePickerContextProvider>
             </StorageContextProvider>

@@ -323,7 +323,7 @@ export const IndexDataVisualizer: FC<{
     >
       <KibanaContextProvider services={{ ...services }}>
         <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
-          <DatePickerContextProvider deps={datePickerDeps}>
+          <DatePickerContextProvider {...datePickerDeps}>
             <DataVisualizerStateContextProvider
               IndexDataVisualizerComponent={IndexDataVisualizerView}
               getAdditionalLinks={getAdditionalLinks}

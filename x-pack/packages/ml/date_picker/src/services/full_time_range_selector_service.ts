@@ -15,18 +15,20 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { getTimeFieldRange } from './time_field_range';
+import type { GetTimeFieldRangeResponse } from './types';
 
-export interface GetTimeFieldRangeResponse {
-  success: boolean;
-  start: { epoch: number; string: string };
-  end: { epoch: number; string: string };
-}
-
-export interface TimeRange {
-  from: number;
-  to: number;
-}
-
+/**
+ * Determines the full available time range of the given Data View and updates
+ * the timefilter accordingly.
+ *
+ * @param timefilter - TimefilterContract
+ * @param dataView - DataView
+ * @param toasts - ToastsStart
+ * @param http - HttpStart
+ * @param query - optional query
+ * @param excludeFrozenData - optional boolean flag
+ * @returns {GetTimeFieldRangeResponse}
+ */
 export async function setFullTimeRange(
   timefilter: TimefilterContract,
   dataView: DataView,
@@ -72,6 +74,26 @@ export async function setFullTimeRange(
   }
 }
 
+/**
+ * Return type for the `getTimeFilterRange` function.
+ */
+export interface TimeRange {
+  /**
+   * From timestamp.
+   */
+  from: number;
+  /**
+   * To timestamp.
+   */
+  to: number;
+}
+
+/**
+ * Function to get the time filter range as timestamps.
+ *
+ * @param timefilter - The timefilter
+ * @returns TimeRange
+ */
 export function getTimeFilterRange(timefilter: TimefilterContract): TimeRange {
   const fromMoment = dateMath.parse(timefilter.getTime().from);
   const toMoment = dateMath.parse(timefilter.getTime().to);

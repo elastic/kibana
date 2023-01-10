@@ -50,10 +50,11 @@ export const useDatePickerContext = (): DatePickerDependencies => {
 /**
  * React Component that acts as a wrapper for DatePickerContext.
  *
- * @param props - `DatePickerDependencies`
- * @returns JSX
+ * @type {FC<DatePickerDependencies>}
+ * @param props - The component props
+ * @returns {React.ReactElement} The DatePickerContextProvider component.
  */
-export const DatePickerContextProvider: FC<{ deps: DatePickerDependencies }> = ({
-  children,
-  deps,
-}) => <DatePickerContext.Provider value={deps}>{children}</DatePickerContext.Provider>;
+
+export const DatePickerContextProvider: FC<DatePickerDependencies> = ({ children, ...deps }) => (
+  <DatePickerContext.Provider value={deps}>{children}</DatePickerContext.Provider>
+);

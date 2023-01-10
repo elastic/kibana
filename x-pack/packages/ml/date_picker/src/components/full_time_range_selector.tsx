@@ -26,31 +26,53 @@ import type { DataView } from '@kbn/data-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDatePickerContext } from '../hooks/use_date_picker_context';
-import {
-  setFullTimeRange,
-  type GetTimeFieldRangeResponse,
-} from '../services/full_time_range_selector_service';
+import { setFullTimeRange } from '../services/full_time_range_selector_service';
+import type { GetTimeFieldRangeResponse } from '../services/types';
 import { FROZEN_TIER_PREFERENCE, type FrozenTierPreference } from '../storage';
 
 /**
  * FullTimeRangeSelectorProps React Component props interface
  */
 export interface FullTimeRangeSelectorProps {
+  /**
+   * Frozen data preference ('exclude-frozen' | 'include-frozen')
+   */
   frozenDataPreference: FrozenTierPreference;
+  /**
+   * Callback to set frozen data preference.
+   * @param value - The updated frozen data preference.
+   */
   setFrozenDataPreference: (value: FrozenTierPreference | undefined) => void;
+  /**
+   * timefilter service.
+   */
   timefilter: TimefilterContract;
+  /**
+   * Current data view.
+   */
   dataView: DataView;
+  /**
+   * Boolean flag to enable/disable the full time range button.
+   */
   disabled: boolean;
+  /**
+   * Optional DSL query.
+   */
   query?: QueryDslQueryContainer;
-  callback?: (a: GetTimeFieldRangeResponse) => void;
+  /**
+   * Optional callback.
+   * @param value - The time field range response.
+   */
+  callback?: (value: GetTimeFieldRangeResponse) => void;
 }
 
 /**
  * Component for rendering a button which automatically sets the range of the time filter
  * to the time range of data in the index(es) mapped to the supplied Kibana data view or query.
  *
- * @param `FullTimeRangeSelectorProps` component props
- * @returns
+ * @type {FC<FullTimeRangeSelectorProps>}
+ * @param props - `FullTimeRangeSelectorProps` component props
+ * @returns {React.ReactElement} The FullTimeRangeSelector component.
  */
 export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = ({
   frozenDataPreference,

@@ -21,8 +21,8 @@ export {
 } from './src/components/full_time_range_selector';
 export {
   getTimeFilterRange,
-  type GetTimeFieldRangeResponse,
   type TimeRange,
 } from './src/services/full_time_range_selector_service';
+export { type GetTimeFieldRangeResponse } from './src/services/types';
 export { mlTimefilterRefresh$, type Refresh } from './src/services/timefilter_refresh_service';
 export { type FrozenTierPreference, FROZEN_TIER_PREFERENCE } from './src/storage';

@@ -10,30 +10,45 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { HttpStart } from '@kbn/core/public';
 
-export interface GetTimeFieldRangeResponse {
-  success: boolean;
-  start: { epoch: number; string: string };
-  end: { epoch: number; string: string };
+import type { GetTimeFieldRangeResponse } from './types';
+
+/**
+ * Options definition for the `getTimeFieldRange` function.
+ */
+interface GetTimeFieldRangeOptions {
+  /**
+   * The index to be queried.
+   */
+  index: string;
+  /**
+   * Optional time field name.
+   */
+  timeFieldName?: string;
+  /**
+   * Optional DSL query.
+   */
+  query?: QueryDslQueryContainer;
+  /**
+   * Optional runtime mappings.
+   */
+  runtimeMappings?: estypes.MappingRuntimeFields;
+  /**
+   * HTTP client
+   */
+  http: HttpStart;
 }
 
-export async function getTimeFieldRange({
-  index,
-  timeFieldName,
-  query,
-  runtimeMappings,
-  http,
-}: {
-  index: string;
-  timeFieldName?: string;
-  query?: QueryDslQueryContainer;
-  runtimeMappings?: estypes.MappingRuntimeFields;
-  http: HttpStart;
-}) {
-  const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings });
+/**
+ *
+ * @param options - GetTimeFieldRangeOptions
+ * @returns GetTimeFieldRangeResponse
+ */
+export async function getTimeFieldRange(options: GetTimeFieldRangeOptions) {
+  const { http, ...body } = options;
 
   return await http.fetch<GetTimeFieldRangeResponse>({
     path: `/internal/file_upload/time_field_range`,
     method: 'POST',
-    body,
+    body: JSON.stringify(body),
   });
 }
