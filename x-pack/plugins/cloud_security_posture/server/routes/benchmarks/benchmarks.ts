@@ -69,7 +69,7 @@ const createBenchmarks = (
         const agentPolicyStatus = {
           id: agentPolicy.id,
           name: agentPolicy.name,
-          agents: agentStatusByAgentPolicyId[agentPolicy.id].total,
+          agents: agentStatusByAgentPolicyId[agentPolicy.id]?.total,
         };
         return {
           package_policy: cspPackage,

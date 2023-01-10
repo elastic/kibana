@@ -104,15 +104,7 @@
             "signature": [
               "Map<string, ",
               "ActionInternal",
-              "<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<object>>>"
+              "<object>>"
             ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
@@ -258,7 +250,7 @@
             "label": "registerAction",
             "description": [],
             "signature": [
-              "<A extends ",
+              "<Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -266,7 +258,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>>(definition: A) => ",
+              "<Context>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -274,9 +266,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<A>>"
+              "<Context>"
             ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
@@ -285,12 +275,19 @@
               {
                 "parentPluginId": "uiActions",
                 "id": "def-public.UiActionsService.registerAction.$1",
-                "type": "Uncategorized",
+                "type": "Object",
                 "tags": [],
                 "label": "definition",
                 "description": [],
                 "signature": [
-                  "A"
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<Context>"
                 ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
@@ -476,7 +473,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>) => void"
+              "<any>) => void"
             ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
@@ -512,7 +509,7 @@
                     "section": "def-public.ActionDefinition",
                     "text": "ActionDefinition"
                   },
-                  "<object>"
+                  "<any>"
                 ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
@@ -530,15 +527,7 @@
             "label": "getAction",
             "description": [],
             "signature": [
-              "<T extends ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<object>>(id: string) => ",
+              "(id: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -546,9 +535,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<T>>"
+              "<object>"
             ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
@@ -702,6 +689,10 @@
               {
                 "plugin": "discover",
                 "path": "src/plugins/discover/public/plugin.tsx"
+              },
+              {
+                "plugin": "imageEmbeddable",
+                "path": "src/plugins/image_embeddable/public/image_embeddable/image_embeddable_factory.tsx"
               },
               {
                 "plugin": "embeddable",
@@ -1149,37 +1140,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.Action.MenuItem",
-            "type": "Function",
-            "tags": [],
-            "label": "MenuItem",
-            "description": [
-              "\n`UiComponent` to render when displaying this action as a context menu item.\nIf not provided, `getDisplayName` will be used instead."
-            ],
-            "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponent",
-                "text": "UiComponent"
-              },
-              "<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionMenuItemProps",
-                "text": "ActionMenuItemProps"
-              },
-              "<Context>> | undefined"
-            ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActions",
@@ -1796,17 +1756,10 @@
             "tags": [],
             "label": "MenuItem",
             "description": [
-              "\n`UiComponent` to render when displaying this entity as a context menu item.\nIf not provided, `getDisplayName` will be used instead."
+              "\nComponent to render when displaying this entity as a context menu item.\nIf not provided, `getDisplayName` will be used instead."
             ],
             "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponent",
-                "text": "UiComponent"
-              },
-              "<{ context: Context; }> | undefined"
+              "React.FC<{ context: Context; }> | undefined"
             ],
             "path": "src/plugins/ui_actions/public/util/presentable.ts",
             "deprecated": false,
@@ -2636,7 +2589,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+        "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2644,7 +2597,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<object>>(definition: A) => ",
+        "<Context>) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2652,9 +2605,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<",
-        "ActionContext",
-        "<A>>; readonly registerTrigger: (trigger: ",
+        "<Context>; readonly registerTrigger: (trigger: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2686,7 +2637,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+        "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2694,7 +2645,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<object>>(definition: A) => ",
+        "<Context>) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2702,9 +2653,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<",
-        "ActionContext",
-        "<A>>; readonly registerTrigger: (trigger: ",
+        "<Context>; readonly registerTrigger: (trigger: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2714,15 +2663,7 @@
         },
         ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
         "TriggerContract",
-        "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: <T extends ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
-        },
-        "<object>>(id: string) => ",
+        "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2730,9 +2671,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<",
-        "ActionContext",
-        "<T>>; readonly getTriggerActions: (triggerId: string) => ",
+        "<object>; readonly getTriggerActions: (triggerId: string) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
