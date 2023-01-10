@@ -8,6 +8,8 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import type { Agent } from '../../types';
+
 import { createClientMock } from './action.mock';
 import { updateAgentTags } from './update_agent_tags';
 import { updateTagsBatch } from './update_agent_tags_action_runner';
@@ -83,7 +85,27 @@ describe('update_agent_tags', () => {
       expect.objectContaining({
         conflicts: 'proceed',
         index: '.fleet-agents',
-        query: { terms: { _id: ['agent1'] } },
+        query: {
+          bool: {
+            must_not: {
+              bool: {
+                should: [
+                  {
+                    bool: { should: [{ match: { status: 'inactive' } }], minimum_should_match: 1 },
+                  },
+                  {
+                    bool: {
+                      should: [{ match: { status: 'unenrolled' } }],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            must: { terms: { _id: ['agent1'] } },
+          },
+        },
         script: expect.objectContaining({
           lang: 'painless',
           params: expect.objectContaining({
@@ -253,7 +275,7 @@ describe('update_agent_tags', () => {
     await updateTagsBatch(
       soClient,
       esClient,
-      [],
+      [{ id: 'agent1' } as Agent, { id: 'agent2' } as Agent],
       {},
       {
         tagsToAdd: ['new'],
@@ -263,65 +285,41 @@ describe('update_agent_tags', () => {
     );
 
     const updateByQuery = esClient.updateByQuery.mock.calls[0][0] as any;
-    expect(updateByQuery.query).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "filter": Array [
-            Object {
-              "bool": Object {
-                "must_not": Object {
-                  "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
-                      Object {
-                        "bool": Object {
-                          "minimum_should_match": 1,
-                          "should": Array [
-                            Object {
-                              "match": Object {
-                                "status": "inactive",
-                              },
-                            },
-                          ],
-                        },
+    expect(updateByQuery.query).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              must_not: {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        should: [{ match: { status: 'inactive' } }],
+                        minimum_should_match: 1,
                       },
-                      Object {
-                        "bool": Object {
-                          "minimum_should_match": 1,
-                          "should": Array [
-                            Object {
-                              "match": Object {
-                                "status": "unenrolled",
-                              },
-                            },
-                          ],
-                        },
+                    },
+                    {
+                      bool: {
+                        should: [{ match: { status: 'unenrolled' } }],
+                        minimum_should_match: 1,
                       },
-                    ],
-                  },
+                    },
+                  ],
+                  minimum_should_match: 1,
                 },
               },
             },
-            Object {
-              "bool": Object {
-                "must_not": Object {
-                  "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
-                      Object {
-                        "match": Object {
-                          "tags": "new",
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
+          },
+          {
+            bool: {
+              must_not: { bool: { should: [{ match: { tags: 'new' } }], minimum_should_match: 1 } },
             },
-          ],
-        },
-      }
-    `);
+          },
+        ],
+        must: { terms: { _id: ['agent1', 'agent2'] } },
+      },
+    });
   });
 
   it('should add tags filter if only one tag to remove', async () => {
