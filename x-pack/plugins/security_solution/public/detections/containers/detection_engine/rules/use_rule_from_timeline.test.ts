@@ -100,9 +100,7 @@ describe('useRuleFromTimeline', () => {
     jest.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-    (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
-      decodedParam: timelineId,
-    }));
+    (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => timelineId);
     (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
   });
 
@@ -139,9 +137,7 @@ describe('useRuleFromTimeline', () => {
         });
     });
     it('if no timeline id in URL, loading: false and query not set', async () => {
-      (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
-        decodedParam: undefined,
-      }));
+      (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => undefined);
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
 
       expect(result.current.loading).toEqual(false);
@@ -227,9 +223,7 @@ describe('useRuleFromTimeline', () => {
     });
 
     it('Sets rule from timeline query via callback', async () => {
-      (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
-        decodedParam: undefined,
-      }));
+      (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => undefined);
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(false);
       await act(async () => {
@@ -280,9 +274,7 @@ describe('useRuleFromTimeline', () => {
     });
 
     it('Handles error when query is malformed', async () => {
-      (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
-        decodedParam: undefined,
-      }));
+      (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => undefined);
       const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(false);
       const tl = {
