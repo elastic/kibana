@@ -815,7 +815,7 @@ export class ActionsClient {
     filter,
     namespaces,
   }: GetGlobalExecutionKPIParams) {
-    this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
+    this.logger.debug(`getGlobalExecutionKpiWithAuth(): getting global execution KPI`);
 
     const authorizationTuple = {} as KueryNode;
     try {
