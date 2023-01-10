@@ -231,7 +231,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
       <I18nContext>
         <KibanaThemeProvider theme$={this.services[0].theme.theme$}>
           <KibanaContextProvider services={services}>
-            <DatePickerContextProvider deps={datePickerDeps}>
+            <DatePickerContextProvider {...datePickerDeps}>
               <Suspense fallback={<EmbeddableLoading />}>
                 <IndexDataVisualizerViewWrapper
                   id={this.input.id}

@@ -54,7 +54,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
           <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-            <DatePickerContextProvider deps={datePickerDeps}>
+            <DatePickerContextProvider {...datePickerDeps}>
               <PageHeader />
               <EuiSpacer />
               <ChangePointDetectionContextProvider>
