@@ -220,7 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(alertLimit.setLimitReached.calledOnceWith(true)).to.be(true);
         });
 
-        it.skip('should limit alerts to the alert limit', async () => {
+        it('should limit alerts to the alert limit', async () => {
           const timestamp = new Date(DATES['alert-test-data'].gauge.max);
           const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
           const alertLimit = {
