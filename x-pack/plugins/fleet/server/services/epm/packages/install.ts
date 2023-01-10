@@ -20,7 +20,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pRetry from 'p-retry';
 
-import { isPackagePrerelease } from '../../../../common/services';
+import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
 
@@ -36,14 +36,15 @@ import type {
   InstallSource,
   InstallType,
   KibanaAssetType,
+  NewPackagePolicy,
   PackageInfo,
   PackageVerificationResult,
   RegistryDataStream,
 } from '../../../types';
 import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common/constants';
-import { FleetError, PackageOutdatedError } from '../../../errors';
+import { FleetError, PackageOutdatedError, PackagePolicyValidationError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
-import { licenseService } from '../..';
+import { dataStreamService, licenseService } from '../..';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import {
@@ -51,6 +52,7 @@ import {
   generatePackageInfoFromArchiveBuffer,
   unpackBufferToCache,
   deleteVerificationResult,
+  getArchiveFilelist,
 } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
@@ -919,6 +921,71 @@ export async function installIndexTemplatesAndPipelines({
     esReferences: newEsReferences,
     installedTemplates,
   };
+}
+
+export async function installAssetsForInputPackagePolicy(opts: {
+  pkgInfo: PackageInfo;
+  logger: Logger;
+  packagePolicy: NewPackagePolicy;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  force: boolean;
+}) {
+  const { pkgInfo, logger, packagePolicy, esClient, soClient, force } = opts;
+
+  if (pkgInfo.type !== 'input') return;
+
+  const paths = await getArchiveFilelist(pkgInfo);
+  if (!paths) throw new Error('No paths found for ');
+
+  const datasetName = packagePolicy.inputs[0].streams[0].vars?.['data_stream.dataset']?.value;
+  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
+  const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
+    type: dataStream.type,
+    dataset: datasetName,
+  });
+
+  if (existingDataStreams.length) {
+    const existingDataStreamsAreFromDifferentPackage = existingDataStreams.some(
+      (ds) => ds._meta?.package?.name !== pkgInfo.name
+    );
+    if (existingDataStreamsAreFromDifferentPackage && !force) {
+      // user has opted to send data to an existing data stream which is managed by another
+      // package. This means certain custom setting such as elasticsearch settings
+      // defined by the package will not have been applied which could lead
+      // to unforeseen circumstances, so force flag must be used.
+      const streamIndexPattern = dataStreamService.streamPartsToIndexPattern({
+        type: dataStream.type,
+        dataset: datasetName,
+      });
+
+      throw new PackagePolicyValidationError(
+        `Datastreams matching "${streamIndexPattern}" already exist and are not managed by this package, force flag is required`
+      );
+    } else {
+      logger.info(
+        `Data stream ${dataStream.name} already exists, skipping index template creation for ${packagePolicy.id}`
+      );
+    }
+  } else {
+    const installedPkg = await getInstallation({
+      savedObjectsClient: soClient,
+      pkgName: pkgInfo.name,
+      logger,
+    });
+    if (!installedPkg)
+      throw new Error('Unable to find installed package while creating index templates');
+    await installIndexTemplatesAndPipelines({
+      installedPkg,
+      paths,
+      packageInfo: pkgInfo,
+      esReferences: installedPkg.installed_es || [],
+      savedObjectsClient: soClient,
+      esClient,
+      logger,
+      onlyForDataStream: dataStream,
+    });
+  }
 }
 
 interface NoPkgArgs {
