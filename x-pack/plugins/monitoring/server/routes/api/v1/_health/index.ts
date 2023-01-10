@@ -53,7 +53,7 @@ export function registerV1HealthRoute(server: MonitoringCore) {
         getIndexPatterns({ config, moduleType: 'logstash' }),
         getIndexPatterns({ config, moduleType: 'beats' }),
       ].join(',');
-      const entSearchIndex = getIndexPatterns({ config, moduleType: 'enterprise_search' });
+      const entSearchIndex = getIndexPatterns({ config, moduleType: 'enterprisesearch' });
 
       const monitoredClustersFn = () =>
         fetchMonitoredClusters({
