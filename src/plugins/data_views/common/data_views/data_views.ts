@@ -526,7 +526,7 @@ export class DataViewsService {
     return this.apiClient.getFieldsForWildcard({
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
-      allowNoIndex: dataView.allowNoIndex,
+      allowNoIndex: true, // dataView.allowNoIndex,  - what should we do when setting this?
       pattern: dataView.getIndexPattern(),
       metaFields,
     });

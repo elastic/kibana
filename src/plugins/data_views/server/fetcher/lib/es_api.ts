@@ -66,7 +66,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     indices,
     indexFilter,
     fieldCapsOptions = {
-      allow_no_indices: true, // CHANGE TO DEFAULT TO TRUE
+      allow_no_indices: false,
       include_unmapped: false,
     },
     fields = ['*'],
@@ -82,6 +82,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
       },
       { meta: true }
     );
+    // this may need twweaking based on allow_no_index
     if (caps.body.indices.length === 0) {
       const pattern = Array.isArray(indices) ? indices.join(',') : indices;
       throw new DataViewMissingIndices(pattern);
