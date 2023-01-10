@@ -22,7 +22,7 @@ import {
 import { getMlGlobalServices } from '../../application/app';
 import { GeoJobFlyout } from './flyout';
 
-export async function showMapVisToJobFlyout(
+export async function showMapVisToADJobFlyout(
   embeddable: MapEmbeddable,
   coreStart: CoreStart,
   share: SharePluginStart,

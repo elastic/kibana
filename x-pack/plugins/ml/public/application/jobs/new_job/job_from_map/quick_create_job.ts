@@ -37,7 +37,7 @@ interface VisDescriptor {
   bucketSpan?: string;
 }
 
-export class QuickJobCreator extends QuickJobCreatorBase {
+export class QuickGeoJobCreator extends QuickJobCreatorBase {
   constructor(
     public readonly kibanaConfig: IUiSettingsClient,
     public readonly timeFilter: TimefilterContract,

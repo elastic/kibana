@@ -35,7 +35,7 @@ import {
 import { VisualizationExtractor } from './visualization_extractor';
 import { QuickJobCreatorBase, CreateState } from '../job_from_dashboard';
 
-export class QuickJobCreator extends QuickJobCreatorBase {
+export class QuickLensJobCreator extends QuickJobCreatorBase {
   constructor(
     private readonly lens: LensPublicStart,
     public readonly kibanaConfig: IUiSettingsClient,

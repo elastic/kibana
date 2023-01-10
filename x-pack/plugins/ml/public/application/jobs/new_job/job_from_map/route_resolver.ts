@@ -8,7 +8,7 @@
 import rison from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
-import { QuickJobCreator } from './quick_create_job';
+import { QuickGeoJobCreator } from './quick_create_job';
 import { ml } from '../../../services/ml_api_service';
 
 import { getUiSettings, getTimefilter, getShare } from '../../../util/dependency_cache';
@@ -58,7 +58,7 @@ export async function resolver(
     to = '';
   }
 
-  const jobCreator = new QuickJobCreator(getUiSettings(), getTimefilter(), getShare(), ml);
+  const jobCreator = new QuickGeoJobCreator(getUiSettings(), getTimefilter(), getShare(), ml);
 
   await jobCreator.createAndStashGeoJob(
     dataViewId,

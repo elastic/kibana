@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
+  const PageObjects = getPageObjects(['common', 'dashboard']);
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 

@@ -26,12 +26,12 @@ export const IncompatibleLayer: FC<Props> = ({ noDataView }) => {
           {noDataView === true ? (
             <FormattedMessage
               id="xpack.ml.embeddables.geoJobFlyout.noDataViewError"
-              defaultMessage="There is no source Data View for this layer. It cannot be used to create an anomaly detection job"
+              defaultMessage="There is no source data view for this layer. It cannot be used to create an anomaly detection job"
             />
           ) : (
             <FormattedMessage
               id="xpack.ml.embeddables.geoJobFlyout.noTimeFieldError"
-              defaultMessage="This source Dataview for this layer does not contain a timefield. It cannot be used to create an anomaly detection job"
+              defaultMessage="The source data view for this layer does not contain a timestamp field. It cannot be used to create an anomaly detection job"
             />
           )}
         </EuiText>

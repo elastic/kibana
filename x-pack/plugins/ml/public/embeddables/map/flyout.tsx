@@ -20,7 +20,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { Layer } from './layer';
+import { Layer } from './map_vis_layer_selection_flyout/layer';
 import { LayerResult, VisualizationExtractor } from '../../application/jobs/new_job/job_from_map';
 
 interface Props {

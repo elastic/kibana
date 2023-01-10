@@ -10,7 +10,7 @@ import type { Embeddable } from '@kbn/lens-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
-import { isLensEmbeddable, isMapEmbeddable } from '../application/jobs/new_job/job_from_lens/utils';
+import { isLensEmbeddable, isMapEmbeddable } from '../application/jobs/new_job/job_from_dashboard';
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
@@ -38,13 +38,12 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
             return;
           }
           await showLensVisToADJobFlyout(embeddable, coreStart, share, data, lens);
-        }
-        if (isMapEmbeddable(embeddable)) {
-          const [{ showMapVisToJobFlyout }, [coreStart, { share, data }]] = await Promise.all([
+        } else if (isMapEmbeddable(embeddable)) {
+          const [{ showMapVisToADJobFlyout }, [coreStart, { share, data }]] = await Promise.all([
             import('../embeddables/map'),
             getStartServices(),
           ]);
-          await showMapVisToJobFlyout(embeddable, coreStart, share, data);
+          await showMapVisToADJobFlyout(embeddable, coreStart, share, data);
         }
       } catch (e) {
         return Promise.reject();

@@ -16,6 +16,7 @@ import type { DashboardAppLocatorParams } from '@kbn/dashboard-plugin/public';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { Embeddable } from '@kbn/lens-plugin/public';
+import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
 import type { ErrorType } from '../../../../../common/util/errors';
@@ -23,6 +24,14 @@ import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
 import { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
+
+export function isLensEmbeddable(arg: any): arg is Embeddable {
+  return arg.hasOwnProperty('type') && arg.type === 'lens';
+}
+
+export function isMapEmbeddable(arg: any): arg is MapEmbeddable {
+  return arg.hasOwnProperty('type') && arg.type === 'map';
+}
 
 export type Dashboard = Embeddable['parent'];
 

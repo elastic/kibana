@@ -13,7 +13,6 @@ import type {
   ChartInfo,
   LensSavedObjectAttributes,
 } from '@kbn/lens-plugin/public';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
@@ -21,14 +20,6 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
-
-export function isLensEmbeddable(arg: any): arg is Embeddable {
-  return arg.hasOwnProperty('type') && arg.type === 'lens';
-}
-
-export function isMapEmbeddable(arg: any): arg is MapEmbeddable {
-  return arg.hasOwnProperty('type') && arg.type === 'map';
-}
 
 export const COMPATIBLE_SERIES_TYPES = [
   'line',

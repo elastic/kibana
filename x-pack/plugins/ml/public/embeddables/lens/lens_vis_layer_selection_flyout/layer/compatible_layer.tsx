@@ -13,15 +13,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
 import {
   redirectToADJobWizards,
-  QuickJobCreator,
+  QuickLensJobCreator,
 } from '../../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import { useMlFromLensKibanaContext } from '../../context';
-import {
-  MlJobAdditionalSettings,
-  CreateADJobParams,
-} from '../../../common/ml_job_additional_settings';
+import { JobDetails, CreateADJobParams } from '../../../common/job_details';
 
 interface Props {
   layer: LayerResult;
@@ -42,7 +39,13 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
 
   const quickJobCreator = useMemo(
     () =>
-      new QuickJobCreator(lens, uiSettings, data.query.timefilter.timefilter, share, mlApiServices),
+      new QuickLensJobCreator(
+        lens,
+        uiSettings,
+        data.query.timefilter.timefilter,
+        share,
+        mlApiServices
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, uiSettings]
   );
@@ -71,7 +74,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
 
   return (
     <>
-      <MlJobAdditionalSettings
+      <JobDetails
         createADJob={createADJob}
         createADJobInWizard={createADJobInWizard}
         embeddable={embeddable}
@@ -100,7 +103,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </MlJobAdditionalSettings>
+      </JobDetails>
     </>
   );
 };

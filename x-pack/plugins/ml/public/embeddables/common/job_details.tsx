@@ -30,7 +30,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { QuickJobCreator } from '../../application/jobs/new_job/job_from_lens';
+import { QuickLensJobCreator } from '../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../application/jobs/new_job/job_from_lens';
 import type { CreateState } from '../../application/jobs/new_job/job_from_dashboard';
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../common/constants/new_job';
@@ -67,7 +67,7 @@ enum STATE {
   SAVE_FAILED,
 }
 
-export const MlJobAdditionalSettings: FC<Props> = ({
+export const JobDetails: FC<Props> = ({
   children,
   createADJobInWizard,
   createADJob,
@@ -429,7 +429,7 @@ export const MlJobAdditionalSettings: FC<Props> = ({
 };
 
 const checkForCreationErrors = (
-  result: Awaited<ReturnType<QuickJobCreator['createAndSaveJob']>>
+  result: Awaited<ReturnType<QuickLensJobCreator['createAndSaveJob']>>
 ) => {
   if (result.jobCreated.error) {
     return {

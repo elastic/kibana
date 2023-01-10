@@ -6,6 +6,6 @@
  */
 
 export { resolver } from './route_resolver';
-export { QuickJobCreator } from './quick_create_job';
+export { QuickGeoJobCreator } from './quick_create_job';
 export { getJobsItemsFromEmbeddable, redirectToGeoJobWizard } from './utils';
 export { type LayerResult, VisualizationExtractor } from './visualization_extractor';

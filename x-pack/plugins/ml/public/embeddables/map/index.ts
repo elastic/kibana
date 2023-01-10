@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { showMapVisToJobFlyout } from './show_flyout';
+export { showMapVisToADJobFlyout } from './show_flyout';
