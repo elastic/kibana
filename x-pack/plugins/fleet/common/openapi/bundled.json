@@ -1178,6 +1178,9 @@
                     "inactive": {
                       "type": "integer"
                     },
+                    "unenrolled": {
+                      "type": "integer"
+                    },
                     "offline": {
                       "type": "integer"
                     },
@@ -1379,64 +1382,6 @@
             }
           }
         }
-      }
-    },
-    "/agents/current_upgrades": {
-      "get": {
-        "summary": "Agents - Current Bulk Upgrades",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "actionId": {
-                            "type": "string"
-                          },
-                          "complete": {
-                            "type": "boolean"
-                          },
-                          "nbAgents": {
-                            "type": "number"
-                          },
-                          "nbAgentsAck": {
-                            "type": "number"
-                          },
-                          "version": {
-                            "type": "string"
-                          },
-                          "startTime": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "actionId",
-                          "complete",
-                          "nbAgents",
-                          "nbAgentsAck",
-                          "version",
-                          "startTime"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "items"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "agents-current-upgrades"
       }
     },
     "/agents/action_status": {
@@ -6416,6 +6361,35 @@
               },
               "key": {
                 "type": "string"
+              }
+            }
+          },
+          "proxy_id": {
+            "type": "string"
+          },
+          "shipper": {
+            "type": "object",
+            "properties": {
+              "disk_queue_enabled": {
+                "type": "boolean"
+              },
+              "disk_queue_path": {
+                "type": "string"
+              },
+              "disk_queue_max_size": {
+                "type": "number"
+              },
+              "disk_queue_encryption_enabled": {
+                "type": "boolean"
+              },
+              "disk_queue_compression_enabled": {
+                "type": "boolean"
+              },
+              "compression_level": {
+                "type": "number"
+              },
+              "loadbalance": {
+                "type": "boolean"
               }
             }
           }

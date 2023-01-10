@@ -55,8 +55,6 @@ paths:
     $ref: paths/agents.yaml
   /agents/bulk_upgrade:
     $ref: paths/agents@bulk_upgrade.yaml
-  /agents/current_upgrades:
-    $ref: paths/agents@current_upgrades.yaml
   /agents/action_status:
     $ref: paths/agents@action_status.yaml
   '/agents/{agentId}':

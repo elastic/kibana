@@ -12,7 +12,6 @@ import { ErrorCode } from '../../../../../../common/types/error_codes';
 import { generateEncodedPath } from '../../../../app_search/utils/encode_path_params';
 
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import { flashAPIErrors } from '../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../shared/kibana';
 import {
   AddConnectorApiLogic,
@@ -41,7 +40,6 @@ export const AddConnectorLogic = kea<MakeLogicType<AddConnectorValues, AddConnec
     actions: [AddConnectorApiLogic, ['apiError', 'apiSuccess']],
   },
   listeners: {
-    apiError: (error) => flashAPIErrors(error),
     apiSuccess: async ({ indexName }, breakpoint) => {
       // Give Elasticsearch the chance to propagate the index so we don't end up in an error state after navigating
       await breakpoint(1000);
@@ -53,7 +51,7 @@ export const AddConnectorLogic = kea<MakeLogicType<AddConnectorValues, AddConnec
       );
     },
   },
-  path: ['enterprise_search', 'add_connector'],
+  path: ['enterprise_search', 'content', 'add_connector'],
   reducers: {
     isModalVisible: [
       false,
