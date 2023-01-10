@@ -124,6 +124,16 @@ export const mockState: SyntheticsAppState = {
   dynamicSettings: {
     loading: false,
   },
+  defaultAlerting: {
+    loading: false,
+    error: null,
+    success: null,
+  },
+  elasticsearch: {
+    results: {},
+    loading: {},
+    error: {},
+  },
 };
 
 function getBrowserJourneyMockSlice() {
