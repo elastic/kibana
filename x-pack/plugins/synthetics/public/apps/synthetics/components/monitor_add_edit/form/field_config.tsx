@@ -11,14 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { UseFormReturn, ControllerRenderProps, FormState } from 'react-hook-form';
 import {
-  EuiCheckbox,
   EuiCode,
-  EuiComboBox,
   EuiComboBoxOptionOption,
   EuiComboBoxProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldPassword,
   EuiSuperSelect,
   EuiText,
   EuiLink,
@@ -27,17 +24,23 @@ import {
 import {
   FieldText,
   FieldNumber,
+  FieldPassword,
+  Checkbox,
+  ComboBox,
   Select,
   Switch,
   Source,
   ButtonGroup,
-  ComboBox,
+  FormattedComboBox,
   JSONEditor,
+  MonitorTypeRadioGroup,
+  HeaderField,
+  RequestBodyField,
+  ResponseBodyIndexField,
 } from './field_wrappers';
 import { formatLocation } from '../../../../../../common/utils/location_formatter';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
-import { MonitorTypeRadioGroup } from '../fields/monitor_type_radio_group';
 import {
   ConfigKey,
   DataStream,
@@ -53,9 +56,6 @@ import {
   FieldMeta,
 } from '../types';
 import { AlertConfigKey, DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
-import { HeaderField } from '../fields/header_field';
-import { RequestBodyField } from '../fields/request_body_field';
-import { ResponseBodyIndexField } from '../fields/index_response_body_field';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 
@@ -373,7 +373,7 @@ export const FIELD: Record<string, FieldMeta> = {
     fieldKey: ConfigKey.LOCATIONS,
     required: true,
     controlled: true,
-    component: EuiComboBox as React.ComponentType<EuiComboBoxProps<string>>,
+    component: ComboBox as React.ComponentType<EuiComboBoxProps<string>>,
     label: i18n.translate('xpack.synthetics.monitorConfig.locations.label', {
       defaultMessage: 'Locations',
     }),
@@ -462,7 +462,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
-    component: ComboBox,
+    component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.tags.label', {
       defaultMessage: 'Tags',
     }),
@@ -611,7 +611,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.PASSWORD]: {
     fieldKey: ConfigKey.PASSWORD,
-    component: EuiFieldPassword,
+    component: FieldPassword,
     label: i18n.translate('xpack.synthetics.monitorConfig.password.label', {
       defaultMessage: 'Password',
     }),
@@ -676,7 +676,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.RESPONSE_HEADERS_INDEX]: {
     fieldKey: ConfigKey.RESPONSE_HEADERS_INDEX,
-    component: EuiCheckbox,
+    component: Checkbox,
     helpText: (
       <>
         <FormattedMessage
@@ -715,7 +715,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.RESPONSE_STATUS_CHECK]: {
     fieldKey: ConfigKey.RESPONSE_STATUS_CHECK,
-    component: ComboBox,
+    component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseStatusCheck.label', {
       defaultMessage: 'Check response status equals',
     }),
@@ -760,7 +760,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: {
     fieldKey: ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
-    component: ComboBox,
+    component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheck.label', {
       defaultMessage: 'Check response body contains',
     }),
@@ -775,7 +775,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: {
     fieldKey: ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
-    component: ComboBox,
+    component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheckNegative.label', {
       defaultMessage: 'Check response body does not contain',
     }),
@@ -909,7 +909,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.TLS_VERSION]: {
     fieldKey: ConfigKey.TLS_VERSION,
-    component: EuiComboBox as React.ComponentType<EuiComboBoxProps<string>>,
+    component: ComboBox as React.ComponentType<EuiComboBoxProps<string>>,
     label: i18n.translate('xpack.synthetics.monitorConfig.tlsVersion.label', {
       defaultMessage: 'Supported TLS protocols',
     }),
@@ -973,7 +973,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.TLS_KEY_PASSPHRASE]: {
     fieldKey: ConfigKey.TLS_KEY_PASSPHRASE,
-    component: EuiFieldPassword,
+    component: FieldPassword,
     label: i18n.translate('xpack.synthetics.monitorConfig.clientKeyPassphrase.label', {
       defaultMessage: 'Client key passphrase',
     }),
@@ -1007,7 +1007,7 @@ export const FIELD: Record<string, FieldMeta> = {
         label: option.replace(/-/g, ' '),
       })),
       css: {
-        'text-transform': 'capitalize',
+        textTransform: 'capitalize',
       },
     }),
   },

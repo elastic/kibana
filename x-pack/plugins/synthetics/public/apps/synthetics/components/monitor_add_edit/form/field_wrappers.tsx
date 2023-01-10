@@ -14,14 +14,36 @@ import {
   EuiSelectProps,
   EuiFieldNumber,
   EuiFieldNumberProps,
+  EuiFieldPassword,
+  EuiFieldPasswordProps,
+  EuiCheckbox,
+  EuiCheckboxProps,
   EuiSwitch,
   EuiSwitchProps,
   EuiButtonGroup,
   EuiButtonGroupProps,
+  EuiComboBox,
+  EuiComboBoxProps,
 } from '@elastic/eui';
 import { SourceField, SourceFieldProps } from '../fields/source_field';
-import { ComboBox as DefaultComboBox, ComboBoxProps } from '../fields/combo_box';
+import {
+  FormattedComboBox as DefaultFormattedComboBox,
+  FormattedComboBoxProps,
+} from '../fields/combo_box';
 import { JSONEditor as DefaultJSONEditor, CodeEditorProps } from '../fields/code_editor';
+import {
+  MonitorTypeRadioGroup as DefaultMonitorTypeRadioGroup,
+  MonitorTypeRadioGroupProps,
+} from '../fields/monitor_type_radio_group';
+import { HeaderField as DefaultHeaderField, HeaderFieldProps } from '../fields/header_field';
+import {
+  RequestBodyField as DefaultRequestBodyField,
+  RequestBodyFieldProps,
+} from '../fields/request_body_field';
+import {
+  ResponseBodyIndexField as DefaultResponseBodyIndexField,
+  ResponseBodyIndexFieldProps,
+} from '../fields/index_response_body_field';
 
 export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>(
   (props, ref: Ref<HTMLInputElement>) => (
@@ -32,12 +54,20 @@ export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>(
   )
 );
 
-export const Select = React.forwardRef<HTMLSelectElement, EuiSelectProps>((props, ref) => (
-  <EuiSelect {...props} inputRef={ref} />
-));
-
 export const FieldNumber = React.forwardRef<HTMLInputElement, EuiFieldNumberProps>((props, ref) => (
   <EuiFieldNumber {...props} inputRef={ref} />
+));
+
+export const FieldPassword = React.forwardRef<HTMLInputElement, EuiFieldPasswordProps>(
+  (props, ref) => <EuiFieldPassword {...props} inputRef={ref} />
+);
+
+export const Checkbox = React.forwardRef<HTMLInputElement, EuiCheckboxProps>((props, _ref) => (
+  <EuiCheckbox {...(omit(props, ['defaultValue', 'fullWidth', 'isInvalid']) as EuiCheckboxProps)} />
+));
+
+export const Select = React.forwardRef<HTMLSelectElement, EuiSelectProps>((props, ref) => (
+  <EuiSelect {...props} inputRef={ref} />
 ));
 
 export const Switch = React.forwardRef<unknown, EuiSwitchProps>((props, _ref) => (
@@ -52,10 +82,30 @@ export const ButtonGroup = React.forwardRef<unknown, EuiButtonGroupProps>((props
   <EuiButtonGroup {...(omit(props, ['isInvalid', 'fullWidth']) as EuiButtonGroupProps)} />
 ));
 
-export const ComboBox = React.forwardRef<unknown, ComboBoxProps>((props, _ref) => (
-  <DefaultComboBox {...props} />
+export const FormattedComboBox = React.forwardRef<unknown, FormattedComboBoxProps>(
+  (props, _ref) => <DefaultFormattedComboBox {...props} />
+);
+
+export const ComboBox = React.forwardRef<unknown, EuiComboBoxProps<unknown>>((props, _ref) => (
+  <EuiComboBox {...omit(props, ['isServiceManaged'])} />
 ));
 
 export const JSONEditor = React.forwardRef<unknown, CodeEditorProps>((props, _ref) => (
   <DefaultJSONEditor {...props} />
 ));
+
+export const MonitorTypeRadioGroup = React.forwardRef<unknown, MonitorTypeRadioGroupProps>(
+  (props, _ref) => <DefaultMonitorTypeRadioGroup {...props} />
+);
+
+export const HeaderField = React.forwardRef<unknown, HeaderFieldProps>((props, _ref) => (
+  <DefaultHeaderField {...props} />
+));
+
+export const RequestBodyField = React.forwardRef<unknown, RequestBodyFieldProps>((props, _ref) => (
+  <DefaultRequestBodyField {...props} />
+));
+
+export const ResponseBodyIndexField = React.forwardRef<unknown, ResponseBodyIndexFieldProps>(
+  (props, _ref) => <DefaultResponseBodyIndexField {...props} />
+);
