@@ -41,7 +41,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       ];
 
       return range
-        .interval('1s')
+        .interval('1m')
         .rate(1)
         .generator((timestamp, timestampIndex) => {
           return logger.perf(

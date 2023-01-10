@@ -40,7 +40,7 @@ const persistedFilters: Array<keyof APMQueryParams> = [
   'serviceVersion',
 ];
 
-const txGroupsDroppedBucketName = 'other';
+const txGroupsDroppedBucketName = '_other';
 
 export function TransactionDetailLink({
   serviceName,
@@ -77,32 +77,27 @@ export function TransactionDetailLink({
     search: location.search,
   });
 
+  if (transactionName !== txGroupsDroppedBucketName) {
+    return <EuiLink href={href} {...rest} />;
+  }
+
   return (
-    <>
-      {transactionName === txGroupsDroppedBucketName ? (
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.transactionDetail.tooltip.message',
-            {
-              defaultMessage:
-                "The transaction group limit has been reached. Please see the APM Server docs for 'aggregation.transaction.max_groups' to increase this",
-            }
-          )}
-        >
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={1}>
-              {i18n.translate('xpack.apm.transactionDetail.other.label', {
-                defaultMessage: 'other',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              <EuiIcon size="s" color="subdued" type="alert" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiToolTip>
-      ) : (
-        <EuiLink href={href} {...rest} />
-      )}
-    </>
+    <EuiToolTip
+      content={i18n.translate('xpack.apm.transactionDetail.tooltip.message', {
+        defaultMessage:
+          "The transaction group limit has been reached. Please see the APM Server docs for 'aggregation.transaction.max_groups' to increase this",
+      })}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexItem grow={1}>
+          {i18n.translate('xpack.apm.transactionDetail.other.label', {
+            defaultMessage: 'other',
+          })}
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiIcon size="s" color="subdued" type="alert" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
   );
 }
