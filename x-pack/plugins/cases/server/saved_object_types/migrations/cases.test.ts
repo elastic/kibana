@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { SavedObjectSanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
-import { CaseSeverity, ConnectorTypes, NONE_CONNECTOR_ID } from '../../../common/api';
+import { CaseSeverity, CaseStatuses, ConnectorTypes, NONE_CONNECTOR_ID } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
+import { ESCaseSeverity, ESCaseStatus } from '../../services/cases/types';
 import type { ESCaseConnectorWithId } from '../../services/test_utils';
 import { createExternalService } from '../../services/test_utils';
 import {
@@ -17,6 +18,8 @@ import {
   addDuration,
   addSeverity,
   caseConnectorIdMigration,
+  convertSeverity,
+  convertStatus,
   removeCaseType,
 } from './cases';
 
@@ -574,6 +577,101 @@ describe('case migrations', () => {
           ...doc.attributes,
           assignees,
         },
+      });
+    });
+  });
+
+  describe('update severity', () => {
+    it.each([
+      [CaseSeverity.LOW, ESCaseSeverity.LOW],
+      [CaseSeverity.MEDIUM, ESCaseSeverity.MEDIUM],
+      [CaseSeverity.HIGH, ESCaseSeverity.HIGH],
+      [CaseSeverity.CRITICAL, ESCaseSeverity.CRITICAL],
+    ])(
+      'migrates "%s" severity keyword value to matching short',
+      (oldSeverityValue, expectedSeverityValue) => {
+        const doc = {
+          id: '123',
+          type: 'abc',
+          attributes: {
+            severity: oldSeverityValue,
+          },
+          references: [],
+        } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+        expect(convertSeverity(doc)).toEqual({
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            severity: expectedSeverityValue,
+          },
+          references: [],
+        });
+      }
+    );
+
+    it('default value for severity is 0(LOW) if it does not exist', () => {
+      const doc = {
+        id: '123',
+        type: 'abc',
+        attributes: {},
+        references: [],
+      } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+      expect(convertSeverity(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          severity: ESCaseSeverity.LOW,
+        },
+        references: [],
+      });
+    });
+  });
+
+  describe('update status', () => {
+    it.each([
+      [CaseStatuses.open, ESCaseStatus.OPEN],
+      [CaseStatuses['in-progress'], ESCaseStatus.IN_PROGRESS],
+      [CaseStatuses.closed, ESCaseStatus.CLOSED],
+    ])(
+      'migrates "%s" status keyword value to matching short',
+      (oldStatusValue, expectedStatusValue) => {
+        const doc = {
+          id: '123',
+          type: 'abc',
+          attributes: {
+            status: oldStatusValue,
+          },
+          references: [],
+        } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+        expect(convertStatus(doc)).toEqual({
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            status: expectedStatusValue,
+          },
+          references: [],
+        });
+      }
+    );
+
+    it('default value for status is 0(OPEN) if it does not exist', () => {
+      const doc = {
+        id: '123',
+        type: 'abc',
+        attributes: {},
+        references: [],
+      } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
+
+      expect(convertStatus(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          status: ESCaseStatus.OPEN,
+        },
+        references: [],
       });
     });
   });

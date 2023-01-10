@@ -9,19 +9,12 @@ import type { KibanaLocation } from '@kbn/share-plugin/public';
 import React from 'react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import {
   AdvancedUiActionsStart,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
   UiActionsEnhancedDrilldownDefinition as Drilldown,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import {
-  CollectConfigProps,
-  StartServicesGetter,
-  UiComponent,
-} from '@kbn/kibana-utils-plugin/public';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DrilldownConfig } from '../../../../common/drilldowns/dashboard_drilldown/types';
 import { CollectConfigContainer } from './components';
 import { txtGoToDashboard } from './i18n';
@@ -38,13 +31,9 @@ export interface Params {
 export abstract class AbstractDashboardDrilldown<Context extends object = object>
   implements Drilldown<Config, Context>
 {
-  constructor(protected readonly params: Params, theme: ThemeServiceStart) {
-    this.ReactCollectConfig = (props) => (
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <CollectConfigContainer {...props} params={this.params} />
-      </KibanaThemeProvider>
-    );
-    this.CollectConfig = reactToUiComponent(this.ReactCollectConfig);
+  constructor(protected readonly params: Params) {
+    this.ReactCollectConfig = (props) => <CollectConfigContainer {...props} params={this.params} />;
+    this.CollectConfig = this.ReactCollectConfig;
   }
 
   public abstract readonly id: string;
@@ -67,7 +56,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
     CollectConfigProps<Config, BaseActionFactoryContext>
   >;
 
-  public readonly CollectConfig: UiComponent<
+  public readonly CollectConfig: React.FC<
     CollectConfigProps<DrilldownConfig, BaseActionFactoryContext>
   >;
 

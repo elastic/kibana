@@ -12,7 +12,7 @@ import uuid from 'uuid';
 import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
-import { ExecutionHandler } from './execution_handler';
+import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
 import { Alert, createAlertFactory } from '../alert';
 import {
@@ -70,6 +70,7 @@ import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
+import { RuleResultService } from '../monitoring/rule_result_service';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -113,6 +114,7 @@ export class TaskRunner<
   private cancelled: boolean;
   private stackTraceLog: StackTraceLog | null;
   private ruleMonitoring: RuleMonitoringService;
+  private ruleResult: RuleResultService;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -146,6 +148,7 @@ export class TaskRunner<
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
     this.ruleMonitoring = new RuleMonitoringService();
+    this.ruleResult = new RuleResultService();
   }
 
   private async updateRuleSavedObject(
@@ -322,6 +325,11 @@ export class TaskRunner<
             includedHiddenTypes: ['alert', 'action'],
           });
 
+          const dataViews = await this.context.dataViews.dataViewsServiceFactory(
+            savedObjectsClient,
+            scopedClusterClient.asInternalUser
+          );
+
           updatedState = await this.context.executionContext.withContext(ctx, () =>
             this.ruleType.executor({
               executionId: this.executionId,
@@ -334,6 +342,9 @@ export class TaskRunner<
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
+                dataViews,
+                share: this.context.share,
+                ruleResultService: this.ruleResult.getLastRunSetters(),
               },
               params,
               state: ruleTypeState as RuleState,
@@ -459,6 +470,8 @@ export class TaskRunner<
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
     });
 
+    let executionHandlerRunResult: RunResult = { throttledActions: {} };
+
     await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
       await rulesClient.clearExpiredSnoozes({ id: rule.id });
 
@@ -470,8 +483,10 @@ export class TaskRunner<
         );
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
-        await executionHandler.run(activeAlerts);
-        await executionHandler.run(currentRecoveredAlerts, true);
+        executionHandlerRunResult = await executionHandler.run({
+          ...activeAlerts,
+          ...currentRecoveredAlerts,
+        });
       }
     });
 
@@ -487,6 +502,7 @@ export class TaskRunner<
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: alertsToReturn,
       alertRecoveredInstances: recoveredAlertsToReturn,
+      summaryActions: executionHandlerRunResult.throttledActions,
     };
   }
 
@@ -574,7 +590,7 @@ export class TaskRunner<
       ILastRun
     >(
       stateWithMetrics,
-      (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics),
+      (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics, this.ruleResult),
       (err: ElasticsearchError) => lastRunFromError(err)
     );
 
@@ -632,6 +648,7 @@ export class TaskRunner<
           executionStatus
         )} - ${JSON.stringify(lastRun)}`
       );
+
       await this.updateRuleSavedObject(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
         nextRun,
@@ -672,7 +689,18 @@ export class TaskRunner<
 
       // fetch the rule again to ensure we return the correct schedule as it may have
       // changed during the task execution
-      schedule = asOk((await preparedResult.rulesClient.get({ id: ruleId })).schedule);
+      schedule = asOk(
+        (
+          await loadRule<Params>({
+            paramValidator: this.ruleType.validate?.params,
+            ruleId,
+            spaceId,
+            context: this.context,
+            ruleTypeRegistry: this.ruleTypeRegistry,
+            alertingEventLogger: this.alertingEventLogger,
+          })
+        ).rule.schedule
+      );
     } catch (err) {
       stateWithMetrics = asErr(err);
       schedule = asErr(err);
@@ -802,7 +830,9 @@ export class TaskRunner<
       nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
     }
 
-    const outcomeMsg = `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`;
+    const outcomeMsg = [
+      `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`,
+    ];
     const date = new Date();
     // Update the rule saved object with execution status
     const executionStatus: RuleExecutionStatus = {
@@ -810,7 +840,7 @@ export class TaskRunner<
       status: 'error',
       error: {
         reason: RuleExecutionStatusErrorReasons.Timeout,
-        message: outcomeMsg,
+        message: outcomeMsg.join(' '),
       },
     };
     this.logger.debug(

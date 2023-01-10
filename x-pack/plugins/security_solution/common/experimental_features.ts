@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type ExperimentalFeatures = typeof allowedExperimentalValues;
+export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
 
 /**
  * A list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.
@@ -82,6 +82,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionGetFileEnabled: false,
 
   /**
+   * Enables top charts on Alerts Page
+   */
+  alertsPageChartsEnabled: false,
+
+  /**
    * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
    * https://www.elastic.co/guide/en/security/current/user-risk-score.html
    * https://www.elastic.co/guide/en/security/current/host-risk-score.html
@@ -122,7 +127,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
   };
 };
 
-export const isValidExperimentalValue = (value: string): boolean => {
+export const isValidExperimentalValue = (value: string): value is keyof ExperimentalFeatures => {
   return allowedKeys.includes(value as keyof ExperimentalFeatures);
 };
 

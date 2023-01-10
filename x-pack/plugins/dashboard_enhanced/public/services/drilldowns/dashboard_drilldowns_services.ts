@@ -39,7 +39,7 @@ export class DashboardDrilldownsService {
     const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ start });
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
 
-    const dashboardToDashboardDrilldown = new EmbeddableToDashboardDrilldown({ start }, core.theme);
+    const dashboardToDashboardDrilldown = new EmbeddableToDashboardDrilldown({ start });
     uiActions.registerDrilldown(dashboardToDashboardDrilldown);
   }
 }
