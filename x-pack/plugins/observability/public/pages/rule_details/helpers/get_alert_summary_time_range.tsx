@@ -48,19 +48,21 @@ const getFixedInterval = ({ to, from }: TimeRange) => {
 
   if (start && end) {
     const durationS = Math.floor(moment.duration(end - start).asSeconds());
-    return getCalendarInterval(durationS);
+    return getInterval(durationS);
   }
 
   return '1m';
 };
 
-const getCalendarInterval = (durationS: number) => {
+const getInterval = (durationS: number) => {
   if (durationS > 31 * 24 * 60 * 60) {
     return '30d';
   } else if (durationS > 25 * 60 * 60) {
     return '1d';
   } else if (durationS > 60 * 60) {
     return '1h';
+  } else if (durationS > 30 * 60) {
+    return '5m';
   } else {
     return '1m';
   }
