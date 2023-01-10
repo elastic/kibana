@@ -13,6 +13,10 @@
           "ignore_above": 256,
           "type": "keyword"
         },
+        "host.name": {
+          "ignore_above": 256,
+          "type": "keyword"
+        },
         "value": {
           "type": "long"
         }
