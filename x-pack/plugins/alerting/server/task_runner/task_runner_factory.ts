@@ -31,6 +31,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RulesClientApi,
+  RulesSettingsClientApi,
 } from '../types';
 import { TaskRunner } from './task_runner';
 import { NormalizedRuleType } from '../rule_type_registry';
@@ -46,6 +47,7 @@ export interface TaskRunnerContext {
   uiSettings: UiSettingsServiceStart;
   elasticsearch: ElasticsearchServiceStart;
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
+  getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;

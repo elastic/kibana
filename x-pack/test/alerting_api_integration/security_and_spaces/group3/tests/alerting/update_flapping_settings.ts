@@ -74,6 +74,53 @@ export default function updateFlappingSettingsTest({ getService }: FtrProviderCo
       });
     }
 
+    it('should error if provided with invalid inputs', async () => {
+      let response = await supertestWithoutAuth
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/settings/_flapping`)
+        .set('kbn-xsrf', 'foo')
+        .auth(Superuser.username, Superuser.password)
+        .send({
+          enabled: true,
+          lookBackWindow: 200,
+          statusChangeThreshold: 200,
+        })
+        .expect(400);
+
+      expect(response.body.message).to.eql(
+        'Invalid lookBackWindow value, must be between 2 and 20, but got: 200.'
+      );
+
+      response = await supertestWithoutAuth
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/settings/_flapping`)
+        .set('kbn-xsrf', 'foo')
+        .auth(Superuser.username, Superuser.password)
+        .send({
+          enabled: true,
+          lookBackWindow: 20,
+          statusChangeThreshold: 200,
+        })
+        .expect(400);
+
+      expect(response.body.message).to.eql(
+        'Invalid statusChangeThreshold value, must be between 3 and 20, but got: 200.'
+      );
+
+      response = await supertestWithoutAuth
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/settings/_flapping`)
+        .set('kbn-xsrf', 'foo')
+        .auth(Superuser.username, Superuser.password)
+        .send({
+          enabled: true,
+          lookBackWindow: 5,
+          statusChangeThreshold: 10,
+        })
+        .expect(400);
+
+      expect(response.body.message).to.eql(
+        'Invalid values,lookBackWindow (5) must be equal to or greater than statusChangeThreshold (10).'
+      );
+    });
+
     describe('updateFlappingSettings for other spaces', () => {
       it('should update specific isolated settings depending on space', async () => {
         // Update the rules setting in space1

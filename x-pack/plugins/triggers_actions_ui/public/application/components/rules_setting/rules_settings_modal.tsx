@@ -33,7 +33,10 @@ import {
 import { useKibana } from '../../../common/lib/kibana';
 import { getFlappingSettings } from '../../lib/rule_api/get_flapping_settings';
 import { updateFlappingSettings } from '../../lib/rule_api/update_flapping_settings';
-import { RulesSettingsFlapping, RulesSettingsFlappingTitle } from './rules_settings_flapping';
+import {
+  RulesSettingsFlappingFormSection,
+  RulesSettingsFlappingTitle,
+} from './rules_settings_flapping_form_section';
 import { CenterJustifiedSpinner } from '../center_justified_spinner';
 
 const flappingDescription = i18n.translate(
@@ -229,7 +232,7 @@ export const RulesSettingsModal = (props: RulesSettingsModalProps) => {
 
     return (
       <EuiFlexItem>
-        <RulesSettingsFlapping
+        <RulesSettingsFlappingFormSection
           flappingSettings={settings}
           onChange={(key, value) => handleSettingsChange(key, value)}
         />

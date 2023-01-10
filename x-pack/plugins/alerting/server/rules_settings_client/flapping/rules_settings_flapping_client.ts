@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { Logger, SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import {
   RulesSettings,
@@ -23,7 +24,7 @@ const verifyFlappingSettings = (flappingSettings: RulesSettingsFlappingPropertie
   const { lookBackWindow, statusChangeThreshold } = flappingSettings;
 
   if (lookBackWindow < MIN_LOOK_BACK_WINDOW || lookBackWindow > MAX_LOOK_BACK_WINDOW) {
-    throw new Error(
+    throw Boom.badRequest(
       `Invalid lookBackWindow value, must be between ${MIN_LOOK_BACK_WINDOW} and ${MAX_LOOK_BACK_WINDOW}, but got: ${lookBackWindow}.`
     );
   }
@@ -32,8 +33,14 @@ const verifyFlappingSettings = (flappingSettings: RulesSettingsFlappingPropertie
     statusChangeThreshold < MIN_STATUS_CHANGE_THRESHOLD ||
     statusChangeThreshold > MAX_STATUS_CHANGE_THRESHOLD
   ) {
-    throw new Error(
-      `Invalid statusChangeThreshold value, must be between ${MIN_STATUS_CHANGE_THRESHOLD} and ${MAX_STATUS_CHANGE_THRESHOLD}, but got: ${statusChangeThreshold}`
+    throw Boom.badRequest(
+      `Invalid statusChangeThreshold value, must be between ${MIN_STATUS_CHANGE_THRESHOLD} and ${MAX_STATUS_CHANGE_THRESHOLD}, but got: ${statusChangeThreshold}.`
+    );
+  }
+
+  if (lookBackWindow < statusChangeThreshold) {
+    throw Boom.badRequest(
+      `Invalid values,lookBackWindow (${lookBackWindow}) must be equal to or greater than statusChangeThreshold (${statusChangeThreshold}).`
     );
   }
 };

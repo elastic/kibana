@@ -52,8 +52,8 @@ describe('updateFlappingSettingsRoute', () => {
 
     const updateResult = {
       enabled: false,
-      lookBackWindow: 5,
-      statusChangeThreshold: 6,
+      lookBackWindow: 6,
+      statusChangeThreshold: 5,
     };
 
     const [context, req, res] = mockHandlerArguments(
@@ -72,8 +72,8 @@ describe('updateFlappingSettingsRoute', () => {
       Array [
         Object {
           "enabled": false,
-          "lookBackWindow": 5,
-          "statusChangeThreshold": 6,
+          "lookBackWindow": 6,
+          "statusChangeThreshold": 5,
         },
       ]
     `);

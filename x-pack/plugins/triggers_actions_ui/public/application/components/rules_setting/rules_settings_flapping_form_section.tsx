@@ -46,6 +46,26 @@ const statusChangeThresholdLabel = i18n.translate(
   }
 );
 
+const getLookBackWindowLabelRuleRuns = (amount: number) => {
+  return i18n.translate(
+    'xpack.triggersActionsUI.rulesSettings.flapping.lookBackWindowLabelRuleRuns',
+    {
+      defaultMessage: '{amount, number} rule {amount, plural, one {run} other {runs}}',
+      values: { amount },
+    }
+  );
+};
+
+const getStatusChangeThresholdRuleRuns = (amount: number) => {
+  return i18n.translate(
+    'xpack.triggersActionsUI.rulesSettings.flapping.statusChangeThresholdTimes',
+    {
+      defaultMessage: '{amount, number} {amount, plural, one {time} other {times}}',
+      values: { amount },
+    }
+  );
+};
+
 export interface RulesSettingsRangeProps {
   label: EuiFormRowProps['label'];
   labelPopoverText?: string;
@@ -99,13 +119,13 @@ export const RulesSettingsRange = (props: RulesSettingsRangeProps) => {
   );
 };
 
-interface RulesSettingsFlappingProps {
+interface RulesSettingsFlappingFormSectionProps {
   flappingSettings: RulesSettingsFlappingProperties;
   compressed?: boolean;
   onChange: (key: OnChangeKey, value: number) => void;
 }
 
-export const RulesSettingsFlapping = (props: RulesSettingsFlappingProps) => {
+export const RulesSettingsFlappingFormSection = (props: RulesSettingsFlappingFormSectionProps) => {
   const { flappingSettings, compressed = false, onChange } = props;
 
   const { lookBackWindow, statusChangeThreshold } = flappingSettings;
@@ -190,10 +210,12 @@ export const RulesSettingsFlapping = (props: RulesSettingsFlappingProps) => {
           <EuiText size="s">
             <FormattedMessage
               id="xpack.triggersActionsUI.rulesSettings.flapping.flappingSettingsDescription"
-              defaultMessage="An alert will be considered flapping if it changes status {lookBackWindow} within the last {statusChangeThreshold}."
+              defaultMessage="An alert will be considered flapping if it changes status {statusChangeThreshold} within the last {lookBackWindow} ."
               values={{
-                lookBackWindow: <b>{lookBackWindow} times</b>,
-                statusChangeThreshold: <b>{statusChangeThreshold} rule runs</b>,
+                lookBackWindow: <b>{getLookBackWindowLabelRuleRuns(lookBackWindow)}</b>,
+                statusChangeThreshold: (
+                  <b>{getStatusChangeThresholdRuleRuns(statusChangeThreshold)}</b>
+                ),
               }}
             />
           </EuiText>
