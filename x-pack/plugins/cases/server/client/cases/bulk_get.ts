@@ -13,7 +13,12 @@ import { pick, partition } from 'lodash';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { MAX_BULK_GET_CASES } from '../../../common/constants';
-import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/api';
+import type {
+  CasesBulkGetResponse,
+  CasesBulkGetResponseCertainFields,
+  CasesBulkGetRequestCertainFields,
+  CaseResponse,
+} from '../../../common/api';
 import {
   CasesBulkGetRequestRt,
   CasesResponseRt,
@@ -34,10 +39,10 @@ type SOWithErrors = Array<CaseSavedObject & { error: SavedObjectError }>;
 /**
  * Retrieves multiple cases by ids.
  */
-export const bulkGet = async (
-  params: CasesBulkGetRequest,
+export const bulkGet = async <Field extends keyof CaseResponse = keyof CaseResponse>(
+  params: CasesBulkGetRequestCertainFields<Field>,
   clientArgs: CasesClientArgs
-): Promise<CasesBulkGetResponse> => {
+): Promise<CasesBulkGetResponseCertainFields<Field>> => {
   const {
     services: { caseService, attachmentService },
     logger,

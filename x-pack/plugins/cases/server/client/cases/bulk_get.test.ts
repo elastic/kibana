@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CaseResponse } from '../../../common/api';
 import { getTypeProps, CaseResponseRt } from '../../../common/api';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
@@ -39,7 +40,7 @@ describe('bulkGet', () => {
     });
 
     const typeProps = getTypeProps(CaseResponseRt) ?? {};
-    const validFields = Object.keys(typeProps);
+    const validFields = Object.keys(typeProps) as Array<keyof CaseResponse>;
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -54,6 +55,7 @@ describe('bulkGet', () => {
     it('throws if the requested field is not valid', async () => {
       const ids = ['test'];
 
+      // @ts-expect-error
       await expect(bulkGet({ ids, fields: ['not-valid'] }, clientArgs)).rejects.toThrow(
         'Failed to bulk get cases: test: Error: Field: not-valid is not supported'
       );

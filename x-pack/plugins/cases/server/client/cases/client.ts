@@ -13,7 +13,9 @@ import type {
   AllTagsFindRequest,
   AllReportersFindRequest,
   CasesByAlertId,
-  CasesBulkGetRequest,
+  CaseResponse,
+  CasesBulkGetRequestCertainFields,
+  CasesBulkGetResponseCertainFields,
 } from '../../../common/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -25,7 +27,6 @@ import type {
   ICasesFindResponse,
   ICasesPatchRequest,
   ICasesResponse,
-  ICasesBulkGetResponse,
 } from '../typedoc_interfaces';
 import type { CasesClientArgs } from '../types';
 import { bulkGet } from './bulk_get';
@@ -64,7 +65,9 @@ export interface CasesSubClient {
   /**
    * Retrieves multiple cases with the specified IDs.
    */
-  bulkGet(params: CasesBulkGetRequest): Promise<ICasesBulkGetResponse>;
+  bulkGet<Field extends keyof CaseResponse = keyof CaseResponse>(
+    params: CasesBulkGetRequestCertainFields<Field | 'id' | 'version' | 'owner'>
+  ): Promise<CasesBulkGetResponseCertainFields<Field | 'id' | 'version' | 'owner'>>;
   /**
    * Pushes a specific case to an external system.
    */
@@ -108,7 +111,7 @@ export const createCasesSubClient = (
     find: (params: CasesFindRequest) => find(params, clientArgs),
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
-    bulkGet: (params: CasesBulkGetRequest) => bulkGet(params, clientArgs),
+    bulkGet: (params) => bulkGet(params, clientArgs),
     push: (params: PushParams) => push(params, clientArgs, casesClient, casesClientInternal),
     update: (cases: CasesPatchRequest) => update(cases, clientArgs),
     delete: (ids: string[]) => deleteCases(ids, clientArgs),

@@ -370,3 +370,13 @@ export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
 
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
+export type CasesBulkGetRequestCertainFields<
+  Field extends keyof CaseResponse = keyof CaseResponse
+> = Omit<CasesBulkGetRequest, 'fields'> & {
+  fields?: Field[];
+};
+export type CasesBulkGetResponseCertainFields<
+  Field extends keyof CaseResponse = keyof CaseResponse
+> = Omit<CasesBulkGetResponse, 'cases'> & {
+  cases: Array<Pick<CaseResponse, Field | 'id' | 'version' | 'owner'>>;
+};
