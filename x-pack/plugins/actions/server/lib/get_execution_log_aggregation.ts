@@ -17,7 +17,6 @@ const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number
 const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
 
 const SPACE_ID_FIELD = 'kibana.space_ids';
-const PROVIDER_FIELD = 'event.provider';
 const ACTION_NAME_FIELD = 'action.name';
 const START_FIELD = 'event.start';
 const ACTION_FIELD = 'event.action';
@@ -31,6 +30,7 @@ const EXECUTION_UUID_FIELD = 'action.uuid';
 
 const Millis2Nanos = 1000 * 1000;
 
+export const ACTION_FILTER = 'event.provider: actions AND NOT event.action: execute-start';
 export const EMPTY_EXECUTION_LOG_RESULT = {
   total: 0,
   data: [],
@@ -69,14 +69,14 @@ export interface ExecutionUuidKPIAggResult extends estypes.AggregationsAggregate
   buckets: IExecutionUuidKpiAggBucket[];
 }
 
-interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase {
+interface ExecutionLogAggResult extends estypes.AggregationsAggregateBase {
   executionUuid: ExecutionUuidAggResult;
   executionUuidCardinality: {
     executionUuidCardinality: estypes.AggregationsCardinalityAggregate;
   };
 }
 
-interface ExcludeExecuteStartKpiAggResult extends estypes.AggregationsAggregateBase {
+interface ExecutionKpiAggResult extends estypes.AggregationsAggregateBase {
   executionUuid: ExecutionUuidKPIAggResult;
 }
 
@@ -97,16 +97,10 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
   const dslFilterQuery: estypes.QueryDslBoolQuery['filter'] = buildDslFilterQuery(filter);
 
   return {
-    excludeExecuteStart: {
+    executionKpiAgg: {
       filter: {
         bool: {
-          must_not: [
-            {
-              term: {
-                'event.action': 'execute-start',
-              },
-            },
-          ],
+          ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
         },
       },
       aggs: {
@@ -128,8 +122,13 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
             actionExecution: {
               filter: {
                 bool: {
-                  ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
-                  must: [getProviderAndActionFilter('actions', 'execute')],
+                  must: [
+                    {
+                      match: {
+                        [ACTION_FIELD]: 'execute',
+                      },
+                    },
+                  ],
                 },
               },
               aggs: {
@@ -194,16 +193,10 @@ export function getExecutionLogAggregation({
   const dslFilterQuery: estypes.QueryDslBoolQuery['filter'] = buildDslFilterQuery(filter);
 
   return {
-    excludeExecuteStart: {
+    executionLogAgg: {
       filter: {
         bool: {
-          must_not: [
-            {
-              term: {
-                [ACTION_FIELD]: 'execute-start',
-              },
-            },
-          ],
+          ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
         },
       },
       aggs: {
@@ -211,8 +204,13 @@ export function getExecutionLogAggregation({
         executionUuidCardinality: {
           filter: {
             bool: {
-              ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
-              must: [getProviderAndActionFilter('actions', 'execute')],
+              must: [
+                {
+                  match: {
+                    [ACTION_FIELD]: 'execute',
+                  },
+                },
+              ],
             },
           },
           aggs: {
@@ -244,8 +242,13 @@ export function getExecutionLogAggregation({
             actionExecution: {
               filter: {
                 bool: {
-                  ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
-                  must: [getProviderAndActionFilter('actions', 'execute')],
+                  must: [
+                    {
+                      match: {
+                        [ACTION_FIELD]: 'execute',
+                      },
+                    },
+                  ],
                 },
               },
               aggs: {
@@ -305,25 +308,6 @@ function buildDslFilterQuery(filter: IExecutionLogAggOptions['filter']) {
   } catch (err) {
     throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
   }
-}
-
-function getProviderAndActionFilter(provider: string, action: string) {
-  return {
-    bool: {
-      must: [
-        {
-          match: {
-            [ACTION_FIELD]: action,
-          },
-        },
-        {
-          match: {
-            [PROVIDER_FIELD]: provider,
-          },
-        },
-      ],
-    },
-  };
 }
 
 function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutionLog {
@@ -406,10 +390,10 @@ function formatExecutionKPIAggBuckets(buckets: IExecutionUuidKpiAggBucket[]) {
 
 export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectResult) {
   const { aggregations } = results;
-  if (!aggregations || !aggregations.excludeExecuteStart) {
+  if (!aggregations || !aggregations.executionKpiAgg) {
     return EMPTY_EXECUTION_KPI_RESULT;
   }
-  const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartKpiAggResult;
+  const aggs = aggregations.executionKpiAgg as ExecutionKpiAggResult;
   const buckets = aggs.executionUuid.buckets;
   return formatExecutionKPIAggBuckets(buckets);
 }
@@ -419,11 +403,11 @@ export function formatExecutionLogResult(
 ): IExecutionLogResult {
   const { aggregations } = results;
 
-  if (!aggregations || !aggregations.excludeExecuteStart) {
+  if (!aggregations || !aggregations.executionLogAgg) {
     return EMPTY_EXECUTION_LOG_RESULT;
   }
 
-  const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartAggResult;
+  const aggs = aggregations.executionLogAgg as ExecutionLogAggResult;
 
   const total = aggs.executionUuidCardinality.executionUuidCardinality.value;
   const buckets = aggs.executionUuid.buckets;

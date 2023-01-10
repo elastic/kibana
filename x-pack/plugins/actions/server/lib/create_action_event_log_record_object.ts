@@ -6,7 +6,6 @@
  */
 
 import { isEmpty, set } from 'lodash';
-import uuid from 'uuid/v4';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { RelatedSavedObjects } from './related_saved_objects';
 
@@ -33,6 +32,7 @@ interface CreateActionEventLogRecordParams {
     relation?: string;
   }>;
   relatedSavedObjects?: RelatedSavedObjects;
+  actionExecutionId?: string;
 }
 
 export function createActionEventLogRecordObject(params: CreateActionEventLogRecordParams): Event {
@@ -46,6 +46,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
     consumer,
     relatedSavedObjects,
     name,
+    actionExecutionId,
   } = params;
 
   const kibanaAlertRule = {
@@ -80,7 +81,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
     ...(message ? { message } : {}),
     action: {
       name,
-      uuid: uuid(),
+      uuid: actionExecutionId,
     },
   };
 

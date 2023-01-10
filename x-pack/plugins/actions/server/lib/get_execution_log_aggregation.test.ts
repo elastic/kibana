@@ -69,7 +69,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ timestamp: { order: 'asc' } }, { execution_duration: { order: 'desc' } }],
       })
     ).toEqual({
-      excludeExecuteStart: {
+      executionLogAgg: {
         aggs: {
           executionUuid: {
             aggs: {
@@ -109,19 +109,8 @@ describe('getExecutionLogAggregation', () => {
                   bool: {
                     must: [
                       {
-                        bool: {
-                          must: [
-                            {
-                              match: {
-                                'event.action': 'execute',
-                              },
-                            },
-                            {
-                              match: {
-                                'event.provider': 'actions',
-                              },
-                            },
-                          ],
+                        match: {
+                          'event.action': 'execute',
                         },
                       },
                     ],
@@ -183,19 +172,8 @@ describe('getExecutionLogAggregation', () => {
               bool: {
                 must: [
                   {
-                    bool: {
-                      must: [
-                        {
-                          match: {
-                            'event.action': 'execute',
-                          },
-                        },
-                        {
-                          match: {
-                            'event.provider': 'actions',
-                          },
-                        },
-                      ],
+                    match: {
+                      'event.action': 'execute',
                     },
                   },
                 ],
@@ -204,15 +182,7 @@ describe('getExecutionLogAggregation', () => {
           },
         },
         filter: {
-          bool: {
-            must_not: [
-              {
-                term: {
-                  'event.action': 'execute-start',
-                },
-              },
-            ],
-          },
+          bool: {},
         },
       },
     });
@@ -227,7 +197,7 @@ describe('getExecutionLogAggregation', () => {
         filter: 'test:test',
       })
     ).toEqual({
-      excludeExecuteStart: {
+      executionLogAgg: {
         aggs: {
           executionUuid: {
             aggs: {
@@ -265,33 +235,10 @@ describe('getExecutionLogAggregation', () => {
                 },
                 filter: {
                   bool: {
-                    filter: {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            match: {
-                              test: 'test',
-                            },
-                          },
-                        ],
-                      },
-                    },
                     must: [
                       {
-                        bool: {
-                          must: [
-                            {
-                              match: {
-                                'event.action': 'execute',
-                              },
-                            },
-                            {
-                              match: {
-                                'event.provider': 'actions',
-                              },
-                            },
-                          ],
+                        match: {
+                          'event.action': 'execute',
                         },
                       },
                     ],
@@ -351,33 +298,10 @@ describe('getExecutionLogAggregation', () => {
             },
             filter: {
               bool: {
-                filter: {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      {
-                        match: {
-                          test: 'test',
-                        },
-                      },
-                    ],
-                  },
-                },
                 must: [
                   {
-                    bool: {
-                      must: [
-                        {
-                          match: {
-                            'event.action': 'execute',
-                          },
-                        },
-                        {
-                          match: {
-                            'event.provider': 'actions',
-                          },
-                        },
-                      ],
+                    match: {
+                      'event.action': 'execute',
                     },
                   },
                 ],
@@ -387,13 +311,18 @@ describe('getExecutionLogAggregation', () => {
         },
         filter: {
           bool: {
-            must_not: [
-              {
-                term: {
-                  'event.action': 'execute-start',
-                },
+            filter: {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    match: {
+                      test: 'test',
+                    },
+                  },
+                ],
               },
-            ],
+            },
           },
         },
       },
@@ -409,7 +338,7 @@ describe('getExecutionLogAggregation', () => {
         filter: fromKueryExpression('test:test'),
       })
     ).toEqual({
-      excludeExecuteStart: {
+      executionLogAgg: {
         aggs: {
           executionUuid: {
             aggs: {
@@ -447,33 +376,10 @@ describe('getExecutionLogAggregation', () => {
                 },
                 filter: {
                   bool: {
-                    filter: {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            match: {
-                              test: 'test',
-                            },
-                          },
-                        ],
-                      },
-                    },
                     must: [
                       {
-                        bool: {
-                          must: [
-                            {
-                              match: {
-                                'event.action': 'execute',
-                              },
-                            },
-                            {
-                              match: {
-                                'event.provider': 'actions',
-                              },
-                            },
-                          ],
+                        match: {
+                          'event.action': 'execute',
                         },
                       },
                     ],
@@ -533,33 +439,10 @@ describe('getExecutionLogAggregation', () => {
             },
             filter: {
               bool: {
-                filter: {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      {
-                        match: {
-                          test: 'test',
-                        },
-                      },
-                    ],
-                  },
-                },
                 must: [
                   {
-                    bool: {
-                      must: [
-                        {
-                          match: {
-                            'event.action': 'execute',
-                          },
-                        },
-                        {
-                          match: {
-                            'event.provider': 'actions',
-                          },
-                        },
-                      ],
+                    match: {
+                      'event.action': 'execute',
                     },
                   },
                 ],
@@ -569,13 +452,18 @@ describe('getExecutionLogAggregation', () => {
         },
         filter: {
           bool: {
-            must_not: [
-              {
-                term: {
-                  'event.action': 'execute-start',
-                },
+            filter: {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    match: {
+                      test: 'test',
+                    },
+                  },
+                ],
               },
-            ],
+            },
           },
         },
       },
@@ -590,10 +478,10 @@ describe('formatExecutionLogResult', () => {
       data: [],
     });
   });
-  test('should return empty results if aggregations.excludeExecuteStart are undefined', () => {
+  test('should return empty results if aggregations.executionLogAgg are undefined', () => {
     expect(
       formatExecutionLogResult({
-        aggregations: { excludeExecuteStart: undefined as unknown as ExecutionUuidAggResult },
+        aggregations: { executionLogAgg: undefined as unknown as ExecutionUuidAggResult },
       })
     ).toEqual({
       total: 0,
@@ -603,7 +491,7 @@ describe('formatExecutionLogResult', () => {
   test('should format results correctly', () => {
     const results = {
       aggregations: {
-        excludeExecuteStart: {
+        executionLogAgg: {
           doc_count: 5,
           executionUuid: {
             doc_count_error_upper_bound: 0,
@@ -670,7 +558,7 @@ describe('formatExecutionLogResult', () => {
   test('should format results correctly with rule execution errors', () => {
     const results = {
       aggregations: {
-        excludeExecuteStart: {
+        executionLogAgg: {
           doc_count: 10,
           executionUuid: {
             doc_count_error_upper_bound: 0,
@@ -787,7 +675,7 @@ describe('formatExecutionLogResult', () => {
 describe('getExecutionKPIAggregation', () => {
   test('should correctly generate aggregation', () => {
     expect(getExecutionKPIAggregation()).toEqual({
-      excludeExecuteStart: {
+      executionKpiAgg: {
         aggs: {
           executionUuid: {
             aggs: {
@@ -809,19 +697,8 @@ describe('getExecutionKPIAggregation', () => {
                   bool: {
                     must: [
                       {
-                        bool: {
-                          must: [
-                            {
-                              match: {
-                                'event.action': 'execute',
-                              },
-                            },
-                            {
-                              match: {
-                                'event.provider': 'actions',
-                              },
-                            },
-                          ],
+                        match: {
+                          'event.action': 'execute',
                         },
                       },
                     ],
@@ -858,15 +735,7 @@ describe('getExecutionKPIAggregation', () => {
           },
         },
         filter: {
-          bool: {
-            must_not: [
-              {
-                term: {
-                  'event.action': 'execute-start',
-                },
-              },
-            ],
-          },
+          bool: {},
         },
       },
     });
@@ -874,7 +743,7 @@ describe('getExecutionKPIAggregation', () => {
 
   test('should correctly generate aggregation with a defined filter in the form of a string', () => {
     expect(getExecutionKPIAggregation('test:test')).toEqual({
-      excludeExecuteStart: {
+      executionKpiAgg: {
         aggs: {
           executionUuid: {
             aggs: {
@@ -894,33 +763,10 @@ describe('getExecutionKPIAggregation', () => {
                 },
                 filter: {
                   bool: {
-                    filter: {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            match: {
-                              test: 'test',
-                            },
-                          },
-                        ],
-                      },
-                    },
                     must: [
                       {
-                        bool: {
-                          must: [
-                            {
-                              match: {
-                                'event.action': 'execute',
-                              },
-                            },
-                            {
-                              match: {
-                                'event.provider': 'actions',
-                              },
-                            },
-                          ],
+                        match: {
+                          'event.action': 'execute',
                         },
                       },
                     ],
@@ -958,13 +804,18 @@ describe('getExecutionKPIAggregation', () => {
         },
         filter: {
           bool: {
-            must_not: [
-              {
-                term: {
-                  'event.action': 'execute-start',
-                },
+            filter: {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    match: {
+                      test: 'test',
+                    },
+                  },
+                ],
               },
-            ],
+            },
           },
         },
       },
@@ -973,7 +824,7 @@ describe('getExecutionKPIAggregation', () => {
 
   test('should correctly generate aggregation with a defined filter in the form of a KueryNode', () => {
     expect(getExecutionKPIAggregation(fromKueryExpression('test:test'))).toEqual({
-      excludeExecuteStart: {
+      executionKpiAgg: {
         aggs: {
           executionUuid: {
             aggs: {
@@ -993,33 +844,10 @@ describe('getExecutionKPIAggregation', () => {
                 },
                 filter: {
                   bool: {
-                    filter: {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            match: {
-                              test: 'test',
-                            },
-                          },
-                        ],
-                      },
-                    },
                     must: [
                       {
-                        bool: {
-                          must: [
-                            {
-                              match: {
-                                'event.action': 'execute',
-                              },
-                            },
-                            {
-                              match: {
-                                'event.provider': 'actions',
-                              },
-                            },
-                          ],
+                        match: {
+                          'event.action': 'execute',
                         },
                       },
                     ],
@@ -1057,13 +885,18 @@ describe('getExecutionKPIAggregation', () => {
         },
         filter: {
           bool: {
-            must_not: [
-              {
-                term: {
-                  'event.action': 'execute-start',
-                },
+            filter: {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    match: {
+                      test: 'test',
+                    },
+                  },
+                ],
               },
-            ],
+            },
           },
         },
       },
@@ -1083,7 +916,7 @@ describe('formatExecutionKPIAggBuckets', () => {
   test('should format results correctly', () => {
     const results = {
       aggregations: {
-        excludeExecuteStart: {
+        executionKpiAgg: {
           doc_count: 21,
           executionUuid: {
             doc_count_error_upper_bound: 0,

@@ -67,6 +67,7 @@ export interface ExecuteOptions<Source = unknown> {
   executionId?: string;
   consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
+  actionExecutionId?: string;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -100,6 +101,7 @@ export class ActionExecutor {
     executionId,
     consumer,
     relatedSavedObjects,
+    actionExecutionId,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
@@ -190,6 +192,7 @@ export class ActionExecutor {
           ],
           relatedSavedObjects,
           name,
+          actionExecutionId,
         });
 
         eventLogger.startTiming(event);
@@ -298,6 +301,7 @@ export class ActionExecutor {
     executionId,
     taskInfo,
     consumer,
+    actionExecutionId,
   }: {
     actionId: string;
     request: KibanaRequest;
@@ -306,6 +310,7 @@ export class ActionExecutor {
     relatedSavedObjects: RelatedSavedObjects;
     source?: ActionExecutionSource<Source>;
     consumer?: string;
+    actionExecutionId?: string;
   }) {
     const {
       spaces,
@@ -358,6 +363,7 @@ export class ActionExecutor {
         },
       ],
       relatedSavedObjects,
+      actionExecutionId,
     });
 
     eventLogger.logEvent(event);

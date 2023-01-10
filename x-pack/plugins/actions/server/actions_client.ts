@@ -81,6 +81,7 @@ import {
   GetOAuthClientCredentialsSecrets,
 } from './lib/get_oauth_client_credentials_access_token';
 import {
+  ACTION_FILTER,
   formatExecutionKPIResult,
   formatExecutionLogResult,
   getExecutionKPIAggregation,
@@ -792,7 +793,7 @@ export class ActionsClient {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
           aggs: getExecutionLogAggregation({
-            filter,
+            filter: filter ? `${filter} AND ${ACTION_FILTER}` : ACTION_FILTER,
             page,
             perPage,
             sort,
@@ -850,7 +851,9 @@ export class ActionsClient {
         {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
-          aggs: getExecutionKPIAggregation(filter),
+          aggs: getExecutionKPIAggregation(
+            filter ? `${filter} AND ${ACTION_FILTER}` : ACTION_FILTER
+          ),
         },
         namespaces
       );

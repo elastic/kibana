@@ -2596,7 +2596,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
   };
   const results = {
     aggregations: {
-      excludeExecuteStart: {
+      executionLogAgg: {
         doc_count: 5,
         executionUuid: {
           doc_count_error_upper_bound: 0,
@@ -2652,7 +2652,7 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
   };
   const results = {
     aggregations: {
-      excludeExecuteStart: {
+      executionKpiAgg: {
         doc_count: 5,
         executionUuid: {
           doc_count_error_upper_bound: 0,
