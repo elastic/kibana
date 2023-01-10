@@ -29,9 +29,9 @@ interface Props {
 }
 
 export const MoveData: FC<Props> = ({ addBasePath, isCloudEnabled, trackUiMetric }) => {
-  const migrateDataUrl = !isCloudEnabled
-    ? '/app/management/data/migrate_data'
-    : 'https://ela.st/cloud-migration';
+  const migrateDataUrl = isCloudEnabled
+    ? 'https://ela.st/cloud-migration'
+    : '/app/management/data/migrate_data';
   const buttonLabel = (
     <FormattedMessage
       id="home.addData.moveYourDataButtonLabel"
@@ -67,18 +67,7 @@ export const MoveData: FC<Props> = ({ addBasePath, isCloudEnabled, trackUiMetric
             />
           </EuiText>
           <EuiSpacer size="m" />
-          {!isCloudEnabled /* eslint-disable-next-line @elastic/eui/href-or-on-click */ ? (
-            <EuiButton
-              color="primary"
-              href={addBasePath(migrateDataUrl)}
-              onClick={(event: MouseEvent) => {
-                trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud__home_self_managed_link');
-                createAppNavigationHandler(migrateDataUrl)(event);
-              }}
-            >
-              {buttonLabel}
-            </EuiButton>
-          ) : (
+          {isCloudEnabled ? (
             // eslint-disable-next-line @elastic/eui/href-or-on-click
             <EuiButton
               fill={true}
@@ -86,6 +75,18 @@ export const MoveData: FC<Props> = ({ addBasePath, isCloudEnabled, trackUiMetric
               href={migrateDataUrl}
               onClick={() => {
                 trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud__home_cloud_enabled_link');
+              }}
+            >
+              {buttonLabel}
+            </EuiButton>
+          ) : (
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiButton
+              color="primary"
+              href={addBasePath(migrateDataUrl)}
+              onClick={(event: MouseEvent) => {
+                trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud__home_self_managed_link');
+                createAppNavigationHandler(migrateDataUrl)(event);
               }}
             >
               {buttonLabel}
