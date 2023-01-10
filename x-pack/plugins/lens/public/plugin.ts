@@ -328,8 +328,7 @@ export class LensPlugin {
     }
 
     if (share) {
-      // const useHash = core.uiSettings.get('state:storeInSessionStorage');
-      this.locator = share.url.locators.create(new LensAppLocatorDefinition({}));
+      this.locator = share.url.locators.create(new LensAppLocatorDefinition());
 
       share.register(
         downloadCsvShareProvider({

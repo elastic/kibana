@@ -70,7 +70,7 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
     setupExpressions(core, plugins.expressions);
 
     if (plugins.share) {
-      plugins.share.url.locators.create(new LensAppLocatorDefinition({}));
+      plugins.share.url.locators.create(new LensAppLocatorDefinition());
     }
 
     const lensEmbeddableFactory = makeLensEmbeddableFactory(
