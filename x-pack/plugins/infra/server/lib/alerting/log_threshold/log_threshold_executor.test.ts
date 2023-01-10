@@ -567,15 +567,17 @@ describe('Log threshold executor', () => {
               doc_count: 10,
               additionalContext: {
                 hits: {
-                  hits: [{
-                    _source: {
-                      'host': {
-                        'name': 'i-am-a-host-name-1',
-                      }
-                    }
-                  }]
-                }
-              }
+                  hits: [
+                    {
+                      _source: {
+                        host: {
+                          name: 'i-am-a-host-name-1',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
           {
@@ -588,15 +590,17 @@ describe('Log threshold executor', () => {
               doc_count: 2,
               additionalContext: {
                 hits: {
-                  hits: [{
-                    _source: {
-                      'host': {
-                        'name': 'i-am-a-host-name-2',
-                      }
-                    }
-                  }]
-                }
-              }
+                  hits: [
+                    {
+                      _source: {
+                        host: {
+                          name: 'i-am-a-host-name-2',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
           {
@@ -609,15 +613,17 @@ describe('Log threshold executor', () => {
               doc_count: 20,
               additionalContext: {
                 hits: {
-                  hits: [{
-                    _source: {
-                      'host': {
-                        'name': 'i-am-a-host-name-3',
-                      }
-                    }
-                  }]
-                }
-              }
+                  hits: [
+                    {
+                      _source: {
+                        host: {
+                          name: 'i-am-a-host-name-3',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
@@ -702,15 +708,17 @@ describe('Log threshold executor', () => {
               doc_count: 10,
               additionalContext: {
                 hits: {
-                  hits: [{
-                    _source: {
-                      'host': {
-                        'name': 'i-am-a-host-name-1',
-                      }
-                    }
-                  }]
-                }
-              }
+                  hits: [
+                    {
+                      _source: {
+                        host: {
+                          name: 'i-am-a-host-name-1',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
           {
@@ -733,15 +741,17 @@ describe('Log threshold executor', () => {
               doc_count: 20,
               additionalContext: {
                 hits: {
-                  hits: [{
-                    _source: {
-                      'host': {
-                        'name': 'i-am-a-host-name-3',
-                      }
-                    }
-                  }]
-                }
-              }
+                  hits: [
+                    {
+                      _source: {
+                        host: {
+                          name: 'i-am-a-host-name-3',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
@@ -776,15 +786,17 @@ describe('Log threshold executor', () => {
               doc_count: 10,
               additionalContext: {
                 hits: {
-                  hits: [{
-                    _source: {
-                      'host': {
-                        'name': 'i-am-a-host-name-1',
-                      }
-                    }
-                  }]
-                }
-              }
+                  hits: [
+                    {
+                      _source: {
+                        host: {
+                          name: 'i-am-a-host-name-1',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
           {
@@ -797,15 +809,17 @@ describe('Log threshold executor', () => {
               doc_count: 2,
               additionalContext: {
                 hits: {
-                  hits: [{
-                    _source: {
-                      'host': {
-                        'name': 'i-am-a-host-name-2',
-                      }
-                    }
-                  }]
-                }
-              }
+                  hits: [
+                    {
+                      _source: {
+                        host: {
+                          name: 'i-am-a-host-name-2',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
           {
@@ -818,15 +832,17 @@ describe('Log threshold executor', () => {
               doc_count: 20,
               additionalContext: {
                 hits: {
-                  hits: [{
-                    _source: {
-                      'host': {
-                        'name': 'i-am-a-host-name-3',
-                      }
-                    }
-                  }]
-                }
-              }
+                  hits: [
+                    {
+                      _source: {
+                        host: {
+                          name: 'i-am-a-host-name-3',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
