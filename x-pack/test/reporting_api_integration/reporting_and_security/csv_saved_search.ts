@@ -40,6 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
   const log = getService('log');
+  const esVersion = getService('esVersion');
 
   const requestCsvFromSavedSearch = async (
     savedSearchId: string,
@@ -110,6 +111,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
   };
 
+  const itIf7 = esVersion.matchRange('<8') ? it : it.skip;
+  const itIf8 = esVersion.matchRange('>=8') ? it : it.skip;
+
   describe('CSV Generation from Saved Search ID', () => {
     before(async () => {
       // clear any previous UI Settings
@@ -155,6 +159,13 @@ export default ({ getService }: FtrProviderContext) => {
           job = payload.job;
           path = payload.path;
           await reportingAPI.waitForJobToFinish(path);
+
+          const response = await supertest.get(path);
+          expect(response.header['content-disposition']).to.equal(
+            'inline; filename="A Saved Search.csv"'
+          );
+          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
+          csvFile = response.text;
         });
 
         it('job response data is correct', () => {
@@ -168,13 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(job.payload.version).equal('7.17');
         });
 
-        it('csv file matches', async () => {
-          const response = await supertest.get(path);
-          expect(response.header['content-disposition']).to.equal(
-            'inline; filename="A Saved Search.csv"'
-          );
-          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
-          csvFile = response.text;
+        it('csv file matches', () => {
           expectSnapshot(csvFile).toMatch();
         });
       });
@@ -193,6 +198,12 @@ export default ({ getService }: FtrProviderContext) => {
           job = payload.job;
           path = payload.path;
           await reportingAPI.waitForJobToFinish(path);
+          const response = await supertest.get(path);
+          expect(response.header['content-disposition']).to.equal(
+            'inline; filename="A Saved Search with a date filter.csv"'
+          );
+          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
+          csvFile = response.text;
         });
 
         it('job response data is correct', () => {
@@ -206,13 +217,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(job.payload.version).equal('7.17');
         });
 
-        it('csv file matches', async () => {
-          const response = await supertest.get(path);
-          expect(response.header['content-disposition']).to.equal(
-            'inline; filename="A Saved Search with a date filter.csv"'
-          );
-          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
-          csvFile = response.text;
+        it('csv file matches', () => {
           expectSnapshot(csvFile).toMatch();
         });
       });
@@ -231,6 +236,12 @@ export default ({ getService }: FtrProviderContext) => {
           job = payload.job;
           path = payload.path;
           await reportingAPI.waitForJobToFinish(path);
+          const response = await supertest.get(path);
+          expect(response.header['content-disposition']).to.equal(
+            'inline; filename="Saved Search with date filter and no columns selected.csv"'
+          );
+          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
+          csvFile = response.text;
         });
 
         it('job response data is correct', () => {
@@ -244,13 +255,10 @@ export default ({ getService }: FtrProviderContext) => {
           expect(job.payload.version).equal('7.17');
         });
 
-        it('csv file matches', async () => {
-          const response = await supertest.get(path);
-          expect(response.header['content-disposition']).to.equal(
-            'inline; filename="Saved Search with date filter and no columns selected.csv"'
-          );
-          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
-          csvFile = response.text;
+        itIf7('csv file matches (7.17)', () => {
+          expectSnapshot(csvFile).toMatch();
+        });
+        itIf8('csv file matches (8)', () => {
           expectSnapshot(csvFile).toMatch();
         });
       });
@@ -269,6 +277,12 @@ export default ({ getService }: FtrProviderContext) => {
           job = payload.job;
           path = payload.path;
           await reportingAPI.waitForJobToFinish(path);
+          const response = await supertest.get(path);
+          expect(response.header['content-disposition']).to.equal(
+            'inline; filename="A Saved Search with date and terms filters.csv"'
+          );
+          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
+          csvFile = response.text;
         });
 
         it('job response data is correct', () => {
@@ -282,13 +296,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(job.payload.version).equal('7.17');
         });
 
-        it('csv file matches', async () => {
-          const response = await supertest.get(path);
-          expect(response.header['content-disposition']).to.equal(
-            'inline; filename="A Saved Search with date and terms filters.csv"'
-          );
-          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
-          csvFile = response.text;
+        it('csv file matches', () => {
           expectSnapshot(csvFile).toMatch();
         });
       });
@@ -313,6 +321,12 @@ export default ({ getService }: FtrProviderContext) => {
           job = payload.job;
           path = payload.path;
           await reportingAPI.waitForJobToFinish(path);
+          const response = await supertest.get(path);
+          expect(response.header['content-disposition']).to.equal(
+            'inline; filename="A Saved Search with a date filter.csv"'
+          );
+          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
+          csvFile = response.text;
         });
 
         it('job response data is correct', () => {
@@ -326,13 +340,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(job.payload.version).equal('7.17');
         });
 
-        it('csv file matches', async () => {
-          const response = await supertest.get(path);
-          expect(response.header['content-disposition']).to.equal(
-            'inline; filename="A Saved Search with a date filter.csv"'
-          );
-          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
-          csvFile = response.text;
+        it('csv file matches', () => {
           expectSnapshot(csvFile).toMatch();
         });
       });
@@ -354,6 +362,12 @@ export default ({ getService }: FtrProviderContext) => {
           job = payload.job;
           path = payload.path;
           await reportingAPI.waitForJobToFinish(path);
+          const response = await supertest.get(path);
+          expect(response.header['content-disposition']).to.equal(
+            'inline; filename="A Saved Search.csv"'
+          );
+          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
+          csvFile = response.text;
         });
 
         it('job response data is correct', () => {
@@ -367,13 +381,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(job.payload.version).equal('7.17');
         });
 
-        it('csv file matches', async () => {
-          const response = await supertest.get(path);
-          expect(response.header['content-disposition']).to.equal(
-            'inline; filename="A Saved Search.csv"'
-          );
-          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
-          csvFile = response.text;
+        it('csv file matches', () => {
           expectSnapshot(csvFile).toMatch();
         });
       });
@@ -397,6 +405,12 @@ export default ({ getService }: FtrProviderContext) => {
           job = payload.job;
           path = payload.path;
           await reportingAPI.waitForJobToFinish(path);
+          const response = await supertest.get(path);
+          expect(response.header['content-disposition']).to.equal(
+            'inline; filename="Ecommerce Data.csv"'
+          );
+          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
+          csvFile = response.text;
         });
 
         after(async () => {
@@ -414,13 +428,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(job.payload.version).equal('7.17');
         });
 
-        it('csv file matches', async () => {
-          const response = await supertest.get(path);
-          expect(response.header['content-disposition']).to.equal(
-            'inline; filename="Ecommerce Data.csv"'
-          );
-          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
-          csvFile = response.text;
+        it('csv file matches', () => {
           expectSnapshot(csvFile).toMatch();
         });
       });
@@ -443,6 +451,12 @@ export default ({ getService }: FtrProviderContext) => {
           job = payload.job;
           path = payload.path;
           await reportingAPI.waitForJobToFinish(path);
+          const response = await supertest.get(path);
+          expect(response.header['content-disposition']).to.equal(
+            'inline; filename="A Saved Search.csv"'
+          );
+          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
+          csvFile = response.text;
         });
 
         after(async () => {
@@ -460,13 +474,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(job.payload.version).equal('7.17');
         });
 
-        it('csv file matches', async () => {
-          const response = await supertest.get(path);
-          expect(response.header['content-disposition']).to.equal(
-            'inline; filename="A Saved Search.csv"'
-          );
-          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
-          csvFile = response.text;
+        it('csv file matches', () => {
           expectSnapshot(csvFile).toMatch();
         });
       });
@@ -535,6 +543,12 @@ export default ({ getService }: FtrProviderContext) => {
           job = payload.job;
           path = payload.path;
           await reportingAPI.waitForJobToFinish(path);
+          const response = await supertest.get(path);
+          expect(response.header['content-disposition']).to.equal(
+            'inline; filename="timeless: no filter, no columns selected.csv"'
+          );
+          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
+          csvFile = response.text;
         });
 
         it('job response data is correct', () => {
@@ -548,13 +562,10 @@ export default ({ getService }: FtrProviderContext) => {
           expect(job.payload.version).equal('7.17');
         });
 
-        it('csv file matches', async () => {
-          const response = await supertest.get(path);
-          expect(response.header['content-disposition']).to.equal(
-            'inline; filename="timeless: no filter, no columns selected.csv"'
-          );
-          expect(response.header['content-type']).to.equal('text/csv; charset=utf-8');
-          csvFile = response.text;
+        itIf7('csv file matches (7.17)', () => {
+          expectSnapshot(csvFile).toMatch();
+        });
+        itIf8('csv file matches (8)', () => {
           expectSnapshot(csvFile).toMatch();
         });
       });
