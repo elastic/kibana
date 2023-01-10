@@ -46,5 +46,7 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
+      env:
+        NODE_OPTIONS: "--max_old_space_size=4096"
       with:
         category: "/language:${{matrix.language}}"
