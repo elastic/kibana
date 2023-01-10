@@ -10,7 +10,7 @@ import React, { FC, ReactElement, useCallback, useRef, useState } from 'react';
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-interface Props {
+export interface FloatingActionsProps {
   className?: string;
   actions?: JSX.Element;
   children: ReactElement;
@@ -18,7 +18,7 @@ interface Props {
   usingTwoLineLayout?: boolean;
 }
 
-export const FloatingActions: FC<Props> = ({
+export const FloatingActions: FC<FloatingActionsProps> = ({
   className = '',
   actions,
   isEnabled,
