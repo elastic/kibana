@@ -43,8 +43,6 @@ Review important information about the {kib} 8.6.0 release.
 [[release-notes-8.6.0]]
 == {kib} 8.6.0
 
-coming::[8.6.0]
-
 Review the following information about the {kib} 8.6.0 release.
 
 [float]
