@@ -32,6 +32,7 @@ import type { PluginDependencies } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
+import { PluginSystemOverrides } from './plugin_system_overrides';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -286,7 +287,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     // NOTE: We can't do both in the same previous loop because some plugins' deprecations may affect others.
     // Hence, we need all the deprecations to be registered before accessing any config parameter.
     for (const plugin of plugins) {
-      const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
+      const isEnabled =
+        PluginSystemOverrides.getEnableAllPlugins() === true
+          ? true
+          : await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
 
       if (pluginEnableStatuses.has(plugin.name)) {
         throw new Error(`Plugin with id "${plugin.name}" is already registered!`);

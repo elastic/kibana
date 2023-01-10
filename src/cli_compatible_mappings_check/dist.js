@@ -6,11 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { PluginsService, PluginWrapper, config, isNewPlatformPlugin } from './src';
-export type {
-  PluginsServiceSetup,
-  PluginsServiceStart,
-  DiscoveredPlugins,
-  PluginDependencies,
-} from './src';
-export { PluginSystemOverrides } from './src/plugin_system_overrides';
+require('../setup_node_env/dist');
+require('./cli_compatible_mappings_check');

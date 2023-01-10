@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { PluginsService, PluginWrapper, config, isNewPlatformPlugin } from './src';
-export type {
-  PluginsServiceSetup,
-  PluginsServiceStart,
-  DiscoveredPlugins,
-  PluginDependencies,
-} from './src';
-export { PluginSystemOverrides } from './src/plugin_system_overrides';
+export class PluginSystemOverrides {
+  private static allPluginsEnabled: true | undefined = undefined;
+
+  public static setAllPluginsEnabled(): void {
+    PluginSystemOverrides.allPluginsEnabled = true;
+  }
+  public static getEnableAllPlugins(): true | undefined {
+    return PluginSystemOverrides.allPluginsEnabled;
+  }
+}
