@@ -15,8 +15,9 @@ import type { TimeRange } from '../../../../../common/http_api/shared';
 import { fetchMonitoredClusters } from './monitored_clusters';
 import { fetchMetricbeatErrors } from './metricbeat';
 import type { FetchParameters } from './types';
+import { fetchPackageErrors } from './package/fetch_package_errors';
 
-const DEFAULT_QUERY_TIMERANGE = { min: 'now-15m', max: 'now' };
+const DEFAULT_QUERY_TIMERANGE = { min: 'now-15h', max: 'now' };
 const DEFAULT_QUERY_TIMEOUT_SECONDS = 15;
 
 export function registerV1HealthRoute(server: MonitoringCore) {
@@ -74,12 +75,22 @@ export function registerV1HealthRoute(server: MonitoringCore) {
           return { error: err.message };
         });
 
-      const [monitoredClusters, metricbeatErrors] = await Promise.all([
+      const packageErrorsFn = () =>
+        fetchPackageErrors({
+          ...fetchArgs,
+          packageIndex: config.ui.package.index,
+        }).catch((err: Error) => {
+          logger.error(`_health: failed to retrieve package data:\n${err.stack}`);
+          return { error: err.message };
+        });
+
+      const [monitoredClusters, metricbeatErrors, packageErrors] = await Promise.all([
         monitoredClustersFn(),
         metricbeatErrorsFn(),
+        packageErrorsFn(),
       ]);
 
-      return { monitoredClusters, metricbeatErrors, settings };
+      return { monitoredClusters, metricbeatErrors, packageErrors, settings };
     },
   });
 }
@@ -89,6 +100,7 @@ function extractSettings(config: MonitoringConfig) {
     ccs: config.ui.ccs.enabled,
     logsIndex: config.ui.logs.index,
     metricbeatIndex: config.ui.metricbeat.index,
+    packageIndex: config.ui.package.index,
     hasRemoteClusterConfigured: (config.ui.elasticsearch.hosts || []).some(Boolean),
   };
 }

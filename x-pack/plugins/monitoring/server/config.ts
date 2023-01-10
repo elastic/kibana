@@ -33,6 +33,9 @@ export const configSchema = schema.object({
     metricbeat: schema.object({
       index: schema.string({ defaultValue: 'metricbeat-*' }),
     }),
+    package: schema.object({
+      index: schema.string({ defaultValue: 'metrics-*' }),
+    }),
     max_bucket_size: schema.number({ defaultValue: 10000 }),
     elasticsearch: monitoringElasticsearchConfigSchema,
     kibana: schema.object({
