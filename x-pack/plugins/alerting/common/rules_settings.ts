@@ -38,7 +38,7 @@ export const API_PRIVILEGES = {
   WRITE_FLAPPING_SETTINGS: 'write-flapping-settings',
 };
 
-export const RULES_SETTINGS_SAVED_OBJECT_TYPE = 'rules_settings';
+export const RULES_SETTINGS_SAVED_OBJECT_TYPE = 'rules-settings';
 export const RULES_SETTINGS_SAVED_OBJECT_ID = 'rules-settings';
 
 export const DEFAULT_FLAPPING_SETTINGS = {

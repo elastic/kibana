@@ -98,8 +98,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('rulesSettingsLink');
       await testSubjects.waitForDeleted('centerJustifiedSpinner');
 
-      await dragRangeInput('lookBackWindowRangeInput', 5, 'left');
-      await dragRangeInput('statusChangeThresholdRangeInput', 5, 'right');
+      await dragRangeInput('lookBackWindowRangeInput', 5, 'right');
+      await dragRangeInput('statusChangeThresholdRangeInput', 5, 'left');
 
       let lookBackWindowInput = await testSubjects.find('lookBackWindowRangeInput');
       let statusChangeThresholdInput = await testSubjects.find('statusChangeThresholdRangeInput');
@@ -107,8 +107,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let lookBackWindowValue = await lookBackWindowInput.getAttribute('value');
       let statusChangeThresholdValue = await statusChangeThresholdInput.getAttribute('value');
 
-      expect(lookBackWindowValue).to.eql('5');
-      expect(statusChangeThresholdValue).to.eql('15');
+      expect(lookBackWindowValue).to.eql('15');
+      expect(statusChangeThresholdValue).to.eql('5');
 
       await testSubjects.click('rulesSettingsModalEnableSwitch');
       await testSubjects.existOrFail('rulesSettingsModalFlappingOffPrompt');
@@ -132,8 +132,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       lookBackWindowValue = await lookBackWindowInput.getAttribute('value');
       statusChangeThresholdValue = await statusChangeThresholdInput.getAttribute('value');
 
-      expect(lookBackWindowValue).to.eql('5');
-      expect(statusChangeThresholdValue).to.eql('15');
+      expect(lookBackWindowValue).to.eql('15');
+      expect(statusChangeThresholdValue).to.eql('5');
     });
   });
 };
