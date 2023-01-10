@@ -8,6 +8,7 @@
 import { SavedObject } from 'kibana/server';
 import type { SearchSourceFields } from 'src/plugins/data/common';
 import type { VisualizationSavedObjectAttributes } from 'src/plugins/visualizations/common';
+import { DeepPartial } from 'utility-types';
 import { JobParamsCSV } from '../..';
 import { injectReferences, parseSearchSourceJSON } from '../../../../../../src/plugins/data/common';
 import { CSV_JOB_TYPE } from '../../../common/constants';
@@ -23,6 +24,15 @@ type SavedSearchObjectType = SavedObject<
   VisualizationSavedObjectAttributes & { columns?: string[]; sort: Array<[string, string]> }
 >;
 type ParsedSearchSourceJSON = SearchSourceFields & { indexRefName?: string };
+
+function isSavedObject(
+  savedSearch: SavedSearchObjectType | unknown
+): savedSearch is SavedSearchObjectType {
+  return (
+    (savedSearch as DeepPartial<SavedSearchObjectType> | undefined)?.attributes
+      ?.kibanaSavedObjectMeta?.searchSourceJSON != null
+  );
+}
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFnType> = (reporting, _logger) => {
   const config = reporting.getConfig();
@@ -54,7 +64,13 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFnType> = (reporting, _lo
     };
 
     // Get the Saved Search Fields object from ID
-    const savedSearch: SavedSearchObjectType = await savedObjects.get('search', job.savedObjectId);
+    const savedSearch = await savedObjects.get('search', job.savedObjectId);
+
+    if (!isSavedObject(savedSearch)) {
+      throw new Error(`Saved search object is not valid`);
+    }
+
+    // allowed to throw an Invalid JSON error if the JSON is not parseable.
     const searchSourceFields: ParsedSearchSourceJSON = parseSearchSourceJSON(
       savedSearch.attributes.kibanaSavedObjectMeta.searchSourceJSON
     );
@@ -67,7 +83,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFnType> = (reporting, _lo
     // Inject references into the Saved Search Fields
     const searchSourceFieldsWithRefs = injectReferences(
       { ...searchSourceFields, indexRefName },
-      savedSearch.references
+      savedSearch.references ?? []
     );
 
     // Form the Saved Search attributes and SearchSource into a config that's compatible with CsvGenerator
