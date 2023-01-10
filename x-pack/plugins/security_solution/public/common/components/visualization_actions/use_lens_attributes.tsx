@@ -16,10 +16,11 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import type { LensAttributes, GetLensAttributes, ExtraOptions } from './types';
 import {
-  getHostDetailsPageFilter,
+  getDetailsPageFilter,
   sourceOrDestinationIpExistsFilter,
   hostNameExistsFilter,
   getIndexFilters,
+  getNetworkDetailsPageFilter,
 } from './utils';
 
 export const useLensAttributes = ({
@@ -60,9 +61,17 @@ export const useLensAttributes = ({
   }, [pageName, tabName]);
 
   const pageFilters = useMemo(() => {
-    if (pageName === SecurityPageName.hosts && detailName != null) {
-      return getHostDetailsPageFilter(detailName);
+    if (
+      [SecurityPageName.hosts, SecurityPageName.users].indexOf(pageName) >= 0 &&
+      detailName != null
+    ) {
+      return getDetailsPageFilter(pageName, detailName);
     }
+
+    if (SecurityPageName.network === pageName) {
+      return getNetworkDetailsPageFilter(detailName);
+    }
+
     return [];
   }, [detailName, pageName]);
 
