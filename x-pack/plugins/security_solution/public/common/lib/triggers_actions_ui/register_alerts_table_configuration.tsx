@@ -55,6 +55,7 @@ import type { OnRowSelected } from '../../components/data_table/types';
 import { getEventIdToDataMapping } from '../../components/data_table/helpers';
 import { checkBoxControlColumn } from '../../components/control_columns';
 import { useBulkAlertActionItems } from './use_alert_actions';
+import { FIELDS_WITHOUT_CELL_ACTIONS } from '../cell_actions/constants';
 
 function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] {
   if (isKnownEmptyQuery(datafeedQuery)) {
@@ -248,13 +249,13 @@ const registerAlertsTableConfiguration = (
             showCheckboxes={showCheckboxes}
             tabType={'query'}
             tableId={TableId.alertsOnAlertsPage}
-            width={124}
+            width={0}
             setEventsLoading={setEventsLoading}
             setEventsDeleted={setEventsDeleted}
           />
         );
       },
-      width: 224,
+      width: 124,
     };
   };
 
@@ -311,7 +312,7 @@ const registerAlertsTableConfiguration = (
           });
         }) as EuiDataGridColumnCellAction[],
         visibleCellActions: 5,
-        disabledCellActions: [],
+        disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
       };
     },
   });

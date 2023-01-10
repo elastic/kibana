@@ -36,7 +36,6 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
     value,
   }) => {
     const filterForValueFn = useCallback(() => {
-      debugger;
       const makeFilter = (currentVal: string | null | undefined) =>
         currentVal?.length === 0 ? createFilter(field, undefined) : createFilter(field, currentVal);
       const filters = Array.isArray(value)

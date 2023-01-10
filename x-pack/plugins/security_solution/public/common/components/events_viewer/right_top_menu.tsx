@@ -48,7 +48,9 @@ export const RightTopMenu = ({
       alignItems={alignItems}
       data-test-subj="events-viewer-updated"
       gutterSize="m"
+      component="span"
       justifyContent="flexEnd"
+      direction="row"
       $hasRightOffset={hasRightOffset}
     >
       <UpdatedFlexItem grow={false} $show={!loading}>

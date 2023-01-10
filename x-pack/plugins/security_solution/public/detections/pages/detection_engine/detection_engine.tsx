@@ -384,6 +384,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               flyoutSize="m"
               inputFilters={alertsTableDefaultFilters}
               tableId={TableId.alertsOnAlertsPage}
+              showBuildingBlockAlerts={showBuildingBlockAlerts}
+              onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
+              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+              onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
             />
             <EuiHorizontalRule />
 

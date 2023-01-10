@@ -10,7 +10,7 @@ import {
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import React, { lazy, Suspense } from 'react';
+import React, { Fragment, lazy, Suspense } from 'react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsCount } from './components/alerts_count/alerts_count';
 import { BulkActionsConfig } from '../../../../types';
@@ -39,10 +39,10 @@ const getDefaultVisibility = ({
   const hasBrowserFields = Object.keys(browserFields).length > 0;
   const localAdditionalControls = {
     right: (
-      <>
-        <LastUpdatedAt updatedAt={updatedAt} />,
+      <Fragment>
+        <LastUpdatedAt updatedAt={updatedAt} />
         {additionalControls?.right ? additionalControls.right : null}
-      </>
+      </Fragment>
     ),
     left: {
       append: (
@@ -118,10 +118,10 @@ export const getToolbarVisibility = ({
     showSortSelector: false,
     additionalControls: {
       right: (
-        <>
+        <div className="right-controls">
           <LastUpdatedAt updatedAt={updatedAt} />
           {additionalControls?.right ? additionalControls.right : null}
-        </>
+        </div>
       ),
       left: {
         append: (

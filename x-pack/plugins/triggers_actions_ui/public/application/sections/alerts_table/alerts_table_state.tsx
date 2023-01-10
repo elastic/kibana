@@ -60,7 +60,7 @@ export type AlertsTableStateProps = {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
-  additionalControls: EuiDataGridToolBarAdditionalControlsOptions;
+  additionalControls?: EuiDataGridToolBarAdditionalControlsOptions;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -219,8 +219,6 @@ const AlertsTableState = ({
     },
     [id]
   );
-
-  console.warn({ inspectQuery: getInspectQuery() });
 
   const useFetchAlertsData = useCallback(() => {
     return {
