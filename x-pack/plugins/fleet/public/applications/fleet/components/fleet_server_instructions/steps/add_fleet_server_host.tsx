@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @elastic/eui/href-or-on-click */
 import React, { useState, useCallback } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
 import {
@@ -215,6 +214,7 @@ export const AddFleetServerHostStepContent = ({
               values={{
                 host: submittedFleetServerHost.host_urls[0],
                 fleetSettingsLink: (
+                  // eslint-disable-next-line @elastic/eui/href-or-on-click
                   <EuiButtonEmpty href={getHref('settings')} onClick={onClose} flush="left">
                     <FormattedMessage
                       id="xpack.fleet.fleetServerSetup.fleetSettingsLink"

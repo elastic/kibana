@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @elastic/eui/href-or-on-click */
 import React from 'react';
 
 import type { EuiStepProps } from '@elastic/eui';
@@ -73,6 +72,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
             values={{
               hostUrl: <EuiCode>{selectedFleetServerHost?.host_urls[0]}</EuiCode>,
               fleetSettingsLink: (
+                // eslint-disable-next-line @elastic/eui/href-or-on-click
                 <EuiButtonEmpty href={getHref('settings')} onClick={onClose} flush="left">
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
