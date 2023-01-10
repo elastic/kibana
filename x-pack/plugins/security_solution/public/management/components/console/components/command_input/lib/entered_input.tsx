@@ -110,7 +110,7 @@ export class EnteredInput {
         }
       }
 
-      // Remove all empty characters (created as a result of inserting any Argument Selector components
+      // Remove all empty characters (created as a result of inserting any Argument Selector components)
       this.leftOfCursorContent = this.leftOfCursorContent.filter(({ value }) => value.length > 0);
       this.rightOfCursorContent = this.rightOfCursorContent.filter(({ value }) => value.length > 0);
     }
@@ -118,8 +118,8 @@ export class EnteredInput {
 
   private replaceSelection(selection: string, newValue: string) {
     // FIXME:PT implement text replacement
-    // const prevFullTextEntered = this.getFullText();
-    //
+    const prevFullTextEntered = this.getFullText();
+
     // this.leftOfCursorText =
     //   prevFullTextEntered.substring(0, prevFullTextEntered.indexOf(selection)) + newValue;
     //

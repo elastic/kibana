@@ -52,7 +52,7 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
     return (
       <ArgumentSelectorWrapperContainer className="eui-displayInlineBlock">
         <EuiFlexGroup responsive={false} gutterSize="none">
-          <EuiFlexItem grow={false}>{`--${argName}=`}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{`--${argName}="`}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SelectorComponent
               value={value}
@@ -60,6 +60,7 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
               onChange={handleSelectorComponentOnChange}
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>{'"'}</EuiFlexItem>
         </EuiFlexGroup>
       </ArgumentSelectorWrapperContainer>
     );

@@ -185,7 +185,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           enteredCommand: prevEnteredCommand,
           parsedInput: prevParsedInput,
         }) => {
-          let inputText = new EnteredInput(
+          const inputText = new EnteredInput(
             prevLeftOfCursor,
             prevRightOfCursor,
             prevParsedInput,
@@ -212,10 +212,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                 enteredCommand: prevEnteredCommand,
                 parsedInput: prevParsedInput,
               });
-
-              // FIXME:PT add `clear()` method to `EnteredInput` and remove code below
-
-              inputText = new EnteredInput('', '', prevParsedInput, prevEnteredCommand);
+              inputText.clear();
               break;
 
             // ARROW LEFT

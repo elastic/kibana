@@ -98,8 +98,9 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
         // Determine if `enteredCommand` should be re-defined
         if (
-          parsedInput.name &&
-          (!enteredCommand || parsedInput.name !== enteredCommand.commandDefinition.name)
+          (parsedInput.name &&
+            (!enteredCommand || parsedInput.name !== enteredCommand.commandDefinition.name)) ||
+          (!parsedInput.name && enteredCommand)
         ) {
           enteredCommand = undefined;
 
