@@ -171,7 +171,7 @@ describe('agent policy', () => {
 
     it('should run package policy delete external callbacks', async () => {
       await agentPolicyService.delete(soClient, esClient, 'mocked');
-      expect(packagePolicyService.runDeleteExternalCallbacks).toHaveBeenCalledWith([
+      expect(packagePolicyService.runPostDeleteExternalCallbacks).toHaveBeenCalledWith([
         { id: 'package-1' },
       ]);
     });
@@ -195,7 +195,7 @@ describe('agent policy', () => {
 
       await agentPolicyService.delete(soClient, esClient, 'mocked', { force: true });
 
-      expect(packagePolicyService.runDeleteExternalCallbacks).toHaveBeenCalledWith([
+      expect(packagePolicyService.runPostDeleteExternalCallbacks).toHaveBeenCalledWith([
         { id: 'package-1' },
       ]);
     });
