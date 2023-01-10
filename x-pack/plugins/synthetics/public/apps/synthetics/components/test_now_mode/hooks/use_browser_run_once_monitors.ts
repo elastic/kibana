@@ -7,10 +7,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { createEsParams, useEsSearch, useFetcher } from '@kbn/observability-plugin/public';
 import { useTickTick } from './use_tick_tick';
-import { fetchJourneySteps } from '../../../state';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { JourneyStep } from '../../../../../../common/runtime_types';
+import { fetchBrowserJourney } from '../../../state';
 
 export interface CheckGroupResult {
   checkGroupId: string;
@@ -156,7 +156,7 @@ export const useBrowserRunOnceMonitors = ({
 
       return Promise.all(
         checkGroupIds.map((id) => {
-          return fetchJourneySteps({
+          return fetchBrowserJourney({
             checkGroup: id,
           })
             .then((stepsData) => {
