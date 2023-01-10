@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act } from 'react-test-renderer';
+import { renderHook, act } from '@testing-library/react-hooks';
 import {
   stubDataViewWithoutTimeField,
   stubLogstashDataView as dataView,
@@ -168,6 +167,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     const fieldGroups = fieldListGroupedProps.fieldGroups;
+    const scrollToTopResetCounter1 = fieldListGroupedProps.scrollToTopResetCounter;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -195,8 +195,89 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     fieldListGroupedProps = result.current.fieldListGroupedProps;
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
     expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+    expect(result.current.fieldListGroupedProps.scrollToTopResetCounter).not.toBe(
+      scrollToTopResetCounter1
+    );
 
     (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
+  });
+
+  it('should work correctly when searched and filtered', async () => {
+    const props: GroupedFieldsParams<DataViewField> = {
+      dataViewId: dataView.id!,
+      allFields: allFieldsIncludingUnmapped,
+      services: mockedServices,
+    };
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: props,
+    });
+
+    await waitForNextUpdate();
+
+    let fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) =>
+          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
+            fieldGroups![key as FieldsGroupNames]?.fieldCount
+          }`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0-0',
+      'SelectedFields-0-0',
+      'PopularFields-0-0',
+      'AvailableFields-25-25',
+      'UnmappedFields-28-28',
+      'EmptyFields-0-0',
+      'MetaFields-3-3',
+    ]);
+
+    act(() => {
+      result.current.fieldListFiltersProps.onChangeNameFilter('@');
+    });
+
+    fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) =>
+          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
+            fieldGroups![key as FieldsGroupNames]?.fieldCount
+          }`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0-0',
+      'SelectedFields-0-0',
+      'PopularFields-0-0',
+      'AvailableFields-2-25',
+      'UnmappedFields-2-28',
+      'EmptyFields-0-0',
+      'MetaFields-0-3',
+    ]);
+
+    act(() => {
+      result.current.fieldListFiltersProps.onChangeFieldTypes(['date']);
+    });
+
+    fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) =>
+          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
+            fieldGroups![key as FieldsGroupNames]?.fieldCount
+          }`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0-0',
+      'SelectedFields-0-0',
+      'PopularFields-0-0',
+      'AvailableFields-1-25',
+      'UnmappedFields-1-28',
+      'EmptyFields-0-0',
+      'MetaFields-0-3',
+    ]);
   });
 
   it('should not change the scroll position if fields list is extended', async () => {
