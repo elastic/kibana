@@ -94,13 +94,15 @@ import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/p
 import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
-import { appContextService } from '.';
+import { appContextService, dataStreamService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
 import { handleExperimentalDatastreamFeatureOptIn } from './package_policies';
 import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type { PackagePolicyClient, PackagePolicyService } from './package_policy_service';
+import { installIndexTemplatesAndPipelines } from './epm/packages/install';
+import { getArchiveFilelist } from './epm/archive';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -134,6 +136,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packageInfo?: PackageInfo;
     }
   ): Promise<PackagePolicy> {
+    const logger = appContextService.getLogger();
     const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
 
     if (agentPolicy && packagePolicy.package?.name === FLEET_APM_PACKAGE) {
@@ -206,6 +209,59 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
 
       elasticsearch = pkgInfo.elasticsearch;
+
+      if (pkgInfo.type === 'input') {
+        const paths = await getArchiveFilelist(pkgInfo);
+        if (!paths) throw new Error('No paths found for package'); // TODO: better error
+        const datasetName = packagePolicy.inputs[0].streams[0].vars?.['data_stream.dataset']?.value;
+        const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
+
+        const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
+          type: dataStream.type,
+          dataset: datasetName,
+        });
+
+        if (existingDataStreams.length) {
+          const existingDataStreamsAreFromDifferentPackage = existingDataStreams.some(
+            (ds) => ds._meta?.package?.name !== pkgInfo.name
+          );
+          if (existingDataStreamsAreFromDifferentPackage && !options?.force) {
+            // user has opted to send data to an existing data stream which is managed by another
+            // package. This means certain custom setting such as elasticsearch settings
+            // defined by the package will not have been applied which could lead
+            // to unforeseen circumstances, so force flag must be used.
+            const streamIndexPattern = dataStreamService.streamPartsToIndexPattern({
+              type: dataStream.type,
+              dataset: datasetName,
+            });
+
+            throw new Error(
+              `Datastreams matching "${streamIndexPattern}" already exist and are not managed by this package, force flag is required`
+            );
+          } else {
+            logger.info(
+              `Data stream ${dataStream.name} already exists, skipping index template creation`
+            );
+          }
+        } else {
+          const installedPkg = await getInstallation({
+            savedObjectsClient: soClient,
+            pkgName: pkgInfo.name,
+            logger,
+          });
+          if (!installedPkg) throw new Error('Package not installed'); // TODO: better error
+          await installIndexTemplatesAndPipelines({
+            installedPkg,
+            paths,
+            packageInfo: pkgInfo,
+            esReferences: installedPkg.installed_es || [],
+            savedObjectsClient: soClient,
+            esClient,
+            logger,
+            onlyForDataStream: dataStream,
+          });
+        }
+      }
     }
 
     const isoDate = new Date().toISOString();

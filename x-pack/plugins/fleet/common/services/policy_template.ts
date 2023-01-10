@@ -52,7 +52,10 @@ export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): Reg
   return [input];
 };
 
-export const getNormalizedDataStreams = (packageInfo: PackageInfo): RegistryDataStream[] => {
+export const getNormalizedDataStreams = (
+  packageInfo: PackageInfo,
+  datasetName?: string
+): RegistryDataStream[] => {
   if (packageInfo.type !== 'input') {
     return packageInfo.data_streams || [];
   }
@@ -66,7 +69,7 @@ export const getNormalizedDataStreams = (packageInfo: PackageInfo): RegistryData
   return policyTemplates.map((policyTemplate) => {
     const dataStream: RegistryDataStream = {
       type: policyTemplate.type,
-      dataset: createDefaultDatasetName(packageInfo, policyTemplate),
+      dataset: datasetName || createDefaultDatasetName(packageInfo, policyTemplate),
       title: policyTemplate.title + ' Dataset',
       release: packageInfo.release || 'ga',
       package: packageInfo.name,
