@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { takeRight } from 'lodash';
-
 import expect from '@kbn/expect';
 import {
   OPTIONS_LIST_CONTROL,

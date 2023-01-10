@@ -83,12 +83,6 @@ export const OptionsListPopoverSuggestions = ({
           !showOnlySelected && availableOptions?.[key] ? (
             <OptionsListPopoverSuggestionBadge documentCount={availableOptions[key].doc_count} />
           ) : undefined,
-        'aria-label': availableOptions?.[key]
-          ? OptionsListStrings.popover.getSuggestionAriaLabel(
-              key,
-              availableOptions[key].doc_count ?? 0
-            )
-          : key,
       };
     });
     return existsSelectableOption ? [existsSelectableOption, ...options] : options;
@@ -101,10 +95,10 @@ export const OptionsListPopoverSuggestions = ({
     existsSelectableOption,
   ]);
 
-  const [suggestionsTest, setSuggestionsTest] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
+  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
     /* This useEffect makes suggestionsSelectableOptions responsive to search, show only selected, and clear selections */
-    setSuggestionsTest(suggestionsSelectableOptions);
+    setSelectableOptions(suggestionsSelectableOptions);
   }, [suggestionsSelectableOptions]);
 
   return (
@@ -117,12 +111,15 @@ export const OptionsListPopoverSuggestions = ({
           {OptionsListStrings.popover.getLoadingMessage()}
         </span>
       }
-      options={suggestionsTest}
+      options={selectableOptions}
       listProps={{ onFocusBadge: false }}
-      aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(fieldName)}
+      aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
+        fieldName,
+        selectableOptions.length
+      )}
       emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
       onChange={(newSuggestions, _, changedOption) => {
-        setSuggestionsTest(newSuggestions);
+        setSelectableOptions(newSuggestions);
 
         const key = changedOption.key ?? changedOption.label;
         if (key === 'exists-option') {

@@ -48,16 +48,11 @@ export const OptionsListStrings = {
         defaultMessage: 'Popover for {fieldName} control',
         values: { fieldName },
       }),
-    getSuggestionsAriaLabel: (fieldName: string) =>
+    getSuggestionsAriaLabel: (fieldName: string, optionCount: number) =>
       i18n.translate('controls.optionsList.popover.suggestionsAriaLabel', {
-        defaultMessage: 'Available options for {fieldName}',
-        values: { fieldName },
-      }),
-    getSuggestionAriaLabel: (key: string, documentCount: number) =>
-      i18n.translate('controls.optionsList.popover.suggestionAriaLabel', {
         defaultMessage:
-          '{key}, which appears in {documentCount} {documentCount, plural, one {document} other {documents}}.',
-        values: { key, documentCount },
+          'Available {optionCount, plural, one {option} other {options}} for {fieldName}',
+        values: { fieldName, optionCount },
       }),
     getLoadingMessage: () =>
       i18n.translate('controls.optionsList.popover.loading', {
@@ -89,6 +84,12 @@ export const OptionsListStrings = {
           'Search {totalOptions} available {totalOptions, plural, one {option} other {options}}',
         values: { totalOptions },
       }),
+    getInvalidSelectionsSectionAriaLabel: (fieldName: string, invalidSelectionCount: number) =>
+      i18n.translate('controls.optionsList.popover.invalidSelectionsAriaLabel', {
+        defaultMessage:
+          'Ignored {invalidSelectionCount, plural, one {selection} other {selections}} for {fieldName}',
+        values: { fieldName, invalidSelectionCount },
+      }),
     getInvalidSelectionsSectionTitle: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsSectionTitle', {
         defaultMessage:
@@ -101,10 +102,9 @@ export const OptionsListStrings = {
           '{selectedOptions} selected {selectedOptions, plural, one {option} other {options}} {selectedOptions, plural, one {is} other {are}} ignored because {selectedOptions, plural, one {it is} other {they are}} no longer in the data.',
         values: { selectedOptions },
       }),
-    getInvalidSelectionAriaLabel: (option: string) =>
-      i18n.translate('controls.optionsList.popover.invalidSelectionAriaLabel', {
-        defaultMessage: 'Ignored selection: {option}',
-        values: { option },
+    getInvalidSelectionScreenReaderText: () =>
+      i18n.translate('controls.optionsList.popover.invalidSelectionScreenReaderText', {
+        defaultMessage: 'Invalid selection.',
       }),
     getIncludeLabel: () =>
       i18n.translate('controls.optionsList.popover.includeLabel', {
@@ -134,6 +134,12 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.documentCountTooltip', {
         defaultMessage:
           'This value appears in {documentCount, number} {documentCount, plural, one {document} other {documents}}',
+        values: { documentCount },
+      }),
+    getDocumentCountScreenReaderText: (documentCount: number) =>
+      i18n.translate('controls.optionsList.popover.documentCountScreenReaderText', {
+        defaultMessage:
+          'Appears in {documentCount, number} {documentCount, plural, one {document} other {documents}}',
         values: { documentCount },
       }),
   },
