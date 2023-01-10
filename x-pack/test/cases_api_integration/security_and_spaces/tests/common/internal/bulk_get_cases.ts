@@ -160,6 +160,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(errors.length).to.be(1);
         expect(errors[0]).to.eql({
+          error: 'Not Found',
           message: 'Saved object [cases/not-exist] not found',
           status: 404,
           caseId: 'not-exist',
@@ -199,49 +200,49 @@ export default ({ getService }: FtrProviderContext): void => {
             user: globalRead,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
-            errors: { totals: 0, forCaseId: '' },
+            errors: { totals: 0, forCaseId: '', forOwner: '' },
           },
           {
             user: superUser,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
-            errors: { totals: 0, forCaseId: '' },
+            errors: { totals: 0, forCaseId: '', forOwner: '' },
           },
           {
             user: secOnlyRead,
             numberOfExpectedCases: 1,
             owners: ['securitySolutionFixture'],
-            errors: { totals: 1, forCaseId: obsCase.id },
+            errors: { totals: 1, forCaseId: obsCase.id, forOwner: obsCase.owner },
           },
           {
             user: obsOnlyRead,
             numberOfExpectedCases: 1,
             owners: ['observabilityFixture'],
-            errors: { totals: 1, forCaseId: secCase.id },
+            errors: { totals: 1, forCaseId: secCase.id, forOwner: secCase.owner },
           },
           {
             user: obsSecRead,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
-            errors: { totals: 0, forCaseId: '' },
+            errors: { totals: 0, forCaseId: '', forOwner: '' },
           },
           {
             user: obsSec,
             numberOfExpectedCases: 2,
             owners: ['securitySolutionFixture', 'observabilityFixture'],
-            errors: { totals: 0, forCaseId: '' },
+            errors: { totals: 0, forCaseId: '', forOwner: '' },
           },
           {
             user: secOnly,
             numberOfExpectedCases: 1,
             owners: ['securitySolutionFixture'],
-            errors: { totals: 1, forCaseId: obsCase.id },
+            errors: { totals: 1, forCaseId: obsCase.id, forOwner: obsCase.owner },
           },
           {
             user: obsOnly,
             numberOfExpectedCases: 1,
             owners: ['observabilityFixture'],
-            errors: { totals: 1, forCaseId: secCase.id },
+            errors: { totals: 1, forCaseId: secCase.id, forOwner: secCase.owner },
           },
         ]) {
           const { cases, errors } = await bulkGetCases({
@@ -255,7 +256,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           if (scenario.errors.totals) {
             expect(errors[0]).to.eql({
-              message: 'Unauthorized',
+              error: 'Forbidden',
+              message: `Unauthorized to access case with owner: "${scenario.errors.forOwner}"`,
               status: 403,
               caseId: scenario.errors.forCaseId,
             });
@@ -315,7 +317,8 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(errors.length).to.be(1);
 
           expect(errors[0]).to.eql({
-            message: 'Unauthorized',
+            error: 'Forbidden',
+            message: 'Unauthorized to access case with owner: "securitySolutionFixture"',
             status: 403,
             caseId: newCase.id,
           });
