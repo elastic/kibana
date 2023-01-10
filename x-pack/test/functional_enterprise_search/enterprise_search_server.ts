@@ -35,10 +35,10 @@ function childProcessToLogLine(childProcess: ChildProcess, log: ToolingLog) {
   Rx.merge(
     observeLines(childProcess.stdout!).pipe(
       tap((line) => log.info(`[docker:${dockerImage}] ${line}`))
-    ), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+    ),
     observeLines(childProcess.stderr!).pipe(
       tap((line) => log.error(`[docker:${dockerImage}] ${line}`))
-    ) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
+    )
   ).subscribe(logLine$);
 
   return logLine$.asObservable();
@@ -61,7 +61,7 @@ export async function setupEnterpriseSearch(logger: ToolingLog): Promise<void> {
         `-e`,
         `allow_es_settings_modification=true`,
         `-e`,
-        `secret_management.encryption_keys=[4a2cd3f81d39bf28738c10db0ca782095ffac07279561809eecc722e0c20eb09]`,
+        `secret_management.encryption_keys=[f8482eb76613714a62569a48f854d2390a957674d46db742c008d80745cd82d9]`,
         `-e`,
         `ENT_SEARCH_DEFAULT_PASSWORD=changeme`,
         `-e`,
@@ -92,9 +92,6 @@ export async function setupEnterpriseSearch(logger: ToolingLog): Promise<void> {
         enterpriseSearchProcess.kill();
         throw err;
       }
-
-      // TODO check if that makes sense ?
-      // or replace with a better solution, timeout + wait for
       setTimeout(res, 15000);
     } catch (error) {
       rej(error);
@@ -104,14 +101,14 @@ export async function setupEnterpriseSearch(logger: ToolingLog): Promise<void> {
 
 export function cleanupEnterpriseSearch(log: ToolingLog) {
   if (enterpriseSearchProcess) {
-    log.info('Cleaning up enterprise search process');
+    log.info('Cleaning up Enterprise Search process');
     spawn('docker', ['stop', 'enterprise-search-ftr'], { stdio: 'inherit' });
     if (!enterpriseSearchProcess.kill(9)) {
-      log.info("Couldn't clean enterprise search process");
+      log.info("Couldn't clean Enterprise Search process");
     }
 
     enterpriseSearchProcess.on('close', () => {
-      log.info('Enterprise search closed ');
+      log.info('Enterprise Search closed ');
     });
   }
 }

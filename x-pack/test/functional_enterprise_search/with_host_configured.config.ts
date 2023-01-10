@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test';
-import { runEnterpriseSearchTests } from './runner';
-// import { getLatestVersion } from './artifact_manager';
+import { EnterpriseSearchCypressVisualTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -31,8 +29,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--enterpriseSearch.host=http://localhost:3002',
       ],
     },
-    testRunner: (context: GenericFtrProviderContext<{}, {}>) => {
-      return runEnterpriseSearchTests(context, 'open');
-    },
+    testRunner: EnterpriseSearchCypressVisualTestRunner,
   };
 }

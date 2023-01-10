@@ -6,13 +6,14 @@
  */
 import { resolve } from 'path';
 import Url from 'url';
-import { GenericFtrProviderContext } from '@kbn/test';
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { setupEnterpriseSearch, cleanupEnterpriseSearch } from './enterprise_search_server';
 
+import type { FtrProviderContext } from './ftr_provider_context';
+
 export async function withEnterpriseSearch(
-  context: GenericFtrProviderContext<{}, {}>,
+  context: FtrProviderContext,
   runner: (runnerEnv: Record<string, string>) => Promise<void>
 ) {
   const log = context.getService('log');
@@ -26,7 +27,7 @@ export async function withEnterpriseSearch(
 }
 
 export async function runEnterpriseSearchTests(
-  context: GenericFtrProviderContext<{}, {}>,
+  context: FtrProviderContext,
   cypressCommand: string
 ) {
   const log = context.getService('log');
@@ -66,4 +67,12 @@ export async function runEnterpriseSearchTests(
       });
     })
   );
+}
+
+export async function EnterpriseSearchCypressCliTestRunner(context: FtrProviderContext) {
+  await runEnterpriseSearchTests(context, 'run');
+}
+
+export async function EnterpriseSearchCypressVisualTestRunner(context: FtrProviderContext) {
+  await runEnterpriseSearchTests(context, 'open');
 }
