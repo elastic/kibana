@@ -8,7 +8,6 @@
     "target/**/*"
   ],
   "compilerOptions": {
-    "target": "ES2019",
     "outDir": "target/types",
     "types": [
       "cypress",
@@ -17,7 +16,4 @@
       "node",
     ],
   },
-  "kbn_references": [
-    { "path": "../tsconfig.json" }
-  ]
 }

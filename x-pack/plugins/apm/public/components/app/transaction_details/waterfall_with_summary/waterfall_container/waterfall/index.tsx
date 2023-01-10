@@ -31,15 +31,17 @@ const Container = euiStyled.div`
 const toggleFlyout = ({
   history,
   item,
+  flyoutDetailTab,
 }: {
   history: History;
   item?: IWaterfallItem;
+  flyoutDetailTab?: string;
 }) => {
   history.replace({
     ...history.location,
     search: fromQuery({
       ...toQuery(location.search),
-      flyoutDetailTab: undefined,
+      flyoutDetailTab,
       waterfallItemId: item?.id,
     }),
   });
@@ -77,6 +79,8 @@ function getWaterfallMaxLevel(waterfall: IWaterfall) {
   countLevels(entryId, 1);
   return maxLevel;
 }
+// level starts with 0
+const maxLevelOpen = 2;
 
 export function Waterfall({
   waterfall,
@@ -114,7 +118,11 @@ export function Waterfall({
           iconType="alert"
           title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
             defaultMessage:
-              'Number of items in this trace exceed what is displayed',
+              'The number of items in this trace is {traceItemCount} which is higher than the current limit of {maxTraceItems}. Please increase the limit to see the full trace',
+            values: {
+              traceItemCount: waterfall.traceItemCount,
+              maxTraceItems: waterfall.maxTraceItems,
+            },
           })}
         />
       )}
@@ -146,10 +154,12 @@ export function Waterfall({
               duration={duration}
               waterfall={waterfall}
               timelineMargins={timelineMargins}
-              onClickWaterfallItem={(item: IWaterfallItem) =>
-                toggleFlyout({ history, item })
-              }
+              onClickWaterfallItem={(
+                item: IWaterfallItem,
+                flyoutDetailTab: string
+              ) => toggleFlyout({ history, item, flyoutDetailTab })}
               showCriticalPath={showCriticalPath}
+              maxLevelOpen={maxLevelOpen}
             />
           )}
         </WaterfallItemsContainer>

@@ -165,7 +165,7 @@ describe('heatmap', () => {
             accessors: [
               {
                 columnId: 'v-accessor',
-                triggerIcon: 'colorBy',
+                triggerIconType: 'colorBy',
                 palette: ['blue', 'yellow'],
               },
             ],
@@ -281,7 +281,7 @@ describe('heatmap', () => {
             accessors: [
               {
                 columnId: 'v-accessor',
-                triggerIcon: 'none',
+                triggerIconType: 'none',
               },
             ],
             filterOperations: isCellValueSupported,
