@@ -33,6 +33,7 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
     // is encountered
     (async () => {
       const dataView = await dataViewService.get(dataViewId ?? '');
+      if (!dataView) return;
       for (const filter of DEFAULT_DETECTION_PAGE_FILTERS) {
         const fieldExists = dataView.getFieldByName(filter.fieldName);
         if (!fieldExists) {
