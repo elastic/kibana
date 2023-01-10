@@ -49,7 +49,8 @@ const groupResultsMessage = i18n.translate(
 const groupResultsHelpMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResultsHelpMessage',
   {
-    defaultMessage: "In expanded row, field/value pairs which do not appear in other groups are marked by an asterisk (*).",
+    defaultMessage:
+      'In expanded row, field/value pairs which do not appear in other groups are marked by an asterisk (*).',
   }
 );
 
