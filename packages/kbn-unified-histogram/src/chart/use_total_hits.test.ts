@@ -12,11 +12,15 @@ import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield
 import { useTotalHits } from './use_total_hits';
 import { useEffect as mockUseEffect } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of, Subject, throwError } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { DataViewType, SearchSourceSearchOptions } from '@kbn/data-plugin/common';
 
 jest.mock('react-use/lib/useDebounce', () => {

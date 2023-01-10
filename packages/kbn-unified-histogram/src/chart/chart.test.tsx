@@ -14,6 +14,7 @@ import type { UnifiedHistogramFetchStatus } from '../types';
 import { Chart } from './chart';
 import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of } from 'rxjs';
 import { HitsCounter } from '../hits_counter';

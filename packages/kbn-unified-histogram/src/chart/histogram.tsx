@@ -15,7 +15,7 @@ import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
 import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { RequestStatus } from '@kbn/inspector-plugin/public';
+import { RequestStatus } from '@kbn/inspector-plugin/common';
 import type { Observable } from 'rxjs';
 import {
   UnifiedHistogramBucketInterval,
@@ -50,7 +50,7 @@ export interface HistogramProps {
 }
 
 export function Histogram({
-  services: { data, lens, uiSettings },
+  services: { search, data, lens, uiSettings },
   dataView,
   request,
   hits,
@@ -100,6 +100,7 @@ export function Histogram({
 
       if (response) {
         const newBucketInterval = buildBucketInterval({
+          search,
           data,
           dataView,
           timeInterval,

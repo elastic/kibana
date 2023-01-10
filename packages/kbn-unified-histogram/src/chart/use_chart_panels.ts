@@ -11,16 +11,17 @@ import type {
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
-import { search } from '@kbn/data-plugin/public';
-import type { UnifiedHistogramChartContext } from '../types';
+import type { SearchType, UnifiedHistogramChartContext } from '../types';
 
 export function useChartPanels({
+  search,
   chart,
   toggleHideChart,
   onTimeIntervalChange,
   closePopover,
   onResetChartHeight,
 }: {
+  search: SearchType;
   chart?: UnifiedHistogramChartContext;
   toggleHideChart: () => void;
   onTimeIntervalChange?: (timeInterval: string) => void;

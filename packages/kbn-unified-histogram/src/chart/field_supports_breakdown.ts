@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 

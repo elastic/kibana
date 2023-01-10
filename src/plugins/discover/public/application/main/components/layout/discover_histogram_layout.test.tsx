@@ -33,7 +33,7 @@ import { HISTOGRAM_HEIGHT_KEY } from './use_discover_histogram';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramLayout } from '@kbn/unified-histogram';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { ResetSearchButton } from './reset_search_button';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';

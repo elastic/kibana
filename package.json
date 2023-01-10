@@ -439,6 +439,7 @@
     "@kbn/ui-shared-deps-npm": "link:packages/kbn-ui-shared-deps-npm",
     "@kbn/ui-shared-deps-src": "link:packages/kbn-ui-shared-deps-src",
     "@kbn/ui-theme": "link:packages/kbn-ui-theme",
+    "@kbn/unified-histogram": "link:packages/kbn-unified-histogram",
     "@kbn/user-profile-components": "link:packages/kbn-user-profile-components",
     "@kbn/utility-types": "link:packages/kbn-utility-types",
     "@kbn/utility-types-jest": "link:packages/kbn-utility-types-jest",

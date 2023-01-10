@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin } from '@kbn/core/public';
-
-export class UnifiedHistogramPublicPlugin implements Plugin<{}, {}, object, {}> {
-  public setup() {
-    return {};
-  }
-
-  public start() {
-    return {};
-  }
-}
+export * from './src';

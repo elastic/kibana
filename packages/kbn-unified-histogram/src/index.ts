@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { UnifiedHistogramPublicPlugin } from './plugin';
-
 export type { UnifiedHistogramLayoutProps } from './layout';
 export { UnifiedHistogramLayout } from './layout';
 export type {
@@ -23,5 +21,3 @@ export type {
   UnifiedHistogramInput$,
 } from './types';
 export { UnifiedHistogramFetchStatus } from './types';
-
-export const plugin = () => new UnifiedHistogramPublicPlugin();

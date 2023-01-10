@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { isCompleteResponse } from '@kbn/data-plugin/public';
-import { DataView, DataViewType } from '@kbn/data-views-plugin/public';
+import { isCompleteResponse } from '@kbn/data-plugin/common';
+import { DataView, DataViewType } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { MutableRefObject, useEffect, useRef } from 'react';

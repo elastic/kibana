@@ -10,8 +10,10 @@ import { renderHook } from '@testing-library/react-hooks';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 
 const getUseRequestParams = async () => {
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
   jest.doMock('@kbn/data-plugin/common', () => {
     return {
+      // eslint-disable-next-line @kbn/imports/no_boundary_crossing
       ...jest.requireActual('@kbn/data-plugin/common'),
       getAbsoluteTimeRange: jest.fn((range) => range),
     };

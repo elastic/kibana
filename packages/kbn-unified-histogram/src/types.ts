@@ -8,7 +8,7 @@
 
 import type { Theme } from '@kbn/charts-plugin/public/plugin';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, search } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
@@ -28,9 +28,15 @@ export enum UnifiedHistogramFetchStatus {
 }
 
 /**
+ * Search namespace re-export
+ */
+export type SearchType = typeof search;
+
+/**
  * The services required by the unified histogram components
  */
 export interface UnifiedHistogramServices {
+  search: SearchType;
   data: DataPublicPluginStart;
   theme: Theme;
   uiSettings: IUiSettingsClient;

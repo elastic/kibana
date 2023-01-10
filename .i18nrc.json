@@ -100,7 +100,7 @@
     "visualizations": "src/plugins/visualizations",
     "unifiedSearch": "src/plugins/unified_search",
     "unifiedFieldList": "src/plugins/unified_field_list",
-    "unifiedHistogram": "src/plugins/unified_histogram"
+    "unifiedHistogram": "packages/kbn-unified-histogram"
   },
   "translations": []
 }

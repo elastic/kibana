@@ -4229,6 +4229,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-histogram@link:packages/kbn-unified-histogram":
+  version "0.0.0"
+  uid ""
+
 "@kbn/user-profile-components@link:packages/kbn-user-profile-components":
   version "0.0.0"
   uid ""

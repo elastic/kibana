@@ -7,6 +7,7 @@
  */
 
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getChartAggConfigs } from './get_chart_agg_configs';
 

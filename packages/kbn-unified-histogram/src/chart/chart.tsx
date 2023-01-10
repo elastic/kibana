@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
@@ -112,6 +112,7 @@ export function Chart({
   });
 
   const panels = useChartPanels({
+    search: services.search,
     chart,
     toggleHideChart,
     onTimeIntervalChange,

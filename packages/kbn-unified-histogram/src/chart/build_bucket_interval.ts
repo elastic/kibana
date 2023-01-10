@@ -7,10 +7,11 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { DataPublicPluginStart, search, tabifyAggResponse } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
-import type { UnifiedHistogramBucketInterval } from '../types';
+import { tabifyAggResponse } from '@kbn/data-plugin/common';
+import type { SearchType, UnifiedHistogramBucketInterval } from '../types';
 import { getChartAggConfigs } from './get_chart_agg_configs';
 
 /**
@@ -19,12 +20,14 @@ import { getChartAggConfigs } from './get_chart_agg_configs';
  * time range interval of histogram.
  */
 export const buildBucketInterval = ({
+  search,
   data,
   dataView,
   timeInterval,
   timeRange,
   response,
 }: {
+  search: SearchType;
   data: DataPublicPluginStart;
   dataView: DataView;
   timeInterval?: string;

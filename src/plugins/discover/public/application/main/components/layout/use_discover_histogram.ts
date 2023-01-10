@@ -14,8 +14,8 @@ import {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
   UnifiedHistogramInputMessage,
-} from '@kbn/unified-histogram-plugin/public';
-import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
+} from '@kbn/unified-histogram';
+import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram';
 import useObservable from 'react-use/lib/useObservable';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { Subject } from 'rxjs';

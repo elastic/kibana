@@ -9,11 +9,14 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useChartPanels } from './use_chart_panels';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { search } from '@kbn/data-plugin/public';
 
 describe('test useChartPanels', () => {
   test('useChartsPanel when hideChart is true', async () => {
     const { result } = renderHook(() => {
       return useChartPanels({
+        search,
         toggleHideChart: jest.fn(),
         onTimeIntervalChange: jest.fn(),
         closePopover: jest.fn(),
@@ -33,6 +36,7 @@ describe('test useChartPanels', () => {
   test('useChartsPanel when hideChart is false', async () => {
     const { result } = renderHook(() => {
       return useChartPanels({
+        search,
         toggleHideChart: jest.fn(),
         onTimeIntervalChange: jest.fn(),
         closePopover: jest.fn(),
@@ -53,6 +57,7 @@ describe('test useChartPanels', () => {
   test('should not show reset chart height when onResetChartHeight is undefined', async () => {
     const { result } = renderHook(() => {
       return useChartPanels({
+        search,
         toggleHideChart: jest.fn(),
         onTimeIntervalChange: jest.fn(),
         closePopover: jest.fn(),
@@ -70,6 +75,7 @@ describe('test useChartPanels', () => {
     const onResetChartHeight = jest.fn();
     const { result } = renderHook(() => {
       return useChartPanels({
+        search,
         toggleHideChart: jest.fn(),
         onTimeIntervalChange: jest.fn(),
         closePopover: jest.fn(),

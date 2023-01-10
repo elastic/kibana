@@ -38,7 +38,7 @@ import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
-import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';

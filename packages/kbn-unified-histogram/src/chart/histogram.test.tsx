@@ -10,12 +10,14 @@ import { Histogram } from './histogram';
 import React from 'react';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { UnifiedHistogramFetchStatus, UnifiedHistogramInput$ } from '../types';
 import { getLensAttributes } from './get_lens_attributes';
 import { act } from 'react-dom/test-utils';
 import * as buildBucketInterval from './build_bucket_interval';
 import * as useTimeRange from './use_time_range';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import { Subject } from 'rxjs';
 import { getLensProps } from './use_lens_props';

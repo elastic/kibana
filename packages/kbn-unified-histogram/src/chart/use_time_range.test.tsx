@@ -7,7 +7,7 @@
  */
 
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { renderHook } from '@testing-library/react-hooks';
 import { UnifiedHistogramBucketInterval } from '../types';
 import { useTimeRange } from './use_time_range';

@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
-import { calculateBounds } from '@kbn/data-plugin/public';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { calculateBounds, search } from '@kbn/data-plugin/public';
 import { buildBucketInterval } from './build_bucket_interval';
 
 describe('buildBucketInterval', () => {
@@ -68,6 +70,7 @@ describe('buildBucketInterval', () => {
       return calculateBounds(timeRange);
     };
     return {
+      search,
       data: dataMock,
       dataView,
       timeInterval: 'auto',
