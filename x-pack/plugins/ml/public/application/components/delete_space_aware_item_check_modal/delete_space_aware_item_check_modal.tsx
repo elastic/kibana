@@ -339,10 +339,12 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
         <>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTitle"
-                defaultMessage="Checking space permissions"
-              />
+              <h1>
+                <FormattedMessage
+                  id="xpack.ml.deleteSpaceAwareItemCheckModal.modalTitle"
+                  defaultMessage="Checking space permissions"
+                />
+              </h1>
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
