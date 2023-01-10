@@ -180,8 +180,8 @@ export class LensAppLocatorDefinition implements LocatorDefinition<LensAppLocato
       queryState.time = { from: resolvedDateRange.fromDate, to: resolvedDateRange.toDate };
     }
     if (filters?.length) {
-      appState.filters = filters?.filter((f) => !isFilterPinned(f));
-      queryState.filters = appState.filters;
+      appState.filters = filters;
+      queryState.filters = filters?.filter((f) => !isFilterPinned(f));
     }
 
     const savedObjectPath = savedObjectId ? `/edit/${encodeURIComponent(savedObjectId)}` : '';

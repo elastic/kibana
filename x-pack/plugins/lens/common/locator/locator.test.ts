@@ -109,13 +109,23 @@ describe('Lens url generator', () => {
     expect(state.payload).toEqual({
       filters: [
         {
-          $state: {
-            store: 'appState',
-          },
           meta: {
             alias: 'foo',
             disabled: false,
             negate: false,
+          },
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+        },
+        {
+          meta: {
+            alias: 'bar',
+            disabled: false,
+            negate: false,
+          },
+          $state: {
+            store: FilterStateStore.GLOBAL_STATE,
           },
         },
       ],

@@ -79,5 +79,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./show_underlying_data'));
     loadTestFile(require.resolve('./show_underlying_data_dashboard'));
     loadTestFile(require.resolve('./tsdb'));
+    loadTestFile(require.resolve('./share'));
   });
 };

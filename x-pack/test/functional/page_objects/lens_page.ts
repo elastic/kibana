@@ -1652,5 +1652,58 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       // map to testSubjId
       return Promise.all(allFieldsForType.map((el) => el.getAttribute('data-test-subj')));
     },
+
+    async clickShareMenu() {
+      await testSubjects.click('lnsApp_shareButton');
+    },
+
+    async isShareable() {
+      return await testSubjects.isEnabled('lnsApp_shareButton');
+    },
+
+    async isShareActionEnabled(action: 'csvDownload' | 'permalinks') {
+      switch (action) {
+        case 'csvDownload':
+          return await testSubjects.isEnabled('sharePanel-csvDownloadMenuItem');
+        case 'permalinks':
+          return await testSubjects.isEnabled('sharePanel-Permalinks');
+      }
+    },
+
+    async openPermalinkShare() {
+      if (!(await testSubjects.exists('shareContextMenu'))) {
+        await this.clickShareMenu();
+      }
+      if (!(await this.isShareActionEnabled('permalinks'))) {
+        throw Error('Sharing feature is disabled');
+      }
+      await testSubjects.click('sharePanel-Permalinks');
+    },
+
+    async getAvailableUrlSharingOptions() {
+      if (!(await testSubjects.exists('shareUrlForm'))) {
+        await this.openPermalinkShare();
+      }
+      const el = await testSubjects.find('shareUrlForm');
+      const available = await el.findAllByCssSelector('input:not([disabled])');
+      const ids = await Promise.all(available.map((node) => node.getAttribute('id')));
+      return ids;
+    },
+
+    async getUrl(type: 'snapshot' | 'savedObject' = 'snapshot') {
+      if (!(await testSubjects.exists('shareUrlForm'))) {
+        await this.openPermalinkShare();
+      }
+      const options = await this.getAvailableUrlSharingOptions();
+      const optionIndex = options.findIndex((option) => option === type);
+      if (optionIndex < 0) {
+        throw Error(`Sharing URL of type ${type} is not available`);
+      }
+      const testSubFrom = `exportAs${type[0].toUpperCase()}${type.substring(1)}`;
+      await testSubjects.click(testSubFrom);
+      const copyButton = await testSubjects.find('copyShareUrlButton');
+      const url = await copyButton.getAttribute('data-share-url');
+      return url;
+    },
   });
 }
