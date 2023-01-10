@@ -619,7 +619,11 @@ export const RulesList = ({
       return;
     }
     if (showHeaderWithCreateButton) {
-      setHeaderActions([<CreateRuleButton openFlyout={openFlyout} />, <RulesSettingsLink />, <RulesListDocLink />]);
+      setHeaderActions([
+        <CreateRuleButton openFlyout={openFlyout} />,
+        <RulesSettingsLink />,
+        <RulesListDocLink />,
+      ]);
       return;
     }
     setHeaderActions();
