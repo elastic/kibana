@@ -130,6 +130,10 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         if (dataView?.metaFields?.includes(field.name)) {
           return 'metaFields';
         }
+        // `nested` root fields are not a part of data view fields list, so we need to check them separately
+        if (field.type === 'nested') {
+          return 'availableFields';
+        }
         if (dataView?.getFieldByName && !dataView.getFieldByName(field.name)) {
           return 'unmappedFields';
         }

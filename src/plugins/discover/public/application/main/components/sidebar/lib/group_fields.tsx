@@ -38,13 +38,14 @@ export interface SelectedFieldsResult {
 
 export function getSelectedFields(
   dataView: DataView | undefined,
-  columns: string[]
+  columns: string[],
+  allFields: DataViewField[] | null
 ): SelectedFieldsResult {
   const result: SelectedFieldsResult = {
     selectedFields: [],
     selectedFieldsMap: {},
   };
-  if (!Array.isArray(columns) || !columns.length) {
+  if (!Array.isArray(columns) || !columns.length || !allFields) {
     return INITIAL_SELECTED_FIELDS_RESULT;
   }
 
@@ -52,6 +53,7 @@ export function getSelectedFields(
   for (const column of columns) {
     const selectedField =
       dataView?.getFieldByName?.(column) ||
+      allFields.find((field) => field.name === column) || // for example to pick a `nested` root field
       ({
         name: column,
         displayName: column,

@@ -141,9 +141,9 @@ export function DiscoverSidebarComponent({
   >(undefined);
 
   useEffect(() => {
-    const result = getSelectedFields(selectedDataView, columns);
+    const result = getSelectedFields(selectedDataView, columns, allFields);
     setSelectedFieldsState(result);
-  }, [selectedDataView, columns, setSelectedFieldsState]);
+  }, [selectedDataView, columns, setSelectedFieldsState, allFields]);
 
   useEffect(() => {
     if (isPlainRecord || !useNewFieldsApi) {
