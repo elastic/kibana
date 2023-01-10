@@ -182,7 +182,7 @@ export const createCaseSavedObjectType = (
       total_alerts: {
         type: 'integer',
       },
-      total_comment: {
+      total_comments: {
         type: 'integer',
       },
     },

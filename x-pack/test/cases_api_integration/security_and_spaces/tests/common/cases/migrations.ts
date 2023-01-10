@@ -539,11 +539,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('total_comment', () => {
-        it('total_comment field has default value -1', async () => {
+      describe('total_comments', () => {
+        it('total_comments field has default value -1', async () => {
           const casesFromES = await getCaseSavedObjectsFromES({ es });
           for (const hit of casesFromES.body.hits.hits) {
-            expect(hit._source?.cases.total_comment).to.eql(-1);
+            expect(hit._source?.cases.total_comments).to.eql(-1);
           }
         });
       });

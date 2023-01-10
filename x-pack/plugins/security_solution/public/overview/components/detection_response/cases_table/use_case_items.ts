@@ -110,7 +110,7 @@ function parseCases(casesResponse: Cases): CaseItem[] {
     accumulated.push({
       id: currentCase.id,
       name: currentCase.title,
-      totalAlerts: currentCase.totalAlerts ?? 0,
+      totalAlerts: currentCase.totalAlerts,
       createdAt: currentCase.createdAt,
       createdBy: currentCase.createdBy.username || '—',
       status: currentCase.status,

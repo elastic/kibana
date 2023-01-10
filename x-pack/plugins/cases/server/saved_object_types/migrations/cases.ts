@@ -159,7 +159,7 @@ export const convertStatus = (
 
 export const addTotalAlerts = (
   doc: SavedObjectUnsanitizedDoc<CaseAttributes>
-): SavedObjectSanitizedDoc<CaseAttributes> => {
+): SavedObjectSanitizedDoc<CaseAttributes & { total_alerts: number }> => {
   const total_alerts = -1;
   return {
     ...doc,
@@ -168,13 +168,13 @@ export const addTotalAlerts = (
   };
 };
 
-export const addTotalComment = (
+export const addTotalComments = (
   doc: SavedObjectUnsanitizedDoc<CaseAttributes>
-): SavedObjectSanitizedDoc<CaseAttributes> => {
-  const total_comment = -1;
+): SavedObjectSanitizedDoc<CaseAttributes & { total_comments: number }> => {
+  const total_comments = -1;
   return {
     ...doc,
-    attributes: { ...doc.attributes, total_comment },
+    attributes: { ...doc.attributes, total_comments },
     references: doc.references ?? [],
   };
 };
@@ -242,5 +242,5 @@ export const caseMigrations = {
   '8.1.0': removeCaseType,
   '8.3.0': pipeMigrations(addDuration, addSeverity),
   '8.5.0': addAssignees,
-  '8.7.0': flow(convertSeverity, convertStatus, addTotalAlerts, addTotalComment),
+  '8.7.0': flow(convertSeverity, convertStatus, addTotalAlerts, addTotalComments),
 };

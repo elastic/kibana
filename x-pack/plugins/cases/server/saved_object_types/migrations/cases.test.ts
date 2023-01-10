@@ -18,7 +18,7 @@ import {
   addDuration,
   addSeverity,
   addTotalAlerts,
-  addTotalComment,
+  addTotalComments,
   caseConnectorIdMigration,
   convertSeverity,
   convertStatus,
@@ -695,7 +695,7 @@ describe('case migrations', () => {
       });
     });
 
-    it('default value for total_comment is -1', () => {
+    it('default value for total_comments is -1', () => {
       const doc = {
         id: '123',
         type: 'abc',
@@ -703,11 +703,11 @@ describe('case migrations', () => {
         references: [],
       } as unknown as SavedObjectUnsanitizedDoc<CaseAttributes>;
 
-      expect(addTotalComment(doc)).toEqual({
+      expect(addTotalComments(doc)).toEqual({
         ...doc,
         attributes: {
           ...doc.attributes,
-          total_comment: -1,
+          total_comments: -1,
         },
         references: [],
       });
