@@ -23,7 +23,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,schedule_delay]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,schedule_delay]"`
     );
   });
 
@@ -35,7 +35,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,schedule_delay]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,schedule_delay]"`
     );
   });
 

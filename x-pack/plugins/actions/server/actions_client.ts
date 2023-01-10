@@ -38,7 +38,7 @@ import {
   ActionExecutorContract,
   validateConnector,
   ActionExecutionSource,
-  parseIsoOrRelativeDate,
+  parseDate,
 } from './lib';
 import {
   ActionResult,
@@ -766,6 +766,7 @@ export class ActionsClient {
       this.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_LOG,
+          error,
         })
       );
       throw error;
@@ -824,6 +825,7 @@ export class ActionsClient {
       this.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_KPI,
+          error,
         })
       );
       throw error;
@@ -843,7 +845,7 @@ export class ActionsClient {
 
     try {
       const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
-        'alert',
+        'action',
         authorizationTuple,
         {
           start: parsedDateStart.toISOString(),
@@ -929,25 +931,4 @@ async function injectExtraFindData(
     // @ts-expect-error aggegation type is not specified
     referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
   }));
-}
-
-function parseDate(dateString: string | undefined, propertyName: string, defaultValue: Date): Date {
-  if (dateString === undefined) {
-    return defaultValue;
-  }
-
-  const parsedDate = parseIsoOrRelativeDate(dateString);
-  if (parsedDate === undefined) {
-    throw Boom.badRequest(
-      i18n.translate('xpack.actions.actionsClient.invalidDate', {
-        defaultMessage: 'Invalid date for parameter {field}: "{dateValue}"',
-        values: {
-          field: propertyName,
-          dateValue: dateString,
-        },
-      })
-    );
-  }
-
-  return parsedDate;
 }

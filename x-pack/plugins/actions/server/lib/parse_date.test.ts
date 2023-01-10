@@ -5,7 +5,29 @@
  * 2.0.
  */
 
-import { parseIsoOrRelativeDate } from './iso_or_relative_date';
+import { parseDate, parseIsoOrRelativeDate } from './parse_date';
+
+describe('parseDate', () => {
+  test('returns valid parsed date', () => {
+    const date = new Date(Date.now() - 1 * 60 * 60 * 1000);
+    const parsedDate = parseDate(date.toISOString(), 'dateStart', new Date());
+    expect(parsedDate?.valueOf()).toBe(date.valueOf());
+  });
+
+  test('returns default value if date is undefined', () => {
+    const date = new Date();
+    const parsedDate = parseDate(undefined, 'dateStart', date);
+    expect(parsedDate?.valueOf()).toBe(date.valueOf());
+  });
+
+  test('throws an error for invalid date strings', () => {
+    expect(() =>
+      parseDate('this shall not pass', 'dateStart', new Date())
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid date for parameter dateStart: \\"this shall not pass\\""`
+    );
+  });
+});
 
 describe('parseIsoOrRelativeDate', () => {
   test('handles ISO dates', () => {

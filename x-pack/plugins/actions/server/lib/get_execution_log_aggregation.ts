@@ -90,7 +90,6 @@ export interface IExecutionLogAggOptions {
 const ExecutionLogSortFields: Record<string, string> = {
   timestamp: 'actionExecution>executeStartTime',
   execution_duration: 'actionExecution>executionDuration',
-  total_search_duration: 'actionExecution>totalSearchDuration',
   schedule_delay: 'actionExecution>scheduleDelay',
 };
 

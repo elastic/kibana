@@ -4,11 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 
 const SECONDS_REGEX = /^[1-9][0-9]*s$/;
 const MINUTES_REGEX = /^[1-9][0-9]*m$/;
 const HOURS_REGEX = /^[1-9][0-9]*h$/;
 const DAYS_REGEX = /^[1-9][0-9]*d$/;
+
+export function parseDate(
+  dateString: string | undefined,
+  propertyName: string,
+  defaultValue: Date
+): Date {
+  if (dateString === undefined) {
+    return defaultValue;
+  }
+
+  const parsedDate = parseIsoOrRelativeDate(dateString);
+  if (parsedDate === undefined) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.actions.actionsClient.invalidDate', {
+        defaultMessage: 'Invalid date for parameter {field}: "{dateValue}"',
+        values: {
+          field: propertyName,
+          dateValue: dateString,
+        },
+      })
+    );
+  }
+
+  return parsedDate;
+}
 
 /**
  * Parse an ISO date or NNx duration string as a Date
