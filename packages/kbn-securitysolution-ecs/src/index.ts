@@ -55,8 +55,8 @@ type OverwriteTypes =
 
 // Security Common Schema
 export interface Scs extends Omit<Ecs, OverwriteTypes> {
-  // Exists in Ecs
-  // overwrites to support multiple values for security entities
+  // Ecs Overrides
+  // overrides Ecs to support multiple values for security entities
   destination?: DestinationEcs;
   dns?: DnsEcs;
   event?: EventEcs;
@@ -75,7 +75,7 @@ export interface Scs extends Omit<Ecs, OverwriteTypes> {
   user?: UserEcs;
 
   // security specific Ecs
-  // exists only in security solution
+  // exists only in security solution Ecs definition
   _id: string;
   _index?: string;
   auditd?: AuditdEcs;
