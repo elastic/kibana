@@ -78,7 +78,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.maxBatchSizeDescription"
-                  defaultMessage="Data will be sent to the output when the agent has events which total larger then this configured maximum."
+                  defaultMessage="Data will be sent to the output when the agent has more events in the queue than this number."
                 />
               </EuiText>
             </EuiFlexItem>
@@ -116,7 +116,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
           label={
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.memQueueEventsLabel"
-              defaultMessage="Memory Queue Events"
+              defaultMessage="Memory Queue Size"
             />
           }
         >
@@ -128,7 +128,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.memQueueEventsSizeDescription"
-                  defaultMessage="Maximum number of events that can be stored in the queue. Default is set to 4096."
+                  defaultMessage="Maximum number of events that can be stored in the queue. Default is set to 4096. When this queue is full, new events are dropped."
                 />
               </EuiText>
             </EuiFlexItem>
@@ -155,7 +155,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.diskQueueSwitchDescription"
-                  defaultMessage="Once enabled, events will be queued on disk when there's a requirement to cache them on the agents in the event of connection loss."
+                  defaultMessage="Once enabled, events will be queued on disk if, for some reason, agent is not able to send them."
                 />
               </EuiText>
             </EuiFlexItem>
@@ -229,7 +229,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.diskQueueMaxSizeDescription"
-                  defaultMessage="Limits the disk size for spooling of data. If set too low, data may be lost when agent can't write data to the destination."
+                  defaultMessage="Limits the disk queue size for spooling of data. When data in the queue exceeds this limit, new events will be dropped."
                 />
               </EuiText>
             </EuiFlexItem>
@@ -291,7 +291,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
               <EuiText size="s" color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.compressionSwitchDescription"
-                  defaultMessage="Level 1 compression is the fastest, Level 9 however would provide the best compression."
+                  defaultMessage="Level 1 compression is the fastest, Level 9 however would provide the most compression."
                 />
               </EuiText>
             </EuiFlexItem>
