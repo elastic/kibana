@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { map, uniq } from 'lodash';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
   AgentService,
@@ -43,17 +43,26 @@ export type AgentStatusByAgentPolicyMap = Record<string, GetAgentStatusResponse[
 
 export const getAgentStatusesByAgentPolicies = async (
   agentService: AgentService,
-  agentPolicies: AgentPolicy[] | undefined
+  agentPolicies: AgentPolicy[] | undefined,
+  logger: Logger
 ): Promise<AgentStatusByAgentPolicyMap> => {
   if (!agentPolicies?.length) return {};
 
   const internalAgentService = agentService.asInternalUser;
   const result: AgentStatusByAgentPolicyMap = {};
 
-  for (const agentPolicy of agentPolicies) {
-    result[agentPolicy.id] = await internalAgentService.getAgentStatusForAgentPolicy(
-      agentPolicy.id
-    );
+  try {
+    for (const agentPolicy of agentPolicies) {
+      result[agentPolicy.id] = await internalAgentService.getAgentStatusForAgentPolicy(
+        agentPolicy.id
+      );
+    }
+  } catch (error) {
+    if (error.statusCode === 404) {
+      logger.debug('Index .fleet-agents does not exist yet, skipping point in time.');
+    } else {
+      throw error;
+    }
   }
 
   return result;
