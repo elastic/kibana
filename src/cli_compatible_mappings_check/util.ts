@@ -11,6 +11,8 @@ import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import { Client } from '@elastic/elasticsearch';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 
 export const CURRENT_MAPPINGS_FILE = path.join(__dirname, 'current_mappings.json');
 export function writeToMappingsFile(mappings: SavedObjectsTypeMappingDefinitions) {
@@ -56,4 +58,10 @@ export async function checkIfMappingsAreIncompatible({
     index,
     properties: nextMappings,
   });
+}
+
+export async function startES(): Promise<Client> {
+  const servers = createTestServers({ adjustTimeout: () => {} });
+  const esServer = await servers.startES();
+  return (esServer.es as any).getClient();
 }

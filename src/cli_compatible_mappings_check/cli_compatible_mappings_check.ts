@@ -8,27 +8,20 @@
 import fs from 'fs';
 import { Command } from 'commander';
 import deepEqual from 'fast-deep-equal';
-import type { Client } from '@elastic/elasticsearch';
 import { kibanaPackageJson } from '@kbn/repo-info';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
+
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import { extractMappingsFromPlugins } from './extract_mappings_from_plugins';
 import {
-  CURRENT_MAPPINGS_FILE,
-  exit,
   log,
+  exit,
+  startES,
   writeToMappingsFile,
+  CURRENT_MAPPINGS_FILE,
   checkIfMappingsAreIncompatible,
 } from './util';
 
 const program = new Command('bin/compatible-mappings-check');
-
-async function startES(): Promise<Client> {
-  const servers = createTestServers({ adjustTimeout: () => {} });
-  const esServer = await servers.startES();
-  return (esServer.es as any).getClient();
-}
 
 program
   .version(kibanaPackageJson.version)
