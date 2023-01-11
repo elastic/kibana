@@ -1,3 +1,7 @@
-.euiAccordionWithDescription:hover {
+.euiAccordionWithDescription:hover, .euiAccordionWithDescription:focus {
   text-decoration: none;
+}
+
+.subFeaturePanel {
+  margin-left: $euiSizeL + $euiSizeXS;
 }

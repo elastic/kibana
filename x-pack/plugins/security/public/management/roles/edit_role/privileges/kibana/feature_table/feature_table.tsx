@@ -22,7 +22,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { CSSObject } from '@emotion/react';
 import type { ReactElement } from 'react';
 import React, { Component } from 'react';
 
@@ -37,10 +36,6 @@ import { FeatureTableCell } from '../feature_table_cell';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
-
-const subFeatureTabSpacing: CSSObject = {
-  'margin-left': '30px',
-};
 
 interface Props {
   role: Role;
@@ -114,7 +109,7 @@ export class FeatureTable extends Component<Props, State> {
         >
           {category.euiIconType ? (
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={category.euiIconType} className="could it be this" />
+              <EuiIcon size="m" type={category.euiIconType} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={1}>
@@ -249,7 +244,7 @@ export class FeatureTable extends Component<Props, State> {
               }}
             >
               <EuiSpacer size="s" />
-              <EuiPanel color="subdued" paddingSize="s" css={subFeatureTabSpacing}>
+              <EuiPanel color="subdued" paddingSize="s" className="subFeaturePanel">
                 <FeatureTableExpandedRow
                   feature={feature}
                   privilegeIndex={this.props.privilegeIndex}
