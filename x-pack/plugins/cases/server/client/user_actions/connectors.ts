@@ -52,16 +52,16 @@ export const getConnectors = async (
       userActionService,
     });
 
-    const results: GetCaseConnectorsResponse = [];
+    const results: GetCaseConnectorsResponse = {};
 
     for (const enrichedConnector of enrichedConnectors) {
-      results.push({
+      results[enrichedConnector.connector.id] = {
         ...enrichedConnector.connector,
         name: enrichedConnector.name,
         needsToBePushed: hasDataToPush(enrichedConnector),
         latestPushDate: enrichedConnector.pushInfo?.pushDate.toISOString(),
         hasBeenPushed: hasBeenPushed(enrichedConnector),
-      });
+      };
     }
 
     return GetCaseConnectorsResponseRt.encode(results);

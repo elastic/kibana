@@ -65,11 +65,11 @@ export default ({ getService }: FtrProviderContext): void => {
       serviceNowServer.close();
     });
 
-    it('does not return a case that does not have a connector', async () => {
+    it('does not return the connectors for a case that does not have connectors', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
 
       const connectors = await getConnectors({ caseId: postedCase.id, supertest });
-      expect(connectors.length).to.be(0);
+      expect(Object.keys(connectors).length).to.be(0);
     });
 
     it('retrieves multiple connectors', async () => {
@@ -114,9 +114,9 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const connectors = await getConnectors({ caseId: theCase.id, supertest });
-      expect(connectors.length).to.be(2);
-      expect(connectors[0].id).to.be(serviceNowConnector.id);
-      expect(connectors[1].id).to.be(jiraConnector.id);
+      expect(Object.keys(connectors).length).to.be(2);
+      expect(connectors[serviceNowConnector.id].id).to.be(serviceNowConnector.id);
+      expect(connectors[jiraConnector.id].id).to.be(jiraConnector.id);
     });
 
     describe('retrieving fields', () => {
@@ -134,8 +134,10 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const connectors = await getConnectors({ caseId: theCase.id, supertest });
-        expect(connectors.length).to.be(1);
-        expect(connectors[0].fields).to.eql({
+        const snConnector = connectors[connector.id];
+
+        expect(Object.keys(connectors).length).to.be(1);
+        expect(connectors[connector.id].fields).to.eql({
           category: 'software',
           impact: '2',
           severity: '2',
@@ -143,9 +145,9 @@ export default ({ getService }: FtrProviderContext): void => {
           urgency: '2',
         });
 
-        expect(connectors[0].needsToBePushed).to.be(false);
-        expect(connectors[0].name).to.be('ServiceNow Connector');
-        expect(connectors[0].id).to.be(connector.id);
+        expect(snConnector.needsToBePushed).to.be(false);
+        expect(snConnector.name).to.be('ServiceNow Connector');
+        expect(snConnector.id).to.be(connector.id);
       });
 
       it('retrieves a single connector using the connector user action', async () => {
@@ -180,8 +182,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const connectors = await getConnectors({ caseId: postedCase.id, supertest });
 
-        expect(connectors.length).to.be(1);
-        expect(connectors[0].id).to.be(jiraConnector.id);
+        expect(Object.keys(connectors).length).to.be(1);
+        expect(connectors[jiraConnector.id].id).to.be(jiraConnector.id);
       });
 
       it('returns the fields of the connector update after a case was created with a connector', async () => {
@@ -218,8 +220,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const connectors = await getConnectors({ caseId: postedCase.id, supertest });
 
-        expect(connectors.length).to.be(1);
-        expect(connectors[0].fields).to.eql({
+        expect(Object.keys(connectors).length).to.be(1);
+        expect(connectors[serviceNowConnector.id].fields).to.eql({
           urgency: '3',
           impact: '2',
           severity: '2',
@@ -232,7 +234,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('push', () => {
       describe('latestPushDate', () => {
         it('does not set latestPushDate when the connector has not been used to push', async () => {
-          const { postedCase } = await createCaseWithConnector({
+          const { postedCase, connector } = await createCaseWithConnector({
             supertest,
             serviceNowSimulatorURL,
             actionsRemover,
@@ -240,8 +242,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const connectors = await getConnectors({ caseId: postedCase.id, supertest });
 
-          expect(connectors.length).to.be(1);
-          expect(connectors[0].latestPushDate).to.be(undefined);
+          expect(Object.keys(connectors).length).to.be(1);
+          expect(connectors).to.have.property(connector.id);
+          expect(connectors[connector.id].latestPushDate).to.be(undefined);
         });
 
         it('sets latestPushDate to the most recent push date', async () => {
@@ -277,14 +280,14 @@ export default ({ getService }: FtrProviderContext): void => {
           const pushes = userActions.filter((ua) => ua.type === ActionTypes.pushed);
           const latestPush = pushes[pushes.length - 1];
 
-          expect(connectors.length).to.be(1);
-          expect(connectors[0].latestPushDate).to.eql(latestPush.created_at);
+          expect(Object.keys(connectors).length).to.be(1);
+          expect(connectors[connector.id].latestPushDate).to.eql(latestPush.created_at);
         });
       });
 
       describe('hasBeenPushed', () => {
         it('sets hasBeenPushed to false when the connector has not been used to push', async () => {
-          const { postedCase } = await createCaseWithConnector({
+          const { postedCase, connector } = await createCaseWithConnector({
             supertest,
             serviceNowSimulatorURL,
             actionsRemover,
@@ -292,8 +295,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const connectors = await getConnectors({ caseId: postedCase.id, supertest });
 
-          expect(connectors.length).to.be(1);
-          expect(connectors[0].hasBeenPushed).to.be(false);
+          expect(Object.keys(connectors).length).to.be(1);
+          expect(connectors[connector.id].hasBeenPushed).to.be(false);
         });
 
         it('sets hasBeenPushed to true when the connector was used to push', async () => {
@@ -311,8 +314,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const connectors = await getConnectors({ caseId: postedCase.id, supertest });
 
-          expect(connectors.length).to.be(1);
-          expect(connectors[0].hasBeenPushed).to.be(true);
+          expect(Object.keys(connectors).length).to.be(1);
+          expect(connectors[connector.id].hasBeenPushed).to.be(true);
         });
       });
 
@@ -326,9 +329,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const connectors = await getConnectors({ caseId: postedCase.id, supertest });
 
-          expect(connectors.length).to.be(1);
-          expect(connectors[0].id).to.be(connector.id);
-          expect(connectors[0].needsToBePushed).to.be(true);
+          expect(Object.keys(connectors).length).to.be(1);
+          expect(connectors[connector.id].id).to.be(connector.id);
+          expect(connectors[connector.id].needsToBePushed).to.be(true);
         });
 
         it('sets needs to push to false when a push has occurred', async () => {
@@ -346,9 +349,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const connectors = await getConnectors({ caseId: postedCase.id, supertest });
 
-          expect(connectors.length).to.be(1);
-          expect(connectors[0].id).to.be(connector.id);
-          expect(connectors[0].needsToBePushed).to.be(false);
+          expect(Object.keys(connectors).length).to.be(1);
+          expect(connectors[connector.id].id).to.be(connector.id);
+          expect(connectors[connector.id].needsToBePushed).to.be(false);
         });
 
         it('sets needs to push to true when a comment was created after the last push', async () => {
@@ -372,9 +375,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const connectors = await getConnectors({ caseId: postedCase.id, supertest });
 
-          expect(connectors.length).to.be(1);
-          expect(connectors[0].id).to.be(connector.id);
-          expect(connectors[0].needsToBePushed).to.be(true);
+          expect(Object.keys(connectors).length).to.be(1);
+          expect(connectors[connector.id].id).to.be(connector.id);
+          expect(connectors[connector.id].needsToBePushed).to.be(true);
         });
 
         it('sets needs to push to false when the severity of a case was changed after the last push', async () => {
@@ -405,9 +408,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const connectors = await getConnectors({ caseId: postedCase.id, supertest });
 
-          expect(connectors.length).to.be(1);
-          expect(connectors[0].id).to.be(connector.id);
-          expect(connectors[0].needsToBePushed).to.be(false);
+          expect(Object.keys(connectors).length).to.be(1);
+          expect(connectors[connector.id].id).to.be(connector.id);
+          expect(connectors[connector.id].needsToBePushed).to.be(false);
         });
 
         it('sets needs to push to false the service now connector and true for jira', async () => {
@@ -453,11 +456,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const connectors = await getConnectors({ caseId: postedCase.id, supertest });
 
-          expect(connectors.length).to.be(2);
-          expect(connectors[0].id).to.be(serviceNowConnector.id);
-          expect(connectors[0].needsToBePushed).to.be(false);
-          expect(connectors[1].id).to.be(jiraConnector.id);
-          expect(connectors[1].needsToBePushed).to.be(true);
+          expect(Object.keys(connectors).length).to.be(2);
+          expect(connectors[serviceNowConnector.id].id).to.be(serviceNowConnector.id);
+          expect(connectors[serviceNowConnector.id].needsToBePushed).to.be(false);
+          expect(connectors[jiraConnector.id].id).to.be(jiraConnector.id);
+          expect(connectors[jiraConnector.id].needsToBePushed).to.be(true);
         });
 
         describe('changing connector fields', () => {
@@ -556,9 +559,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
             const connectors = await getConnectors({ caseId: postedCase.id, supertest });
 
-            expect(connectors.length).to.be(1);
-            expect(connectors[0].id).to.be(serviceNowConnector.id);
-            expect(connectors[0].needsToBePushed).to.be(false);
+            expect(Object.keys(connectors).length).to.be(1);
+            expect(connectors[serviceNowConnector.id].id).to.be(serviceNowConnector.id);
+            expect(connectors[serviceNowConnector.id].needsToBePushed).to.be(false);
           });
 
           it('sets needs to push to true when the latest connector fields do not match those used in the push', async () => {
@@ -601,9 +604,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
             const connectors = await getConnectors({ caseId: postedCase.id, supertest });
 
-            expect(connectors.length).to.be(1);
-            expect(connectors[0].id).to.be(serviceNowConnector.id);
-            expect(connectors[0].needsToBePushed).to.be(true);
+            expect(Object.keys(connectors).length).to.be(1);
+            expect(connectors[serviceNowConnector.id].id).to.be(serviceNowConnector.id);
+            expect(connectors[serviceNowConnector.id].needsToBePushed).to.be(true);
           });
         });
       });
@@ -628,8 +631,8 @@ export default ({ getService }: FtrProviderContext): void => {
             auth: { user, space: 'space1' },
           });
 
-          expect(connectors.length).to.eql(1);
-          expect(connectors[0].id).to.eql(serviceNowConnector.id);
+          expect(Object.keys(connectors).length).to.eql(1);
+          expect(connectors[serviceNowConnector.id].id).to.eql(serviceNowConnector.id);
         }
       });
 
