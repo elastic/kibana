@@ -60,7 +60,7 @@ describe(`useRefetchByRestartingSession`, () => {
       children: React.ReactNode;
     },
     {
-      searchSessionId: string;
+      searchSessionId: string | undefined;
       refetchByRestartingSession: Refetch;
     }
   >;
