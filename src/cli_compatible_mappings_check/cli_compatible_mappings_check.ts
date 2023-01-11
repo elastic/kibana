@@ -72,7 +72,7 @@ program
           return;
         }
 
-        // TODO: Implement check for additive only changes.
+        // TODO: Implement check to enforce additive only changes.
 
         log.info(`Starting ES node...`);
         const esClient = await startES();
