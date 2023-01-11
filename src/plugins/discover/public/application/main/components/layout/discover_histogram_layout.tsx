@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { RefObject } from 'react';
-import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
+import React, { RefObject, useMemo } from 'react';
+import { UnifiedHistogramLayout } from '@kbn/unified-histogram';
 import { css } from '@emotion/react';
+import { search } from '@kbn/data-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { ResetSearchButton } from './reset_search_button';
+import type { DataFetch$ } from '../../hooks/use_saved_search';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resetSavedSearch: () => void;
@@ -22,6 +24,7 @@ export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resizeRef: RefObject<HTMLDivElement>;
   inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
+  savedSearchFetch$: DataFetch$;
 }
 
 export const DiscoverHistogramLayout = ({
@@ -30,6 +33,7 @@ export const DiscoverHistogramLayout = ({
   resetSavedSearch,
   savedSearch,
   savedSearchData$,
+  savedSearchFetch$,
   stateContainer,
   isTimeBased,
   resizeRef,
@@ -37,7 +41,8 @@ export const DiscoverHistogramLayout = ({
   searchSessionManager,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
-  const services = useDiscoverServices();
+  const discoverServices = useDiscoverServices();
+  const services = useMemo(() => ({ ...discoverServices, search }), [discoverServices]);
 
   const commonProps = {
     dataView,
@@ -51,6 +56,7 @@ export const DiscoverHistogramLayout = ({
     isTimeBased,
     inspectorAdapters,
     searchSessionManager,
+    savedSearchFetch$,
     ...commonProps,
   });
 

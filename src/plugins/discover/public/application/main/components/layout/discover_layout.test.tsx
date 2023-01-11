@@ -24,6 +24,7 @@ import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_
 import {
   AvailableFields$,
   DataDocuments$,
+  DataFetch$,
   DataMain$,
   DataRefetch$,
   DataTotalHits$,
@@ -58,7 +59,9 @@ function mountComponent(
       [SIDEBAR_CLOSED_KEY]: prevSidebarClosed,
     }) as unknown as Storage,
   } as unknown as DiscoverServices;
-
+  services.data.query.timefilter.timefilter.getTime = () => {
+    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+  };
   (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
     language: 'kuery',
     query: '',
@@ -113,6 +116,7 @@ function mountComponent(
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     savedSearchData$,
+    savedSearchFetch$: new Subject() as DataFetch$,
     savedSearchRefetch$: new Subject() as DataRefetch$,
     searchSource: searchSourceMock,
     state: { columns: [], query, hideChart: false, interval: 'auto' },
