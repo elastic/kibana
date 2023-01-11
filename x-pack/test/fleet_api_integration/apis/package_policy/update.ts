@@ -210,6 +210,10 @@ export default function (providerContext: FtrProviderContext) {
         .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
+      await supertest
+        .delete(`/api/fleet/epm/packages/input_package-1.0.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
     });
 
     after(async () => {
