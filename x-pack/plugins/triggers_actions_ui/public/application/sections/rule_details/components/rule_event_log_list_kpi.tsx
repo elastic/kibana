@@ -140,7 +140,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={4}>
-        <EventLogStat title="Response" tooltip={RESPONSE_TOOLTIP}>
+        <EventLogStat title="Responses" tooltip={RESPONSE_TOOLTIP}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiStat

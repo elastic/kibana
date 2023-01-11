@@ -19,7 +19,7 @@ export const EventLogStat = ({
 }) => {
   return (
     <EuiPanel color="subdued">
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <b>{title}</b>
         </EuiFlexItem>

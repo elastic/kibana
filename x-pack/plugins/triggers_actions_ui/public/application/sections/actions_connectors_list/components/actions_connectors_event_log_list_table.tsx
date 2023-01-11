@@ -302,44 +302,6 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
 
   const columns: EuiDataGridColumn[] = useMemo(
     () => [
-      ...(hasConnectorNames
-        ? [
-            {
-              id: 'connector_name',
-              displayAsText: i18n.translate(
-                'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.connectorName',
-                {
-                  defaultMessage: 'Connector',
-                }
-              ),
-              isSortable: getIsColumnSortable('connector_name'),
-              actions: {
-                showSortAsc: false,
-                showSortDesc: false,
-                showHide: false,
-              },
-            },
-          ]
-        : []),
-      ...(showFromAllSpaces
-        ? [
-            {
-              id: 'space_ids',
-              displayAsText: i18n.translate(
-                'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.spaceIds',
-                {
-                  defaultMessage: 'Space',
-                }
-              ),
-              isSortable: getIsColumnSortable('space_ids'),
-              actions: {
-                showSortAsc: false,
-                showSortDesc: false,
-                showHide: false,
-              },
-            },
-          ]
-        : []),
       {
         id: 'id',
         displayAsText: i18n.translate(
@@ -406,6 +368,25 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         isResizable: false,
         initialWidth: 150,
       },
+      ...(hasConnectorNames
+        ? [
+            {
+              id: 'connector_name',
+              displayAsText: i18n.translate(
+                'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.connectorName',
+                {
+                  defaultMessage: 'Connector',
+                }
+              ),
+              isSortable: getIsColumnSortable('connector_name'),
+              actions: {
+                showSortAsc: false,
+                showSortDesc: false,
+                showHide: false,
+              },
+            },
+          ]
+        : []),
       {
         id: 'message',
         actions: {
@@ -422,6 +403,21 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         cellActions: [],
       },
       {
+        id: 'execution_duration',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.duration',
+          {
+            defaultMessage: 'Duration',
+          }
+        ),
+        isSortable: getIsColumnSortable('execution_duration'),
+        isResizable: false,
+        actions: {
+          showHide: false,
+        },
+        initialWidth: 100,
+      },
+      {
         id: 'schedule_delay',
         displayAsText: i18n.translate(
           'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.scheduleDelay',
@@ -431,6 +427,25 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         ),
         isSortable: getIsColumnSortable('schedule_delay'),
       },
+      ...(showFromAllSpaces
+        ? [
+            {
+              id: 'space_ids',
+              displayAsText: i18n.translate(
+                'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.spaceIds',
+                {
+                  defaultMessage: 'Space',
+                }
+              ),
+              isSortable: getIsColumnSortable('space_ids'),
+              actions: {
+                showSortAsc: false,
+                showSortDesc: false,
+                showHide: false,
+              },
+            },
+          ]
+        : []),
     ],
     [onFilterChange, hasConnectorNames, showFromAllSpaces]
   );
