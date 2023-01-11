@@ -50,6 +50,7 @@ export async function setupEnterpriseSearch(logger: ToolingLog): Promise<void> {
       const dockerArgs: string[] = [
         `run`,
         `--name=enterprise-search-ftr`,
+        `--rm`,
         `-p`,
         `3002:3002`,
         `-e`,
