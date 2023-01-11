@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { RefObject } from 'react';
-import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
+import React, { RefObject, useCallback, useEffect, useState } from 'react';
+import {
+  UnifiedHistogramLayout,
+  UnifiedHistogramLayoutContainer,
+  UnifiedHistogramLayoutContainerApi,
+} from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverHistogram } from './use_discover_histogram';
@@ -54,6 +58,23 @@ export const DiscoverHistogramLayout = ({
     ...commonProps,
   });
 
+  const [unifiedHistogram, setUnifiedHistogram] = useState<UnifiedHistogramLayoutContainerApi>();
+  const onUnifiedHistogramRef = useCallback(
+    (ref: UnifiedHistogramLayoutContainerApi) => setUnifiedHistogram(ref),
+    []
+  );
+
+  useEffect(() => {
+    if (!unifiedHistogram) {
+      return;
+    }
+    setTimeout(() => {
+      if (unifiedHistogram && !unifiedHistogram.initialized) {
+        unifiedHistogram.initialize();
+      }
+    }, 5000);
+  }, [unifiedHistogram]);
+
   if (!histogramProps) {
     return null;
   }
@@ -63,23 +84,26 @@ export const DiscoverHistogramLayout = ({
   `;
 
   return (
-    <UnifiedHistogramLayout
-      resizeRef={resizeRef}
-      services={services}
-      dataView={dataView}
-      appendHitsCounter={
-        savedSearch?.id ? <ResetSearchButton resetSavedSearch={resetSavedSearch} /> : undefined
-      }
-      css={histogramLayoutCss}
-      {...histogramProps}
-    >
-      <DiscoverMainContent
-        {...commonProps}
-        {...mainContentProps}
-        // The documents grid doesn't rerender when the chart visibility changes
-        // which causes it to render blank space, so we need to force a rerender
-        key={`docKey${histogramProps.chart?.hidden}`}
-      />
-    </UnifiedHistogramLayout>
+    <>
+      <UnifiedHistogramLayoutContainer ref={onUnifiedHistogramRef} />
+      <UnifiedHistogramLayout
+        resizeRef={resizeRef}
+        services={services}
+        dataView={dataView}
+        appendHitsCounter={
+          savedSearch?.id ? <ResetSearchButton resetSavedSearch={resetSavedSearch} /> : undefined
+        }
+        css={histogramLayoutCss}
+        {...histogramProps}
+      >
+        <DiscoverMainContent
+          {...commonProps}
+          {...mainContentProps}
+          // The documents grid doesn't rerender when the chart visibility changes
+          // which causes it to render blank space, so we need to force a rerender
+          key={`docKey${histogramProps.chart?.hidden}`}
+        />
+      </UnifiedHistogramLayout>
+    </>
   );
 };
