@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { PluginStartDependencies } from '.';
 
 export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
@@ -111,6 +112,25 @@ export function initRoutes(
     async (context, request, response) => {
       const [, { taskManager }] = await core.getStartServices();
       logger.info(`Toggle session cleanup task (enabled: ${request.body.enabled}).`);
+
+      // Before enabling/disable task wait until it's in an idle state.
+      for (let i = 0; i < 10; i++) {
+        try {
+          const taskStatus = (await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME)).status;
+          if (taskStatus === TaskStatus.Idle) {
+            break;
+          } else if (i < 9) {
+            logger.debug(`Waiting for 2s before re-fetching cleanup task.`);
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+          }
+        } catch (err) {
+          logger.error(
+            `Failed to fetch task (enabled: ${request.body.enabled}): ${err?.message || err}.`
+          );
+          throw err;
+        }
+      }
+
       let bulkEnableDisableResult;
       try {
         if (request.body.enabled) {

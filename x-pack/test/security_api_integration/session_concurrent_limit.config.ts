@@ -47,9 +47,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${testEndpointsPlugin}`,
-        '--logging.root.level=debug',
         '--xpack.security.session.concurrentSessions.maxSessions=2',
-        '--xpack.security.session.cleanupInterval=10s',
         `--xpack.security.authc.providers=${JSON.stringify({
           basic: { basic1: { order: 0 } },
           saml: { saml1: { order: 1, realm: 'saml1' } },
