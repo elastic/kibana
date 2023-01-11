@@ -13,9 +13,13 @@ import { shallowWithIntl } from '@kbn/test-jest-helpers';
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
 describe('MoveData', () => {
-  test('render when cloud enabled', () => {
+  test('render when management NOT enabled', () => {
     const component = shallowWithIntl(
-      <MoveData addBasePath={addBasePathMock} isCloudEnabled={true} trackUiMetric={jest.fn()} />
+      <MoveData
+        addBasePath={addBasePathMock}
+        isManagementEnabled={false}
+        trackUiMetric={jest.fn()}
+      />
     );
 
     const button = component.find('EuiButton');
@@ -24,9 +28,13 @@ describe('MoveData', () => {
     expect(buttonProps.target).toBe('_blank');
   });
 
-  test('render when cloud NOT enabled', () => {
+  test('render when management enabled', () => {
     const component = shallowWithIntl(
-      <MoveData addBasePath={addBasePathMock} isCloudEnabled={false} trackUiMetric={jest.fn()} />
+      <MoveData
+        addBasePath={addBasePathMock}
+        isManagementEnabled={true}
+        trackUiMetric={jest.fn()}
+      />
     );
 
     const $button = component.find('EuiButton');

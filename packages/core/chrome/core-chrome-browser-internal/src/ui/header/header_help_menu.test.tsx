@@ -33,7 +33,7 @@ describe('HeaderHelpMenu', () => {
     component.find('EuiButtonEmpty').simulate('click');
 
     // 4 default links + the toggle button
-    expect(component.find('EuiButtonEmpty').length).toBe(5);
+    expect(component.find('EuiButtonEmpty').length).toBe(6);
   });
 
   test('it renders the global custom content + the default content', () => {
@@ -70,7 +70,7 @@ describe('HeaderHelpMenu', () => {
     component.find('EuiButtonEmpty').simulate('click');
 
     // 2 custom global link + 4 default links + the toggle button
-    expect(component.find('EuiButtonEmpty').length).toBe(7);
+    expect(component.find('EuiButtonEmpty').length).toBe(8);
 
     expect(component.find('[data-test-subj="my-test-custom-link"]').exists()).toBeTruthy();
 

@@ -24,14 +24,14 @@ import { createAppNavigationHandler } from '../app_navigation_handler';
 
 interface Props {
   addBasePath: (path: string) => string;
-  isCloudEnabled: boolean;
+  isManagementEnabled: boolean;
   trackUiMetric: (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void;
 }
 
-export const MoveData: FC<Props> = ({ addBasePath, isCloudEnabled, trackUiMetric }) => {
-  const migrateDataUrl = isCloudEnabled
-    ? 'https://ela.st/cloud-migration'
-    : '/app/management/data/migrate_data';
+export const MoveData: FC<Props> = ({ addBasePath, isManagementEnabled, trackUiMetric }) => {
+  const migrateDataUrl = isManagementEnabled
+    ? '/app/management/data/migrate_data'
+    : 'https://ela.st/cloud-migration';
   const buttonLabel = (
     <FormattedMessage
       id="home.addData.moveYourDataButtonLabel"
@@ -67,19 +67,7 @@ export const MoveData: FC<Props> = ({ addBasePath, isCloudEnabled, trackUiMetric
             />
           </EuiText>
           <EuiSpacer size="m" />
-          {isCloudEnabled ? (
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiButton
-              fill={true}
-              target="_blank"
-              href={migrateDataUrl}
-              onClick={() => {
-                trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud__home_cloud_enabled_link');
-              }}
-            >
-              {buttonLabel}
-            </EuiButton>
-          ) : (
+          {isManagementEnabled ? (
             // eslint-disable-next-line @elastic/eui/href-or-on-click
             <EuiButton
               color="primary"
@@ -87,6 +75,21 @@ export const MoveData: FC<Props> = ({ addBasePath, isCloudEnabled, trackUiMetric
               onClick={(event: MouseEvent) => {
                 trackUiMetric(METRIC_TYPE.CLICK, 'migrate_data_to_cloud__home_self_managed_link');
                 createAppNavigationHandler(migrateDataUrl)(event);
+              }}
+            >
+              {buttonLabel}
+            </EuiButton>
+          ) : (
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiButton
+              fill={true}
+              target="_blank"
+              href={migrateDataUrl}
+              onClick={() => {
+                trackUiMetric(
+                  METRIC_TYPE.CLICK,
+                  'migrate_data_to_cloud__home_management_disabled_link'
+                );
               }}
             >
               {buttonLabel}
