@@ -23,7 +23,8 @@ export interface EngineViewActions {
 export interface EngineViewValues {
   engineData: typeof FetchEngineApiLogic.values.data;
   engineName: typeof EngineNameLogic.values.engineName;
-  fetchEngineApiStatus: typeof FetchEngineApiLogic.values.apiStatus;
+  fetchEngineApiError: typeof FetchEngineApiLogic.values.error;
+  fetchEngineApiStatus: typeof FetchEngineApiLogic.values.status;
   isLoadingEngine: boolean;
 }
 
@@ -34,18 +35,15 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
       EngineNameLogic,
       ['engineName'],
       FetchEngineApiLogic,
-      ['data as engineData', 'apiStatus as fetchEngineApiStatus'],
+      ['data as engineData', 'status as fetchEngineApiStatus', 'error as fetchEngineApiError'],
     ],
   },
   path: ['enterprise_search', 'content', 'engine_view_logic'],
   selectors: ({ selectors }) => ({
     isLoadingEngine: [
       () => [selectors.fetchEngineApiStatus, selectors.engineData],
-      (
-        apiStatus: EngineViewValues['fetchEngineApiStatus'],
-        data: EngineViewValues['engineData']
-      ) => {
-        return apiStatus.status === Status.IDLE || (!data && apiStatus.status === Status.LOADING);
+      (status: EngineViewValues['fetchEngineApiStatus'], data: EngineViewValues['engineData']) => {
+        return status === Status.IDLE || (!data && status === Status.LOADING);
       },
     ],
   }),

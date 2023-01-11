@@ -23,7 +23,8 @@ import { EngineError } from './engine_error';
 import { EngineViewLogic } from './engine_view_logic';
 
 export const EngineView: React.FC = () => {
-  const { engineName, fetchEngineApiStatus, isLoadingEngine } = useValues(EngineViewLogic);
+  const { engineName, fetchEngineApiError, fetchEngineApiStatus, isLoadingEngine } =
+    useValues(EngineViewLogic);
   const { fetchEngine } = useActions(EngineViewLogic);
   const { tabId = EngineViewTabs.OVERVIEW } = useParams<{
     tabId?: string;
@@ -32,7 +33,7 @@ export const EngineView: React.FC = () => {
     fetchEngine({ engineName });
   }, [engineName]);
 
-  if (fetchEngineApiStatus.status === Status.ERROR) {
+  if (fetchEngineApiStatus === Status.ERROR) {
     return (
       <EnterpriseSearchEnginesPageTemplate
         isEmptyState
@@ -43,7 +44,7 @@ export const EngineView: React.FC = () => {
           rightSideItems: [],
         }}
         engineName={engineName}
-        emptyState={<EngineError apiStatus={fetchEngineApiStatus} />}
+        emptyState={<EngineError error={fetchEngineApiError} />}
       />
     );
   }

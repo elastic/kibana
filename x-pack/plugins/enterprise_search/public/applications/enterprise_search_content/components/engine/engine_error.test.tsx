@@ -8,7 +8,7 @@ import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { ApiError, Status } from '../../../../../common/types/api';
+import { HttpError } from '../../../../../common/types/api';
 
 import { ErrorStatePrompt } from '../../../shared/error_state';
 import { NotFoundPrompt } from '../../../shared/not_found';
@@ -25,17 +25,14 @@ describe('EngineError', () => {
   });
 
   it('renders 404 prompt for 404 error', () => {
-    const apiStatus = {
-      error: {
-        body: {
-          error: 'NOT_FOUND',
-          message: 'Not Found',
-          statusCode: 404,
-        },
+    const error = {
+      body: {
+        error: 'NOT_FOUND',
+        message: 'Not Found',
+        statusCode: 404,
       },
-      status: Status.ERROR,
-    } as ApiError;
-    const wrapper = mountWithIntl(<EngineError apiStatus={apiStatus} />);
+    } as HttpError;
+    const wrapper = mountWithIntl(<EngineError error={error} />);
 
     expect(wrapper.find(NotFoundPrompt)).toHaveLength(1);
     expect(wrapper.find(SendEnterpriseSearchTelemetry)).toHaveLength(1);
@@ -51,17 +48,14 @@ describe('EngineError', () => {
   });
 
   it('renders error prompt for api errors', () => {
-    const apiStatus = {
-      error: {
-        body: {
-          error: 'ERROR',
-          message: 'Internal Server Error',
-          statusCode: 500,
-        },
+    const error = {
+      body: {
+        error: 'ERROR',
+        message: 'Internal Server Error',
+        statusCode: 500,
       },
-      status: Status.ERROR,
-    } as ApiError;
-    const wrapper = mountWithIntl(<EngineError apiStatus={apiStatus} />);
+    } as HttpError;
+    const wrapper = mountWithIntl(<EngineError error={error} />);
 
     expect(wrapper.find(ErrorStatePrompt)).toHaveLength(1);
     expect(wrapper.find(SendEnterpriseSearchTelemetry)).toHaveLength(1);

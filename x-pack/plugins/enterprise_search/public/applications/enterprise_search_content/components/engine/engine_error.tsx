@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-import { ApiError } from '../../../../../common/types/api';
+import { HttpError } from '../../../../../common/types/api';
 
 import { ErrorStatePrompt } from '../../../shared/error_state';
 import { NotFoundPrompt } from '../../../shared/not_found';
@@ -18,8 +18,8 @@ import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 import { ENGINES_PATH } from '../../routes';
 
-export const EngineError: React.FC<{ apiStatus: ApiError }> = ({ apiStatus }) => {
-  if (apiStatus.error.body?.statusCode === 404) {
+export const EngineError: React.FC<{ error: HttpError }> = ({ error }) => {
+  if (error.body?.statusCode === 404) {
     return (
       <>
         <SendEnterpriseSearchTelemetry action="error" metric="not_found" />
