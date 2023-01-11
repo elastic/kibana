@@ -16,6 +16,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const observability = getService('observability');
   const supertest = getService('supertest');
   const find = getService('find');
@@ -138,6 +139,34 @@ export default ({ getService }: FtrProviderContext) => {
         );
         const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
         expect(ruleType).to.be('Log threshold');
+      });
+
+      it('shows alert summary widget component in the rule summary', async () => {
+        await observability.components.alertSummaryWidget.getCompactComponentSelectorOrFail();
+
+        const timeRangeTitle =
+          await observability.components.alertSummaryWidget.getCompactTimeRangeTitle();
+        expect(timeRangeTitle).to.be('Last 30 days');
+      });
+
+      it('handles alert summary widget component active click correctly', async () => {
+        const activeAlerts =
+          await observability.components.alertSummaryWidget.getCompactActiveAlertSelector();
+        await activeAlerts.click();
+
+        const url = await browser.getCurrentUrl();
+        expect(url.includes('tabId=alerts')).to.be(true);
+        expect(url.includes('status%3Aactive')).to.be(true);
+      });
+
+      it('handles alert summary widget component recovered click correctly', async () => {
+        const recoveredAlerts =
+          await observability.components.alertSummaryWidget.getCompactRecoveredAlertSelector();
+        await recoveredAlerts.click();
+
+        const url = await browser.getCurrentUrl();
+        expect(url.includes('tabId=alerts')).to.be(true);
+        expect(url.includes('status%3Arecovered')).to.be(true);
       });
     });
 
