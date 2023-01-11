@@ -15,6 +15,16 @@ import { FormatFactory } from '../../../common';
 import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
+declare global {
+  interface Window {
+    /**
+     * Debug setting to test CSV download
+     */
+    ELASTIC_LENS_CSV_DOWNLOAD_DEBUG?: boolean;
+    ELASTIC_LENS_CSV_CONTENT?: Record<string, { content: string; type: string }>;
+  }
+}
+
 async function downloadCSVs({
   activeData,
   title,
@@ -27,6 +37,9 @@ async function downloadCSVs({
   uiSettings: IUiSettingsClient;
 }) {
   if (!activeData) {
+    if (window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG) {
+      window.ELASTIC_LENS_CSV_CONTENT = undefined;
+    }
     return;
   }
   const datatables = Object.values(activeData);
@@ -50,6 +63,9 @@ async function downloadCSVs({
     },
     {}
   );
+  if (window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG) {
+    window.ELASTIC_LENS_CSV_CONTENT = content;
+  }
   if (content) {
     downloadMultipleAs(content);
   }
