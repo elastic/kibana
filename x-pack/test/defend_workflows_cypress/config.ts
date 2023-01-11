@@ -40,8 +40,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalTestsConfig
           .get('kbnTestServer.serverArgs')
           .filter((arg: string) => !arg.startsWith('--plugin-path=')),
-        '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
+        '--csp.strict=false',
         '--csp.script_src=["self", "unsafe-eval", "unsafe-inline"]',
         '--csp.disableUnsafeEval=true',
         // define custom kibana server args here
@@ -49,6 +49,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
       ],
     },
   };
