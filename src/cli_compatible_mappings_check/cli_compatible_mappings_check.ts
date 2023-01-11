@@ -5,45 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import chalk from 'chalk';
+import fs from 'fs';
 import { Command } from 'commander';
 import deepEqual from 'fast-deep-equal';
 import type { Client } from '@elastic/elasticsearch';
 import { kibanaPackageJson } from '@kbn/repo-info';
-import path from 'path';
-import fs from 'fs';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
-
 import { extractMappingsFromPlugins } from './extract_mappings_from_plugins';
-
-const MY_INDEX = '.kibana_mappings_check';
-const CURRENT_MAPPINGS_FILE = path.join(__dirname, 'current_mappings.json');
+import { CURRENT_MAPPINGS_FILE, exit, log, writeToMappingsFile } from './util';
 
 const program = new Command('bin/compatible-mappings-check');
-
-function writeToMappingsFile(mappings: SavedObjectsTypeMappingDefinitions) {
-  fs.writeFileSync(
-    CURRENT_MAPPINGS_FILE,
-    JSON.stringify(mappings, Object.keys(mappings).sort(), 2)
-  );
-}
-
-const log = {
-  // eslint-disable-next-line no-console
-  write: (...msg: string[]) => console.log(...msg),
-  info: (...msg: string[]) => log.write(chalk.cyan(`[info]`), ...msg),
-  fatal: (...msg: string[]) => log.write(chalk.red(`[fatal]`), ...msg),
-  success: (...msg: string[]) => log.write(chalk.green(`[success]`), ...msg),
-};
-
-function exit(code: number) {
-  process.nextTick(() => {
-    process.exit(code);
-  });
-}
 
 async function startES(): Promise<Client> {
   const servers = createTestServers({ adjustTimeout: () => {} });
@@ -55,6 +28,7 @@ program
   .version(kibanaPackageJson.version)
   .description(`Check whether this commit's SO mappings are compatible with latest from main`);
 
+const MY_INDEX = '.kibana_mappings_check';
 program.command('check').action(
   /**
    * Algorithm for checking compatible mappings. Should work in CI or local
@@ -71,7 +45,7 @@ program.command('check').action(
   async () => {
     if (!fs.existsSync(CURRENT_MAPPINGS_FILE)) {
       log.fatal(
-        `No existing mappings file found at ${CURRENT_MAPPINGS_FILE}. Run "generate" command first then retry this command.`
+        `No existing mappings file found at ${CURRENT_MAPPINGS_FILE}. Run the "generate" command then retry this command.`
       );
       exit(1);
       return;
@@ -125,7 +99,9 @@ program.command('check').action(
 );
 
 program.command('generate').action(async () => {
+  log.info(`Extracting mappings from plugins and writing to ${CURRENT_MAPPINGS_FILE}...`);
   writeToMappingsFile(await extractMappingsFromPlugins());
+  log.success(`Done!`);
   exit(0);
 });
 

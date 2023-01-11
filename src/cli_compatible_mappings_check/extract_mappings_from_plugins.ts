@@ -31,8 +31,8 @@ export async function extractMappingsFromPlugins(): Promise<SavedObjectsTypeMapp
 
   await root.preboot();
   const { savedObjects } = await root.setup();
-  // Skip root.start
-  await root.shutdown();
-
-  return mergeTypes(savedObjects.getTypeRegistry().getAllTypes());
+  const mappings = mergeTypes(savedObjects.getTypeRegistry().getAllTypes());
+  // Skip root.start, best effort shut down
+  await root.shutdown().catch(() => {});
+  return mappings;
 }
