@@ -13,9 +13,10 @@ export class ContentManagementPlugin implements Plugin {
   private rpcClient: RpcClient | undefined;
 
   public setup(core: CoreSetup): void {
-    this.rpcClient = new RpcClient({
+    const httpClient = {
       post: core.http.post,
-    });
+    };
+    this.rpcClient = new RpcClient(httpClient);
   }
 
   public start() {
@@ -24,8 +25,9 @@ export class ContentManagementPlugin implements Plugin {
     }
 
     const foo = async (rpc: RpcClient) => {
-      await rpc.get('7777');
-      // console.log('Result', res);
+      // Get a content by id
+      const res = await rpc.get({ type: 'dashboard', id: '123' });
+      console.log('Result', res);
     };
 
     foo(this.rpcClient);

@@ -7,12 +7,31 @@
  */
 import * as t from 'io-ts';
 
-export const Payload = t.tuple([t.string, t.unknown]);
+export const Payload = t.strict({
+  fn: t.string,
+  arg: t.unknown,
+});
+
+export const kibanaContent = t.intersection([
+  t.type({
+    id: t.string,
+    title: t.string,
+    type: t.string,
+  }),
+  t.partial({
+    description: t.string,
+  }),
+]);
+
+export type KibanaContent = t.TypeOf<typeof kibanaContent>;
 
 export const Calls = {
   get: () => ({
-    i: t.string,
-    o: t.number,
+    i: t.type({
+      type: t.string, // content type
+      id: t.string, // content ID
+    }),
+    o: kibanaContent,
   }),
 };
 

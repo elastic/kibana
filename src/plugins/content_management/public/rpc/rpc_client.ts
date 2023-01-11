@@ -17,12 +17,12 @@ export class RpcClient {
   // --------------------
   // Public API
   // --------------------
-  public get(id: string) {
-    return this.realize(Calls.get)(id);
+  public get({ type, id }: { type: string; id: string }) {
+    return this.realize(Calls.get)({ type, id });
   }
 
-  private sendMessage = <I, O>(name: string, input: I): Promise<O> => {
-    const payload = Payload.encode([name, input]);
+  private sendMessage = async <I, O>(name: string, input: I): Promise<O> => {
+    const payload = Payload.encode({ fn: name, arg: input });
     return this.http.post(API_ENDPOINT, { body: JSON.stringify(payload) });
   };
 

@@ -33,7 +33,10 @@ export function initRpcRoutes(
     {
       path: '/api/content_management/rpc',
       validate: {
-        body: schema.arrayOf(schema.string()),
+        body: schema.object({
+          fn: schema.string(),
+          arg: schema.object({}, { unknowns: 'allow' }),
+        }),
       },
     },
     async (context, request, response) => {

@@ -37,12 +37,12 @@ export class FunctionHandler<Context> {
       throw new Error(`Payload error: ${payload}`);
     }
 
-    const [name, args] = payload.right;
-    const handler = this.registry[name];
-    if (!handler) throw new Error(`Handler missing for ${name}`);
+    const { fn, arg } = payload.right;
+    const handler = this.registry[fn];
+    if (!handler) throw new Error(`Handler missing for ${fn}`);
 
-    const input = handler.type.i.decode(args);
-    if (isLeft(input)) throw new Error(`Invalid input for ${name}: ${input}`);
+    const input = handler.type.i.decode(arg);
+    if (isLeft(input)) throw new Error(`Invalid input for ${fn}: ${input}`);
 
     const result = await handler.fn(context, input.right);
     return { result };
