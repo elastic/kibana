@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-// FIXME:PT breakup module in order to avoid turning off eslint rule below
-/* eslint-disable complexity */
-
-import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { executionTranslations } from './translations';
 import type { ParsedCommandInterface } from '../../../service/types';
 import { ConsoleCodeBlock } from '../../console_code_block';
 import { handleInputAreaState } from './handle_input_area_state';
@@ -165,20 +161,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   const requiredArgs = getRequiredArguments(commandDefinition.args);
   const exclusiveOrArgs = getExclusiveOrArgs(commandDefinition.args);
 
-  const exclusiveOrErrorMessage = (
-    <ConsoleCodeBlock>
-      <FormattedMessage
-        id="xpack.securitySolution.console.commandValidation.exclusiveOr"
-        defaultMessage="This command supports only one of the following arguments: {argNames}"
-        values={{
-          argNames: (
-            <ConsoleCodeBlock bold inline>
-              {exclusiveOrArgs.map(toCliArgumentOption).join(', ')}
-            </ConsoleCodeBlock>
-          ),
-        }}
-      />
-    </ConsoleCodeBlock>
+  const exclusiveOrErrorMessage = executionTranslations.onlyOneFromExclusiveOr(
+    exclusiveOrArgs.map(toCliArgumentOption).join(', ')
   );
 
   // If args were entered, then validate them
@@ -217,12 +201,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         createCommandHistoryEntry(
           cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
           createCommandExecutionState({
-            errorMessage: i18n.translate(
-              'xpack.securitySolution.console.commandValidation.noArgumentsSupported',
-              {
-                defaultMessage: 'Command does not support any arguments',
-              }
-            ),
+            errorMessage: executionTranslations.NO_ARGUMENTS_SUPPORTED,
           }),
           false
         )
@@ -238,26 +217,10 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         createCommandHistoryEntry(
           cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
           createCommandExecutionState({
-            errorMessage: (
-              <ConsoleCodeBlock>
-                <FormattedMessage
-                  id="xpack.securitySolution.console.commandValidation.unknownArgument"
-                  defaultMessage="The following {command} {countOfInvalidArgs, plural, =1 {argument is} other {arguments are}} not supported by this command: {unknownArgs}"
-                  values={{
-                    countOfInvalidArgs: unknownInputArgs.length,
-                    command: (
-                      <ConsoleCodeBlock bold inline>
-                        {parsedInput.name}
-                      </ConsoleCodeBlock>
-                    ),
-                    unknownArgs: (
-                      <ConsoleCodeBlock bold inline>
-                        {unknownInputArgs.map(toCliArgumentOption).join(', ')}
-                      </ConsoleCodeBlock>
-                    ),
-                  }}
-                />
-              </ConsoleCodeBlock>
+            errorMessage: executionTranslations.unknownArgument(
+              unknownInputArgs.length,
+              parsedInput.name,
+              unknownInputArgs.map(toCliArgumentOption).join(', ')
             ),
           }),
           false
@@ -276,15 +239,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
             createCommandExecutionState({
               errorMessage: (
                 <ConsoleCodeBlock>
-                  {i18n.translate(
-                    'xpack.securitySolution.console.commandValidation.missingRequiredArg',
-                    {
-                      defaultMessage: 'Missing required argument: {argName}',
-                      values: {
-                        argName: toCliArgumentOption(requiredArg),
-                      },
-                    }
-                  )}
+                  {executionTranslations.missingRequiredArg(requiredArg)}
                 </ConsoleCodeBlock>
               ),
             }),
@@ -323,15 +278,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
             createCommandExecutionState({
               errorMessage: (
-                <ConsoleCodeBlock>
-                  {i18n.translate(
-                    'xpack.securitySolution.console.commandValidation.unsupportedArg',
-                    {
-                      defaultMessage: 'Unsupported argument: {argName}',
-                      values: { argName: toCliArgumentOption(argName) },
-                    }
-                  )}
-                </ConsoleCodeBlock>
+                <ConsoleCodeBlock>{executionTranslations.unsupportedArg(argName)}</ConsoleCodeBlock>
               ),
             }),
             false
@@ -348,13 +295,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
             createCommandExecutionState({
               errorMessage: (
                 <ConsoleCodeBlock>
-                  {i18n.translate(
-                    'xpack.securitySolution.console.commandValidation.argSupportedOnlyOnce',
-                    {
-                      defaultMessage: 'Argument can only be used once: {argName}',
-                      values: { argName: toCliArgumentOption(argName) },
-                    }
-                  )}
+                  {executionTranslations.noMultiplesAllowed(argName)}
                 </ConsoleCodeBlock>
               ),
             }),
@@ -367,19 +308,19 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         let dataValidationError = '';
 
         if (argInput.length === 0) {
-          dataValidationError = `Argument --${argName} must have a value`;
+          dataValidationError = executionTranslations.mustHaveValue(argName);
         } else {
           argInput.some((argValue, index) => {
             switch (argDefinition.mustHaveValue) {
               case true:
               case 'non-empty-string':
                 if (typeof argValue === 'boolean') {
-                  dataValidationError = `Argument --${argName} must have a value`;
+                  dataValidationError = executionTranslations.mustHaveValue(argName);
                 } else if (
                   argDefinition.mustHaveValue === 'non-empty-string' &&
                   argValue.trim().length === 0
                 ) {
-                  dataValidationError = `Argument --${argName} must have a value`;
+                  dataValidationError = executionTranslations.mustHaveNonBlankValue(argName);
                 }
                 break;
 
@@ -389,11 +330,11 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                   const valueNumber = Number(argValue);
 
                   if (!Number.isSafeInteger(valueNumber)) {
-                    dataValidationError = `Argument --${argName} value must be a number`;
+                    dataValidationError = executionTranslations.mustBeNumber(argName);
                   } else {
                     if (argDefinition.mustHaveValue === 'number-greater-than-zero') {
                       if (valueNumber <= 0) {
-                        dataValidationError = `Argument --${argName} value must be greater than zero`;
+                        dataValidationError = executionTranslations.mustBeGreaterThanZero(argName);
                       }
                     }
                   }
@@ -412,17 +353,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
 
               createCommandExecutionState({
-                errorMessage: (
-                  <ConsoleCodeBlock>
-                    {i18n.translate(
-                      'xpack.securitySolution.console.commandValidation.dataValueInvalid',
-                      {
-                        defaultMessage: dataValidationError,
-                        values: { argName: toCliArgumentOption(argName) },
-                      }
-                    )}
-                  </ConsoleCodeBlock>
-                ),
+                errorMessage: <ConsoleCodeBlock>{dataValidationError}</ConsoleCodeBlock>,
               }),
               false
             )
@@ -442,13 +373,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               createCommandExecutionState({
                 errorMessage: (
                   <ConsoleCodeBlock>
-                    {i18n.translate(
-                      'xpack.securitySolution.console.commandValidation.invalidArgValue',
-                      {
-                        defaultMessage: 'Invalid argument value: {argName}. {error}',
-                        values: { argName: toCliArgumentOption(argName), error: validationResult },
-                      }
-                    )}
+                    {executionTranslations.argValueValidatorError(argName, validationResult)}
                   </ConsoleCodeBlock>
                 ),
               }),
@@ -466,14 +391,9 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         createCommandExecutionState({
           errorMessage: (
             <ConsoleCodeBlock>
-              {i18n.translate('xpack.securitySolution.console.commandValidation.mustHaveArgs', {
-                defaultMessage: 'Missing required arguments: {requiredArgs}',
-                values: {
-                  requiredArgs: requiredArgs
-                    .map((argName) => toCliArgumentOption(argName))
-                    .join(', '),
-                },
-              })}
+              {executionTranslations.missingArguments(
+                requiredArgs.map((argName) => toCliArgumentOption(argName)).join(', ')
+              )}
             </ConsoleCodeBlock>
           ),
         }),
@@ -498,11 +418,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
         createCommandExecutionState({
           errorMessage: (
-            <ConsoleCodeBlock>
-              {i18n.translate('xpack.securitySolution.console.commandValidation.oneArgIsRequired', {
-                defaultMessage: 'At least one argument must be used',
-              })}
-            </ConsoleCodeBlock>
+            <ConsoleCodeBlock>{executionTranslations.MUST_HAVE_AT_LEAST_ONE_ARG}</ConsoleCodeBlock>
           ),
         }),
         false
