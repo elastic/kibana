@@ -14,14 +14,14 @@ import {
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
-  SESSION_ID,
   TRANSACTION_NAME,
+  SPAN_SUBTYPE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 
-export async function getSessionsChart({
+export async function getHttpRequestsChart({
   kuery,
   apmEventClient,
   serviceName,
@@ -46,15 +46,15 @@ export async function getSessionsChart({
     minBucketSize: 60,
   });
 
-  const response = await apmEventClient.search('get_sessions_chart', {
-    apm: { events: [ProcessorEvent.transaction] },
+  const response = await apmEventClient.search('get_http_requests_chart', {
+    apm: { events: [ProcessorEvent.span] },
     body: {
       track_total_hits: false,
       size: 0,
       query: {
         bool: {
           filter: [
-            { exists: { field: SESSION_ID } },
+            { exists: { field: SPAN_SUBTYPE } },
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(TRANSACTION_TYPE, transactionType),
             ...termQuery(TRANSACTION_NAME, transactionName),
@@ -72,8 +72,8 @@ export async function getSessionsChart({
             min_doc_count: 0,
           },
           aggs: {
-            sessions: {
-              cardinality: { field: SESSION_ID },
+            requests: {
+              filter: { term: { [SPAN_SUBTYPE]: 'http' } },
             },
           },
         },

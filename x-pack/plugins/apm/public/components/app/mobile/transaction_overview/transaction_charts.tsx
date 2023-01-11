@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
 import { SessionsChart } from '../charts/sessions_chart';
+import { HttpRequestsChart } from '../charts/http_requests_chart';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
 import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
 
@@ -47,8 +48,19 @@ export function MobileTransactionCharts({
               transactionName={transactionName}
             />
           </EuiFlexItem>
-          <EuiFlexItem style={{ flexShrink: 1 }}></EuiFlexItem>
+          <EuiFlexItem style={{ flexShrink: 1 }}>
+            <HttpRequestsChart
+              kuery={kuery}
+              start={start}
+              end={end}
+              environment={environment}
+              serviceName={serviceName}
+              transactionName={transactionName}
+            />
+          </EuiFlexItem>
         </EuiFlexGrid>
+
+        <EuiSpacer size="s" />
 
         <EuiFlexGrid columns={3} gutterSize="s">
           <EuiFlexItem data-cy={`transaction-duration-charts`}>

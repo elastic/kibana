@@ -25,13 +25,10 @@ const INITIAL_STATE = {
   timeseries: [],
 };
 
-function yLabelFormat(y?: number | null) {
-  return y;
-}
+type HttpRequests =
+  APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests'>;
 
-type SessionsChart =
-  APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions'>;
-export function SessionsChart({
+export function HttpRequestsChart({
   kuery,
   serviceName,
   start,
@@ -49,12 +46,12 @@ export function SessionsChart({
   environment: string;
 }) {
   const comparisonChartTheme = getComparisonChartTheme();
-  const { currentPeriodColor } = getTimeSeriesColor(ChartType.HTTP_REQUESTS);
+  const { currentPeriodColor } = getTimeSeriesColor(ChartType.SESSIONS);
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
-        'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions',
+        'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests',
         {
           params: {
             path: {
@@ -88,8 +85,8 @@ export function SessionsChart({
       data: data.timeseries,
       type: 'linemark',
       color: currentPeriodColor,
-      title: i18n.translate('xpack.apm.transactions.sessionsChartTitle', {
-        defaultMessage: 'Sessions',
+      title: i18n.translate('xpack.apm.transactions.httpRequestsTitle', {
+        defaultMessage: 'HTTP Requests',
       }),
     },
   ];
@@ -99,8 +96,8 @@ export function SessionsChart({
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate('xpack.apm.transactions.sessionsChartTitle', {
-                defaultMessage: 'Sessions',
+              {i18n.translate('xpack.apm.transactions.httpRequestsTitle', {
+                defaultMessage: 'HTTP Requests',
               })}
             </h2>
           </EuiTitle>
@@ -109,9 +106,9 @@ export function SessionsChart({
         <EuiFlexItem grow={false}>
           <EuiIconTip
             content={i18n.translate(
-              'xpack.apm.transactions.sessionsCharTooltip',
+              'xpack.apm.transactions.httpRequestsTooltip',
               {
-                defaultMessage: 'Unique sessions id',
+                defaultMessage: 'Total http requests',
               }
             )}
             position="right"
@@ -120,7 +117,7 @@ export function SessionsChart({
       </EuiFlexGroup>
 
       <TimeseriesChartWithContext
-        id="sessions"
+        id="requests"
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
