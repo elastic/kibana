@@ -28,9 +28,11 @@ const setArgSelectorValueToParsedArgs = (
   enteredCommand: EnteredCommand | undefined
 ) => {
   if (enteredCommand && enteredCommand.argsWithValueSelectors) {
-    for (const [argName, argState] of Object.entries(enteredCommand.argState)) {
+    for (const argName of Object.keys(enteredCommand.argsWithValueSelectors)) {
       if (parsedInput.hasArg(argName)) {
-        parsedInput.args[argName] = argState.map((itemState) => itemState.value);
+        const argumentValues = enteredCommand.argState[argName] ?? [];
+
+        parsedInput.args[argName] = argumentValues.map((itemState) => itemState.value);
       }
     }
   }
