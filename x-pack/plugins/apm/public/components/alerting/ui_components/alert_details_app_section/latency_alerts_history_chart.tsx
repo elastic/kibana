@@ -14,6 +14,13 @@ import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { useFetchTriggeredAlertsHistory } from '@kbn/observability-plugin/public';
+import {
+  AnnotationDomainType,
+  LineAnnotation,
+  Position,
+} from '@elastic/charts';
+import { EuiIcon } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -101,6 +108,7 @@ export function LatencyAlertsHistoryChart({
     features: 'apm',
     ruleId,
   });
+  console.log(triggeredAlertsData);
   return (
     <EuiPanel hasBorder={true}>
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -166,9 +174,32 @@ export function LatencyAlertsHistoryChart({
         </EuiFlexGroup>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
+      <EuiSpacer size="xl" />
 
       <TimeseriesChart
         id="latencyChart"
+        annotations={[
+          <LineAnnotation
+            id="annotations"
+            domainType={AnnotationDomainType.XDomain}
+            dataValues={
+              triggeredAlertsData?.histogramTriggeredAlerts
+                .filter((annotation) => annotation.doc_count > 0)
+                .map((annotation) => {
+                  return {
+                    dataValue: annotation.key,
+                    header: String(annotation.doc_count),
+                    details: String(annotation.doc_count),
+                  };
+                }) || []
+            }
+            style={{
+              line: { strokeWidth: 3, stroke: 'red', opacity: 1 },
+            }}
+            marker={<EuiIcon type="alert" color={'red'} />}
+            markerPosition={Position.Top}
+          />,
+        ]}
         height={200}
         comparisonEnabled={false}
         offset={''}
