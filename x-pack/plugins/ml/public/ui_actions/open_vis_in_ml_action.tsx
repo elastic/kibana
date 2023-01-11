@@ -14,7 +14,7 @@ import { isLensEmbeddable, isMapEmbeddable } from '../application/jobs/new_job/j
 
 export const CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
-export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getStartServices']) {
+export function createVisToADJobAction(getStartServices: MlCoreSetup['getStartServices']) {
   return createAction<{ embeddable: Embeddable | MapEmbeddable }>({
     id: 'create-ml-ad-job-action',
     type: CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION,

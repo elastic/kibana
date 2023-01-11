@@ -28,7 +28,7 @@ export function MachineLearningLensVisualizationsProvider(
       await testSubjects.click(`mlLensLayerCreateWithWizardButton_${layerIndex}`);
     },
     async assertLensLayerSelectorExists() {
-      await testSubjects.existOrFail('mlFlyoutLensLayerSelector');
+      await testSubjects.existOrFail('mlFlyoutLayerSelector');
     },
     async assertMapLayerSelectorExists() {
       await testSubjects.existOrFail('mlGeoJobFlyout');
