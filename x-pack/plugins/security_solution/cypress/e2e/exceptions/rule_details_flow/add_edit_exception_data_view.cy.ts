@@ -75,7 +75,7 @@ describe('Add exception using data views from rule details', () => {
         customQuery: 'agent.name:*',
         dataSource: { dataView: 'exceptions-*', type: 'dataView' },
         runsEvery: {
-          interval: '1',
+          interval: '10',
           timeType: 'Seconds',
           type: 's',
         },

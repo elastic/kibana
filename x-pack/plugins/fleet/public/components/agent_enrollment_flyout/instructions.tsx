@@ -109,7 +109,7 @@ export const Instructions = (props: InstructionProps) => {
             </>
           )}
           {isFleetServerPolicySelected ? (
-            <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} />
+            <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} onClose={() => undefined} />
           ) : (
             <ManagedSteps {...props} />
           )}
