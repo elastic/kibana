@@ -311,11 +311,14 @@ function _generateMappings(
               break;
             default: {
               const meta = {};
-              if ('metric_type' in field) Reflect.set(meta, 'metric_type', field.metric_type);
               if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
               fieldProps.meta = meta;
             }
           }
+        }
+
+        if ('metric_type' in field) {
+          fieldProps.time_series_metric = field.metric_type;
         }
 
         props[field.name] = fieldProps;
