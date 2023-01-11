@@ -77,6 +77,10 @@ export const errorInvalidName = i18n.translate('xpack.cloudDefend.errorInvalidNa
   defaultMessage: 'Selector names must be alpha numeric and contain no spaces.',
 });
 
+export const errorValueRequired = i18n.translate('xpack.cloudDefend.errorValueRequired', {
+  defaultMessage: 'At least one value is required.',
+});
+
 export const getConditionLabel = (prop: string) => {
   switch (prop) {
     case ControlSelectorCondition.operation:

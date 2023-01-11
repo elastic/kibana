@@ -59,9 +59,13 @@ export const ControlGeneralViewSelector = ({
   }, []);
 
   const onRemoveClicked = useCallback(() => {
-    onRemove(selector);
+    // we prevent the removal of the last selector to avoid an empty state
+    if (selectors.length > 1) {
+      onRemove(selector);
+    }
+
     closePopover();
-  }, [closePopover, onRemove, selector]);
+  }, [closePopover, onRemove, selector, selectors.length]);
 
   const onDuplicateClicked = useCallback(() => {
     onDuplicate(selector);
@@ -100,13 +104,29 @@ export const ControlGeneralViewSelector = ({
     [errorMap, onChange, selector, selectors]
   );
 
+  const onChangeCondition = useCallback(
+    (prop: string, values: string[]) => {
+      setControlSelectorValueForProp(prop, values, selector);
+
+      if (values.length === 0) {
+        errorMap[prop] = [i18n.errorValueRequired];
+        selector.hasErrors = true;
+      } else {
+        delete errorMap[prop];
+      }
+
+      setErrorMap({ ...errorMap });
+      onChange(selector);
+    },
+    [errorMap, onChange, selector]
+  );
+
   const onAddCondition = useCallback(
     (prop: string) => {
-      setControlSelectorValueForProp(prop, [], selector);
-      onChange(selector);
+      onChangeCondition(prop, []);
       closeAddCondition();
     },
-    [closeAddCondition, onChange, selector]
+    [closeAddCondition, onChangeCondition]
   );
 
   const onRemoveCondition = useCallback(
@@ -116,14 +136,6 @@ export const ControlGeneralViewSelector = ({
       closeAddCondition();
     },
     [closeAddCondition, onChange, selector]
-  );
-
-  const onChangeCondition = useCallback(
-    (prop: string, values: string[]) => {
-      setControlSelectorValueForProp(prop, values, selector);
-      onChange(selector);
-    },
-    [onChange, selector]
   );
 
   const onAddValueToCondition = useCallback(
@@ -168,6 +180,7 @@ export const ControlGeneralViewSelector = ({
               iconType="boxesHorizontal"
               onClick={onTogglePopover}
               aria-label="Selector options"
+              data-test-subj="cloud-defend-btnselectorpopover"
             />
           }
           isOpen={isPopoverOpen}
@@ -178,7 +191,12 @@ export const ControlGeneralViewSelector = ({
           <EuiContextMenuPanel
             size="s"
             items={[
-              <EuiContextMenuItem key="duplicate" icon="copy" onClick={onDuplicateClicked}>
+              <EuiContextMenuItem
+                key="duplicate"
+                icon="copy"
+                onClick={onDuplicateClicked}
+                data-test-subj="cloud-defend-btnduplicateselector"
+              >
                 {i18n.duplicate}
               </EuiContextMenuItem>,
               <EuiContextMenuItem
@@ -186,6 +204,7 @@ export const ControlGeneralViewSelector = ({
                 icon="trash"
                 disabled={selectors.length < 2}
                 onClick={onRemoveClicked}
+                data-test-subj="cloud-defend-btndeleteselector"
               >
                 {i18n.remove}
               </EuiContextMenuItem>,
@@ -202,6 +221,7 @@ export const ControlGeneralViewSelector = ({
             value={selector.name}
             onChange={onNameChange}
             isInvalid={errorMap.hasOwnProperty('name')}
+            data-test-subj="cloud-defend-selectorcondition-name"
           />
         </EuiFormRow>
         {Object.keys(selector).map((prop: string) => {
@@ -235,7 +255,7 @@ export const ControlGeneralViewSelector = ({
                       onChangeCondition(prop, options.map((option) => option.value) as string[])
                     }
                     isClearable={true}
-                    data-test-subj={'condition-' + prop}
+                    data-test-subj={'cloud-defend-selectorcondition-' + prop}
                   />
                   <EuiFlexItem>
                     <EuiButtonIcon
@@ -244,6 +264,7 @@ export const ControlGeneralViewSelector = ({
                       color="danger"
                       onClick={() => onRemoveCondition(prop)}
                       aria-label="Remove condition"
+                      data-test-subj={'cloud-defend-btnremovecondition-' + prop}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -255,8 +276,13 @@ export const ControlGeneralViewSelector = ({
       <EuiSpacer size="m" />
       <EuiPopover
         id="cloudDefendControlAddCondition"
+        data-test-subj="cloud-defend-addconditionpopover"
         button={
-          <EuiButtonEmpty onClick={onToggleAddCondition} iconType="plusInCircle">
+          <EuiButtonEmpty
+            onClick={onToggleAddCondition}
+            iconType="plusInCircle"
+            data-test-subj="cloud-defend-btnaddselectorcondition"
+          >
             {i18n.addSelectorCondition}
           </EuiButtonEmpty>
         }
@@ -270,7 +296,7 @@ export const ControlGeneralViewSelector = ({
           items={remainingProps.map((prop) => {
             return (
               <EuiContextMenuItem key={prop} onClick={() => onAddCondition(prop)}>
-                {prop}
+                {i18n.getConditionLabel(prop)}
               </EuiContextMenuItem>
             );
           })}

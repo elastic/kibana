@@ -39,6 +39,12 @@ export enum ControlSelectorCondition {
   orchestratorType = 'orchestratorType',
 }
 
+export enum ControlSelectorOperation {
+  createExecutable = 'createExecutable',
+  modifyExecutable = 'modifyExecutable',
+  execMemFd = 'execMemFd',
+}
+
 export interface ControlSelectorConditionUIOptions {
   [key: string]: {
     values: string[];
@@ -46,7 +52,7 @@ export interface ControlSelectorConditionUIOptions {
 }
 
 export const ControlSelectorConditionUIOptionsMap: ControlSelectorConditionUIOptions = {
-  operation: { values: ['createExecutable', 'modifyExecutable', 'execMemFd'] },
+  operation: { values: Object.values(ControlSelectorOperation) },
 };
 
 export interface ControlSelector {
@@ -68,8 +74,8 @@ export interface ControlSelector {
 }
 
 export interface ControlResponse {
-  match: ControlSelector[];
-  exclude?: ControlSelector[];
+  match: string[];
+  exclude?: string[];
   actions: ControlResponseAction[];
 }
 

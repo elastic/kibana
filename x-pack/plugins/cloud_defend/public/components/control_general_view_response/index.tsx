@@ -75,10 +75,14 @@ export const ControlGeneralViewResponse = ({
     [onChange, response]
   );
 
-  const selectorOptions = useMemo(
-    () => selectors.map((selector) => ({ label: selector.name, value: selector.name })),
-    [selectors]
-  );
+  const selectorOptions = useMemo(() => {
+    return selectors
+      .filter(
+        (selector) =>
+          !(response.match.includes(selector.name) || response.exclude?.includes(selector.name))
+      )
+      .map((selector) => ({ label: selector.name, value: selector.name }));
+  }, [response.exclude, response.match, selectors]);
 
   const selectedMatches = useMemo(
     () =>
@@ -142,7 +146,7 @@ export const ControlGeneralViewResponse = ({
               options={selectorOptions}
               isClearable={true}
               onChange={onChangeMatches}
-              data-test-subj="cloudDefend:controlResponseMatches"
+              data-test-subj="cloud-defend-responsematch"
             />
           </EuiFormRow>
           {response.exclude && (
@@ -154,13 +158,18 @@ export const ControlGeneralViewResponse = ({
                 options={selectorOptions}
                 onChange={onChangeExcludes}
                 isClearable={true}
-                data-test-subj="cloudDefend:controlResponseExcludes"
+                data-test-subj="cloud-defend-responseexclude"
               />
             </EuiFormRow>
           )}
           <EuiSpacer size="s" />
           {!response.exclude && (
-            <EuiButtonEmpty iconType="plusInCircle" onClick={onShowExclude} size="xs">
+            <EuiButtonEmpty
+              iconType="plusInCircle"
+              onClick={onShowExclude}
+              size="xs"
+              data-test-subj="cloud-defend-btnshowexclude"
+            >
               {i18n.excludeSelectors}
             </EuiButtonEmpty>
           )}
@@ -171,6 +180,7 @@ export const ControlGeneralViewResponse = ({
                 <EuiSpacer size="s" />
                 <EuiCheckbox
                   id={'alert' + index}
+                  data-test-subj="cloud-defend-chkalertaction"
                   disabled={blockSelected}
                   label={i18n.actionAlert}
                   checked={alertSelected}
@@ -182,6 +192,7 @@ export const ControlGeneralViewResponse = ({
                 <EuiSpacer size="s" />
                 <EuiCheckbox
                   id={'block' + index}
+                  data-test-subj="cloud-defend-chkblockaction"
                   label={i18n.actionBlock}
                   checked={blockSelected}
                   onChange={onToggleBlock}
@@ -198,6 +209,7 @@ export const ControlGeneralViewResponse = ({
               iconType="boxesHorizontal"
               onClick={onTogglePopover}
               aria-label="Response options"
+              data-test-subj="cloud-defend-btnresponsepopover"
             />
           }
           isOpen={isPopoverOpen}
@@ -208,7 +220,12 @@ export const ControlGeneralViewResponse = ({
           <EuiContextMenuPanel
             size="s"
             items={[
-              <EuiContextMenuItem key="duplicate" icon="copy" onClick={onDuplicateClicked}>
+              <EuiContextMenuItem
+                key="duplicate"
+                icon="copy"
+                onClick={onDuplicateClicked}
+                data-test-subj="cloud-defend-btnduplicateresponse"
+              >
                 {i18n.duplicate}
               </EuiContextMenuItem>,
               <EuiContextMenuItem
@@ -216,6 +233,7 @@ export const ControlGeneralViewResponse = ({
                 icon="trash"
                 disabled={responses.length < 2}
                 onClick={onRemoveClicked}
+                data-test-subj="cloud-defend-btndeleteresponse"
               >
                 {i18n.remove}
               </EuiContextMenuItem>,
