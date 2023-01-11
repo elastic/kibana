@@ -8,7 +8,7 @@
 
 import type { CoreSetup, Plugin, PluginInitializerContext, Logger } from '@kbn/core/server';
 import { PLUGIN_ID } from '../common';
-import { ContentCore } from './core';
+import { ContentCore, ContentCoreApi } from './core';
 import { wrapError } from './error_wrapper';
 import { initRpcRoutes, FunctionHandler, initRpcHandlers } from './rpc';
 import type { Context as RpcContext } from './rpc';
@@ -16,28 +16,45 @@ import type { Context as RpcContext } from './rpc';
 export class ContentManagementPlugin implements Plugin {
   private readonly logger: Logger;
   private contentCore: ContentCore;
+  private coreApi: ContentCoreApi | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.contentCore = new ContentCore();
   }
 
-  public setup(core: CoreSetup): void {
+  public setup(core: CoreSetup) {
     this.logger.info(`>>>> [${PLUGIN_ID}] setup...`);
+
+    this.coreApi = this.contentCore.setup();
 
     const fnHandler = new FunctionHandler<RpcContext>();
     initRpcHandlers(fnHandler);
     const router = core.http.createRouter();
-    initRpcRoutes(router, { logger: this.logger, wrapError, fnHandler, context: {} });
+    initRpcRoutes(router, {
+      logger: this.logger,
+      wrapError,
+      fnHandler,
+      context: { core: this.coreApi },
+    });
 
-    this.contentCore.setup();
-  }
 
-  public start() {
-    this.logger.info(`>>>> [${PLUGIN_ID}] start...`);
+    const addContent = async () => {
+      // Add dummy content
+      const { id } = await storage.create({
+        title: 'Foo',
+        description: 'Some description',
+        foo: false,
+      });
+      console.log('>>>>>>>>> Content created:', id);
+    };
+    addContent();
+    // ----------------------------------------
 
     return {
-      ...this.contentCore.start(),
+      ...this.coreApi,
     };
   }
+
+  public start() {}
 }

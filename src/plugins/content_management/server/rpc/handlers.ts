@@ -13,8 +13,9 @@ import { Context } from './types';
 export function initRpcHandlers(fnHandler: FunctionHandler<Context>) {
   fnHandler.load((register) => {
     // Get single content
-    register(Calls.get)(async (ctx, msg) => {
-      return parseFloat(msg);
+    register(Calls.get)(async (ctx, payload) => {
+      const crudInstance = ctx.core.crud(payload.type);
+      return crudInstance.get(payload.id);
     });
   });
 }

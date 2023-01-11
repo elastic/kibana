@@ -11,7 +11,7 @@ import type { ContentStorage, ContentConfig } from './types';
 export class ContentRegistry {
   private contents = new Map<string, ContentConfig<ContentStorage>>();
 
-  register<S extends ContentStorage = ContentStorage>(
+  register<S extends ContentStorage<any> = ContentStorage>(
     contentType: string,
     config: ContentConfig<S>
   ) {

@@ -12,11 +12,21 @@ export const Payload = t.strict({
   arg: t.unknown,
 });
 
+const ref = t.type({
+  $id: t.string,
+});
+
 export const kibanaContent = t.intersection([
   t.type({
     id: t.string,
     title: t.string,
     type: t.string,
+    meta: t.type({
+      updatedAt: t.string,
+      createdAt: t.string,
+      updatedBy: ref,
+      createdBy: ref,
+    }),
   }),
   t.partial({
     description: t.string,

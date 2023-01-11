@@ -50,6 +50,7 @@ export interface Ref {
 /** Fields that all kibana content must have (fields *not* editable by the user) */
 export interface InternalFields {
   id: string;
+  type: string;
   meta: {
     createdAt: string;
     createdBy: Ref;
@@ -65,7 +66,7 @@ export interface CommonFields {
 }
 
 /** Base type for all Kibana content */
-export type KibanaContent = InternalFields & CommonFields;
+export type KibanaContent<T extends object = {}> = InternalFields & CommonFields & T;
 
 // --- CRUD
 

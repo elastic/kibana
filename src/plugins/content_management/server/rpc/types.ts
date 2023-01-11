@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Context {}
+import type { ContentCoreApi } from '../core';
+
+export interface Context {
+  core: ContentCoreApi;
+}

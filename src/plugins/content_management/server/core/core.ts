@@ -9,6 +9,13 @@ import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
 
+export interface ContentCoreApi {
+  register: ContentRegistry['register'];
+  crud: <UniqueFields extends object = Record<string, unknown>>(
+    contentType: string
+  ) => ContentCrud<UniqueFields>;
+}
+
 export class ContentCore {
   private contentRegistry: ContentRegistry;
   private eventBus: EventBus;
@@ -18,9 +25,7 @@ export class ContentCore {
     this.eventBus = new EventBus();
   }
 
-  setup() {}
-
-  start() {
+  setup(): ContentCoreApi {
     const crud = <UniqueFields extends object = Record<string, unknown>>(contentType: string) => {
       return new ContentCrud<UniqueFields>(contentType, {
         contentRegistry: this.contentRegistry,
@@ -33,4 +38,6 @@ export class ContentCore {
       crud,
     };
   }
+
+  start() {}
 }

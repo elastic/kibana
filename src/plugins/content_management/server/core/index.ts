@@ -7,6 +7,7 @@
  */
 
 export { ContentCore } from './core';
+export type { ContentCoreApi } from './core';
 
 export type {
   ContentStorage,
