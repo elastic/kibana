@@ -12,6 +12,7 @@
  */
 
 import expect from '@kbn/expect';
+import dateMath from '@kbn/datemath';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -155,8 +156,19 @@ export default ({ getService }: FtrProviderContext) => {
         await activeAlerts.click();
 
         const url = await browser.getCurrentUrl();
+        const fromMoment = dateMath.parse(
+          await (await testSubjects.find('superDatePickerstartDatePopoverButton')).getVisibleText()
+        );
+        const from = fromMoment.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
+        const toMoment = dateMath.parse(
+          await (await testSubjects.find('superDatePickerendDatePopoverButton')).getVisibleText()
+        );
+        const to = toMoment.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
+
         expect(url.includes('tabId=alerts')).to.be(true);
         expect(url.includes('status%3Aactive')).to.be(true);
+        expect(url.includes(from)).to.be(true);
+        expect(url.includes(to)).to.be(true);
       });
 
       it('handles alert summary widget component recovered click correctly', async () => {
@@ -165,8 +177,19 @@ export default ({ getService }: FtrProviderContext) => {
         await recoveredAlerts.click();
 
         const url = await browser.getCurrentUrl();
+        const fromMoment = dateMath.parse(
+          await (await testSubjects.find('superDatePickerstartDatePopoverButton')).getVisibleText()
+        );
+        const from = fromMoment.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
+        const toMoment = dateMath.parse(
+          await (await testSubjects.find('superDatePickerendDatePopoverButton')).getVisibleText()
+        );
+        const to = toMoment.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
+
         expect(url.includes('tabId=alerts')).to.be(true);
         expect(url.includes('status%3Arecovered')).to.be(true);
+        expect(url.includes(from)).to.be(true);
+        expect(url.includes(to)).to.be(true);
       });
     });
 
