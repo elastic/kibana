@@ -53,19 +53,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Mobile stats when data is not loaded', { config: 'basic', archives: [] }, () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
-        const response = await callApi({ serviceName: 'test' });
+        const response = await getMobileStats({ serviceName: 'foo' });
         expect(response).to.eql({
           sessions: {
             timeseries: [],
-            value: 0,
           },
           requests: {
             timeseries: [],
-            value: 0,
           },
           maxLoadTime: {
             timeseries: [],
-            value: null,
           },
           crashCount: {
             value: 0,
@@ -78,7 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Mobile stats', { config: 'basic', archives: [] }, () => {
     before(async () => {
-      generateMobileData({
+      await generateMobileData({
         synthtraceEsClient,
         start,
         end,
@@ -113,6 +110,60 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { value, timeseries } = response.requests;
         const timeseriesTotal = sumBy(timeseries, 'y');
         expect(value).to.be(timeseriesTotal);
+      });
+    });
+
+    describe('when filters are applied', () => {
+      it('returns empty state for filters', async () => {
+        const response = await getMobileStats({
+          serviceName: 'synth-android',
+          environment: 'production',
+          kuery: `app.version:"none"`,
+        });
+
+        expect(response).to.eql({
+          sessions: {
+            value: 0,
+            timeseries: [],
+          },
+          requests: {
+            value: 0,
+            timeseries: [],
+          },
+          maxLoadTime: {
+            value: null,
+            timeseries: [],
+          },
+          crashCount: {
+            value: 0,
+            timeseries: [],
+          },
+        });
+      });
+
+      it('returns the correct values when single filter is applied', async () => {
+        const response = await getMobileStats({
+          serviceName: 'synth-android',
+          environment: 'production',
+          kuery: `network.connection.type:"wifi"`,
+        });
+
+        expect(response.sessions.value).to.eql(3);
+        expect(response.requests.value).to.eql(6);
+        expect(response.crashCount.value).to.eql(0);
+        expect(response.maxLoadTime.value).to.eql(null);
+      });
+
+      it('returns the correct values when multiple filters are applied', async () => {
+        const response = await getMobileStats({
+          serviceName: 'synth-android',
+          kuery: `app.version:"1.0" and environment: "production"`,
+        });
+
+        expect(response.sessions.value).to.eql(0);
+        expect(response.requests.value).to.eql(0);
+        expect(response.crashCount.value).to.eql(0);
+        expect(response.maxLoadTime.value).to.eql(null);
       });
     });
   });

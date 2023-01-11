@@ -83,7 +83,7 @@ export async function generateMobileData({
       carrierMCC: '525',
     });
 
-  await synthtraceEsClient.index([
+  return await synthtraceEsClient.index([
     timerange(start, end)
       .interval('5m')
       .rate(1)
