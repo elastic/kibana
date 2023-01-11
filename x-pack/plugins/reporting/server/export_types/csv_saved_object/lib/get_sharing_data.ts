@@ -58,7 +58,9 @@ export async function getSharingData(
   // Add/adjust columns from the saved search attributes and UI Settings
   let columns: string[] | undefined;
   let timeFieldName: string | undefined;
-  const columnsTemp = savedSearch.attributes?.columns;
+  // ignore '_source' column: it may be the only column when the user wishes to export all fields
+  const columnsTemp = savedSearch.attributes?.columns?.filter((col) => col !== '_source');
+
   if (typeof columnsTemp !== 'undefined' && columnsTemp.length > 0 && isStringArray(columnsTemp)) {
     columns = columnsTemp;
 

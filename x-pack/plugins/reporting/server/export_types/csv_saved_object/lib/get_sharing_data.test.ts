@@ -121,6 +121,18 @@ describe('get_sharing_data', () => {
     expect(mockSearchSource.setField).toHaveBeenNthCalledWith(2, 'fields', ['*']);
   });
 
+  it('with saved search containing ["_source"]', async () => {
+    mockIndexPattern = createMockIndexPattern();
+    mockSavedSearch.attributes.columns = ['_source'];
+    const sharingData = await getSharingData({ uiSettings }, mockSearchSource, mockSavedSearch);
+    expect(sharingData.columns).toBe(undefined);
+    expect(mockSearchSource.setField).toBeCalledTimes(2);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(1, 'sort', [
+      { '@timestamp': 'desc' },
+    ]);
+    expect(mockSearchSource.setField).toHaveBeenNthCalledWith(2, 'fields', ['*']);
+  });
+
   it('with search source using columns without time field', async () => {
     mockIndexPattern = createMockIndexPatternWithoutTimeField();
     mockSavedSearch.attributes.sort = [];
