@@ -129,21 +129,17 @@ paths:
               description: The properties vary depending on the connector type.
               oneOf:
                 - $ref: '#/components/schemas/update_connector_request_cases_webhook'
-                - $ref: '#/components/schemas/update_connector_request_email'
                 - $ref: '#/components/schemas/update_connector_request_index'
                 - $ref: '#/components/schemas/update_connector_request_jira'
                 - $ref: '#/components/schemas/update_connector_request_opsgenie'
-                - $ref: '#/components/schemas/update_connector_request_pagerduty'
                 - $ref: '#/components/schemas/update_connector_request_resilient'
                 - $ref: '#/components/schemas/update_connector_request_serverlog'
                 - $ref: '#/components/schemas/update_connector_request_servicenow'
                 - $ref: '#/components/schemas/update_connector_request_servicenow_itom'
-                - $ref: '#/components/schemas/update_connector_request_slack'
                 - $ref: '#/components/schemas/update_connector_request_swimlane'
-                - $ref: '#/components/schemas/update_connector_request_teams'
-                - $ref: '#/components/schemas/update_connector_request_tines'
-                - $ref: '#/components/schemas/update_connector_request_webhook'
-                - $ref: '#/components/schemas/update_connector_request_xmatters'
+            examples:
+              updateIndexConnectorRequest:
+                $ref: '#/components/examples/update_index_connector_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1816,20 +1812,6 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_cases_webhook'
-    update_connector_request_email:
-      title: Update email connector request
-      type: object
-      required:
-        - config
-        - name
-      properties:
-        config:
-          $ref: '#/components/schemas/config_properties_email'
-        name:
-          type: string
-          description: The display name for the connector.
-        secrets:
-          $ref: '#/components/schemas/secrets_properties_email'
     update_connector_request_index:
       title: Update index connector request
       type: object
@@ -1872,21 +1854,6 @@ components:
           description: The display name for the connector.
         secrets:
           $ref: '#/components/schemas/secrets_properties_opsgenie'
-    update_connector_request_pagerduty:
-      title: Update PagerDuty connector request
-      type: object
-      required:
-        - config
-        - name
-        - secrets
-      properties:
-        config:
-          $ref: '#/components/schemas/config_properties_pagerduty'
-        name:
-          type: string
-          description: The display name for the connector.
-        secrets:
-          $ref: '#/components/schemas/secrets_properties_pagerduty'
     update_connector_request_resilient:
       title: Update IBM Resilient connector request
       type: object
@@ -1941,18 +1908,6 @@ components:
           description: The display name for the connector.
         secrets:
           $ref: '#/components/schemas/secrets_properties_servicenow'
-    update_connector_request_slack:
-      title: Update Slack connector request
-      type: object
-      required:
-        - name
-        - secrets
-      properties:
-        name:
-          type: string
-          description: The display name for the connector.
-        secrets:
-          $ref: '#/components/schemas/secrets_properties_slack'
     update_connector_request_swimlane:
       title: Update Swimlane connector request
       type: object
@@ -1969,63 +1924,6 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_swimlane'
-    update_connector_request_teams:
-      title: Update Microsoft Teams connector request
-      type: object
-      required:
-        - name
-        - secrets
-      properties:
-        name:
-          type: string
-          description: The display name for the connector.
-        secrets:
-          $ref: '#/components/schemas/secrets_properties_teams'
-    update_connector_request_tines:
-      title: Update Tines connector request
-      type: object
-      required:
-        - config
-        - name
-        - secrets
-      properties:
-        config:
-          $ref: '#/components/schemas/config_properties_tines'
-        name:
-          type: string
-          description: The display name for the connector.
-        secrets:
-          $ref: '#/components/schemas/secrets_properties_tines'
-    update_connector_request_webhook:
-      title: Update Webhook connector request
-      type: object
-      required:
-        - config
-        - name
-        - secrets
-      properties:
-        config:
-          $ref: '#/components/schemas/config_properties_webhook'
-        name:
-          type: string
-          description: The display name for the connector.
-        secrets:
-          $ref: '#/components/schemas/secrets_properties_webhook'
-    update_connector_request_xmatters:
-      title: Update xMatters connector request
-      type: object
-      required:
-        - config
-        - name
-        - secrets
-      properties:
-        config:
-          $ref: '#/components/schemas/config_properties_xmatters'
-        name:
-          type: string
-          description: The display name for the connector.
-        secrets:
-          $ref: '#/components/schemas/secrets_properties_xmatters'
     connector_types:
       title: Connector types
       type: string
@@ -2089,6 +1987,12 @@ components:
         is_preconfigured: false
         is_deprecated: false
         is_missing_secrets: false
+    update_index_connector_request:
+      summary: Update an index connector.
+      value:
+        name: updated-connector
+        config:
+          index: updated-index
     get_connectors_response:
       summary: A list of connectors
       value:

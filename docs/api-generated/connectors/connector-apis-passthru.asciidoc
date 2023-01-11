@@ -423,21 +423,14 @@ Any modifications made to this file will be overwritten.
     <li><a href="#secrets_properties_servicenow"><code>secrets_properties_servicenow</code> - Connector secrets properties for ServiceNow ITOM, ServiceNow ITSM, and ServiceNow SecOps connectors</a></li>
     <li><a href="#secrets_properties_swimlane"><code>secrets_properties_swimlane</code> - Connector secrets properties for a Swimlane connector</a></li>
     <li><a href="#update_connector_request_cases_webhook"><code>update_connector_request_cases_webhook</code> - Update Webhook - Case Managment connector request</a></li>
-    <li><a href="#update_connector_request_email"><code>update_connector_request_email</code> - Update email connector request</a></li>
     <li><a href="#update_connector_request_index"><code>update_connector_request_index</code> - Update index connector request</a></li>
     <li><a href="#update_connector_request_jira"><code>update_connector_request_jira</code> - Update Jira connector request</a></li>
     <li><a href="#update_connector_request_opsgenie"><code>update_connector_request_opsgenie</code> - Update Opsgenie connector request</a></li>
-    <li><a href="#update_connector_request_pagerduty"><code>update_connector_request_pagerduty</code> - Update PagerDuty connector request</a></li>
     <li><a href="#update_connector_request_resilient"><code>update_connector_request_resilient</code> - Update IBM Resilient connector request</a></li>
     <li><a href="#update_connector_request_serverlog"><code>update_connector_request_serverlog</code> - Update server log connector request</a></li>
     <li><a href="#update_connector_request_servicenow"><code>update_connector_request_servicenow</code> - Update ServiceNow ITSM connector or ServiceNow SecOps request</a></li>
     <li><a href="#update_connector_request_servicenow_itom"><code>update_connector_request_servicenow_itom</code> - Create ServiceNow ITOM connector request</a></li>
-    <li><a href="#update_connector_request_slack"><code>update_connector_request_slack</code> - Update Slack connector request</a></li>
     <li><a href="#update_connector_request_swimlane"><code>update_connector_request_swimlane</code> - Update Swimlane connector request</a></li>
-    <li><a href="#update_connector_request_teams"><code>update_connector_request_teams</code> - Update Microsoft Teams connector request</a></li>
-    <li><a href="#update_connector_request_tines"><code>update_connector_request_tines</code> - Update Tines connector request</a></li>
-    <li><a href="#update_connector_request_webhook"><code>update_connector_request_webhook</code> - Update Webhook connector request</a></li>
-    <li><a href="#update_connector_request_xmatters"><code>update_connector_request_xmatters</code> - Update xMatters connector request</a></li>
   </ol>
 
   <div class="model">
@@ -566,9 +559,9 @@ Any modifications made to this file will be overwritten.
     <h3><a name="Update_connector_request_body_properties"><code>Update_connector_request_body_properties</code> - Update connector request body properties</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The properties vary depending on the connector type.</div>
     <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.xmatters</code>. </div>
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_swimlane">config_properties_swimlane</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.xmatters</code>. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_swimlane">secrets_properties_swimlane</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1203,15 +1196,6 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="update_connector_request_email"><code>update_connector_request_email</code> - Update email connector request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.email</code>. </div>
-<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.email</code>. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
     <h3><a name="update_connector_request_index"><code>update_connector_request_index</code> - Update index connector request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
@@ -1235,15 +1219,6 @@ Any modifications made to this file will be overwritten.
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_opsgenie">config_properties_opsgenie</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_opsgenie">secrets_properties_opsgenie</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_connector_request_pagerduty"><code>update_connector_request_pagerduty</code> - Update PagerDuty connector request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.pagerduty</code>. </div>
-<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.pagerduty</code>. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1281,55 +1256,12 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="update_connector_request_slack"><code>update_connector_request_slack</code> - Update Slack connector request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.slack</code>. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
     <h3><a name="update_connector_request_swimlane"><code>update_connector_request_swimlane</code> - Update Swimlane connector request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_swimlane">config_properties_swimlane</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_swimlane">secrets_properties_swimlane</a></span>  </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_connector_request_teams"><code>update_connector_request_teams</code> - Update Microsoft Teams connector request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.teams</code>. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_connector_request_tines"><code>update_connector_request_tines</code> - Update Tines connector request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.tines</code>. </div>
-<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.tines</code>. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_connector_request_webhook"><code>update_connector_request_webhook</code> - Update Webhook connector request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.webhook</code>. </div>
-<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.webhook</code>. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_connector_request_xmatters"><code>update_connector_request_xmatters</code> - Update xMatters connector request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.xmatters</code>. </div>
-<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.xmatters</code>. </div>
     </div>  <!-- field-items -->
   </div>
 </div>
