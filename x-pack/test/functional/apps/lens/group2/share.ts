@@ -46,21 +46,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.isShareable()).to.eql(true);
     });
 
-    it.skip('should enable both download and URL sharing for valid configuration', async () => {
+    it('should enable both download and URL sharing for valid configuration', async () => {
       await PageObjects.lens.clickShareMenu();
 
       expect(await PageObjects.lens.isShareActionEnabled('csvDownload'));
       expect(await PageObjects.lens.isShareActionEnabled('permalinks'));
     });
 
-    it.skip('should provide only snapshot url sharing if visualization is not saved yet', async () => {
+    it('should provide only snapshot url sharing if visualization is not saved yet', async () => {
       await PageObjects.lens.openPermalinkShare();
 
       const options = await PageObjects.lens.getAvailableUrlSharingOptions();
       expect(options).eql(['snapshot']);
     });
 
-    it.skip('should basically work for snapshot', async () => {
+    it('should basically work for snapshot', async () => {
       const url = await PageObjects.lens.getUrl('snapshot');
       await browser.openNewTab();
 
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(lensWindowHandler);
     });
 
-    it.skip('should provide also saved object url sharing if the visualization is shared', async () => {
+    it('should provide also saved object url sharing if the visualization is shared', async () => {
       await PageObjects.lens.save('ASavedVisualizationToShare');
       await PageObjects.lens.openPermalinkShare();
 
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(options).eql(['snapshot', 'savedObject']);
     });
 
-    it.skip('should preserve filter and query when sharing', async () => {
+    it('should preserve filter and query when sharing', async () => {
       await filterBarService.addFilter({ field: 'bytes', operation: 'is', value: '-1' });
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
