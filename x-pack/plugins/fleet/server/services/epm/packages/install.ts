@@ -861,7 +861,7 @@ export async function installIndexTemplatesAndPipelines({
   savedObjectsClient,
   esClient,
   logger,
-  onlyForDataStream,
+  onlyForDataStreams,
 }: {
   installedPkg?: Installation;
   paths: string[];
@@ -870,7 +870,7 @@ export async function installIndexTemplatesAndPipelines({
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   logger: Logger;
-  onlyForDataStream?: RegistryDataStream;
+  onlyForDataStreams?: RegistryDataStream[];
 }) {
   /**
    * In order to install assets in parallel, we need to split the preparation step from the installation step. This
@@ -883,13 +883,13 @@ export async function installIndexTemplatesAndPipelines({
    */
   const experimentalDataStreamFeatures = installedPkg?.experimental_data_stream_features ?? [];
 
-  const preparedIngestPipelines = prepareToInstallPipelines(packageInfo, paths, onlyForDataStream);
+  const preparedIngestPipelines = prepareToInstallPipelines(packageInfo, paths, onlyForDataStreams);
   const preparedIndexTemplates = prepareToInstallTemplates(
     packageInfo,
     paths,
     esReferences,
     experimentalDataStreamFeatures,
-    onlyForDataStream
+    onlyForDataStreams
   );
 
   // Update the references for the templates and ingest pipelines together. Need to be done together to avoid race
@@ -901,7 +901,7 @@ export async function installIndexTemplatesAndPipelines({
     packageInfo.name,
     esReferences,
     {
-      assetsToRemove: onlyForDataStream ? [] : preparedIndexTemplates.assetsToRemove,
+      assetsToRemove: onlyForDataStreams ? [] : preparedIndexTemplates.assetsToRemove,
       assetsToAdd: [...preparedIngestPipelines.assetsToAdd, ...preparedIndexTemplates.assetsToAdd],
     }
   );
@@ -983,7 +983,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
       savedObjectsClient: soClient,
       esClient,
       logger,
-      onlyForDataStream: dataStream,
+      onlyForDataStreams: [dataStream],
     });
   }
 }

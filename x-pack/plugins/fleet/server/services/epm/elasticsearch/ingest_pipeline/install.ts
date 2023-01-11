@@ -41,7 +41,7 @@ import type { PipelineInstall, RewriteSubstitution } from './types';
 export const prepareToInstallPipelines = (
   installablePackage: InstallablePackage | PackageInfo,
   paths: string[],
-  onlyForDataStream?: RegistryDataStream
+  onlyForDataStreams?: RegistryDataStream[]
 ): {
   assetsToAdd: EsAssetReference[];
   install: (esClient: ElasticsearchClient, logger: Logger) => Promise<void>;
@@ -49,7 +49,7 @@ export const prepareToInstallPipelines = (
   // unlike other ES assets, pipeline names are versioned so after a template is updated
   // it can be created pointing to the new template, without removing the old one and effecting data
   // so do not remove the currently installed pipelines here
-  const dataStreams = onlyForDataStream ? [onlyForDataStream] : installablePackage.data_streams;
+  const dataStreams = onlyForDataStreams || installablePackage.data_streams;
   const { version: pkgVersion } = installablePackage;
   const pipelinePaths = paths.filter((path) => isPipeline(path));
   const topLevelPipelinePaths = paths.filter((path) => isTopLevelPipeline(path));

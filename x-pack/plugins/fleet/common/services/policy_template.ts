@@ -13,6 +13,7 @@ import type {
   PackageInfo,
   RegistryVarsEntry,
   RegistryDataStream,
+  InstallablePackage,
 } from '../types';
 
 const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
@@ -53,7 +54,7 @@ export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): Reg
 };
 
 export const getNormalizedDataStreams = (
-  packageInfo: PackageInfo,
+  packageInfo: PackageInfo | InstallablePackage,
   datasetName?: string
 ): RegistryDataStream[] => {
   if (packageInfo.type !== 'input') {
@@ -108,6 +109,6 @@ const addDatasetVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntr
 };
 
 const createDefaultDatasetName = (
-  packageInfo: PackageInfo,
-  policyTemplate: RegistryPolicyInputOnlyTemplate
+  packageInfo: { name: string },
+  policyTemplate: { name: string }
 ): string => packageInfo.name + '.' + policyTemplate.name;

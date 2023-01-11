@@ -207,7 +207,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
 
-      elasticsearch = pkgInfo.elasticsearch;
+      if (pkgInfo.type === 'integration') elasticsearch = pkgInfo.elasticsearch;
 
       if (pkgInfo.type === 'input') {
         installAssetsForInputPackagePolicy({

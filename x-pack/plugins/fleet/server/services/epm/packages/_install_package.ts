@@ -16,6 +16,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
+import { getNormalizedDataStreams } from '../../../../common/services';
+
 import {
   MAX_TIME_COMPLETE_INSTALL,
   ASSETS_SAVED_OBJECT_TYPE,
@@ -31,6 +33,7 @@ import type {
   InstallSource,
   PackageAssetReference,
   PackageVerificationResult,
+  IndexTemplateEntry,
 } from '../../../types';
 import { ensureFileUploadWriteIndices } from '../elasticsearch/template/install';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
@@ -168,18 +171,52 @@ export async function _installPackage({
       installMlModel(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
     );
 
-    const { installedTemplates, esReferences: templateEsReferences } =
-      await installIndexTemplatesAndPipelines({
-        installedPkg: installedPkg ? installedPkg.attributes : undefined,
-        packageInfo,
-        paths,
-        esClient,
-        savedObjectsClient,
-        logger,
-        esReferences,
-      });
+    let indexTemplates: IndexTemplateEntry[] = [];
 
-    esReferences = templateEsReferences;
+    if (packageInfo.type === 'integration') {
+      const { installedTemplates, esReferences: templateEsReferences } =
+        await installIndexTemplatesAndPipelines({
+          installedPkg: installedPkg ? installedPkg.attributes : undefined,
+          packageInfo,
+          paths,
+          esClient,
+          savedObjectsClient,
+          logger,
+          esReferences,
+        });
+      esReferences = templateEsReferences;
+      indexTemplates = installedTemplates;
+    }
+
+    if (packageInfo.type === 'input' && installedPkg) {
+      // input packages create their data streams during package policy creation
+      // we must use installed_es to infer which streams exist first then
+      // we can install the new index templates
+      const dataStreamNames = installedPkg.attributes.installed_es
+        .filter((ref) => ref.type === 'index_template')
+        // index templates are named {type}-{dataset}, remove everything before first hyphen
+        .map((ref) => ref.id.replace(/.*-$/, ''));
+
+      const dataStreams = dataStreamNames.flatMap((dataStreamName) =>
+        getNormalizedDataStreams(packageInfo, dataStreamName)
+      );
+
+      if (dataStreams.length) {
+        const { installedTemplates, esReferences: templateEsReferences } =
+          await installIndexTemplatesAndPipelines({
+            installedPkg: installedPkg ? installedPkg.attributes : undefined,
+            packageInfo,
+            paths,
+            esClient,
+            savedObjectsClient,
+            logger,
+            esReferences,
+            onlyForDataStreams: dataStreams,
+          });
+        esReferences = templateEsReferences;
+        indexTemplates = installedTemplates;
+      }
+    }
 
     try {
       await removeLegacyTemplates({ packageInfo, esClient, logger });
@@ -198,7 +235,7 @@ export async function _installPackage({
 
     // update current backing indices of each data stream
     await withPackageSpan('Update write indices', () =>
-      updateCurrentWriteIndices(esClient, logger, installedTemplates)
+      updateCurrentWriteIndices(esClient, logger, indexTemplates)
     );
 
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
