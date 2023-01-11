@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import { isEmpty } from 'lodash';
 import {
   Comparator,
   FilterQuery,
@@ -36,6 +37,7 @@ export function validateMetricThreshold({
         threshold1: string[];
       };
       metric: string[];
+      customMetrics: Record<string, { aggType?: string; field?: string }>;
     };
   } & { filterQuery?: string[] } = {};
   validationResult.errors = errors;
@@ -70,6 +72,7 @@ export function validateMetricThreshold({
       },
       metric: [],
       filterQuery: [],
+      customMetrics: {},
     };
     if (!c.aggType) {
       errors[id].aggField.push(
@@ -136,12 +139,37 @@ export function validateMetricThreshold({
       );
     }
 
-    if (!c.metric && c.aggType !== 'count') {
+    if (!c.metric && c.aggType !== 'count' && c.aggType !== 'custom') {
       errors[id].metric.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.metricRequired', {
           defaultMessage: 'Metric is required.',
         })
       );
+    }
+
+    if (c.aggType === 'custom' && c.customMetrics) {
+      c.customMetrics.forEach((metric) => {
+        const customMetricErrors: { aggType?: string; field?: string } = {};
+        if (!metric.aggType) {
+          customMetricErrors.aggType = i18n.translate(
+            'xpack.infra.metrics.alertFlyout.error.customMetrics.aggTypeRequired',
+            {
+              defaultMessage: 'Aggregation is required',
+            }
+          );
+        }
+        if (metric.aggType !== 'count' && !metric.field) {
+          customMetricErrors.field = i18n.translate(
+            'xpack.infra.metrics.alertFlyout.error.customMetrics.fieldRequired',
+            {
+              defaultMessage: 'Field is required',
+            }
+          );
+        }
+        if (!isEmpty(customMetricErrors)) {
+          errors[id].customMetrics[metric.name] = customMetricErrors;
+        }
+      });
     }
   });
 

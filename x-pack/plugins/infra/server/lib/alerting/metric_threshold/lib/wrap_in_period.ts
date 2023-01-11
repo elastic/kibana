@@ -34,11 +34,15 @@ export const wrapInCurrentPeriod = <Aggs extends {}>(
 ) => {
   return {
     currentPeriod: {
-      filter: {
-        range: {
-          [TIMESTAMP_FIELD]: {
-            gte: moment(timeframe.start).toISOString(),
-            lte: moment(timeframe.end).toISOString(),
+      filters: {
+        filters: {
+          all: {
+            range: {
+              [TIMESTAMP_FIELD]: {
+                gte: moment(timeframe.start).toISOString(),
+                lte: moment(timeframe.end).toISOString(),
+              },
+            },
           },
         },
       },

@@ -19,7 +19,8 @@ export type MetricExpression = Omit<
   'metric' | 'timeSize' | 'timeUnit' | 'metrics' | 'equation'
 > & {
   metric?: MetricExpressionParams['metric'];
-  metrics?: MetricExpressionParams['metrics'];
+  customMetrics?: MetricExpressionParams['customMetrics'];
+  label?: MetricExpressionParams['label'];
   equation?: MetricExpressionParams['equation'];
   timeSize?: MetricExpressionParams['timeSize'];
   timeUnit?: MetricExpressionParams['timeUnit'];

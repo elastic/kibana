@@ -101,20 +101,27 @@ interface BaseMetricExpressionParams {
 export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Exclude<Aggregators, Aggregators.COUNT>;
   metric: string;
-  metrics: never;
+  customMetrics: never;
   equation: never;
+  label: never;
 }
 
 export interface CountMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Aggregators.COUNT;
   metric: never;
-  metrics: never;
+  customMetrics: never;
   equation: never;
+  label: never;
 }
+
+export type CustomMetricAggTypes = Exclude<
+  Aggregators,
+  Aggregators.CUSTOM | Aggregators.RATE | Aggregators.P95 | Aggregators.P99
+>;
 
 export interface MetricExpressionCustomMetric {
   name: string;
-  aggType?: Exclude<Aggregators, Aggregators.CUSTOM>;
+  aggType: CustomMetricAggTypes;
   field?: string;
   filter?: string;
 }
@@ -122,8 +129,9 @@ export interface MetricExpressionCustomMetric {
 export interface CustomMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Aggregators.CUSTOM;
   metric: never;
-  metrics: MetricExpressionCustomMetric[];
+  customMetrics: MetricExpressionCustomMetric[];
   equation: string;
+  label?: string;
 }
 
 export type MetricExpressionParams =

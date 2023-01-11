@@ -8,6 +8,10 @@
 import moment from 'moment';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import {
+  convertToMetricExplorerCustomMetric,
+  createCustomMetricsAggregations,
+} from '../../../create_custom_metrics_aggregations';
+import {
   hasAdditionalContext,
   KUBERNETES_POD_UID,
   NUMBER_OF_DOCUMENTS,
@@ -87,7 +91,7 @@ export const getElasticsearchMetricQuery = (
   if (aggType === Aggregators.COUNT && metric) {
     throw new Error('Cannot aggregate document count with a metric');
   }
-  if (aggType !== Aggregators.COUNT && !metric) {
+  if (['count', 'custom'].includes(aggType) !== true && !metric) {
     throw new Error('Can only aggregate without a metric if using the document count aggregator');
   }
 
@@ -102,6 +106,12 @@ export const getElasticsearchMetricQuery = (
       ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metric)
       : aggType === Aggregators.P95 || aggType === Aggregators.P99
       ? createPercentileAggregation(aggType, metric)
+      : aggType === Aggregators.CUSTOM
+      ? createCustomMetricsAggregations(
+          'aggregatedValue',
+          convertToMetricExplorerCustomMetric(metricParams.customMetrics),
+          metricParams.equation
+        )
       : {
           aggregatedValue: {
             [aggType]: {

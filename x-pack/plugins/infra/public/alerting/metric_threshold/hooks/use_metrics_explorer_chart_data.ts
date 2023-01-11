@@ -35,7 +35,8 @@ export const useMetricsExplorerChartData = (
           ? {
               aggregation: 'custom',
               custom_metrics:
-                expression?.metrics?.map(mapMetricThresholdMetricToMetricsExplorerMetric) ?? [],
+                expression?.customMetrics?.map(mapMetricThresholdMetricToMetricsExplorerMetric) ??
+                [],
               equation: expression.equation,
             }
           : { field: expression.metric, aggregation: expression.aggType },
@@ -46,7 +47,7 @@ export const useMetricsExplorerChartData = (
       expression.aggType,
       expression.equation,
       expression.metric,
-      expression.metrics,
+      expression.customMetrics,
       filterQuery,
       groupBy,
     ]

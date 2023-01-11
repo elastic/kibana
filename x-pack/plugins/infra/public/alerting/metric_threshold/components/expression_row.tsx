@@ -75,6 +75,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
   const { children, setRuleParams, expression, errors, expressionId, remove, fields, canDelete } =
     props;
+
   const {
     aggType = AGGREGATION_TYPES.MAX,
     metric,
@@ -266,8 +267,10 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   fields={normalizedFields}
                   aggregationTypes={aggregationType}
                   onChange={handleCustomMetricChange}
+                  errors={errors}
                 />
               </StyledExpressionRow>
+              <EuiSpacer size={'s'} />
             </>
           )}
           {displayWarningThreshold && (

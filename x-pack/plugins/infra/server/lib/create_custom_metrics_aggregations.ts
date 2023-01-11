@@ -6,8 +6,16 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { isEmpty } from 'lodash';
+import { isEmpty, omit } from 'lodash';
+import { MetricExpressionCustomMetric } from '../../common/alerting/metrics';
 import { MetricsExplorerCustomMetric } from '../../common/http_api';
+
+export const convertToMetricExplorerCustomMetric = (
+  customMetrics: MetricExpressionCustomMetric[]
+) =>
+  customMetrics.map((metric) => {
+    return { ...omit(metric, 'aggType'), aggregation: metric.aggType };
+  });
 
 export const createCustomMetricsAggregations = (
   id: string,

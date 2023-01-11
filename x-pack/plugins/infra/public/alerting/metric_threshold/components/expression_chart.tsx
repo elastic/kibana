@@ -69,10 +69,11 @@ export const ExpressionChart: React.FC<Props> = ({
   };
 
   if (metric.aggregation === 'custom') {
-    metric.label = i18n.translate(
-      'xpack.infra.metrics.alertFlyout.previewChart.customMetric.label',
-      { defaultMessage: 'Custom metric' }
-    );
+    metric.label =
+      expression.label ||
+      i18n.translate('xpack.infra.metrics.alertFlyout.previewChart.customMetric.label', {
+        defaultMessage: 'Custom metric',
+      });
   }
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {

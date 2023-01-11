@@ -16,11 +16,15 @@ import {
   EuiSelect,
   EuiComboBox,
 } from '@elastic/eui';
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { range, first, xor, debounce } from 'lodash';
-import { AggregationType } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useState, useCallback, useMemo } from 'react';
+import { omit, range, first, xor, debounce, get } from 'lodash';
+import { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { Aggregators, MetricExpressionCustomMetric } from '../../../../common/alerting/metrics';
+import {
+  Aggregators,
+  CustomMetricAggTypes,
+  MetricExpressionCustomMetric,
+} from '../../../../common/alerting/metrics';
 import { MetricExpression } from '../types';
 
 interface NormalizedField {
@@ -34,18 +38,17 @@ interface AggregationTypes {
   [x: string]: AggregationType;
 }
 
-type CustomAggType = Exclude<Aggregators, Aggregators.CUSTOM>;
-
 interface Props {
   onChange: (expression: MetricExpression) => void;
   expression: MetricExpression;
   fields: NormalizedFields;
   aggregationTypes: AggregationTypes;
+  errors: IErrorObject;
 }
 
-type Metrics = MetricExpression['metrics'];
+type CustomMetrics = MetricExpression['customMetrics'];
 
-const NEW_METRIC = { name: 'A', aggType: Aggregators.AVERAGE as CustomAggType };
+const NEW_METRIC = { name: 'A', aggType: Aggregators.AVERAGE as CustomMetricAggTypes };
 const VAR_NAMES = range(65, 65 + 26).map((c) => String.fromCharCode(c));
 
 export const CustomMetricEditor: React.FC<Props> = ({
@@ -53,53 +56,69 @@ export const CustomMetricEditor: React.FC<Props> = ({
   expression,
   fields,
   aggregationTypes,
+  errors,
 }) => {
-  const [metrics, setMetrics] = useState<Metrics>(expression?.metrics ?? [NEW_METRIC]);
+  const [customMetrics, setCustomMetrics] = useState<CustomMetrics>(
+    expression?.customMetrics ?? [NEW_METRIC]
+  );
+  const [label, setLabel] = useState<string | undefined>(expression?.label || undefined);
   const [equation, setEquation] = useState<string | undefined>(expression?.equation || undefined);
+  const debouncedOnChange = useMemo(() => debounce(onChange, 500), [onChange]);
 
   const handleAddNewRow = useCallback(() => {
-    setMetrics((previous) => {
+    setCustomMetrics((previous) => {
       const currentVars = previous?.map((m) => m.name) ?? [];
       const name = first(xor(VAR_NAMES, currentVars)) || 'XX'; // This should never happen.
-      return [...(previous || []), { ...NEW_METRIC, name }];
+      const nextMetrics = [...(previous || []), { ...NEW_METRIC, name }];
+      debouncedOnChange({ ...expression, customMetrics: nextMetrics, equation, label });
+      return nextMetrics;
     });
-  }, [setMetrics]);
+  }, [debouncedOnChange, equation, expression, label]);
 
   const handleDelete = useCallback(
     (name: string) => {
-      setMetrics((previous) => {
+      setCustomMetrics((previous) => {
         const nextMetrics = previous?.filter((row) => row.name !== name) ?? [NEW_METRIC];
-        return (nextMetrics.length && nextMetrics) || [NEW_METRIC];
+        const finalMetrics = (nextMetrics.length && nextMetrics) || [NEW_METRIC];
+        debouncedOnChange({ ...expression, customMetrics: finalMetrics, equation, label });
+        return finalMetrics;
       });
     },
-    [setMetrics]
+    [equation, expression, debouncedOnChange, label]
   );
 
   const handleChange = useCallback(
     (metric: MetricExpressionCustomMetric) => {
-      setMetrics((previous) => {
-        return previous?.map((m) => (m.name === metric.name ? metric : m));
+      setCustomMetrics((previous) => {
+        const nextMetrics = previous?.map((m) => (m.name === metric.name ? metric : m));
+        debouncedOnChange({ ...expression, customMetrics: nextMetrics, equation, label });
+        return nextMetrics;
       });
     },
-    [setMetrics]
+    [equation, expression, debouncedOnChange, label]
   );
 
   const handleEquationChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setEquation(e.target.value);
+      debouncedOnChange({ ...expression, customMetrics, equation: e.target.value, label });
     },
-    [setEquation]
+    [debouncedOnChange, expression, customMetrics, label]
   );
 
-  const debouncedOnChange = useMemo(() => debounce(onChange, 200), [onChange]);
+  const handleLabelChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setLabel(e.target.value);
+      debouncedOnChange({ ...expression, customMetrics, equation, label: e.target.value });
+    },
+    [debouncedOnChange, expression, customMetrics, equation]
+  );
 
-  useEffect(() => {
-    debouncedOnChange({ ...expression, metrics, equation });
-  }, [metrics, equation, expression, onChange, debouncedOnChange]);
+  const filteredAggregationTypes = omit(aggregationTypes, ['custom', 'rate', 'p99', 'p95']);
 
-  const metricRows = metrics?.map((row) => {
-    const disableAdd = metrics?.length === 26;
-    const disableDelete = metrics?.length === 1;
+  const metricRows = customMetrics?.map((row) => {
+    const disableAdd = customMetrics?.length === 26;
+    const disableDelete = customMetrics?.length === 1;
     if (row.aggType === Aggregators.COUNT) {
       return (
         <MetricRowWithCount
@@ -110,9 +129,10 @@ export const CustomMetricEditor: React.FC<Props> = ({
           onAdd={handleAddNewRow}
           onDelete={handleDelete}
           disableAdd={disableAdd}
-          aggregationTypes={aggregationTypes}
+          aggregationTypes={filteredAggregationTypes}
           disableDelete={disableDelete}
           onChange={handleChange}
+          errors={errors}
         />
       );
     }
@@ -121,7 +141,7 @@ export const CustomMetricEditor: React.FC<Props> = ({
         key={row.name}
         name={row.name}
         aggType={row.aggType}
-        aggregationTypes={aggregationTypes}
+        aggregationTypes={filteredAggregationTypes}
         field={row.field}
         fields={fields}
         onAdd={handleAddNewRow}
@@ -129,27 +149,41 @@ export const CustomMetricEditor: React.FC<Props> = ({
         disableAdd={disableAdd}
         disableDelete={disableDelete}
         onChange={handleChange}
+        errors={errors}
       />
     );
   });
 
   const placeholder = useMemo(() => {
-    return metrics?.map((row) => row.name).join(' + ');
-  }, [metrics]);
+    return customMetrics?.map((row) => row.name).join(' + ');
+  }, [customMetrics]);
 
   return (
     <EuiPanel>
       {metricRows}
       <EuiFlexGroup>
-        <EuiFormRow label="Equation" fullWidth style={{ width: '100%' }}>
-          <EuiFieldText
-            compressed
-            fullWidth
-            placeholder={placeholder}
-            onChange={handleEquationChange}
-            value={equation ?? ''}
-          />
-        </EuiFormRow>
+        <EuiFlexItem>
+          <EuiFormRow label="Equation">
+            <EuiFieldText
+              compressed
+              fullWidth
+              placeholder={placeholder}
+              onChange={handleEquationChange}
+              value={equation ?? ''}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow label="Label (optional)">
+            <EuiFieldText
+              compressed
+              fullWidth
+              value={label}
+              placeholder="Custom metric"
+              onChange={handleLabelChange}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
@@ -163,6 +197,7 @@ interface MetricRowBaseProps {
   disableAdd: boolean;
   onChange: (metric: MetricExpressionCustomMetric) => void;
   aggregationTypes: AggregationTypes;
+  errors: IErrorObject;
 }
 
 interface MetricRowControlProps {
@@ -210,7 +245,7 @@ const MetricRowVarName: React.FC<{ name: string }> = ({ name }) => {
 };
 
 interface MetricRowWithAggProps extends MetricRowBaseProps {
-  aggType?: CustomAggType;
+  aggType?: CustomMetricAggTypes;
   field?: string;
   fields: NormalizedFields;
 }
@@ -226,6 +261,7 @@ const MetricRowWithAgg: React.FC<MetricRowWithAggProps> = ({
   fields,
   aggregationTypes,
   onChange,
+  errors,
 }) => {
   const handleDelete = useCallback(() => {
     onDelete(name);
@@ -247,12 +283,10 @@ const MetricRowWithAgg: React.FC<MetricRowWithAggProps> = ({
 
   const aggOptions = useMemo(
     () =>
-      Object.values(aggregationTypes)
-        .filter((a) => ['custom', 'p99', 'p95', 'rate'].includes(a.value) === false)
-        .map((a) => ({
-          text: a.text,
-          value: a.value,
-        })),
+      Object.values(aggregationTypes).map((a) => ({
+        text: a.text,
+        value: a.value,
+      })),
     [aggregationTypes]
   );
 
@@ -272,26 +306,36 @@ const MetricRowWithAgg: React.FC<MetricRowWithAggProps> = ({
       onChange({
         name,
         field,
-        aggType: el.target.value as CustomAggType,
+        aggType: el.target.value as CustomMetricAggTypes,
       });
     },
     [name, field, onChange]
   );
+
+  const isAggInvalid = get(errors, ['customMetrics', name, 'aggType']) != null;
+  const isFieldInvalid = get(errors, ['customMetrics', name, 'field']) != null;
 
   return (
     <>
       <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
         <MetricRowVarName name={name} />
         <EuiFlexItem style={{ maxWidth: 145 }}>
-          <EuiFormRow label="Agg">
-            <EuiSelect compressed options={aggOptions} value={aggType} onChange={handleAggChange} />
+          <EuiFormRow label="Agg" isInvalid={isAggInvalid}>
+            <EuiSelect
+              compressed
+              options={aggOptions}
+              value={aggType}
+              isInvalid={isAggInvalid}
+              onChange={handleAggChange}
+            />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label="Field">
+          <EuiFormRow label="Field" isInvalid={isFieldInvalid}>
             <EuiComboBox
               fullWidth
               compressed
+              isInvalid={isFieldInvalid}
               singleSelection={{ asPlainText: true }}
               options={fieldOptions}
               selectedOptions={field ? [{ label: field }] : []}
@@ -347,7 +391,7 @@ const MetricRowWithCount: React.FC<MetricRowWithCountProps> = ({
       onChange({
         name,
         filter,
-        aggType: el.target.value as CustomAggType,
+        aggType: el.target.value as CustomMetricAggTypes,
       });
     },
     [name, filter, onChange]
@@ -358,7 +402,7 @@ const MetricRowWithCount: React.FC<MetricRowWithCountProps> = ({
       onChange({
         name,
         filter: el.target.value,
-        aggType: agg as CustomAggType,
+        aggType: agg as CustomMetricAggTypes,
       });
     },
     [name, agg, onChange]
@@ -375,7 +419,7 @@ const MetricRowWithCount: React.FC<MetricRowWithCountProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow label="KQL filter">
-            <EuiFieldText compressed onChange={handleFilterChange} />
+            <EuiFieldText compressed value={filter} onChange={handleFilterChange} />
           </EuiFormRow>
         </EuiFlexItem>
         <MetricRowControls
