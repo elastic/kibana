@@ -34,6 +34,8 @@ import { importRulesRoute } from './route';
 
 jest.mock('../../../../../machine_learning/authz');
 
+// TODO add tests for connectors
+
 describe('Import rules route', () => {
   let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
@@ -107,6 +109,8 @@ describe('Import rules route', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
       });
     });
 
@@ -146,6 +150,8 @@ describe('Import rules route', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
       });
     });
 
@@ -171,6 +177,8 @@ describe('Import rules route', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
       });
     });
 
@@ -196,6 +204,8 @@ describe('Import rules route', () => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
         });
       });
 
@@ -218,6 +228,8 @@ describe('Import rules route', () => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
         });
       });
     });
@@ -242,6 +254,8 @@ describe('Import rules route', () => {
         rules_count: 2,
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
       });
     });
 
@@ -262,6 +276,8 @@ describe('Import rules route', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
       });
     });
 
@@ -302,6 +318,8 @@ describe('Import rules route', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
       });
     });
 
@@ -332,6 +350,8 @@ describe('Import rules route', () => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
         });
       });
 
@@ -353,6 +373,8 @@ describe('Import rules route', () => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
         });
       });
     });
@@ -387,6 +409,8 @@ describe('Import rules route', () => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
         });
       });
 
@@ -407,6 +431,8 @@ describe('Import rules route', () => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
         });
       });
     });
