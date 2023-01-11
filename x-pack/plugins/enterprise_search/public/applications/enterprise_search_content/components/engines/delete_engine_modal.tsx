@@ -27,7 +27,9 @@ export const DeleteEngineModal: React.FC = () => {
         title={i18n.translate('xpack.enterpriseSearch.content.engineList.deleteEngineModal.title', {
           defaultMessage: 'Permanently delete this engine?',
         })}
-        onCancel={() => closeDeleteEngineModal}
+        onCancel={() => {
+          closeDeleteEngineModal();
+        }}
         onConfirm={() => {
           deleteEngine({ engineName });
         }}

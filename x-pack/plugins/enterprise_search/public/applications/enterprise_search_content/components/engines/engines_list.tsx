@@ -16,9 +16,8 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
 import { DataPanel } from '../../../shared/data_panel/data_panel';
 
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { handlePageChange } from '../../../shared/table_pagination';
-import { ENGINE_CREATION_PATH } from '../../routes';
+
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { EnginesListTable } from './components/tables/engines_table';
@@ -51,16 +50,12 @@ export const EnginesList: React.FC = () => {
             defaultMessage: 'Engines',
           }),
           rightSideItems: [
-            <EuiLinkTo
+            <EuiButton
+              fill
+              iconType="plusInCircle"
               data-test-subj="enterpriseSearchContentEnginesCreationButton"
-              to={ENGINE_CREATION_PATH}
-            >
-              <EuiButton fill iconType="plusInCircle">
-                {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
-                  defaultMessage: 'Create engine',
-                })}
-              </EuiButton>
-            </EuiLinkTo>,
+              href={'TODO'}
+            />,
           ],
         }}
         pageViewTelemetry="Engines"
