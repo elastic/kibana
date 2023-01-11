@@ -12,7 +12,7 @@ import React from 'react';
 import { UnifiedHistogramBreakdownContext } from '..';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
-import { fieldSupportsBreakdown } from './field_supports_breakdown';
+import { fieldSupportsBreakdown } from './utils/field_supports_breakdown';
 
 describe('BreakdownFieldSelector', () => {
   it('should pass fields that support breakdown as options to the EuiComboBox', () => {

@@ -19,7 +19,7 @@ import {
   UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
-} from '../types';
+} from '../../types';
 import { useStableCallback } from './use_stable_callback';
 
 export const useTotalHits = ({

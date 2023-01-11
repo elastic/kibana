@@ -23,7 +23,7 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
-import { useChartPanels } from './use_chart_panels';
+import { useChartPanels } from './hooks/use_chart_panels';
 import type {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -36,12 +36,12 @@ import type {
   UnifiedHistogramInputMessage,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
-import { useTotalHits } from './use_total_hits';
-import { useRequestParams } from './use_request_params';
-import { useChartStyles } from './use_chart_styles';
-import { useChartActions } from './use_chart_actions';
-import { getLensAttributes } from './get_lens_attributes';
-import { useRefetch } from './use_refetch';
+import { useTotalHits } from './hooks/use_total_hits';
+import { useRequestParams } from './hooks/use_request_params';
+import { useChartStyles } from './hooks/use_chart_styles';
+import { useChartActions } from './hooks/use_chart_actions';
+import { getLensAttributes } from './utils/get_lens_attributes';
+import { useRefetch } from './hooks/use_refetch';
 
 export interface ChartProps {
   className?: string;

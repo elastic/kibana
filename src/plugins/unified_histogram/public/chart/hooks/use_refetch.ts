@@ -17,7 +17,7 @@ import {
   UnifiedHistogramHitsContext,
   UnifiedHistogramInput$,
   UnifiedHistogramRequestContext,
-} from '../types';
+} from '../../types';
 
 export const useRefetch = ({
   dataView,
