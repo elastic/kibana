@@ -338,29 +338,74 @@ export const buildExclusionClause = (booleanFilter: BooleanFilter): BooleanFilte
 
 export const buildMatchClause = (entry: EntryMatch): BooleanFilter => {
   const { field, operator, value } = entry;
+  const matchClause = {
+    bool: {
+      minimum_should_match: 1,
+      should: [
+        {
+          match_phrase: {
+            [field]: value,
+          },
+        },
+      ],
+    },
+  };
+
+  if (operator === 'excluded') {
+    return buildExclusionClause(matchClause);
+  } else {
+    return matchClause;
+  }
+};
+
+export const getBaseMatchAnyClause = (entry: EntryMatchAny): BooleanFilter => {
+  const { field, value } = entry;
+
+  if (value.length === 1) {
+    return {
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          {
+            match_phrase: {
+              [field]: value[0],
+            },
+          },
+        ],
+      },
+    };
+  }
+
   return {
     bool: {
-      [operator === 'excluded' ? 'must_not' : 'filter']: {
-        terms: {
-          [field]: [value],
-        },
-      },
+      minimum_should_match: 1,
+      should: value.map((val) => {
+        return {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match_phrase: {
+                  [field]: val,
+                },
+              },
+            ],
+          },
+        };
+      }),
     },
   };
 };
 
 export const buildMatchAnyClause = (entry: EntryMatchAny): BooleanFilter => {
-  const { field, operator, value } = entry;
+  const { operator } = entry;
+  const matchAnyClause = getBaseMatchAnyClause(entry);
 
-  return {
-    bool: {
-      [operator === 'excluded' ? 'must_not' : 'filter']: {
-        terms: {
-          [field]: value,
-        },
-      },
-    },
-  };
+  if (operator === 'excluded') {
+    return buildExclusionClause(matchAnyClause);
+  } else {
+    return matchAnyClause;
+  }
 };
 
 export const buildMatchWildcardClause = (entry: EntryMatchWildcard): BooleanFilter => {
