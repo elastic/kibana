@@ -74,6 +74,7 @@ export const getNormalizedDataStreams = (
       release: packageInfo.release || 'ga',
       package: packageInfo.name,
       path: packageInfo.name,
+      elasticsearch: packageInfo.elasticsearch,
       streams: [
         {
           input: policyTemplate.input,

@@ -117,6 +117,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'icons',
   'policy_templates',
   'release',
+  'elasticsearch',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);
