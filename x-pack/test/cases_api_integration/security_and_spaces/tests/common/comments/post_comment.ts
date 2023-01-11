@@ -50,16 +50,21 @@ import {
   secOnly,
   secOnlyRead,
   superUser,
+  obsOnlyReadAlerts,
+  obsSec,
+  secOnlyReadAlerts,
 } from '../../../../common/lib/authentication/users';
 import {
   getSecuritySolutionAlerts,
   createSecuritySolutionAlerts,
   getAlertById,
 } from '../../../../common/lib/alerts';
+import { User } from '../../../../common/lib/authentication/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
@@ -361,14 +366,21 @@ export default ({ getService }: FtrProviderContext): void => {
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
-        const createCommentAndRefreshIndex = async (
-          caseId: string,
-          alertId: string,
-          alertIndex: string,
-          expectedHttpCode?: number
-        ) => {
+        const createCommentAndRefreshIndex = async ({
+          caseId,
+          alertId,
+          alertIndex,
+          expectedHttpCode = 200,
+          auth = { user: superUser, space: null },
+        }: {
+          caseId: string;
+          alertId: string;
+          alertIndex: string;
+          expectedHttpCode?: number;
+          auth?: { user: User; space: string | null };
+        }) => {
           await createComment({
-            supertest,
+            supertest: supertestWithoutAuth,
             caseId,
             params: {
               alertId,
@@ -381,6 +393,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: CommentType.alert,
             },
             expectedHttpCode,
+            auth,
           });
 
           await es.indices.refresh({ index: alertIndex });
@@ -413,7 +426,11 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
 
-          await createCommentAndRefreshIndex(postedCase.id, alert._id, alert._index);
+          await createCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+          });
 
           const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id]);
 
@@ -436,7 +453,11 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
 
           for (const theCase of cases) {
-            await createCommentAndRefreshIndex(theCase.id, alert._id, alert._index);
+            await createCommentAndRefreshIndex({
+              caseId: theCase.id,
+              alertId: alert._id,
+              alertIndex: alert._index,
+            });
           }
 
           const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id]);
@@ -444,7 +465,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(updatedAlert.hits.hits[0]._source?.[ALERT_CASE_IDS]).eql(caseIds);
 
-          return updatedAlert;
+          return { updatedAlert, cases };
         };
 
         it('should change the status of the alert if sync alert is on', async () => {
@@ -464,7 +485,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should not add more than 10 cases to an alert', async () => {
-          const updatedAlert = await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(10);
+          const { updatedAlert } = await bulkCreateAlertsAndVerifyCaseIdsInAlertSchema(10);
           const alert = updatedAlert.hits.hits[0];
 
           const postedCase = await createCase(supertest, {
@@ -472,7 +493,58 @@ export default ({ getService }: FtrProviderContext): void => {
             settings: { syncAlerts: false },
           });
 
-          createCommentAndRefreshIndex(postedCase.id, alert._id, alert._index, 400);
+          await createCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('should add the case ID to the alert schema when the user has read access only', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alert = signals.hits.hits[0];
+
+          await createCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+            expectedHttpCode: 200,
+            auth: { user: secOnlyReadAlerts, space: 'space1' },
+          });
+        });
+
+        it('should NOT add the case ID to the alert schema when the user does NOT have access to the alert', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alert = signals.hits.hits[0];
+
+          await createCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+            expectedHttpCode: 403,
+            auth: { user: obsSec, space: 'space1' },
+          });
         });
       });
 
@@ -562,6 +634,66 @@ export default ({ getService }: FtrProviderContext): void => {
             expectedHttpCode: 400,
           });
         });
+
+        it('should add the case ID to the alert schema when the user has read access only', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              owner: 'observabilityFixture',
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: {
+              alertId,
+              index: ampIndex,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              owner: 'observabilityFixture',
+              type: CommentType.alert,
+            },
+            auth: { user: obsOnlyReadAlerts, space: 'space1' },
+            expectedHttpCode: 200,
+          });
+        });
+
+        it('should NOT add the case ID to the alert schema when the user does NOT have access to the alert', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              owner: 'observabilityFixture',
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: {
+              alertId,
+              index: ampIndex,
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              owner: 'observabilityFixture',
+              type: CommentType.alert,
+            },
+            auth: { user: obsSec, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+        });
       });
     });
 
@@ -605,8 +737,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('rbac', () => {
-      const supertestWithoutAuth = getService('supertestWithoutAuth');
-
       afterEach(async () => {
         await deleteAllCaseItems(es);
       });

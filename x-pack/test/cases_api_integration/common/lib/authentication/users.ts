@@ -17,6 +17,8 @@ import {
   testDisabledPluginAll,
   securitySolutionOnlyDelete,
   securitySolutionOnlyNoDelete,
+  observabilityOnlyReadAlerts,
+  securitySolutionOnlyReadAlerts,
 } from './roles';
 import { User } from './types';
 
@@ -56,6 +58,12 @@ export const secOnlyRead: User = {
   roles: [securitySolutionOnlyRead.name],
 };
 
+export const secOnlyReadAlerts: User = {
+  username: 'sec_only_read_alerts',
+  password: 'sec_only_read_alerts',
+  roles: [securitySolutionOnlyReadAlerts.name],
+};
+
 export const obsOnly: User = {
   username: 'obs_only',
   password: 'obs_only',
@@ -66,6 +74,12 @@ export const obsOnlyRead: User = {
   username: 'obs_only_read',
   password: 'obs_only_read',
   roles: [observabilityOnlyRead.name],
+};
+
+export const obsOnlyReadAlerts: User = {
+  username: 'obs_only_read_alerts',
+  password: 'obs_only_read_alerts',
+  roles: [observabilityOnlyReadAlerts.name],
 };
 
 export const obsSec: User = {
@@ -112,10 +126,12 @@ export const users = [
   superUser,
   secOnly,
   secOnlyRead,
+  secOnlyReadAlerts,
   secOnlyDelete,
   secOnlyNoDelete,
   obsOnly,
   obsOnlyRead,
+  obsOnlyReadAlerts,
   obsSec,
   obsSecRead,
   globalRead,

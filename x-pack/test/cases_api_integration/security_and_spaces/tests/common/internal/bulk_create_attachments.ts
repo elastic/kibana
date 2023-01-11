@@ -45,9 +45,12 @@ import {
   noKibanaPrivileges,
   obsOnly,
   obsOnlyRead,
+  obsOnlyReadAlerts,
+  obsSec,
   obsSecRead,
   secOnly,
   secOnlyRead,
+  secOnlyReadAlerts,
   superUser,
 } from '../../../../common/lib/authentication/users';
 import {
@@ -55,10 +58,12 @@ import {
   createSecuritySolutionAlerts,
   getAlertById,
 } from '../../../../common/lib/alerts';
+import { User } from '../../../../common/lib/authentication/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
@@ -478,6 +483,41 @@ export default ({ getService }: FtrProviderContext): void => {
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
+        const bulkCreateCommentAndRefreshIndex = async ({
+          caseId,
+          alertId,
+          alertIndex,
+          expectedHttpCode = 200,
+          auth = { user: superUser, space: null },
+        }: {
+          caseId: string;
+          alertId: string;
+          alertIndex: string;
+          expectedHttpCode?: number;
+          auth?: { user: User; space: string | null };
+        }) => {
+          await bulkCreateAttachments({
+            supertest: supertestWithoutAuth,
+            caseId,
+            params: [
+              {
+                alertId,
+                index: alertIndex,
+                rule: {
+                  id: 'id',
+                  name: 'name',
+                },
+                owner: 'securitySolutionFixture',
+                type: CommentType.alert,
+              },
+            ],
+            expectedHttpCode,
+            auth,
+          });
+
+          await es.indices.refresh({ index: alertIndex });
+        };
+
         const bulkCreateAlertsAndVerifyAlertStatus = async (
           syncAlerts: boolean,
           expectedAlertStatus: string
@@ -552,21 +592,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
 
           for (const theCase of cases) {
-            await bulkCreateAttachments({
-              supertest,
+            await bulkCreateCommentAndRefreshIndex({
               caseId: theCase.id,
-              params: [
-                {
-                  alertId: alert._id,
-                  index: alert._index,
-                  rule: {
-                    id: 'id',
-                    name: 'name',
-                  },
-                  owner: 'securitySolutionFixture',
-                  type: CommentType.alert,
-                },
-              ],
+              alertId: alert._id,
+              alertIndex: alert._index,
             });
           }
 
@@ -605,22 +634,57 @@ export default ({ getService }: FtrProviderContext): void => {
             settings: { syncAlerts: false },
           });
 
-          await bulkCreateAttachments({
-            supertest,
+          await bulkCreateCommentAndRefreshIndex({
             caseId: postedCase.id,
-            params: [
-              {
-                alertId: alert._id,
-                index: alert._index,
-                rule: {
-                  id: 'id',
-                  name: 'name',
-                },
-                owner: 'securitySolutionFixture',
-                type: CommentType.alert,
-              },
-            ],
+            alertId: alert._id,
+            alertIndex: alert._index,
             expectedHttpCode: 400,
+          });
+        });
+
+        it('should add the case ID to the alert schema when the user has read access only', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alert = signals.hits.hits[0];
+
+          await bulkCreateCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+            expectedHttpCode: 200,
+            auth: { user: secOnlyReadAlerts, space: 'space1' },
+          });
+        });
+
+        it('should NOT add the case ID to the alert schema when the user does NOT have access to the alert', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alert = signals.hits.hits[0];
+
+          await bulkCreateCommentAndRefreshIndex({
+            caseId: postedCase.id,
+            alertId: alert._id,
+            alertIndex: alert._index,
+            expectedHttpCode: 403,
+            auth: { user: obsSec, space: 'space1' },
           });
         });
       });
@@ -715,6 +779,70 @@ export default ({ getService }: FtrProviderContext): void => {
             expectedHttpCode: 400,
           });
         });
+
+        it('should add the case ID to the alert schema when the user has read access only', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              owner: 'observabilityFixture',
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          await bulkCreateAttachments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: [
+              {
+                alertId,
+                index: ampIndex,
+                rule: {
+                  id: 'id',
+                  name: 'name',
+                },
+                owner: 'observabilityFixture',
+                type: CommentType.alert,
+              },
+            ],
+            auth: { user: obsOnlyReadAlerts, space: 'space1' },
+            expectedHttpCode: 200,
+          });
+        });
+
+        it('should NOT add the case ID to the alert schema when the user does NOT have access to the alert', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              owner: 'observabilityFixture',
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          await bulkCreateAttachments({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            params: [
+              {
+                alertId,
+                index: ampIndex,
+                rule: {
+                  id: 'id',
+                  name: 'name',
+                },
+                owner: 'observabilityFixture',
+                type: CommentType.alert,
+              },
+            ],
+            auth: { user: obsSec, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+        });
       });
     });
 
@@ -763,8 +891,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('rbac', () => {
-      const supertestWithoutAuth = getService('supertestWithoutAuth');
-
       afterEach(async () => {
         await deleteAllCaseItems(es);
       });
