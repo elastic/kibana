@@ -45,9 +45,6 @@ const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): str
 
 export type AgentStatusByAgentPolicyMap = Record<string, GetAgentStatusResponse['results']>;
 
-const isFleetMissingAgentHttpError = (error: unknown) =>
-  error instanceof errors.ResponseError && error.statusCode === 404;
-
 export const getAgentStatusesByAgentPolicies = async (
   agentService: AgentService,
   agentPolicies: AgentPolicy[] | undefined,
