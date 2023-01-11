@@ -5,9 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
+
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
+import { ContentSearchIndex } from './search';
 
 export interface ContentCoreApi {
   register: ContentRegistry['register'];
@@ -19,10 +22,12 @@ export interface ContentCoreApi {
 export class ContentCore {
   private contentRegistry: ContentRegistry;
   private eventBus: EventBus;
+  private searchIndex: ContentSearchIndex;
 
-  constructor() {
+  constructor({ logger }: { logger: Logger }) {
     this.contentRegistry = new ContentRegistry();
     this.eventBus = new EventBus();
+    this.searchIndex = new ContentSearchIndex({ logger });
   }
 
   setup(): ContentCoreApi {
@@ -39,5 +44,7 @@ export class ContentCore {
     };
   }
 
-  start() {}
+  start({ esClient }: { esClient: ElasticsearchClient }) {
+    this.searchIndex.start({ esClient });
+  }
 }

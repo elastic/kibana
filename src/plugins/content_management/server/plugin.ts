@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, Plugin, PluginInitializerContext, Logger } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
 import { PLUGIN_ID } from '../common';
 import { ContentCore, ContentCoreApi } from './core';
 import { wrapError } from './error_wrapper';
@@ -21,7 +27,7 @@ export class ContentManagementPlugin implements Plugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.contentCore = new ContentCore();
+    this.contentCore = new ContentCore({ logger: this.logger });
   }
 
   public setup(core: CoreSetup) {
@@ -64,5 +70,8 @@ export class ContentManagementPlugin implements Plugin {
     };
   }
 
-  public start() {}
+  public start(core: CoreStart) {
+    const esClient = core.elasticsearch.client.asInternalUser;
+    this.contentCore.start({ esClient });
+  }
 }
