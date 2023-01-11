@@ -53,15 +53,8 @@ export async function registerFleetPolicyCallbacks({
 
   fleetPluginStart.registerExternalCallback(
     'packagePolicyDelete',
-    onPackagePolicyDelete({ fleetPluginStart, coreStart, logger })
+    onPackagePolicyDelete({ coreStart, logger })
   );
-
-  // fleetPluginStart.registerExternalCallback(
-  //   'packagePolicyPostDelete',
-  //   async (deletedPackagePolicies: any) => {
-  //     console.log(`packagePolicyPostDelete`, deletedPackagePolicies);
-  //   }
-  // );
 
   fleetPluginStart.registerExternalCallback(
     'packagePolicyPostCreate',
@@ -74,11 +67,9 @@ export async function registerFleetPolicyCallbacks({
 }
 
 function onPackagePolicyDelete({
-  fleetPluginStart,
   coreStart,
   logger,
 }: {
-  fleetPluginStart: FleetStartContract;
   coreStart: CoreStart;
   logger: Logger;
 }): PostPackagePolicyDeleteCallback {

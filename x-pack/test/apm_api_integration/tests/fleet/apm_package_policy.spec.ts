@@ -39,6 +39,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
+  const es = getService('es');
   const bettertest = getBettertest(supertest);
 
   function createEsClientWithApiKeyAuth({ id, apiKey }: { id: string; apiKey: string }) {
@@ -90,6 +91,28 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     return response.body;
   }
 
+  async function getActiveApiKeysCount(packagePolicyId: string) {
+    const res = await es.transport.request({
+      method: 'GET',
+      path: '_security/_query/api_key',
+      body: {
+        size: 10000,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'metadata.application': 'apm' } },
+              { term: { 'metadata.package_policy_id': packagePolicyId } },
+              { term: { invalidated: false } },
+            ],
+          },
+        },
+      },
+    });
+
+    // @ts-expect-error
+    return res.total as number;
+  }
+
   registry.when('APM package policy', { config: 'basic', archives: [] }, () => {
     let apmPackagePolicy: PackagePolicy;
     let agentPolicyId: string;
@@ -105,6 +128,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     after(async () => {
       await deleteAgentPolicy(bettertest, agentPolicyId);
       await deletePackagePolicy(bettertest, packagePolicyId);
+      expect(await getActiveApiKeysCount(packagePolicyId)).to.eql(0); // make sure all api keys for the policy are invalidated
     });
 
     describe('APM package policy callbacks', () => {
@@ -116,6 +140,10 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       it('sets default values for agent configs', async () => {
         const agentConfigs = get(apmPackagePolicy, AGENT_CONFIG_PATH);
         expect(agentConfigs).to.eql([]);
+      });
+
+      it('creates two API keys for the package policy', async () => {
+        expect(await getActiveApiKeysCount(packagePolicyId)).to.eql(2);
       });
 
       it('has api key that provides access to source maps only', async () => {

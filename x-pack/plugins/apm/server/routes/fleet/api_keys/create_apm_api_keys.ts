@@ -34,7 +34,7 @@ export async function createApmSourceMapApiKey({
           ...apiKeyMetadata,
           description:
             'Provides read access to the source maps index. Created for APM Server',
-          packagePolicyId,
+          package_policy_id: packagePolicyId,
           type: 'source-map',
         },
         role_descriptors: {
@@ -75,7 +75,7 @@ export async function createApmAgentConfigApiKey({
           ...apiKeyMetadata,
           description:
             'Provides read access to the agent configurations index. Created for APM Server',
-          packagePolicyId,
+          package_policy_id: packagePolicyId,
           type: 'agent-configuration',
         },
         role_descriptors: {
