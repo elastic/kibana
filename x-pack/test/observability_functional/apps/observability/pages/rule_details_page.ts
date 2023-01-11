@@ -159,11 +159,11 @@ export default ({ getService }: FtrProviderContext) => {
         const fromMoment = dateMath.parse(
           await (await testSubjects.find('superDatePickerstartDatePopoverButton')).getVisibleText()
         );
-        const from = fromMoment.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
+        const from = fromMoment?.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
         const toMoment = dateMath.parse(
           await (await testSubjects.find('superDatePickerendDatePopoverButton')).getVisibleText()
         );
-        const to = toMoment.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
+        const to = toMoment?.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
 
         expect(url.includes('tabId=alerts')).to.be(true);
         expect(url.includes('status%3Aactive')).to.be(true);
@@ -180,11 +180,11 @@ export default ({ getService }: FtrProviderContext) => {
         const fromMoment = dateMath.parse(
           await (await testSubjects.find('superDatePickerstartDatePopoverButton')).getVisibleText()
         );
-        const from = fromMoment.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
+        const from = fromMoment?.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
         const toMoment = dateMath.parse(
           await (await testSubjects.find('superDatePickerendDatePopoverButton')).getVisibleText()
         );
-        const to = toMoment.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
+        const to = toMoment?.format('YYYY-MM-DDTHH:mm:ss.SSS').replaceAll(':', '%3A');
 
         expect(url.includes('tabId=alerts')).to.be(true);
         expect(url.includes('status%3Arecovered')).to.be(true);
