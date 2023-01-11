@@ -20,7 +20,6 @@ import {
   Position,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import { EuiBadge } from '@elastic/eui';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
