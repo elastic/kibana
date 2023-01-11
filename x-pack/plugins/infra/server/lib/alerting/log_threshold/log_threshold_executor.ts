@@ -415,7 +415,7 @@ export const processUngroupedRatioResults = (
 
   const numeratorCount = numeratorResults.hits.total.value;
   const denominatorCount = denominatorResults.hits.total.value;
-  const additionalContextHits = denominatorResults.aggregations?.additionalContext?.hits?.hits;
+  const additionalContextHits = numeratorResults.aggregations?.additionalContext?.hits?.hits;
   const additionalContext =
     additionalContextHits && additionalContextHits.length > 0
       ? additionalContextHits[0]._source
