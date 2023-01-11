@@ -7,7 +7,9 @@
  */
 
 import uuid from 'uuid';
-import { CommonFields, ContentStorage, InternalFields, KibanaContent } from '../core';
+
+import type { CommonFields, InternalFields, KibanaContent } from '../../common';
+import { ContentStorage } from '../core';
 import { FooUniqueFields } from './types';
 
 const generateMeta = (): InternalFields['meta'] => {

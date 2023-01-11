@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { CommonFields, InternalFields, KibanaContent } from '../../common';
+
 export interface ContentStorage<
   UniqueFields extends object = Record<string, unknown>,
   UserFields extends CommonFields = UniqueFields & CommonFields,

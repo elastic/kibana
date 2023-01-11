@@ -33,13 +33,25 @@ export const kibanaContent = t.intersection([
   }),
 ]);
 
-export type KibanaContent = t.TypeOf<typeof kibanaContent>;
-
 export const Calls = {
   get: () => ({
     i: t.type({
       type: t.string, // content type
       id: t.string, // content ID
+    }),
+    o: kibanaContent,
+  }),
+  create: () => ({
+    i: t.type({
+      type: t.string, // content type
+      data: t.intersection([
+        t.type({
+          title: t.string,
+        }),
+        t.partial({
+          description: t.string,
+        }),
+      ]),
     }),
     o: kibanaContent,
   }),

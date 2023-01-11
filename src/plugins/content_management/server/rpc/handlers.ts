@@ -17,5 +17,11 @@ export function initRpcHandlers(fnHandler: FunctionHandler<Context>) {
       const crudInstance = ctx.core.crud(payload.type);
       return crudInstance.get(payload.id);
     });
+
+    // Create a content
+    register(Calls.create)(async (ctx, payload) => {
+      const crudInstance = ctx.core.crud(payload.type);
+      return crudInstance.create(payload.data);
+    });
   });
 }

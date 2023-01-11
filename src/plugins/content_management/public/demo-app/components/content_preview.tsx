@@ -8,9 +8,7 @@
 
 import React, { FC, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { css } from '@emotion/react';
 import {
-  EuiPanel,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiSplitPanel,
@@ -24,6 +22,7 @@ import { useApp } from '../context';
 export const ContentPreview: FC<{ type: string; id: string }> = ({ type, id }) => {
   const { rpc } = useApp();
   const [content, setContent] = useState<KibanaContent | null>(null);
+  const isIdEmpty = id.trim() === '';
 
   useDebounce(
     () => {
@@ -32,11 +31,17 @@ export const ContentPreview: FC<{ type: string; id: string }> = ({ type, id }) =
         setContent(res);
       };
 
-      load();
+      if (!isIdEmpty) {
+        load();
+      }
     },
     500,
-    [rpc, type, id]
+    [rpc, type, id, isIdEmpty]
   );
+
+  if (isIdEmpty) {
+    return <EuiText>Provide an id to load the content</EuiText>;
+  }
 
   if (!content) {
     return <span>Loading...</span>;

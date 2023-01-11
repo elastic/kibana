@@ -18,8 +18,8 @@ import {
 import { ContentPreview } from './content_preview';
 
 export const ContentPreviewSection: FC = () => {
-  const [contentType, setContentType] = useState('elastic');
-  const [contentId, setContentId] = useState('123');
+  const [contentType, setContentType] = useState('foo');
+  const [contentId, setContentId] = useState('');
 
   return (
     <>

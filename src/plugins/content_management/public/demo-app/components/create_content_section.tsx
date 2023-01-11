@@ -9,7 +9,9 @@
 import React, { FC, useState } from 'react';
 import {
   EuiButton,
+  EuiCallOut,
   EuiCode,
+  EuiCodeBlock,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
@@ -19,13 +21,22 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { KibanaContent } from '../../../common';
+import { useApp } from '../context';
+
 export const CreateContentSection: FC = () => {
   const [title, setContentType] = useState('');
   const [description, setContentId] = useState('');
+  const [contentCreated, setContentCreated] = useState<KibanaContent | null>(null);
 
-  const createContent = () => {
+  const { rpc } = useApp();
+
+  const createContent = async () => {
     const content = { title, description };
-    console.log(content);
+
+    setContentCreated(null);
+    const created = await rpc.create({ type: 'foo', data: content });
+    setContentCreated(created);
   };
 
   return (
@@ -38,7 +49,7 @@ export const CreateContentSection: FC = () => {
         title={<h3>Create a new content</h3>}
         description={
           <p>
-            Create a new <EuiCode>memory</EuiCode> type content
+            Create a new <EuiCode>foo</EuiCode> type content. This content is persisted in memory.
           </p>
         }
       >
@@ -65,6 +76,16 @@ export const CreateContentSection: FC = () => {
             fullWidth
           />
         </EuiFormRow>
+        <EuiSpacer />
+
+        {contentCreated !== null && (
+          <>
+            <EuiCallOut title="Content created!" color="success" iconType="package">
+              <EuiCodeBlock isCopyable>{contentCreated.id}</EuiCodeBlock>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
 
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>

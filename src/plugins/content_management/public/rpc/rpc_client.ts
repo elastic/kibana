@@ -9,7 +9,7 @@
 import { HttpSetup } from '@kbn/core-http-browser';
 
 import { API_ENDPOINT, Calls, Payload } from '../../common';
-import type { AsyncFN, NamedFnDef } from '../../common';
+import type { AsyncFN, NamedFnDef, CommonFields } from '../../common';
 
 export class RpcClient {
   constructor(private http: { post: HttpSetup['post'] }) {}
@@ -19,6 +19,10 @@ export class RpcClient {
   // --------------------
   public get({ type, id }: { type: string; id: string }) {
     return this.realize(Calls.get)({ type, id });
+  }
+
+  public create({ type, data }: { type: string; data: CommonFields }) {
+    return this.realize(Calls.create)({ type, data });
   }
 
   private sendMessage = async <I, O>(name: string, input: I): Promise<O> => {
