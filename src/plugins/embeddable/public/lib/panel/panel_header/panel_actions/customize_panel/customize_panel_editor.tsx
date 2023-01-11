@@ -27,7 +27,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { TimeRangeInput } from './customize_panel_action';
+import { hasTimeRange, TimeRangeInput } from './customize_panel_action';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { IEmbeddable, Embeddable, EmbeddableOutput, CommonlyUsedRange } from '../../../..';
 
@@ -74,12 +74,6 @@ function isTimeRangeCompatible(embeddable: IEmbeddable) {
       !isMarkdown &&
       !isImage
   );
-}
-
-function hasTimeRange(
-  embeddable: IEmbeddable | Embeddable<TimeRangeInput>
-): embeddable is Embeddable<TimeRangeInput> {
-  return (embeddable as Embeddable<TimeRangeInput>).getInput().timeRange !== undefined;
 }
 
 export const CustomizePanelEditor = (props: CustomizePanelProps) => {
