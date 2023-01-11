@@ -203,7 +203,7 @@ async function _getActions(
           version: hit._source.data?.version as string,
           startTime: source.start_time,
           type: source.type,
-          nbAgentsActioned: source.total ?? 0,
+          nbAgentsActioned: 0,
           status: isExpired ? 'EXPIRED' : 'IN_PROGRESS',
           expiration: source.expiration,
           newPolicyId: source.data?.policy_id as string,
@@ -213,6 +213,7 @@ async function _getActions(
       }
 
       acc[hit._source.action_id].nbAgentsActionCreated += hit._source.agents?.length ?? 0;
+      acc[hit._source.action_id].nbAgentsActioned += hit._source.total ?? 0;
 
       return acc;
     }, {} as { [k: string]: ActionStatus })
