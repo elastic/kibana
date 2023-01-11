@@ -363,6 +363,74 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         );
       }
 
+      if (argDefinition.mustHaveValue !== undefined && argDefinition.mustHaveValue !== false) {
+        let dataValidationError = '';
+
+        if (argInput.length === 0) {
+          dataValidationError = `Argument --${argName} must have a value`;
+        } else {
+          argInput.some((argValue, index) => {
+            switch (argDefinition.mustHaveValue) {
+              case true:
+              case 'non-empty-string':
+                if (typeof argValue === 'boolean') {
+                  dataValidationError = `Argument --${argName} must have a value`;
+                } else if (
+                  argDefinition.mustHaveValue === 'non-empty-string' &&
+                  argValue.trim().length === 0
+                ) {
+                  dataValidationError = `Argument --${argName} must have a value`;
+                }
+                break;
+
+              case 'number':
+              case 'number-greater-than-zero':
+                {
+                  const valueNumber = Number(argValue);
+
+                  if (!Number.isSafeInteger(valueNumber)) {
+                    dataValidationError = `Argument --${argName} value must be a number`;
+                  } else {
+                    if (argDefinition.mustHaveValue === 'number-greater-than-zero') {
+                      if (valueNumber <= 0) {
+                        dataValidationError = `Argument --${argName} value must be greater than zero`;
+                      }
+                    }
+                  }
+                }
+                break;
+            }
+
+            return !!dataValidationError;
+          });
+        }
+
+        if (dataValidationError) {
+          return updateStateWithNewCommandHistoryItem(
+            state,
+            createCommandHistoryEntry(
+              cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+
+              createCommandExecutionState({
+                errorMessage: (
+                  <ConsoleCodeBlock>
+                    {i18n.translate(
+                      'xpack.securitySolution.console.commandValidation.dataValueInvalid',
+                      {
+                        defaultMessage: dataValidationError,
+                        values: { argName: toCliArgumentOption(argName) },
+                      }
+                    )}
+                  </ConsoleCodeBlock>
+                ),
+              }),
+              false
+            )
+          );
+        }
+      }
+
+      // Call validation callback if one was defined for the argument
       if (argDefinition.validate) {
         const validationResult = argDefinition.validate(argInput);
 

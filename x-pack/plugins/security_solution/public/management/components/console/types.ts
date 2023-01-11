@@ -18,10 +18,29 @@ import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/type
  * Definition interface for a Command argument
  */
 export interface CommandArgDefinition {
+  /**
+   * If the argument is required to be entered by the user. NOTE that this will only validate that
+   * the user has entered the argument name - it does not validate that the argument must have a
+   * value. Argument's that have no value entered by the user have (by default) a value of
+   * `true` boolean.
+   */
   required: boolean;
   allowMultiples: boolean;
-  exclusiveOr?: boolean;
   about: string;
+  /**
+   * If argument (when used) should have a value defined by the user.
+   * Default is `false` which mean that argument can be entered without any value - internally the
+   * value for the argument will be a boolean `true`.
+   * When set to `true` the argument is expected to have a value that is non-boolean
+   * In addition, the following options can be used with this parameter to further validate the user's input:
+   *
+   * - `non-empty-string`: user's value must be a string whose length is greater than zero. Note that
+   *   the value entered will first be `trim()`'d.
+   * - `number`: user's value will be converted to a Number and ensured to be a `safe integer`
+   * - `number-greater-than-zero`: user's value must be a number greater than zero
+   */
+  mustHaveValue?: boolean | 'non-empty-string' | 'number' | 'number-greater-than-zero';
+  exclusiveOr?: boolean;
   /**
    * Validate the individual values given to this argument.
    * Should return `true` if valid or a string with the error message
