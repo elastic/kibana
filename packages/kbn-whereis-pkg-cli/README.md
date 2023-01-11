@@ -1,3 +1,3 @@
-# @kbn/package-linter-cli
+# @kbn/whereis-pkg-cli
 
-CLI for running the package linter, which just validates a couple rules for each package.
+CLI for finding package locations by providing their IDs.
