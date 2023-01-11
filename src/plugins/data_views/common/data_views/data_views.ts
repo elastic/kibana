@@ -516,7 +516,7 @@ export class DataViewsService {
     this.getFieldsForWildcard({
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
-      allowNoIndex: indexPattern.allowNoIndex,
+      allowNoIndex: true, // indexPattern.allowNoIndex,
       ...options,
       pattern: indexPattern.title as string,
     });
@@ -526,7 +526,7 @@ export class DataViewsService {
     return this.apiClient.getFieldsForWildcard({
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
-      allowNoIndex: true, // dataView.allowNoIndex,  - what should we do when setting this?
+      allowNoIndex: true, // dataView.allowNoIndex  - if not set, error when fieldcaps doesn't match indices
       pattern: dataView.getIndexPattern(),
       metaFields,
     });
@@ -539,7 +539,7 @@ export class DataViewsService {
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
-      allowNoIndex: options.allowNoIndex,
+      allowNoIndex: true, // options.allowNoIndex,
       indexFilter: options.indexFilter,
     });
   };
