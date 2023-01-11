@@ -6,10 +6,10 @@
  */
 import expect from '@kbn/expect';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
-
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -36,6 +36,10 @@ export default function (providerContext: FtrProviderContext) {
     let packagePolicyId2: string;
     let packagePolicyId3: string;
     let endpointPackagePolicyId: string;
+    let inputOnlyPackagePolicyId: string;
+
+    let inputOnlyBasePackagePolicy: NewPackagePolicy;
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -45,24 +49,20 @@ export default function (providerContext: FtrProviderContext) {
       if (!server.enabled) {
         return;
       }
-      const { body: agentPolicyResponse } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'Test policy',
-          namespace: 'default',
-        });
+      const [{ body: agentPolicyResponse }, { body: managedAgentPolicyResponse }] =
+        await Promise.all([
+          supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'xxxx').send({
+            name: 'Test policy',
+            namespace: 'default',
+          }),
+          supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'xxxx').send({
+            name: 'Test hosted agent policy',
+            namespace: 'default',
+            is_managed: true,
+          }),
+        ]);
 
       agentPolicyId = agentPolicyResponse.item.id;
-
-      const { body: managedAgentPolicyResponse } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'Test hosted agent policy',
-          namespace: 'default',
-          is_managed: true,
-        });
 
       // if one already exists, re-use that
       const managedExists = managedAgentPolicyResponse.statusCode === 409;
@@ -76,90 +76,128 @@ export default function (providerContext: FtrProviderContext) {
         managedAgentPolicyId = managedAgentPolicyResponse.item.id;
       }
 
-      const { body: packagePolicyResponse } = await supertest
-        .post(`/api/fleet/package_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'filetest-1',
-          description: '',
-          namespace: 'default',
-          policy_id: agentPolicyId,
-          enabled: true,
-          inputs: [],
-          package: {
-            name: 'filetest',
-            title: 'For File Tests',
-            version: '0.1.0',
+      inputOnlyBasePackagePolicy = {
+        name: 'input-only-test-1',
+        description: '',
+        namespace: 'default',
+        policy_id: agentPolicyId,
+        enabled: true,
+        inputs: [
+          {
+            type: 'logfile',
+            policy_template: 'logs',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'input_package.logs' },
+                vars: {
+                  paths: { type: 'text', value: ['/tmp/test.log'] },
+                  tags: { type: 'text', value: ['tag1'] },
+                  ignore_older: { value: '72h', type: 'text' },
+                  'data_stream.dataset': { type: 'text', value: 'generic' },
+                },
+              },
+            ],
           },
-        });
-      packagePolicyId = packagePolicyResponse.item.id;
+        ],
+        package: { name: 'input_package', title: 'Input only package', version: '1.0.0' },
+      };
 
-      const { body: packagePolicyResponse2 } = await supertest
-        .post(`/api/fleet/package_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'filetest-2',
-          description: '',
-          namespace: 'default',
-          policy_id: agentPolicyId,
-          enabled: true,
-          inputs: [],
-          package: {
-            name: 'filetest',
-            title: 'For File Tests',
-            version: '0.1.0',
-          },
-        });
-      packagePolicyId2 = packagePolicyResponse2.item.id;
-
-      const { body: packagePolicyResponse3 } = await supertest
-        .post(`/api/fleet/package_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'update-package-policy-with_required_variables-1',
-          description: '',
-          namespace: 'default',
-          policy_id: agentPolicyId,
-          inputs: {
-            'with_required_variables-test_input': {
-              streams: {
-                'with_required_variables.log': {
-                  vars: { test_var_required: 'I am required' },
+      const [
+        { body: packagePolicyResponse },
+        { body: packagePolicyResponse2 },
+        { body: packagePolicyResponse3 },
+        { body: endpointPackagePolicyResponse },
+        { body: inputOnlyPolicyResponse },
+      ] = await Promise.all([
+        supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          }),
+        supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-2',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          }),
+        supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'update-package-policy-with_required_variables-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
                 },
               },
             },
-          },
-          package: {
-            name: 'with_required_variables',
-            version: '0.1.0',
-          },
-        });
-      packagePolicyId3 = packagePolicyResponse3.item.id;
-
-      const { body: endpointPackagePolicyResponse } = await supertest
-        .post(`/api/fleet/package_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: 'endpoint-1',
-          description: '',
-          namespace: 'default',
-          policy_id: agentPolicyId,
-          enabled: true,
-          inputs: [
-            {
-              enabled: true,
-              streams: [],
-              type: 'endpoint',
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
             },
-          ],
-          force: true,
-          package: {
-            name: 'endpoint',
-            title: 'Elastic Defend',
-            version: '8.6.1',
-          },
-        });
+          }),
+        supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'endpoint-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [
+              {
+                enabled: true,
+                streams: [],
+                type: 'endpoint',
+              },
+            ],
+            force: true,
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Defend',
+              version: '8.6.1',
+            },
+          }),
+        supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(inputOnlyBasePackagePolicy),
+      ]);
+      packagePolicyId = packagePolicyResponse.item.id;
+      packagePolicyId2 = packagePolicyResponse2.item.id;
+      packagePolicyId3 = packagePolicyResponse3.item.id;
       endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
+      inputOnlyPackagePolicyId = inputOnlyPolicyResponse.item.id;
     });
 
     after(async function () {
@@ -167,12 +205,14 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
         .send({ agentPolicyId });
-
       // uninstall endpoint package
       await supertest
         .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ force: true })
+        .expect(200);
+      await supertest
+        .delete(`/api/fleet/epm/packages/input_package-1.0.0`)
+        .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });
 
@@ -437,6 +477,34 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(body.message).eql('Input not found: with_required_variables-i-do-not-exists');
+      });
+
+      it('should return a 400 if namespace is edited on input only package policy', async function () {
+        const { body } = await supertest
+          .put(`/api/fleet/package_policies/${inputOnlyPackagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            ...inputOnlyBasePackagePolicy,
+            namespace: 'updated_namespace',
+          })
+          .expect(400);
+        expect(body.message).eql(
+          'Package policy namespace cannot be modified for input only packages, please create a new package policy.'
+        );
+      });
+      it('should return a 400 if dataset is edited on input only package policy', async function () {
+        const updatedPolicy = JSON.parse(JSON.stringify(inputOnlyBasePackagePolicy));
+
+        updatedPolicy.inputs[0].streams[0].vars['data_stream.dataset'].value = 'updated_dataset';
+
+        const { body } = await supertest
+          .put(`/api/fleet/package_policies/${inputOnlyPackagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updatedPolicy)
+          .expect(400);
+        expect(body.message).eql(
+          'Package policy dataset cannot be modified for input only packages, please create a new package policy.'
+        );
       });
     });
   });
