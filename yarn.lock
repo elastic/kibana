@@ -2985,6 +2985,34 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-custom-branding-browser-internal@link:packages/core/custom-branding/core-custom-branding-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-browser-mocks@link:packages/core/custom-branding/core-custom-branding-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-browser@link:packages/core/custom-branding/core-custom-branding-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-common@link:packages/core/custom-branding/core-custom-branding-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-server-internal@link:packages/core/custom-branding/core-custom-branding-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-server-mocks@link:packages/core/custom-branding/core-custom-branding-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-server@link:packages/core/custom-branding/core-custom-branding-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-deprecations-browser-internal@link:packages/core/deprecations/core-deprecations-browser-internal":
   version "0.0.0"
   uid ""
