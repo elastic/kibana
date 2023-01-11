@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -135,70 +134,68 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
   }, []);
   return (
     <>
-      <EuiPanel paddingSize="m">
-        <JobDetails
-          layerIndex={layerIndex}
-          createADJob={createGeoJob}
-          createADJobInWizard={createGeoJobInWizard}
-          embeddable={embeddable}
-          incomingCreateError={createError}
-        >
-          <>
-            <EuiFlexGroup gutterSize="s" data-test-subj="mlMapLayerCompatible">
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <EuiIcon type="checkInCircleFilled" color="success" />
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.ml.embeddables.geoJobFlyout.createJobCalloutTitle.multiMetric"
-                    defaultMessage="The {geoField} field can be used to create a geo job for {sourceDataViewTitle}"
-                    values={{
-                      geoField: layer.geoField,
-                      sourceDataViewTitle: layer.dataView?.getIndexPattern(),
-                    }}
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {layer.splitFieldOptions?.length ? (
-              <>
-                <EuiSpacer size="m" />
-                <EuiAccordion
-                  data-test-subj={'mlGeoJobAdditionalSettingsButton'}
-                  id="additional-section"
-                  buttonContent={i18n.translate(
-                    'xpack.ml.embeddables.geoJobFlyout.createJobCallout.splitField.title',
-                    {
-                      defaultMessage: 'Optionally select a field to split the data',
-                    }
-                  )}
-                >
-                  <EuiFormRow
-                    label={
-                      <FormattedMessage
-                        id="xpack.ml.embeddables.geoJobFlyout.selectSplitField"
-                        defaultMessage="Split field"
-                      />
-                    }
-                  >
-                    <EuiComboBox
-                      singleSelection={{ asPlainText: true }}
-                      options={layer.splitFieldOptions}
-                      selectedOptions={splitFieldSelection}
-                      onChange={onSplitFieldChange}
-                      isClearable={true}
-                      data-test-subj="mlGeoJobSplitFieldSelect"
+      <JobDetails
+        layerIndex={layerIndex}
+        createADJob={createGeoJob}
+        createADJobInWizard={createGeoJobInWizard}
+        embeddable={embeddable}
+        incomingCreateError={createError}
+      >
+        <>
+          <EuiFlexGroup gutterSize="s" data-test-subj="mlMapLayerCompatible">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <EuiIcon type="checkInCircleFilled" color="success" />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.ml.embeddables.geoJobFlyout.createJobCalloutTitle.multiMetric"
+                  defaultMessage="The {geoField} field can be used to create a geo job for {sourceDataViewTitle}"
+                  values={{
+                    geoField: layer.geoField,
+                    sourceDataViewTitle: layer.dataView?.getIndexPattern(),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {layer.splitFieldOptions?.length ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiAccordion
+                data-test-subj={'mlGeoJobAdditionalSettingsButton'}
+                id="additional-section"
+                buttonContent={i18n.translate(
+                  'xpack.ml.embeddables.geoJobFlyout.createJobCallout.splitField.title',
+                  {
+                    defaultMessage: 'Optionally select a field to split the data',
+                  }
+                )}
+              >
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.ml.embeddables.geoJobFlyout.selectSplitField"
+                      defaultMessage="Split field"
                     />
-                  </EuiFormRow>
-                </EuiAccordion>
-              </>
-            ) : null}
-          </>
-        </JobDetails>
-      </EuiPanel>
+                  }
+                >
+                  <EuiComboBox
+                    singleSelection={{ asPlainText: true }}
+                    options={layer.splitFieldOptions}
+                    selectedOptions={splitFieldSelection}
+                    onChange={onSplitFieldChange}
+                    isClearable={true}
+                    data-test-subj="mlGeoJobSplitFieldSelect"
+                  />
+                </EuiFormRow>
+              </EuiAccordion>
+            </>
+          ) : null}
+        </>
+      </JobDetails>
     </>
   );
 };
