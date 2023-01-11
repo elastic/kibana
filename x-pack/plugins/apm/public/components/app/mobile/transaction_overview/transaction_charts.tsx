@@ -10,16 +10,19 @@ import React from 'react';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
-import { LatencyChart } from '../latency_chart';
-import { FailedTransactionRateChart } from '../failed_transaction_rate_chart';
+import { SessionsChart } from '../charts/sessions_chart';
+import { LatencyChart } from '../../../shared/charts/latency_chart';
+import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
 
 export function MobileTransactionCharts({
+  serviceName,
   kuery,
   environment,
   start,
   end,
   transactionName,
 }: {
+  serviceName: string;
   kuery: string;
   environment: string;
   start: string;
@@ -33,6 +36,20 @@ export function MobileTransactionCharts({
       end={end}
     >
       <ChartPointerEventContextProvider>
+        <EuiFlexGrid columns={2} gutterSize="s">
+          <EuiFlexItem data-cy={`transaction-sessipn-charts`}>
+            <SessionsChart
+              kuery={kuery}
+              start={start}
+              end={end}
+              environment={environment}
+              serviceName={serviceName}
+              transactionName={transactionName}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem style={{ flexShrink: 1 }}></EuiFlexItem>
+        </EuiFlexGrid>
+
         <EuiFlexGrid columns={3} gutterSize="s">
           <EuiFlexItem data-cy={`transaction-duration-charts`}>
             <EuiPanel hasBorder={true}>
