@@ -8,6 +8,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { MaybeImmutable } from '../../../../../../../common/endpoint/types';
+import type { ArgumentSelectorWrapperProps } from '../components/argument_selector_wrapper';
 import { ArgumentSelectorWrapper } from '../components/argument_selector_wrapper';
 import type { ParsedCommandInterface } from '../../../service/types';
 import type { EnteredCommand } from '../../console_state/types';
@@ -99,7 +100,12 @@ export class EnteredInput {
 
             replaceValues[0] = createInputCharacter({
               value: argNameMatch,
-              renderValue: <ArgumentSelectorWrapper argName={argName} argDefinition={argDef} />,
+              renderValue: (
+                <ArgumentSelectorWrapper
+                  argName={argName}
+                  argDefinition={argDef as ArgumentSelectorWrapperProps['argDefinition']}
+                />
+              ),
               isArgSelector: true,
               argName,
               argInstance,

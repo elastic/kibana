@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@el
 import styled from 'styled-components';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
-import type { ExecuteCommandPayload } from '../console_state/types';
+import type { ExecuteCommandPayload, ConsoleDataState } from '../console_state/types';
 import { useWithInputShowPopover } from '../../hooks/state_selectors/use_with_input_show_popover';
 import { EnteredInput } from './lib/entered_input';
 import type { InputCaptureProps } from './components/input_capture';
@@ -209,8 +209,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             case 13:
               setCommandToExecute({
                 input: inputText.getFullText(),
-                enteredCommand: prevEnteredCommand,
-                parsedInput: prevParsedInput,
+                enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
+                parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
               });
               inputText.clear();
               break;
