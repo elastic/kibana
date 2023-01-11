@@ -7,95 +7,32 @@
  */
 
 import React, { memo } from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiSpacer,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
-import { Status } from '../status/status';
-import { CaseStatuses } from '../status/types';
-import { IconWithCount } from './icon_with_count';
-import * as i18n from './translations';
+import { TooltipContent } from './tooltip_content';
 import type { CaseTooltipProps } from './types';
+import { Skeleton } from './skeleton';
 
 interface Props extends CaseTooltipProps {
   children: React.ReactNode;
+  dataTestSubj?: string;
+  className?: string;
+  loading?: boolean;
 }
 
-const CaseTooltipComponent = React.memo<Props>(
-  ({
-    title,
-    description,
-    status,
-    totalComments,
-    createdAt,
-    createdBy,
-    dataTestSubj,
-    children,
-    className = '',
-  }) => {
-    const { euiTheme } = useEuiTheme();
-    const borderColor = euiTheme.colors.subduedText;
+const CaseTooltipComponent = React.memo<Props>((props) => {
+  const { dataTestSubj, children, loading = false, className = '', ...rest } = props;
 
-    const commonTextStyles: React.CSSProperties = {
-      textOverflow: 'ellipsis',
-      display: '-webkit-box',
-      WebkitBoxOrient: 'vertical',
-      overflow: 'hidden',
-    };
-
-    return (
-      <EuiToolTip
-        data-test-subj={dataTestSubj ? dataTestSubj : 'cases-components-tooltip'}
-        anchorClassName={className}
-        content={
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <Status status={status} />
-                <IconWithCount count={totalComments} icon={'editorComment'} />
-              </EuiFlexGroup>
-
-              <EuiSpacer size="xs" />
-
-              <EuiText style={{ ...commonTextStyles, WebkitLineClamp: 1 }} size="relative">
-                <strong>{title}</strong>
-              </EuiText>
-              <EuiText style={{ ...commonTextStyles, WebkitLineClamp: 2 }} size="relative">
-                {description}
-              </EuiText>
-
-              <EuiSpacer size="xs" />
-
-              <EuiText style={{ borderTop: `1px solid ${borderColor}` }} size="relative">
-                <EuiSpacer size="xs" />
-                {status === CaseStatuses.closed ? i18n.CLOSED : i18n.OPENED}{' '}
-                <FormattedRelative value={createdAt} />{' '}
-                {createdBy.username || createdBy.fullName ? (
-                  <>
-                    {i18n.BY}{' '}
-                    <strong data-test-subj="tooltip-username">
-                      {createdBy.username || createdBy.fullName}
-                    </strong>
-                  </>
-                ) : (
-                  ''
-                )}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      >
-        <>{children}</>
-      </EuiToolTip>
-    );
-  }
-);
+  return (
+    <EuiToolTip
+      data-test-subj={dataTestSubj ? dataTestSubj : 'cases-components-tooltip'}
+      anchorClassName={className}
+      content={loading ? <Skeleton /> : <TooltipContent {...rest} />}
+    >
+      <>{children}</>
+    </EuiToolTip>
+  );
+});
 
 CaseTooltipComponent.displayName = 'Tooltip';
 

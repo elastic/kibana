@@ -58,6 +58,19 @@ describe('Tooltip', () => {
     expect(await res.findByTestId('custom-data-test')).toBeInTheDocument();
   });
 
+  it('renders loading state correctly', async () => {
+    const res = render(
+      <I18nProvider>
+        <Tooltip {...tooltipProps} loading={true}>
+          <TestSpan />
+        </Tooltip>
+      </I18nProvider>
+    );
+
+    fireEvent.mouseOver(res.getByTestId('sample-span'));
+    expect(await res.findByTestId('cases-components-tooltip')).toBeInTheDocument();
+  });
+
   it('renders icon', async () => {
     const res = render(
       <I18nProvider>

@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CaseStatuses } from '../status/types';
+export const getTruncatedText = (text: string, truncateLength: number): string => {
+  if (truncateLength < 0 || text.length < truncateLength) {
+    return text;
+  }
 
-export interface CaseTooltipProps {
-  title: string;
-  description: string;
-  status: CaseStatuses;
-  totalComments: number;
-  createdAt: string;
-  createdBy: { username?: string; fullName?: string };
-}
+  return text.slice(0, truncateLength).trim().concat('...');
+};
