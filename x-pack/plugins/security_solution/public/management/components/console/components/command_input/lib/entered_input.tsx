@@ -129,12 +129,14 @@ export class EnteredInput {
     let rightSelection = '';
 
     if (start < leftText.length) {
-      leftSelection = selection.substring(0, leftText.length - start);
+      const numOfCharsFromLeft = leftText.length - start;
+
+      leftSelection = selection.substring(0, numOfCharsFromLeft);
 
       // If there is still replacement text left, then it
       // needs to be removed from the right side
       if (leftSelection !== selection) {
-        rightSelection = selection.substring(leftText.length - 1);
+        rightSelection = selection.substring(numOfCharsFromLeft);
       }
     } else {
       rightSelection = selection;
@@ -193,6 +195,7 @@ export class EnteredInput {
     // UPDATED FULL:   [${this.getFullText()}]
     //
     // NEW POSITION:   ${newCursorIndex}
+    // LETTER AT POS:  [${this.getFullText().charAt(newCursorIndex)}]
     //
     // `);
     // console.table(
