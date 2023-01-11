@@ -15,8 +15,20 @@ export class Timerange {
     return new Interval({ from: this.from, to: this.to, interval });
   }
 
-  ratePerMinute(rate: number) {
-    return this.interval(`1m`).rate(rate);
+  ratePerMinute(ratePerMin: number) {
+    const intervalPerSecond = Math.max(1, 60 / ratePerMin);
+
+    // rate per second
+    let interval = `${intervalPerSecond}s`;
+    let rate = (ratePerMin / 60) * intervalPerSecond;
+
+    // rate per minute
+    if (!Number.isInteger(rate) || !Number.isInteger(intervalPerSecond)) {
+      interval = '1m';
+      rate = rate * 60;
+    }
+
+    return this.interval(interval).rate(rate);
   }
 }
 
