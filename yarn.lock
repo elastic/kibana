@@ -2821,6 +2821,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/chart-expressions-common@link:src/plugins/chart_expressions/common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/chart-icons@link:packages/kbn-chart-icons":
   version "0.0.0"
   uid ""
@@ -2978,6 +2982,34 @@
   uid ""
 
 "@kbn/core-config-server-internal@link:packages/core/config/core-config-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-browser-internal@link:packages/core/custom-branding/core-custom-branding-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-browser-mocks@link:packages/core/custom-branding/core-custom-branding-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-browser@link:packages/core/custom-branding/core-custom-branding-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-common@link:packages/core/custom-branding/core-custom-branding-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-server-internal@link:packages/core/custom-branding/core-custom-branding-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-server-mocks@link:packages/core/custom-branding/core-custom-branding-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-custom-branding-server@link:packages/core/custom-branding/core-custom-branding-server":
   version "0.0.0"
   uid ""
 
