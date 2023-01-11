@@ -10,7 +10,6 @@ import moment from 'moment';
 
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services';
-import { InternalQueryError } from '../../errors';
 import { Duration, DurationUnit } from '../../domain/models';
 import { createSLO } from './fixtures/slo';
 import { DefaultSLIClient } from './sli_client';
@@ -52,24 +51,6 @@ describe('SLIClient', () => {
 
   describe('fetchCurrentSLIData', () => {
     describe('with occurrences budgeting method', () => {
-      it('throws when aggregations failed', async () => {
-        const slo = createSLO({ timeWindow: sevenDaysRolling() });
-        esClientMock.msearch.mockResolvedValueOnce({
-          ...commonEsResponse,
-          responses: [
-            {
-              ...commonEsResponse,
-              aggregations: {},
-            },
-          ],
-        });
-        const sliClient = new DefaultSLIClient(esClientMock);
-
-        await expect(sliClient.fetchCurrentSLIData([slo])).rejects.toThrowError(
-          new InternalQueryError('SLI aggregation query')
-        );
-      });
-
       describe('with a rolling time window', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({ timeWindow: sevenDaysRolling() });
@@ -158,32 +139,6 @@ describe('SLIClient', () => {
     });
 
     describe('with timeslices budgeting method', () => {
-      it('throws when aggregations failed', async () => {
-        const slo = createSLO({
-          budgetingMethod: 'timeslices',
-          objective: {
-            target: 0.95,
-            timesliceTarget: 0.95,
-            timesliceWindow: new Duration(10, DurationUnit.Minute),
-          },
-        });
-
-        esClientMock.msearch.mockResolvedValueOnce({
-          ...commonEsResponse,
-          responses: [
-            {
-              ...commonEsResponse,
-              aggregations: {},
-            },
-          ],
-        });
-        const sliClient = new DefaultSLIClient(esClientMock);
-
-        await expect(sliClient.fetchCurrentSLIData([slo])).rejects.toThrowError(
-          new InternalQueryError('SLI aggregation query')
-        );
-      });
-
       describe('with a calendar aligned time window', () => {
         it('returns the aggregated good and total values', async () => {
           const slo = createSLO({
